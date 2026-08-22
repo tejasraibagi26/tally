@@ -3,7 +3,7 @@ import { eq, and, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, schema } from "@/db";
 import { SideNav } from "@/components/nav/SideNav";
-import { TopBar } from "@/components/nav/TopBar";
+import { MOCK_MODE } from "@/lib/config";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -30,9 +30,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           accounts: acctCount?.count ?? 0,
           creditCards: cardCount?.count ?? 0,
         }}
+        mockMode={MOCK_MODE}
       />
       <div className="flex-1 flex flex-col min-w-0 h-screen">
-        <TopBar userEmail={session.user.email ?? ""} />
         <main className="flex-1 min-w-0 overflow-y-auto">{children}</main>
       </div>
     </div>

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { LogoMark } from "@/components/Logo";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { SignOutButton } from "@/components/nav/SignOutButton";
 
 /**
  * Pixel-matched to the Claude Design canvas (TallyNav.dc.html): 240px shell,
@@ -66,7 +68,21 @@ function initials(name: string | null, email: string): string {
   return email.slice(0, 2).toUpperCase();
 }
 
-export function SideNav({ user, counts }: { user: { name: string | null; email: string }; counts: NavCounts }) {
+/** Prefer the account name; fall back to the email's local part rather than the full address. */
+function displayName(name: string | null, email: string): string {
+  if (name?.trim()) return name.trim();
+  return email.split("@")[0] || email;
+}
+
+export function SideNav({
+  user,
+  counts,
+  mockMode,
+}: {
+  user: { name: string | null; email: string };
+  counts: NavCounts;
+  mockMode: boolean;
+}) {
   const pathname = usePathname();
   const isActive = (href: string) => pathname?.startsWith(href) ?? false;
 
@@ -105,11 +121,22 @@ export function SideNav({ user, counts }: { user: { name: string | null; email: 
           </div>
           <div className="flex flex-col gap-0.5 min-w-0">
             <span className="text-[13.5px] font-medium leading-none text-text truncate">
-              {user.name?.trim() || user.email}
+              {displayName(user.name, user.email)}
             </span>
             <span className="text-xs leading-none text-text-3">Private</span>
           </div>
         </Link>
+
+        {mockMode && (
+          <span className="self-start inline-flex items-center gap-1.5 rounded-full bg-warning-subtle text-warning text-xs font-medium px-2.5 py-0.5">
+            Mock data
+          </span>
+        )}
+
+        <div className="flex items-center justify-between px-2">
+          <ThemeToggle />
+          <SignOutButton />
+        </div>
       </div>
     </nav>
   );
