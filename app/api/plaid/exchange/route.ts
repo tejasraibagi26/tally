@@ -1,0 +1,151 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { CountryCode } from "plaid";
+import { db, schema } from "@/db";
+import { requireUserId } from "@/lib/session";
+import { plaidClient, encryptAccessToken, PLAID_COUNTRY_CODES } from "@/lib/plaid";
+import { syncTransactionsForItem } from "@/lib/plaidSync";
+import { syncHoldingsForItem, syncInvestmentTransactionsForItem } from "@/lib/plaidInvestments";
+import { syncLiabilitiesForItem } from "@/lib/plaidLiabilities";
+
+const bodySchema = z.object({
+  publicToken: z.string().min(1),
+  metadata: z
+    .object({
+      institution: z.object({ institution_id: z.string(), name: z.string() }).nullable().optional(),
+    })
+    .optional(),
+});
+
+export async function POST(req: Request) {
+  let userId: string;
+  try {
+    userId = await requireUserId();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const parsed = bodySchema.safeParse(await req.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
+  }
+  const { publicToken, metadata } = parsed.data;
+
+  try {
+    const exchange = await plaidClient.itemPublicTokenExchange({ public_token: publicToken });
+    const accessToken = exchange.data.access_token;
+    const plaidItemId = exchange.data.item_id;
+
+    const itemRes = await plaidClient.itemGet({ access_token: accessToken });
+    const institutionId = itemRes.data.item.institution_id ?? metadata?.institution?.institution_id ?? null;
+
+    let institutionName = metadata?.institution?.name ?? null;
+    if (institutionId) {
+      try {
+        const inst = await plaidClient.institutionsGetById({
+          institution_id: institutionId,
+          country_codes: PLAID_COUNTRY_CODES as CountryCode[],
+          options: { include_optional_metadata: true },
+        });
+        institutionName = inst.data.institution.name;
+        await db
+          .insert(schema.institutions)
+          .values({
+            id: institutionId,
+            name: inst.data.institution.name,
+            logoBase64: inst.data.institution.logo ?? null,
+            primaryColor: inst.data.institution.primary_color ?? null,
+            url: inst.data.institution.url ?? null,
+            oauth: inst.data.institution.oauth,
+          })
+          .onConflictDoUpdate({
+            target: schema.institutions.id,
+            set: {
+              name: inst.data.institution.name,
+              logoBase64: inst.data.institution.logo ?? null,
+              primaryColor: inst.data.institution.primary_color ?? null,
+            },
+          });
+      } catch (err) {
+        console.error("institutions/get_by_id failed, continuing without logo", err);
+      }
+    }
+
+    const { accessTokenCiphertext, accessTokenIv, accessTokenTag } = encryptAccessToken(accessToken);
+
+    const [item] = await db
+      .insert(schema.plaidItems)
+      .values({
+        userId,
+        plaidItemId,
+        institutionId,
+        institutionName,
+        accessTokenCiphertext,
+        accessTokenIv,
+        accessTokenTag,
+        status: "healthy",
+        consentedProducts: itemRes.data.item.consented_products ?? [],
+        availableProducts: itemRes.data.item.available_products ?? [],
+      })
+      .returning({ id: schema.plaidItems.id });
+
+    if (!item) throw new Error("Failed to insert plaid_items row");
+
+    const accountsRes = await plaidClient.accountsGet({ access_token: accessToken });
+    for (const acct of accountsRes.data.accounts) {
+      await db
+        .insert(schema.accounts)
+        .values({
+          userId,
+          itemId: item.id,
+          plaidAccountId: acct.account_id,
+          name: acct.name,
+          officialName: acct.official_name ?? null,
+          mask: acct.mask ?? null,
+          type: acct.type,
+          subtype: acct.subtype ?? null,
+          currency: acct.balances.iso_currency_code ?? "USD",
+          currentBalance: acct.balances.current != null ? Math.round(acct.balances.current * 100) : null,
+          availableBalance: acct.balances.available != null ? Math.round(acct.balances.available * 100) : null,
+          creditLimit: acct.balances.limit != null ? Math.round(acct.balances.limit * 100) : null,
+          balanceAsOf: new Date(),
+        })
+        .onConflictDoUpdate({
+          target: schema.accounts.plaidAccountId,
+          set: {
+            currentBalance: acct.balances.current != null ? Math.round(acct.balances.current * 100) : null,
+            availableBalance: acct.balances.available != null ? Math.round(acct.balances.available * 100) : null,
+            creditLimit: acct.balances.limit != null ? Math.round(acct.balances.limit * 100) : null,
+            balanceAsOf: new Date(),
+          },
+        });
+    }
+
+    // Kick off the first pull of everything immediately rather than waiting
+    // for a webhook — failure here doesn't fail the link, the item just
+    // stays un-synced for that product until the next webhook/manual/cron
+    // sync retries it. Holdings/liabilities/investment-tx no-op quietly for
+    // institutions or account types that don't support them (§6.4, §6.5).
+    try {
+      await syncTransactionsForItem(item.id, "initial");
+    } catch (err) {
+      console.error(`Initial transaction sync failed for item ${item.id}, will retry on next sync`, err);
+    }
+    try {
+      await syncHoldingsForItem(item.id, "initial");
+      await syncInvestmentTransactionsForItem(item.id, "initial");
+    } catch (err) {
+      console.error(`Initial investments sync failed for item ${item.id}, will retry on next sync`, err);
+    }
+    try {
+      await syncLiabilitiesForItem(item.id, "initial");
+    } catch (err) {
+      console.error(`Initial liabilities sync failed for item ${item.id}, will retry on next sync`, err);
+    }
+
+    return NextResponse.json({ ok: true, itemId: item.id });
+  } catch (err) {
+    console.error("plaid/exchange failed", err);
+    return NextResponse.json({ error: "Failed to link account" }, { status: 502 });
+  }
+}

@@ -1,0 +1,32 @@
+# Dependencies
+node_modules
+
+# Next.js build output
+.next
+out
+
+# Env files (never commit real secrets; .env.example stays tracked)
+.env
+.env.*.local
+.env.local
+.env.production
+.env.development
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor/IDE
+.vscode
+.idea
+
+# Database dumps and local artifacts
+*.dump
+*.dump.gz

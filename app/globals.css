@@ -1,0 +1,233 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --canvas: #F5F4F0;
+  --surface: #FCFCFB;
+  --surface-2: #F9F8F5;
+  --sunken: #EFEDE8;
+  --border: #E4E1D9;
+  --border-strong: #CFCBC0;
+  --text: #1A1917;
+  --text-2: #63615A;
+  --text-3: #938F87;
+  --brand: #14513F;
+  --brand-hover: #0E3E30;
+  --brand-subtle: #E6EFEA;
+  --brand-border: #BFD6CB;
+  --on-brand: #FFFFFF;
+  --positive: #0F7A57;
+  --negative: #B23A2C;
+  --warning: #8A5A00;
+  --info: #2A78D6;
+  --positive-subtle: #E3F0EA;
+  --negative-subtle: #F6E7E4;
+  --warning-subtle: #F5EEDC;
+  --info-subtle: #E5EEFA;
+
+  --status-good: #0CA30C;
+  --status-warning: #FAB219;
+  --status-serious: #EC835A;
+  --status-critical: #D03B3B;
+
+  --series-1: #1baf7a;
+  --series-2: #eb6834;
+  --series-3: #2a78d6;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+  --series-6: #008300;
+  --series-7: #4a3aa7;
+  --series-8: #e34948;
+
+  --radius-control: 8px;
+  --radius-card: 12px;
+  --radius-panel: 16px;
+
+  --shadow-raised: 0 1px 2px rgba(26,25,23,.06);
+  --shadow-overlay: 0 12px 32px -8px rgba(26,25,23,.14);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --canvas: #111110;
+    --surface: #1A1A19;
+    --surface-2: #232320;
+    --sunken: #0C0C0B;
+    --border: #2B2B28;
+    --border-strong: #3D3D38;
+    --text: #F2F1ED;
+    --text-2: #A8A69D;
+    --text-3: #77756D;
+    --brand: #4FB394;
+    --brand-hover: #6AC5A9;
+    --brand-subtle: #14251F;
+    --brand-border: #234438;
+    --on-brand: #0C1A15;
+    --positive: #4FC49B;
+    --negative: #F0846B;
+    --warning: #E0A94A;
+    --info: #3987E5;
+    --positive-subtle: #12271F;
+    --negative-subtle: #2B1A16;
+    --warning-subtle: #2A2213;
+    --info-subtle: #111F2E;
+    --series-1: #199e70;
+    --series-2: #d95926;
+    --series-3: #3987e5;
+    --series-4: #c98500;
+    --series-5: #d55181;
+    --series-6: #008300;
+    --series-7: #9085e9;
+    --series-8: #e66767;
+    --shadow-raised: none;
+    --shadow-overlay: 0 12px 32px -8px rgba(0,0,0,.6);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --canvas: #111110;
+  --surface: #1A1A19;
+  --surface-2: #232320;
+  --sunken: #0C0C0B;
+  --border: #2B2B28;
+  --border-strong: #3D3D38;
+  --text: #F2F1ED;
+  --text-2: #A8A69D;
+  --text-3: #77756D;
+  --brand: #4FB394;
+  --brand-hover: #6AC5A9;
+  --brand-subtle: #14251F;
+  --brand-border: #234438;
+  --on-brand: #0C1A15;
+  --positive: #4FC49B;
+  --negative: #F0846B;
+  --warning: #E0A94A;
+  --info: #3987E5;
+  --positive-subtle: #12271F;
+  --negative-subtle: #2B1A16;
+  --warning-subtle: #2A2213;
+  --info-subtle: #111F2E;
+  --series-1: #199e70;
+  --series-2: #d95926;
+  --series-3: #3987e5;
+  --series-4: #c98500;
+  --series-5: #d55181;
+  --series-6: #008300;
+  --series-7: #9085e9;
+  --series-8: #e66767;
+  --shadow-raised: none;
+  --shadow-overlay: 0 12px 32px -8px rgba(0,0,0,.6);
+}
+
+* {
+  border-color: var(--border);
+}
+
+body {
+  background: var(--canvas);
+  color: var(--text);
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* DESIGN.md §11: panel/sheet motion, 220ms cubic-bezier(.32,.72,0,1) — used by components/ui/SidePanel.tsx */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Marketing homepage (app/page.tsx) — slow ambient background drift, never more than a few px so it reads as "alive," not distracting. */
+@keyframes drift {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(3%, -4%) scale(1.05);
+  }
+}
+
+@keyframes float-dot {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes draw-line {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes grow-bar {
+  to {
+    width: 68%;
+  }
+}
+
+/* components/marketing/FeatureShowcase.tsx + FeatureDemos.tsx */
+@keyframes grow-width {
+  from {
+    width: 0%;
+  }
+  to {
+    width: var(--target-width, 100%);
+  }
+}
+
+@keyframes progress-fill {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes tag-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

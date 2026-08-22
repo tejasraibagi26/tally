@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "recurring_user_merchant_account_idx" ON "recurring_streams" USING btree ("user_id","merchant_key","account_id");

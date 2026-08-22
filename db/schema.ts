@@ -1,0 +1,424 @@
+import {
+  pgTable,
+  uuid,
+  text,
+  bigint,
+  boolean,
+  timestamp,
+  date,
+  jsonb,
+  numeric,
+  integer,
+  uniqueIndex,
+  index,
+  pgEnum,
+} from "drizzle-orm/pg-core";
+import { relations, sql } from "drizzle-orm";
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+export const itemStatusEnum = pgEnum("item_status", [
+  "healthy",
+  "login_required",
+  "pending_expiration",
+  "revoked",
+  "error",
+]);
+
+export const categorySourceEnum = pgEnum("category_source", [
+  "plaid",
+  "ml",
+  "rule",
+  "manual",
+]);
+
+export const categoryKindEnum = pgEnum("category_kind", [
+  "income",
+  "expense",
+  "transfer",
+  "ignore",
+]);
+
+export const recurringStatusEnum = pgEnum("recurring_status", [
+  "active",
+  "at_risk",
+  "cancelled",
+]);
+
+export const recurringFrequencyEnum = pgEnum("recurring_frequency", [
+  "weekly",
+  "biweekly",
+  "monthly",
+  "quarterly",
+  "annual",
+]);
+
+export const syncKindEnum = pgEnum("sync_kind", [
+  "transactions",
+  "holdings",
+  "inv_tx",
+  "liabilities",
+  "balances",
+]);
+
+export const syncTriggerEnum = pgEnum("sync_trigger", [
+  "webhook",
+  "cron",
+  "manual",
+  "initial",
+]);
+
+// ---------------------------------------------------------------------------
+// Core
+// ---------------------------------------------------------------------------
+
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  name: text("name"),
+  timezone: text("timezone").notNull().default("America/New_York"),
+  baseCurrency: text("base_currency").notNull().default("USD"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const plaidItems = pgTable("plaid_items", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  plaidItemId: text("plaid_item_id").notNull().unique(),
+  institutionId: text("institution_id"),
+  institutionName: text("institution_name"),
+  // Envelope-encrypted access token — see lib/crypto.ts. Never selected into
+  // any API response; decrypted only inside lib/plaid.ts.
+  accessTokenCiphertext: text("access_token_ciphertext").notNull(),
+  accessTokenIv: text("access_token_iv").notNull(),
+  accessTokenTag: text("access_token_tag").notNull(),
+  status: itemStatusEnum("status").notNull().default("healthy"),
+  lastErrorCode: text("last_error_code"),
+  consentedProducts: jsonb("consented_products").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  availableProducts: jsonb("available_products").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  transactionsCursor: text("transactions_cursor"),
+  lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  userIdx: index("plaid_items_user_idx").on(t.userId),
+}));
+
+export const institutions = pgTable("institutions", {
+  id: text("id").primaryKey(), // Plaid institution_id
+  name: text("name").notNull(),
+  logoBase64: text("logo_base64"),
+  primaryColor: text("primary_color"),
+  url: text("url"),
+  oauth: boolean("oauth").notNull().default(false),
+});
+
+export const accounts = pgTable("accounts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  itemId: uuid("item_id").references(() => plaidItems.id, { onDelete: "cascade" }),
+  plaidAccountId: text("plaid_account_id").unique(),
+  name: text("name").notNull(),
+  officialName: text("official_name"),
+  mask: text("mask"),
+  type: text("type").notNull(), // depository | credit | investment | loan
+  subtype: text("subtype"),
+  currency: text("currency").notNull().default("USD"),
+  isHidden: boolean("is_hidden").notNull().default(false),
+  isManual: boolean("is_manual").notNull().default(false),
+  currentBalance: bigint("current_balance", { mode: "number" }),
+  availableBalance: bigint("available_balance", { mode: "number" }),
+  creditLimit: bigint("credit_limit", { mode: "number" }),
+  balanceAsOf: timestamp("balance_as_of", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  userIdx: index("accounts_user_idx").on(t.userId),
+  itemIdx: index("accounts_item_idx").on(t.itemId),
+}));
+
+export const accountBalances = pgTable("account_balances", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  accountId: uuid("account_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  asOfDate: date("as_of_date").notNull(),
+  current: bigint("current", { mode: "number" }),
+  available: bigint("available", { mode: "number" }),
+  limit: bigint("limit", { mode: "number" }),
+}, (t) => ({
+  acctDateIdx: uniqueIndex("account_balances_acct_date_idx").on(t.accountId, t.asOfDate),
+}));
+
+// ---------------------------------------------------------------------------
+// Categories & rules
+// ---------------------------------------------------------------------------
+
+export const categories = pgTable("categories", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }), // null = system category
+  parentId: uuid("parent_id"),
+  name: text("name").notNull(),
+  slug: text("slug").notNull(),
+  icon: text("icon"),
+  colorSlot: integer("color_slot").notNull().default(1), // 1-8, maps to --series-N
+  kind: categoryKindEnum("kind").notNull().default("expense"),
+  sortOrder: integer("sort_order").notNull().default(0),
+});
+
+export const rules = pgTable("rules", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  priority: integer("priority").notNull().default(0),
+  enabled: boolean("enabled").notNull().default(true),
+  match: jsonb("match").notNull(),
+  actions: jsonb("actions").notNull(),
+  appliesToExisting: boolean("applies_to_existing").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  userIdx: index("rules_user_idx").on(t.userId),
+}));
+
+// ---------------------------------------------------------------------------
+// Transactions
+// ---------------------------------------------------------------------------
+
+export const transactions = pgTable("transactions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  accountId: uuid("account_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  plaidTransactionId: text("plaid_transaction_id").unique(),
+  pendingTransactionId: text("pending_transaction_id"),
+  isPending: boolean("is_pending").notNull().default(false),
+  amount: bigint("amount", { mode: "number" }).notNull(), // cents; expenses negative, income positive
+  currency: text("currency").notNull().default("USD"),
+  postedDate: date("posted_date").notNull(),
+  authorizedDate: date("authorized_date"),
+  name: text("name").notNull(),
+  merchantName: text("merchant_name"),
+  merchantEntityId: text("merchant_entity_id"),
+  logoUrl: text("logo_url"),
+  website: text("website"),
+  paymentChannel: text("payment_channel"),
+  pfcPrimary: text("pfc_primary"),
+  pfcDetailed: text("pfc_detailed"),
+  pfcConfidence: text("pfc_confidence"),
+  categoryId: uuid("category_id").references(() => categories.id),
+  categorySource: categorySourceEnum("category_source").notNull().default("plaid"),
+  counterparties: jsonb("counterparties"),
+  location: jsonb("location"),
+  notes: text("notes"),
+  tags: jsonb("tags").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  isTransfer: boolean("is_transfer").notNull().default(false),
+  transferGroupId: uuid("transfer_group_id"),
+  excludedFromBudget: boolean("excluded_from_budget").notNull().default(false),
+  reviewed: boolean("reviewed").notNull().default(false),
+  raw: jsonb("raw"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  userDateIdx: index("transactions_user_date_idx").on(t.userId, t.postedDate),
+  acctDateIdx: index("transactions_acct_date_idx").on(t.accountId, t.postedDate),
+  pendingIdx: index("transactions_pending_idx").on(t.userId).where(sql`is_pending`),
+}));
+
+export const transactionSplits = pgTable("transaction_splits", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  transactionId: uuid("transaction_id").notNull().references(() => transactions.id, { onDelete: "cascade" }),
+  categoryId: uuid("category_id").references(() => categories.id),
+  amount: bigint("amount", { mode: "number" }).notNull(),
+  note: text("note"),
+});
+
+// ---------------------------------------------------------------------------
+// Budgets
+// ---------------------------------------------------------------------------
+
+export const budgets = pgTable("budgets", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  month: date("month").notNull(), // always the 1st
+  categoryId: uuid("category_id").notNull().references(() => categories.id),
+  amount: bigint("amount", { mode: "number" }).notNull(),
+  rolloverEnabled: boolean("rollover_enabled").notNull().default(false),
+  rolloverFromPrior: bigint("rollover_from_prior", { mode: "number" }).notNull().default(0),
+}, (t) => ({
+  userMonthIdx: index("budgets_user_month_idx").on(t.userId, t.month),
+  uniq: uniqueIndex("budgets_user_month_category_idx").on(t.userId, t.month, t.categoryId),
+}));
+
+// ---------------------------------------------------------------------------
+// Investments
+// ---------------------------------------------------------------------------
+
+export const securities = pgTable("securities", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  plaidSecurityId: text("plaid_security_id").unique(),
+  ticker: text("ticker"),
+  cusip: text("cusip"),
+  isin: text("isin"),
+  name: text("name"),
+  type: text("type"),
+  isCashEquivalent: boolean("is_cash_equivalent").notNull().default(false),
+  closePrice: bigint("close_price", { mode: "number" }), // cents
+  closePriceAsOf: date("close_price_as_of"),
+  currency: text("currency").notNull().default("USD"),
+  sector: text("sector"),
+  assetClass: text("asset_class"),
+});
+
+export const holdings = pgTable("holdings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  accountId: uuid("account_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  securityId: uuid("security_id").notNull().references(() => securities.id),
+  quantity: numeric("quantity", { precision: 28, scale: 10 }).notNull(),
+  costBasis: bigint("cost_basis", { mode: "number" }),
+  institutionPrice: bigint("institution_price", { mode: "number" }),
+  institutionPriceAsOf: date("institution_price_as_of"),
+  institutionValue: bigint("institution_value", { mode: "number" }).notNull(),
+  asOfDate: date("as_of_date").notNull(),
+}, (t) => ({
+  uniq: uniqueIndex("holdings_acct_sec_date_idx").on(t.accountId, t.securityId, t.asOfDate),
+  acctDateIdx: index("holdings_acct_date_idx").on(t.accountId, t.asOfDate),
+}));
+
+export const investmentTransactions = pgTable("investment_transactions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  accountId: uuid("account_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  plaidInvestmentTransactionId: text("plaid_investment_transaction_id").unique(),
+  securityId: uuid("security_id").references(() => securities.id),
+  date: date("date").notNull(),
+  name: text("name"),
+  quantity: numeric("quantity", { precision: 28, scale: 10 }),
+  amount: bigint("amount", { mode: "number" }).notNull(),
+  price: bigint("price", { mode: "number" }),
+  fees: bigint("fees", { mode: "number" }),
+  type: text("type"),
+  subtype: text("subtype"),
+  currency: text("currency").notNull().default("USD"),
+});
+
+// ---------------------------------------------------------------------------
+// Liabilities
+// ---------------------------------------------------------------------------
+
+export const liabilitiesCredit = pgTable("liabilities_credit", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  accountId: uuid("account_id").notNull().references(() => accounts.id, { onDelete: "cascade" }).unique(),
+  aprs: jsonb("aprs"),
+  isOverdue: boolean("is_overdue").notNull().default(false),
+  lastPaymentAmount: bigint("last_payment_amount", { mode: "number" }),
+  lastPaymentDate: date("last_payment_date"),
+  lastStatementBalance: bigint("last_statement_balance", { mode: "number" }),
+  lastStatementIssueDate: date("last_statement_issue_date"),
+  minimumPaymentAmount: bigint("minimum_payment_amount", { mode: "number" }),
+  nextPaymentDueDate: date("next_payment_due_date"),
+  asOf: timestamp("as_of", { withTimezone: true }),
+});
+
+// ---------------------------------------------------------------------------
+// Recurring / subscriptions
+// ---------------------------------------------------------------------------
+
+export const recurringStreams = pgTable("recurring_streams", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  merchantKey: text("merchant_key").notNull(),
+  description: text("description"),
+  accountId: uuid("account_id").references(() => accounts.id),
+  categoryId: uuid("category_id").references(() => categories.id),
+  averageAmount: bigint("average_amount", { mode: "number" }).notNull(),
+  frequency: recurringFrequencyEnum("frequency").notNull(),
+  lastDate: date("last_date"),
+  predictedNextDate: date("predicted_next_date"),
+  status: recurringStatusEnum("status").notNull().default("active"),
+  confidence: numeric("confidence", { precision: 4, scale: 3 }),
+  transactionIds: jsonb("transaction_ids").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+}, (t) => ({
+  userIdx: index("recurring_user_idx").on(t.userId),
+  uniq: uniqueIndex("recurring_user_merchant_account_idx").on(t.userId, t.merchantKey, t.accountId),
+}));
+
+// ---------------------------------------------------------------------------
+// Net worth / sync bookkeeping
+// ---------------------------------------------------------------------------
+
+export const netWorthSnapshots = pgTable("net_worth_snapshots", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  asOfDate: date("as_of_date").notNull(),
+  assets: bigint("assets", { mode: "number" }).notNull(),
+  liabilities: bigint("liabilities", { mode: "number" }).notNull(),
+  net: bigint("net", { mode: "number" }).notNull(),
+  breakdown: jsonb("breakdown"),
+}, (t) => ({
+  uniq: uniqueIndex("net_worth_user_date_idx").on(t.userId, t.asOfDate),
+}));
+
+export const webhookEvents = pgTable("webhook_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  provider: text("provider").notNull().default("plaid"),
+  itemId: text("item_id"),
+  webhookType: text("webhook_type").notNull(),
+  webhookCode: text("webhook_code").notNull(),
+  payload: jsonb("payload").notNull(),
+  signatureVerified: boolean("signature_verified").notNull(),
+  receivedAt: timestamp("received_at", { withTimezone: true }).notNull().defaultNow(),
+  processedAt: timestamp("processed_at", { withTimezone: true }),
+  status: text("status").notNull().default("pending"), // pending | processed | failed
+  attempts: integer("attempts").notNull().default(0),
+  error: text("error"),
+});
+
+export const syncRuns = pgTable("sync_runs", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  itemId: uuid("item_id").notNull().references(() => plaidItems.id, { onDelete: "cascade" }),
+  kind: syncKindEnum("kind").notNull(),
+  trigger: syncTriggerEnum("trigger").notNull(),
+  startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+  finishedAt: timestamp("finished_at", { withTimezone: true }),
+  added: integer("added").notNull().default(0),
+  modified: integer("modified").notNull().default(0),
+  removed: integer("removed").notNull().default(0),
+  error: text("error"),
+}, (t) => ({
+  itemIdx: index("sync_runs_item_idx").on(t.itemId),
+}));
+
+export const auditLog = pgTable("audit_log", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").references(() => users.id),
+  action: text("action").notNull(),
+  entity: text("entity").notNull(),
+  entityId: text("entity_id"),
+  before: jsonb("before"),
+  after: jsonb("after"),
+  at: timestamp("at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ---------------------------------------------------------------------------
+// Relations
+// ---------------------------------------------------------------------------
+
+export const usersRelations = relations(users, ({ many }) => ({
+  items: many(plaidItems),
+  accounts: many(accounts),
+}));
+
+export const plaidItemsRelations = relations(plaidItems, ({ one, many }) => ({
+  user: one(users, { fields: [plaidItems.userId], references: [users.id] }),
+  accounts: many(accounts),
+  syncRuns: many(syncRuns),
+}));
+
+export const accountsRelations = relations(accounts, ({ one, many }) => ({
+  item: one(plaidItems, { fields: [accounts.itemId], references: [plaidItems.id] }),
+  user: one(users, { fields: [accounts.userId], references: [users.id] }),
+  transactions: many(transactions),
+  liability: one(liabilitiesCredit, { fields: [accounts.id], references: [liabilitiesCredit.accountId] }),
+}));
+
+export const transactionsRelations = relations(transactions, ({ one, many }) => ({
+  account: one(accounts, { fields: [transactions.accountId], references: [accounts.id] }),
+  category: one(categories, { fields: [transactions.categoryId], references: [categories.id] }),
+  splits: many(transactionSplits),
+}));
