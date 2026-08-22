@@ -265,59 +265,59 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
         )}
       </Card>
 
-      <Card className="flex-1 min-h-0 flex flex-col overflow-hidden">
-        <div className="grid grid-cols-[92px_minmax(180px,1fr)_150px_170px_120px] gap-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 flex-none">
-          <span>Date</span>
-          <span>Merchant</span>
-          <span>Account</span>
-          <span>Category</span>
-          <span className="text-right">Amount</span>
-        </div>
-
-        <div className="flex-1 min-h-0 overflow-y-auto">
-          {rows.length === 0 ? (
-            <div className="px-4 py-10">
-              {total === 0 && !hasFilters ? (
-                <EmptyState
-                  icon={Receipt}
-                  title="Nothing here yet"
-                  description="Connect an account, or hit Sync now to pull in your transaction history."
-                />
-              ) : (
-                <EmptyState
-                  icon={SearchX}
-                  title="No matches"
-                  description="Nothing fits these filters. Try widening the date range or clearing one."
-                />
-              )}
-            </div>
+      {rows.length === 0 ? (
+        <Card className="flex-none p-10">
+          {total === 0 && !hasFilters ? (
+            <EmptyState
+              icon={Receipt}
+              title="Nothing here yet"
+              description="Connect an account, or hit Sync now to pull in your transaction history."
+            />
           ) : (
-            <TransactionsList rows={rowData} accountsById={accountsById} categories={categoryOptions} />
+            <EmptyState
+              icon={SearchX}
+              title="No matches"
+              description="Nothing fits these filters. Try widening the date range or clearing one."
+            />
           )}
-        </div>
-
-        {total > 0 && (
-          <div className="flex items-center justify-between px-4 py-3 text-[13.5px] text-text-3 flex-none border-t border-border">
-            <span>
-              Showing {start}–{end} of {total}
-            </span>
-            <div className="flex gap-3">
-              <Link
-                href={pageHref(Math.max(1, page - 1))}
-                className={page <= 1 ? "pointer-events-none text-text-3" : "text-text-2"}
-              >
-                Previous
-              </Link>
-              <Link
-                href={pageHref(Math.min(totalPages, page + 1))}
-                className={page >= totalPages ? "pointer-events-none text-text-3" : "text-text-2"}
-              >
-                Next
-              </Link>
-            </div>
+        </Card>
+      ) : (
+        <Card className="flex-1 min-h-0 flex flex-col overflow-hidden">
+          <div className="grid grid-cols-[92px_minmax(180px,1fr)_150px_170px_120px] gap-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 flex-none">
+            <span>Date</span>
+            <span>Merchant</span>
+            <span>Account</span>
+            <span>Category</span>
+            <span className="text-right">Amount</span>
           </div>
-        )}
-      </Card>
+
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            <TransactionsList rows={rowData} accountsById={accountsById} categories={categoryOptions} />
+          </div>
+
+          {total > 0 && (
+            <div className="flex items-center justify-between px-4 py-3 text-[13.5px] text-text-3 flex-none border-t border-border">
+              <span>
+                Showing {start}–{end} of {total}
+              </span>
+              <div className="flex gap-3">
+                <Link
+                  href={pageHref(Math.max(1, page - 1))}
+                  className={page <= 1 ? "pointer-events-none text-text-3" : "text-text-2"}
+                >
+                  Previous
+                </Link>
+                <Link
+                  href={pageHref(Math.min(totalPages, page + 1))}
+                  className={page >= totalPages ? "pointer-events-none text-text-3" : "text-text-2"}
+                >
+                  Next
+                </Link>
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
     </div>
   );
 }
