@@ -1,7 +1,9 @@
 import { asc, eq, isNull, or } from "drizzle-orm";
+import { Wand2 } from "lucide-react";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { RuleForm } from "@/components/rules/RuleForm";
 import { RuleRow } from "@/components/rules/RuleRow";
 import { summarizeMatch, summarizeActions } from "@/lib/ruleSummary";
@@ -40,8 +42,13 @@ export default async function RulesPage() {
       <Card>
         <CardHeader title="Existing rules" meta="Lower priority number runs first" />
         {rules.length === 0 ? (
-          <div className="px-4 py-10 text-center text-text-2 text-[15px]">
-            No rules yet. Rules created from "Always categorize this way" on a transaction show up here too.
+          <div className="px-4 py-10">
+            <EmptyState
+              icon={Wand2}
+              animation="wiggle"
+              title="No rules yet"
+              description={'Create one above, or click "Always categorize this way" on any transaction to add one automatically.'}
+            />
           </div>
         ) : (
           rules.map((r) => (

@@ -1,7 +1,9 @@
 import { db, schema } from "@/db";
 import { and, desc, eq, gte, ilike, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import { Receipt, SearchX } from "lucide-react";
 import { requireUserId } from "@/lib/session";
 import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { SyncAllButton } from "@/components/plaid/SyncAllButton";
 import { TransactionsList, type TransactionRowData, type AccountLookup } from "@/components/transactions/TransactionsList";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
@@ -274,10 +276,20 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
 
         <div className="flex-1 min-h-0 overflow-y-auto">
           {rows.length === 0 ? (
-            <div className="px-4 py-10 text-center text-text-2 text-[15px]">
-              {total === 0 && !hasFilters
-                ? "No transactions yet. Connect an account or click Sync now."
-                : "No transactions match these filters."}
+            <div className="px-4 py-10">
+              {total === 0 && !hasFilters ? (
+                <EmptyState
+                  icon={Receipt}
+                  title="Nothing here yet"
+                  description="Connect an account, or hit Sync now to pull in your transaction history."
+                />
+              ) : (
+                <EmptyState
+                  icon={SearchX}
+                  title="No matches"
+                  description="Nothing fits these filters. Try widening the date range or clearing one."
+                />
+              )}
             </div>
           ) : (
             <TransactionsList rows={rowData} accountsById={accountsById} categories={categoryOptions} />

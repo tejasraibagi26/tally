@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { PiggyBank } from "lucide-react";
 import { formatCents } from "@/lib/money";
 import { computeBurnRateProjection } from "@/lib/budgetMath";
+import { EmptyState } from "@/components/ui/EmptyState";
 import type { BudgetLine } from "@/lib/budgets";
 
 // Read-only condensed meter list for the Overview screen (DESIGN.md §10 "Budget this month" panel) —
@@ -21,11 +23,17 @@ export function BudgetMeterList({
 }) {
   if (budgets.length === 0) {
     return (
-      <div className="px-4 py-8 text-center text-text-2 text-[15px] flex flex-col items-center gap-2">
-        <span>No budgets set for this month yet.</span>
-        <Link href="/budgets" className="text-brand text-[13.5px]">
-          Set a budget →
-        </Link>
+      <div className="px-4 py-8">
+        <EmptyState
+          icon={PiggyBank}
+          compact
+          title="No budgets set for this month yet"
+          action={
+            <Link href="/budgets" className="text-brand text-[13.5px]">
+              Set a budget →
+            </Link>
+          }
+        />
       </div>
     );
   }

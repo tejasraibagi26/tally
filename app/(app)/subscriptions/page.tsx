@@ -1,9 +1,11 @@
 import { eq } from "drizzle-orm";
+import { Repeat } from "lucide-react";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { formatCents } from "@/lib/money";
 import { Card } from "@/components/ui/Card";
 import { StatusBadge, type Status } from "@/components/ui/StatusBadge";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const FREQUENCY_MONTHLY_MULTIPLIER: Record<string, number> = {
   weekly: 52 / 12,
@@ -60,12 +62,13 @@ export default async function SubscriptionsPage() {
       <h1 className="text-2xl font-semibold text-text">Subscriptions &amp; recurring</h1>
 
       {streams.length === 0 ? (
-        <Card className="p-10 flex flex-col items-center gap-2 text-center">
-          <span className="font-display text-2xl text-text">Nothing detected yet</span>
-          <p className="text-text-2 text-[15px] max-w-md">
-            Recurring charges and income show up here automatically once a merchant, account, and amount repeat at least 3
-            times with a stable interval.
-          </p>
+        <Card className="p-10">
+          <EmptyState
+            icon={Repeat}
+            animation="spin"
+            title="Nothing detected yet"
+            description="Recurring charges and income show up here automatically once a merchant, account, and amount repeat at least 3 times with a stable interval."
+          />
         </Card>
       ) : (
         <>

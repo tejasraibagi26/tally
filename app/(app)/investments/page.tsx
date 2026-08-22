@@ -1,9 +1,12 @@
 import { desc, eq, inArray } from "drizzle-orm";
+import Link from "next/link";
+import { TrendingUp } from "lucide-react";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { formatCents, formatPercent } from "@/lib/money";
 import { latestHoldingsForUser, portfolioValue, allocationFor, unrealizedGain, portfolioSimpleReturn } from "@/lib/portfolio";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 function formatQuantity(q: string): string {
   const n = parseFloat(q);
@@ -47,11 +50,17 @@ export default async function InvestmentsPage() {
     return (
       <div className="max-w-[1280px] mx-auto px-8 py-7 flex flex-col gap-6">
         <h1 className="text-2xl font-semibold text-text">Investments</h1>
-        <Card className="p-10 flex flex-col items-center gap-2 text-center">
-          <span className="font-display text-2xl text-text">No holdings yet</span>
-          <p className="text-text-2 text-[15px]">
-            Connect a brokerage account, or sync an existing one — holdings usually appear within a minute.
-          </p>
+        <Card className="p-10">
+          <EmptyState
+            icon={TrendingUp}
+            title="Nothing invested here yet"
+            description="Connect a brokerage account, or sync an existing one. Holdings usually appear within a minute."
+            action={
+              <Link href="/accounts" className="text-brand text-[13.5px] font-medium">
+                Go to Accounts →
+              </Link>
+            }
+          />
         </Card>
       </div>
     );

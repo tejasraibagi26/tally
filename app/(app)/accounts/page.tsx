@@ -1,9 +1,11 @@
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
+import { Landmark } from "lucide-react";
 import { requireUserId } from "@/lib/session";
 import { formatCents } from "@/lib/money";
 import { Card } from "@/components/ui/Card";
 import { StatusBadge, type Status } from "@/components/ui/StatusBadge";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { LinkButton } from "@/components/plaid/LinkButton";
 import { DeleteItemButton } from "@/components/plaid/DeleteItemButton";
 import { MOCK_MODE } from "@/lib/config";
@@ -84,9 +86,13 @@ export default async function AccountsPage() {
       )}
 
       {items.length === 0 ? (
-        <Card className="p-10 flex flex-col items-center gap-3 text-center">
-          <span className="text-text text-[15px]">No accounts connected yet.</span>
-          <LinkButton mode="create" label="Connect your first account" mock={MOCK_MODE} />
+        <Card className="p-10">
+          <EmptyState
+            icon={Landmark}
+            title="No accounts yet"
+            description="Connect your bank, card, or brokerage to see everything in one place."
+            action={<LinkButton mode="create" label="Connect your first account" mock={MOCK_MODE} />}
+          />
         </Card>
       ) : (
         <div className="grid grid-cols-2 gap-4 items-start">

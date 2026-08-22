@@ -110,7 +110,8 @@ export function SideNav({
       <div className="mt-auto flex flex-col gap-3">
         <div className="h-px bg-border" />
 
-        <div className="px-2">
+        <div className="flex items-center justify-between px-2">
+          <span className="text-[13.5px] text-text-2">Theme</span>
           <ThemeToggle />
         </div>
 

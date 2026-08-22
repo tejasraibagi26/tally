@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { and, eq, isNull, notInArray, or } from "drizzle-orm";
+import { PiggyBank } from "lucide-react";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { getBudgetsForMonth, shiftMonth } from "@/lib/budgets";
 import { monthLastDay } from "@/lib/budgetMath";
 import { formatCents } from "@/lib/money";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { BudgetRow } from "@/components/budgets/BudgetRow";
 import { AddBudgetForm } from "@/components/budgets/AddBudgetForm";
 
@@ -84,8 +86,8 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
       <Card>
         <CardHeader title="This month" />
         {budgets.length === 0 ? (
-          <div className="px-4 py-10 text-center text-text-2 text-[15px]">
-            No budgets set for {monthLabel(month)} yet — add one below.
+          <div className="px-4 py-10">
+            <EmptyState icon={PiggyBank} title="No budgets yet" description={`Add one below to start tracking spend against a limit for ${monthLabel(month)}.`} />
           </div>
         ) : (
           budgets.map((b) => <BudgetRow key={b.categoryId} budget={{ ...b, month }} daysElapsed={daysElapsed} daysInMonth={daysInMonth} />)

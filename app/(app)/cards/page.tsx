@@ -1,8 +1,11 @@
+import Link from "next/link";
+import { CreditCard as CreditCardIcon } from "lucide-react";
 import { requireUserId } from "@/lib/session";
 import { formatCents, formatPercent } from "@/lib/money";
 import { creditCardsForUser, utilizationFor } from "@/lib/liabilities";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { EmptyState } from "@/components/ui/EmptyState";
 
 const APR_TYPE_LABEL: Record<string, string> = {
   purchase_apr: "Purchase APR",
@@ -29,9 +32,17 @@ export default async function CardsPage() {
     return (
       <div className="max-w-[1280px] mx-auto px-8 py-7 flex flex-col gap-6">
         <h1 className="text-2xl font-semibold text-text">Credit cards</h1>
-        <Card className="p-10 flex flex-col items-center gap-2 text-center">
-          <span className="font-display text-2xl text-text">No credit cards connected</span>
-          <p className="text-text-2 text-[15px]">Connect a credit card account to see APR, statement, and due-date details here.</p>
+        <Card className="p-10">
+          <EmptyState
+            icon={CreditCardIcon}
+            title="No credit cards connected"
+            description="Connect one and its APR, statement balance, and due dates show up right here."
+            action={
+              <Link href="/accounts" className="text-brand text-[13.5px] font-medium">
+                Go to Accounts →
+              </Link>
+            }
+          />
         </Card>
       </div>
     );
