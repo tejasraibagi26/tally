@@ -6,6 +6,9 @@ import { ScrollReveal } from "@/components/marketing/ScrollReveal";
 import { LogoMark } from "@/components/Logo";
 import { FeatureShowcase } from "@/components/marketing/FeatureShowcase";
 import { HeroVisual } from "@/components/marketing/HeroVisual";
+import { ShieldCheck, Check } from "lucide-react";
+
+const TRUST_POINTS = ["No ads", "No data resale", "Nothing sent to a third-party LLM"] as const;
 
 const STEPS = [
   { n: "01", title: "Connect", body: "Link your checking, credit card, and brokerage accounts through Plaid in minutes." },
@@ -110,14 +113,31 @@ export default async function RootPage() {
 
         <section className="max-w-[1120px] mx-auto px-6 pb-24">
           <ScrollReveal>
-            <div className="bg-surface border border-border rounded-panel p-10 flex flex-col items-center gap-4 text-center">
-              <span className="font-display text-3xl text-text">Your money, your server, your rules.</span>
-              <p className="text-text-2 max-w-md">
-                No ads, no data resale, nothing sent to a third-party LLM. Tally runs on infrastructure you control.
-              </p>
+            <div className="relative overflow-hidden bg-surface border border-border rounded-panel p-10 flex flex-col items-center gap-5 text-center">
+              <div
+                className="absolute -top-24 left-1/2 -translate-x-1/2 w-[420px] h-[420px] rounded-full opacity-[0.16] pointer-events-none"
+                style={{ background: "var(--brand)", filter: "blur(80px)" }}
+                aria-hidden
+              />
+
+              <div className="relative w-14 h-14 rounded-full bg-brand-subtle flex items-center justify-center">
+                <ShieldCheck size={26} strokeWidth={1.75} className="text-brand" />
+              </div>
+
+              <span className="relative font-display text-3xl text-text">Your money, your server, your rules.</span>
+
+              <div className="relative flex items-center gap-x-6 gap-y-2 flex-wrap justify-center">
+                {TRUST_POINTS.map((point) => (
+                  <span key={point} className="inline-flex items-center gap-1.5 text-[14.5px] text-text-2">
+                    <Check size={15} strokeWidth={2} className="text-positive flex-none" />
+                    {point}
+                  </span>
+                ))}
+              </div>
+
               <Link
                 href="/docs"
-                className="h-11 px-6 inline-flex items-center rounded-control bg-brand text-on-brand text-[15px] font-medium hover:bg-brand-hover transition-colors"
+                className="relative h-11 px-6 inline-flex items-center rounded-control bg-brand text-on-brand text-[15px] font-medium hover:bg-brand-hover transition-colors"
               >
                 Read the self-hosting guide →
               </Link>

@@ -1,37 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { formatCents } from "@/lib/money";
+import { useCountUp } from "@/lib/useCountUp";
 
 const TARGET_CENTS = 84_231_855; // $842,318.55 — illustrative only, never real user data
 const SPARK_POINTS = "0,38 12,34 24,36 36,26 48,29 60,18 72,21 84,10 96,13 108,2";
 const DOTS = [1, 3, 5, 2, 7, 4] as const;
 
-function useCountUp(target: number, durationMs = 1600) {
-  const [value, setValue] = useState(0);
-  const started = useRef(false);
-
-  useEffect(() => {
-    if (started.current) return;
-    started.current = true;
-    const start = performance.now();
-    let frame: number;
-
-    function tick(now: number) {
-      const t = Math.min(1, (now - start) / durationMs);
-      const eased = 1 - Math.pow(1 - t, 3); // ease-out-cubic
-      setValue(Math.round(target * eased));
-      if (t < 1) frame = requestAnimationFrame(tick);
-    }
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [target, durationMs]);
-
-  return value;
-}
-
 export function HeroVisual() {
-  const value = useCountUp(TARGET_CENTS);
+  const value = useCountUp(TARGET_CENTS, 1600);
 
   return (
     <div className="relative w-full max-w-[420px] mx-auto">

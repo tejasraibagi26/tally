@@ -1,5 +1,7 @@
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
+import { Landmark } from "lucide-react";
+import { cn } from "@/lib/cn";
 import { requireUserId } from "@/lib/session";
 import { formatCents, formatPercent } from "@/lib/money";
 import { getBudgetsForMonth } from "@/lib/budgets";
@@ -9,6 +11,8 @@ import { netWorthTrend } from "@/lib/networth";
 import { creditCardsForUser, utilizationFor } from "@/lib/liabilities";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { StatTile } from "@/components/ui/StatTile";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { NetWorthChart } from "@/components/charts/NetWorthChart";
 import { CashFlowChart } from "@/components/charts/CashFlowChart";
 import { RankedBars } from "@/components/charts/RankedBars";
@@ -16,6 +20,13 @@ import { BudgetMeterList } from "@/components/budgets/BudgetMeterList";
 import { LinkButton } from "@/components/plaid/LinkButton";
 import { MOCK_MODE } from "@/lib/config";
 import Link from "next/link";
+
+// A short, increasing entrance delay per major section so the page arrives
+// in a quick cascade rather than all at once. Kept small (120ms apart) so
+// it reads as "alive," not like a slow reveal you have to wait through.
+function reveal(step: number): React.CSSProperties {
+  return { animation: `fade-in-up 420ms ease-out ${step * 120}ms both` };
+}
 
 function currentMonth(): string {
   const now = new Date();
@@ -45,12 +56,13 @@ export default async function OverviewPage() {
     return (
       <div className="max-w-[1280px] mx-auto px-8 py-7">
         <h1 className="text-2xl font-semibold text-text mb-6">Overview</h1>
-        <Card className="p-12 flex flex-col items-center gap-4 text-center">
-          <span className="font-display text-3xl text-text">Nothing connected yet</span>
-          <p className="text-text-2 text-[15px] max-w-md">
-            Connect a bank, credit card, or brokerage account to see your net worth, spend, and budgets here.
-          </p>
-          <LinkButton mode="create" label="Connect an account" mock={MOCK_MODE} />
+        <Card className="p-12">
+          <EmptyState
+            icon={Landmark}
+            title="Nothing connected yet"
+            description="Connect a bank, credit card, or brokerage account to see your net worth, spend, and budgets here."
+            action={<LinkButton mode="create" label="Connect an account" mock={MOCK_MODE} />}
+          />
         </Card>
       </div>
     );
@@ -113,12 +125,12 @@ export default async function OverviewPage() {
       </div>
 
       {/* Row 1: hero net worth + connections health */}
-      <div className="grid grid-cols-12 gap-4 items-stretch">
+      <div className="grid grid-cols-12 gap-4 items-stretch" style={reveal(0)}>
         <Card className="col-span-8 p-7 flex flex-col gap-4">
           <div className="flex items-end justify-between gap-12">
             <div className="flex flex-col gap-3">
               <span className="text-xs font-medium uppercase tracking-wide text-text-3">Net worth</span>
-              <span className="font-display text-[56px] leading-none text-text tabular">{formatCents(netWorth)}</span>
+              <AnimatedNumber cents={netWorth} className="font-display text-[56px] leading-none text-text tabular" />
               <div className="flex items-center gap-2">
                 {netWorthDelta && (
                   <span className={`text-xs font-medium ${netWorthDelta.direction === "up" ? "text-positive" : "text-negative"}`}>
@@ -143,7 +155,10 @@ export default async function OverviewPage() {
             {items.slice(0, 4).map((item) => (
               <div key={item.id} className="flex items-center justify-between text-[13.5px]">
                 <span className="text-text truncate">{item.institutionName ?? "Unknown"}</span>
-                <span className={item.status === "healthy" ? "text-positive" : "text-negative"}>
+                <span className={cn("inline-flex items-center gap-1.5", item.status === "healthy" ? "text-positive" : "text-negative")}>
+                  {item.status === "healthy" && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-positive flex-none" style={{ animation: "float-dot 1.8s ease-in-out infinite" }} />
+                  )}
                   {item.status === "healthy" ? "Healthy" : "Needs attention"}
                 </span>
               </div>
@@ -156,23 +171,23 @@ export default async function OverviewPage() {
       </div>
 
       {/* Row 2: stat tiles */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-4" style={reveal(1)}>
         <StatTile
           label="Spent this month"
-          value={formatCents(thisMonth.spend)}
+          value={<AnimatedNumber cents={thisMonth.spend} />}
           delta={spendDelta ? { ...spendDelta, goodDirection: "down", comparisonLabel: "vs last month" } : undefined}
           secondary={totalBudgeted > 0 ? `${formatPercent(thisMonth.spend / totalBudgeted)} of ${formatCents(totalBudgeted)} budget` : "Projected " + formatCents(projectedSpend)}
           href={`/transactions?from=${monthStart}&to=${monthEnd}&kind=expense&transfer=0&excluded=0`}
         />
         <StatTile
           label="Income this month"
-          value={formatCents(thisMonth.income)}
+          value={<AnimatedNumber cents={thisMonth.income} />}
           delta={incomeDelta ? { ...incomeDelta, goodDirection: "up", comparisonLabel: "vs last month" } : undefined}
           href={`/transactions?from=${monthStart}&to=${monthEnd}&kind=income&transfer=0&excluded=0`}
         />
         <StatTile
           label="Cash flow"
-          value={formatCents(cashFlow, { signed: true })}
+          value={<AnimatedNumber cents={cashFlow} signed />}
           delta={cashFlowDelta ? { ...cashFlowDelta, goodDirection: "up", comparisonLabel: "vs last month" } : undefined}
           href={`/transactions?from=${monthStart}&to=${monthEnd}&transfer=0&excluded=0`}
         />
@@ -191,7 +206,7 @@ export default async function OverviewPage() {
       </div>
 
       {/* Cash flow trend */}
-      <Card>
+      <Card style={reveal(2)}>
         <CardHeader title="Cash flow" meta="Last 13 months" />
         <div className="p-4">
           <CashFlowChart months={cashFlowMonths} />
@@ -199,7 +214,7 @@ export default async function OverviewPage() {
       </Card>
 
       {/* Row 3: budget + where it went */}
-      <div className="grid grid-cols-12 gap-4 items-start">
+      <div className="grid grid-cols-12 gap-4 items-start" style={reveal(3)}>
         <Card className="col-span-7">
           <CardHeader title="Budget this month" action={<Link href="/budgets" className="text-brand text-[13.5px]">Manage →</Link>} />
           <BudgetMeterList budgets={budgets} from={monthStart} to={monthEnd} daysElapsed={daysElapsed} daysInMonth={daysInMonth} />
@@ -213,7 +228,7 @@ export default async function OverviewPage() {
       </div>
 
       {/* Row 4: upcoming + recent activity */}
-      <div className="grid grid-cols-12 gap-4 items-start">
+      <div className="grid grid-cols-12 gap-4 items-start" style={reveal(4)}>
         <Card className="col-span-5">
           <CardHeader title="Upcoming" meta={bills.length > 0 ? `${bills.length} in the next 30 days` : undefined} />
           {bills.length === 0 ? (

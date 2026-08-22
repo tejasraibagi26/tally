@@ -9,11 +9,20 @@ const inputClass =
 const labelClass = "text-xs font-medium uppercase tracking-wide text-text-2";
 
 export function PasswordForm() {
+  const [editing, setEditing] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  function cancel() {
+    setEditing(false);
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setError(null);
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -51,8 +60,19 @@ export function PasswordForm() {
     }
   }
 
+  if (!editing) {
+    return (
+      <div className="flex items-center justify-between">
+        <span className="text-[15px] text-text-2 tracking-widest">••••••••</span>
+        <Button variant="secondary" size="sm" onClick={() => setEditing(true)}>
+          Change password
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4" style={{ animation: "fade-in-up 200ms ease-out" }}>
       <div className="flex flex-col gap-1.5">
         <label className={labelClass} htmlFor="current-password">
           Current password
@@ -97,9 +117,12 @@ export function PasswordForm() {
         />
       </div>
       {error && <p className="text-sm text-negative">{error}</p>}
-      <div>
+      <div className="flex items-center gap-3">
         <Button type="submit" size="sm" disabled={loading}>
           {loading ? "Updating…" : "Update password"}
+        </Button>
+        <Button type="button" variant="ghost" size="sm" onClick={cancel} disabled={loading}>
+          Cancel
         </Button>
       </div>
     </form>

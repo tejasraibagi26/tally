@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 
@@ -17,7 +18,7 @@ export function StatTile({
   href,
 }: {
   label: string;
-  value: string;
+  value: ReactNode;
   delta?: StatTileDelta;
   secondary?: string;
   href: string;
