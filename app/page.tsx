@@ -3,6 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ScrollReveal } from "@/components/marketing/ScrollReveal";
+import { LogoMark } from "@/components/Logo";
 import { FeatureShowcase } from "@/components/marketing/FeatureShowcase";
 import { HeroVisual } from "@/components/marketing/HeroVisual";
 
@@ -31,7 +32,7 @@ export default async function RootPage() {
 
       <header className="max-w-[1120px] mx-auto px-6 py-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="w-7 h-7 rounded-[8px] bg-brand text-on-brand flex items-center justify-center font-display text-base leading-none">T</span>
+          <LogoMark size={28} />
           <span className="font-display text-xl text-text">Tally</span>
         </div>
         <div className="flex items-center gap-4">

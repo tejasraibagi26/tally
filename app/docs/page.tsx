@@ -3,6 +3,7 @@ import { join } from "node:path";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { DocsNav, type DocsNavItem } from "@/components/docs/DocsNav";
+import { LogoMark } from "@/components/Logo";
 
 // Read the repo's LICENSE file directly rather than duplicating its text here, so there is one source of truth.
 function readLicenseText(): string {
@@ -99,7 +100,7 @@ export default function DocsPage() {
     <div className="min-h-screen bg-canvas">
       <header className="max-w-[1120px] mx-auto px-6 py-6 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <span className="w-7 h-7 rounded-[8px] bg-brand text-on-brand flex items-center justify-center font-display text-base leading-none">T</span>
+          <LogoMark size={28} />
           <span className="font-display text-xl text-text">Tally</span>
         </Link>
         <div className="flex items-center gap-4">

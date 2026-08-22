@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
+import { LogoMark } from "@/components/Logo";
 
 /**
  * Pixel-matched to the Claude Design canvas (TallyNav.dc.html): 240px shell,
@@ -72,9 +73,7 @@ export function SideNav({ user, counts }: { user: { name: string | null; email: 
   return (
     <nav className="w-60 flex-none bg-surface border-r border-border px-4 py-6 flex flex-col gap-6">
       <div className="flex items-center gap-2 px-2">
-        <div className="w-[22px] h-[22px] rounded-[6px] bg-brand flex items-center justify-center font-display text-[15px] leading-none text-on-brand">
-          T
-        </div>
+        <LogoMark size={22} />
         <span className="font-display text-2xl leading-none text-text">Tally</span>
       </div>
 
