@@ -109,23 +109,10 @@ export function SideNav({
 
       <div className="mt-auto flex flex-col gap-3">
         <div className="h-px bg-border" />
-        <Link
-          href="/settings"
-          className={cn(
-            "flex items-center gap-2.5 px-2 py-1 -mx-2 rounded-control hover:bg-sunken",
-            isActive("/settings") && "bg-sunken",
-          )}
-        >
-          <div className="w-7 h-7 flex-none rounded-full bg-sunken border border-border flex items-center justify-center text-xs font-medium text-text-2">
-            {initials(user.name, user.email)}
-          </div>
-          <div className="flex flex-col gap-0.5 min-w-0">
-            <span className="text-[13.5px] font-medium leading-none text-text truncate">
-              {displayName(user.name, user.email)}
-            </span>
-            <span className="text-xs leading-none text-text-3">Private</span>
-          </div>
-        </Link>
+
+        <div className="px-2">
+          <ThemeToggle />
+        </div>
 
         {mockMode && (
           <span className="self-start inline-flex items-center gap-1.5 rounded-full bg-warning-subtle text-warning text-xs font-medium px-2.5 py-0.5">
@@ -133,8 +120,23 @@ export function SideNav({
           </span>
         )}
 
-        <div className="flex items-center justify-between px-2">
-          <ThemeToggle />
+        <div
+          className={cn(
+            "flex items-center gap-2 px-2 py-1 -mx-2 rounded-control hover:bg-sunken",
+            isActive("/settings") && "bg-sunken",
+          )}
+        >
+          <Link href="/settings" className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="w-7 h-7 flex-none rounded-full bg-sunken border border-border flex items-center justify-center text-xs font-medium text-text-2">
+              {initials(user.name, user.email)}
+            </div>
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <span className="text-[13.5px] font-medium leading-none text-text truncate">
+                {displayName(user.name, user.email)}
+              </span>
+              <span className="text-xs leading-none text-text-3">Private</span>
+            </div>
+          </Link>
           <SignOutButton />
         </div>
       </div>

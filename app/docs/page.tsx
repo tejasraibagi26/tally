@@ -405,6 +405,12 @@ pg_restore -d "$DATABASE_URL" --clean --if-exists tally-20260101.dump`}</CodeBlo
               {licenseText}
             </pre>
           </Section>
+
+          <div className="pt-4 border-t border-border">
+            <Link href="/privacy" className="text-sm text-text-3 hover:text-text-2 transition-colors">
+              Privacy policy
+            </Link>
+          </div>
         </div>
       </div>
     </div>

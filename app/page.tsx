@@ -128,7 +128,12 @@ export default async function RootPage() {
 
       <footer className="max-w-[1120px] mx-auto px-6 py-8 flex items-center justify-between text-xs text-text-3 flex-wrap gap-2">
         <span>Tally · self-hosted personal finance</span>
-        <span>Built on Plaid · Next.js · Postgres</span>
+        <div className="flex items-center gap-4">
+          <Link href="/privacy" className="hover:text-text-2 transition-colors">
+            Privacy
+          </Link>
+          <span>Built on Plaid · Next.js · Postgres</span>
+        </div>
       </footer>
     </div>
   );
