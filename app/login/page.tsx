@@ -35,9 +35,14 @@ function LoginForm() {
       onSubmit={handleSubmit}
       className="w-full max-w-sm bg-surface border border-border rounded-panel shadow-raised p-8 flex flex-col gap-5"
     >
-      <div className="flex flex-col gap-1 pb-2">
-        <span className="font-display text-2xl text-text">Sign in</span>
-        <span className="text-[14.5px] text-text-2">Enter your credentials to reach your dashboard.</span>
+      <div className="flex flex-col items-center gap-3 pb-2 text-center">
+        <div style={{ animation: "empty-pop 450ms ease-out" }}>
+          <LogoMark size={40} />
+        </div>
+        <div className="flex flex-col gap-1">
+          <span className="font-display text-2xl text-text">Sign in</span>
+          <span className="text-[14.5px] text-text-2">See exactly where you stand.</span>
+        </div>
       </div>
 
       <div className="flex flex-col gap-1.5">
@@ -76,12 +81,11 @@ function LoginForm() {
         {loading ? "Signing in…" : "Sign in"}
       </Button>
 
-      <span className="text-xs text-text-3 text-center">
-        This instance is invite-only. Want your own?{" "}
+      <span className="text-xs text-text-3 text-center whitespace-nowrap">
+        Invite-only instance.{" "}
         <Link href="/docs" className="text-brand hover:underline">
-          Self-host Tally
+          Self-host your own →
         </Link>
-        .
       </span>
     </form>
   );
