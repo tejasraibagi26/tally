@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Layers, Tags, Gauge, TrendingUp, CreditCard as CreditCardIcon, ShieldCheck, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { NetWorthDemo, CategorizeDemo, BudgetDemo, InvestmentDemo, CreditCardDemo, SecurityDemo } from "@/components/marketing/FeatureDemos";
@@ -25,8 +25,15 @@ const FEATURES: Feature[] = [
 const AUTO_ADVANCE_MS = 5000;
 const SWAP_OUT_MS = 200;
 
-/** Click a feature (or let it auto-advance) to see a small live demo of it — replaces a flat "here's a list of things we do" grid. */
-export function FeatureShowcase() {
+/**
+ * Click a feature (or let it auto-advance) to see a small live demo of it —
+ * replaces a flat "here's a list of things we do" grid. Desktop only: the
+ * hover-to-pause interaction and the shared demo panel far from the list
+ * don't translate to touch, so mobile gets MobileFeatureList instead.
+ */
+function DesktopShowcase() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -38,11 +45,22 @@ export function FeatureShowcase() {
   const [displayed, setDisplayed] = useState(0);
   const [swapping, setSwapping] = useState(false);
 
+  // Gate auto-advance on actual visibility, not just mount: every section
+  // mounts immediately on page load, so an ungated timer could be several
+  // steps in by the time someone scrolls down to it.
   useEffect(() => {
-    if (paused) return;
+    const el = containerRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => setInView(entry?.isIntersecting ?? false), { threshold: 0.5 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (paused || !inView) return;
     const id = setTimeout(() => setActive((a) => (a + 1) % FEATURES.length), AUTO_ADVANCE_MS);
     return () => clearTimeout(id);
-  }, [active, paused]);
+  }, [active, paused, inView]);
 
   useEffect(() => {
     if (active === displayed) return;
@@ -56,10 +74,12 @@ export function FeatureShowcase() {
 
   const current = FEATURES[active]!;
   const shown = FEATURES[displayed]!;
+  const running = !paused && inView;
 
   return (
     <div
-      className="grid grid-cols-1 lg:grid-cols-[minmax(0,360px)_1fr] gap-6 items-stretch"
+      ref={containerRef}
+      className="hidden lg:grid lg:grid-cols-[minmax(0,360px)_1fr] gap-6 items-stretch"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -89,9 +109,9 @@ export function FeatureShowcase() {
               {isActive && (
                 <span className="absolute bottom-0 left-3.5 right-3.5 h-[2px] bg-border overflow-hidden rounded-full">
                   <span
-                    key={`${active}-${paused}`}
+                    key={`${active}-${running}`}
                     className="block h-full"
-                    style={{ background: color, animation: paused ? "none" : `progress-fill ${AUTO_ADVANCE_MS}ms linear forwards` }}
+                    style={{ background: color, animation: running ? `progress-fill ${AUTO_ADVANCE_MS}ms linear forwards` : "none" }}
                   />
                 </span>
               )}
@@ -117,5 +137,66 @@ export function FeatureShowcase() {
         </div>
       </div>
     </div>
+  );
+}
+
+/** One self-contained card: icon, title, body, and its own demo, which mounts (and so animates) only once the card itself scrolls into view. */
+function MobileFeatureCard({ feature }: { feature: Feature }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [revealed, setRevealed] = useState(false);
+  const color = `var(--series-${feature.slot})`;
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setRevealed(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.35 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className="flex flex-col gap-4 p-5 rounded-panel border border-border bg-surface">
+      <div className="flex items-center gap-3">
+        <span
+          className="w-9 h-9 flex-none rounded-[9px] flex items-center justify-center"
+          style={{ background: `color-mix(in srgb, ${color} 18%, transparent)` }}
+        >
+          <feature.icon size={18} strokeWidth={1.75} style={{ color }} />
+        </span>
+        <span className="text-[15px] font-medium text-text">{feature.title}</span>
+      </div>
+      <p className="text-[13px] text-text-3 leading-snug">{feature.body}</p>
+      <div className="rounded-card border border-border bg-canvas p-5 flex items-center justify-center min-h-[180px]">
+        {revealed && <feature.Demo />}
+      </div>
+    </div>
+  );
+}
+
+/** Mobile: a plain scrollable stack instead of the interactive panel — no hover-to-pause on touch, and no shared demo panel scrolled far from the list it corresponds to. */
+function MobileFeatureList() {
+  return (
+    <div className="flex flex-col gap-4 lg:hidden">
+      {FEATURES.map((f) => (
+        <MobileFeatureCard key={f.title} feature={f} />
+      ))}
+    </div>
+  );
+}
+
+export function FeatureShowcase() {
+  return (
+    <>
+      <MobileFeatureList />
+      <DesktopShowcase />
+    </>
   );
 }

@@ -123,7 +123,7 @@ export function SideNav({
 
         <div
           className={cn(
-            "flex items-center gap-2 px-2 py-1 -mx-2 rounded-control hover:bg-sunken",
+            "flex items-center gap-2 px-2 py-2 -mx-2 rounded-control hover:bg-sunken",
             isActive("/settings") && "bg-sunken",
           )}
         >
