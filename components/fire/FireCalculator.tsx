@@ -106,7 +106,7 @@ export function FireCalculator({
         </label>
 
         <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium uppercase tracking-wide text-text-3">Safe withdrawal rate — {formatPercent(swr)}</span>
+          <span className="text-xs font-medium uppercase tracking-wide text-text-3">Safe withdrawal rate: {formatPercent(swr)}</span>
           <input
             type="range"
             min={0.01}
@@ -119,7 +119,7 @@ export function FireCalculator({
         </label>
 
         <label className="flex flex-col gap-1.5">
-          <span className="text-xs font-medium uppercase tracking-wide text-text-3">Expected annual return — {formatPercent(expectedReturn)}</span>
+          <span className="text-xs font-medium uppercase tracking-wide text-text-3">Expected annual return: {formatPercent(expectedReturn)}</span>
           <input
             type="range"
             min={-0.05}
@@ -150,7 +150,7 @@ export function FireCalculator({
         {yearsResult.alreadyThere ? (
           <span className="text-[15px] font-medium text-positive">You&apos;ve already hit your FIRE number.</span>
         ) : yearsResult.years == null ? (
-          <span className="text-[15px] font-medium text-warning">Not reachable with these inputs — raise the contribution or expected return.</span>
+          <span className="text-[15px] font-medium text-warning">Not reachable with these inputs. Raise the contribution or expected return.</span>
         ) : (
           <span className="text-[15px] font-medium text-text">
             <span className="tabular">{yearsResult.years.toFixed(1)} years</span> to FIRE at this pace

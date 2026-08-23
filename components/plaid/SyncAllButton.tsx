@@ -40,7 +40,7 @@ export function SyncAllButton() {
       <Button variant="secondary" size="sm" disabled={loading} onClick={handleSync}>
         {loading ? "Syncing…" : "Sync now"}
       </Button>
-      {loading && <LoadingOverlay message="Syncing your connections — this can take a moment." />}
+      {loading && <LoadingOverlay message="Syncing your connections. This can take a moment." />}
     </>
   );
 }

@@ -61,7 +61,7 @@ const ENV_VARS: { name: string; required: boolean; description: string }[] = [
   { name: "PLAID_WEBHOOK_URL", required: false, description: "Where Plaid pushes sync events. Requires a public HTTPS URL (a tunnel in local development)." },
   { name: "MASTER_KEY", required: true, description: "32-byte base64 key. Generate with openssl rand -base64 32. Encrypts Plaid access tokens at rest." },
   { name: "CRON_SECRET", required: true, description: "Authorizes the nightly Vercel Cron Job (app/api/cron/nightly) and the Upstash QStash-triggered sync (app/api/cron/sync-all). Generate with openssl rand -base64 32." },
-  { name: "QSTASH_TOKEN / QSTASH_URL / QSTASH_CURRENT_SIGNING_KEY / QSTASH_NEXT_SIGNING_KEY", required: true, description: "Auto-provisioned by installing the Upstash QStash integration from the Vercel Marketplace — powers the twice-daily transactions safety net, since Vercel's own Cron Jobs are capped at once/day on the Hobby plan." },
+  { name: "QSTASH_TOKEN / QSTASH_URL / QSTASH_CURRENT_SIGNING_KEY / QSTASH_NEXT_SIGNING_KEY", required: true, description: "Auto-provisioned by installing the Upstash QStash integration from the Vercel Marketplace. Powers the twice-daily transactions safety net, since Vercel's own Cron Jobs are capped at once/day on the Hobby plan." },
   { name: "ADMIN_EMAIL", required: true, description: "Used once by npm run seed:user to create the single admin login." },
   { name: "ADMIN_PASSWORD", required: true, description: "Used once by npm run seed:user. At least 8 characters." },
 ];
@@ -129,17 +129,17 @@ export default function DocsPage() {
               </Link>
               . This is a self-hosted app: you provide your own Postgres database and Plaid account, and it runs
               entirely on infrastructure you control. <strong className="text-text font-medium">Deploying to production</strong> below
-              is the primary path — a real instance connected to your own accounts. Local development with mock data
+              is the primary path: a real instance connected to your own accounts. Local development with mock data
               is for iterating on the code itself, not a substitute for actually standing up an instance.
             </p>
           </div>
 
           <Section id="requirements" title="Requirements">
             <ul className="list-disc pl-5 flex flex-col gap-1.5">
-              <li>A Vercel account (or any host that runs a standard Next.js app) and a Postgres database — this repo's Marketplace integrations provision both Neon Postgres and Upstash QStash automatically</li>
+              <li>A Vercel account (or any host that runs a standard Next.js app) and a Postgres database. This repo's Marketplace integrations provision both Neon Postgres and Upstash QStash automatically</li>
               <li>
                 A <span className="text-text">Plaid production application</span>, approved and billed by Plaid, to
-                connect real accounts — see “Deploying to production” below. A free Sandbox account is enough for
+                connect real accounts (see “Deploying to production” below). A free Sandbox account is enough for
                 local development instead
               </li>
               <li>Node.js 20 or later and npm, only needed for local development or running one-off scripts against a deployed instance</li>
@@ -176,7 +176,7 @@ export default function DocsPage() {
             <p>
               This is the path for actually running Tally against real accounts. It assumes deploying to Vercel,
               which this repo is set up for out of the box (<span className="font-mono text-text">vercel.json</span>'s
-              Cron Job, the Upstash QStash integration below) — the app itself is a standard Next.js app and will run
+              Cron Job, the Upstash QStash integration below). The app itself is a standard Next.js app and will run
               on any platform that supports one, but the cron/queue wiring described here is Vercel-specific.
             </p>
 
@@ -197,8 +197,8 @@ export default function DocsPage() {
             <Subsection id="production-infra" title="Database, cron, and queue">
               <p>
                 There is no separate worker process to run or supervise. Webhook-triggered syncs
-                (<span className="font-mono text-text">app/api/plaid/webhook</span>) run inline within the request —
-                Vercel Functions don't support a persistent listener process, and one item's sync takes a few
+                (<span className="font-mono text-text">app/api/plaid/webhook</span>) run inline within the request,
+                since Vercel Functions don't support a persistent listener process, and one item's sync takes a few
                 seconds, well inside a Function's execution budget.
               </p>
               <p>
@@ -211,7 +211,7 @@ export default function DocsPage() {
                   <span className="font-mono text-text">CRON_SECRET</span>.
                 </li>
                 <li>
-                  A twice-daily transactions safety net (<span className="font-mono text-text">app/api/cron/sync-all</span>) —
+                  A twice-daily transactions safety net (<span className="font-mono text-text">app/api/cron/sync-all</span>).
                   Vercel's Hobby plan caps native Cron Jobs at once/day, so this one runs on{" "}
                   <span className="text-text">Upstash QStash</span> instead. Install it from the Vercel Marketplace (
                   <span className="font-mono text-text">vercel integration add upstash/upstash-qstash</span>), which
@@ -235,7 +235,7 @@ DOTENV_CONFIG_PATH=.env.production.local ADMIN_EMAIL=you@example.com ADMIN_PASSW
 DOTENV_CONFIG_PATH=.env.production.local npx tsx scripts/seed-categories.ts`}</CodeBlock>
               <p>
                 (<span className="font-mono text-text">vercel env pull .env.production.local --environment=production</span>{" "}
-                first, to get real production credentials locally for that one run — don't commit that file.)
+                first, to get real production credentials locally for that one run. Don't commit that file.)
               </p>
             </Subsection>
 
@@ -287,7 +287,7 @@ DOTENV_CONFIG_PATH=.env.production.local npx tsx scripts/seed-categories.ts`}</C
           <Section id="local-dev" title="Local development">
             <p>
               For iterating on the code itself, not a substitute for the production setup above. Runs entirely with
-              mock data by default — zero Plaid credentials needed.
+              mock data by default, with zero Plaid credentials needed.
             </p>
 
             <Subsection id="local-dev-postgres" title="Start Postgres">
@@ -321,7 +321,7 @@ npm run seed:categories`}</CodeBlock>
                 Visit <span className="font-mono text-text">http://localhost:3000</span> and sign in. Mock data is
                 enabled by default in development: “Add account” connects a fixture institution with realistic
                 accounts and transactions immediately, with no Plaid credentials required. Manual “Sync now” and the
-                nightly/twice-daily automatic sync both work locally the same way they do in production — there is no
+                nightly/twice-daily automatic sync both work locally the same way they do in production, with no
                 separate process to start.
               </p>
             </Subsection>

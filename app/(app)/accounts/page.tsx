@@ -158,8 +158,8 @@ export default async function AccountsPage() {
                   {notReady && (
                     <div className="flex items-center gap-3 px-4 py-3.5 bg-info-subtle border-b border-border flex-none">
                       <span className="flex-1 text-[15px] leading-snug text-text">
-                        ● Still pulling transaction history from {item.institutionName ?? "this institution"} — this
-                        can take a few hours right after connecting. Nothing to do; it'll sync in automatically.
+                        ● Still pulling transaction history from {item.institutionName ?? "this institution"}. This
+                        can take a few hours right after connecting, and it will sync in automatically once ready.
                       </span>
                     </div>
                   )}

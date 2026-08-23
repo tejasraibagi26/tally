@@ -22,7 +22,7 @@ export default async function FirePage() {
           <EmptyState
             icon={Flame}
             title="Connect an account to get started"
-            description="The calculator uses your investable net worth and spending history to seed sensible defaults — you can always adjust them by hand."
+            description="The calculator uses your investable net worth and spending history to seed sensible defaults, which you can always adjust by hand."
             action={
               <Link href="/accounts" className="text-brand text-[13.5px] font-medium">
                 Go to Accounts →

@@ -117,7 +117,7 @@ export function LinkButton({ mode, itemId, label, variant = "primary", mock = fa
         <LoadingOverlay
           message={
             mode === "create"
-              ? "Connecting your account — pulling transactions, balances, and more. This can take a moment."
+              ? "Connecting your account. Pulling transactions, balances, and more. This can take a moment."
               : "Reconnecting and syncing this account…"
           }
         />

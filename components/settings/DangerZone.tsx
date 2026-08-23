@@ -50,14 +50,14 @@ export function DangerZone({ itemCount }: { itemCount: number }) {
   }
 
   if (itemCount === 0 && !done) {
-    return <p className="text-text-2 text-sm">Nothing connected — there's no data to wipe.</p>;
+    return <p className="text-text-2 text-sm">Nothing connected, so there's no data to wipe.</p>;
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <p className="text-[15px] text-text">
         Disconnects all {itemCount} connected institution{itemCount === 1 ? "" : "s"} and permanently deletes every
-        account, transaction, and holding stored locally. Your login stays intact — you'll land on an empty app, not
+        account, transaction, and holding stored locally. Your login stays intact: you'll land on an empty app, not
         get signed out.
       </p>
       <div className="flex flex-col gap-1.5">

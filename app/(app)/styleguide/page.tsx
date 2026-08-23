@@ -33,9 +33,9 @@ export default function StyleguidePage() {
         <Card className="p-6 flex flex-col gap-4">
           <span className="font-display text-[56px] leading-none text-text">$412,806.24</span>
           <span className="font-display text-4xl leading-none text-text">Display L</span>
-          <h1 className="text-2xl font-semibold text-text">H1 — Page title</h1>
-          <h2 className="text-xl font-semibold text-text">H2 — Panel title</h2>
-          <p className="text-[15px] text-text">Body text, 15px/1.55 — the default reading size.</p>
+          <h1 className="text-2xl font-semibold text-text">H1: Page title</h1>
+          <h2 className="text-xl font-semibold text-text">H2: Panel title</h2>
+          <p className="text-[15px] text-text">Body text, 15px/1.55, the default reading size.</p>
           <span className="text-xs font-medium uppercase tracking-wide text-text-2">Label text</span>
           <span className="font-mono text-xs text-text-3">Chase Sapphire ····4021 · txn_1PqR8kLm9vZt</span>
         </Card>
@@ -64,7 +64,7 @@ export default function StyleguidePage() {
           ))}
           <Card className="p-5">
             <span className="text-xs font-medium uppercase tracking-wide text-text-3 mb-3 block">
-              Chart series (fixed order — never cycle)
+              Chart series (fixed order, never cycle)
             </span>
             <div className="flex flex-wrap gap-3">
               {SERIES.map((token) => (

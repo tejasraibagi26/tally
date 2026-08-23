@@ -24,8 +24,8 @@ export function FailureBanner({ items, onDismiss }: { items: FailureBannerItem[]
         {items.map((item, i) => (
           <span key={i}>
             Could not fetch {joinLabels(item.labels)}
-            {item.institutionName ? ` for ${item.institutionName}` : ""} — Plaid may be temporarily unavailable. It will retry
-            automatically.
+            {item.institutionName ? ` for ${item.institutionName}` : ""}. Plaid may be temporarily unavailable. It will
+            retry automatically.
           </span>
         ))}
       </div>

@@ -198,7 +198,7 @@ export default async function OverviewPage() {
             cards.length === 0
               ? "No cards connected"
               : utilization.excludedCount > 0
-                ? `${utilization.excludedCount} card${utilization.excludedCount === 1 ? "" : "s"} excluded — no limit reported`
+                ? `${utilization.excludedCount} card${utilization.excludedCount === 1 ? "" : "s"} excluded (no limit reported)`
                 : `${formatCents(utilization.totalBalance)} of ${formatCents(utilization.totalLimit)}`
           }
           href="/cards"

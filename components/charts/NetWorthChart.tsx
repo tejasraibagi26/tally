@@ -13,7 +13,7 @@ export function NetWorthChart({ points }: { points: NetWorthPoint[] }) {
   if (points.length < 2) {
     return (
       <div className="h-[120px] flex items-center justify-center text-text-3 text-sm">
-        Building history — net worth is snapshotted nightly, check back in a few days
+        Building history. Net worth is snapshotted nightly, so check back in a few days
       </div>
     );
   }

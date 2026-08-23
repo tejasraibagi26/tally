@@ -43,7 +43,7 @@ export default function PlaidOAuthPage() {
 
   useEffect(() => {
     if (!session) {
-      setError("No pending connection found — return to Accounts and try again.");
+      setError("No pending connection found. Return to Accounts and try again.");
       return;
     }
     if (ready) open();
@@ -55,7 +55,7 @@ export default function PlaidOAuthPage() {
         <span className="font-display text-2xl text-text">
           {error ? "Couldn't finish connecting" : "Finishing connection…"}
         </span>
-        <span className="text-text-2 text-sm">{error ?? "Reopening Plaid Link — this only takes a second."}</span>
+        <span className="text-text-2 text-sm">{error ?? "Reopening Plaid Link. This only takes a second."}</span>
       </div>
     </div>
   );

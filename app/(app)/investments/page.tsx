@@ -99,13 +99,13 @@ export default async function InvestmentsPage() {
           ) : (
             <span className="text-text-3 text-[15px]">Building history…</span>
           )}
-          <span className="text-xs text-text-3">Value change minus contributions — not IRR/TWR</span>
+          <span className="text-xs text-text-3">Value change minus contributions (not IRR/TWR)</span>
         </div>
       </Card>
 
       {mixedCurrencies.length > 1 && (
         <p className="text-xs text-text-3 -mt-2">
-          Holdings span {mixedCurrencies.join(", ")} — totals above are a mixed sum, not currency-converted.
+          Holdings span {mixedCurrencies.join(", ")}. Totals above are a mixed sum, not currency-converted.
         </p>
       )}
 

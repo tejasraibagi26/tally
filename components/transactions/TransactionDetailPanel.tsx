@@ -237,7 +237,7 @@ export function TransactionDetailPanel({
                 <span className="absolute left-0.5 top-0.5 w-[14px] h-[14px] rounded-full bg-surface transition-transform peer-checked:translate-x-[14px]" />
               </span>
               <span className="text-[13.5px] text-text leading-snug">
-                Always categorize <strong>{transaction.merchantName}</strong> as {current?.name ?? "this category"} —{" "}
+                Always categorize <strong>{transaction.merchantName}</strong> as {current?.name ?? "this category"}:{" "}
                 {previewLoading ? "checking…" : previewCount != null ? `applies to ${previewCount} past transaction${previewCount === 1 ? "" : "s"}.` : "applies going forward."}
               </span>
             </label>

@@ -69,7 +69,7 @@ export default async function CardsPage() {
           </span>
           {utilization.excludedCount > 0 && (
             <span className="text-xs text-text-3">
-              {utilization.excludedCount} card{utilization.excludedCount === 1 ? "" : "s"} excluded — limit not reported
+              {utilization.excludedCount} card{utilization.excludedCount === 1 ? "" : "s"} excluded (limit not reported)
             </span>
           )}
         </div>
@@ -157,7 +157,7 @@ export default async function CardsPage() {
                       <EmptyState
                         icon={Clock}
                         title="No liability details yet"
-                        description="Plaid hasn't reported statement or APR data for this card — check back after the next sync."
+                        description="Plaid hasn't reported statement or APR data for this card yet. Check back after the next sync."
                         compact
                       />
                     </div>
