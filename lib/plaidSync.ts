@@ -57,7 +57,11 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
     const added: PlaidTransaction[] = [];
     const modified: PlaidTransaction[] = [];
     const removed: { transaction_id: string }[] = [];
-    let cursor = item.transactionsCursor ?? undefined;
+    // Plaid can hand back next_cursor: "" while its initial historical pull
+    // for an item is still in progress — normalize that to undefined so the
+    // request omits `cursor` entirely rather than resending a literal empty
+    // string, which some APIs treat differently from the field being absent.
+    let cursor = item.transactionsCursor || undefined;
     let hasMore = true;
 
     while (hasMore) {
@@ -70,20 +74,8 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
       added.push(...res.data.added);
       modified.push(...res.data.modified);
       removed.push(...res.data.removed);
-      cursor = res.data.next_cursor;
+      cursor = res.data.next_cursor || undefined;
       hasMore = res.data.has_more;
-    }
-
-    // TEMP DEBUG — remove once the TD sync question is resolved. Confirms
-    // whether Plaid is actually returning transactions for this item before
-    // reconcileTransactions has a chance to map/filter/drop any of them.
-    if (item.institutionName?.toLowerCase().includes("td")) {
-      console.log(`[debug-td] item ${itemId} (${item.institutionName}): cursorIn=${item.transactionsCursor ?? "none"} cursorOut=${cursor}`, {
-        added: added.length,
-        modified: modified.length,
-        removed: removed.length,
-        sample: added.slice(0, 5).map((t) => ({ name: t.name, amount: t.amount, date: t.date, account_id: t.account_id, pending: t.pending })),
-      });
     }
 
     const result = await reconcileTransactions(item.userId, itemId, added, modified, removed, cursor);
