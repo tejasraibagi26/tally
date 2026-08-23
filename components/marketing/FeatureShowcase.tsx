@@ -133,8 +133,21 @@ function DesktopShowcase() {
 
       <div className="relative bg-surface border border-border rounded-panel p-8 flex items-center justify-center h-full min-h-[320px] overflow-hidden">
         <div
-          className="pointer-events-none absolute -bottom-16 -right-16 w-56 h-56 rounded-full opacity-[0.10] blur-3xl transition-colors duration-500"
-          style={{ background: `var(--series-${current.slot})` }}
+          key={`${shown.slot}-tl`}
+          className="pointer-events-none absolute -top-16 -left-16 w-64 h-64 rounded-full blur-3xl transition-colors duration-500"
+          style={{
+            background: `color-mix(in srgb, var(--series-${shown.slot}) 26%, transparent)`,
+            animation: "glow-pulse 3.2s ease-in-out infinite",
+          }}
+          aria-hidden
+        />
+        <div
+          key={`${shown.slot}-br`}
+          className="pointer-events-none absolute -bottom-16 -right-16 w-64 h-64 rounded-full blur-3xl transition-colors duration-500"
+          style={{
+            background: `color-mix(in srgb, var(--series-${shown.slot}) 26%, transparent)`,
+            animation: "glow-pulse 3.2s ease-in-out 1.6s infinite",
+          }}
           aria-hidden
         />
         <div
@@ -146,16 +159,14 @@ function DesktopShowcase() {
         >
           {/* Matches MobileFeatureCard's existing bg-canvas card — desktop was
               missing this inner surface, so every demo just floated as flat
-              text/bars directly on the big panel's background. */}
-          <div className="relative overflow-hidden bg-canvas border border-border rounded-card shadow-raised p-6">
-            <div
-              className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 w-[260px] h-[260px] rounded-full opacity-[0.16] blur-2xl"
-              style={{ background: `var(--series-${shown.slot})` }}
-              aria-hidden
-            />
-            <div className="relative">
-              <shown.Demo />
-            </div>
+              text/bars directly on the big panel's background. Frosted
+              (translucent + backdrop-blur) rather than opaque so the
+              panel's corner glow behind it still reads through, subtly. */}
+          <div
+            className="border border-border rounded-card shadow-raised p-6"
+            style={{ background: "color-mix(in srgb, var(--canvas) 82%, transparent)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
+          >
+            <shown.Demo />
           </div>
         </div>
       </div>
@@ -186,8 +197,18 @@ function MobileFeatureCard({ feature }: { feature: Feature }) {
   }, []);
 
   return (
-    <div ref={ref} className="flex flex-col gap-4 p-5 rounded-panel border border-border bg-surface">
-      <div className="flex items-center gap-3">
+    <div ref={ref} className="relative overflow-hidden flex flex-col gap-4 p-5 rounded-panel border border-border bg-surface">
+      <div
+        className="pointer-events-none absolute -top-14 -left-14 w-52 h-52 rounded-full blur-3xl"
+        style={{ background: `color-mix(in srgb, ${color} 26%, transparent)`, animation: "glow-pulse 3.2s ease-in-out infinite" }}
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute -bottom-14 -right-14 w-52 h-52 rounded-full blur-3xl"
+        style={{ background: `color-mix(in srgb, ${color} 26%, transparent)`, animation: "glow-pulse 3.2s ease-in-out 1.6s infinite" }}
+        aria-hidden
+      />
+      <div className="relative flex items-center gap-3">
         <span
           className="w-9 h-9 flex-none rounded-[9px] flex items-center justify-center"
           style={{ background: `color-mix(in srgb, ${color} 18%, transparent)` }}
@@ -196,14 +217,12 @@ function MobileFeatureCard({ feature }: { feature: Feature }) {
         </span>
         <span className="text-[15px] font-medium text-text">{feature.title}</span>
       </div>
-      <p className="text-[13px] text-text-3 leading-snug">{feature.body}</p>
-      <div className="relative overflow-hidden rounded-card border border-border bg-canvas p-5 flex items-center justify-center min-h-[180px]">
-        <div
-          className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 w-[220px] h-[220px] rounded-full opacity-[0.16] blur-2xl"
-          style={{ background: color }}
-          aria-hidden
-        />
-        {revealed && <div className="relative w-full">{<feature.Demo />}</div>}
+      <p className="relative text-[13px] text-text-3 leading-snug">{feature.body}</p>
+      <div
+        className="relative rounded-card border border-border p-5 flex items-center justify-center min-h-[180px]"
+        style={{ background: "color-mix(in srgb, var(--canvas) 82%, transparent)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}
+      >
+        {revealed && <feature.Demo />}
       </div>
     </div>
   );

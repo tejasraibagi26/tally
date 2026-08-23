@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CreditCard as CreditCardIcon } from "lucide-react";
+import { CreditCard as CreditCardIcon, Clock } from "lucide-react";
 import { requireUserId } from "@/lib/session";
 import { formatCents, formatPercent } from "@/lib/money";
 import { creditCardsForUser, utilizationFor } from "@/lib/liabilities";
@@ -153,7 +153,14 @@ export default async function CardsPage() {
                       )}
                     </div>
                   ) : (
-                    <div className="px-4 py-6 text-center text-text-2 text-[15px]">No liability details reported for this card yet.</div>
+                    <div className="h-full flex items-center justify-center p-4">
+                      <EmptyState
+                        icon={Clock}
+                        title="No liability details yet"
+                        description="Plaid hasn't reported statement or APR data for this card — check back after the next sync."
+                        compact
+                      />
+                    </div>
                   )}
                 </div>
               </div>

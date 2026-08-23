@@ -44,7 +44,7 @@ export function NetWorthDemo() {
 export function CategorizeDemo() {
   return (
     <div className="flex flex-col gap-4 w-full max-w-[340px] mx-auto">
-      <div className="flex items-center gap-3 bg-surface-2 border border-border rounded-control p-3">
+      <div className="flex items-center gap-3">
         <span className="w-8 h-8 flex-none rounded-[7px] bg-sunken flex items-center justify-center text-xs font-medium text-text-2">A</span>
         <div className="flex flex-col gap-0.5 flex-1 min-w-0">
           <span className="text-[14px] text-text truncate">AMAZON.COM*A1B2C3</span>

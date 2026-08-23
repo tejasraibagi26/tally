@@ -263,6 +263,18 @@ body {
   }
 }
 
+/* FeatureShowcase's demo-card glow (components/marketing/FeatureShowcase.tsx):
+   a slow breathing pulse so the glow reads as alive rather than a static
+   backdrop tint. */
+@keyframes glow-pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
 @keyframes progress-fill {
   from {
     width: 0%;
