@@ -75,6 +75,23 @@ export async function syncHoldingsForItem(itemId: string, trigger: SyncTrigger):
 
     const accessToken = await getAccessToken(itemId);
     const res = await plaidClient.investmentsHoldingsGet({ access_token: accessToken });
+
+    // TEMP DEBUG — remove once the Wealthsimple $0 holdings question is
+    // resolved. Raw values straight from Plaid, before reconcileHoldings'
+    // own null-guarding/rounding touches them.
+    if (item.institutionName?.toLowerCase().includes("wealthsimple")) {
+      console.log(
+        `[debug-holdings] item ${itemId} (${item.institutionName}): ${res.data.holdings.length} holding(s)`,
+        res.data.holdings.slice(0, 10).map((h) => ({
+          security_id: h.security_id,
+          quantity: h.quantity,
+          institution_price: h.institution_price,
+          institution_price_as_of: h.institution_price_as_of,
+          institution_value: h.institution_value,
+        })),
+      );
+    }
+
     await reconcileHoldings(res.data.securities, res.data.holdings);
     await recordSyncRun(itemId, "holdings", trigger, startedAt, { added: res.data.holdings.length });
   } catch (err) {
