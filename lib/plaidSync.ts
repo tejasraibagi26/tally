@@ -71,6 +71,12 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
         count: 500,
         options: { include_original_description: true },
       });
+      // TEMP DEBUG — remove once done inspecting raw transactions/sync
+      // responses. Logs the entire page exactly as Plaid sent it, no
+      // filtering/truncation on this end (Vercel's own log line limits may
+      // still truncate a very large page).
+      console.log(`[debug-raw-sync] item ${itemId} (${item.institutionName}) page`, JSON.stringify(res.data, null, 2));
+
       added.push(...res.data.added);
       modified.push(...res.data.modified);
       removed.push(...res.data.removed);
