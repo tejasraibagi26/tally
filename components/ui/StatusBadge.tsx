@@ -1,12 +1,13 @@
 import clsx from "clsx";
 
-export type Status = "good" | "warning" | "serious" | "critical";
+export type Status = "good" | "warning" | "serious" | "critical" | "syncing";
 
 const statusConfig: Record<Status, { bg: string; fg: string; label: string; icon: string }> = {
   good: { bg: "bg-positive-subtle", fg: "text-positive", label: "Fresh", icon: "●" },
   warning: { bg: "bg-warning-subtle", fg: "text-warning", label: "Stale", icon: "●" },
   serious: { bg: "bg-warning-subtle", fg: "text-warning", label: "Needs attention", icon: "▲" },
   critical: { bg: "bg-negative-subtle", fg: "text-negative", label: "Broken", icon: "▲" },
+  syncing: { bg: "bg-info-subtle", fg: "text-info", label: "Syncing", icon: "●" },
 };
 
 export function StatusBadge({ status, label }: { status: Status; label?: string }) {

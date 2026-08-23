@@ -63,6 +63,9 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
     // string, which some APIs treat differently from the field being absent.
     let cursor = item.transactionsCursor || undefined;
     let hasMore = true;
+    // Last page's value wins — the only one that matters is where things
+    // stood once the loop below finished.
+    let transactionsUpdateStatus: string | undefined;
 
     while (hasMore) {
       const res = await plaidClient.transactionsSync({
@@ -76,9 +79,10 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
       removed.push(...res.data.removed);
       cursor = res.data.next_cursor || undefined;
       hasMore = res.data.has_more;
+      transactionsUpdateStatus = res.data.transactions_update_status;
     }
 
-    const result = await reconcileTransactions(item.userId, itemId, added, modified, removed, cursor);
+    const result = await reconcileTransactions(item.userId, itemId, added, modified, removed, cursor, transactionsUpdateStatus);
 
     // Best-effort enrichment: categorization/transfer-pairing failures must
     // never fail the sync itself (the cursor already advanced and the core
@@ -143,10 +147,14 @@ async function reconcileTransactions(
   modified: PlaidTransaction[],
   removed: { transaction_id: string }[],
   cursor: string | undefined,
+  transactionsUpdateStatus: string | undefined,
 ): Promise<SyncResult> {
   const incoming = [...added, ...modified];
   if (incoming.length === 0 && removed.length === 0) {
-    await db.update(schema.plaidItems).set({ transactionsCursor: cursor, lastSyncedAt: new Date(), status: "healthy" }).where(eq(schema.plaidItems.id, itemId));
+    await db
+      .update(schema.plaidItems)
+      .set({ transactionsCursor: cursor, transactionsUpdateStatus, lastSyncedAt: new Date(), status: "healthy" })
+      .where(eq(schema.plaidItems.id, itemId));
     return { added: 0, modified: 0, removed: 0 };
   }
 
@@ -242,7 +250,7 @@ async function reconcileTransactions(
     // silently skipping it.
     await tx
       .update(schema.plaidItems)
-      .set({ transactionsCursor: cursor, lastSyncedAt: new Date(), status: "healthy" })
+      .set({ transactionsCursor: cursor, transactionsUpdateStatus, lastSyncedAt: new Date(), status: "healthy" })
       .where(eq(schema.plaidItems.id, itemId));
   });
 

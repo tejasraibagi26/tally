@@ -15,9 +15,13 @@ import { freshnessStatus } from "@/lib/freshness";
 
 // A broken item (needs re-auth) always reads "Broken" regardless of how
 // recently it last synced — otherwise the freshness badge follows §8.3.
-function itemStatusToBadge(status: string, lastSyncedAt: Date | null): Status {
+// NOT_READY overrides freshness too: a sync that ran five minutes ago but
+// came back empty because Plaid hasn't finished its initial pull would
+// otherwise misleadingly read "Fresh" even though there's no data yet.
+function itemStatusToBadge(status: string, lastSyncedAt: Date | null, transactionsUpdateStatus: string | null): Status {
   if (status === "login_required" || status === "revoked" || status === "error") return "critical";
   if (status === "pending_expiration") return "warning";
+  if (transactionsUpdateStatus === "NOT_READY") return "syncing";
   return freshnessStatus(lastSyncedAt);
 }
 
@@ -103,6 +107,7 @@ export default async function AccountsPage() {
           {items.map((item, index) => {
             const itemAccounts = accountsByItem.get(item.id) ?? [];
             const broken = item.status === "login_required" || item.status === "revoked" || item.status === "error";
+            const notReady = !broken && item.transactionsUpdateStatus === "NOT_READY";
             // currentBalance is stored positive for every account type — a credit
             // card's/loan's balance is what's owed, not held — so it must be
             // subtracted here the same way totalLiabilities is above, or a card
@@ -137,7 +142,7 @@ export default async function AccountsPage() {
                       </span>
                       <span className="font-mono text-xs text-text-3">{relativeTime(item.lastSyncedAt)}</span>
                     </div>
-                    <StatusBadge status={itemStatusToBadge(item.status, item.lastSyncedAt)} />
+                    <StatusBadge status={itemStatusToBadge(item.status, item.lastSyncedAt, item.transactionsUpdateStatus)} />
                     <ItemActionsMenu itemId={item.id} institutionName={item.institutionName ?? "this institution"} />
                   </div>
 
@@ -147,6 +152,15 @@ export default async function AccountsPage() {
                         ▲ Login expired. Balances and transactions are frozen until you reconnect.
                       </span>
                       <LinkButton mode="update" itemId={item.id} label="Reconnect" variant="primary" />
+                    </div>
+                  )}
+
+                  {notReady && (
+                    <div className="flex items-center gap-3 px-4 py-3.5 bg-info-subtle border-b border-border flex-none">
+                      <span className="flex-1 text-[15px] leading-snug text-text">
+                        ● Still pulling transaction history from {item.institutionName ?? "this institution"} — this
+                        can take a few hours right after connecting. Nothing to do; it'll sync in automatically.
+                      </span>
                     </div>
                   )}
 

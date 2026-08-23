@@ -100,6 +100,13 @@ export const plaidItems = pgTable("plaid_items", {
   consentedProducts: jsonb("consented_products").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
   availableProducts: jsonb("available_products").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
   transactionsCursor: text("transactions_cursor"),
+  // Plaid's transactions_update_status verbatim ("NOT_READY" |
+  // "INITIAL_UPDATE_COMPLETE" | "HISTORICAL_UPDATE_COMPLETE"), refreshed on
+  // every transactions sync — lets the UI tell "just synced, nothing new"
+  // apart from "hasn't finished its first pull yet," which lastSyncedAt
+  // alone can't distinguish (a NOT_READY sync still completes "successfully"
+  // with zero rows).
+  transactionsUpdateStatus: text("transactions_update_status"),
   lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({
