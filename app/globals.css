@@ -144,10 +144,13 @@ body {
    Scoped to span/div only — deliberately excludes <input> so a budget/rule
    amount field stays legible while the user is actively editing it.
    The real text stays in the DOM (just painted transparent, box size intact
-   so layout doesn't shift) and a bullet-dot overlay stands in for it —
-   dots rather than "0.00" so a masked value can never be misread as a real
-   zero balance. ::after inherits text-align/line-height from the host span,
-   so it lines up whether the figure is left- or right-aligned. */
+   so layout doesn't shift) and a masked-currency-shape overlay stands in for
+   it — "$••,•••.••" rather than "0.00" so a masked value can never be
+   misread as a real zero balance, and rather than plain dots so it still
+   reads as "a dollar amount" at a glance. Same fixed shape for every value
+   regardless of its actual magnitude — sign and digit count aren't hinted
+   at either. ::after inherits text-align/line-height from the host span, so
+   it lines up whether the figure is left- or right-aligned. */
 [data-hide-amounts="true"] span.money,
 [data-hide-amounts="true"] div.money {
   position: relative;
@@ -157,7 +160,7 @@ body {
 
 [data-hide-amounts="true"] span.money::after,
 [data-hide-amounts="true"] div.money::after {
-  content: "•••••";
+  content: "$••,•••.••";
   position: absolute;
   inset: 0;
   color: var(--text-3);
