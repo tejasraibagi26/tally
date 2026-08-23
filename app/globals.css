@@ -139,14 +139,28 @@ body {
 /* Privacy toggle (components/PrivacyToggle.tsx): every dollar figure in the
    app is rendered inside a .tabular span/div (font-variant-numeric is applied
    universally to numeric display, not just money), so that's the one marker
-   available to blur everything at once without touching each call site.
+   available to mask everything at once without touching each call site.
    Scoped to span/div only — deliberately excludes <input> so a budget/rule
-   amount field stays legible while the user is actively editing it. */
+   amount field stays legible while the user is actively editing it.
+   The real text stays in the DOM (just painted transparent, box size intact
+   so layout doesn't shift) and a bullet-dot overlay stands in for it —
+   dots rather than "0.00" so a masked value can never be misread as a real
+   zero balance. ::after inherits text-align/line-height from the host span,
+   so it lines up whether the figure is left- or right-aligned. */
 [data-hide-amounts="true"] span.tabular,
 [data-hide-amounts="true"] div.tabular {
-  filter: blur(6px);
+  position: relative;
+  color: transparent !important;
   user-select: none;
-  transition: filter 150ms ease-out;
+}
+
+[data-hide-amounts="true"] span.tabular::after,
+[data-hide-amounts="true"] div.tabular::after {
+  content: "•••••";
+  position: absolute;
+  inset: 0;
+  color: var(--text-3);
+  letter-spacing: 1px;
 }
 
 /* DESIGN.md §11: panel/sheet motion, 220ms cubic-bezier(.32,.72,0,1) — used by components/ui/SidePanel.tsx */
