@@ -225,21 +225,54 @@ export function CreditCardDemo() {
 
 export function SecurityDemo() {
   return (
-    <div className="flex flex-col items-center gap-5 w-full max-w-[340px] mx-auto text-center">
-      <span className="font-mono text-[12.5px] text-text-3 break-all opacity-0" style={{ animation: "fade-in-up 400ms ease-out forwards" }}>
-        access-sandbox-8f2e1c9b4a7d
-      </span>
-      <span
-        className="flex items-center justify-center w-14 h-14 rounded-full opacity-0"
-        style={{ background: "color-mix(in srgb, var(--series-6) 16%, transparent)", animation: "tag-pop 500ms ease-out 500ms forwards" }}
+    <div className="flex flex-col gap-3 w-full max-w-[340px] mx-auto">
+      <div
+        className="flex items-center gap-3 bg-surface-2 border border-border rounded-control p-3 opacity-0"
+        style={{ animation: "fade-in-up 400ms ease-out forwards" }}
       >
-        <Lock size={22} strokeWidth={1.75} style={{ color: "var(--series-6)" }} />
-      </span>
-      <span className="font-mono text-[12.5px] text-text-2 opacity-0" style={{ animation: "fade-in-up 400ms ease-out 1000ms forwards" }}>
-        7f3a9c••••••••••••••••e21b
-      </span>
-      <span className="text-[13px] text-text-3 opacity-0" style={{ animation: "fade-in-up 400ms ease-out 1300ms forwards" }}>
-        AES-256-GCM · encrypted at rest · never reaches your browser
+        <span className="w-8 h-8 flex-none rounded-[7px] bg-sunken flex items-center justify-center text-xs font-medium text-text-2">WE</span>
+        <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+          <span className="text-[14px] text-text truncate">Wealthsimple access token</span>
+          <span className="font-mono text-[11px] text-text-3 truncate">access-sandbox-8f2e1c9b4a7d</span>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-center py-1">
+        <span
+          className="relative flex items-center justify-center w-14 h-14 rounded-full opacity-0"
+          style={{ background: "color-mix(in srgb, var(--series-6) 16%, transparent)", animation: "tag-pop 500ms ease-out 450ms forwards" }}
+        >
+          <span
+            className="absolute inset-0 rounded-full border"
+            style={{ borderColor: "color-mix(in srgb, var(--series-6) 35%, transparent)" }}
+            aria-hidden
+          />
+          <Lock size={22} strokeWidth={1.75} style={{ color: "var(--series-6)" }} />
+        </span>
+      </div>
+
+      <div
+        className="flex items-center gap-3 bg-surface-2 border border-border rounded-control p-3 opacity-0"
+        style={{ animation: "fade-in-up 400ms ease-out 950ms forwards" }}
+      >
+        <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+          <span className="text-[14px] text-text">Stored ciphertext</span>
+          <span className="font-mono text-[11px] text-text-3 truncate">7f3a9c••••••••••••••••e21b</span>
+        </div>
+        <span
+          className="inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full text-[11px] font-medium flex-none opacity-0"
+          style={{
+            background: "color-mix(in srgb, var(--positive) 16%, transparent)",
+            color: "var(--positive)",
+            animation: "tag-pop 400ms ease-out 1250ms forwards",
+          }}
+        >
+          Encrypted
+        </span>
+      </div>
+
+      <span className="text-[12px] text-text-3 text-center opacity-0" style={{ animation: "fade-in-up 400ms ease-out 1550ms forwards" }}>
+        AES-256-GCM · never reaches your browser
       </span>
     </div>
   );

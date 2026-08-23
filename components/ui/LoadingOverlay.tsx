@@ -5,9 +5,9 @@
  * closed" and "the app has actually finished pulling data" — a stretch that
  * used to have zero feedback, which reads as the app being stuck rather than
  * working. Built to DESIGN.md §8's Modal spec (480px, radius 16, --canvas
- * scrim at 60%) with a staggered fade-dot trio, matching the app's existing
- * fade animation language (app/globals.css) instead of a spinner —
- * DESIGN.md §8 is explicit: "never a centered spinner on a full page."
+ * scrim at 60%). The indicator is a single track of three segments filling
+ * left-to-right in sequence (see app/globals.css's segment-fill) — DESIGN.md
+ * §8 explicitly rules out "a centered spinner on a full page."
  */
 export function LoadingOverlay({ message }: { message: string }) {
   return (
@@ -17,13 +17,18 @@ export function LoadingOverlay({ message }: { message: string }) {
       role="status"
       aria-live="polite"
     >
-      <div className="flex flex-col items-center gap-4 bg-surface border border-border rounded-[16px] shadow-overlay px-8 py-7 w-[360px] max-w-full text-center">
-        <div className="flex items-center gap-2" aria-hidden="true">
-          {[0, 0.2, 0.4].map((delay) => (
+      <div className="flex flex-col items-center gap-5 bg-surface border border-border rounded-[16px] shadow-overlay px-8 py-7 w-[360px] max-w-full text-center">
+        <div className="flex w-40 h-1.5 rounded-full bg-sunken overflow-hidden" aria-hidden="true">
+          {[0, 0.6, 1.2].map((delay, i) => (
             <span
               key={delay}
-              className="w-2 h-2 rounded-full bg-brand"
-              style={{ animation: `fade-dot 1.4s ease-in-out ${delay}s infinite` }}
+              className="flex-1 h-full"
+              style={{
+                background: `var(--series-${i + 1})`,
+                transformOrigin: "left",
+                transform: "scaleX(0)",
+                animation: `segment-fill 1.8s ease-in-out ${delay}s infinite backwards`,
+              }}
             />
           ))}
         </div>

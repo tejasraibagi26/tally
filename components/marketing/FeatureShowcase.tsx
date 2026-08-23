@@ -144,7 +144,12 @@ function DesktopShowcase() {
             swapping ? "opacity-0 translate-y-1" : "opacity-100 translate-y-0",
           )}
         >
-          <shown.Demo />
+          {/* Matches MobileFeatureCard's existing bg-canvas card — desktop was
+              missing this inner surface, so every demo just floated as flat
+              text/bars directly on the big panel's background. */}
+          <div className="bg-canvas border border-border rounded-card shadow-raised p-6">
+            <shown.Demo />
+          </div>
         </div>
       </div>
     </div>

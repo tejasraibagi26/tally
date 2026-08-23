@@ -164,6 +164,24 @@ body {
   letter-spacing: 1px;
 }
 
+/* components/ui/LoadingOverlay.tsx: three equal segments in a single
+   rounded track, each filling left-to-right (scaleX from transform-origin:
+   left) in sequence — segment 2 starts right as segment 1 finishes, so the
+   whole track reads as one continuous sweep — then all three reset and
+   loop. Same three-part timing for every segment; app/globals.css only
+   needs the one keyframe, staggered per segment via animation-delay. */
+@keyframes segment-fill {
+  0% {
+    transform: scaleX(0);
+  }
+  33%, 83% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(0);
+  }
+}
+
 /* DESIGN.md §11: panel/sheet motion, 220ms cubic-bezier(.32,.72,0,1) — used by components/ui/SidePanel.tsx */
 @keyframes slide-in-right {
   from {
