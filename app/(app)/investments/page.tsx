@@ -5,6 +5,7 @@ import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { formatCents, formatPercent } from "@/lib/money";
 import { latestHoldingsForUser, portfolioValue, allocationFor, unrealizedGain, portfolioSimpleReturn, currenciesInvolved } from "@/lib/portfolio";
+import { toNetWorthCurrency, NET_WORTH_CURRENCY } from "@/lib/fx";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 
@@ -21,10 +22,11 @@ export default async function InvestmentsPage() {
   const allocation = allocationFor(holdings);
   const gain = unrealizedGain(holdings);
   const simpleReturn = await portfolioSimpleReturn(userId);
-  // No FX conversion anywhere in this app — when holdings span more than one
-  // currency, the totals above are a mixed sum, not a real one, and need to
-  // say so rather than imply everything's comparable.
-  const mixedCurrencies = currenciesInvolved(holdings);
+  // Every holding above is already converted to NET_WORTH_CURRENCY
+  // (lib/portfolio.ts), so this is purely informational now — which native
+  // currencies these positions actually trade in, not a "can't total this"
+  // warning.
+  const originalCurrencies = currenciesInvolved(holdings);
 
   const holdingsByAccount = new Map<string, typeof holdings>();
   for (const h of holdings) {
@@ -32,13 +34,14 @@ export default async function InvestmentsPage() {
   }
 
   const investmentAccountIds = [...holdingsByAccount.keys()];
-  const activity = investmentAccountIds.length
+  const rawActivity = investmentAccountIds.length
     ? await db
         .select({
           id: schema.investmentTransactions.id,
           date: schema.investmentTransactions.date,
           name: schema.investmentTransactions.name,
           amount: schema.investmentTransactions.amount,
+          currency: schema.investmentTransactions.currency,
           type: schema.investmentTransactions.type,
           subtype: schema.investmentTransactions.subtype,
           ticker: schema.securities.ticker,
@@ -49,6 +52,7 @@ export default async function InvestmentsPage() {
         .orderBy(desc(schema.investmentTransactions.date))
         .limit(20)
     : [];
+  const activity = await Promise.all(rawActivity.map(async (tx) => ({ ...tx, amount: await toNetWorthCurrency(tx.amount, tx.currency) })));
 
   if (holdings.length === 0) {
     return (
@@ -76,7 +80,7 @@ export default async function InvestmentsPage() {
 
       <Card className="flex flex-col sm:flex-row">
         <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-text-3">Portfolio value</span>
+          <span className="text-xs font-medium uppercase tracking-wide text-text-3">Portfolio value ({NET_WORTH_CURRENCY})</span>
           <span className="font-display text-3xl text-text tabular money">{formatCents(value)}</span>
         </div>
         <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
@@ -103,9 +107,9 @@ export default async function InvestmentsPage() {
         </div>
       </Card>
 
-      {mixedCurrencies.length > 1 && (
+      {originalCurrencies.length > 1 && (
         <p className="text-xs text-text-3 -mt-2">
-          Holdings span {mixedCurrencies.join(", ")}. Totals above are a mixed sum, not currency-converted.
+          Holdings span {originalCurrencies.join(", ")}, converted to {NET_WORTH_CURRENCY} above at today's rate.
         </p>
       )}
 
@@ -130,15 +134,11 @@ export default async function InvestmentsPage() {
       </Card>
 
       {[...holdingsByAccount.entries()].map(([accountId, accountHoldings]) => {
-        const accountCurrencies = currenciesInvolved(accountHoldings);
         return (
           <Card key={accountId} className="overflow-hidden">
             <CardHeader
               title={accountHoldings[0]?.accountName ?? "Account"}
-              meta={
-                formatCents(accountHoldings.reduce((s, h) => s + h.institutionValue, 0)) +
-                (accountCurrencies.length > 1 ? " (mixed)" : ` ${accountCurrencies[0] ?? ""}`)
-              }
+              meta={`${formatCents(accountHoldings.reduce((s, h) => s + h.institutionValue, 0))} ${NET_WORTH_CURRENCY}`}
               metaIsMoney
             />
             <div className="overflow-x-auto">
@@ -161,7 +161,10 @@ export default async function InvestmentsPage() {
                   </span>
                   <div className="flex flex-col items-end gap-0.5">
                     <span className="text-right text-[15px] text-text tabular money">{formatCents(h.institutionValue)}</span>
-                    <span className="text-right text-[11px] text-text-3">{h.currency}</span>
+                    <span className="text-right text-[11px] text-text-3">
+                      {h.currency}
+                      {h.originalCurrency !== h.currency && ` (${h.originalCurrency})`}
+                    </span>
                   </div>
                 </div>
               ))}

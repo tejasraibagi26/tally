@@ -1,6 +1,7 @@
 import { and, eq, gte, inArray, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { computeAllocation, computeSimpleReturn, type AllocationSlice, type HoldingLike } from "@/lib/portfolioMath";
+import { toNetWorthCurrency, NET_WORTH_CURRENCY } from "@/lib/fx";
 
 export interface HoldingRow {
   accountId: string;
@@ -11,14 +12,15 @@ export interface HoldingRow {
   assetType: string;
   isCashEquivalent: boolean;
   quantity: string; // numeric column — string-precision, format for display
-  institutionValue: number; // cents
-  costBasis: number | null; // cents
-  currency: string; // what institutionValue/costBasis are actually denominated in — this app does no FX conversion
+  institutionValue: number; // cents, converted to NET_WORTH_CURRENCY (lib/fx.ts)
+  costBasis: number | null; // cents, converted to NET_WORTH_CURRENCY
+  currency: string; // always NET_WORTH_CURRENCY — what institutionValue/costBasis are actually denominated in now
+  originalCurrency: string; // what the institution actually reported this holding in, before conversion
 }
 
-/** No FX conversion anywhere in this app — a total spanning more than one currency is a mixed sum, not a real total, and every place that sums institutionValue needs to say so rather than imply it's all one currency. */
+/** Every holding is converted to a single currency (lib/fx.ts) before this is ever called, so in practice this is purely informational now — "these are the original currencies represented" rather than "we couldn't total this." */
 export function currenciesInvolved(holdings: HoldingRow[]): string[] {
-  return [...new Set(holdings.map((h) => h.currency))].sort();
+  return [...new Set(holdings.map((h) => h.originalCurrency))].sort();
 }
 
 async function investmentAccountIds(userId: string): Promise<{ id: string; name: string }[]> {
@@ -70,9 +72,10 @@ export async function latestHoldingsForUser(userId: string): Promise<HoldingRow[
         assetType: h.assetType ?? "other",
         isCashEquivalent: h.isCashEquivalent,
         quantity: h.quantity,
-        institutionValue: h.institutionValue,
-        costBasis: h.costBasis,
-        currency: h.currency,
+        institutionValue: await toNetWorthCurrency(h.institutionValue, h.currency),
+        costBasis: h.costBasis != null ? await toNetWorthCurrency(h.costBasis, h.currency) : null,
+        currency: NET_WORTH_CURRENCY,
+        originalCurrency: h.currency,
       });
     }
   }
@@ -137,27 +140,34 @@ export async function portfolioSimpleReturn(userId: string): Promise<{ value: nu
   let endValue = 0;
   let earliestDate: string | null = null;
 
+  // Row-level fetch + per-row conversion instead of a SQL sum, since the sum
+  // needs to happen after converting each row to NET_WORTH_CURRENCY (a raw
+  // SQL sum would add mismatched currencies together the same way the old
+  // unconverted total did). Uses today's FX rate for every past date rather
+  // than the rate that applied on that date — a reasonable simplification
+  // for a personal net worth trend, not something precise enough to need
+  // historical rates.
   for (const row of dateRows) {
     if (row.minDate !== row.maxDate) hasHistory = true;
     if (!earliestDate || row.minDate < earliestDate) earliestDate = row.minDate;
 
-    const [[startSum], [endSum]] = await Promise.all([
+    const [startRows, endRows] = await Promise.all([
       db
-        .select({ v: sql<number>`coalesce(sum(${schema.holdings.institutionValue}), 0)::int` })
+        .select({ v: schema.holdings.institutionValue, currency: schema.holdings.currency })
         .from(schema.holdings)
         .where(and(eq(schema.holdings.accountId, row.accountId), eq(schema.holdings.asOfDate, row.minDate))),
       db
-        .select({ v: sql<number>`coalesce(sum(${schema.holdings.institutionValue}), 0)::int` })
+        .select({ v: schema.holdings.institutionValue, currency: schema.holdings.currency })
         .from(schema.holdings)
         .where(and(eq(schema.holdings.accountId, row.accountId), eq(schema.holdings.asOfDate, row.maxDate))),
     ]);
-    startValue += startSum?.v ?? 0;
-    endValue += endSum?.v ?? 0;
+    for (const r of startRows) startValue += await toNetWorthCurrency(r.v, r.currency);
+    for (const r of endRows) endValue += await toNetWorthCurrency(r.v, r.currency);
   }
   if (!earliestDate || !hasHistory) return { value: 0, hasHistory };
 
-  const [contribRow] = await db
-    .select({ total: sql<number>`coalesce(sum(${schema.investmentTransactions.amount}), 0)::int` })
+  const contribRows = await db
+    .select({ amount: schema.investmentTransactions.amount, currency: schema.investmentTransactions.currency })
     .from(schema.investmentTransactions)
     .where(
       and(
@@ -166,7 +176,9 @@ export async function portfolioSimpleReturn(userId: string): Promise<{ value: nu
         gte(schema.investmentTransactions.date, earliestDate),
       ),
     );
-  const netContributions = -(contribRow?.total ?? 0);
+  let contribTotal = 0;
+  for (const r of contribRows) contribTotal += await toNetWorthCurrency(r.amount, r.currency);
+  const netContributions = -contribTotal;
 
   return { value: computeSimpleReturn(endValue, startValue, netContributions), hasHistory };
 }
