@@ -215,12 +215,12 @@ export default async function OverviewPage() {
       </Card>
 
       {/* Row 3: budget + where it went */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start" style={reveal(3)}>
-        <Card className="lg:col-span-7">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch" style={reveal(3)}>
+        <Card className="lg:col-span-7 h-full">
           <CardHeader title="Budget this month" action={<Link href="/budgets" className="text-brand text-[13.5px]">Manage →</Link>} />
           <BudgetMeterList budgets={budgets} from={monthStart} to={monthEnd} daysElapsed={daysElapsed} daysInMonth={daysInMonth} />
         </Card>
-        <Card className="lg:col-span-5">
+        <Card className="lg:col-span-5 h-full">
           <CardHeader title="Where it went" />
           <RankedBars
             rows={breakdown.map((b) => ({ ...b, href: `/transactions?category=${b.key}&from=${monthStart}&to=${monthEnd}&transfer=0&excluded=0` }))}
@@ -229,8 +229,8 @@ export default async function OverviewPage() {
       </div>
 
       {/* Row 4: upcoming + recent activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start" style={reveal(4)}>
-        <Card className="lg:col-span-5">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch" style={reveal(4)}>
+        <Card className="lg:col-span-5 h-full">
           <CardHeader title="Upcoming" meta={bills.length > 0 ? `${bills.length} in the next 30 days` : undefined} />
           {bills.length === 0 ? (
             <div className="px-4 py-8 text-center text-text-2 text-[15px]">Nothing due in the next 30 days.</div>
@@ -248,7 +248,7 @@ export default async function OverviewPage() {
             </div>
           )}
         </Card>
-        <Card className="lg:col-span-7">
+        <Card className="lg:col-span-7 h-full">
           <CardHeader title="Recent activity" action={<Link href="/transactions" className="text-brand text-[13.5px]">View all →</Link>} />
           <div className="flex flex-col">
             {recentTx.map((t) => (
