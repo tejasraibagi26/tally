@@ -92,10 +92,36 @@ export function TransactionsList({
           <button
             key={t.id}
             onClick={() => setSelectedId(t.id)}
-            className="w-full grid grid-cols-[92px_minmax(180px,1fr)_150px_170px_120px] gap-3 items-center px-4 py-2.5 border-b border-border last:border-b-0 text-left hover:bg-surface-2 transition-colors"
+            className="w-full flex flex-col gap-1.5 px-4 py-3 lg:grid lg:grid-cols-[92px_minmax(180px,1fr)_150px_170px_120px] lg:gap-3 lg:items-center lg:py-2.5 border-b border-border last:border-b-0 text-left hover:bg-surface-2 transition-colors"
           >
-            <span className="font-mono text-[13.5px] text-text-2 tabular">{relativeDate(t.postedDate)}</span>
-            <span className="flex items-center gap-2.5 min-w-0">
+            {/* Mobile: merchant + amount on top, date/account/category condensed below. Desktop grid columns hidden here. */}
+            <div className="flex items-center justify-between gap-3 lg:hidden">
+              <span className="flex items-center gap-2.5 min-w-0">
+                <span className="w-[26px] h-[26px] flex-none rounded-[7px] bg-sunken text-text-2 flex items-center justify-center text-xs font-medium">
+                  {initial}
+                </span>
+                <span className="text-[15px] text-text truncate">{t.merchantName ?? t.name}</span>
+                {t.isPending && (
+                  <span className="flex-none px-1.5 py-0.5 rounded-full bg-warning-subtle text-warning text-[11px] font-medium uppercase tracking-wide">
+                    Pending
+                  </span>
+                )}
+              </span>
+              <span className={`flex-none text-[15px] tabular ${amountColorClass(t.amount)}`}>{formatCents(t.amount, { signed: true })}</span>
+            </div>
+            <div className="flex items-center gap-2 min-w-0 pl-[34px] lg:hidden">
+              <span className="font-mono text-xs text-text-3 tabular flex-none">{relativeDate(t.postedDate)}</span>
+              <span className="text-text-3 flex-none">·</span>
+              <span
+                className="w-1.5 h-1.5 rounded-full flex-none"
+                style={{ background: category ? `var(--series-${category.colorSlot})` : "var(--text-3)" }}
+              />
+              <span className="text-xs text-text-3 truncate">{category?.name ?? prettifyPfc(t.pfcDetailed)}</span>
+            </div>
+
+            {/* Desktop grid columns */}
+            <span className="hidden lg:inline font-mono text-[13.5px] text-text-2 tabular">{relativeDate(t.postedDate)}</span>
+            <span className="hidden lg:flex items-center gap-2.5 min-w-0">
               <span className="w-[26px] h-[26px] flex-none rounded-[7px] bg-sunken text-text-2 flex items-center justify-center text-xs font-medium">
                 {initial}
               </span>
@@ -106,17 +132,19 @@ export function TransactionsList({
                 </span>
               )}
             </span>
-            <span className="font-mono text-xs text-text-2 truncate">
+            <span className="hidden lg:inline font-mono text-xs text-text-2 truncate">
               {account ? `${account.name} ····${account.mask ?? "----"}` : "—"}
             </span>
-            <span className="flex items-center gap-1.5 min-w-0">
+            <span className="hidden lg:flex items-center gap-1.5 min-w-0">
               <span
                 className="w-1.5 h-1.5 rounded-full flex-none"
                 style={{ background: category ? `var(--series-${category.colorSlot})` : "var(--text-3)" }}
               />
               <span className="text-[13px] text-text-2 truncate">{category?.name ?? prettifyPfc(t.pfcDetailed)}</span>
             </span>
-            <span className={`text-right text-[15px] tabular ${amountColorClass(t.amount)}`}>{formatCents(t.amount, { signed: true })}</span>
+            <span className={`hidden lg:inline text-right text-[15px] tabular ${amountColorClass(t.amount)}`}>
+              {formatCents(t.amount, { signed: true })}
+            </span>
           </button>
         );
       })}

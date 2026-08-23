@@ -146,6 +146,16 @@ body {
   }
 }
 
+/* Same motion, mirrored — used by components/nav/MobileNav.tsx's drawer. */
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
 /* Marketing homepage (app/page.tsx) — slow ambient background drift, never more than a few px so it reads as "alive," not distracting. */
 @keyframes drift {
   0%, 100% {

@@ -3,6 +3,7 @@ import { eq, and, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, schema } from "@/db";
 import { SideNav } from "@/components/nav/SideNav";
+import { MobileNav } from "@/components/nav/MobileNav";
 import { MOCK_MODE } from "@/lib/config";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -21,18 +22,20 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       .where(and(eq(schema.accounts.userId, userId), eq(schema.accounts.type, "credit"))),
   ]);
 
+  const navUser = { name: user?.name ?? null, email: user?.email ?? session.user.email ?? "" };
+  const navCounts = {
+    transactions: txnCount?.count ?? 0,
+    accounts: acctCount?.count ?? 0,
+    creditCards: cardCount?.count ?? 0,
+  };
+
   return (
-    <div className="flex h-screen overflow-hidden bg-canvas">
-      <SideNav
-        user={{ name: user?.name ?? null, email: user?.email ?? session.user.email ?? "" }}
-        counts={{
-          transactions: txnCount?.count ?? 0,
-          accounts: acctCount?.count ?? 0,
-          creditCards: cardCount?.count ?? 0,
-        }}
-        mockMode={MOCK_MODE}
-      />
-      <div className="flex-1 flex flex-col min-w-0 h-screen">
+    <div className="flex flex-col lg:flex-row h-screen overflow-hidden bg-canvas">
+      <div className="hidden lg:flex lg:flex-none">
+        <SideNav user={navUser} counts={navCounts} mockMode={MOCK_MODE} />
+      </div>
+      <MobileNav user={navUser} counts={navCounts} mockMode={MOCK_MODE} />
+      <div className="flex-1 flex flex-col min-w-0 min-h-0">
         <main className="flex-1 min-w-0 overflow-y-auto">{children}</main>
       </div>
     </div>

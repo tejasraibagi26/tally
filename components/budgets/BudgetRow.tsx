@@ -75,15 +75,15 @@ export function BudgetRow({ budget, daysElapsed, daysInMonth }: { budget: Budget
 
   return (
     <div className="flex flex-col gap-2 px-4 py-3 border-b border-border last:border-b-0">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
         <span className="w-1.5 h-1.5 rounded-full flex-none" style={{ background: `var(--series-${budget.categoryColorSlot})` }} />
-        <span className="text-[15px] text-text flex-1 min-w-0 truncate">{budget.categoryName}</span>
+        <span className="text-[15px] text-text flex-1 min-w-[80px] truncate">{budget.categoryName}</span>
         {budget.rolloverEnabled && budget.rolloverFromPrior !== 0 && (
           <span className="text-xs text-text-3 tabular">+{formatCents(budget.rolloverFromPrior)} rollover</span>
         )}
 
         {editing ? (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2 basis-full sm:basis-auto">
             <span className="text-text-3 text-sm">$</span>
             <input
               type="number"
@@ -110,7 +110,7 @@ export function BudgetRow({ budget, daysElapsed, daysInMonth }: { budget: Budget
             </button>
           </div>
         ) : (
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3 basis-full sm:basis-auto">
             <span className={cn("text-[15px] tabular", overBudget ? "text-negative" : "text-text")}>
               {formatCents(budget.remaining)} left
             </span>

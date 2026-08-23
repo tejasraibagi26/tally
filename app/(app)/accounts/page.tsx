@@ -54,8 +54,8 @@ export default async function AccountsPage() {
     .reduce((sum, a) => sum + (a.currentBalance ?? 0), 0);
 
   return (
-    <div className="max-w-[1280px] mx-auto px-8 py-7 flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-baseline gap-3">
           <h1 className="text-2xl font-semibold text-text">Accounts &amp; connections</h1>
           <span className="text-[13.5px] text-text-3">
@@ -67,12 +67,12 @@ export default async function AccountsPage() {
       </div>
 
       {items.length > 0 && (
-        <Card className="flex">
-          <div className="flex-1 p-[18px_24px] border-r border-border flex flex-col gap-2">
+        <Card className="flex flex-col sm:flex-row">
+          <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-text-3">Assets</span>
             <span className="font-display text-3xl text-positive tabular">{formatCents(totalAssets)}</span>
           </div>
-          <div className="flex-1 p-[18px_24px] border-r border-border flex flex-col gap-2">
+          <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-text-3">Liabilities</span>
             <span className="font-display text-3xl text-negative tabular">{formatCents(totalLiabilities)}</span>
           </div>
@@ -95,7 +95,7 @@ export default async function AccountsPage() {
           />
         </Card>
       ) : (
-        <div className="grid grid-cols-2 gap-4 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
           {items.map((item) => {
             const itemAccounts = accountsByItem.get(item.id) ?? [];
             const broken = item.status === "login_required" || item.status === "revoked" || item.status === "error";

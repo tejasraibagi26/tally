@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { LogoMark } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -78,19 +79,29 @@ export function SideNav({
   user,
   counts,
   mockMode,
+  onClose,
 }: {
   user: { name: string | null; email: string };
   counts: NavCounts;
   mockMode: boolean;
+  /** Present only when rendered inside the mobile drawer (components/nav/MobileNav.tsx) — shows a close button. */
+  onClose?: () => void;
 }) {
   const pathname = usePathname();
   const isActive = (href: string) => pathname?.startsWith(href) ?? false;
 
   return (
-    <nav className="w-60 flex-none bg-surface border-r border-border px-4 py-6 flex flex-col gap-6">
-      <div className="flex items-center gap-2 px-2">
-        <LogoMark size={22} />
-        <span className="font-display text-2xl leading-none text-text">Tally</span>
+    <nav className="w-60 h-full flex-none bg-surface border-r border-border px-4 py-6 flex flex-col gap-6 overflow-y-auto">
+      <div className="flex items-center justify-between gap-2 px-2">
+        <div className="flex items-center gap-2">
+          <LogoMark size={22} />
+          <span className="font-display text-2xl leading-none text-text">Tally</span>
+        </div>
+        {onClose && (
+          <button onClick={onClose} aria-label="Close menu" className="w-7 h-7 flex items-center justify-center text-text-3 hover:text-text">
+            <X size={18} strokeWidth={1.75} />
+          </button>
+        )}
       </div>
 
       <div className="flex flex-col gap-[2px]">

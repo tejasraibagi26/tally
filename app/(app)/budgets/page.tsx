@@ -47,8 +47,8 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
   const daysInMonth = isCurrentMonth ? new Date(monthLastDay(month) + "T00:00:00Z").getUTCDate() : undefined;
 
   return (
-    <div className="max-w-[1280px] mx-auto px-8 py-7 flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-baseline gap-3">
           <h1 className="text-2xl font-semibold text-text">Budgets</h1>
           <span className="text-[13.5px] text-text-3">{budgets.length} categories budgeted</span>
@@ -65,12 +65,12 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
       </div>
 
       {budgets.length > 0 && (
-        <Card className="flex">
-          <div className="flex-1 p-[18px_24px] border-r border-border flex flex-col gap-2">
+        <Card className="flex flex-col sm:flex-row">
+          <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-text-3">Budgeted</span>
             <span className="font-display text-3xl text-text tabular">{formatCents(totalBudgeted)}</span>
           </div>
-          <div className="flex-1 p-[18px_24px] border-r border-border flex flex-col gap-2">
+          <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-text-3">Spent</span>
             <span className="font-display text-3xl text-text tabular">{formatCents(totalSpend)}</span>
           </div>

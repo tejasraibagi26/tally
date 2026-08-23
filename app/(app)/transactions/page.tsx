@@ -188,8 +188,8 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   }
 
   return (
-    <div className="max-w-[1280px] mx-auto px-8 py-7 h-full min-h-0 flex flex-col gap-4">
-      <div className="flex items-center justify-between flex-none">
+    <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 h-full min-h-0 flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 flex-none">
         <div className="flex items-baseline gap-3">
           <h1 className="text-2xl font-semibold text-text">Transactions</h1>
           <span className="text-[13.5px] text-text-3 tabular">{total} in range</span>
@@ -283,7 +283,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
         </Card>
       ) : (
         <Card className="flex-1 min-h-0 flex flex-col overflow-hidden">
-          <div className="grid grid-cols-[92px_minmax(180px,1fr)_150px_170px_120px] gap-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 flex-none">
+          <div className="hidden lg:grid grid-cols-[92px_minmax(180px,1fr)_150px_170px_120px] gap-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 flex-none">
             <span>Date</span>
             <span>Merchant</span>
             <span>Account</span>

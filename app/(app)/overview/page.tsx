@@ -54,7 +54,7 @@ export default async function OverviewPage() {
 
   if (accounts.length === 0) {
     return (
-      <div className="max-w-[1280px] mx-auto px-8 py-7">
+      <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7">
         <h1 className="text-2xl font-semibold text-text mb-6">Overview</h1>
         <Card className="p-12">
           <EmptyState
@@ -114,8 +114,8 @@ export default async function OverviewPage() {
   const totalBudgeted = budgets.reduce((s, b) => s + b.amount + b.rolloverFromPrior, 0);
 
   return (
-    <div className="max-w-[1280px] mx-auto px-8 py-7 flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-semibold text-text">Overview</h1>
         {brokenItems > 0 && (
           <Link href="/accounts" className="text-[13.5px] text-negative">
@@ -125,13 +125,13 @@ export default async function OverviewPage() {
       </div>
 
       {/* Row 1: hero net worth + connections health */}
-      <div className="grid grid-cols-12 gap-4 items-stretch" style={reveal(0)}>
-        <Card className="col-span-8 p-7 flex flex-col gap-4">
-          <div className="flex items-end justify-between gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch" style={reveal(0)}>
+        <Card className="lg:col-span-8 p-5 lg:p-7 flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-12">
             <div className="flex flex-col gap-3">
               <span className="text-xs font-medium uppercase tracking-wide text-text-3">Net worth</span>
-              <AnimatedNumber cents={netWorth} className="font-display text-[56px] leading-none text-text tabular" />
-              <div className="flex items-center gap-2">
+              <AnimatedNumber cents={netWorth} className="font-display text-[40px] lg:text-[56px] leading-none text-text tabular" />
+              <div className="flex flex-wrap items-center gap-2">
                 {netWorthDelta && (
                   <span className={`text-xs font-medium ${netWorthDelta.direction === "up" ? "text-positive" : "text-negative"}`}>
                     {netWorthDelta.direction === "up" ? "▲" : "▼"} {netWorthDelta.pctLabel} vs last month
@@ -149,7 +149,7 @@ export default async function OverviewPage() {
           <NetWorthChart points={netWorthPoints} />
         </Card>
 
-        <Card className="col-span-4 flex flex-col">
+        <Card className="lg:col-span-4 flex flex-col">
           <CardHeader title="Connections" />
           <div className="flex-1 flex flex-col gap-3 p-4">
             {items.slice(0, 4).map((item) => (
@@ -171,7 +171,7 @@ export default async function OverviewPage() {
       </div>
 
       {/* Row 2: stat tiles */}
-      <div className="grid grid-cols-4 gap-4" style={reveal(1)}>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" style={reveal(1)}>
         <StatTile
           label="Spent this month"
           value={<AnimatedNumber cents={thisMonth.spend} />}
@@ -214,12 +214,12 @@ export default async function OverviewPage() {
       </Card>
 
       {/* Row 3: budget + where it went */}
-      <div className="grid grid-cols-12 gap-4 items-start" style={reveal(3)}>
-        <Card className="col-span-7">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start" style={reveal(3)}>
+        <Card className="lg:col-span-7">
           <CardHeader title="Budget this month" action={<Link href="/budgets" className="text-brand text-[13.5px]">Manage →</Link>} />
           <BudgetMeterList budgets={budgets} from={monthStart} to={monthEnd} daysElapsed={daysElapsed} daysInMonth={daysInMonth} />
         </Card>
-        <Card className="col-span-5">
+        <Card className="lg:col-span-5">
           <CardHeader title="Where it went" />
           <RankedBars
             rows={breakdown.map((b) => ({ ...b, href: `/transactions?category=${b.key}&from=${monthStart}&to=${monthEnd}&transfer=0&excluded=0` }))}
@@ -228,8 +228,8 @@ export default async function OverviewPage() {
       </div>
 
       {/* Row 4: upcoming + recent activity */}
-      <div className="grid grid-cols-12 gap-4 items-start" style={reveal(4)}>
-        <Card className="col-span-5">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start" style={reveal(4)}>
+        <Card className="lg:col-span-5">
           <CardHeader title="Upcoming" meta={bills.length > 0 ? `${bills.length} in the next 30 days` : undefined} />
           {bills.length === 0 ? (
             <div className="px-4 py-8 text-center text-text-2 text-[15px]">Nothing due in the next 30 days.</div>
@@ -247,7 +247,7 @@ export default async function OverviewPage() {
             </div>
           )}
         </Card>
-        <Card className="col-span-7">
+        <Card className="lg:col-span-7">
           <CardHeader title="Recent activity" action={<Link href="/transactions" className="text-brand text-[13.5px]">View all →</Link>} />
           <div className="flex flex-col">
             {recentTx.map((t) => (

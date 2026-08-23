@@ -25,7 +25,7 @@ export default async function RulesPage() {
   const accountNameById = new Map(accounts.map((a) => [a.id, a.name]));
 
   return (
-    <div className="max-w-[1280px] mx-auto px-8 py-7 flex flex-col gap-6">
+    <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
       <div className="flex items-baseline gap-3">
         <h1 className="text-2xl font-semibold text-text">Rules</h1>
         <span className="text-[13.5px] text-text-3">{rules.length} rule{rules.length === 1 ? "" : "s"}</span>

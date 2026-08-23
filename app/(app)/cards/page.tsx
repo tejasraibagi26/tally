@@ -30,7 +30,7 @@ export default async function CardsPage() {
 
   if (cards.length === 0) {
     return (
-      <div className="max-w-[1280px] mx-auto px-8 py-7 flex flex-col gap-6">
+      <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
         <h1 className="text-2xl font-semibold text-text">Credit cards</h1>
         <Card className="p-10">
           <EmptyState
@@ -49,11 +49,11 @@ export default async function CardsPage() {
   }
 
   return (
-    <div className="max-w-[1280px] mx-auto px-8 py-7 flex flex-col gap-6">
+    <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
       <h1 className="text-2xl font-semibold text-text">Credit cards</h1>
 
-      <Card className="flex">
-        <div className="flex-1 p-[18px_24px] border-r border-border flex flex-col gap-2">
+      <Card className="flex flex-col sm:flex-row">
+        <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Total balance</span>
           <span className="font-display text-3xl text-negative tabular">{formatCents(utilization.totalBalance)}</span>
         </div>
@@ -70,7 +70,7 @@ export default async function CardsPage() {
         </div>
       </Card>
 
-      <div className="grid grid-cols-2 gap-4 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
         {cards.map((card) => {
           const cardUtilization = card.creditLimit ? card.currentBalance / card.creditLimit : null;
           const liability = card.liability;

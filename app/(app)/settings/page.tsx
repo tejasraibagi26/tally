@@ -44,7 +44,7 @@ export default async function SettingsPage() {
   const items = await db.select({ id: schema.plaidItems.id }).from(schema.plaidItems).where(eq(schema.plaidItems.userId, userId));
 
   return (
-    <div className="max-w-[720px] mx-auto px-8 py-7 flex flex-col gap-8">
+    <div className="max-w-[720px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-8">
       <h1 className="text-2xl font-semibold text-text">Settings</h1>
 
       <div className="flex flex-col gap-3">

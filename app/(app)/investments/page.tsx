@@ -48,7 +48,7 @@ export default async function InvestmentsPage() {
 
   if (holdings.length === 0) {
     return (
-      <div className="max-w-[1280px] mx-auto px-8 py-7 flex flex-col gap-6">
+      <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
         <h1 className="text-2xl font-semibold text-text">Investments</h1>
         <Card className="p-10">
           <EmptyState
@@ -67,15 +67,15 @@ export default async function InvestmentsPage() {
   }
 
   return (
-    <div className="max-w-[1280px] mx-auto px-8 py-7 flex flex-col gap-6">
+    <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
       <h1 className="text-2xl font-semibold text-text">Investments</h1>
 
-      <Card className="flex">
-        <div className="flex-1 p-[18px_24px] border-r border-border flex flex-col gap-2">
+      <Card className="flex flex-col sm:flex-row">
+        <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Portfolio value</span>
           <span className="font-display text-3xl text-text tabular">{formatCents(value)}</span>
         </div>
-        <div className="flex-1 p-[18px_24px] border-r border-border flex flex-col gap-2">
+        <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Unrealized gain</span>
           {gain.hasCostBasis ? (
             <span className={`font-display text-3xl tabular ${gain.gain < 0 ? "text-negative" : "text-positive"}`}>
@@ -120,28 +120,30 @@ export default async function InvestmentsPage() {
       </Card>
 
       {[...holdingsByAccount.entries()].map(([accountId, accountHoldings]) => (
-        <Card key={accountId}>
+        <Card key={accountId} className="overflow-hidden">
           <CardHeader title={accountHoldings[0]?.accountName ?? "Account"} meta={formatCents(accountHoldings.reduce((s, h) => s + h.institutionValue, 0))} />
-          <div className="grid grid-cols-[100px_minmax(180px,1fr)_120px_120px_140px] gap-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3">
-            <span>Ticker</span>
-            <span>Name</span>
-            <span className="text-right">Quantity</span>
-            <span className="text-right">Price</span>
-            <span className="text-right">Value</span>
-          </div>
-          {accountHoldings.map((h) => (
-            <div key={h.securityId} className="grid grid-cols-[100px_minmax(180px,1fr)_120px_120px_140px] gap-3 items-center px-4 py-2.5 border-b border-border last:border-b-0">
-              <span className="font-mono text-[13.5px] text-text">{h.ticker ?? "—"}</span>
-              <span className="text-[15px] text-text truncate">{h.securityName ?? "Unknown security"}</span>
-              <span className="text-right text-[13.5px] text-text-2 tabular">{formatQuantity(h.quantity)}</span>
-              <span className="text-right text-[13.5px] text-text-2 tabular">
-                {h.institutionValue != null && parseFloat(h.quantity) > 0
-                  ? formatCents(Math.round(h.institutionValue / parseFloat(h.quantity)))
-                  : "—"}
-              </span>
-              <span className="text-right text-[15px] text-text tabular">{formatCents(h.institutionValue)}</span>
+          <div className="overflow-x-auto">
+            <div className="grid grid-cols-[100px_minmax(180px,1fr)_120px_120px_140px] gap-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 min-w-[660px]">
+              <span>Ticker</span>
+              <span>Name</span>
+              <span className="text-right">Quantity</span>
+              <span className="text-right">Price</span>
+              <span className="text-right">Value</span>
             </div>
-          ))}
+            {accountHoldings.map((h) => (
+              <div key={h.securityId} className="grid grid-cols-[100px_minmax(180px,1fr)_120px_120px_140px] gap-3 items-center px-4 py-2.5 border-b border-border last:border-b-0 min-w-[660px]">
+                <span className="font-mono text-[13.5px] text-text">{h.ticker ?? "—"}</span>
+                <span className="text-[15px] text-text truncate">{h.securityName ?? "Unknown security"}</span>
+                <span className="text-right text-[13.5px] text-text-2 tabular">{formatQuantity(h.quantity)}</span>
+                <span className="text-right text-[13.5px] text-text-2 tabular">
+                  {h.institutionValue != null && parseFloat(h.quantity) > 0
+                    ? formatCents(Math.round(h.institutionValue / parseFloat(h.quantity)))
+                    : "—"}
+                </span>
+                <span className="text-right text-[15px] text-text tabular">{formatCents(h.institutionValue)}</span>
+              </div>
+            ))}
+          </div>
         </Card>
       ))}
 
