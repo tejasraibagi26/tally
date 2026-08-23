@@ -12,6 +12,7 @@ import { ItemActionsMenu } from "@/components/plaid/ItemActionsMenu";
 import { SyncFailureToast } from "@/components/plaid/SyncFailureToast";
 import { MOCK_MODE } from "@/lib/config";
 import { freshnessStatus } from "@/lib/freshness";
+import { toNetWorthCurrency, NET_WORTH_CURRENCY } from "@/lib/fx";
 
 // A broken item (needs re-auth) always reads "Broken" regardless of how
 // recently it last synced — otherwise the freshness badge follows §8.3.
@@ -52,12 +53,15 @@ export default async function AccountsPage() {
     accountsByItem.set(acct.itemId, [...(accountsByItem.get(acct.itemId) ?? []), acct]);
   }
 
-  const totalAssets = accounts
-    .filter((a) => a.type === "depository" || a.type === "investment")
-    .reduce((sum, a) => sum + (a.currentBalance ?? 0), 0);
-  const totalLiabilities = accounts
-    .filter((a) => a.type === "credit" || a.type === "loan")
-    .reduce((sum, a) => sum + (a.currentBalance ?? 0), 0);
+  // Per-connection/per-account balances below stay labeled in their own
+  // currency, unconverted — but the totals here mix every account together,
+  // so they're converted to NET_WORTH_CURRENCY first (lib/fx.ts) rather than
+  // summing raw USD and CAD cents as if they were the same currency.
+  const convertedForTotals = await Promise.all(
+    accounts.map(async (a) => (a.currentBalance != null ? await toNetWorthCurrency(a.currentBalance, a.currency) : 0)),
+  );
+  const totalAssets = accounts.reduce((sum, a, i) => (a.type === "depository" || a.type === "investment" ? sum + convertedForTotals[i]! : sum), 0);
+  const totalLiabilities = accounts.reduce((sum, a, i) => (a.type === "credit" || a.type === "loan" ? sum + convertedForTotals[i]! : sum), 0);
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
@@ -77,15 +81,15 @@ export default async function AccountsPage() {
       {items.length > 0 && (
         <Card className="flex flex-col sm:flex-row">
           <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-text-3">Assets</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-text-3">Assets ({NET_WORTH_CURRENCY})</span>
             <span className="font-display text-3xl text-positive tabular money">{formatCents(totalAssets)}</span>
           </div>
           <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-text-3">Liabilities</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-text-3">Liabilities ({NET_WORTH_CURRENCY})</span>
             <span className="font-display text-3xl text-negative tabular money">{formatCents(totalLiabilities)}</span>
           </div>
           <div className="flex-1 p-[18px_24px] flex flex-col gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-text-3">Net</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-text-3">Net ({NET_WORTH_CURRENCY})</span>
             <span className="font-display text-3xl text-text tabular money">
               {formatCents(totalAssets - totalLiabilities)}
             </span>

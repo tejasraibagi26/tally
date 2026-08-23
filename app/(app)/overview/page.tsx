@@ -8,6 +8,7 @@ import { getBudgetsForMonth } from "@/lib/budgets";
 import { monthRange, monthLastDay, shiftMonth, computeBurnRateProjection } from "@/lib/budgetMath";
 import { monthTotals, categoryBreakdown, upcomingBills, cashFlowTrend } from "@/lib/analytics";
 import { netWorthTrend } from "@/lib/networth";
+import { NET_WORTH_CURRENCY } from "@/lib/fx";
 import { creditCardsForUser, utilizationFor } from "@/lib/liabilities";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { StatTile } from "@/components/ui/StatTile";
@@ -129,7 +130,7 @@ export default async function OverviewPage() {
         <Card className="lg:col-span-8 p-5 lg:p-7 flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-12">
             <div className="flex flex-col gap-3">
-              <span className="text-xs font-medium uppercase tracking-wide text-text-3">Net worth</span>
+              <span className="text-xs font-medium uppercase tracking-wide text-text-3">Net worth ({NET_WORTH_CURRENCY})</span>
               <AnimatedNumber cents={netWorth} className="font-display text-[40px] lg:text-[56px] leading-none text-text tabular money" />
               <div className="flex flex-wrap items-center gap-2">
                 {netWorthDelta && (

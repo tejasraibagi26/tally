@@ -62,6 +62,7 @@ const ENV_VARS: { name: string; required: boolean; description: string }[] = [
   { name: "MASTER_KEY", required: true, description: "32-byte base64 key. Generate with openssl rand -base64 32. Encrypts Plaid access tokens at rest." },
   { name: "CRON_SECRET", required: true, description: "Authorizes the nightly Vercel Cron Job (app/api/cron/nightly) and the Upstash QStash-triggered sync (app/api/cron/sync-all). Generate with openssl rand -base64 32." },
   { name: "QSTASH_TOKEN / QSTASH_URL / QSTASH_CURRENT_SIGNING_KEY / QSTASH_NEXT_SIGNING_KEY", required: true, description: "Auto-provisioned by installing the Upstash QStash integration from the Vercel Marketplace. Powers the twice-daily transactions safety net, since Vercel's own Cron Jobs are capped at once/day on the Hobby plan." },
+  { name: "NET_WORTH_CURRENCY", required: false, description: "Defaults to CAD. The one figure in the app that's actually currency-converted (via Frankfurter's free daily rates) — every account/holding balance elsewhere stays labeled in its own currency, unconverted." },
   { name: "ADMIN_EMAIL", required: true, description: "Used once by npm run seed:user to create the single admin login." },
   { name: "ADMIN_PASSWORD", required: true, description: "Used once by npm run seed:user. At least 8 characters." },
 ];

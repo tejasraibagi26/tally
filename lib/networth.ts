@@ -1,9 +1,22 @@
 import { and, desc, eq, gte } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { toNetWorthCurrency } from "@/lib/fx";
 
 /** §9 "Net worth": Σ depository + investment balances − Σ credit + loan balances, as of now. One row per user per day (§5). */
 export async function computeAndStoreNetWorthSnapshot(userId: string, asOfDate: string): Promise<void> {
-  const accounts = await db.select().from(schema.accounts).where(eq(schema.accounts.userId, userId));
+  const rawAccounts = await db.select().from(schema.accounts).where(eq(schema.accounts.userId, userId));
+
+  // Every other balance/holding display in this app stays labeled in its own
+  // currency, never converted — but a single net worth figure can't honor
+  // that the same way. Summing raw USD and CAD cents together isn't merely
+  // "unconverted," it's arithmetically wrong, so this is the one place a
+  // real FX rate is worth fetching (lib/fx.ts).
+  const accounts = await Promise.all(
+    rawAccounts.map(async (a) => ({
+      ...a,
+      currentBalance: a.currentBalance != null ? await toNetWorthCurrency(a.currentBalance, a.currency) : null,
+    })),
+  );
 
   const assets = accounts.filter((a) => a.type === "depository" || a.type === "investment").reduce((s, a) => s + (a.currentBalance ?? 0), 0);
   const liabilities = accounts.filter((a) => a.type === "credit" || a.type === "loan").reduce((s, a) => s + (a.currentBalance ?? 0), 0);
