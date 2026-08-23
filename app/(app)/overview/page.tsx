@@ -1,6 +1,6 @@
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
-import { Landmark } from "lucide-react";
+import { Landmark, CalendarCheck } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { requireUserId } from "@/lib/session";
 import { formatCents, formatPercent } from "@/lib/money";
@@ -87,7 +87,7 @@ export default async function OverviewPage() {
       limit: 6,
     }),
     creditCardsForUser(userId),
-    cashFlowTrend(userId, 13),
+    cashFlowTrend(userId, 12),
   ]);
 
   const totalAssets = accounts.filter((a) => a.type === "depository" || a.type === "investment").reduce((sum, a) => sum + (a.currentBalance ?? 0), 0);
@@ -208,7 +208,7 @@ export default async function OverviewPage() {
 
       {/* Cash flow trend */}
       <Card style={reveal(2)}>
-        <CardHeader title="Cash flow" meta="Last 13 months" />
+        <CardHeader title="Cash flow" meta="Last 12 months" />
         <div className="p-4">
           <CashFlowChart months={cashFlowMonths} />
         </div>
@@ -230,10 +230,12 @@ export default async function OverviewPage() {
 
       {/* Row 4: upcoming + recent activity */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch" style={reveal(4)}>
-        <Card className="lg:col-span-5 h-full">
+        <Card className="lg:col-span-5 h-full flex flex-col">
           <CardHeader title="Upcoming" meta={bills.length > 0 ? `${bills.length} in the next 30 days` : undefined} />
           {bills.length === 0 ? (
-            <div className="px-4 py-8 text-center text-text-2 text-[15px]">Nothing due in the next 30 days.</div>
+            <div className="flex-1 flex items-center justify-center px-4 py-8">
+              <EmptyState icon={CalendarCheck} title="Nothing due in the next 30 days." compact />
+            </div>
           ) : (
             <div className="flex flex-col">
               {bills.map((bill, i) => (
