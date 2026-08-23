@@ -23,6 +23,11 @@ export async function syncLiabilitiesForItem(itemId: string, trigger: SyncTrigge
       return;
     }
 
+    // Known up front from the item's own consented products (captured at
+    // link time) — skip the call entirely rather than spend an API request
+    // just to have Plaid reject it with PRODUCTS_NOT_SUPPORTED every sync.
+    if (!item.consentedProducts.includes("liabilities")) return;
+
     const accessToken = await getAccessToken(itemId);
     const res = await plaidClient.liabilitiesGet({ access_token: accessToken });
     const creditLiabilities = res.data.liabilities.credit ?? [];

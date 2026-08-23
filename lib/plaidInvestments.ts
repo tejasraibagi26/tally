@@ -68,6 +68,11 @@ export async function syncHoldingsForItem(itemId: string, trigger: SyncTrigger):
       return;
     }
 
+    // Known up front from the item's own consented products (captured at
+    // link time) — skip the call entirely rather than spend an API request
+    // just to have Plaid reject it with PRODUCTS_NOT_SUPPORTED every sync.
+    if (!item.consentedProducts.includes("investments")) return;
+
     const accessToken = await getAccessToken(itemId);
     const res = await plaidClient.investmentsHoldingsGet({ access_token: accessToken });
     await reconcileHoldings(res.data.securities, res.data.holdings);
@@ -135,6 +140,8 @@ export async function syncInvestmentTransactionsForItem(itemId: string, trigger:
       await recordSyncRun(itemId, "inv_tx", trigger, startedAt, {});
       return;
     }
+
+    if (!item.consentedProducts.includes("investments")) return;
 
     const accessToken = await getAccessToken(itemId);
     const endDate = new Date().toISOString().slice(0, 10);
