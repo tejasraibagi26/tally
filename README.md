@@ -9,7 +9,7 @@ A private finance dashboard — see `WORK.md` for the full spec and milestone pl
 - **Database**: full Drizzle schema (`db/schema.ts`) for the whole product per `WORK.md` §5, with an initial migration generated.
 - **Plaid Link**: create + update (re-auth) modes, OAuth institution redirect round-trip (`/plaid/oauth`), encrypted access-token storage (AES-256-GCM envelope encryption, `lib/crypto.ts`), account + institution sync on exchange, item removal via `/item/remove`, webhook endpoint with full JWT signature verification.
 - **Transaction sync**: `/transactions/sync` with a persisted cursor, idempotent upserts, pending→posted reconciliation that preserves user edits, and `removed[]` handling (`lib/plaidSync.ts`).
-- **Webhooks + automation (M3)**: verified webhooks hand off to a pg-boss queue (`worker/index.ts`) instead of running inline; a twice-daily cron safety net (06:00 / 18:00) re-syncs every item in case a webhook was missed; a nightly (02:00) job refreshes balances; jobs retry up to 5 times with exponential backoff. `webhook_events` and `sync_runs` track every attempt.
+- **Webhooks + automation (M3)**: verified webhooks (`app/api/plaid/webhook/route.ts`) process the matching sync inline within the request — no queue/worker process (Vercel Functions don't support a persistent listener, and one item's sync takes a few seconds); a twice-daily cron safety net re-syncs every item in case a webhook was missed, and a nightly job refreshes balances — both are Vercel Cron Jobs (`vercel.json` → `app/api/cron/sync-all`, `app/api/cron/nightly`), authenticated via `CRON_SECRET`, always running in UTC (no per-project timezone). `webhook_events` and `sync_runs` track every attempt.
 - **Accounts & Connections** screen: real data, a freshness badge per §8.3 (Fresh < 6h · Stale 6–48h · Needs attention > 48h, or broken regardless of age), reconnect flow (update-mode Link), manual balance + transaction refresh.
 - **Categorization, rules, budgets (M4)**: system categories seeded from Plaid's PFC taxonomy (`npm run seed:categories`); a rules engine (`lib/rulesEngine.ts`) that matches on description/merchant/amount/account/PFC/direction and sets category/tags/exclude/transfer/split, with priority ordering and a preview count before "apply to existing" commits; transfer pairing (`lib/transferDetection.ts`) that auto-excludes matched pairs (e.g. a card payment and its funding-account debit) from spend on both sides; manual category edits on a transaction (with an optional "always categorize this merchant" one-click rule) that sync can never overwrite; monthly budgets with optional rollover and a burn-down view at `/budgets`. A `/rules` screen manages rules (linked from Transactions).
 - **Investments + liabilities (M5)**: holdings/securities snapshots and investment transactions via `/investments/holdings/get` + `/investments/transactions/get` (`lib/plaidInvestments.ts`), credit card APR/statement/due-date via `/liabilities/get` (`lib/plaidLiabilities.ts`) — both wired into initial link, manual sync, webhooks (`HOLDINGS`/`INVESTMENTS_TRANSACTIONS`/`LIABILITIES`), and the nightly cron. `/investments` shows portfolio value, allocation (cash as its own slice), per-account holdings, and recent activity; `/cards` shows APR/statement/min payment/due date and utilization, with a null-limit card excluded from the ratio and footnoted (§6.5). Both institutions and account types that don't support these products degrade quietly rather than erroring (§6.4).
@@ -60,13 +60,7 @@ npm run dev
 
 Visit `http://localhost:3000`, sign in, and go to **Accounts**. In dev, **Mock data** is on by default (see below) — "Add account" instantly connects a fixture institution, no Plaid account needed.
 
-### 5. Run the worker
-
-```bash
-npm run worker
-```
-
-Processes webhook-triggered and cron-scheduled syncs (`worker/index.ts`) against the same `DATABASE_URL`. Needed for automatic sync — the app's own manual "Sync now" buttons work without it. Uses pg-boss, which creates its own `pgboss` schema in the database on first start.
+Automatic sync (twice-daily safety net + nightly balance refresh) runs as Vercel Cron Jobs in production (`vercel.json`) — there's no separate worker process to run locally. Webhook-triggered syncs process inline in `/api/plaid/webhook` itself. The app's manual "Sync now" buttons always work regardless.
 
 ## Mock mode
 
@@ -84,9 +78,10 @@ In mock mode, "Add account" calls `/api/mock/connect` instead of opening Plaid L
 
 ### Testing webhooks + automation (M3) against Sandbox
 
-With `npm run dev`, `npm run worker`, and a tunnel all running:
+With `npm run dev` and a tunnel running:
 
-- **End-to-end sync**: connect an item, then call `POST /sandbox/item/fire_webhook` (Plaid API, `webhook_code: "SYNC_UPDATES_AVAILABLE"`, the item's `access_token`) — the app's `/api/plaid/webhook` should verify it, insert a `webhook_events` row, and the worker should pick up the enqueued job and sync within seconds. Check `sync_runs` and the Accounts freshness badge.
+- **End-to-end sync**: connect an item, then call `POST /sandbox/item/fire_webhook` (Plaid API, `webhook_code: "SYNC_UPDATES_AVAILABLE"`, the item's `access_token`) — the app's `/api/plaid/webhook` should verify it, insert a `webhook_events` row, and sync it inline within that same request. Check `sync_runs` and the Accounts freshness badge.
+- **Cron routes locally**: `curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/sync-all` (and `/api/cron/nightly`) — set `CRON_SECRET` in `.env` first; these 401 without it, same as production.
 - **Tampered webhook rejected**: POST anything to `/api/plaid/webhook` without a valid `Plaid-Verification` header, or with the body altered after signing — expect `400`.
 - **Re-auth flow**: call `POST /sandbox/item/reset_login` for a Sandbox item, then either wait for the `ITEM_LOGIN_REQUIRED` webhook or trigger a sync manually — the item flips to `login_required`, the Accounts screen shows the "Login expired" banner, and its **Reconnect** button opens Link in update mode. Completing Link with `user_good`/`pass_good` should clear the banner.
 
@@ -129,15 +124,15 @@ For Docker Compose, run `pg_dump`/`pg_restore` from a container with network acc
 
 ## Secret rotation
 
-- **`PLAID_SECRET`**: generate a new secret in the [Plaid dashboard](https://dashboard.plaid.com), set it in `.env`, restart the app and worker, confirm a sync still works, then revoke the old secret in the dashboard. No data migration needed — it's only ever sent to Plaid, never stored.
+- **`PLAID_SECRET`**: generate a new secret in the [Plaid dashboard](https://dashboard.plaid.com), set it in `.env`, restart the app, confirm a sync still works, then revoke the old secret in the dashboard. No data migration needed — it's only ever sent to Plaid, never stored.
 - **`MASTER_KEY`**: this one *is* stored — it's what every `plaid_items.access_token_ciphertext` is encrypted under, so rotating it means re-encrypting every row, not just swapping an env var.
-  1. Stop the app and worker (no syncs in flight during rotation).
+  1. Pause the app (no syncs in flight during rotation) — e.g. temporarily disable the Vercel Cron Jobs, or run this during a quiet window.
   2. Generate a new key: `openssl rand -base64 32`.
   3. Run the rotation script with both keys in the environment:
      ```bash
      OLD_MASTER_KEY=<current MASTER_KEY> NEW_MASTER_KEY=<new key> npm run rotate:master-key
      ```
-  4. Set `MASTER_KEY` to the new key in `.env`, restart the app and worker, and confirm a manual sync works.
+  4. Set `MASTER_KEY` to the new key in `.env` (and in Vercel for production), restart/redeploy, and confirm a manual sync works.
   5. Keep the old key somewhere safe until you've confirmed the app works — the script's own log tells you if it stopped partway through, which is the one case where you'd need it.
 
 ## Scripts
@@ -152,7 +147,6 @@ For Docker Compose, run `pg_dump`/`pg_restore` from a container with network acc
 | `npm run db:studio` | Drizzle Studio (browse the DB) |
 | `npm run seed:user` | Create/update the single admin user from `ADMIN_EMAIL`/`ADMIN_PASSWORD` |
 | `npm run seed:categories` | Seed system categories from Plaid's PFC taxonomy (idempotent) |
-| `npm run worker` | Runs the pg-boss worker (webhook + cron sync processing) |
 | `npm run rotate:master-key` | Re-encrypts every stored access token under a new `MASTER_KEY` — see **Secret rotation** |
 
 ## Security notes

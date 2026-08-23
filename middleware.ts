@@ -10,6 +10,9 @@ export const config = {
   // "|$" excludes the bare root path — it's the public marketing homepage
   // (app/page.tsx), which does its own auth check and redirects signed-in
   // users to /overview itself. "docs" and "privacy" are public pages with
-  // no user data — no auth check needed. Every other route stays gated here.
-  matcher: ["/((?!api/auth|api/plaid/webhook|login|docs|privacy|_next/static|_next/image|favicon.ico|$).*)"],
+  // no user data — no auth check needed. "api/cron" is Vercel Cron Jobs
+  // calling in with no user session at all — CRON_SECRET (lib/cronAuth.ts)
+  // is its own auth, checked inside each route. Every other route stays
+  // gated here.
+  matcher: ["/((?!api/auth|api/plaid/webhook|api/cron|login|docs|privacy|_next/static|_next/image|favicon.ico|$).*)"],
 };

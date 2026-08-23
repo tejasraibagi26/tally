@@ -17,7 +17,6 @@
     "seed:categories": "tsx scripts/seed-categories.ts",
     "rotate:master-key": "tsx scripts/rotate-master-key.ts",
     "clear:mock-data": "tsx scripts/clear-mock-data.ts",
-    "worker": "tsx worker/index.ts",
     "test": "vitest run"
   },
   "dependencies": {
@@ -28,7 +27,6 @@
     "lucide-react": "^1.33.0",
     "next": "^15.1.0",
     "next-auth": "5.0.0-beta.25",
-    "pg-boss": "^10.1.5",
     "plaid": "^33.0.0",
     "postgres": "^3.4.5",
     "react": "^18.3.1",

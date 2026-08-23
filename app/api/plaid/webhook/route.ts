@@ -1,32 +1,35 @@
 import { NextResponse } from "next/server";
 import { db, schema } from "@/db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { verifyPlaidWebhook } from "@/lib/plaidWebhook";
-import {
-  enqueueSyncTransactions,
-  enqueueSyncHoldings,
-  enqueueSyncInvestmentTransactions,
-  enqueueSyncLiabilities,
-  type ItemSyncJobData,
-} from "@/lib/queue";
+import { syncTransactionsForItem, type SyncTrigger } from "@/lib/plaidSync";
+import { syncHoldingsForItem, syncInvestmentTransactionsForItem } from "@/lib/plaidInvestments";
+import { syncLiabilitiesForItem } from "@/lib/plaidLiabilities";
+
+export const maxDuration = 120;
 
 const TRANSACTIONS_CODES = new Set(["SYNC_UPDATES_AVAILABLE", "INITIAL_UPDATE", "HISTORICAL_UPDATE", "DEFAULT_UPDATE"]);
 const HOLDINGS_CODES = new Set(["DEFAULT_UPDATE"]);
 const INVESTMENTS_TRANSACTIONS_CODES = new Set(["DEFAULT_UPDATE", "HISTORICAL_UPDATE"]);
 const LIABILITIES_CODES = new Set(["DEFAULT_UPDATE"]);
 
-// (webhook_type -> matching codes -> which queue to enqueue into), per §6.7's table.
-const ENQUEUE_BY_TYPE: { type: string; codes: Set<string>; enqueue: (data: ItemSyncJobData) => Promise<unknown> }[] = [
-  { type: "TRANSACTIONS", codes: TRANSACTIONS_CODES, enqueue: enqueueSyncTransactions },
-  { type: "HOLDINGS", codes: HOLDINGS_CODES, enqueue: enqueueSyncHoldings },
-  { type: "INVESTMENTS_TRANSACTIONS", codes: INVESTMENTS_TRANSACTIONS_CODES, enqueue: enqueueSyncInvestmentTransactions },
-  { type: "LIABILITIES", codes: LIABILITIES_CODES, enqueue: enqueueSyncLiabilities },
+// (webhook_type -> matching codes -> which sync function to run), per §6.7's table.
+const SYNC_BY_TYPE: { type: string; codes: Set<string>; sync: (itemId: string, trigger: SyncTrigger) => Promise<unknown> }[] = [
+  { type: "TRANSACTIONS", codes: TRANSACTIONS_CODES, sync: syncTransactionsForItem },
+  { type: "HOLDINGS", codes: HOLDINGS_CODES, sync: syncHoldingsForItem },
+  { type: "INVESTMENTS_TRANSACTIONS", codes: INVESTMENTS_TRANSACTIONS_CODES, sync: syncInvestmentTransactionsForItem },
+  { type: "LIABILITIES", codes: LIABILITIES_CODES, sync: syncLiabilitiesForItem },
 ];
 
 // Public endpoint — no session. Trust nothing until the signature verifies.
-// Every sync is handed off to the pg-boss queue (worker/index.ts) so a slow
-// Plaid response can't hold the webhook connection open or block a retry
-// storm.
+// Processed inline, synchronously, within the request — no queue/worker.
+// Vercel Functions don't support a persistent listener process; a single
+// item's sync normally takes a few seconds, well within the function's
+// execution budget. The twice-daily/nightly cron routes (app/api/cron/*)
+// remain the safety net if a webhook-triggered sync here fails — this
+// endpoint always returns 200 regardless, matching that "webhook is the
+// fast path, cron is the backstop" design rather than relying on Plaid's
+// own webhook-delivery retries.
 export async function POST(req: Request) {
   const rawBody = await req.text();
   const verified = await verifyPlaidWebhook(rawBody, req.headers.get("plaid-verification"));
@@ -74,8 +77,8 @@ export async function POST(req: Request) {
     }
   }
 
-  let queued = false;
-  const match = ENQUEUE_BY_TYPE.find((m) => m.type === payload.webhook_type && m.codes.has(payload.webhook_code));
+  let processed = false;
+  const match = SYNC_BY_TYPE.find((m) => m.type === payload.webhook_type && m.codes.has(payload.webhook_code));
   if (match && payload.item_id) {
     const [item] = await db
       .select({ id: schema.plaidItems.id })
@@ -84,18 +87,33 @@ export async function POST(req: Request) {
       .limit(1);
     if (item) {
       try {
-        await match.enqueue({ itemId: item.id, trigger: "webhook", webhookEventId: event?.id });
-        queued = true;
+        await match.sync(item.id, "webhook");
+        if (event) {
+          await db
+            .update(schema.webhookEvents)
+            .set({ status: "processed", processedAt: new Date() })
+            .where(eq(schema.webhookEvents.id, event.id));
+        }
+        processed = true;
       } catch (err) {
-        console.error(`Failed to enqueue ${payload.webhook_type} sync for item ${item.id}`, err);
+        console.error(`Webhook-triggered ${payload.webhook_type} sync failed for item ${item.id}`, err);
+        if (event) {
+          await db
+            .update(schema.webhookEvents)
+            .set({
+              status: "failed",
+              error: err instanceof Error ? err.message : "unknown error",
+              attempts: sql`${schema.webhookEvents.attempts} + 1`,
+            })
+            .where(eq(schema.webhookEvents.id, event.id));
+        }
       }
     }
   }
 
-  // A job was handed off — the worker updates this event's status when it
-  // finishes. Everything else (ITEM status changes above) was handled
-  // synchronously, so mark it processed now.
-  if (!queued && event) {
+  // Nothing matched a syncable product (e.g. a bare ITEM status webhook) —
+  // that was handled synchronously above, so mark it processed now.
+  if (!processed && event) {
     await db
       .update(schema.webhookEvents)
       .set({ status: "processed", processedAt: new Date() })
