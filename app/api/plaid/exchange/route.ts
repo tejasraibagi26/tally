@@ -9,6 +9,7 @@ import { syncTransactionsForItem } from "@/lib/plaidSync";
 import { syncHoldingsForItem, syncInvestmentTransactionsForItem } from "@/lib/plaidInvestments";
 import { syncLiabilitiesForItem } from "@/lib/plaidLiabilities";
 import { runSyncStep, type SyncFailure } from "@/lib/syncSteps";
+import { recordAudit } from "@/lib/audit";
 
 const bodySchema = z.object({
   publicToken: z.string().min(1),
@@ -94,6 +95,14 @@ export async function POST(req: Request) {
       .returning({ id: schema.plaidItems.id });
 
     if (!item) throw new Error("Failed to insert plaid_items row");
+
+    await recordAudit({
+      userId,
+      action: "plaid_item.connected",
+      entity: "plaid_items",
+      entityId: item.id,
+      after: { institutionName, institutionId },
+    });
 
     const accountsRes = await plaidClient.accountsGet({ access_token: accessToken });
     for (const acct of accountsRes.data.accounts) {

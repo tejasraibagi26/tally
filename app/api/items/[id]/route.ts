@@ -4,6 +4,7 @@ import { eq, inArray } from "drizzle-orm";
 import { requireUserId } from "@/lib/session";
 import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
+import { recordAudit } from "@/lib/audit";
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
@@ -15,7 +16,12 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
   const { id } = await params;
   const [item] = await db
-    .select({ id: schema.plaidItems.id, userId: schema.plaidItems.userId, plaidItemId: schema.plaidItems.plaidItemId })
+    .select({
+      id: schema.plaidItems.id,
+      userId: schema.plaidItems.userId,
+      plaidItemId: schema.plaidItems.plaidItemId,
+      institutionName: schema.plaidItems.institutionName,
+    })
     .from(schema.plaidItems)
     .where(eq(schema.plaidItems.id, id))
     .limit(1);
@@ -50,6 +56,14 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   }
 
   await db.delete(schema.plaidItems).where(eq(schema.plaidItems.id, id));
+
+  await recordAudit({
+    userId,
+    action: "plaid_item.revoked",
+    entity: "plaid_items",
+    entityId: id,
+    before: { institutionName: item.institutionName, accountCount: accounts.length },
+  });
 
   return NextResponse.json({ ok: true });
 }

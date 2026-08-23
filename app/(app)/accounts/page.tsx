@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { StatusBadge, type Status } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LinkButton } from "@/components/plaid/LinkButton";
-import { DeleteItemButton } from "@/components/plaid/DeleteItemButton";
+import { ItemActionsMenu } from "@/components/plaid/ItemActionsMenu";
 import { SyncFailureToast } from "@/components/plaid/SyncFailureToast";
 import { MOCK_MODE } from "@/lib/config";
 import { freshnessStatus } from "@/lib/freshness";
@@ -138,7 +138,7 @@ export default async function AccountsPage() {
                       <span className="font-mono text-xs text-text-3">{relativeTime(item.lastSyncedAt)}</span>
                     </div>
                     <StatusBadge status={itemStatusToBadge(item.status, item.lastSyncedAt)} />
-                    <DeleteItemButton itemId={item.id} />
+                    <ItemActionsMenu itemId={item.id} institutionName={item.institutionName ?? "this institution"} />
                   </div>
 
                   {broken && (
