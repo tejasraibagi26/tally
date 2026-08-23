@@ -43,6 +43,13 @@
       "when": 1787461559794,
       "tag": "0005_flowery_cassandra_nova",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1787463427911,
+      "tag": "0006_busy_romulus",
+      "breakpoints": true
     }
   ]
 }

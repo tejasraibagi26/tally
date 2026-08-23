@@ -286,6 +286,12 @@ export const holdings = pgTable("holdings", {
   institutionPrice: bigint("institution_price", { mode: "number" }),
   institutionPriceAsOf: date("institution_price_as_of"),
   institutionValue: bigint("institution_value", { mode: "number" }).notNull(),
+  // The Holding's own iso_currency_code/unofficial_currency_code — what
+  // institutionPrice/institutionValue are actually denominated in. Distinct
+  // from securities.currency (the security's general trading currency);
+  // this app does no FX conversion, so every display of these numbers must
+  // show this alongside them rather than imply everything's one currency.
+  currency: text("currency").notNull().default("USD"),
   asOfDate: date("as_of_date").notNull(),
 }, (t) => ({
   uniq: uniqueIndex("holdings_acct_sec_date_idx").on(t.accountId, t.securityId, t.asOfDate),

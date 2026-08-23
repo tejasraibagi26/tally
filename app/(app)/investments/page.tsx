@@ -4,7 +4,7 @@ import { TrendingUp } from "lucide-react";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { formatCents, formatPercent } from "@/lib/money";
-import { latestHoldingsForUser, portfolioValue, allocationFor, unrealizedGain, portfolioSimpleReturn } from "@/lib/portfolio";
+import { latestHoldingsForUser, portfolioValue, allocationFor, unrealizedGain, portfolioSimpleReturn, currenciesInvolved } from "@/lib/portfolio";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 
@@ -21,6 +21,10 @@ export default async function InvestmentsPage() {
   const allocation = allocationFor(holdings);
   const gain = unrealizedGain(holdings);
   const simpleReturn = await portfolioSimpleReturn(userId);
+  // No FX conversion anywhere in this app — when holdings span more than one
+  // currency, the totals above are a mixed sum, not a real one, and need to
+  // say so rather than imply everything's comparable.
+  const mixedCurrencies = currenciesInvolved(holdings);
 
   const holdingsByAccount = new Map<string, typeof holdings>();
   for (const h of holdings) {
@@ -73,12 +77,12 @@ export default async function InvestmentsPage() {
       <Card className="flex flex-col sm:flex-row">
         <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Portfolio value</span>
-          <span className="font-display text-3xl text-text tabular">{formatCents(value)}</span>
+          <span className="font-display text-3xl text-text tabular money">{formatCents(value)}</span>
         </div>
         <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Unrealized gain</span>
           {gain.hasCostBasis ? (
-            <span className={`font-display text-3xl tabular ${gain.gain < 0 ? "text-negative" : "text-positive"}`}>
+            <span className={`font-display text-3xl tabular money ${gain.gain < 0 ? "text-negative" : "text-positive"}`}>
               {formatCents(gain.gain, { signed: true })}
             </span>
           ) : (
@@ -89,7 +93,7 @@ export default async function InvestmentsPage() {
         <div className="flex-1 p-[18px_24px] flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Simple return</span>
           {simpleReturn.hasHistory ? (
-            <span className={`font-display text-3xl tabular ${simpleReturn.value < 0 ? "text-negative" : "text-positive"}`}>
+            <span className={`font-display text-3xl tabular money ${simpleReturn.value < 0 ? "text-negative" : "text-positive"}`}>
               {formatCents(simpleReturn.value, { signed: true })}
             </span>
           ) : (
@@ -98,6 +102,12 @@ export default async function InvestmentsPage() {
           <span className="text-xs text-text-3">Value change minus contributions — not IRR/TWR</span>
         </div>
       </Card>
+
+      {mixedCurrencies.length > 1 && (
+        <p className="text-xs text-text-3 -mt-2">
+          Holdings span {mixedCurrencies.join(", ")} — totals above are a mixed sum, not currency-converted.
+        </p>
+      )}
 
       <Card>
         <CardHeader title="Allocation" />
@@ -119,33 +129,46 @@ export default async function InvestmentsPage() {
         </div>
       </Card>
 
-      {[...holdingsByAccount.entries()].map(([accountId, accountHoldings]) => (
-        <Card key={accountId} className="overflow-hidden">
-          <CardHeader title={accountHoldings[0]?.accountName ?? "Account"} meta={formatCents(accountHoldings.reduce((s, h) => s + h.institutionValue, 0))} />
-          <div className="overflow-x-auto">
-            <div className="grid grid-cols-[100px_minmax(180px,1fr)_120px_120px_140px] gap-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 min-w-[660px]">
-              <span>Ticker</span>
-              <span>Name</span>
-              <span className="text-right">Quantity</span>
-              <span className="text-right">Price</span>
-              <span className="text-right">Value</span>
-            </div>
-            {accountHoldings.map((h) => (
-              <div key={h.securityId} className="grid grid-cols-[100px_minmax(180px,1fr)_120px_120px_140px] gap-3 items-center px-4 py-2.5 border-b border-border last:border-b-0 min-w-[660px]">
-                <span className="font-mono text-[13.5px] text-text">{h.ticker ?? "—"}</span>
-                <span className="text-[15px] text-text truncate">{h.securityName ?? "Unknown security"}</span>
-                <span className="text-right text-[13.5px] text-text-2 tabular">{formatQuantity(h.quantity)}</span>
-                <span className="text-right text-[13.5px] text-text-2 tabular">
-                  {h.institutionValue != null && parseFloat(h.quantity) > 0
-                    ? formatCents(Math.round(h.institutionValue / parseFloat(h.quantity)))
-                    : "—"}
-                </span>
-                <span className="text-right text-[15px] text-text tabular">{formatCents(h.institutionValue)}</span>
+      {[...holdingsByAccount.entries()].map(([accountId, accountHoldings]) => {
+        const accountCurrencies = currenciesInvolved(accountHoldings);
+        return (
+          <Card key={accountId} className="overflow-hidden">
+            <CardHeader
+              title={accountHoldings[0]?.accountName ?? "Account"}
+              meta={
+                formatCents(accountHoldings.reduce((s, h) => s + h.institutionValue, 0)) +
+                (accountCurrencies.length > 1 ? " (mixed)" : ` ${accountCurrencies[0] ?? ""}`)
+              }
+              metaIsMoney
+            />
+            <div className="overflow-x-auto">
+              <div className="grid grid-cols-[100px_minmax(180px,1fr)_120px_120px_150px] gap-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 min-w-[680px]">
+                <span>Ticker</span>
+                <span>Name</span>
+                <span className="text-right">Quantity</span>
+                <span className="text-right">Price</span>
+                <span className="text-right">Value</span>
               </div>
-            ))}
-          </div>
-        </Card>
-      ))}
+              {accountHoldings.map((h) => (
+                <div key={h.securityId} className="grid grid-cols-[100px_minmax(180px,1fr)_120px_120px_150px] gap-3 items-center px-4 py-2.5 border-b border-border last:border-b-0 min-w-[680px]">
+                  <span className="font-mono text-[13.5px] text-text">{h.ticker ?? "—"}</span>
+                  <span className="text-[15px] text-text truncate">{h.securityName ?? "Unknown security"}</span>
+                  <span className="text-right text-[13.5px] text-text-2 tabular">{formatQuantity(h.quantity)}</span>
+                  <span className="text-right text-[13.5px] text-text-2 tabular money">
+                    {h.institutionValue != null && parseFloat(h.quantity) > 0
+                      ? formatCents(Math.round(h.institutionValue / parseFloat(h.quantity)))
+                      : "—"}
+                  </span>
+                  <div className="flex flex-col items-end gap-0.5">
+                    <span className="text-right text-[15px] text-text tabular money">{formatCents(h.institutionValue)}</span>
+                    <span className="text-right text-[11px] text-text-3">{h.currency}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        );
+      })}
 
       {activity.length > 0 && (
         <Card>
@@ -158,7 +181,7 @@ export default async function InvestmentsPage() {
                 {tx.ticker && <span className="text-text-3"> · {tx.ticker}</span>}
               </span>
               <span className="text-xs text-text-3">{tx.subtype}</span>
-              <span className={`text-[15px] tabular ${tx.amount < 0 ? "text-positive" : "text-text"}`}>{formatCents(tx.amount, { signed: true })}</span>
+              <span className={`text-[15px] tabular money ${tx.amount < 0 ? "text-positive" : "text-text"}`}>{formatCents(tx.amount, { signed: true })}</span>
             </div>
           ))}
         </Card>

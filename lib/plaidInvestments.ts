@@ -108,6 +108,14 @@ async function reconcileHoldings(securities: Security[], holdings: Holding[]): P
     const price = closePrice ?? h.institution_price;
     const priceAsOf = closePrice != null ? (securityByPlaidId.get(h.security_id)?.close_price_as_of ?? null) : (h.institution_price_as_of ?? null);
     const value = closePrice != null ? closePrice * h.quantity : h.institution_value;
+    // No FX conversion anywhere in this app — every consumer of
+    // institutionPrice/institutionValue needs this to know what they're
+    // actually looking at. Falls back to the security's own currency when
+    // substituting its close_price (§ above), since that price came from
+    // the security, not the (broken) holding-level report.
+    const currency = closePrice != null
+      ? (securityByPlaidId.get(h.security_id)?.iso_currency_code ?? securityByPlaidId.get(h.security_id)?.unofficial_currency_code ?? "USD")
+      : (h.iso_currency_code ?? h.unofficial_currency_code ?? "USD");
 
     const values = {
       accountId,
@@ -121,6 +129,7 @@ async function reconcileHoldings(securities: Security[], holdings: Holding[]): P
       institutionPrice: price != null ? Math.round(price * 100) : null,
       institutionPriceAsOf: priceAsOf,
       institutionValue: value != null ? Math.round(value * 100) : 0,
+      currency,
       asOfDate: today,
     };
 
@@ -135,6 +144,7 @@ async function reconcileHoldings(securities: Security[], holdings: Holding[]): P
           institutionPrice: values.institutionPrice,
           institutionPriceAsOf: values.institutionPriceAsOf,
           institutionValue: values.institutionValue,
+          currency: values.currency,
         },
       });
   }

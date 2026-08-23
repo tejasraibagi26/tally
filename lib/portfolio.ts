@@ -13,6 +13,12 @@ export interface HoldingRow {
   quantity: string; // numeric column — string-precision, format for display
   institutionValue: number; // cents
   costBasis: number | null; // cents
+  currency: string; // what institutionValue/costBasis are actually denominated in — this app does no FX conversion
+}
+
+/** No FX conversion anywhere in this app — a total spanning more than one currency is a mixed sum, not a real total, and every place that sums institutionValue needs to say so rather than imply it's all one currency. */
+export function currenciesInvolved(holdings: HoldingRow[]): string[] {
+  return [...new Set(holdings.map((h) => h.currency))].sort();
 }
 
 async function investmentAccountIds(userId: string): Promise<{ id: string; name: string }[]> {
@@ -44,6 +50,7 @@ export async function latestHoldingsForUser(userId: string): Promise<HoldingRow[
         quantity: schema.holdings.quantity,
         institutionValue: schema.holdings.institutionValue,
         costBasis: schema.holdings.costBasis,
+        currency: schema.holdings.currency,
         ticker: schema.securities.ticker,
         securityName: schema.securities.name,
         assetType: schema.securities.type,
@@ -65,6 +72,7 @@ export async function latestHoldingsForUser(userId: string): Promise<HoldingRow[
         quantity: h.quantity,
         institutionValue: h.institutionValue,
         costBasis: h.costBasis,
+        currency: h.currency,
       });
     }
   }

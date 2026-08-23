@@ -13,16 +13,19 @@ export function CardHeader({
   title,
   action,
   meta,
+  metaIsMoney,
 }: {
   title: string;
   action?: ReactNode;
   meta?: string;
+  /** Set when `meta` is a dollar figure, so the privacy toggle (components/PrivacyToggle.tsx) masks it — `.tabular` alone no longer triggers masking, since most `meta` usage (e.g. "Last 13 months") isn't money. */
+  metaIsMoney?: boolean;
 }) {
   return (
     <div className="flex items-baseline justify-between px-5 py-[18px] border-b border-border">
       <h2 className="m-0 text-xl font-semibold text-text">{title}</h2>
       <div className="flex items-center gap-3">
-        {meta && <span className="text-[13.5px] text-text-2 tabular">{meta}</span>}
+        {meta && <span className={cn("text-[13.5px] text-text-2 tabular", metaIsMoney && "money")}>{meta}</span>}
         {action}
       </div>
     </div>
