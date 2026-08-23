@@ -16,7 +16,7 @@ import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { NetWorthChart } from "@/components/charts/NetWorthChart";
 import { CashFlowChart } from "@/components/charts/CashFlowChart";
-import { CategorySpendSwitcher } from "@/components/charts/CategorySpendSwitcher";
+import { CategorySpendBar } from "@/components/charts/CategorySpendBar";
 import { BudgetMeterList } from "@/components/budgets/BudgetMeterList";
 import { LinkButton } from "@/components/plaid/LinkButton";
 import { MOCK_MODE } from "@/lib/config";
@@ -222,7 +222,7 @@ export default async function OverviewPage() {
         </Card>
         <Card className="lg:col-span-5 h-full">
           <CardHeader title="Where it went" />
-          <CategorySpendSwitcher
+          <CategorySpendBar
             rows={breakdown.map((b) => ({ ...b, href: `/transactions?category=${b.key}&from=${monthStart}&to=${monthEnd}&transfer=0&excluded=0` }))}
           />
         </Card>
