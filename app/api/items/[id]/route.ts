@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db, schema } from "@/db";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { requireUserId } from "@/lib/session";
 import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
@@ -34,6 +34,19 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
       const code = plaidErrorCode(err);
       console.error(`item/remove failed (${code ?? "unknown error"}), proceeding with local delete`);
     }
+  }
+
+  // recurring_streams.account_id has no ON DELETE cascade (a stream can
+  // reference a since-deleted account by design), so it blocks the
+  // plaid_items delete (which cascades to accounts) unless removed first.
+  const accounts = await db.select({ id: schema.accounts.id }).from(schema.accounts).where(eq(schema.accounts.itemId, id));
+  if (accounts.length > 0) {
+    await db.delete(schema.recurringStreams).where(
+      inArray(
+        schema.recurringStreams.accountId,
+        accounts.map((a) => a.id),
+      ),
+    );
   }
 
   await db.delete(schema.plaidItems).where(eq(schema.plaidItems.id, id));

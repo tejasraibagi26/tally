@@ -50,6 +50,10 @@ export async function POST(req: Request) {
     }
   }
 
+  // recurring_streams.account_id has no ON DELETE cascade (a stream can
+  // reference a since-deleted account by design), so it blocks the
+  // plaid_items delete (which cascades to accounts) unless removed first.
+  await db.delete(schema.recurringStreams).where(eq(schema.recurringStreams.userId, userId));
   await db.delete(schema.plaidItems).where(eq(schema.plaidItems.userId, userId));
   await db.delete(schema.netWorthSnapshots).where(eq(schema.netWorthSnapshots.userId, userId));
 
