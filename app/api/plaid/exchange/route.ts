@@ -8,6 +8,7 @@ import { plaidClient, encryptAccessToken, PLAID_COUNTRY_CODES } from "@/lib/plai
 import { syncTransactionsForItem } from "@/lib/plaidSync";
 import { syncHoldingsForItem, syncInvestmentTransactionsForItem } from "@/lib/plaidInvestments";
 import { syncLiabilitiesForItem } from "@/lib/plaidLiabilities";
+import { runSyncStep, type SyncFailure } from "@/lib/syncSteps";
 
 const bodySchema = z.object({
   publicToken: z.string().min(1),
@@ -135,24 +136,17 @@ export async function POST(req: Request) {
     // stays un-synced for that product until the next webhook/manual/cron
     // sync retries it. Holdings/liabilities/investment-tx no-op quietly for
     // institutions or account types that don't support them (§6.4, §6.5).
-    try {
-      await syncTransactionsForItem(item.id, "initial");
-    } catch (err) {
-      console.error(`Initial transaction sync failed for item ${item.id}, will retry on next sync`, err);
-    }
-    try {
-      await syncHoldingsForItem(item.id, "initial");
-      await syncInvestmentTransactionsForItem(item.id, "initial");
-    } catch (err) {
-      console.error(`Initial investments sync failed for item ${item.id}, will retry on next sync`, err);
-    }
-    try {
-      await syncLiabilitiesForItem(item.id, "initial");
-    } catch (err) {
-      console.error(`Initial liabilities sync failed for item ${item.id}, will retry on next sync`, err);
-    }
+    // Each step runs independently (runSyncStep) so one down product — e.g.
+    // Plaid returning INSTITUTION_NOT_RESPONDING for liabilities — doesn't
+    // skip the steps after it; `failures` goes back to the client so the UI
+    // can tell the user what didn't come through instead of staying silent.
+    const failures: SyncFailure[] = [];
+    await runSyncStep("transactions", () => syncTransactionsForItem(item.id, "initial"), failures);
+    await runSyncStep("holdings", () => syncHoldingsForItem(item.id, "initial"), failures);
+    await runSyncStep("investments", () => syncInvestmentTransactionsForItem(item.id, "initial"), failures);
+    await runSyncStep("liabilities", () => syncLiabilitiesForItem(item.id, "initial"), failures);
 
-    return NextResponse.json({ ok: true, itemId: item.id });
+    return NextResponse.json({ ok: true, itemId: item.id, institutionName, failures });
   } catch (err) {
     console.error("plaid/exchange failed", err);
     return NextResponse.json({ error: "Failed to link account" }, { status: 502 });

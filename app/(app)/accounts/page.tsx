@@ -9,6 +9,7 @@ import { StatusBadge, type Status } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LinkButton } from "@/components/plaid/LinkButton";
 import { DeleteItemButton } from "@/components/plaid/DeleteItemButton";
+import { SyncFailureToast } from "@/components/plaid/SyncFailureToast";
 import { MOCK_MODE } from "@/lib/config";
 import { freshnessStatus } from "@/lib/freshness";
 
@@ -66,6 +67,8 @@ export default async function AccountsPage() {
         </div>
         <LinkButton mode="create" label="Add account" mock={MOCK_MODE} />
       </div>
+
+      <SyncFailureToast />
 
       {items.length > 0 && (
         <Card className="flex flex-col sm:flex-row">
