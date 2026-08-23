@@ -103,26 +103,28 @@ async function reconcileHoldings(securities: Security[], holdings: Holding[]): P
     // position — Plaid's own security-level close_price (independent market
     // data, not institution-reported) is a far more trustworthy number than
     // a zero for a holding with real quantity, so prefer it in that case.
+    const security = securityByPlaidId.get(h.security_id);
     const institutionPriceLooksBroken = h.institution_price === 0 && h.quantity > 0;
-    const closePrice = institutionPriceLooksBroken ? securityByPlaidId.get(h.security_id)?.close_price : undefined;
+    const closePrice = institutionPriceLooksBroken ? security?.close_price : undefined;
     const price = closePrice ?? h.institution_price;
-    const priceAsOf = closePrice != null ? (securityByPlaidId.get(h.security_id)?.close_price_as_of ?? null) : (h.institution_price_as_of ?? null);
+    const priceAsOf = closePrice != null ? (security?.close_price_as_of ?? null) : (h.institution_price_as_of ?? null);
     const value = closePrice != null ? closePrice * h.quantity : h.institution_value;
     // No FX conversion anywhere in this app — every consumer of
     // institutionPrice/institutionValue needs this to know what they're
-    // actually looking at. Always trust the holding's own reported currency
-    // (what the institution says this position is actually held in) over
-    // the security's — Plaid's security-level close_price/currency comes
-    // from a separate general market-data reference that's observed to
-    // default to USD across the board, which would mislabel every non-USD
-    // holding the moment the close_price fallback above kicks in. Only fall
-    // back to the security's currency if the holding itself reports none.
-    const currency =
-      h.iso_currency_code ??
-      h.unofficial_currency_code ??
-      securityByPlaidId.get(h.security_id)?.iso_currency_code ??
-      securityByPlaidId.get(h.security_id)?.unofficial_currency_code ??
-      "USD";
+    // actually looking at, which means the currency label must match
+    // whichever number is actually being stored. Normally that's the
+    // holding's own reported currency (what the institution says this
+    // position is held in). But when institution_price is broken and we
+    // fell back to the security's close_price instead, that price is
+    // denominated in the SECURITY's currency, not necessarily the holding's
+    // — observed on Wealthsimple: a US stock (close_price in USD) held
+    // inside a CAD account gets iso_currency_code: "CAD" on the holding
+    // itself, which would silently relabel a USD figure as CAD and read as
+    // a much smaller CAD value than the position is actually worth. Only
+    // the institution's own currency is trustworthy when its own price is.
+    const currency = closePrice != null
+      ? (security?.iso_currency_code ?? security?.unofficial_currency_code ?? h.iso_currency_code ?? h.unofficial_currency_code ?? "USD")
+      : (h.iso_currency_code ?? h.unofficial_currency_code ?? security?.iso_currency_code ?? security?.unofficial_currency_code ?? "USD");
 
     const values = {
       accountId,
