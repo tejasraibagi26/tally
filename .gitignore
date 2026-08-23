@@ -31,3 +31,4 @@ Thumbs.db
 *.dump
 *.dump.gz
 .vercel
+.env*.local

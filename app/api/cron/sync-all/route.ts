@@ -1,20 +1,11 @@
 import { NextResponse } from "next/server";
-import { isAuthorizedCronRequest } from "@/lib/cronAuth";
+import { isAuthorizedCronRequest, isAuthorizedQStashRequest } from "@/lib/cronAuth";
 import { activeItemIds } from "@/lib/activeItems";
 import { syncTransactionsForItem } from "@/lib/plaidSync";
 
 export const maxDuration = 300;
 
-// Twice-daily cron safety net (vercel.json: 10:00 & 22:00 UTC, ≈6am/6pm
-// Eastern — Vercel Cron always runs in UTC, no per-project timezone, so this
-// drifts an hour across the DST boundary) — re-syncs transactions for every
-// item in case a webhook was missed. Runs items sequentially so one
-// slow/broken item can't starve the rest of their time budget.
-export async function GET(req: Request) {
-  if (!isAuthorizedCronRequest(req)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+async function runSyncAll(): Promise<{ itemCount: number; failed: number }> {
   const itemIds = await activeItemIds();
   let failed = 0;
   for (const itemId of itemIds) {
@@ -25,6 +16,28 @@ export async function GET(req: Request) {
       console.error(`Cron sync-all: transactions sync failed for item ${itemId}`, err);
     }
   }
+  return { itemCount: itemIds.length, failed };
+}
 
-  return NextResponse.json({ ok: true, itemCount: itemIds.length, failed });
+// Twice-daily safety net — re-syncs transactions for every item in case a
+// webhook was missed. Vercel Hobby caps native Cron Jobs at once/day, so
+// this runs on Upstash QStash instead (scripts/setup-qstash-schedule.ts),
+// which POSTs in with a signed request rather than Vercel's own cron
+// mechanism — see isAuthorizedQStashRequest. GET (Vercel-native, CRON_SECRET)
+// stays supported too in case a Pro plan ever re-adds it to vercel.json.
+export async function GET(req: Request) {
+  if (!isAuthorizedCronRequest(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const result = await runSyncAll();
+  return NextResponse.json({ ok: true, ...result });
+}
+
+export async function POST(req: Request) {
+  const rawBody = await req.text();
+  if (!(await isAuthorizedQStashRequest(req, rawBody))) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const result = await runSyncAll();
+  return NextResponse.json({ ok: true, ...result });
 }
