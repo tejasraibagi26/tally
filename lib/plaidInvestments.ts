@@ -80,15 +80,23 @@ export async function syncHoldingsForItem(itemId: string, trigger: SyncTrigger):
     // resolved. Raw values straight from Plaid, before reconcileHoldings'
     // own null-guarding/rounding touches them.
     if (item.institutionName?.toLowerCase().includes("wealthsimple")) {
+      const securityById = new Map(res.data.securities.map((s) => [s.security_id, s]));
       console.log(
         `[debug-holdings] item ${itemId} (${item.institutionName}): ${res.data.holdings.length} holding(s)`,
-        res.data.holdings.slice(0, 10).map((h) => ({
-          security_id: h.security_id,
-          quantity: h.quantity,
-          institution_price: h.institution_price,
-          institution_price_as_of: h.institution_price_as_of,
-          institution_value: h.institution_value,
-        })),
+        res.data.holdings.slice(0, 10).map((h) => {
+          const sec = securityById.get(h.security_id);
+          return {
+            ticker: sec?.ticker_symbol,
+            name: sec?.name,
+            type: sec?.type,
+            quantity: h.quantity,
+            institution_price: h.institution_price,
+            institution_price_as_of: h.institution_price_as_of,
+            institution_value: h.institution_value,
+            security_close_price: sec?.close_price,
+            security_close_price_as_of: sec?.close_price_as_of,
+          };
+        }),
       );
     }
 
