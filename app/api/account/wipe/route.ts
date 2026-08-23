@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
-import { plaidClient, getAccessToken } from "@/lib/plaid";
+import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
 
 const bodySchema = z.object({ currentPassword: z.string().min(1) });
@@ -45,7 +45,8 @@ export async function POST(req: Request) {
       const accessToken = await getAccessToken(item.id);
       await plaidClient.itemRemove({ access_token: accessToken });
     } catch (err) {
-      console.error(`item/remove failed during wipe for item ${item.id}, continuing`, err);
+      const code = plaidErrorCode(err);
+      console.error(`item/remove failed during wipe for item ${item.id} (${code ?? "unknown error"}), continuing`);
     }
   }
 

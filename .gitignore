@@ -30,3 +30,4 @@ Thumbs.db
 # Database dumps and local artifacts
 *.dump
 *.dump.gz
+.vercel

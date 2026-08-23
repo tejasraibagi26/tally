@@ -75,7 +75,7 @@ export async function syncHoldingsForItem(itemId: string, trigger: SyncTrigger):
   } catch (err) {
     const code = plaidErrorCode(err);
     if (code && NOT_SUPPORTED_CODES.has(code)) return; // not a failure — nothing to sync here (§6.4)
-    console.error(`Holdings sync failed for item ${itemId}`, err);
+    console.error(`Holdings sync failed for item ${itemId} (${code ?? "unknown error"})`);
     await recordSyncRun(itemId, "holdings", trigger, startedAt, { error: err instanceof Error ? err.message : "unknown error" });
     throw err; // rethrow so the queue worker retries (§8.2) — only the "not supported" branch above is a true no-op
   }
@@ -161,7 +161,7 @@ export async function syncInvestmentTransactionsForItem(itemId: string, trigger:
   } catch (err) {
     const code = plaidErrorCode(err);
     if (code && NOT_SUPPORTED_CODES.has(code)) return; // not a failure — nothing to sync here (§6.4)
-    console.error(`Investment transaction sync failed for item ${itemId}`, err);
+    console.error(`Investment transaction sync failed for item ${itemId} (${code ?? "unknown error"})`);
     await recordSyncRun(itemId, "inv_tx", trigger, startedAt, { error: err instanceof Error ? err.message : "unknown error" });
     throw err; // rethrow so the queue worker retries (§8.2)
   }

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
 import { requireUserId } from "@/lib/session";
-import { plaidClient, getAccessToken } from "@/lib/plaid";
+import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -31,7 +31,8 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     } catch (err) {
       // Item may already be revoked/dead on Plaid's side — still proceed to
       // remove our local copy so the user isn't stuck with a zombie connection.
-      console.error("item/remove failed, proceeding with local delete", err);
+      const code = plaidErrorCode(err);
+      console.error(`item/remove failed (${code ?? "unknown error"}), proceeding with local delete`);
     }
   }
 
