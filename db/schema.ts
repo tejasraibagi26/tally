@@ -354,6 +354,15 @@ export const netWorthSnapshots = pgTable("net_worth_snapshots", {
   uniq: uniqueIndex("net_worth_user_date_idx").on(t.userId, t.asOfDate),
 }));
 
+export const fireSettings = pgTable("fire_settings", {
+  userId: uuid("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  swr: numeric("swr", { precision: 5, scale: 4 }).notNull(), // e.g. 0.0400
+  expectedReturn: numeric("expected_return", { precision: 5, scale: 4 }).notNull(),
+  annualExpensesOverride: bigint("annual_expenses_override", { mode: "number" }),
+  monthlyContributionOverride: bigint("monthly_contribution_override", { mode: "number" }),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const webhookEvents = pgTable("webhook_events", {
   id: uuid("id").primaryKey().defaultRandom(),
   provider: text("provider").notNull().default("plaid"),

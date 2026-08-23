@@ -40,6 +40,7 @@ function assetItems(counts: NavCounts): NavItem[] {
   return [
     { href: "/accounts", label: "Accounts", meta: String(counts.accounts) },
     { href: "/investments", label: "Investments" },
+    { href: "/fire", label: "FIRE calculator" },
     { href: "/cards", label: "Credit cards", meta: String(counts.creditCards) },
   ];
 }
