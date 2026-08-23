@@ -1,6 +1,6 @@
 import { eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
+import { plaidClient, getAccessToken, plaidErrorCode, institutionSupportsProduct } from "@/lib/plaid";
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
 import { seedMockHoldingsForItem, seedMockInvestmentTransactionsForItem } from "@/lib/mock/seedInvestments";
 import { recordSyncRun } from "@/lib/syncRuns";
@@ -68,10 +68,10 @@ export async function syncHoldingsForItem(itemId: string, trigger: SyncTrigger):
       return;
     }
 
-    // Known up front from the item's own consented products (captured at
-    // link time) — skip the call entirely rather than spend an API request
-    // just to have Plaid reject it with PRODUCTS_NOT_SUPPORTED every sync.
-    if (!item.consentedProducts.includes("investments")) return;
+    // Skip the call entirely when the institution is known not to support
+    // investments, rather than spend an API request every sync just to have
+    // Plaid reject it with PRODUCTS_NOT_SUPPORTED (see institutionSupportsProduct).
+    if (!(await institutionSupportsProduct(item.institutionId, "investments"))) return;
 
     const accessToken = await getAccessToken(itemId);
     const res = await plaidClient.investmentsHoldingsGet({ access_token: accessToken });
@@ -141,7 +141,7 @@ export async function syncInvestmentTransactionsForItem(itemId: string, trigger:
       return;
     }
 
-    if (!item.consentedProducts.includes("investments")) return;
+    if (!(await institutionSupportsProduct(item.institutionId, "investments"))) return;
 
     const accessToken = await getAccessToken(itemId);
     const endDate = new Date().toISOString().slice(0, 10);

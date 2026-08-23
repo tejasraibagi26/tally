@@ -74,6 +74,18 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
       hasMore = res.data.has_more;
     }
 
+    // TEMP DEBUG — remove once the TD sync question is resolved. Confirms
+    // whether Plaid is actually returning transactions for this item before
+    // reconcileTransactions has a chance to map/filter/drop any of them.
+    if (item.institutionName?.toLowerCase().includes("td")) {
+      console.log(`[debug-td] item ${itemId} (${item.institutionName}): cursorIn=${item.transactionsCursor ?? "none"} cursorOut=${cursor}`, {
+        added: added.length,
+        modified: modified.length,
+        removed: removed.length,
+        sample: added.slice(0, 5).map((t) => ({ name: t.name, amount: t.amount, date: t.date, account_id: t.account_id, pending: t.pending })),
+      });
+    }
+
     const result = await reconcileTransactions(item.userId, itemId, added, modified, removed, cursor);
 
     // Best-effort enrichment: categorization/transfer-pairing failures must

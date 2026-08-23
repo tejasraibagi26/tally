@@ -1,6 +1,6 @@
 import { eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
+import { plaidClient, getAccessToken, plaidErrorCode, institutionSupportsProduct } from "@/lib/plaid";
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
 import { seedMockLiabilitiesForItem } from "@/lib/mock/seedLiabilities";
 import { recordSyncRun } from "@/lib/syncRuns";
@@ -23,10 +23,10 @@ export async function syncLiabilitiesForItem(itemId: string, trigger: SyncTrigge
       return;
     }
 
-    // Known up front from the item's own consented products (captured at
-    // link time) — skip the call entirely rather than spend an API request
-    // just to have Plaid reject it with PRODUCTS_NOT_SUPPORTED every sync.
-    if (!item.consentedProducts.includes("liabilities")) return;
+    // Skip the call entirely when the institution is known not to support
+    // liabilities, rather than spend an API request every sync just to have
+    // Plaid reject it with PRODUCTS_NOT_SUPPORTED (see institutionSupportsProduct).
+    if (!(await institutionSupportsProduct(item.institutionId, "liabilities"))) return;
 
     const accessToken = await getAccessToken(itemId);
     const res = await plaidClient.liabilitiesGet({ access_token: accessToken });

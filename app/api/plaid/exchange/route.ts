@@ -59,6 +59,7 @@ export async function POST(req: Request) {
             primaryColor: inst.data.institution.primary_color ?? null,
             url: inst.data.institution.url ?? null,
             oauth: inst.data.institution.oauth,
+            products: inst.data.institution.products,
           })
           .onConflictDoUpdate({
             target: schema.institutions.id,
@@ -66,6 +67,7 @@ export async function POST(req: Request) {
               name: inst.data.institution.name,
               logoBase64: inst.data.institution.logo ?? null,
               primaryColor: inst.data.institution.primary_color ?? null,
+              products: inst.data.institution.products,
             },
           });
       } catch (err) {

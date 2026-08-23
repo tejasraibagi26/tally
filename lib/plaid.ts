@@ -66,3 +66,25 @@ export function plaidErrorCode(err: unknown): string | undefined {
   }
   return undefined;
 }
+
+/**
+ * Whether an item's institution is known to support a product, for skipping
+ * a sync call that would just get rejected. `institutions.products` (cached
+ * from Plaid's institutions/get_by_id `products` field, not the item's own
+ * consentedProducts — Plaid grants consent for a product regardless of
+ * whether the institution can actually fulfill it, only rejecting it at
+ * call time with PRODUCTS_NOT_SUPPORTED) is the source of truth here.
+ *
+ * Fails open (true) whenever we don't have a confident "no" — no
+ * institutionId, no cached row, or an empty/not-yet-backfilled products
+ * list — so an institution we haven't looked up yet still gets synced
+ * normally; NOT_SUPPORTED_CODES in the sync functions remains the fallback
+ * for a genuine rejection. Only skips when the institution's products list
+ * is populated and positively does not include the product.
+ */
+export async function institutionSupportsProduct(institutionId: string | null, product: string): Promise<boolean> {
+  if (!institutionId) return true;
+  const [inst] = await db.select({ products: schema.institutions.products }).from(schema.institutions).where(eq(schema.institutions.id, institutionId)).limit(1);
+  if (!inst || inst.products.length === 0) return true;
+  return inst.products.includes(product);
+}

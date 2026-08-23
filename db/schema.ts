@@ -113,6 +113,13 @@ export const institutions = pgTable("institutions", {
   primaryColor: text("primary_color"),
   url: text("url"),
   oauth: boolean("oauth").notNull().default(false),
+  // What this institution actually supports (Plaid's institutions/get_by_id
+  // `products` field) — distinct from an item's consentedProducts, which
+  // reflects what the user was asked to consent to, not what the
+  // institution can actually fulfill. Plaid still grants consent for a
+  // product an institution then rejects at call time with
+  // PRODUCTS_NOT_SUPPORTED, so this is the field sync gating should use.
+  products: jsonb("products").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
 });
 
 export const accounts = pgTable("accounts", {
