@@ -157,7 +157,7 @@ export default async function OverviewPage() {
                 <span className="text-text truncate">{item.institutionName ?? "Unknown"}</span>
                 <span className={cn("inline-flex items-center gap-1.5", item.status === "healthy" ? "text-positive" : "text-negative")}>
                   {item.status === "healthy" && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-positive flex-none" style={{ animation: "float-dot 1.8s ease-in-out infinite" }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-positive flex-none" style={{ animation: "fade-dot 1.8s ease-in-out infinite" }} />
                   )}
                   {item.status === "healthy" ? "Healthy" : "Needs attention"}
                 </span>

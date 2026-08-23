@@ -8,6 +8,7 @@ export interface CreditCardRow {
   mask: string | null;
   currentBalance: number;
   creditLimit: number | null;
+  creditLimitIsManual: boolean;
   liability: {
     aprs: unknown;
     isOverdue: boolean;
@@ -29,6 +30,7 @@ export async function creditCardsForUser(userId: string): Promise<CreditCardRow[
       mask: schema.accounts.mask,
       currentBalance: schema.accounts.currentBalance,
       creditLimit: schema.accounts.creditLimit,
+      creditLimitIsManual: schema.accounts.creditLimitIsManual,
       liability: schema.liabilitiesCredit,
     })
     .from(schema.accounts)
@@ -41,6 +43,7 @@ export async function creditCardsForUser(userId: string): Promise<CreditCardRow[
     mask: r.mask,
     currentBalance: r.currentBalance ?? 0,
     creditLimit: r.creditLimit,
+    creditLimitIsManual: r.creditLimitIsManual,
     liability: r.liability,
   }));
 }

@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { LogoMark } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { PrivacyToggle } from "@/components/PrivacyToggle";
 import { SignOutButton } from "@/components/nav/SignOutButton";
 
 /**
@@ -121,6 +122,11 @@ export function SideNav({
 
       <div className="mt-auto flex flex-col gap-3">
         <div className="h-px bg-border" />
+
+        <div className="flex items-center justify-between px-2">
+          <span className="text-[13.5px] text-text-2">Hide amounts</span>
+          <PrivacyToggle />
+        </div>
 
         <div className="flex items-center justify-between px-2">
           <span className="text-[13.5px] text-text-2">Theme</span>

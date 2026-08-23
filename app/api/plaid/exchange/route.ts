@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { sql } from "drizzle-orm";
 import { CountryCode } from "plaid";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
@@ -93,6 +94,7 @@ export async function POST(req: Request) {
 
     const accountsRes = await plaidClient.accountsGet({ access_token: accessToken });
     for (const acct of accountsRes.data.accounts) {
+      const limitCents = acct.balances.limit != null ? Math.round(acct.balances.limit * 100) : null;
       await db
         .insert(schema.accounts)
         .values({
@@ -107,7 +109,7 @@ export async function POST(req: Request) {
           currency: acct.balances.iso_currency_code ?? "USD",
           currentBalance: acct.balances.current != null ? Math.round(acct.balances.current * 100) : null,
           availableBalance: acct.balances.available != null ? Math.round(acct.balances.available * 100) : null,
-          creditLimit: acct.balances.limit != null ? Math.round(acct.balances.limit * 100) : null,
+          creditLimit: limitCents,
           balanceAsOf: new Date(),
         })
         .onConflictDoUpdate({
@@ -115,7 +117,14 @@ export async function POST(req: Request) {
           set: {
             currentBalance: acct.balances.current != null ? Math.round(acct.balances.current * 100) : null,
             availableBalance: acct.balances.available != null ? Math.round(acct.balances.available * 100) : null,
-            creditLimit: acct.balances.limit != null ? Math.round(acct.balances.limit * 100) : null,
+            // Re-linking an existing account: Plaid reporting a limit wins;
+            // Plaid reporting nothing preserves a manually-entered one — see
+            // the matching guard in lib/plaidBalances.ts.
+            creditLimit:
+              limitCents != null
+                ? limitCents
+                : sql`case when ${schema.accounts.creditLimitIsManual} then ${schema.accounts.creditLimit} else null end`,
+            creditLimitIsManual: limitCents != null ? false : sql`${schema.accounts.creditLimitIsManual}`,
             balanceAsOf: new Date(),
           },
         });

@@ -100,7 +100,14 @@ export default async function AccountsPage() {
           {items.map((item, index) => {
             const itemAccounts = accountsByItem.get(item.id) ?? [];
             const broken = item.status === "login_required" || item.status === "revoked" || item.status === "error";
-            const total = itemAccounts.reduce((sum, a) => sum + (a.currentBalance ?? 0), 0);
+            // currentBalance is stored positive for every account type — a credit
+            // card's/loan's balance is what's owed, not held — so it must be
+            // subtracted here the same way totalLiabilities is above, or a card
+            // pairing a checking account with a credit card overstates its total.
+            const total = itemAccounts.reduce((sum, a) => {
+              const signed = a.type === "credit" || a.type === "loan" ? -(a.currentBalance ?? 0) : (a.currentBalance ?? 0);
+              return sum + signed;
+            }, 0);
 
             // A lone card (only connection) or a trailing odd-one-out (3+
             // connections, unpaired last row) sizes to its own content. Every

@@ -36,11 +36,18 @@ export const metadata: Metadata = {
 // anything, mirroring the same storage key and fallback lib/theme.ts uses.
 const THEME_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("tally-theme");var t=s==="light"||s==="dark"?s:(window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.setAttribute("data-theme",t);}catch(e){}})();`;
 
+// Same reasoning as THEME_INIT_SCRIPT, but the stakes are the opposite way
+// round: if this ran late, every dollar figure would flash on screen for a
+// beat before blurring — defeating the point of a privacy toggle — so it
+// must run synchronously before first paint too.
+const PRIVACY_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("tally-hide-amounts");document.documentElement.setAttribute("data-hide-amounts",s==="true"?"true":"false");}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="light" suppressHydrationWarning>
+    <html lang="en" data-theme="light" data-hide-amounts="false" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: PRIVACY_INIT_SCRIPT }} />
       </head>
       <body
         className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} font-ui antialiased`}

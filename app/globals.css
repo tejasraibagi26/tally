@@ -136,6 +136,19 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* Privacy toggle (components/PrivacyToggle.tsx): every dollar figure in the
+   app is rendered inside a .tabular span/div (font-variant-numeric is applied
+   universally to numeric display, not just money), so that's the one marker
+   available to blur everything at once without touching each call site.
+   Scoped to span/div only — deliberately excludes <input> so a budget/rule
+   amount field stays legible while the user is actively editing it. */
+[data-hide-amounts="true"] span.tabular,
+[data-hide-amounts="true"] div.tabular {
+  filter: blur(6px);
+  user-select: none;
+  transition: filter 150ms ease-out;
+}
+
 /* DESIGN.md §11: panel/sheet motion, 220ms cubic-bezier(.32,.72,0,1) — used by components/ui/SidePanel.tsx */
 @keyframes slide-in-right {
   from {
@@ -172,6 +185,15 @@ body {
   }
   50% {
     transform: translateY(-8px);
+  }
+}
+
+@keyframes fade-dot {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
   }
 }
 

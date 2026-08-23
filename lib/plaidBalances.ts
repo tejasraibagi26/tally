@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { plaidClient, getAccessToken } from "@/lib/plaid";
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
@@ -23,12 +23,20 @@ export async function refreshAccountBalances(itemId: string, trigger: SyncTrigge
     const balances = await plaidClient.accountsBalanceGet({ access_token: accessToken });
 
     for (const acct of balances.data.accounts) {
+      const limitCents = acct.balances.limit != null ? Math.round(acct.balances.limit * 100) : null;
       await db
         .update(schema.accounts)
         .set({
           currentBalance: acct.balances.current != null ? Math.round(acct.balances.current * 100) : null,
           availableBalance: acct.balances.available != null ? Math.round(acct.balances.available * 100) : null,
-          creditLimit: acct.balances.limit != null ? Math.round(acct.balances.limit * 100) : null,
+          // Plaid reporting a limit always wins (and clears the manual flag —
+          // Plaid is authoritative again); Plaid reporting nothing preserves
+          // whatever the user entered by hand instead of nulling it out.
+          creditLimit:
+            limitCents != null
+              ? limitCents
+              : sql`case when ${schema.accounts.creditLimitIsManual} then ${schema.accounts.creditLimit} else null end`,
+          creditLimitIsManual: limitCents != null ? false : sql`${schema.accounts.creditLimitIsManual}`,
           balanceAsOf: new Date(),
         })
         .where(eq(schema.accounts.plaidAccountId, acct.account_id));

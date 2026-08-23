@@ -6,6 +6,7 @@ import { creditCardsForUser, utilizationFor } from "@/lib/liabilities";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { CreditLimitEditor } from "@/components/cards/CreditLimitEditor";
 
 const APR_TYPE_LABEL: Record<string, string> = {
   purchase_apr: "Purchase APR",
@@ -27,6 +28,9 @@ export default async function CardsPage() {
   const userId = await requireUserId();
   const cards = await creditCardsForUser(userId);
   const utilization = utilizationFor(cards);
+  // utilization.totalBalance is scoped to the ratio (only cards with a known
+  // limit) — the summary tile needs every card's balance, limit or not.
+  const totalBalance = cards.reduce((sum, c) => sum + c.currentBalance, 0);
 
   if (cards.length === 0) {
     return (
@@ -55,7 +59,7 @@ export default async function CardsPage() {
       <Card className="flex flex-col sm:flex-row">
         <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Total balance</span>
-          <span className="font-display text-3xl text-negative tabular">{formatCents(utilization.totalBalance)}</span>
+          <span className="font-display text-3xl text-negative tabular">{formatCents(totalBalance)}</span>
         </div>
         <div className="flex-1 p-[18px_24px] flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Overall utilization</span>
@@ -95,8 +99,11 @@ export default async function CardsPage() {
                 <div className="flex flex-col gap-1">
                   <span className="text-xs text-text-3 uppercase tracking-wide">Utilization</span>
                   <span className="text-[19px] text-text tabular">
-                    {cardUtilization != null ? formatPercent(cardUtilization) : "Unknown (no limit reported)"}
+                    {cardUtilization != null ? formatPercent(cardUtilization) : "No limit reported"}
                   </span>
+                  {(card.creditLimit == null || card.creditLimitIsManual) && (
+                    <CreditLimitEditor accountId={card.accountId} creditLimitIsManual={card.creditLimitIsManual} />
+                  )}
                 </div>
               </div>
 

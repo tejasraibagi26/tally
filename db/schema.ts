@@ -131,6 +131,10 @@ export const accounts = pgTable("accounts", {
   currentBalance: bigint("current_balance", { mode: "number" }),
   availableBalance: bigint("available_balance", { mode: "number" }),
   creditLimit: bigint("credit_limit", { mode: "number" }),
+  // True once the user has entered a limit by hand (Plaid didn't report
+  // one). Balance-refresh syncs must not null this back out just because
+  // Plaid still has nothing — see lib/plaidBalances.ts.
+  creditLimitIsManual: boolean("credit_limit_is_manual").notNull().default(false),
   balanceAsOf: timestamp("balance_as_of", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({
