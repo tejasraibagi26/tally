@@ -75,31 +75,6 @@ export async function syncHoldingsForItem(itemId: string, trigger: SyncTrigger):
 
     const accessToken = await getAccessToken(itemId);
     const res = await plaidClient.investmentsHoldingsGet({ access_token: accessToken });
-
-    // TEMP DEBUG — remove once the Wealthsimple $0 holdings question is
-    // resolved. Raw values straight from Plaid, before reconcileHoldings'
-    // own null-guarding/rounding touches them.
-    if (item.institutionName?.toLowerCase().includes("wealthsimple")) {
-      const securityById = new Map(res.data.securities.map((s) => [s.security_id, s]));
-      console.log(
-        `[debug-holdings] item ${itemId} (${item.institutionName}): ${res.data.holdings.length} holding(s)`,
-        res.data.holdings.slice(0, 10).map((h) => {
-          const sec = securityById.get(h.security_id);
-          return {
-            ticker: sec?.ticker_symbol,
-            name: sec?.name,
-            type: sec?.type,
-            quantity: h.quantity,
-            institution_price: h.institution_price,
-            institution_price_as_of: h.institution_price_as_of,
-            institution_value: h.institution_value,
-            security_close_price: sec?.close_price,
-            security_close_price_as_of: sec?.close_price_as_of,
-          };
-        }),
-      );
-    }
-
     await reconcileHoldings(res.data.securities, res.data.holdings);
     await recordSyncRun(itemId, "holdings", trigger, startedAt, { added: res.data.holdings.length });
   } catch (err) {
@@ -115,6 +90,7 @@ async function reconcileHoldings(securities: Security[], holdings: Holding[]): P
   if (holdings.length === 0) return;
   const securityIdByPlaidId = await upsertSecurities(securities);
   const acctIdByPlaidId = await accountIdsByPlaidId([...new Set(holdings.map((h) => h.account_id))]);
+  const securityByPlaidId = new Map(securities.map((s) => [s.security_id, s]));
   const today = new Date().toISOString().slice(0, 10);
 
   for (const h of holdings) {
@@ -122,30 +98,43 @@ async function reconcileHoldings(securities: Security[], holdings: Holding[]): P
     const securityId = securityIdByPlaidId.get(h.security_id);
     if (!accountId || !securityId) continue;
 
+    // Observed on Wealthsimple: institution_price/institution_value come back
+    // as a literal 0 (not null) with a populated as_of date for a real
+    // position — Plaid's own security-level close_price (independent market
+    // data, not institution-reported) is a far more trustworthy number than
+    // a zero for a holding with real quantity, so prefer it in that case.
+    const institutionPriceLooksBroken = h.institution_price === 0 && h.quantity > 0;
+    const closePrice = institutionPriceLooksBroken ? securityByPlaidId.get(h.security_id)?.close_price : undefined;
+    const price = closePrice ?? h.institution_price;
+    const priceAsOf = closePrice != null ? (securityByPlaidId.get(h.security_id)?.close_price_as_of ?? null) : (h.institution_price_as_of ?? null);
+    const value = closePrice != null ? closePrice * h.quantity : h.institution_value;
+
+    const values = {
+      accountId,
+      securityId,
+      quantity: String(h.quantity),
+      costBasis: h.cost_basis != null ? Math.round(h.cost_basis * 100) : null,
+      // The Plaid SDK types institution_price/institution_value as non-nullable
+      // `number`, but the live API can send `null` (e.g. no price fetched yet
+      // for a newly-linked security) — guard explicitly rather than let
+      // `null * 100` silently coerce to a misleading stored $0.00.
+      institutionPrice: price != null ? Math.round(price * 100) : null,
+      institutionPriceAsOf: priceAsOf,
+      institutionValue: value != null ? Math.round(value * 100) : 0,
+      asOfDate: today,
+    };
+
     await db
       .insert(schema.holdings)
-      .values({
-        accountId,
-        securityId,
-        quantity: String(h.quantity),
-        costBasis: h.cost_basis != null ? Math.round(h.cost_basis * 100) : null,
-        // The Plaid SDK types institution_price/institution_value as non-nullable
-        // `number`, but the live API can send `null` (e.g. no price fetched yet
-        // for a newly-linked security) — guard explicitly rather than let
-        // `null * 100` silently coerce to a misleading stored $0.00.
-        institutionPrice: h.institution_price != null ? Math.round(h.institution_price * 100) : null,
-        institutionPriceAsOf: h.institution_price_as_of ?? null,
-        institutionValue: h.institution_value != null ? Math.round(h.institution_value * 100) : 0,
-        asOfDate: today,
-      })
+      .values(values)
       .onConflictDoUpdate({
         target: [schema.holdings.accountId, schema.holdings.securityId, schema.holdings.asOfDate],
         set: {
-          quantity: String(h.quantity),
-          costBasis: h.cost_basis != null ? Math.round(h.cost_basis * 100) : null,
-          institutionPrice: h.institution_price != null ? Math.round(h.institution_price * 100) : null,
-          institutionPriceAsOf: h.institution_price_as_of ?? null,
-          institutionValue: h.institution_value != null ? Math.round(h.institution_value * 100) : 0,
+          quantity: values.quantity,
+          costBasis: values.costBasis,
+          institutionPrice: values.institutionPrice,
+          institutionPriceAsOf: values.institutionPriceAsOf,
+          institutionValue: values.institutionValue,
         },
       });
   }
