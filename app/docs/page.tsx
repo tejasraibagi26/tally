@@ -12,35 +12,33 @@ function readLicenseText(): string {
 
 const NAV: DocsNavItem[] = [
   { id: "requirements", label: "Requirements" },
+  { id: "environment", label: "Environment variables" },
   {
-    id: "quick-start",
-    label: "Quick start",
+    id: "production",
+    label: "Deploying to production",
     children: [
-      { id: "quick-start-postgres", label: "Start Postgres" },
-      { id: "quick-start-env", label: "Configure environment" },
-      { id: "quick-start-install", label: "Install, migrate, seed" },
-      { id: "quick-start-run", label: "Run the app" },
-      { id: "quick-start-worker", label: "Run the worker" },
+      { id: "production-plaid", label: "Plaid production access" },
+      { id: "production-infra", label: "Database, cron, and queue" },
+      { id: "production-env", label: "Environment differences" },
+      { id: "production-security", label: "Transport and secrets" },
     ],
   },
-  { id: "environment", label: "Environment variables" },
+  {
+    id: "local-dev",
+    label: "Local development",
+    children: [
+      { id: "local-dev-postgres", label: "Start Postgres" },
+      { id: "local-dev-env", label: "Configure environment" },
+      { id: "local-dev-install", label: "Install, migrate, seed" },
+      { id: "local-dev-run", label: "Run the app" },
+    ],
+  },
   {
     id: "mock-mode",
     label: "Mock mode vs. live Plaid",
     children: [
       { id: "mock-mode-how", label: "How mock mode works" },
       { id: "mock-mode-live", label: "Switching to Sandbox" },
-    ],
-  },
-  { id: "worker", label: "Running the worker" },
-  {
-    id: "production",
-    label: "Deploying to production",
-    children: [
-      { id: "production-plaid", label: "Plaid production access" },
-      { id: "production-env", label: "Environment differences" },
-      { id: "production-process", label: "Running the app and worker" },
-      { id: "production-security", label: "Transport and secrets" },
     ],
   },
   { id: "backups", label: "Backups" },
@@ -62,7 +60,8 @@ const ENV_VARS: { name: string; required: boolean; description: string }[] = [
   { name: "PLAID_REDIRECT_URI", required: false, description: "Required for OAuth institutions. Must be registered in the Plaid dashboard first, separately per environment." },
   { name: "PLAID_WEBHOOK_URL", required: false, description: "Where Plaid pushes sync events. Requires a public HTTPS URL (a tunnel in local development)." },
   { name: "MASTER_KEY", required: true, description: "32-byte base64 key. Generate with openssl rand -base64 32. Encrypts Plaid access tokens at rest." },
-  { name: "CRON_TZ", required: false, description: "Timezone for the worker's cron schedules. Defaults to America/New_York." },
+  { name: "CRON_SECRET", required: true, description: "Authorizes the nightly Vercel Cron Job (app/api/cron/nightly) and the Upstash QStash-triggered sync (app/api/cron/sync-all). Generate with openssl rand -base64 32." },
+  { name: "QSTASH_TOKEN / QSTASH_URL / QSTASH_CURRENT_SIGNING_KEY / QSTASH_NEXT_SIGNING_KEY", required: true, description: "Auto-provisioned by installing the Upstash QStash integration from the Vercel Marketplace — powers the twice-daily transactions safety net, since Vercel's own Cron Jobs are capped at once/day on the Hobby plan." },
   { name: "ADMIN_EMAIL", required: true, description: "Used once by npm run seed:user to create the single admin login." },
   { name: "ADMIN_PASSWORD", required: true, description: "Used once by npm run seed:user. At least 8 characters." },
 ];
@@ -128,67 +127,23 @@ export default function DocsPage() {
               <Link href="/docs#license" className="text-brand hover:underline">
                 Functional Source License
               </Link>
-              . You provide your own Postgres database and Plaid account, and the application runs entirely on
-              infrastructure you control. A working Sandbox instance takes about ten minutes to bring up from a fresh
-              clone.
+              . This is a self-hosted app: you provide your own Postgres database and Plaid account, and it runs
+              entirely on infrastructure you control. <strong className="text-text font-medium">Deploying to production</strong> below
+              is the primary path — a real instance connected to your own accounts. Local development with mock data
+              is for iterating on the code itself, not a substitute for actually standing up an instance.
             </p>
           </div>
 
           <Section id="requirements" title="Requirements">
             <ul className="list-disc pl-5 flex flex-col gap-1.5">
-              <li>Node.js 20 or later, and npm</li>
-              <li>PostgreSQL 16, provisioned through the included Docker Compose file or an existing local install</li>
+              <li>A Vercel account (or any host that runs a standard Next.js app) and a Postgres database — this repo's Marketplace integrations provision both Neon Postgres and Upstash QStash automatically</li>
               <li>
-                A free <span className="text-text">Plaid Sandbox account</span>, required only once mock mode is
-                disabled. The application runs with zero Plaid credentials in development by default
+                A <span className="text-text">Plaid production application</span>, approved and billed by Plaid, to
+                connect real accounts — see “Deploying to production” below. A free Sandbox account is enough for
+                local development instead
               </li>
-              <li>Optional: a tunnel tool such as ngrok or cloudflared, needed only to test OAuth institutions or live webhooks against a local server</li>
+              <li>Node.js 20 or later and npm, only needed for local development or running one-off scripts against a deployed instance</li>
             </ul>
-          </Section>
-
-          <Section id="quick-start" title="Quick start">
-            <Subsection id="quick-start-postgres" title="Start Postgres">
-              <CodeBlock>{`docker compose up -d`}</CodeBlock>
-              <p>
-                This provisions Postgres only. If a Postgres instance is already available, skip this step and point{" "}
-                <span className="font-mono text-text">DATABASE_URL</span> at it directly.
-              </p>
-            </Subsection>
-
-            <Subsection id="quick-start-env" title="Configure environment">
-              <CodeBlock>{`cp .env.example .env`}</CodeBlock>
-              <p>
-                Set <span className="font-mono text-text">AUTH_SECRET</span> (<span className="font-mono text-text">npx auth secret</span>) and{" "}
-                <span className="font-mono text-text">MASTER_KEY</span> (<span className="font-mono text-text">openssl rand -base64 32</span>). Leave every{" "}
-                <span className="font-mono text-text">PLAID_*</span> variable blank for now, mock mode does not require them.
-              </p>
-            </Subsection>
-
-            <Subsection id="quick-start-install" title="Install, migrate, seed">
-              <p>Install dependencies, run migrations, and seed an admin user plus the category taxonomy:</p>
-              <CodeBlock>{`npm install
-npm run db:migrate
-ADMIN_EMAIL=you@example.com ADMIN_PASSWORD=your-password-here npm run seed:user
-npm run seed:categories`}</CodeBlock>
-            </Subsection>
-
-            <Subsection id="quick-start-run" title="Run the app">
-              <CodeBlock>{`npm run dev`}</CodeBlock>
-              <p>
-                Visit <span className="font-mono text-text">http://localhost:3000</span> and sign in. Mock data is
-                enabled by default in development: "Add account" connects a fixture institution with realistic
-                accounts and transactions immediately, with no Plaid credentials required.
-              </p>
-            </Subsection>
-
-            <Subsection id="quick-start-worker" title="Run the worker">
-              <p>In a second terminal, start the background worker:</p>
-              <CodeBlock>{`npm run worker`}</CodeBlock>
-              <p>
-                This is required for automatic, scheduled sync. The app's own "Sync now" action calls the sync engine
-                directly and works without the worker running.
-              </p>
-            </Subsection>
           </Section>
 
           <Section id="environment" title="Environment variables">
@@ -217,6 +172,161 @@ npm run seed:categories`}</CodeBlock>
             </div>
           </Section>
 
+          <Section id="production" title="Deploying to production">
+            <p>
+              This is the path for actually running Tally against real accounts. It assumes deploying to Vercel,
+              which this repo is set up for out of the box (<span className="font-mono text-text">vercel.json</span>'s
+              Cron Job, the Upstash QStash integration below) — the app itself is a standard Next.js app and will run
+              on any platform that supports one, but the cron/queue wiring described here is Vercel-specific.
+            </p>
+
+            <Subsection id="production-plaid" title="Plaid production access">
+              <p>
+                Plaid does not allow Sandbox credentials to read real accounts. Production access requires an
+                approved application in the Plaid dashboard and is billed per connected item and product; Transactions
+                and Investments are priced separately. Confirm current pricing before connecting real accounts.
+              </p>
+              <p>
+                Approval issues a second, distinct <span className="font-mono text-text">PLAID_CLIENT_ID</span> /{" "}
+                <span className="font-mono text-text">PLAID_SECRET</span> pair, unrelated to the Sandbox pair used for
+                local development. A separate redirect URI must also be registered under the production application;
+                Sandbox registrations do not carry over.
+              </p>
+            </Subsection>
+
+            <Subsection id="production-infra" title="Database, cron, and queue">
+              <p>
+                There is no separate worker process to run or supervise. Webhook-triggered syncs
+                (<span className="font-mono text-text">app/api/plaid/webhook</span>) run inline within the request —
+                Vercel Functions don't support a persistent listener process, and one item's sync takes a few
+                seconds, well inside a Function's execution budget.
+              </p>
+              <p>
+                Scheduled sync is two pieces, both already wired into this repo:
+              </p>
+              <ul className="list-disc pl-5 flex flex-col gap-1.5">
+                <li>
+                  A nightly balance refresh (<span className="font-mono text-text">app/api/cron/nightly</span>) runs
+                  as a native <span className="font-mono text-text">vercel.json</span> Cron Job, authorized by{" "}
+                  <span className="font-mono text-text">CRON_SECRET</span>.
+                </li>
+                <li>
+                  A twice-daily transactions safety net (<span className="font-mono text-text">app/api/cron/sync-all</span>) —
+                  Vercel's Hobby plan caps native Cron Jobs at once/day, so this one runs on{" "}
+                  <span className="text-text">Upstash QStash</span> instead. Install it from the Vercel Marketplace (
+                  <span className="font-mono text-text">vercel integration add upstash/upstash-qstash</span>), which
+                  provisions <span className="font-mono text-text">QSTASH_TOKEN</span>/
+                  <span className="font-mono text-text">QSTASH_URL</span>/signing-key env vars automatically, then
+                  register the recurring schedule once:
+                  <CodeBlock>{`APP_URL=https://your-instance.example.com npx tsx scripts/setup-qstash-schedule.ts`}</CodeBlock>
+                </li>
+              </ul>
+              <p>
+                Postgres itself: any provider works, but the Neon Postgres integration (also via the Vercel
+                Marketplace, <span className="font-mono text-text">vercel integration add neon</span>) provisions{" "}
+                <span className="font-mono text-text">DATABASE_URL</span> the same way.
+              </p>
+              <p>
+                After the database and env vars are in place, run migrations and seed the admin login against the
+                production database once:
+              </p>
+              <CodeBlock>{`DOTENV_CONFIG_PATH=.env.production.local npx tsx db/migrate.ts
+DOTENV_CONFIG_PATH=.env.production.local ADMIN_EMAIL=you@example.com ADMIN_PASSWORD=your-password-here npx tsx scripts/create-user.ts
+DOTENV_CONFIG_PATH=.env.production.local npx tsx scripts/seed-categories.ts`}</CodeBlock>
+              <p>
+                (<span className="font-mono text-text">vercel env pull .env.production.local --environment=production</span>{" "}
+                first, to get real production credentials locally for that one run — don't commit that file.)
+              </p>
+            </Subsection>
+
+            <Subsection id="production-env" title="Environment differences">
+              <ul className="list-disc pl-5 flex flex-col gap-1.5">
+                <li>
+                  Set <span className="font-mono text-text">PLAID_ENV=production</span> and the production{" "}
+                  <span className="font-mono text-text">PLAID_CLIENT_ID</span> / <span className="font-mono text-text">PLAID_SECRET</span>{" "}
+                  pair. <span className="font-mono text-text">MOCK_DATA</span> does not need to be set explicitly: with{" "}
+                  <span className="font-mono text-text">NODE_ENV=production</span>, the application already defaults
+                  to live mode. Set <span className="font-mono text-text">MOCK_DATA=true</span> only if a production
+                  build is being run in a staging capacity without real Plaid access.
+                </li>
+                <li>
+                  Set <span className="font-mono text-text">APP_URL</span> to the instance's real, public HTTPS
+                  origin, not a local or tunnel address.
+                </li>
+                <li>
+                  Set <span className="font-mono text-text">PLAID_REDIRECT_URI</span> and{" "}
+                  <span className="font-mono text-text">PLAID_WEBHOOK_URL</span> to paths under that same origin. No
+                  tunnel is needed in production, since the origin is already public; both values still need to be
+                  registered in the Plaid dashboard under the production application before use.
+                </li>
+              </ul>
+            </Subsection>
+
+            <Subsection id="production-security" title="Transport and secrets">
+              <ul className="list-disc pl-5 flex flex-col gap-1.5">
+                <li>
+                  HTTPS is a requirement, not an option: Plaid rejects non-HTTPS redirect and webhook URLs in
+                  production. Vercel terminates TLS automatically; on another host, terminate it at a reverse proxy
+                  or load balancer and enable HSTS there.
+                </li>
+                <li>
+                  Do not commit <span className="font-mono text-text">.env</span> or pass secrets on the command
+                  line. Use the platform's environment configuration or secret store for{" "}
+                  <span className="font-mono text-text">DATABASE_URL</span>, <span className="font-mono text-text">AUTH_SECRET</span>,{" "}
+                  <span className="font-mono text-text">MASTER_KEY</span>, and <span className="font-mono text-text">PLAID_SECRET</span>.
+                </li>
+                <li>
+                  <span className="font-mono text-text">MASTER_KEY</span> decrypts every stored Plaid access token.
+                  Losing it is equivalent to losing every connected account. Back it up with at least the rigor
+                  applied to the database itself, and store that backup somewhere other than the application host.
+                </li>
+              </ul>
+            </Subsection>
+          </Section>
+
+          <Section id="local-dev" title="Local development">
+            <p>
+              For iterating on the code itself, not a substitute for the production setup above. Runs entirely with
+              mock data by default — zero Plaid credentials needed.
+            </p>
+
+            <Subsection id="local-dev-postgres" title="Start Postgres">
+              <CodeBlock>{`docker compose up -d`}</CodeBlock>
+              <p>
+                This provisions Postgres only. If a Postgres instance is already available, skip this step and point{" "}
+                <span className="font-mono text-text">DATABASE_URL</span> at it directly.
+              </p>
+            </Subsection>
+
+            <Subsection id="local-dev-env" title="Configure environment">
+              <CodeBlock>{`cp .env.example .env`}</CodeBlock>
+              <p>
+                Set <span className="font-mono text-text">AUTH_SECRET</span> (<span className="font-mono text-text">npx auth secret</span>) and{" "}
+                <span className="font-mono text-text">MASTER_KEY</span> (<span className="font-mono text-text">openssl rand -base64 32</span>). Leave every{" "}
+                <span className="font-mono text-text">PLAID_*</span> variable blank for now, mock mode does not require them.
+              </p>
+            </Subsection>
+
+            <Subsection id="local-dev-install" title="Install, migrate, seed">
+              <p>Install dependencies, run migrations, and seed an admin user plus the category taxonomy:</p>
+              <CodeBlock>{`npm install
+npm run db:migrate
+ADMIN_EMAIL=you@example.com ADMIN_PASSWORD=your-password-here npm run seed:user
+npm run seed:categories`}</CodeBlock>
+            </Subsection>
+
+            <Subsection id="local-dev-run" title="Run the app">
+              <CodeBlock>{`npm run dev`}</CodeBlock>
+              <p>
+                Visit <span className="font-mono text-text">http://localhost:3000</span> and sign in. Mock data is
+                enabled by default in development: “Add account” connects a fixture institution with realistic
+                accounts and transactions immediately, with no Plaid credentials required. Manual “Sync now” and the
+                nightly/twice-daily automatic sync both work locally the same way they do in production — there is no
+                separate process to start.
+              </p>
+            </Subsection>
+          </Section>
+
           <Section id="mock-mode" title="Mock mode vs. live Plaid">
             <Subsection id="mock-mode-how" title="How mock mode works">
               <p>
@@ -224,7 +334,7 @@ npm run seed:categories`}</CodeBlock>
                 value wins outright. If it is unset, development defaults to mock and production defaults to live.
               </p>
               <p>
-                In mock mode, "Add account" inserts a canned institution, with checking, savings, credit, and
+                In mock mode, “Add account” inserts a canned institution, with checking, savings, credit, and
                 brokerage accounts, directly into Postgres. No network calls are made. Every downstream feature reads
                 the same database rows a live connection would produce, so it exercises the same code paths.
               </p>
@@ -261,102 +371,6 @@ npm run seed:categories`}</CodeBlock>
             </Subsection>
           </Section>
 
-          <Section id="worker" title="Running the worker">
-            <p>
-              <span className="font-mono text-text">npm run worker</span> processes webhook-triggered and
-              cron-scheduled syncs against the same database as the application. It is a separate, long-running
-              process, not a request handler, and must be kept running continuously rather than invoked on demand.
-            </p>
-            <p>
-              If it stops, nothing syncs automatically. The application's manual "Sync now" action is unaffected,
-              since it calls the sync engine directly rather than enqueuing a job.
-            </p>
-          </Section>
-
-          <Section id="production" title="Deploying to production">
-            <p>
-              Everything above describes a local instance running against Plaid Sandbox with mock data available as a
-              fallback. Serving real accounts requires four additional decisions: Plaid access, environment
-              configuration, process management, and transport security.
-            </p>
-
-            <Subsection id="production-plaid" title="Plaid production access">
-              <p>
-                Plaid does not allow Sandbox credentials to read real accounts. Production access requires an
-                approved application in the Plaid dashboard and is billed per connected item and product; Transactions
-                and Investments are priced separately. Confirm current pricing before connecting real accounts.
-              </p>
-              <p>
-                Approval issues a second, distinct <span className="font-mono text-text">PLAID_CLIENT_ID</span> /{" "}
-                <span className="font-mono text-text">PLAID_SECRET</span> pair, unrelated to the Sandbox pair already
-                in use. A separate redirect URI must also be registered under the production application; Sandbox
-                registrations do not carry over.
-              </p>
-            </Subsection>
-
-            <Subsection id="production-env" title="Environment differences">
-              <ul className="list-disc pl-5 flex flex-col gap-1.5">
-                <li>
-                  Set <span className="font-mono text-text">PLAID_ENV=production</span> and the production{" "}
-                  <span className="font-mono text-text">PLAID_CLIENT_ID</span> / <span className="font-mono text-text">PLAID_SECRET</span>{" "}
-                  pair. <span className="font-mono text-text">MOCK_DATA</span> does not need to be set explicitly: with{" "}
-                  <span className="font-mono text-text">NODE_ENV=production</span>, the application already defaults
-                  to live mode. Set <span className="font-mono text-text">MOCK_DATA=true</span> only if a production
-                  build is being run in a staging capacity without real Plaid access.
-                </li>
-                <li>
-                  Set <span className="font-mono text-text">APP_URL</span> to the instance's real, public HTTPS
-                  origin, not a local or tunnel address.
-                </li>
-                <li>
-                  Set <span className="font-mono text-text">PLAID_REDIRECT_URI</span> and{" "}
-                  <span className="font-mono text-text">PLAID_WEBHOOK_URL</span> to paths under that same origin. No
-                  tunnel is needed in production, since the origin is already public; both values still need to be
-                  registered in the Plaid dashboard under the production application before use.
-                </li>
-              </ul>
-            </Subsection>
-
-            <Subsection id="production-process" title="Running the app and worker">
-              <p>
-                The application (<span className="font-mono text-text">npm run build</span> then{" "}
-                <span className="font-mono text-text">npm run start</span>) and the worker (
-                <span className="font-mono text-text">npm run worker</span>) are two independent, long-running
-                processes. Both must stay running continuously; a stopped worker fails silently, since manual sync
-                keeps working while scheduled and webhook-triggered sync simply stop.
-              </p>
-              <p>
-                The <span className="font-mono text-text">docker-compose.yml</span> included in this repository
-                provisions Postgres only. Running the application and worker in containers means adding service
-                definitions for them; running them directly on a host means supervising both with a process manager
-                (systemd, pm2, or equivalent) configured to restart on failure and capture logs. A serverless request
-                handler is not a substitute for the worker: it has no facility for a persistent job-queue listener,
-                so a platform that runs the application as serverless functions still needs the worker hosted
-                separately as a standing process.
-              </p>
-            </Subsection>
-
-            <Subsection id="production-security" title="Transport and secrets">
-              <ul className="list-disc pl-5 flex flex-col gap-1.5">
-                <li>
-                  HTTPS is a requirement, not an option: Plaid rejects non-HTTPS redirect and webhook URLs in
-                  production. Terminate TLS at a reverse proxy or the platform's load balancer, and enable HSTS there.
-                </li>
-                <li>
-                  Do not commit <span className="font-mono text-text">.env</span> or pass secrets on the command
-                  line. Use the platform's environment configuration or secret store for{" "}
-                  <span className="font-mono text-text">DATABASE_URL</span>, <span className="font-mono text-text">AUTH_SECRET</span>,{" "}
-                  <span className="font-mono text-text">MASTER_KEY</span>, and <span className="font-mono text-text">PLAID_SECRET</span>.
-                </li>
-                <li>
-                  <span className="font-mono text-text">MASTER_KEY</span> decrypts every stored Plaid access token.
-                  Losing it is equivalent to losing every connected account. Back it up with at least the rigor
-                  applied to the database itself, and store that backup somewhere other than the application host.
-                </li>
-              </ul>
-            </Subsection>
-          </Section>
-
           <Section id="backups" title="Backups">
             <p>
               A running instance holds a complete transaction history for every connected account. Back up Postgres
@@ -378,18 +392,18 @@ pg_restore -d "$DATABASE_URL" --clean --if-exists tally-20260101.dump`}</CodeBlo
           <Section id="secret-rotation" title="Secret rotation">
             <p>
               <span className="font-mono text-text">PLAID_SECRET</span>: generate a replacement in the Plaid
-              dashboard, update <span className="font-mono text-text">.env</span>, restart the application and
-              worker, and confirm a sync still succeeds before revoking the previous secret. Plaid secrets are never
-              stored in the database, only transmitted to Plaid's API, so no data migration is required.
+              dashboard, update the environment variable and redeploy, and confirm a sync still succeeds before
+              revoking the previous secret. Plaid secrets are never stored in the database, only transmitted to
+              Plaid's API, so no data migration is required.
             </p>
             <p>
               <span className="font-mono text-text">MASTER_KEY</span>: this key is what every stored access token is
-              encrypted under, so rotating it requires re-encrypting each one. Stop the application and worker,
-              generate a new key, then run:
+              encrypted under, so rotating it requires re-encrypting each one. With the app still running on the old
+              key, generate a new key and run:
             </p>
             <CodeBlock>{`OLD_MASTER_KEY=<current key> NEW_MASTER_KEY=<new key> npm run rotate:master-key`}</CodeBlock>
             <p>
-              Set <span className="font-mono text-text">MASTER_KEY</span> to the new value and restart. Do not
+              Set <span className="font-mono text-text">MASTER_KEY</span> to the new value and redeploy. Do not
               discard the old key until the rotation script has completed successfully.
             </p>
           </Section>
