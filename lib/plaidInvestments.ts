@@ -99,9 +99,13 @@ async function reconcileHoldings(securities: Security[], holdings: Holding[]): P
         securityId,
         quantity: String(h.quantity),
         costBasis: h.cost_basis != null ? Math.round(h.cost_basis * 100) : null,
-        institutionPrice: Math.round(h.institution_price * 100),
+        // The Plaid SDK types institution_price/institution_value as non-nullable
+        // `number`, but the live API can send `null` (e.g. no price fetched yet
+        // for a newly-linked security) — guard explicitly rather than let
+        // `null * 100` silently coerce to a misleading stored $0.00.
+        institutionPrice: h.institution_price != null ? Math.round(h.institution_price * 100) : null,
         institutionPriceAsOf: h.institution_price_as_of ?? null,
-        institutionValue: Math.round(h.institution_value * 100),
+        institutionValue: h.institution_value != null ? Math.round(h.institution_value * 100) : 0,
         asOfDate: today,
       })
       .onConflictDoUpdate({
@@ -109,9 +113,9 @@ async function reconcileHoldings(securities: Security[], holdings: Holding[]): P
         set: {
           quantity: String(h.quantity),
           costBasis: h.cost_basis != null ? Math.round(h.cost_basis * 100) : null,
-          institutionPrice: Math.round(h.institution_price * 100),
+          institutionPrice: h.institution_price != null ? Math.round(h.institution_price * 100) : null,
           institutionPriceAsOf: h.institution_price_as_of ?? null,
-          institutionValue: Math.round(h.institution_value * 100),
+          institutionValue: h.institution_value != null ? Math.round(h.institution_value * 100) : 0,
         },
       });
   }

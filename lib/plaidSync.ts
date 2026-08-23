@@ -1,6 +1,6 @@
 import { sql, eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { plaidClient, getAccessToken } from "@/lib/plaid";
+import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
 import { seedMockTransactionsForItem } from "@/lib/mock/seedTransactions";
 import { toPlaidOwnedFields, mergeTransactionUpdate } from "@/lib/transactionSync/mapPlaidTransaction";
@@ -104,7 +104,7 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
     await recordSyncRun(itemId, trigger, startedAt, result);
     return result;
   } catch (err) {
-    console.error(`Transaction sync failed for item ${itemId}`, err);
+    console.error(`Transaction sync failed for item ${itemId} (${plaidErrorCode(err) ?? "unknown error"})`);
     await db.insert(schema.syncRuns).values({
       itemId,
       kind: "transactions",

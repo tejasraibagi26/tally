@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { Landmark } from "lucide-react";
 import { requireUserId } from "@/lib/session";
 import { formatCents } from "@/lib/money";
+import { cn } from "@/lib/cn";
 import { Card } from "@/components/ui/Card";
 import { StatusBadge, type Status } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -96,61 +97,77 @@ export default async function AccountsPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-          {items.map((item) => {
+          {items.map((item, index) => {
             const itemAccounts = accountsByItem.get(item.id) ?? [];
             const broken = item.status === "login_required" || item.status === "revoked" || item.status === "error";
             const total = itemAccounts.reduce((sum, a) => sum + (a.currentBalance ?? 0), 0);
 
+            // A lone card (only connection) or a trailing odd-one-out (3+
+            // connections, unpaired last row) sizes to its own content. Every
+            // other card shares a fixed default height with its row partner —
+            // an overlong account list scrolls internally instead of growing
+            // the card and throwing rows out of alignment.
+            const isSoleConnection = items.length === 1;
+            const isUnpairedTail = items.length > 2 && items.length % 2 === 1 && index === items.length - 1;
+            const capped = !isSoleConnection && !isUnpairedTail;
+
             return (
-              <Card key={item.id} className={broken ? "border-negative" : undefined}>
-                <div className="flex items-center gap-3 p-4 border-b border-border">
-                  <span className="w-[34px] h-[34px] flex-none rounded-[9px] bg-brand-subtle text-brand flex items-center justify-center font-medium text-sm">
-                    {(item.institutionName ?? "?").slice(0, 2).toUpperCase()}
-                  </span>
-                  <div className="flex flex-col gap-1 flex-1 min-w-0">
-                    <span className="font-semibold text-base text-text">
-                      {item.institutionName ?? "Unknown institution"}
+              <Card
+                key={item.id}
+                className={cn(broken && "border-negative", isSoleConnection && "lg:col-span-2", capped && "h-[440px]")}
+              >
+                <div className="flex flex-col h-full">
+                  <div className="flex items-center gap-3 p-4 border-b border-border flex-none">
+                    <span className="w-[34px] h-[34px] flex-none rounded-[9px] bg-brand-subtle text-brand flex items-center justify-center font-medium text-sm">
+                      {(item.institutionName ?? "?").slice(0, 2).toUpperCase()}
                     </span>
-                    <span className="font-mono text-xs text-text-3">{relativeTime(item.lastSyncedAt)}</span>
-                  </div>
-                  <StatusBadge status={itemStatusToBadge(item.status, item.lastSyncedAt)} />
-                  <DeleteItemButton itemId={item.id} />
-                </div>
-
-                {broken && (
-                  <div className="flex items-center gap-3 px-4 py-3.5 bg-negative-subtle border-b border-border">
-                    <span className="flex-1 text-[15px] leading-snug text-text">
-                      ▲ Login expired. Balances and transactions are frozen until you reconnect.
-                    </span>
-                    <LinkButton mode="update" itemId={item.id} label="Reconnect" variant="primary" />
-                  </div>
-                )}
-
-                {itemAccounts.map((acct) => (
-                  <div
-                    key={acct.id}
-                    className="grid grid-cols-[1fr_auto] gap-4 items-center px-4 py-3 border-b border-border last:border-b-0"
-                  >
-                    <div className="flex flex-col gap-1 min-w-0">
-                      <span className="text-[15px] text-text">{acct.name}</span>
-                      <span className="font-mono text-xs text-text-3">
-                        {acct.subtype ?? acct.type} ····{acct.mask ?? "----"}
+                    <div className="flex flex-col gap-1 flex-1 min-w-0">
+                      <span className="font-semibold text-base text-text">
+                        {item.institutionName ?? "Unknown institution"}
                       </span>
+                      <span className="font-mono text-xs text-text-3">{relativeTime(item.lastSyncedAt)}</span>
                     </div>
-                    <div className="flex flex-col gap-1 text-right">
-                      <span className="text-[17px] text-text tabular">
-                        {acct.currentBalance != null ? formatCents(acct.currentBalance) : "—"}
-                      </span>
-                      {acct.type === "credit" && acct.creditLimit != null && (
-                        <span className="text-xs text-text-3 tabular">of {formatCents(acct.creditLimit)}</span>
-                      )}
-                    </div>
+                    <StatusBadge status={itemStatusToBadge(item.status, item.lastSyncedAt)} />
+                    <DeleteItemButton itemId={item.id} />
                   </div>
-                ))}
 
-                <div className="flex items-center justify-between px-4 py-3 text-[13.5px]">
-                  <span className="text-brand">View transactions →</span>
-                  <span className="text-text-3 tabular">{formatCents(total)}</span>
+                  {broken && (
+                    <div className="flex items-center gap-3 px-4 py-3.5 bg-negative-subtle border-b border-border flex-none">
+                      <span className="flex-1 text-[15px] leading-snug text-text">
+                        ▲ Login expired. Balances and transactions are frozen until you reconnect.
+                      </span>
+                      <LinkButton mode="update" itemId={item.id} label="Reconnect" variant="primary" />
+                    </div>
+                  )}
+
+                  <div className={capped ? "flex-1 min-h-0 overflow-y-auto" : undefined}>
+                    {itemAccounts.map((acct) => (
+                      <div
+                        key={acct.id}
+                        className="grid grid-cols-[1fr_auto] gap-4 items-center px-4 py-3 border-b border-border last:border-b-0"
+                      >
+                        <div className="flex flex-col gap-1 min-w-0">
+                          <span className="text-[15px] text-text">{acct.name}</span>
+                          <span className="font-mono text-xs text-text-3">
+                            {acct.subtype ?? acct.type} ····{acct.mask ?? "----"}
+                          </span>
+                        </div>
+                        <div className="flex flex-col gap-1 text-right">
+                          <span className="text-[17px] text-text tabular">
+                            {acct.currentBalance != null ? formatCents(acct.currentBalance) : "—"}
+                          </span>
+                          {acct.type === "credit" && acct.creditLimit != null && (
+                            <span className="text-xs text-text-3 tabular">of {formatCents(acct.creditLimit)}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between px-4 py-3 text-[13.5px] flex-none">
+                    <span className="text-brand">View transactions →</span>
+                    <span className="text-text-3 tabular">{formatCents(total)}</span>
+                  </div>
                 </div>
               </Card>
             );
