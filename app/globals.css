@@ -9,10 +9,10 @@
   --surface-2: #F9F8F5;
   --sunken: #EFEDE8;
   --border: #E4E1D9;
-  --border-strong: #CFCBC0;
+  --border-strong: #938C7D;
   --text: #1A1917;
-  --text-2: #63615A;
-  --text-3: #938F87;
+  --text-2: #524F47;
+  --text-3: #6A665E;
   --brand: #14513F;
   --brand-hover: #0E3E30;
   --brand-subtle: #E6EFEA;
@@ -164,21 +164,15 @@ body {
   letter-spacing: 1px;
 }
 
-/* components/ui/LoadingOverlay.tsx: three equal segments in a single
-   rounded track, each filling left-to-right (scaleX from transform-origin:
-   left) in sequence — segment 2 starts right as segment 1 finishes, so the
-   whole track reads as one continuous sweep — then all three reset and
-   loop. Same three-part timing for every segment; app/globals.css only
-   needs the one keyframe, staggered per segment via animation-delay. */
-@keyframes segment-fill {
+/* components/ui/LoadingOverlay.tsx: a single brand-colored bar sliding
+   across a rounded track — standard indeterminate-progress motion,
+   accelerates in, decelerates out at the far edge, then loops. */
+@keyframes indeterminate-slide {
   0% {
-    transform: scaleX(0);
+    left: -35%;
   }
-  33%, 83% {
-    transform: scaleX(1);
-  }
-  100% {
-    transform: scaleX(0);
+  60%, 100% {
+    left: 100%;
   }
 }
 

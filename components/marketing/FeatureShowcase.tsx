@@ -147,8 +147,15 @@ function DesktopShowcase() {
           {/* Matches MobileFeatureCard's existing bg-canvas card — desktop was
               missing this inner surface, so every demo just floated as flat
               text/bars directly on the big panel's background. */}
-          <div className="bg-canvas border border-border rounded-card shadow-raised p-6">
-            <shown.Demo />
+          <div className="relative overflow-hidden bg-canvas border border-border rounded-card shadow-raised p-6">
+            <div
+              className="pointer-events-none absolute -top-20 left-1/2 -translate-x-1/2 w-[260px] h-[260px] rounded-full opacity-[0.16] blur-2xl"
+              style={{ background: `var(--series-${shown.slot})` }}
+              aria-hidden
+            />
+            <div className="relative">
+              <shown.Demo />
+            </div>
           </div>
         </div>
       </div>
@@ -190,8 +197,13 @@ function MobileFeatureCard({ feature }: { feature: Feature }) {
         <span className="text-[15px] font-medium text-text">{feature.title}</span>
       </div>
       <p className="text-[13px] text-text-3 leading-snug">{feature.body}</p>
-      <div className="rounded-card border border-border bg-canvas p-5 flex items-center justify-center min-h-[180px]">
-        {revealed && <feature.Demo />}
+      <div className="relative overflow-hidden rounded-card border border-border bg-canvas p-5 flex items-center justify-center min-h-[180px]">
+        <div
+          className="pointer-events-none absolute -top-16 left-1/2 -translate-x-1/2 w-[220px] h-[220px] rounded-full opacity-[0.16] blur-2xl"
+          style={{ background: color }}
+          aria-hidden
+        />
+        {revealed && <div className="relative w-full">{<feature.Demo />}</div>}
       </div>
     </div>
   );

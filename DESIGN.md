@@ -29,8 +29,8 @@ TYPE
 
 COLOR — light
   canvas #F5F4F0 · surface #FCFCFB · surface-2 #F9F8F5 · sunken #EFEDE8
-  border #E4E1D9 · border-strong #CFCBC0
-  text #1A1917 · text-2 #63615A · text-3 #938F87
+  border #E4E1D9 · border-strong #938C7D
+  text #1A1917 · text-2 #524F47 · text-3 #6A665E
   brand #14513F (evergreen) · brand-hover #0E3E30 · brand-subtle #E6EFEA
   positive #0F7A57 · negative #B23A2C · warning #8A5A00 · info #2A78D6
 
@@ -150,10 +150,10 @@ chart legend) in both light and dark.
 | `--surface-2` | `#F9F8F5` | Nested/secondary surface |
 | `--sunken` | `#EFEDE8` | Wells, table header, input rest |
 | `--border` | `#E4E1D9` | Hairlines, dividers |
-| `--border-strong` | `#CFCBC0` | Input border, focused container |
+| `--border-strong` | `#938C7D` | Input border, focused container |
 | `--text` | `#1A1917` | Primary |
-| `--text-2` | `#63615A` | Secondary, labels |
-| `--text-3` | `#938F87` | Tertiary, placeholders, axis |
+| `--text-2` | `#524F47` | Secondary, labels |
+| `--text-3` | `#6A665E` | Tertiary, placeholders, axis |
 | `--brand` | `#14513F` | Primary action, active nav |
 | `--brand-hover` | `#0E3E30` | Hover/pressed |
 | `--brand-subtle` | `#E6EFEA` | Selected row, brand-tinted chip |
@@ -385,8 +385,8 @@ Respect `prefers-reduced-motion: reduce` — replace movement with an instant st
 :root {
   color-scheme: light;
   --canvas:#F5F4F0; --surface:#FCFCFB; --surface-2:#F9F8F5; --sunken:#EFEDE8;
-  --border:#E4E1D9; --border-strong:#CFCBC0;
-  --text:#1A1917; --text-2:#63615A; --text-3:#938F87;
+  --border:#E4E1D9; --border-strong:#938C7D;
+  --text:#1A1917; --text-2:#524F47; --text-3:#6A665E;
   --brand:#14513F; --brand-hover:#0E3E30; --brand-subtle:#E6EFEA;
   --brand-border:#BFD6CB; --on-brand:#FFFFFF;
   --positive:#0F7A57; --negative:#B23A2C; --warning:#8A5A00; --info:#2A78D6;
