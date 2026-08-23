@@ -139,6 +139,60 @@ export function InvestmentDemo() {
   );
 }
 
+export function FireDemo() {
+  return (
+    <div className="flex flex-col gap-3 w-full max-w-[340px] mx-auto">
+      <span className="text-xs font-medium uppercase tracking-wide text-text-3">FIRE number</span>
+      <span className="font-display text-[28px] leading-none text-text tabular opacity-0" style={{ animation: "fade-in-up 500ms ease-out forwards" }}>
+        $1,750,000
+      </span>
+      <div className="h-2.5 rounded-full bg-sunken overflow-hidden">
+        <div
+          className="h-full rounded-full"
+          style={{ background: "var(--series-4)", width: 0, ["--target-width" as string]: "61%", animation: "grow-width 1.1s ease-out 200ms forwards" }}
+        />
+      </div>
+      <div className="flex items-center justify-between text-[12px] text-text-3 opacity-0" style={{ animation: "fade-in-up 400ms ease-out 1300ms forwards" }}>
+        <span>$1,067,500 invested · 61% there</span>
+        <span>≈14.2 years at this pace</span>
+      </div>
+    </div>
+  );
+}
+
+export function SubscriptionsDemo() {
+  const rows = [
+    { name: "Netflix", frequency: "Monthly", amount: -1549, slot: 5 },
+    { name: "Spotify", frequency: "Monthly", amount: -1099, slot: 5 },
+    { name: "Gym membership", frequency: "Monthly", amount: -4500, slot: 5 },
+  ];
+  const total = rows.reduce((s, r) => s + r.amount, 0);
+
+  return (
+    <div className="flex flex-col gap-3 w-full max-w-[340px] mx-auto">
+      {rows.map((r, i) => (
+        <div
+          key={r.name}
+          className="flex items-center justify-between opacity-0"
+          style={{ animation: `fade-in-up 500ms ease-out ${i * 130}ms forwards` }}
+        >
+          <span className="flex items-center gap-2 text-[14px] text-text-2">
+            <span className="w-1.5 h-1.5 rounded-full flex-none" style={{ background: `var(--series-${r.slot})` }} />
+            {r.name}
+            <span className="text-[12px] text-text-3">· {r.frequency}</span>
+          </span>
+          <span className="text-[14px] tabular text-text">{formatCents(r.amount, { signed: true })}</span>
+        </div>
+      ))}
+      <div className="h-px bg-border opacity-0" style={{ animation: "fade-in-up 400ms ease-out 560ms forwards" }} />
+      <div className="flex items-center justify-between opacity-0" style={{ animation: "fade-in-up 500ms ease-out 650ms forwards" }}>
+        <span className="text-xs font-medium uppercase tracking-wide text-text-3">Monthly recurring</span>
+        <span className="font-display text-[22px] leading-none text-text tabular">{formatCents(total, { signed: true })}</span>
+      </div>
+    </div>
+  );
+}
+
 export function CreditCardDemo() {
   return (
     <div className="flex flex-col gap-4 w-full max-w-[340px] mx-auto">

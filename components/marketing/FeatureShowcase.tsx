@@ -1,9 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Layers, Tags, Gauge, TrendingUp, CreditCard as CreditCardIcon, ShieldCheck, type LucideIcon } from "lucide-react";
+import { Layers, Tags, Gauge, Flame, Repeat, TrendingUp, CreditCard as CreditCardIcon, ShieldCheck, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { NetWorthDemo, CategorizeDemo, BudgetDemo, InvestmentDemo, CreditCardDemo, SecurityDemo } from "@/components/marketing/FeatureDemos";
+import {
+  NetWorthDemo,
+  CategorizeDemo,
+  BudgetDemo,
+  FireDemo,
+  SubscriptionsDemo,
+  InvestmentDemo,
+  CreditCardDemo,
+  SecurityDemo,
+} from "@/components/marketing/FeatureDemos";
 
 interface Feature {
   icon: LucideIcon;
@@ -17,6 +26,8 @@ const FEATURES: Feature[] = [
   { icon: Layers, slot: 1, title: "Net worth, always current", body: "Every checking, savings, credit card, and brokerage account in one ledger, synced automatically.", Demo: NetWorthDemo },
   { icon: Tags, slot: 2, title: "Categorization that sticks", body: "Rules you set once apply forever, so a card payment is never double-counted as spend.", Demo: CategorizeDemo },
   { icon: Gauge, slot: 3, title: "Budgets with a pulse", body: "Real burn-down per category, projected to the end of the month, not just a static number.", Demo: BudgetDemo },
+  { icon: Flame, slot: 4, title: "FIRE, tracked for real", body: "Your FIRE number against what's actually invested, with years-to-go at your real savings pace.", Demo: FireDemo },
+  { icon: Repeat, slot: 5, title: "Every subscription, caught", body: "Recurring charges detected automatically from your transaction history — nothing sneaks past a free trial.", Demo: SubscriptionsDemo },
   { icon: TrendingUp, slot: 7, title: "Investments & allocation", body: "Holdings, performance, and asset allocation across every brokerage account you connect.", Demo: InvestmentDemo },
   { icon: CreditCardIcon, slot: 8, title: "Credit card intelligence", body: "See APR, statement balance, due dates, and utilization before anything becomes a late fee.", Demo: CreditCardDemo },
   { icon: ShieldCheck, slot: 6, title: "Bank-level security", body: "Access tokens are envelope-encrypted at rest and never reach your browser.", Demo: SecurityDemo },

@@ -75,6 +75,11 @@ export default function PrivacyPage() {
               An encrypted Plaid access token per connected institution, used to fetch the data above. It is never
               exposed by any API response.
             </li>
+            <li>
+              An audit trail of account-level actions on your connections — connecting an institution, revoking one,
+              and manual balance refreshes — recording what happened and when. This trail records the action itself,
+              not the underlying financial data.
+            </li>
           </ul>
         </Section>
 
@@ -132,6 +137,11 @@ export default function PrivacyPage() {
             The account settings page also offers a full data wipe, which disconnects every connected institution and
             deletes all financial data for your account. It does not delete the account login itself; removing that
             requires direct access to the database, since the application doesn't expose that action in its own UI.
+          </p>
+          <p>
+            Audit trail entries (see “Information stored” above) are the exception — they are retained even after the
+            connection or account they reference is revoked or wiped, since an entry is the record that the action
+            happened, not data about your finances.
           </p>
         </Section>
 
