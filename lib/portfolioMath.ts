@@ -7,16 +7,37 @@ export interface HoldingLike {
 }
 
 export interface AllocationSlice {
-  label: string; // "Cash" for cash equivalents, else the asset type
+  label: string; // "Cash" for cash equivalents, else the formatted asset type
   value: number; // cents
   pct: number; // 0-1, sums to 1 across the returned array (given at least one holding)
+}
+
+// Plaid's documented Security.type values (all lowercase on the wire) — an
+// acronym needs its own casing (ETF), everything else is just title case.
+const SECURITY_TYPE_LABEL: Record<string, string> = {
+  cash: "Cash",
+  cryptocurrency: "Cryptocurrency",
+  derivative: "Derivative",
+  equity: "Equity",
+  etf: "ETF",
+  "fixed income": "Fixed Income",
+  loan: "Loan",
+  "mutual fund": "Mutual Fund",
+  other: "Other",
+};
+
+/** Formats a raw Security.type (or any unrecognized string) for display — falls back to title case for anything not in the known Plaid enum. */
+export function formatSecurityType(assetType: string): string {
+  const known = SECURITY_TYPE_LABEL[assetType.toLowerCase()];
+  if (known) return known;
+  return assetType.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 /** Groups holdings by asset class per §9 "Allocation" — cash equivalents always get their own slice, regardless of their nominal `type`. */
 export function computeAllocation(holdings: HoldingLike[]): AllocationSlice[] {
   const totals = new Map<string, number>();
   for (const h of holdings) {
-    const label = h.isCashEquivalent ? "Cash" : h.assetType;
+    const label = h.isCashEquivalent ? "Cash" : formatSecurityType(h.assetType);
     totals.set(label, (totals.get(label) ?? 0) + h.institutionValue);
   }
   const total = [...totals.values()].reduce((a, b) => a + b, 0);

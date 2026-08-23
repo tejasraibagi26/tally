@@ -32,7 +32,24 @@ describe("computeAllocation", () => {
       { institutionValue: 1000, isCashEquivalent: false, assetType: "equity" },
       { institutionValue: 9000, isCashEquivalent: false, assetType: "etf" },
     ];
-    expect(computeAllocation(holdings).map((s) => s.label)).toEqual(["etf", "equity"]);
+    expect(computeAllocation(holdings).map((s) => s.label)).toEqual(["ETF", "Equity"]);
+  });
+
+  it("formats known Plaid security types for display", () => {
+    const holdings: HoldingLike[] = [
+      { institutionValue: 1000, isCashEquivalent: false, assetType: "etf" },
+      { institutionValue: 1000, isCashEquivalent: false, assetType: "equity" },
+      { institutionValue: 1000, isCashEquivalent: false, assetType: "fixed income" },
+      { institutionValue: 1000, isCashEquivalent: false, assetType: "mutual fund" },
+      { institutionValue: 1000, isCashEquivalent: false, assetType: "cryptocurrency" },
+      { institutionValue: 1000, isCashEquivalent: false, assetType: "derivative" },
+      { institutionValue: 1000, isCashEquivalent: false, assetType: "loan" },
+      { institutionValue: 1000, isCashEquivalent: false, assetType: "other" },
+      { institutionValue: 1000, isCashEquivalent: false, assetType: "something new" },
+    ];
+    expect(computeAllocation(holdings).map((s) => s.label).sort()).toEqual(
+      ["Cryptocurrency", "Derivative", "ETF", "Equity", "Fixed Income", "Loan", "Mutual Fund", "Other", "Something New"].sort(),
+    );
   });
 });
 

@@ -110,12 +110,19 @@ async function reconcileHoldings(securities: Security[], holdings: Holding[]): P
     const value = closePrice != null ? closePrice * h.quantity : h.institution_value;
     // No FX conversion anywhere in this app — every consumer of
     // institutionPrice/institutionValue needs this to know what they're
-    // actually looking at. Falls back to the security's own currency when
-    // substituting its close_price (§ above), since that price came from
-    // the security, not the (broken) holding-level report.
-    const currency = closePrice != null
-      ? (securityByPlaidId.get(h.security_id)?.iso_currency_code ?? securityByPlaidId.get(h.security_id)?.unofficial_currency_code ?? "USD")
-      : (h.iso_currency_code ?? h.unofficial_currency_code ?? "USD");
+    // actually looking at. Always trust the holding's own reported currency
+    // (what the institution says this position is actually held in) over
+    // the security's — Plaid's security-level close_price/currency comes
+    // from a separate general market-data reference that's observed to
+    // default to USD across the board, which would mislabel every non-USD
+    // holding the moment the close_price fallback above kicks in. Only fall
+    // back to the security's currency if the holding itself reports none.
+    const currency =
+      h.iso_currency_code ??
+      h.unofficial_currency_code ??
+      securityByPlaidId.get(h.security_id)?.iso_currency_code ??
+      securityByPlaidId.get(h.security_id)?.unofficial_currency_code ??
+      "USD";
 
     const values = {
       accountId,
