@@ -5,6 +5,7 @@ import { requireUserId } from "@/lib/session";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SyncAllButton } from "@/components/plaid/SyncAllButton";
+import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
 import { TransactionsList, type TransactionRowData, type AccountLookup } from "@/components/transactions/TransactionsList";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import Link from "next/link";
@@ -201,6 +202,8 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
           <SyncAllButton />
         </div>
       </div>
+
+      <SyncFailureBanner />
 
       <Card className="p-3 flex-none">
         <form method="get" className="flex items-center gap-2 flex-wrap">
