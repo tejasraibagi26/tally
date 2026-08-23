@@ -34,6 +34,22 @@ export function prettifyPfc(detailed: string | null): string {
     .join(" ");
 }
 
+/**
+ * Same as prettifyPfc, but for a child/detailed value strips its known
+ * `${primary}_` prefix before title-casing, so a subcategory reads "Dental
+ * care" rather than "Medical Dental Care" — the parent name is already shown
+ * one level up, so repeating it in every child label is just noise.
+ */
+export function prettifyPfcChild(primary: string, detailed: string | null): string {
+  if (!detailed) return "Uncategorized";
+  if (OVERRIDES[detailed]) return OVERRIDES[detailed];
+  const stripped = detailed.startsWith(`${primary}_`) ? detailed.slice(primary.length + 1) : detailed;
+  return stripped
+    .split("_")
+    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
 const PRIMARY_TO_SLOT: Record<string, number> = {
   FOOD_AND_DRINK: 1,
   TRANSPORTATION: 2,

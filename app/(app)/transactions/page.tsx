@@ -8,6 +8,7 @@ import { SyncAllButton } from "@/components/plaid/SyncAllButton";
 import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
 import { TransactionsList, type TransactionRowData, type AccountLookup } from "@/components/transactions/TransactionsList";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { groupCategoryOptions, categoryIdsInGroup } from "@/lib/categoryOptions";
 import Link from "next/link";
 
 const PAGE_SIZE = 50;
@@ -68,12 +69,15 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     where: or(isNull(schema.categories.userId), eq(schema.categories.userId, userId)),
     orderBy: (c, { asc }) => [asc(c.name)],
   });
-  const categoryOptions = categories.map((c) => ({ id: c.id, name: c.name, colorSlot: c.colorSlot }));
+  const categoryOptions = groupCategoryOptions(categories);
 
   const conditions = [eq(schema.transactions.userId, userId)];
   if (accountFilter) conditions.push(eq(schema.transactions.accountId, accountFilter));
   if (pendingOnly) conditions.push(eq(schema.transactions.isPending, true));
-  if (categoryFilter) conditions.push(eq(schema.transactions.categoryId, categoryFilter));
+  // A parent category (e.g. "Medical") rolls up every transaction filed under one of its
+  // subcategories (e.g. "Dental care") too — selecting the parent shouldn't show nothing just
+  // because every transaction actually got tagged with the more specific child category.
+  if (categoryFilter) conditions.push(inArray(schema.transactions.categoryId, categoryIdsInGroup(categoryFilter, categories)));
   if (fromFilter) conditions.push(gte(schema.transactions.postedDate, fromFilter));
   if (toFilter) conditions.push(lte(schema.transactions.postedDate, toFilter));
   if (transferFilter != null) conditions.push(eq(schema.transactions.isTransfer, transferFilter));
@@ -228,7 +232,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
             buttonPlaceholder="All categories"
             placeholder="Search categories…"
             className="w-52"
-            options={[{ value: "", label: "All categories" }, ...categoryOptions.map((c) => ({ value: c.id, label: c.name, colorSlot: c.colorSlot }))]}
+            options={[{ value: "", label: "All categories" }, ...categoryOptions.map((c) => ({ value: c.id, label: c.name, colorSlot: c.colorSlot, indent: c.indent }))]}
           />
           <input
             type="date"

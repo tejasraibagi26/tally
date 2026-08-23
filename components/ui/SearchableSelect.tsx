@@ -7,6 +7,7 @@ export interface SearchableSelectOption {
   value: string;
   label: string;
   colorSlot?: number; // renders a category-style color dot next to the label
+  indent?: boolean; // renders nested under the preceding non-indented option (e.g. a subcategory under its parent)
 }
 
 export interface SearchableSelectProps {
@@ -123,6 +124,7 @@ export function SearchableSelect({
                   onClick={() => select(o.value)}
                   className={cn(
                     "w-full flex items-start gap-1.5 px-2.5 py-1.5 text-sm text-left hover:bg-surface-2",
+                    o.indent && !query.trim() && "pl-6",
                     o.value === currentValue && "bg-brand-subtle text-brand",
                   )}
                 >

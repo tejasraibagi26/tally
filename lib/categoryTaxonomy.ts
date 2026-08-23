@@ -1,4 +1,4 @@
-import { prettifyPfc, pfcColorSlot } from "@/lib/pfc";
+import { prettifyPfc, prettifyPfcChild, pfcColorSlot } from "@/lib/pfc";
 import type { categoryKindEnum } from "@/db/schema";
 
 export type CategoryKind = (typeof categoryKindEnum.enumValues)[number];
@@ -105,6 +105,14 @@ const TAXONOMY: Record<string, string[]> = {
     "PERSONAL_CARE_LAUNDRY_AND_DRY_CLEANING",
     "PERSONAL_CARE_OTHER_PERSONAL_CARE",
   ],
+  // Not part of Plaid's real PFC taxonomy — Plaid has no dedicated bucket for
+  // app/software subscriptions (Claude Pro, Lightroom, a wallpaper app, …),
+  // which otherwise land wherever the merchant happens to fall (general
+  // services, general merchandise, entertainment). Seeded so it exists as a
+  // pickable/rule-target category; nothing auto-categorizes into it, since no
+  // real transaction's pfc_detailed will ever match these synthetic values —
+  // assign it manually or with a merchant-name rule instead.
+  SUBSCRIPTIONS: ["SUBSCRIPTIONS_SOFTWARE_AND_APPS", "SUBSCRIPTIONS_OTHER_SUBSCRIPTIONS"],
   GENERAL_SERVICES: [
     "GENERAL_SERVICES_ACCOUNTING_AND_FINANCIAL_PLANNING",
     "GENERAL_SERVICES_AUTOMOTIVE",
@@ -182,7 +190,7 @@ export function buildCategoryTaxonomy(): TaxonomyParent[] {
     colorSlot: pfcColorSlot(primary),
     children: detailedValues.map((detailed) => ({
       slug: slugifyPfc(detailed),
-      name: prettifyPfc(detailed),
+      name: prettifyPfcChild(primary, detailed),
       kind: KIND_OVERRIDES[detailed] ?? kindForPrimary(primary),
       pfcDetailed: detailed,
     })),

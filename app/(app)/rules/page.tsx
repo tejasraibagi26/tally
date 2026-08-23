@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { RuleForm } from "@/components/rules/RuleForm";
 import { RuleRow } from "@/components/rules/RuleRow";
 import { summarizeMatch, summarizeActions } from "@/lib/ruleSummary";
+import { groupCategoryOptions } from "@/lib/categoryOptions";
 import type { RuleActions, RuleMatch } from "@/lib/rulesEngine";
 
 export default async function RulesPage() {
@@ -23,6 +24,7 @@ export default async function RulesPage() {
 
   const categoryNameById = new Map(categories.map((c) => [c.id, c.name]));
   const accountNameById = new Map(accounts.map((a) => [a.id, a.name]));
+  const groupedCategories = groupCategoryOptions(categories);
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
@@ -34,7 +36,7 @@ export default async function RulesPage() {
       <Card>
         <CardHeader title="New rule" />
         <RuleForm
-          categories={categories.map((c) => ({ id: c.id, name: c.name }))}
+          categories={groupedCategories}
           accounts={accounts.map((a) => ({ id: a.id, name: `${a.name} ····${a.mask ?? "----"}` }))}
         />
       </Card>

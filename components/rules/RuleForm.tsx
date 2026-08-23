@@ -28,6 +28,8 @@ const OPS_BY_FIELD: Record<Field, { value: string; label: string }[]> = {
 export interface RuleFormCategory {
   id: string;
   name: string;
+  colorSlot?: number;
+  indent?: boolean;
 }
 
 export interface RuleFormAccount {
@@ -207,7 +209,7 @@ export function RuleForm({ categories, accounts }: { categories: RuleFormCategor
           buttonPlaceholder="Don't change category"
           placeholder="Search categories…"
           className="w-56"
-          options={categories.map((c) => ({ value: c.id, label: `Set category: ${c.name}` }))}
+          options={categories.map((c) => ({ value: c.id, label: `Set category: ${c.name}`, colorSlot: c.colorSlot, indent: c.indent }))}
         />
         <input
           type="text"

@@ -11,6 +11,7 @@ export interface DetailCategoryOption {
   id: string;
   name: string;
   colorSlot: number;
+  indent?: boolean;
 }
 
 export interface DetailSplit {
@@ -220,7 +221,7 @@ export function TransactionDetailPanel({
             onChange={setCategoryId}
             buttonPlaceholder="Uncategorized"
             placeholder="Search categories…"
-            options={[{ value: "", label: "Uncategorized" }, ...categories.map((c) => ({ value: c.id, label: c.name, colorSlot: c.colorSlot }))]}
+            options={[{ value: "", label: "Uncategorized" }, ...categories.map((c) => ({ value: c.id, label: c.name, colorSlot: c.colorSlot, indent: c.indent }))]}
           />
 
           {transaction.merchantName && (
@@ -322,7 +323,7 @@ export function TransactionDetailPanel({
                     buttonPlaceholder="Choose category"
                     placeholder="Search categories…"
                     className="flex-1"
-                    options={categories.map((c) => ({ value: c.id, label: c.name, colorSlot: c.colorSlot }))}
+                    options={categories.map((c) => ({ value: c.id, label: c.name, colorSlot: c.colorSlot, indent: c.indent }))}
                   />
                   <input
                     type="number"
