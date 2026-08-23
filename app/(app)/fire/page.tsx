@@ -54,11 +54,11 @@ export default async function FirePage() {
       <Card className="flex flex-col sm:flex-row">
         <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Investable net worth</span>
-          <span className="font-display text-3xl text-text tabular">{formatCents(investableNetWorth)}</span>
+          <span className="font-display text-3xl text-text tabular money">{formatCents(investableNetWorth)}</span>
         </div>
         <div className="flex-1 p-[18px_24px] flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Trailing 12mo expenses</span>
-          <span className="font-display text-3xl text-text tabular">{formatCents(defaultAnnualExpenses)}</span>
+          <span className="font-display text-3xl text-text tabular money">{formatCents(defaultAnnualExpenses)}</span>
         </div>
       </Card>
 

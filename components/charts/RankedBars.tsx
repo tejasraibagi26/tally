@@ -29,7 +29,7 @@ export function RankedBars({ rows, limit = 6 }: { rows: RankedBarRow[]; limit?: 
               style={{ width: `${(row.total / max) * 100}%`, background: `var(--series-${row.colorSlot})` }}
             />
           </span>
-          <span className="w-20 flex-none text-right text-[13.5px] text-text tabular">{formatCents(row.total)}</span>
+          <span className="w-20 flex-none text-right text-[13.5px] text-text tabular money">{formatCents(row.total)}</span>
         </Link>
       ))}
     </div>

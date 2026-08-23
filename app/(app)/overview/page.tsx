@@ -130,7 +130,7 @@ export default async function OverviewPage() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-12">
             <div className="flex flex-col gap-3">
               <span className="text-xs font-medium uppercase tracking-wide text-text-3">Net worth</span>
-              <AnimatedNumber cents={netWorth} className="font-display text-[40px] lg:text-[56px] leading-none text-text tabular" />
+              <AnimatedNumber cents={netWorth} className="font-display text-[40px] lg:text-[56px] leading-none text-text tabular money" />
               <div className="flex flex-wrap items-center gap-2">
                 {netWorthDelta && (
                   <span className={`text-xs font-medium ${netWorthDelta.direction === "up" ? "text-positive" : "text-negative"}`}>
@@ -174,20 +174,20 @@ export default async function OverviewPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" style={reveal(1)}>
         <StatTile
           label="Spent this month"
-          value={<AnimatedNumber cents={thisMonth.spend} />}
+          value={<AnimatedNumber cents={thisMonth.spend} className="money" />}
           delta={spendDelta ? { ...spendDelta, goodDirection: "down", comparisonLabel: "vs last month" } : undefined}
           secondary={totalBudgeted > 0 ? `${formatPercent(thisMonth.spend / totalBudgeted)} of ${formatCents(totalBudgeted)} budget` : "Projected " + formatCents(projectedSpend)}
           href={`/transactions?from=${monthStart}&to=${monthEnd}&kind=expense&transfer=0&excluded=0`}
         />
         <StatTile
           label="Income this month"
-          value={<AnimatedNumber cents={thisMonth.income} />}
+          value={<AnimatedNumber cents={thisMonth.income} className="money" />}
           delta={incomeDelta ? { ...incomeDelta, goodDirection: "up", comparisonLabel: "vs last month" } : undefined}
           href={`/transactions?from=${monthStart}&to=${monthEnd}&kind=income&transfer=0&excluded=0`}
         />
         <StatTile
           label="Cash flow"
-          value={<AnimatedNumber cents={cashFlow} signed />}
+          value={<AnimatedNumber cents={cashFlow} signed className="money" />}
           delta={cashFlowDelta ? { ...cashFlowDelta, goodDirection: "up", comparisonLabel: "vs last month" } : undefined}
           href={`/transactions?from=${monthStart}&to=${monthEnd}&transfer=0&excluded=0`}
         />
@@ -241,7 +241,7 @@ export default async function OverviewPage() {
                     <span className="text-[15px] text-text truncate">{bill.label}</span>
                     <span className="text-xs text-text-3">{bill.dueDate}</span>
                   </div>
-                  <span className="text-[15px] text-text tabular">{formatCents(bill.amount)}</span>
+                  <span className="text-[15px] text-text tabular money">{formatCents(bill.amount)}</span>
                 </div>
               ))}
             </div>
@@ -257,7 +257,7 @@ export default async function OverviewPage() {
                   {t.isPending && <span className="text-[11px] text-warning uppercase tracking-wide">Pending</span>}
                 </div>
                 <span className="font-mono text-xs text-text-3 tabular flex-none">{relativeDate(t.postedDate)}</span>
-                <span className={`text-[15px] tabular flex-none w-24 text-right ${t.amount > 0 ? "text-positive" : "text-text"}`}>
+                <span className={`text-[15px] tabular money flex-none w-24 text-right ${t.amount > 0 ? "text-positive" : "text-text"}`}>
                   {formatCents(t.amount, { signed: true })}
                 </span>
               </div>

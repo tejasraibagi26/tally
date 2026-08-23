@@ -107,7 +107,7 @@ export function TransactionsList({
                   </span>
                 )}
               </span>
-              <span className={`flex-none text-[15px] tabular ${amountColorClass(t.amount)}`}>{formatCents(t.amount, { signed: true })}</span>
+              <span className={`flex-none text-[15px] tabular money ${amountColorClass(t.amount)}`}>{formatCents(t.amount, { signed: true })}</span>
             </div>
             <div className="flex items-center gap-2 min-w-0 pl-[34px] lg:hidden">
               <span className="font-mono text-xs text-text-3 tabular flex-none">{relativeDate(t.postedDate)}</span>
@@ -142,7 +142,7 @@ export function TransactionsList({
               />
               <span className="text-[13px] text-text-2 truncate">{category?.name ?? prettifyPfc(t.pfcDetailed)}</span>
             </span>
-            <span className={`hidden lg:inline text-right text-[15px] tabular ${amountColorClass(t.amount)}`}>
+            <span className={`hidden lg:inline text-right text-[15px] tabular money ${amountColorClass(t.amount)}`}>
               {formatCents(t.amount, { signed: true })}
             </span>
           </button>

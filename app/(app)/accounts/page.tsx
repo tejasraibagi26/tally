@@ -74,15 +74,15 @@ export default async function AccountsPage() {
         <Card className="flex flex-col sm:flex-row">
           <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-text-3">Assets</span>
-            <span className="font-display text-3xl text-positive tabular">{formatCents(totalAssets)}</span>
+            <span className="font-display text-3xl text-positive tabular money">{formatCents(totalAssets)}</span>
           </div>
           <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-text-3">Liabilities</span>
-            <span className="font-display text-3xl text-negative tabular">{formatCents(totalLiabilities)}</span>
+            <span className="font-display text-3xl text-negative tabular money">{formatCents(totalLiabilities)}</span>
           </div>
           <div className="flex-1 p-[18px_24px] flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-text-3">Net</span>
-            <span className="font-display text-3xl text-text tabular">
+            <span className="font-display text-3xl text-text tabular money">
               {formatCents(totalAssets - totalLiabilities)}
             </span>
           </div>
@@ -163,11 +163,11 @@ export default async function AccountsPage() {
                           </span>
                         </div>
                         <div className="flex flex-col gap-1 text-right">
-                          <span className="text-[17px] text-text tabular">
+                          <span className="text-[17px] text-text tabular money">
                             {acct.currentBalance != null ? formatCents(acct.currentBalance) : "—"}
                           </span>
                           {acct.type === "credit" && acct.creditLimit != null && (
-                            <span className="text-xs text-text-3 tabular">of {formatCents(acct.creditLimit)}</span>
+                            <span className="text-xs text-text-3 tabular money">of {formatCents(acct.creditLimit)}</span>
                           )}
                         </div>
                       </div>
@@ -176,7 +176,7 @@ export default async function AccountsPage() {
 
                   <div className="flex items-center justify-between px-4 py-3 text-[13.5px] flex-none">
                     <span className="text-brand">View transactions →</span>
-                    <span className="text-text-3 tabular">{formatCents(total)}</span>
+                    <span className="text-text-3 tabular money">{formatCents(total)}</span>
                   </div>
                 </div>
               </Card>

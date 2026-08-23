@@ -109,7 +109,7 @@ export default function StyleguidePage() {
         <div className="grid grid-cols-4 gap-4">
           <Card className="p-4 flex flex-col gap-2.5">
             <span className="text-xs font-medium uppercase tracking-wide text-text-3">Spent this month</span>
-            <span className="font-display text-3xl text-text tabular">{formatCents(214055)}</span>
+            <span className="font-display text-3xl text-text tabular money">{formatCents(214055)}</span>
             <span className="text-[13.5px] text-negative tabular">▲ 12% vs last month</span>
           </Card>
         </div>

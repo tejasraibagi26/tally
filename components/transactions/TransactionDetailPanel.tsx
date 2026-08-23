@@ -189,7 +189,7 @@ export function TransactionDetailPanel({
           </div>
         </div>
 
-        <span className={cn("font-display text-4xl tabular", transaction.amount < 0 ? "text-negative" : "text-positive")}>
+        <span className={cn("font-display text-4xl tabular money", transaction.amount < 0 ? "text-negative" : "text-positive")}>
           {formatCents(transaction.amount, { signed: true })}
         </span>
 
@@ -308,7 +308,7 @@ export function TransactionDetailPanel({
               splits.map((s, i) => (
                 <div key={i} className="flex items-center justify-between text-[13.5px]">
                   <span className="text-text">{categories.find((c) => c.id === s.categoryId)?.name ?? "—"}</span>
-                  <span className="text-text tabular">{formatCents(-s.amount)}</span>
+                  <span className="text-text tabular money">{formatCents(-s.amount)}</span>
                 </div>
               ))
             )
@@ -339,7 +339,7 @@ export function TransactionDetailPanel({
               <button onClick={addSplitLine} className="text-brand text-[13px] w-fit">
                 + Add split
               </button>
-              <span className={cn("text-xs tabular", splitRemaining === 0 ? "text-text-3" : "text-warning")}>
+              <span className={cn("text-xs tabular money", splitRemaining === 0 ? "text-text-3" : "text-warning")}>
                 {formatCents(splitRemaining)} unallocated
               </span>
             </div>

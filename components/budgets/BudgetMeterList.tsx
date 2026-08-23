@@ -54,7 +54,7 @@ export function BudgetMeterList({
           >
             <div className="flex items-center justify-between text-[13.5px]">
               <span className="text-text group-hover:text-brand transition-colors">{b.categoryName}</span>
-              <span className={overBudget ? "text-negative tabular" : "text-text-2 tabular"}>
+              <span className={overBudget ? "text-negative tabular money" : "text-text-2 tabular money"}>
                 {overBudget ? `${formatCents(Math.abs(b.remaining))} over` : `${formatCents(b.remaining)} left`}
               </span>
             </div>

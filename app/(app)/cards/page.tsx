@@ -60,7 +60,7 @@ export default async function CardsPage() {
       <Card className="flex flex-col sm:flex-row">
         <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Total balance</span>
-          <span className="font-display text-3xl text-negative tabular">{formatCents(totalBalance)}</span>
+          <span className="font-display text-3xl text-negative tabular money">{formatCents(totalBalance)}</span>
         </div>
         <div className="flex-1 p-[18px_24px] flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Overall utilization</span>
@@ -105,7 +105,7 @@ export default async function CardsPage() {
                 <div className="grid grid-cols-2 gap-4 p-4 border-b border-border flex-none">
                   <div className="flex flex-col gap-1">
                     <span className="text-xs text-text-3 uppercase tracking-wide">Balance</span>
-                    <span className="text-[19px] text-text tabular">{formatCents(card.currentBalance)}</span>
+                    <span className="text-[19px] text-text tabular money">{formatCents(card.currentBalance)}</span>
                   </div>
                   <div className="flex flex-col gap-1">
                     <span className="text-xs text-text-3 uppercase tracking-wide">Utilization</span>
@@ -124,13 +124,13 @@ export default async function CardsPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1">
                           <span className="text-xs text-text-3 uppercase tracking-wide">Statement balance</span>
-                          <span className="text-[15px] text-text tabular">
+                          <span className="text-[15px] text-text tabular money">
                             {liability.lastStatementBalance != null ? formatCents(liability.lastStatementBalance) : "—"}
                           </span>
                         </div>
                         <div className="flex flex-col gap-1">
                           <span className="text-xs text-text-3 uppercase tracking-wide">Minimum payment</span>
-                          <span className="text-[15px] text-text tabular">
+                          <span className="text-[15px] text-text tabular money">
                             {liability.minimumPaymentAmount != null ? formatCents(liability.minimumPaymentAmount) : "—"}
                           </span>
                         </div>

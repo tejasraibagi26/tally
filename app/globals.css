@@ -136,10 +136,11 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Privacy toggle (components/PrivacyToggle.tsx): every dollar figure in the
-   app is rendered inside a .tabular span/div (font-variant-numeric is applied
-   universally to numeric display, not just money), so that's the one marker
-   available to mask everything at once without touching each call site.
+/* Privacy toggle (components/PrivacyToggle.tsx): applied explicitly via
+   .money on the span/div wrapping a formatCents(...) call — NOT .tabular,
+   which is also used for dates, percentages, and other non-money numerics
+   that shouldn't be masked (font-variant-numeric: tabular-nums is a font
+   styling concern, unrelated to what's actually sensitive).
    Scoped to span/div only — deliberately excludes <input> so a budget/rule
    amount field stays legible while the user is actively editing it.
    The real text stays in the DOM (just painted transparent, box size intact
@@ -147,15 +148,15 @@ body {
    dots rather than "0.00" so a masked value can never be misread as a real
    zero balance. ::after inherits text-align/line-height from the host span,
    so it lines up whether the figure is left- or right-aligned. */
-[data-hide-amounts="true"] span.tabular,
-[data-hide-amounts="true"] div.tabular {
+[data-hide-amounts="true"] span.money,
+[data-hide-amounts="true"] div.money {
   position: relative;
   color: transparent !important;
   user-select: none;
 }
 
-[data-hide-amounts="true"] span.tabular::after,
-[data-hide-amounts="true"] div.tabular::after {
+[data-hide-amounts="true"] span.money::after,
+[data-hide-amounts="true"] div.money::after {
   content: "•••••";
   position: absolute;
   inset: 0;

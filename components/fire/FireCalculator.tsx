@@ -135,13 +135,13 @@ export function FireCalculator({
       <div className="flex flex-col gap-2">
         <div className="flex items-baseline justify-between">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">FIRE number</span>
-          <span className="font-display text-2xl text-text tabular">{formatCents(fireNumberValue)}</span>
+          <span className="font-display text-2xl text-text tabular money">{formatCents(fireNumberValue)}</span>
         </div>
         <div className="h-2 rounded-full bg-sunken overflow-hidden">
           <div className="h-full rounded-full bg-brand transition-[width]" style={{ width: `${barPct * 100}%` }} />
         </div>
         <div className="flex items-center justify-between text-xs text-text-3">
-          <span>{formatCents(investableNetWorth)} invested today</span>
+          <span className="tabular money">{formatCents(investableNetWorth)} invested today</span>
           <span className="tabular">{formatPercent(progress)} of the way there</span>
         </div>
       </div>
