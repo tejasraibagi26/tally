@@ -15,6 +15,7 @@ export interface BudgetRowData {
   amount: number;
   rolloverEnabled: boolean;
   rolloverFromPrior: number;
+  isFixedAmount: boolean;
   spend: number;
   remaining: number;
 }
@@ -25,6 +26,7 @@ export function BudgetRow({ budget, daysElapsed, daysInMonth }: { budget: Budget
   const [editing, setEditing] = useState(false);
   const [amountInput, setAmountInput] = useState((budget.amount / 100).toFixed(2));
   const [rollover, setRollover] = useState(budget.rolloverEnabled);
+  const [fixed, setFixed] = useState(budget.isFixedAmount);
   const [saving, setSaving] = useState(false);
 
   const totalAvailable = budget.amount + budget.rolloverFromPrior;
@@ -32,7 +34,12 @@ export function BudgetRow({ budget, daysElapsed, daysInMonth }: { budget: Budget
   const overBudget = budget.remaining < 0;
   const barColor = overBudget ? "bg-negative" : pct >= 0.8 ? "bg-warning" : "bg-positive";
 
-  const projected = daysElapsed && daysInMonth ? computeBurnRateProjection(budget.spend, daysElapsed, daysInMonth) : null;
+  // A fixed monthly charge (rent, insurance) posts once rather than
+  // accruing daily, so the spend-so-far/days-elapsed extrapolation below
+  // doesn't mean anything for it — it'd read as "on pace to blow past
+  // budget" the moment the one charge lands, even though nothing more is
+  // coming this month.
+  const projected = !budget.isFixedAmount && daysElapsed && daysInMonth ? computeBurnRateProjection(budget.spend, daysElapsed, daysInMonth) : null;
   const projectedPct = projected != null && totalAvailable > 0 ? Math.min(1, projected / totalAvailable) : null;
   const projectedOver = projected != null && projected > totalAvailable;
 
@@ -44,7 +51,7 @@ export function BudgetRow({ budget, daysElapsed, daysInMonth }: { budget: Budget
       const res = await fetch("/api/budgets", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ month: budget.month, categoryId: budget.categoryId, amount, rolloverEnabled: rollover }),
+        body: JSON.stringify({ month: budget.month, categoryId: budget.categoryId, amount, rolloverEnabled: rollover, isFixedAmount: fixed }),
       });
       if (!res.ok) throw new Error("Failed to save budget");
       setEditing(false);
@@ -97,6 +104,10 @@ export function BudgetRow({ budget, daysElapsed, daysInMonth }: { budget: Budget
             <label className="flex items-center gap-1 text-xs text-text-2">
               <input type="checkbox" checked={rollover} onChange={(e) => setRollover(e.target.checked)} />
               Rollover
+            </label>
+            <label className="flex items-center gap-1 text-xs text-text-2" title="A fixed charge like rent or insurance — skips the burn-rate projection">
+              <input type="checkbox" checked={fixed} onChange={(e) => setFixed(e.target.checked)} />
+              Fixed
             </label>
             <button
               onClick={save}

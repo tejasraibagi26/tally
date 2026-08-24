@@ -1,0 +1,1 @@
+ALTER TABLE "budgets" ADD COLUMN "is_fixed_amount" boolean DEFAULT false NOT NULL;

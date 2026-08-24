@@ -73,6 +73,7 @@ export interface BudgetLine {
   amount: number;
   rolloverEnabled: boolean;
   rolloverFromPrior: number;
+  isFixedAmount: boolean;
   spend: number;
   remaining: number;
 }
@@ -106,6 +107,7 @@ export async function getBudgetsForMonth(userId: string, month: string): Promise
       categoryId: schema.budgets.categoryId,
       amount: schema.budgets.amount,
       rolloverEnabled: schema.budgets.rolloverEnabled,
+      isFixedAmount: schema.budgets.isFixedAmount,
       categoryName: schema.categories.name,
       categoryColorSlot: schema.categories.colorSlot,
     })
@@ -126,6 +128,7 @@ export async function getBudgetsForMonth(userId: string, month: string): Promise
       amount: row.amount,
       rolloverEnabled: row.rolloverEnabled,
       rolloverFromPrior,
+      isFixedAmount: row.isFixedAmount,
       spend: catSpend,
       remaining: computeRemaining(row.amount, rolloverFromPrior, catSpend),
     });

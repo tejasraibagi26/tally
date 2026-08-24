@@ -44,8 +44,11 @@ export function BudgetMeterList({
         const totalAvailable = b.amount + b.rolloverFromPrior;
         const pct = totalAvailable > 0 ? Math.min(1, b.spend / totalAvailable) : b.spend > 0 ? 1 : 0;
         const overBudget = b.remaining < 0;
-        const projected = computeBurnRateProjection(b.spend, daysElapsed, daysInMonth);
-        const projectedPct = totalAvailable > 0 ? Math.min(1, projected / totalAvailable) : null;
+        // See BudgetRow.tsx: a fixed monthly charge (rent, insurance) posts
+        // once rather than accruing daily, so this linear extrapolation
+        // doesn't apply to it.
+        const projected = b.isFixedAmount ? null : computeBurnRateProjection(b.spend, daysElapsed, daysInMonth);
+        const projectedPct = projected != null && totalAvailable > 0 ? Math.min(1, projected / totalAvailable) : null;
         return (
           <Link
             key={b.categoryId}
@@ -63,7 +66,7 @@ export function BudgetMeterList({
                 className="h-full rounded-full"
                 style={{ width: `${pct * 100}%`, background: overBudget ? "var(--negative)" : `var(--series-${b.categoryColorSlot})` }}
               />
-              {projectedPct != null && (
+              {projected != null && projectedPct != null && (
                 <div
                   className="absolute top-0 bottom-0 w-0 border-l-2 border-dashed border-text-3"
                   style={{ left: `${projectedPct * 100}%` }}

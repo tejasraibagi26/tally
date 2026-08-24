@@ -15,6 +15,7 @@ export function AddBudgetForm({ month, categories }: { month: string; categories
   const [categoryId, setCategoryId] = useState(categories[0]?.id ?? "");
   const [amountInput, setAmountInput] = useState("");
   const [rollover, setRollover] = useState(false);
+  const [fixed, setFixed] = useState(false);
   const [saving, setSaving] = useState(false);
 
   if (categories.length === 0) return null;
@@ -28,11 +29,12 @@ export function AddBudgetForm({ month, categories }: { month: string; categories
       const res = await fetch("/api/budgets", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ month, categoryId, amount, rolloverEnabled: rollover }),
+        body: JSON.stringify({ month, categoryId, amount, rolloverEnabled: rollover, isFixedAmount: fixed }),
       });
       if (!res.ok) throw new Error("Failed to create budget");
       setAmountInput("");
       setRollover(false);
+      setFixed(false);
       router.refresh();
     } catch (err) {
       console.error(err);
@@ -65,6 +67,10 @@ export function AddBudgetForm({ month, categories }: { month: string; categories
       <label className="flex items-center gap-1.5 text-sm text-text-2">
         <input type="checkbox" checked={rollover} onChange={(e) => setRollover(e.target.checked)} />
         Rollover unused
+      </label>
+      <label className="flex items-center gap-1.5 text-sm text-text-2" title="A fixed charge like rent or insurance — skips the burn-rate projection, which assumes spend accrues gradually through the month">
+        <input type="checkbox" checked={fixed} onChange={(e) => setFixed(e.target.checked)} />
+        Fixed amount
       </label>
       <Button type="submit" size="sm" disabled={saving}>
         {saving ? "Adding…" : "Add budget"}

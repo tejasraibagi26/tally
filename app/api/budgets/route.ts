@@ -30,6 +30,7 @@ const putSchema = z.object({
   categoryId: z.string().uuid(),
   amount: z.number().int().min(0),
   rolloverEnabled: z.boolean().default(false),
+  isFixedAmount: z.boolean().default(false),
 });
 
 export async function PUT(req: Request) {
@@ -44,14 +45,14 @@ export async function PUT(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid request", issues: parsed.error.issues }, { status: 400 });
   }
-  const { month, categoryId, amount, rolloverEnabled } = parsed.data;
+  const { month, categoryId, amount, rolloverEnabled, isFixedAmount } = parsed.data;
 
   const [budget] = await db
     .insert(schema.budgets)
-    .values({ userId, month, categoryId, amount, rolloverEnabled })
+    .values({ userId, month, categoryId, amount, rolloverEnabled, isFixedAmount })
     .onConflictDoUpdate({
       target: [schema.budgets.userId, schema.budgets.month, schema.budgets.categoryId],
-      set: { amount, rolloverEnabled },
+      set: { amount, rolloverEnabled, isFixedAmount },
     })
     .returning();
 

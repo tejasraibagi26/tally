@@ -300,6 +300,14 @@ export const budgets = pgTable("budgets", {
   amount: bigint("amount", { mode: "number" }).notNull(),
   rolloverEnabled: boolean("rollover_enabled").notNull().default(false),
   rolloverFromPrior: bigint("rollover_from_prior", { mode: "number" }).notNull().default(0),
+  // A fixed monthly charge (rent, insurance) that posts once and doesn't
+  // accrue through the month — computeBurnRateProjection's linear
+  // spend-so-far/days-elapsed extrapolation is meaningless for it (posting
+  // the full amount on day 1 makes it look like it's on pace to blow way
+  // past the budget by month end, when in fact it's simply already done).
+  // Suppresses the projection marker/line for this budget in
+  // BudgetRow.tsx/BudgetMeterList.tsx.
+  isFixedAmount: boolean("is_fixed_amount").notNull().default(false),
 }, (t) => ({
   userMonthIdx: index("budgets_user_month_idx").on(t.userId, t.month),
   uniq: uniqueIndex("budgets_user_month_category_idx").on(t.userId, t.month, t.categoryId),
