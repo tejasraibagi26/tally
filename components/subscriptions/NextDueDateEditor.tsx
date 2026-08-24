@@ -44,18 +44,18 @@ export function NextDueDateEditor({
 
   if (editing) {
     return (
-      <form onSubmit={submit} className="flex items-center gap-1.5">
+      <form onSubmit={submit} className="flex items-center gap-1.5 flex-nowrap">
         <input
           type="date"
           autoFocus
           value={dateInput}
           onChange={(e) => setDateInput(e.target.value)}
-          className="h-8 rounded-control bg-surface-2 border border-border-strong px-2 text-xs text-text"
+          className="h-8 w-[136px] flex-none rounded-control bg-surface-2 border border-border-strong px-2 text-xs text-text"
         />
-        <Button type="submit" size="sm" disabled={saving}>
-          {saving ? "Saving…" : "Save"}
+        <Button type="submit" size="sm" disabled={saving} className="flex-none px-2">
+          {saving ? "…" : "Save"}
         </Button>
-        <Button type="button" variant="ghost" size="sm" disabled={saving} onClick={() => setEditing(false)}>
+        <Button type="button" variant="ghost" size="sm" disabled={saving} onClick={() => setEditing(false)} className="flex-none px-2">
           Cancel
         </Button>
       </form>
@@ -64,15 +64,14 @@ export function NextDueDateEditor({
 
   if (manualNextDueDate) {
     return (
-      <div className="flex items-center gap-2">
-        <span className="font-mono text-xs text-text-2 tabular">{manualNextDueDate}</span>
-        <span className="text-[11px] text-text-3">(set manually)</span>
-        <button type="button" className="text-xs text-brand disabled:opacity-40" disabled={saving} onClick={() => setEditing(true)}>
+      <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap">
+        <span className="font-mono text-xs text-text-2 tabular flex-none">{manualNextDueDate}</span>
+        <button type="button" className="text-xs text-brand disabled:opacity-40 flex-none" disabled={saving} onClick={() => setEditing(true)}>
           Edit
         </button>
         <button
           type="button"
-          className="text-xs text-text-3 hover:text-negative disabled:opacity-40"
+          className="text-xs text-text-3 hover:text-negative disabled:opacity-40 flex-none"
           disabled={saving}
           onClick={() => void save(null)}
         >
@@ -83,9 +82,9 @@ export function NextDueDateEditor({
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <span className="font-mono text-xs text-text-2 tabular">{predictedNextDate ?? "—"}</span>
-      <button type="button" className="text-xs text-brand disabled:opacity-40" disabled={saving} onClick={() => setEditing(true)}>
+    <div className="flex items-center gap-2 flex-nowrap whitespace-nowrap">
+      <span className="font-mono text-xs text-text-2 tabular flex-none">{predictedNextDate ?? "—"}</span>
+      <button type="button" className="text-xs text-brand disabled:opacity-40 flex-none" disabled={saving} onClick={() => setEditing(true)}>
         Override
       </button>
     </div>
