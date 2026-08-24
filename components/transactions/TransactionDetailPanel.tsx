@@ -39,6 +39,7 @@ export interface TransactionDetailData {
   accountName: string;
   accountMask: string | null;
   plaidItemLabel: string | null;
+  isManual: boolean;
   splits: DetailSplit[];
 }
 
@@ -69,6 +70,7 @@ export function TransactionDetailPanel({
   const [splits, setSplits] = useState<DetailSplit[]>([]);
   const [editingSplits, setEditingSplits] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!transaction) return;
@@ -156,6 +158,20 @@ export function TransactionDetailPanel({
       console.error(err);
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function deleteTransaction() {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/transactions/${transaction!.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete transaction");
+      router.refresh();
+      onClose();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -358,6 +374,15 @@ export function TransactionDetailPanel({
           <button onClick={onClose} className="h-9 px-4 rounded-control bg-surface border border-border-strong text-sm font-medium text-text hover:bg-sunken">
             Cancel
           </button>
+          {transaction.isManual && (
+            <button
+              onClick={deleteTransaction}
+              disabled={deleting}
+              className="h-9 px-4 ml-auto rounded-control text-negative text-sm font-medium hover:bg-negative-subtle disabled:opacity-40"
+            >
+              {deleting ? "Deleting…" : "Delete"}
+            </button>
+          )}
         </div>
 
         <span className="font-mono text-[11px] text-text-3">

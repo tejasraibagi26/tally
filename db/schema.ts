@@ -197,6 +197,32 @@ export const rules = pgTable("rules", {
 }));
 
 // ---------------------------------------------------------------------------
+// Manual income schedules
+// ---------------------------------------------------------------------------
+
+// A user-defined recurring paycheck the sync engines can't see (e.g. a bank
+// whose Plaid transactions feed doesn't reliably return the deposit). Each
+// anchor in dayAnchors is a day-of-month (1-31) or 0 for "last day of the
+// month"; lib/incomeSchedule.ts resolves an anchor to an actual date for a
+// given month and shifts a weekend landing back to the preceding Friday.
+// Balances/net worth are unaffected either way (those come from Plaid's
+// balance endpoint, not from summing transactions) — this only exists so
+// income shows up in the transactions list, cash flow, and budgets.
+export const incomeSchedules = pgTable("income_schedules", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  accountId: uuid("account_id").notNull().references(() => accounts.id, { onDelete: "cascade" }),
+  categoryId: uuid("category_id").references(() => categories.id),
+  label: text("label").notNull().default("Paycheck"),
+  amount: bigint("amount", { mode: "number" }).notNull(), // cents, positive
+  dayAnchors: jsonb("day_anchors").$type<number[]>().notNull().default(sql`'[15,0]'::jsonb`),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  userIdx: index("income_schedules_user_idx").on(t.userId),
+}));
+
+// ---------------------------------------------------------------------------
 // Transactions
 // ---------------------------------------------------------------------------
 
@@ -230,6 +256,13 @@ export const transactions = pgTable("transactions", {
   transferGroupId: uuid("transfer_group_id"),
   excludedFromBudget: boolean("excluded_from_budget").notNull().default(false),
   reviewed: boolean("reviewed").notNull().default(false),
+  // True for a row that didn't come from Plaid (currently: paychecks generated
+  // from an income schedule). Never touched by sync — sync only ever matches
+  // rows by plaidTransactionId, which these don't have — and it's what gates
+  // the "Delete" action in the transaction detail panel, since a Plaid-synced
+  // row would just come back on the next sync.
+  isManual: boolean("is_manual").notNull().default(false),
+  incomeScheduleId: uuid("income_schedule_id").references(() => incomeSchedules.id, { onDelete: "set null" }),
   raw: jsonb("raw"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -237,6 +270,7 @@ export const transactions = pgTable("transactions", {
   userDateIdx: index("transactions_user_date_idx").on(t.userId, t.postedDate),
   acctDateIdx: index("transactions_acct_date_idx").on(t.accountId, t.postedDate),
   pendingIdx: index("transactions_pending_idx").on(t.userId).where(sql`is_pending`),
+  incomeScheduleIdx: index("transactions_income_schedule_idx").on(t.incomeScheduleId),
 }));
 
 export const transactionSplits = pgTable("transaction_splits", {

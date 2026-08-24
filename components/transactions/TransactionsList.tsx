@@ -23,6 +23,7 @@ export interface TransactionRowData {
   excludedFromBudget: boolean;
   locationLabel: string | null;
   plaidTransactionId: string | null;
+  isManual: boolean;
   splits: DetailSplit[];
 }
 
@@ -78,6 +79,7 @@ export function TransactionsList({
       accountName: account?.name ?? "—",
       accountMask: account?.mask ?? null,
       plaidItemLabel: account?.plaidItemLabel ?? null,
+      isManual: row.isManual,
       splits: row.splits,
     };
   }
@@ -106,6 +108,11 @@ export function TransactionsList({
                     Pending
                   </span>
                 )}
+                {t.isManual && (
+                  <span className="flex-none px-1.5 py-0.5 rounded-full bg-sunken text-text-3 text-[11px] font-medium uppercase tracking-wide">
+                    Manual
+                  </span>
+                )}
               </span>
               <span className={`flex-none text-[15px] tabular money ${amountColorClass(t.amount)}`}>{formatCents(t.amount, { signed: true })}</span>
             </div>
@@ -129,6 +136,11 @@ export function TransactionsList({
               {t.isPending && (
                 <span className="flex-none px-1.5 py-0.5 rounded-full bg-warning-subtle text-warning text-[11px] font-medium uppercase tracking-wide">
                   Pending
+                </span>
+              )}
+              {t.isManual && (
+                <span className="flex-none px-1.5 py-0.5 rounded-full bg-sunken text-text-3 text-[11px] font-medium uppercase tracking-wide">
+                  Manual
                 </span>
               )}
             </span>

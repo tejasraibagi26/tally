@@ -1,12 +1,13 @@
 import Link from "next/link";
-import { eq } from "drizzle-orm";
-import { User, Lock, Download, Link2, Wand2, ChevronRight, AlertTriangle, type LucideIcon } from "lucide-react";
+import { and, eq, isNull, or } from "drizzle-orm";
+import { User, Lock, Download, Link2, Wand2, Wallet, ChevronRight, AlertTriangle, type LucideIcon } from "lucide-react";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { AccountForm } from "@/components/settings/AccountForm";
 import { PasswordForm } from "@/components/settings/PasswordForm";
 import { DangerZone } from "@/components/settings/DangerZone";
+import { IncomeScheduleManager } from "@/components/settings/IncomeScheduleManager";
 
 function GroupLabel({ children }: { children: string }) {
   return <div className="text-xs font-medium uppercase tracking-[0.06em] text-text-3 px-1">{children}</div>;
@@ -43,6 +44,32 @@ export default async function SettingsPage() {
   const [user] = await db.select().from(schema.users).where(eq(schema.users.id, userId)).limit(1);
   const items = await db.select({ id: schema.plaidItems.id }).from(schema.plaidItems).where(eq(schema.plaidItems.userId, userId));
 
+  const accounts = await db
+    .select({ id: schema.accounts.id, name: schema.accounts.name, mask: schema.accounts.mask })
+    .from(schema.accounts)
+    .where(eq(schema.accounts.userId, userId));
+  const incomeCategories = await db
+    .select({ id: schema.categories.id, name: schema.categories.name })
+    .from(schema.categories)
+    .where(and(eq(schema.categories.kind, "income"), or(isNull(schema.categories.userId), eq(schema.categories.userId, userId))));
+  const incomeSchedules = await db
+    .select({
+      id: schema.incomeSchedules.id,
+      accountId: schema.incomeSchedules.accountId,
+      categoryId: schema.incomeSchedules.categoryId,
+      label: schema.incomeSchedules.label,
+      amount: schema.incomeSchedules.amount,
+      dayAnchors: schema.incomeSchedules.dayAnchors,
+      active: schema.incomeSchedules.active,
+      accountName: schema.accounts.name,
+      accountMask: schema.accounts.mask,
+      categoryName: schema.categories.name,
+    })
+    .from(schema.incomeSchedules)
+    .leftJoin(schema.accounts, eq(schema.incomeSchedules.accountId, schema.accounts.id))
+    .leftJoin(schema.categories, eq(schema.incomeSchedules.categoryId, schema.categories.id))
+    .where(eq(schema.incomeSchedules.userId, userId));
+
   return (
     <div className="max-w-[720px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-8">
       <h1 className="text-2xl font-semibold text-text">Settings</h1>
@@ -59,6 +86,24 @@ export default async function SettingsPage() {
           <CardHeader title="Password" action={<Lock size={17} strokeWidth={1.75} className="text-text-3" />} />
           <div className="p-5">
             <PasswordForm />
+          </div>
+        </Card>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <GroupLabel>Income</GroupLabel>
+        <Card>
+          <CardHeader title="Manual income" action={<Wallet size={17} strokeWidth={1.75} className="text-text-3" />} />
+          <div className="p-5 flex flex-col gap-3">
+            <p className="text-text-2 text-sm">
+              For a paycheck your bank doesn&apos;t sync reliably: set the amount and pay days once, and it&apos;s added
+              to your transactions automatically every payday, including next month&apos;s once this month&apos;s are done.
+            </p>
+            <IncomeScheduleManager
+              accounts={accounts}
+              categories={incomeCategories}
+              schedules={incomeSchedules}
+            />
           </div>
         </Card>
       </div>

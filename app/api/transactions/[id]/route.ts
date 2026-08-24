@@ -95,3 +95,31 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const [updated] = await db.select().from(schema.transactions).where(eq(schema.transactions.id, id)).limit(1);
   return NextResponse.json({ transaction: updated, createdRuleId });
 }
+
+// Manual-only: a Plaid-synced row has no business being deleted here — it'd
+// just come back on the next sync — so this only ever removes a row that
+// isManual (currently: a generated-paycheck transaction, lib/incomeSchedule.ts).
+export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  let userId: string;
+  try {
+    userId = await requireUserId();
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const [existing] = await db
+    .select({ id: schema.transactions.id, userId: schema.transactions.userId, isManual: schema.transactions.isManual })
+    .from(schema.transactions)
+    .where(eq(schema.transactions.id, id))
+    .limit(1);
+  if (!existing || existing.userId !== userId) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  if (!existing.isManual) {
+    return NextResponse.json({ error: "Only manually-added transactions can be deleted" }, { status: 400 });
+  }
+
+  await db.delete(schema.transactions).where(eq(schema.transactions.id, id));
+  return NextResponse.json({ ok: true });
+}

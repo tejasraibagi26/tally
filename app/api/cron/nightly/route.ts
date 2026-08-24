@@ -5,12 +5,14 @@ import { refreshAccountBalances } from "@/lib/plaidBalances";
 import { syncHoldingsForItem, syncInvestmentTransactionsForItem } from "@/lib/plaidInvestments";
 import { syncLiabilitiesForItem } from "@/lib/plaidLiabilities";
 import { computeAndStoreNetWorthSnapshot } from "@/lib/networth";
+import { generateDuePaychecksForAllActiveSchedules } from "@/lib/incomeSchedule";
 import { runSyncStep, type SyncFailure } from "@/lib/syncSteps";
 
 export const maxDuration = 300;
 
 // Nightly (vercel.json: 06:00 UTC, ≈2am Eastern): balance refresh, holdings
-// snapshot, liabilities, and a net-worth snapshot for every item. Budget
+// snapshot, liabilities, and a net-worth snapshot for every item, plus any
+// due manual paychecks (lib/incomeSchedule.ts) across every user. Budget
 // rollover isn't a job — it's computed on read (lib/budgets.ts). Recurring
 // re-detection isn't here either — it already runs after every transaction
 // sync that finds something new (lib/plaidSync.ts).
@@ -38,5 +40,12 @@ export async function GET(req: Request) {
     }
   }
 
-  return NextResponse.json({ ok: true, itemCount: items.length });
+  let paychecksGenerated = 0;
+  try {
+    paychecksGenerated = await generateDuePaychecksForAllActiveSchedules(today);
+  } catch (err) {
+    console.error("Cron nightly: income schedule generation failed", err);
+  }
+
+  return NextResponse.json({ ok: true, itemCount: items.length, paychecksGenerated });
 }
