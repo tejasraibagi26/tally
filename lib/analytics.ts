@@ -1,4 +1,4 @@
-import { and, eq, gte, lt, lte } from "drizzle-orm";
+import { and, asc, eq, gte, lt, lte } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { monthRange, shiftMonth } from "@/lib/budgetMath";
 
@@ -77,6 +77,44 @@ export async function cashFlowTrend(userId: string, months = 13): Promise<CashFl
     const b = byMonth.get(month)!;
     return { month, income: b.income, spend: b.spend, cashFlow: b.income - b.spend };
   });
+}
+
+/**
+ * cashFlowTrend's window, but for the FIRE calculator's defaults: a month
+ * before the user's earliest transaction (they hadn't connected an account
+ * yet — a recent mover with only 2 months on file, say) reads as genuinely
+ * $0 income/spend there, which would badly understate a "trailing 12mo"
+ * estimate for anyone without a full year of history. A month that HAS
+ * history, even a genuine $0-spend one, is left alone — only months before
+ * any data existed get substituted, with the highest real income/spend
+ * month on file standing in as a conservative estimate rather than a silent
+ * $0. Recomputed fresh on every read (nothing's stored), so it keeps
+ * updating toward the real 12-month total as more actual months accumulate
+ * and fewer need substituting.
+ */
+export async function trailingAnnualCashFlowEstimate(userId: string, months = 12): Promise<{ income: number; expenses: number }> {
+  const trend = await cashFlowTrend(userId, months);
+
+  const [earliest] = await db
+    .select({ postedDate: schema.transactions.postedDate })
+    .from(schema.transactions)
+    .where(eq(schema.transactions.userId, userId))
+    .orderBy(asc(schema.transactions.postedDate))
+    .limit(1);
+  const earliestMonth = earliest ? earliest.postedDate.slice(0, 7) + "-01" : null;
+
+  const covered = earliestMonth != null ? trend.filter((m) => m.month >= earliestMonth) : [];
+  const highestIncome = covered.reduce((max, m) => Math.max(max, m.income), 0);
+  const highestSpend = covered.reduce((max, m) => Math.max(max, m.spend), 0);
+
+  let income = 0;
+  let expenses = 0;
+  for (const m of trend) {
+    const isCovered = earliestMonth != null && m.month >= earliestMonth;
+    income += isCovered ? m.income : highestIncome;
+    expenses += isCovered ? m.spend : highestSpend;
+  }
+  return { income, expenses };
 }
 
 export interface BreakdownRow {

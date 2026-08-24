@@ -4,7 +4,7 @@ import { Flame } from "lucide-react";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { formatCents } from "@/lib/money";
-import { cashFlowTrend } from "@/lib/analytics";
+import { trailingAnnualCashFlowEstimate } from "@/lib/analytics";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FireCalculator } from "@/components/fire/FireCalculator";
@@ -36,9 +36,7 @@ export default async function FirePage() {
 
   const investableNetWorth = accounts.filter((a) => a.type === "investment").reduce((sum, a) => sum + (a.currentBalance ?? 0), 0);
 
-  const trend = await cashFlowTrend(userId, 12);
-  const defaultAnnualExpenses = trend.reduce((sum, m) => sum + m.spend, 0);
-  const totalIncome = trend.reduce((sum, m) => sum + m.income, 0);
+  const { income: totalIncome, expenses: defaultAnnualExpenses } = await trailingAnnualCashFlowEstimate(userId, 12);
   const defaultMonthlyContribution = Math.max(0, Math.round((totalIncome - defaultAnnualExpenses) / 12));
 
   const [savedSettings] = await db
