@@ -9,9 +9,19 @@ import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
 import { TransactionsList, type TransactionRowData, type AccountLookup } from "@/components/transactions/TransactionsList";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { groupCategoryOptions, categoryIdsInGroup } from "@/lib/categoryOptions";
+import { monthLastDay } from "@/lib/budgetMath";
 import Link from "next/link";
 
 const PAGE_SIZE = 50;
+
+function currentMonth(): string {
+  const now = new Date();
+  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)).toISOString().slice(0, 10);
+}
+
+function monthLabel(month: string): string {
+  return new Date(month + "T00:00:00Z").toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+}
 
 interface RawLocation {
   city?: string | null;
@@ -47,8 +57,14 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
   const categoryFilter = sp.category ?? "";
   const merchantFilter = sp.merchant ?? "";
-  const fromFilter = sp.from ?? "";
-  const toFilter = sp.to ?? "";
+  // Undefined (never touched) defaults to the current calendar month — a
+  // bare /transactions shouldn't dump all-time history and silently mix in
+  // prior months' spend. An explicit "" (the date inputs cleared and the
+  // form resubmitted) is a deliberate "show all time" and is left alone.
+  const thisMonth = currentMonth();
+  const hasExplicitDateFilter = sp.from !== undefined || sp.to !== undefined;
+  const fromFilter = sp.from ?? thisMonth;
+  const toFilter = sp.to ?? monthLastDay(thisMonth);
   // These three are drill-down-only (set by Overview links, not exposed in the filter form): they let a metric's
   // link reproduce its exact underlying transaction set, e.g. "Spent this month" excludes transfers/excluded rows.
   const kindFilter = sp.kind === "income" || sp.kind === "expense" ? sp.kind : "";
@@ -96,7 +112,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     if (searchCondition) conditions.push(searchCondition);
   }
   const whereClause = and(...conditions);
-  const hasFilters = Boolean(q || accountFilter || pendingOnly || categoryFilter || merchantFilter || fromFilter || toFilter);
+  const hasFilters = Boolean(q || accountFilter || pendingOnly || categoryFilter || merchantFilter || hasExplicitDateFilter);
 
   // Explicit columns (not select-all) + a leftJoin so `kindFilter` can reference categories.kind — this
   // lets a drill-down link reproduce a metric's exact filter set (transfers/excluded/category kind) precisely.
@@ -122,7 +138,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     isManual: schema.transactions.isManual,
   };
 
-  const [rows, countRows] = await Promise.all([
+  const [rows, countRows, anyTxRow] = await Promise.all([
     db
       .select(transactionColumns)
       .from(schema.transactions)
@@ -136,7 +152,9 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
       .from(schema.transactions)
       .leftJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))
       .where(whereClause),
+    db.select({ id: schema.transactions.id }).from(schema.transactions).where(eq(schema.transactions.userId, userId)).limit(1),
   ]);
+  const hasAnyTransactions = anyTxRow.length > 0;
 
   const splitRows = rows.length
     ? await db
@@ -199,7 +217,9 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
       <div className="flex flex-wrap items-center justify-between gap-3 flex-none">
         <div className="flex items-baseline gap-3">
           <h1 className="text-2xl font-semibold text-text">Transactions</h1>
-          <span className="text-[13.5px] text-text-3 tabular">{total} in range</span>
+          <span className="text-[13.5px] text-text-3 tabular">
+            {total} {hasExplicitDateFilter ? "in range" : `in ${monthLabel(thisMonth)}`}
+          </span>
         </div>
         <div className="flex items-center gap-4">
           <Link href="/rules" className="text-sm text-brand">
@@ -276,11 +296,17 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
 
       {rows.length === 0 ? (
         <Card className="flex-none p-10">
-          {total === 0 && !hasFilters ? (
+          {!hasAnyTransactions ? (
             <EmptyState
               icon={Receipt}
               title="Nothing here yet"
               description="Connect an account, or hit Sync now to pull in your transaction history."
+            />
+          ) : !hasFilters ? (
+            <EmptyState
+              icon={Receipt}
+              title={`No transactions in ${monthLabel(thisMonth)}`}
+              description="Nothing's posted yet this month. Use the date filters above to look at a different period."
             />
           ) : (
             <EmptyState
