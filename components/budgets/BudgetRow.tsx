@@ -86,7 +86,7 @@ export function BudgetRow({ budget, daysElapsed, daysInMonth }: { budget: Budget
         <span className="w-1.5 h-1.5 rounded-full flex-none" style={{ background: `var(--series-${budget.categoryColorSlot})` }} />
         <span className="text-[15px] text-text flex-1 min-w-[80px] truncate">{budget.categoryName}</span>
         {budget.rolloverEnabled && budget.rolloverFromPrior !== 0 && (
-          <span className="text-xs text-text-3 tabular money">+{formatCents(budget.rolloverFromPrior)} rollover</span>
+          <span className="text-xs text-text-3 tabular">+{formatCents(budget.rolloverFromPrior)} rollover</span>
         )}
 
         {editing ? (
@@ -122,10 +122,10 @@ export function BudgetRow({ budget, daysElapsed, daysInMonth }: { budget: Budget
           </div>
         ) : (
           <div className="flex flex-wrap items-center gap-3 basis-full sm:basis-auto">
-            <span className={cn("text-[15px] tabular money", overBudget ? "text-negative" : "text-text")}>
+            <span className={cn("text-[15px] tabular", overBudget ? "text-negative" : "text-text")}>
               {formatCents(budget.remaining)} left
             </span>
-            <span className="text-xs text-text-3 tabular money">of {formatCents(budget.amount)}</span>
+            <span className="text-xs text-text-3 tabular">of {formatCents(budget.amount)}</span>
             <Link
               href={`/transactions?category=${budget.categoryId}&from=${budget.month}&to=${monthLastDay(budget.month)}&transfer=0&excluded=0`}
               className="text-xs text-brand"
@@ -153,9 +153,9 @@ export function BudgetRow({ budget, daysElapsed, daysInMonth }: { budget: Budget
         )}
       </div>
       <div className="flex items-center justify-between">
-        <span className="text-xs text-text-3 tabular money">{formatCents(budget.spend)} spent</span>
+        <span className="text-xs text-text-3 tabular">{formatCents(budget.spend)} spent</span>
         {projected != null && (
-          <span className={cn("text-xs tabular money", projectedOver ? "text-warning" : "text-text-3")}>
+          <span className={cn("text-xs tabular", projectedOver ? "text-warning" : "text-text-3")}>
             Projected {formatCents(projected)} by month end
           </span>
         )}

@@ -93,11 +93,11 @@ export default async function SubscriptionsPage() {
           <Card className="flex flex-col sm:flex-row">
             <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-text-3">Monthly (subscriptions)</span>
-              <span className="font-display text-3xl text-text tabular money">{formatCents(monthlyTotal)}</span>
+              <span className="font-display text-3xl text-text tabular">{formatCents(monthlyTotal)}</span>
             </div>
             <div className="flex-1 p-[18px_24px] flex flex-col gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-text-3">Annualized</span>
-              <span className="font-display text-3xl text-text tabular money">{formatCents(annualTotal)}</span>
+              <span className="font-display text-3xl text-text tabular">{formatCents(annualTotal)}</span>
             </div>
           </Card>
 
@@ -132,7 +132,7 @@ export default async function SubscriptionsPage() {
                     {s.accountName ? `${s.accountName} ····${s.accountMask ?? "----"}` : "—"}
                   </span>
                   <span className="text-[13.5px] text-text-2">{FREQUENCY_LABEL[s.frequency] ?? s.frequency}</span>
-                  <span className={`text-right text-[15px] tabular money ${s.averageAmount > 0 ? "text-positive" : "text-text"}`}>
+                  <span className={`text-right text-[15px] tabular ${s.averageAmount > 0 ? "text-positive" : "text-text"}`}>
                     {formatCents(s.averageAmount, { signed: true })}
                   </span>
                   <NextDueDateEditor streamId={s.id} predictedNextDate={s.predictedNextDate} manualNextDueDate={s.manualNextDueDate} />

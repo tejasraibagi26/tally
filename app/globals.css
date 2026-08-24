@@ -147,7 +147,12 @@ body {
    so layout doesn't shift) and a plain run of dots stands in for it — no
    "$", comma, or decimal shape, so it never reads as an actual (possibly
    zero) dollar figure. Same fixed dot count for every value regardless of
-   its actual magnitude — digit count isn't hinted at either. */
+   its actual magnitude — digit count isn't hinted at either. Right-aligned
+   regardless of the host's own text-align: a flex-none amount at the end of
+   a row (CategorySpendBar's legend, BudgetMeterList) sizes its box to the
+   real (invisible) figure's width, which differs row to row, so left-aligned
+   dots would start at a different x per row — right-aligning keeps every
+   row's dot run flush against the same edge instead. */
 [data-hide-amounts="true"] span.money,
 [data-hide-amounts="true"] div.money {
   position: relative;
@@ -162,6 +167,7 @@ body {
   inset: 0;
   color: var(--text-3);
   letter-spacing: 1px;
+  text-align: right;
 }
 
 /* components/ui/LoadingOverlay.tsx: a single brand-colored bar sliding

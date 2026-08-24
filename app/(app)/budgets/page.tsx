@@ -68,15 +68,15 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
         <Card className="flex flex-col sm:flex-row">
           <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-text-3">Budgeted</span>
-            <span className="font-display text-3xl text-text tabular money">{formatCents(totalBudgeted)}</span>
+            <span className="font-display text-3xl text-text tabular">{formatCents(totalBudgeted)}</span>
           </div>
           <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-text-3">Spent</span>
-            <span className="font-display text-3xl text-text tabular money">{formatCents(totalSpend)}</span>
+            <span className="font-display text-3xl text-text tabular">{formatCents(totalSpend)}</span>
           </div>
           <div className="flex-1 p-[18px_24px] flex flex-col gap-2">
             <span className="text-xs font-medium uppercase tracking-wide text-text-3">Remaining</span>
-            <span className={`font-display text-3xl tabular money ${totalRemaining < 0 ? "text-negative" : "text-positive"}`}>
+            <span className={`font-display text-3xl tabular ${totalRemaining < 0 ? "text-negative" : "text-positive"}`}>
               {formatCents(totalRemaining)}
             </span>
           </div>
