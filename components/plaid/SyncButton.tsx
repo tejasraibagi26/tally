@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { LoadingOverlay } from "@/components/ui/LoadingOverlay";
 import { SYNC_RESULT_EVENT, type SyncResultEventDetail } from "@/lib/syncResultEvent";
+import type { SyncProduct } from "@/lib/syncSteps";
 
 interface SyncResult {
   itemId: string;
@@ -12,14 +13,25 @@ interface SyncResult {
   failures: { product: string; label: string }[];
 }
 
-export function SyncAllButton() {
+interface SyncButtonProps {
+  /** Which product(s) to sync, across every item the user owns — scoped to whatever this page actually shows, so a failure banner here never mentions data this page doesn't display. */
+  products: SyncProduct[];
+  label?: string;
+  loadingMessage?: string;
+}
+
+export function SyncButton({ products, label = "Sync now", loadingMessage = "Syncing your connections. This can take a moment." }: SyncButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   async function handleSync() {
     setLoading(true);
     try {
-      const res = await fetch("/api/sync", { method: "POST" });
+      const res = await fetch("/api/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ products }),
+      });
       if (!res.ok) throw new Error("Sync failed");
       const data: { results?: SyncResult[] } = await res.json();
       const failedItems = (data.results ?? [])
@@ -38,9 +50,9 @@ export function SyncAllButton() {
   return (
     <>
       <Button variant="secondary" size="sm" disabled={loading} onClick={handleSync}>
-        {loading ? "Syncing…" : "Sync now"}
+        {loading ? "Syncing…" : label}
       </Button>
-      {loading && <LoadingOverlay message="Syncing your connections. This can take a moment." />}
+      {loading && <LoadingOverlay message={loadingMessage} />}
     </>
   );
 }

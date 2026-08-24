@@ -8,6 +8,8 @@ import { latestHoldingsForUser, portfolioValue, allocationFor, unrealizedGain, p
 import { toNetWorthCurrency, NET_WORTH_CURRENCY } from "@/lib/fx";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { SyncButton } from "@/components/plaid/SyncButton";
+import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
 
 function formatQuantity(q: string): string {
   const n = parseFloat(q);
@@ -57,7 +59,11 @@ export default async function InvestmentsPage() {
   if (holdings.length === 0) {
     return (
       <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-        <h1 className="text-2xl font-semibold text-text">Investments</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-semibold text-text">Investments</h1>
+          <SyncButton products={["holdings", "investments"]} label="Sync holdings" loadingMessage="Syncing your investment holdings. This can take a moment." />
+        </div>
+        <SyncFailureBanner />
         <Card className="p-10">
           <EmptyState
             icon={TrendingUp}
@@ -76,7 +82,12 @@ export default async function InvestmentsPage() {
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold text-text">Investments</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold text-text">Investments</h1>
+        <SyncButton products={["holdings", "investments"]} label="Sync holdings" loadingMessage="Syncing your investment holdings. This can take a moment." />
+      </div>
+
+      <SyncFailureBanner />
 
       <Card className="flex flex-col sm:flex-row">
         <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">

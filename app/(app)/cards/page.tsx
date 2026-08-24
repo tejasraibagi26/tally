@@ -7,6 +7,8 @@ import { Card, CardHeader } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { CreditLimitEditor } from "@/components/cards/CreditLimitEditor";
+import { SyncButton } from "@/components/plaid/SyncButton";
+import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
 import { cn } from "@/lib/cn";
 
 const APR_TYPE_LABEL: Record<string, string> = {
@@ -55,7 +57,12 @@ export default async function CardsPage() {
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold text-text">Credit cards</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold text-text">Credit cards</h1>
+        <SyncButton products={["liabilities"]} label="Sync card details" loadingMessage="Syncing your credit card details. This can take a moment." />
+      </div>
+
+      <SyncFailureBanner />
 
       <Card className="flex flex-col sm:flex-row">
         <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">

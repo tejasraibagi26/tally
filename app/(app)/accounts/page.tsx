@@ -9,6 +9,8 @@ import { StatusBadge, type Status } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LinkButton } from "@/components/plaid/LinkButton";
 import { ItemActionsMenu } from "@/components/plaid/ItemActionsMenu";
+import { SyncButton } from "@/components/plaid/SyncButton";
+import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
 import { SyncFailureToast } from "@/components/plaid/SyncFailureToast";
 import { MOCK_MODE } from "@/lib/config";
 import { freshnessStatus } from "@/lib/freshness";
@@ -73,9 +75,13 @@ export default async function AccountsPage() {
             {items.length === 1 ? "" : "s"}
           </span>
         </div>
-        <LinkButton mode="create" label="Add account" mock={MOCK_MODE} />
+        <div className="flex items-center gap-3">
+          {items.length > 0 && <SyncButton products={["balances"]} label="Sync balances" loadingMessage="Refreshing account balances. This can take a moment." />}
+          <LinkButton mode="create" label="Add account" mock={MOCK_MODE} />
+        </div>
       </div>
 
+      <SyncFailureBanner />
       <SyncFailureToast />
 
       {items.length > 0 && (

@@ -4,7 +4,7 @@ import { Receipt, SearchX } from "lucide-react";
 import { requireUserId } from "@/lib/session";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { SyncAllButton } from "@/components/plaid/SyncAllButton";
+import { SyncButton } from "@/components/plaid/SyncButton";
 import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
 import { TransactionsList, type TransactionRowData, type AccountLookup } from "@/components/transactions/TransactionsList";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
@@ -119,6 +119,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     excludedFromBudget: schema.transactions.excludedFromBudget,
     location: schema.transactions.location,
     plaidTransactionId: schema.transactions.plaidTransactionId,
+    isManual: schema.transactions.isManual,
   };
 
   const [rows, countRows] = await Promise.all([
@@ -167,6 +168,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     excludedFromBudget: t.excludedFromBudget,
     locationLabel: locationLabel(t.location),
     plaidTransactionId: t.plaidTransactionId,
+    isManual: t.isManual,
     splits: splitsByTransaction.get(t.id) ?? [],
   }));
 
@@ -203,7 +205,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
           <Link href="/rules" className="text-sm text-brand">
             Manage rules →
           </Link>
-          <SyncAllButton />
+          <SyncButton products={["transactions"]} loadingMessage="Syncing your transactions. This can take a moment." />
         </div>
       </div>
 

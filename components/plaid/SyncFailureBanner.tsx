@@ -6,11 +6,11 @@ import { SYNC_RESULT_EVENT, type SyncResultEventDetail } from "@/lib/syncResultE
 
 /**
  * Renders full-width wherever it's mounted in the page — deliberately a
- * sibling of SyncAllButton rather than something SyncAllButton renders
- * itself, so the banner isn't confined to the button's own header-row flex
- * slot (it used to render squeezed next to "Manage rules →" instead of
- * spanning the page). SyncAllButton dispatches SYNC_RESULT_EVENT on
- * completion; this just listens for it.
+ * sibling of SyncButton rather than something SyncButton renders itself, so
+ * the banner isn't confined to the button's own header-row flex slot (it
+ * used to render squeezed next to "Manage rules →" instead of spanning the
+ * page). SyncButton dispatches SYNC_RESULT_EVENT on completion, scoped to
+ * whatever product(s) that page's button synced; this just listens for it.
  */
 export function SyncFailureBanner() {
   const [items, setItems] = useState<FailureBannerItem[]>([]);
