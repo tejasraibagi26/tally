@@ -4,6 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { normalizeMerchantKey } from "@/lib/recurringDetection";
+import { generateDueManualBillPayments } from "@/lib/recurringBillGeneration";
 
 const bodySchema = z.object({
   description: z.string().min(1).max(120),
@@ -64,8 +65,17 @@ export async function POST(req: Request) {
       manualNextDueDate,
       status: "active",
       transactionIds: [],
+      isManual: true,
     })
     .returning();
+  if (!stream) {
+    return NextResponse.json({ error: "Failed to create bill" }, { status: 500 });
+  }
 
-  return NextResponse.json({ stream });
+  // Immediately backfill every month between now and the due date rather
+  // than waiting on the next nightly cron — a prepayment already covers
+  // those months, so Budgets should reflect that right away.
+  const generated = await generateDueManualBillPayments(stream);
+
+  return NextResponse.json({ stream, generated });
 }

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
+import { generateDueManualBillPayments } from "@/lib/recurringBillGeneration";
 
 const patchSchema = z.object({
   manualNextDueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
@@ -40,6 +41,18 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     .set({ manualNextDueDate: parsed.data.manualNextDueDate })
     .where(eq(schema.recurringStreams.id, id))
     .returning();
+  if (!stream) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
-  return NextResponse.json({ stream });
+  // Only a manually-added bill gets synthetic transactions — an
+  // auto-detected stream (this same PATCH also backs its "Override" control)
+  // already gets real ones from Plaid, and pushing its due date out further
+  // shouldn't fabricate a duplicate alongside them.
+  let generated = 0;
+  if (stream.isManual) {
+    generated = await generateDueManualBillPayments(stream);
+  }
+
+  return NextResponse.json({ stream, generated });
 }

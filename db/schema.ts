@@ -263,6 +263,12 @@ export const transactions = pgTable("transactions", {
   // row would just come back on the next sync.
   isManual: boolean("is_manual").notNull().default(false),
   incomeScheduleId: uuid("income_schedule_id").references(() => incomeSchedules.id, { onDelete: "set null" }),
+  // Set only for a row lib/recurringBillGeneration.ts fabricated from a
+  // manually-added bill (recurringStreams.isManual) — no .references() here
+  // since recurringStreams is declared further down this file; matches how
+  // categories.parentId/transferGroupId skip an explicit FK for the same
+  // forward-reference reason.
+  recurringStreamId: uuid("recurring_stream_id"),
   raw: jsonb("raw"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -271,6 +277,7 @@ export const transactions = pgTable("transactions", {
   acctDateIdx: index("transactions_acct_date_idx").on(t.accountId, t.postedDate),
   pendingIdx: index("transactions_pending_idx").on(t.userId).where(sql`is_pending`),
   incomeScheduleIdx: index("transactions_income_schedule_idx").on(t.incomeScheduleId),
+  recurringStreamIdx: index("transactions_recurring_stream_idx").on(t.recurringStreamId),
 }));
 
 export const transactionSplits = pgTable("transaction_splits", {
@@ -398,6 +405,13 @@ export const recurringStreams = pgTable("recurring_streams", {
   status: recurringStatusEnum("status").notNull().default("active"),
   confidence: numeric("confidence", { precision: 4, scale: 3 }),
   transactionIds: jsonb("transaction_ids").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
+  // True only for a row created directly via Subscriptions' "+ Add a bill"
+  // (never set by detectRecurringForUser's upsert, same guard as
+  // manualNextDueDate above) — gates lib/recurringBillGeneration.ts, which
+  // only fabricates a monthly transaction for these. An auto-detected stream
+  // already gets real Plaid transactions on its own; synthesizing one
+  // alongside would double-count it.
+  isManual: boolean("is_manual").notNull().default(false),
 }, (t) => ({
   userIdx: index("recurring_user_idx").on(t.userId),
   uniq: uniqueIndex("recurring_user_merchant_account_idx").on(t.userId, t.merchantKey, t.accountId),

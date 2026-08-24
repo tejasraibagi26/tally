@@ -71,6 +71,13 @@
       "when": 1787535081342,
       "tag": "0009_amusing_mantis",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1787536009771,
+      "tag": "0010_charming_orphan",
+      "breakpoints": true
     }
   ]
 }
