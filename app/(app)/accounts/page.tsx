@@ -200,7 +200,7 @@ export default async function AccountsPage() {
 
                   <div className="flex items-center justify-between px-4 py-3 text-[13.5px] flex-none">
                     <span className="text-brand">View transactions →</span>
-                    <span className="text-text-3 tabular money">{formatCents(total)}</span>
+                    <span className="text-right text-text-3 tabular money">{formatCents(total)}</span>
                   </div>
                 </div>
               </Card>

@@ -43,7 +43,7 @@ export function CategorySpendBar({ rows, limit = 6 }: { rows: RankedBarRow[]; li
           <Link key={row.key} href={row.href} className="flex items-center gap-2 group">
             <span className="w-2 h-2 rounded-full flex-none" style={{ background: `var(--series-${(i % 8) + 1})` }} />
             <span className="flex-1 text-[13.5px] text-text truncate group-hover:underline">{row.label}</span>
-            <span className="text-[13.5px] text-text-2 tabular money flex-none">{formatCents(row.total)}</span>
+            <span className="text-right text-[13.5px] text-text-2 tabular money flex-none">{formatCents(row.total)}</span>
           </Link>
         ))}
       </div>

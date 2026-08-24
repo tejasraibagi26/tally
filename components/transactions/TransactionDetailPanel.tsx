@@ -325,7 +325,7 @@ export function TransactionDetailPanel({
               splits.map((s, i) => (
                 <div key={i} className="flex items-center justify-between text-[13.5px]">
                   <span className="text-text">{categories.find((c) => c.id === s.categoryId)?.name ?? "—"}</span>
-                  <span className="text-text tabular money">{formatCents(-s.amount)}</span>
+                  <span className="text-right text-text tabular money">{formatCents(-s.amount)}</span>
                 </div>
               ))
             )

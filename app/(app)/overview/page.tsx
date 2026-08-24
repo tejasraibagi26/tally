@@ -244,7 +244,7 @@ export default async function OverviewPage() {
                     <span className="text-[15px] text-text truncate">{bill.label}</span>
                     <span className="text-xs text-text-3">{bill.dueDate}</span>
                   </div>
-                  <span className="text-[15px] text-text tabular money">{formatCents(bill.amount)}</span>
+                  <span className="text-right text-[15px] text-text tabular money">{formatCents(bill.amount)}</span>
                 </div>
               ))}
             </div>

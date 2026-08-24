@@ -147,12 +147,19 @@ body {
    so layout doesn't shift) and a plain run of dots stands in for it — no
    "$", comma, or decimal shape, so it never reads as an actual (possibly
    zero) dollar figure. Same fixed dot count for every value regardless of
-   its actual magnitude — digit count isn't hinted at either. Right-aligned
-   regardless of the host's own text-align: a flex-none amount at the end of
-   a row (CategorySpendBar's legend, BudgetMeterList) sizes its box to the
-   real (invisible) figure's width, which differs row to row, so left-aligned
-   dots would start at a different x per row — right-aligning keeps every
-   row's dot run flush against the same edge instead. */
+   its actual magnitude — digit count isn't hinted at either.
+   ::after inherits text-align from the host span rather than forcing one —
+   deliberately, so it lines up with wherever the real figure would actually
+   sit. That matters because .money's box is sized to the real (invisible)
+   text's width, not stretched to fill its container: a money span whose
+   right edge is pinned (last child in a `justify-between` row, e.g.
+   CategorySpendBar's legend, BudgetMeterList, Upcoming's bill list) needs
+   `text-right` in its own className so its dots stay flush against that
+   edge across every row, same as the real figure would; one whose left edge
+   is pinned instead (first child, or a lone value with nothing after it)
+   is already correct with the browser's left-align default and should stay
+   that way. Add `text-right` at each call site as needed — don't default
+   it here, or every context gets the same alignment whether it matches or not. */
 [data-hide-amounts="true"] span.money,
 [data-hide-amounts="true"] div.money {
   position: relative;
@@ -167,7 +174,6 @@ body {
   inset: 0;
   color: var(--text-3);
   letter-spacing: 1px;
-  text-align: right;
 }
 
 /* components/ui/LoadingOverlay.tsx: a single brand-colored bar sliding
