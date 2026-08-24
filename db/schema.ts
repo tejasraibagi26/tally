@@ -388,6 +388,13 @@ export const recurringStreams = pgTable("recurring_streams", {
   frequency: recurringFrequencyEnum("frequency").notNull(),
   lastDate: date("last_date"),
   predictedNextDate: date("predicted_next_date"),
+  // User override for predictedNextDate — for a bill that's paid in irregular
+  // lump sums (e.g. rent prepaid several months at once), the gap-based
+  // detection in lib/recurringDetection.ts can't guess the real next date (or
+  // even keeps the stream classified, since detectRecurringForUser's upsert
+  // only ever `set`s the columns it recomputes, never this one). Sticks until
+  // the user clears or changes it themselves — nothing here auto-invalidates it.
+  manualNextDueDate: date("manual_next_due_date"),
   status: recurringStatusEnum("status").notNull().default("active"),
   confidence: numeric("confidence", { precision: 4, scale: 3 }),
   transactionIds: jsonb("transaction_ids").$type<string[]>().notNull().default(sql`'[]'::jsonb`),

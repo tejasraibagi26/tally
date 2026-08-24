@@ -159,28 +159,35 @@ export interface UpcomingBill {
   accountId: string | null;
 }
 
-/** §9 "Upcoming bills": active recurring streams predicted within 30 days, plus credit card due dates within 30 days. */
+/**
+ * §9 "Upcoming bills": recurring streams predicted (or manually overridden,
+ * schema.ts's recurringStreams.manualNextDueDate) within 30 days, plus credit
+ * card due dates within 30 days. A manual override is honored even over a
+ * stream the gap-based detector marked at_risk/cancelled — a bill paid in
+ * occasional lump sums (rent prepaid several months at once) can look
+ * "cancelled" to that algorithm despite the user knowing exactly when it's
+ * next due.
+ */
 export async function upcomingBills(userId: string, withinDays = 30): Promise<UpcomingBill[]> {
   const today = new Date().toISOString().slice(0, 10);
   const cutoff = new Date(Date.now() + withinDays * 86_400_000).toISOString().slice(0, 10);
 
-  const streams = await db
+  const streamRows = await db
     .select({
       description: schema.recurringStreams.description,
       merchantKey: schema.recurringStreams.merchantKey,
       averageAmount: schema.recurringStreams.averageAmount,
       predictedNextDate: schema.recurringStreams.predictedNextDate,
+      manualNextDueDate: schema.recurringStreams.manualNextDueDate,
+      status: schema.recurringStreams.status,
       accountId: schema.recurringStreams.accountId,
     })
     .from(schema.recurringStreams)
-    .where(
-      and(
-        eq(schema.recurringStreams.userId, userId),
-        eq(schema.recurringStreams.status, "active"),
-        gte(schema.recurringStreams.predictedNextDate, today),
-        lte(schema.recurringStreams.predictedNextDate, cutoff),
-      ),
-    );
+    .where(eq(schema.recurringStreams.userId, userId));
+
+  const streams = streamRows
+    .map((s) => ({ ...s, dueDate: s.manualNextDueDate ?? s.predictedNextDate }))
+    .filter((s) => s.dueDate != null && s.dueDate >= today && s.dueDate <= cutoff && (s.manualNextDueDate != null || s.status === "active"));
 
   const cards = await db
     .select({
@@ -198,7 +205,7 @@ export async function upcomingBills(userId: string, withinDays = 30): Promise<Up
       type: "subscription" as const,
       label: s.description ?? s.merchantKey,
       amount: Math.abs(s.averageAmount),
-      dueDate: s.predictedNextDate!,
+      dueDate: s.dueDate!,
       accountId: s.accountId,
     })),
     ...cards.map((c) => ({

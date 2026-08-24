@@ -1,0 +1,1 @@
+ALTER TABLE "recurring_streams" ADD COLUMN "manual_next_due_date" date;

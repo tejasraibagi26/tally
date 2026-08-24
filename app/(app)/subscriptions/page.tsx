@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq, isNull, or } from "drizzle-orm";
 import { Repeat } from "lucide-react";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
@@ -6,6 +6,8 @@ import { formatCents } from "@/lib/money";
 import { Card } from "@/components/ui/Card";
 import { StatusBadge, type Status } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { NextDueDateEditor } from "@/components/subscriptions/NextDueDateEditor";
+import { AddBillForm } from "@/components/subscriptions/AddBillForm";
 
 const FREQUENCY_MONTHLY_MULTIPLIER: Record<string, number> = {
   weekly: 52 / 12,
@@ -40,6 +42,7 @@ export default async function SubscriptionsPage() {
       averageAmount: schema.recurringStreams.averageAmount,
       frequency: schema.recurringStreams.frequency,
       predictedNextDate: schema.recurringStreams.predictedNextDate,
+      manualNextDueDate: schema.recurringStreams.manualNextDueDate,
       status: schema.recurringStreams.status,
       accountName: schema.accounts.name,
       accountMask: schema.accounts.mask,
@@ -51,15 +54,30 @@ export default async function SubscriptionsPage() {
     .leftJoin(schema.categories, eq(schema.recurringStreams.categoryId, schema.categories.id))
     .where(eq(schema.recurringStreams.userId, userId));
 
+  const accounts = await db
+    .select({ id: schema.accounts.id, name: schema.accounts.name, mask: schema.accounts.mask })
+    .from(schema.accounts)
+    .where(eq(schema.accounts.userId, userId));
+  const expenseCategories = await db
+    .select({ id: schema.categories.id, name: schema.categories.name })
+    .from(schema.categories)
+    .where(and(eq(schema.categories.kind, "expense"), or(isNull(schema.categories.userId), eq(schema.categories.userId, userId))));
+
   streams.sort((a, b) => Math.abs(b.averageAmount) - Math.abs(a.averageAmount));
 
-  const activeExpenseStreams = streams.filter((s) => s.status !== "cancelled" && s.averageAmount < 0);
+  // A manual override (rent prepaid in lump sums, etc.) counts as still active
+  // for this total even if the gap-based detector marked it cancelled/at_risk —
+  // the user has confirmed it's a real ongoing bill, just off the algorithm's cadence.
+  const activeExpenseStreams = streams.filter((s) => (s.status !== "cancelled" || s.manualNextDueDate != null) && s.averageAmount < 0);
   const monthlyTotal = activeExpenseStreams.reduce((sum, s) => sum + Math.abs(s.averageAmount) * (FREQUENCY_MONTHLY_MULTIPLIER[s.frequency] ?? 1), 0);
   const annualTotal = monthlyTotal * 12;
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold text-text">Subscriptions &amp; recurring</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-2xl font-semibold text-text">Subscriptions &amp; recurring</h1>
+        <AddBillForm accounts={accounts} categories={expenseCategories} />
+      </div>
 
       {streams.length === 0 ? (
         <Card className="p-10">
@@ -67,7 +85,7 @@ export default async function SubscriptionsPage() {
             icon={Repeat}
             animation="spin"
             title="Nothing detected yet"
-            description="Recurring charges and income show up here automatically once a merchant, account, and amount repeat at least 3 times with a stable interval."
+            description="Recurring charges and income show up here automatically once a merchant, account, and amount repeat at least 3 times with a stable interval. Paid in irregular lump sums (e.g. rent prepaid ahead)? Add it manually above instead."
           />
         </Card>
       ) : (
@@ -85,7 +103,7 @@ export default async function SubscriptionsPage() {
 
           <Card className="overflow-hidden">
             <div className="overflow-x-auto">
-              <div className="grid grid-cols-[minmax(180px,1fr)_140px_150px_130px_130px_120px_130px] gap-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 min-w-[990px]">
+              <div className="grid grid-cols-[minmax(180px,1fr)_140px_150px_130px_130px_220px_130px] gap-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 min-w-[1090px]">
                 <span>Merchant</span>
                 <span>Category</span>
                 <span>Account</span>
@@ -97,7 +115,7 @@ export default async function SubscriptionsPage() {
               {streams.map((s) => (
                 <div
                   key={s.id}
-                  className="grid grid-cols-[minmax(180px,1fr)_140px_150px_130px_130px_120px_130px] gap-3 items-center px-4 py-2.5 border-b border-border last:border-b-0 min-w-[990px]"
+                  className="grid grid-cols-[minmax(180px,1fr)_140px_150px_130px_130px_220px_130px] gap-3 items-center px-4 py-2.5 border-b border-border last:border-b-0 min-w-[1090px]"
                 >
                   <span className="text-[15px] text-text truncate">{s.description ?? s.merchantKey}</span>
                   <span className="flex items-center gap-1.5 min-w-0">
@@ -117,11 +135,15 @@ export default async function SubscriptionsPage() {
                   <span className={`text-right text-[15px] tabular money ${s.averageAmount > 0 ? "text-positive" : "text-text"}`}>
                     {formatCents(s.averageAmount, { signed: true })}
                   </span>
-                  <span className="font-mono text-xs text-text-2 tabular">{s.predictedNextDate ?? "—"}</span>
-                  <StatusBadge
-                    status={statusBadge(s.status)}
-                    label={s.status === "active" ? "Active" : s.status === "at_risk" ? "At risk" : "Cancelled"}
-                  />
+                  <NextDueDateEditor streamId={s.id} predictedNextDate={s.predictedNextDate} manualNextDueDate={s.manualNextDueDate} />
+                  {s.manualNextDueDate ? (
+                    <StatusBadge status="syncing" label="Manual" />
+                  ) : (
+                    <StatusBadge
+                      status={statusBadge(s.status)}
+                      label={s.status === "active" ? "Active" : s.status === "at_risk" ? "At risk" : "Cancelled"}
+                    />
+                  )}
                 </div>
               ))}
             </div>
