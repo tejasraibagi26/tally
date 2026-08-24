@@ -144,10 +144,10 @@ body {
    Scoped to span/div only — deliberately excludes <input> so a budget/rule
    amount field stays legible while the user is actively editing it.
    The real text stays in the DOM (just painted transparent, box size intact
-   so layout doesn't shift) and an eye-off glyph (matching PrivacyToggle's
-   own icon) stands in for it, centered in that same box — no digit count,
-   shape, or "$" is shown at all, so it reads as "hidden" rather than as a
-   fake dollar figure that could be misread as a real one. */
+   so layout doesn't shift) and a plain run of dots stands in for it — no
+   "$", comma, or decimal shape, so it never reads as an actual (possibly
+   zero) dollar figure. Same fixed dot count for every value regardless of
+   its actual magnitude — digit count isn't hinted at either. */
 [data-hide-amounts="true"] span.money,
 [data-hide-amounts="true"] div.money {
   position: relative;
@@ -157,18 +157,11 @@ body {
 
 [data-hide-amounts="true"] span.money::after,
 [data-hide-amounts="true"] div.money::after {
-  content: "";
+  content: "••••••";
   position: absolute;
   inset: 0;
-  background-color: var(--text-3);
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49'/%3E%3Cpath d='M14.084 14.158a3 3 0 0 1-4.242-4.242'/%3E%3Cpath d='M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143'/%3E%3Cpath d='m2 2 20 20'/%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49'/%3E%3Cpath d='M14.084 14.158a3 3 0 0 1-4.242-4.242'/%3E%3Cpath d='M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143'/%3E%3Cpath d='m2 2 20 20'/%3E%3C/svg%3E");
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-size: 15px 15px;
-  mask-size: 15px 15px;
+  color: var(--text-3);
+  letter-spacing: 1px;
 }
 
 /* components/ui/LoadingOverlay.tsx: a single brand-colored bar sliding
