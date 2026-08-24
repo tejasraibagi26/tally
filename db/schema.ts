@@ -79,6 +79,9 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   passwordHash: text("password_hash").notNull(),
   name: text("name"),
+  // Optional — only entered if the user wants the FIRE calculator to show
+  // the age (not just years away) they'll hit their FIRE number.
+  birthDate: date("birth_date"),
   timezone: text("timezone").notNull().default("America/New_York"),
   baseCurrency: text("base_currency").notNull().default("USD"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

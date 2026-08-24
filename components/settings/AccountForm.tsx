@@ -9,16 +9,25 @@ const inputClass =
   "h-9 rounded-control border border-border-strong bg-surface px-3 text-[15px] text-text focus:outline-none focus:ring-2 focus:ring-info";
 const labelClass = "text-xs font-medium uppercase tracking-wide text-text-2";
 
-export function AccountForm({ initialName, initialEmail }: { initialName: string; initialEmail: string }) {
+export function AccountForm({
+  initialName,
+  initialEmail,
+  initialBirthDate,
+}: {
+  initialName: string;
+  initialEmail: string;
+  initialBirthDate: string | null;
+}) {
   const router = useRouter();
   const [name, setName] = useState(initialName);
   const [email, setEmail] = useState(initialEmail);
+  const [birthDate, setBirthDate] = useState(initialBirthDate ?? "");
   const [currentPassword, setCurrentPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const hasChanges = name !== initialName || email !== initialEmail;
+  const hasChanges = name !== initialName || email !== initialEmail || birthDate !== (initialBirthDate ?? "");
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -28,7 +37,7 @@ export function AccountForm({ initialName, initialEmail }: { initialName: string
       const res = await fetch("/api/account", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, currentPassword }),
+        body: JSON.stringify({ name, email, birthDate: birthDate || null, currentPassword }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -84,6 +93,22 @@ export function AccountForm({ initialName, initialEmail }: { initialName: string
             setSaved(false);
           }}
         />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <label className={labelClass} htmlFor="birthDate">
+          Birthdate
+        </label>
+        <input
+          id="birthDate"
+          type="date"
+          className={inputClass}
+          value={birthDate}
+          onChange={(e) => {
+            setBirthDate(e.target.value);
+            setSaved(false);
+          }}
+        />
+        <span className="text-xs text-text-3">Optional — lets the FIRE calculator show the age you&apos;ll reach it, not just years away.</span>
       </div>
 
       {hasChanges && (

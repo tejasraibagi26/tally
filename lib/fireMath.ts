@@ -57,6 +57,28 @@ export function yearsToFire({ currentValue, monthlyContribution, annualReturnRat
   return { years: months / 12, alreadyThere: false };
 }
 
+/** Whole-years-old age as of `asOf` — accounts for whether the birthday has happened yet this year, not just a naive year subtraction. */
+export function ageAsOf(birthDate: string, asOf: string): number {
+  const birth = new Date(birthDate + "T00:00:00Z");
+  const today = new Date(asOf + "T00:00:00Z");
+  let age = today.getUTCFullYear() - birth.getUTCFullYear();
+  const hadBirthdayThisYear =
+    today.getUTCMonth() > birth.getUTCMonth() || (today.getUTCMonth() === birth.getUTCMonth() && today.getUTCDate() >= birth.getUTCDate());
+  if (!hadBirthdayThisYear) age -= 1;
+  return age;
+}
+
+export interface FireAgeResult {
+  age: number; // fractional — e.g. 42.3
+  year: number; // calendar year, rounded
+}
+
+/** Given the user's current (whole-years) age and yearsToFire's result, the fractional age and calendar year they'll hit their FIRE number. */
+export function fireAgeAndYear(currentAge: number, yearsToFire: number, asOf: string): FireAgeResult {
+  const currentYear = new Date(asOf + "T00:00:00Z").getUTCFullYear();
+  return { age: currentAge + yearsToFire, year: currentYear + Math.round(yearsToFire) };
+}
+
 export interface ProjectionPoint {
   year: number;
   projectedValue: number;

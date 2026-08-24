@@ -45,6 +45,9 @@ export default async function FirePage() {
     .where(and(eq(schema.fireSettings.userId, userId)))
     .limit(1);
 
+  const [user] = await db.select({ birthDate: schema.users.birthDate }).from(schema.users).where(eq(schema.users.id, userId)).limit(1);
+  const today = new Date().toISOString().slice(0, 10);
+
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
       <h1 className="text-2xl font-semibold text-text">FIRE calculator</h1>
@@ -67,6 +70,8 @@ export default async function FirePage() {
           defaultAnnualExpenses={defaultAnnualExpenses}
           defaultMonthlyContribution={defaultMonthlyContribution}
           savedSettings={savedSettings ?? null}
+          birthDate={user?.birthDate ?? null}
+          today={today}
         />
       </Card>
     </div>

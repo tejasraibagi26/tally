@@ -92,6 +92,13 @@
       "when": 1787537527898,
       "tag": "0012_misty_warbound",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1787541226462,
+      "tag": "0013_shiny_titanium_man",
+      "breakpoints": true
     }
   ]
 }

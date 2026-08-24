@@ -8,11 +8,14 @@ import { requireUserId } from "@/lib/session";
 const bodySchema = z.object({
   name: z.string().trim().max(200).optional(),
   email: z.string().trim().toLowerCase().email(),
+  birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
   currentPassword: z.string().min(1),
 });
 
-// Updates name/email. Email is the login identifier, so it (like a password
-// change) requires the current password — this isn't a "add a field" form.
+// Updates name/email/birthDate. Email is the login identifier, so it (like a
+// password change) requires the current password — this isn't a "add a
+// field" form. birthDate isn't sensitive on its own, but it's bundled into
+// this same password-gated form rather than a separate one, same as name.
 export async function PATCH(req: Request) {
   let userId: string;
   try {
@@ -25,7 +28,7 @@ export async function PATCH(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
-  const { name, email, currentPassword } = parsed.data;
+  const { name, email, birthDate, currentPassword } = parsed.data;
 
   const [user] = await db.select().from(schema.users).where(eq(schema.users.id, userId)).limit(1);
   if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -38,7 +41,7 @@ export async function PATCH(req: Request) {
   try {
     await db
       .update(schema.users)
-      .set({ name: name || null, email })
+      .set({ name: name || null, email, ...(birthDate !== undefined ? { birthDate } : {}) })
       .where(eq(schema.users.id, userId));
   } catch (err) {
     // Unique constraint on email.

@@ -2,8 +2,9 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { formatCents, formatPercent } from "@/lib/money";
-import { fireNumber, fireProgressPct, yearsToFire, projectionSeries } from "@/lib/fireMath";
+import { fireNumber, fireProgressPct, yearsToFire, projectionSeries, ageAsOf, fireAgeAndYear } from "@/lib/fireMath";
 import { Button } from "@/components/ui/Button";
 import { FireProjectionChart } from "@/components/charts/FireProjectionChart";
 import { cn } from "@/lib/cn";
@@ -20,11 +21,15 @@ export function FireCalculator({
   defaultAnnualExpenses,
   defaultMonthlyContribution,
   savedSettings,
+  birthDate,
+  today,
 }: {
   investableNetWorth: number; // cents
   defaultAnnualExpenses: number; // cents
   defaultMonthlyContribution: number; // cents
   savedSettings: FireSettingsData | null;
+  birthDate: string | null;
+  today: string; // server-computed "YYYY-MM-DD", so age math doesn't depend on the client's clock/hydration timing
 }) {
   const router = useRouter();
   const [swr, setSwr] = useState(savedSettings ? parseFloat(savedSettings.swr) : 0.04);
@@ -37,14 +42,15 @@ export function FireCalculator({
   const annualExpenses = Math.round((parseFloat(expensesInput) || 0) * 100);
   const monthlyContribution = Math.round((parseFloat(contributionInput) || 0) * 100);
 
-  const { fireNumberValue, progress, yearsResult, chartPoints } = useMemo(() => {
+  const { fireNumberValue, progress, yearsResult, chartPoints, ageResult } = useMemo(() => {
     const fireNumberValue = fireNumber(annualExpenses, swr);
     const progress = fireProgressPct(investableNetWorth, fireNumberValue);
     const yearsResult = yearsToFire({ currentValue: investableNetWorth, monthlyContribution, annualReturnRate: expectedReturn, targetValue: fireNumberValue });
     const horizonYears = yearsResult.years != null ? Math.min(Math.max(Math.ceil(yearsResult.years) + 2, 5), 40) : 40;
     const chartPoints = projectionSeries({ currentValue: investableNetWorth, monthlyContribution, annualReturnRate: expectedReturn, horizonYears });
-    return { fireNumberValue, progress, yearsResult, chartPoints };
-  }, [annualExpenses, swr, investableNetWorth, monthlyContribution, expectedReturn]);
+    const ageResult = birthDate && yearsResult.years != null ? fireAgeAndYear(ageAsOf(birthDate, today), yearsResult.years, today) : null;
+    return { fireNumberValue, progress, yearsResult, chartPoints, ageResult };
+  }, [annualExpenses, swr, investableNetWorth, monthlyContribution, expectedReturn, birthDate, today]);
 
   const barPct = Math.min(1, Math.max(0, progress));
 
@@ -152,9 +158,23 @@ export function FireCalculator({
         ) : yearsResult.years == null ? (
           <span className="text-[15px] font-medium text-warning">Not reachable with these inputs. Raise the contribution or expected return.</span>
         ) : (
-          <span className="text-[15px] font-medium text-text">
-            <span className="tabular">{yearsResult.years.toFixed(1)} years</span> to FIRE at this pace
-          </span>
+          <div className="flex flex-col gap-1">
+            <span className="text-[15px] font-medium text-text">
+              <span className="tabular">{yearsResult.years.toFixed(1)} years</span> to FIRE at this pace
+            </span>
+            {ageResult ? (
+              <span className="text-[13px] text-text-2">
+                You&apos;ll be <span className="tabular">{Math.round(ageResult.age)}</span> in <span className="tabular">{ageResult.year}</span>
+              </span>
+            ) : (
+              <span className="text-[13px] text-text-3">
+                <Link href="/settings" className="text-brand hover:underline">
+                  Add your birthdate
+                </Link>{" "}
+                to see the age you&apos;ll hit this at, not just years away.
+              </span>
+            )}
+          </div>
         )}
       </div>
 

@@ -1,5 +1,43 @@
 import { describe, it, expect } from "vitest";
-import { fireNumber, fireProgressPct, yearsToFire, projectionSeries } from "./fireMath";
+import { fireNumber, fireProgressPct, yearsToFire, projectionSeries, ageAsOf, fireAgeAndYear } from "./fireMath";
+
+describe("ageAsOf", () => {
+  it("counts a full year once the birthday has passed this year", () => {
+    expect(ageAsOf("1990-01-15", "2026-06-01")).toBe(36);
+  });
+
+  it("hasn't incremented yet if the birthday is later this year", () => {
+    expect(ageAsOf("1990-12-15", "2026-06-01")).toBe(35);
+  });
+
+  it("counts the birthday itself as the new age", () => {
+    expect(ageAsOf("1990-06-01", "2026-06-01")).toBe(36);
+  });
+
+  it("the day before a birthday is still the old age", () => {
+    expect(ageAsOf("1990-06-01", "2026-05-31")).toBe(35);
+  });
+});
+
+describe("fireAgeAndYear", () => {
+  it("adds fractional years-to-fire onto the current age", () => {
+    const result = fireAgeAndYear(35, 12.3, "2026-06-01");
+    expect(result.age).toBeCloseTo(47.3, 6);
+  });
+
+  it("rounds years-to-fire onto the current calendar year", () => {
+    const result = fireAgeAndYear(35, 12.3, "2026-06-01");
+    expect(result.year).toBe(2038);
+  });
+
+  it("rounds down under half a year", () => {
+    expect(fireAgeAndYear(35, 5.2, "2026-06-01").year).toBe(2031);
+  });
+
+  it("rounds up at half a year or more", () => {
+    expect(fireAgeAndYear(35, 5.5, "2026-06-01").year).toBe(2032);
+  });
+});
 
 describe("fireNumber", () => {
   it("is 25x annual expenses at the 4% SWR", () => {

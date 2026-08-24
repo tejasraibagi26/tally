@@ -79,7 +79,7 @@ export default async function SettingsPage() {
         <Card>
           <CardHeader title="Account" action={<User size={17} strokeWidth={1.75} className="text-text-3" />} />
           <div className="p-5">
-            <AccountForm initialName={user?.name ?? ""} initialEmail={user?.email ?? ""} />
+            <AccountForm initialName={user?.name ?? ""} initialEmail={user?.email ?? ""} initialBirthDate={user?.birthDate ?? null} />
           </div>
         </Card>
         <Card>
