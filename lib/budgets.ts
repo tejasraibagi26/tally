@@ -39,6 +39,62 @@ function rolledUpSpend(spend: Map<string, number>, rollup: Map<string, string[]>
   return ids.reduce((sum, id) => sum + (spend.get(id) ?? 0), 0);
 }
 
+function currentMonth(): string {
+  const now = new Date();
+  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)).toISOString().slice(0, 10);
+}
+
+/**
+ * A budget row only ever exists for the month it was explicitly created in —
+ * there's no template/recurrence concept, so a fresh month is otherwise a
+ * blank slate every time. The first time the actual current month is read
+ * with nothing budgeted yet, this copies every line (category, amount,
+ * rollover, fixed-amount) from the immediately preceding month, so opening
+ * Budgets (or Overview) on the 1st isn't empty. Past and future months are
+ * left alone — only "today's" month gets this lazy carry-forward, so
+ * browsing Prev/Next never fabricates budgets for a period that never had
+ * any. Skips entirely once the current month has even one row, so it never
+ * overwrites a month you've already started customizing yourself.
+ * onConflictDoNothing guards a race between concurrent requests (Overview
+ * and Budgets loading in parallel) both seeing "empty" at once.
+ */
+async function ensureMonthSeeded(userId: string, month: string): Promise<void> {
+  if (month !== currentMonth()) return;
+
+  const [already] = await db
+    .select({ id: schema.budgets.id })
+    .from(schema.budgets)
+    .where(and(eq(schema.budgets.userId, userId), eq(schema.budgets.month, month)))
+    .limit(1);
+  if (already) return;
+
+  const priorMonth = shiftMonth(month, -1);
+  const priorRows = await db
+    .select({
+      categoryId: schema.budgets.categoryId,
+      amount: schema.budgets.amount,
+      rolloverEnabled: schema.budgets.rolloverEnabled,
+      isFixedAmount: schema.budgets.isFixedAmount,
+    })
+    .from(schema.budgets)
+    .where(and(eq(schema.budgets.userId, userId), eq(schema.budgets.month, priorMonth)));
+  if (priorRows.length === 0) return;
+
+  await db
+    .insert(schema.budgets)
+    .values(
+      priorRows.map((r) => ({
+        userId,
+        month,
+        categoryId: r.categoryId,
+        amount: r.amount,
+        rolloverEnabled: r.rolloverEnabled,
+        isFixedAmount: r.isFixedAmount,
+      })),
+    )
+    .onConflictDoNothing();
+}
+
 /** Σ |amount| for non-transfer, non-excluded transactions, per category, for one month. */
 export async function spendByCategory(userId: string, month: string): Promise<Map<string, number>> {
   const { start, end } = monthRange(month);
@@ -102,6 +158,8 @@ async function priorMonthRollover(userId: string, categoryId: string, month: str
 }
 
 export async function getBudgetsForMonth(userId: string, month: string): Promise<BudgetLine[]> {
+  await ensureMonthSeeded(userId, month);
+
   const rows = await db
     .select({
       categoryId: schema.budgets.categoryId,
