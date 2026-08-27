@@ -1,0 +1,25 @@
+{
+  "name": "@tally/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./fireMath": "./src/fireMath.ts",
+    "./budgetMath": "./src/budgetMath.ts",
+    "./portfolioMath": "./src/portfolioMath.ts",
+    "./incomeScheduleMath": "./src/incomeScheduleMath.ts",
+    "./transferDetection": "./src/transferDetection.ts",
+    "./rulesEngine": "./src/rulesEngine.ts",
+    "./recurringDetection": "./src/recurringDetection.ts",
+    "./money": "./src/money.ts",
+    "./fx": "./src/fx.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
