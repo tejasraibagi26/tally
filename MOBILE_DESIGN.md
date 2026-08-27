@@ -150,14 +150,48 @@ style.
 
 ### 3.4 Spacing, radius, elevation
 
-Identical scale to `DESIGN.md §6`: 4/8/12/16/24/32/48/64 spacing; radius 8
-(controls) / 12 (cards) / 16 (panels, sheets) / 999 (pills). Page padding 16
-(mobile has no 32px desktop gutter to preserve). Elevation: RN has no
-box-shadow — use `elevation` (Android) / `shadowColor`+`shadowOpacity`+
-`shadowRadius` (iOS, ignored on Android) matched to `raised`
-(`shadow-raised` ≈ elevation 1) and `overlay` (bottom sheets/modals ≈
-elevation 8). Dark mode still drops the shadow and raises `surface-2` a step,
-same rule as web.
+**Visual texture is intentionally softer than the web app** — closer to
+Wealthsimple's app language than `DESIGN.md`'s hairline-and-shadow-barely-there
+treatment, while keeping every actual token (colors, brand accent, serif hero
+numbers) identical. Concretely:
+
+- **Cards drop the visible `--border` hairline and separate from `--canvas`
+  with shadow alone**: `0 2px 12px -2px rgba(26,25,23,.07)` at rest (Android
+  `elevation` equivalent ≈ 2). This replaces `DESIGN.md §6`'s "hairlines
+  first, shadow second" rule for mobile specifically — mobile cards read as
+  soft, floating surfaces, not bordered boxes.
+- **Larger radii than web**: 16 (controls/inputs, up from 8), 18 (cards, up
+  from 12), 999 (pills, unchanged). Bigger radii read as friendlier/more
+  native-app than the web's tighter, more editorial corners.
+- **More generous spacing**: page padding 20 (up from the 16 in §3.4's
+  original web-parity draft), section gaps 24-28 (vs. web's 16-24), stat-tile
+  and card internal padding 18-20. Whitespace does more of the separating
+  work that hairlines used to do.
+- **Hero net-worth figure sits directly on `--canvas`**, no card container —
+  the single biggest number on the screen shouldn't be boxed in.
+- **Stat tiles get a soft tint background** (one of the existing
+  `*-subtle` tokens — `negative-subtle`, `positive-subtle`, `brand-subtle`,
+  `info-subtle` — already defined in `app/globals.css`, rotated per tile by
+  meaning: spend → negative-subtle, income → positive-subtle, cash flow →
+  brand-subtle, credit utilization → info-subtle) instead of a plain
+  white-with-border card. This is the one place mobile explicitly reaches for
+  a categorical color treatment the web app doesn't use at this density —
+  still drawing only from existing tokens, never a new hue.
+- **List rows inside a card**: dividers, where kept (transaction list,
+  account rows), lighten from `--border` at full opacity to ~55% (`rgba(228,
+  225, 217, .55)` in light) and get taller row padding (16 vs. web's tighter
+  44px table row) — separation comes from air first, a faint line second.
+- **Tab bar and primary buttons**: tab bar drops its top border for a soft
+  upward shadow (`0 -4px 16px -4px rgba(26,25,23,.08)`); the primary CTA
+  button becomes a full pill (radius 999, up from 8) with its own soft brand-
+  tinted shadow (`0 8px 20px -6px rgba(20,81,63,.45)`) rather than a flat
+  filled rectangle.
+
+Elevation mechanics: RN has no `box-shadow` — use `elevation` (Android) /
+`shadowColor`+`shadowOpacity`+`shadowRadius` (iOS, ignored on Android) tuned
+to match the values above. Dark mode still drops/reduces the shadow and
+raises `surface-2` a step, same rule as web (`DESIGN.md §6`), just calibrated
+against mobile's stronger resting shadow rather than web's barely-there one.
 
 ---
 
@@ -303,6 +337,7 @@ persisting settings requires an API call).
 
 | Web component (`DESIGN.md §8`) | Mobile equivalent |
 |---|---|
+| Card / panel (hairline border, near-flat) | Soft shadow card, no visible border, 18px radius (see §3.4) |
 | Table | Card list (row = merchant/category left, amount right, 2-line stack) |
 | Side panel (420px, slide from right) | Bottom sheet (85% height, slide up) |
 | Modal | Centered modal, unchanged (Plaid Link, confirm dialogs) |
