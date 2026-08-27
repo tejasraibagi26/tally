@@ -6,10 +6,10 @@ import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
 import { recordAudit } from "@/lib/audit";
 
-export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

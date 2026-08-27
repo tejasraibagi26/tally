@@ -18,7 +18,7 @@ const patchSchema = z.object({
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -50,10 +50,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 // that slug, and deleting a used category would orphan transactions/budgets.
 // Merging into another category first (not yet a separate endpoint) is the
 // path for a category that's already in use.
-export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

@@ -12,14 +12,14 @@ import { syncLiabilitiesForItem } from "@/lib/plaidLiabilities";
 // Stands in for /api/plaid/link-token + /api/plaid/exchange when MOCK_MODE
 // is on: no Plaid credentials required. Real accounts/plaid_items rows, so
 // the rest of the app (balances, health badges, delete) works unmodified.
-export async function POST() {
+export async function POST(req: Request) {
   if (!MOCK_MODE) {
     return NextResponse.json({ error: "Mock mode is disabled" }, { status: 403 });
   }
 
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

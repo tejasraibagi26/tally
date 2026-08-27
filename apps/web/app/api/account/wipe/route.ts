@@ -16,7 +16,7 @@ const bodySchema = z.object({ currentPassword: z.string().min(1) });
 export async function POST(req: Request) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

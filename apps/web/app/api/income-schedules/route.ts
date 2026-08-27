@@ -5,10 +5,10 @@ import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { generateDuePaychecks } from "@/lib/incomeSchedule";
 
-export async function GET() {
+export async function GET(req: Request) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -50,7 +50,7 @@ const bodySchema = z.object({
 export async function POST(req: Request) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

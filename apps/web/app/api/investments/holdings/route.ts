@@ -5,10 +5,10 @@ import { latestHoldingsForUser, portfolioValue, allocationFor, unrealizedGain, p
 // ?asOf is accepted per WORK.md §10 but not yet implemented as a historical
 // lookup — holdings snapshots only started accumulating with M5, so there's
 // no meaningful history to query yet. Always returns the latest snapshot.
-export async function GET(_req: Request) {
+export async function GET(req: Request) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

@@ -15,10 +15,10 @@ import { runSyncStep, type SyncFailure } from "@/lib/syncSteps";
 // calls all of them for a live item. Each step runs independently
 // (runSyncStep) so one down product doesn't prevent the others from running,
 // and `failures` reports back what didn't come through.
-export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

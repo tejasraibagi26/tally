@@ -6,10 +6,10 @@ import { requireUserId } from "@/lib/session";
 import { previewRuleMatchCount, applyRulesToExistingTransactions } from "@/lib/categorize";
 import type { RuleMatch } from "@tally/core/rulesEngine";
 
-export async function GET() {
+export async function GET(req: Request) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -47,7 +47,7 @@ const createSchema = z.object({
 export async function POST(req: Request) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

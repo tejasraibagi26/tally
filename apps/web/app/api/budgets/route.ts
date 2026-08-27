@@ -10,7 +10,7 @@ const monthSchema = z.string().regex(/^\d{4}-\d{2}-01$/, "month must be YYYY-MM-
 export async function GET(req: Request) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -36,7 +36,7 @@ const putSchema = z.object({
 export async function PUT(req: Request) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -64,7 +64,7 @@ const deleteSchema = z.object({ month: monthSchema, categoryId: z.string().uuid(
 export async function DELETE(req: Request) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

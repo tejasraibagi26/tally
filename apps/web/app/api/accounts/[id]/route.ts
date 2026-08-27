@@ -11,7 +11,7 @@ const bodySchema = z.object({ creditLimit: z.number().min(0).max(100_000_000).nu
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

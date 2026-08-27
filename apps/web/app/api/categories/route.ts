@@ -6,10 +6,10 @@ import { requireUserId } from "@/lib/session";
 
 // System categories (user_id null, seeded from Plaid's PFC taxonomy) plus
 // this user's own additions — every category a user is allowed to see or use.
-export async function GET() {
+export async function GET(req: Request) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -33,7 +33,7 @@ const createSchema = z.object({
 export async function POST(req: Request) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

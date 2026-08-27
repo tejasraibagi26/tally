@@ -87,6 +87,20 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+// Refresh tokens for the mobile app's bearer-token auth path, parallel to
+// (and independent of) NextAuth's own cookie session. Only a hash of the
+// token is stored, same treatment as users.passwordHash — a stolen row is
+// useless without the raw value, and a device is revoked by deleting its row.
+export const mobileRefreshTokens = pgTable("mobile_refresh_tokens", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  tokenHash: text("token_hash").notNull().unique(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  deviceInfo: text("device_info"),
+});
+
 export const plaidItems = pgTable("plaid_items", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
@@ -501,6 +515,11 @@ export const auditLog = pgTable("audit_log", {
 export const usersRelations = relations(users, ({ many }) => ({
   items: many(plaidItems),
   accounts: many(accounts),
+  mobileRefreshTokens: many(mobileRefreshTokens),
+}));
+
+export const mobileRefreshTokensRelations = relations(mobileRefreshTokens, ({ one }) => ({
+  user: one(users, { fields: [mobileRefreshTokens.userId], references: [users.id] }),
 }));
 
 export const plaidItemsRelations = relations(plaidItems, ({ one, many }) => ({

@@ -8,10 +8,10 @@ import { recordAudit } from "@/lib/audit";
 // Lighter-weight than "Sync now" (which also pulls transactions/holdings/
 // investments/liabilities) — just the balances, for the 3-dot menu's
 // "Refresh balances" action.
-export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

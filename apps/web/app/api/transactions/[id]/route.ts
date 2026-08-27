@@ -26,7 +26,7 @@ const patchSchema = z.object({
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -99,10 +99,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 // Manual-only: a Plaid-synced row has no business being deleted here — it'd
 // just come back on the next sync — so this only ever removes a row that
 // isManual (currently: a generated-paycheck transaction, lib/incomeSchedule.ts).
-export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
-    userId = await requireUserId();
+    userId = await requireUserId(req);
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

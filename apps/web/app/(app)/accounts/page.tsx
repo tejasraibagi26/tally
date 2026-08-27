@@ -13,20 +13,8 @@ import { SyncButton } from "@/components/plaid/SyncButton";
 import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
 import { SyncFailureToast } from "@/components/plaid/SyncFailureToast";
 import { MOCK_MODE } from "@/lib/config";
-import { freshnessStatus } from "@/lib/freshness";
+import { itemStatusToBadge } from "@/lib/freshness";
 import { toNetWorthCurrency, NET_WORTH_CURRENCY } from "@tally/core/fx";
-
-// A broken item (needs re-auth) always reads "Broken" regardless of how
-// recently it last synced — otherwise the freshness badge follows §8.3.
-// NOT_READY overrides freshness too: a sync that ran five minutes ago but
-// came back empty because Plaid hasn't finished its initial pull would
-// otherwise misleadingly read "Fresh" even though there's no data yet.
-function itemStatusToBadge(status: string, lastSyncedAt: Date | null, transactionsUpdateStatus: string | null): Status {
-  if (status === "login_required" || status === "revoked" || status === "error") return "critical";
-  if (status === "pending_expiration") return "warning";
-  if (transactionsUpdateStatus === "NOT_READY") return "syncing";
-  return freshnessStatus(lastSyncedAt);
-}
 
 function relativeTime(date: Date | null): string {
   if (!date) return "Never synced";
