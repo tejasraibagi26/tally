@@ -46,24 +46,32 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// A single automatic retry after a flaky connection's first failure --
-// confirmed live (production logs showed zero requests ever arriving for
-// a "login failed" report on a weak/roaming connection) that a bare
-// fetch() with no retry turns a one-off network hiccup into a dead end.
-// Only retries the network-layer failure itself, not HTTP error responses
-// (a real 401/500 is not retried here).
+// Automatic retries after a flaky connection's first failure -- confirmed
+// live (production logs showed zero requests ever arriving for a "login
+// failed" report on a weak/roaming connection) that a bare fetch() with no
+// retry turns a one-off network hiccup into a dead end. Every OTA update
+// only takes effect on the next full app restart, and a cold start right
+// after reopening the app is exactly the worst moment for a first network
+// call: all in-memory state is gone and the OS's network stack/DNS
+// resolver hasn't necessarily settled yet, especially on a weak/roaming
+// connection -- one retry at 800ms wasn't enough margin for that specific
+// window. Three attempts with backoff (500ms/1500ms) covers it without
+// making a genuinely offline device hang for too long. Only retries the
+// network-layer failure itself, not HTTP error responses (a real 401/500
+// is not retried here).
 async function rawFetch(path: string, options: RequestInit, accessToken: string | null): Promise<Response> {
   const headers = new Headers(options.headers);
   if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
   if (options.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
-  try {
-    return await fetch(`${API_URL}${path}`, { ...options, headers });
-  } catch {
-    await delay(800);
+  const backoffMs = [500, 1500];
+  for (let attempt = 0; ; attempt++) {
     try {
       return await fetch(`${API_URL}${path}`, { ...options, headers });
     } catch {
-      throw new NetworkError("Couldn't reach the server. Check your connection and try again.");
+      if (attempt >= backoffMs.length) {
+        throw new NetworkError("Couldn't reach the server. Check your connection and try again.");
+      }
+      await delay(backoffMs[attempt]!);
     }
   }
 }
