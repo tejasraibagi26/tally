@@ -6,7 +6,7 @@ import { useSubscriptions, type RecurringStream } from "@/lib/queries/subscripti
 import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
-import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { ScreenBackButton, ScreenTitle } from "@/components/ui/ScreenHeader";
 
 const FREQUENCY_LABEL: Record<RecurringStream["frequency"], string> = {
   weekly: "Weekly",
@@ -38,8 +38,9 @@ export default function SubscriptionsScreen() {
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
     <ScreenGlow />
-    <ScreenHeader title="Subscriptions" />
+    <ScreenBackButton />
     <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
+      <ScreenTitle title="Subscriptions" />
       <Card className="p-5 flex-row justify-between">
         <View>
           <Text className="font-ui text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>

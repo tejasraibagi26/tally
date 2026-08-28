@@ -8,7 +8,7 @@ import { formatPercent } from "@tally/core/money";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
-import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { ScreenHeader, ScreenBackButton, ScreenTitle } from "@/components/ui/ScreenHeader";
 import { AppSlider } from "@/components/ui/AppSlider";
 import { useFireDefaults, useFireSettings, useSaveFireSettings } from "@/lib/queries/fire";
 import { useThemeColors } from "@/theme/useThemeColors";
@@ -132,26 +132,27 @@ export default function FireCalculatorScreen() {
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
       <ScreenGlow />
-      <ScreenHeader
-        title="FIRE Calculator"
-        action={
-          <Pressable
-            onPress={save}
-            disabled={saveSettings.isPending}
-            className="h-9 px-4 rounded-full flex-row items-center gap-1.5 justify-center bg-brand disabled:opacity-50"
-          >
-            {saveSettings.isPending ? (
-              <ActivityIndicator color="#FFFFFF" size="small" />
-            ) : (
-              <>
-                <Check size={15} color="#FFFFFF" strokeWidth={2.5} />
-                <Text className="font-ui-semibold text-[13px] text-on-brand">{saved ? "Saved" : "Save"}</Text>
-              </>
-            )}
-          </Pressable>
-        }
-      />
+      <ScreenBackButton />
       <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
+        <ScreenTitle
+          title="FIRE Calculator"
+          action={
+            <Pressable
+              onPress={save}
+              disabled={saveSettings.isPending}
+              className="h-9 px-4 rounded-full flex-row items-center gap-1.5 justify-center bg-brand disabled:opacity-50"
+            >
+              {saveSettings.isPending ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <>
+                  <Check size={15} color="#FFFFFF" strokeWidth={2.5} />
+                  <Text className="font-ui-semibold text-[13px] text-on-brand">{saved ? "Saved" : "Save"}</Text>
+                </>
+              )}
+            </Pressable>
+          }
+        />
         <Card className="p-5 gap-3">
           <View className="flex-row items-baseline justify-between">
             <Text className="font-ui-medium text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>

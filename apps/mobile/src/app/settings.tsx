@@ -10,7 +10,7 @@ import { ApiError } from "@/lib/api";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { type AppearanceMode, getStoredAppearanceMode, storeAppearanceMode } from "@/theme/appearance";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
-import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { ScreenHeader, ScreenBackButton, ScreenTitle } from "@/components/ui/ScreenHeader";
 
 const APPEARANCE_OPTIONS: { mode: AppearanceMode; label: string; Icon: typeof Sun }[] = [
   { mode: "light", label: "Light", Icon: Sun },
@@ -185,8 +185,9 @@ export default function SettingsScreen() {
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
     <ScreenGlow />
-    <ScreenHeader title="Settings" />
+    <ScreenBackButton />
     <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, gap: 24, paddingBottom: 40 }}>
+      <ScreenTitle title="Settings" />
       {/* Profile */}
       <View className="gap-3">
         <Text className="font-ui-semibold text-[13px] text-text-2" style={{ textTransform: "uppercase" }}>

@@ -8,7 +8,7 @@ import { chartSeries, hairline } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useColorScheme } from "nativewind";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
-import { ScreenHeader } from "@/components/ui/ScreenHeader";
+import { ScreenHeader, ScreenBackButton, ScreenTitle } from "@/components/ui/ScreenHeader";
 
 function formatQuantity(q: string): string {
   const n = parseFloat(q);
@@ -67,8 +67,9 @@ export default function InvestmentsScreen() {
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
     <ScreenGlow />
-    <ScreenHeader title="Investments" />
+    <ScreenBackButton />
     <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
+      <ScreenTitle title="Investments" />
       <Card className="p-5 gap-5">
         <View className="gap-1">
           <Text className="font-ui-medium text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>
