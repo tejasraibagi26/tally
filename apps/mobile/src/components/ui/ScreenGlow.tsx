@@ -36,8 +36,11 @@ export function ScreenGlow({ height = 260 }: { height?: number }) {
     );
   }, [pulse]);
 
+  // A 0.7-1.0 swing on top of an already-subtle base alpha (0.14 dark /
+  // 0.4 light) was imperceptible -- widened so the breathing motion is
+  // actually visible instead of reading as static.
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: 0.7 + pulse.value * 0.3,
+    opacity: 0.35 + pulse.value * 0.65,
   }));
 
   return (
