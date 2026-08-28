@@ -7,6 +7,24 @@
     "packages/*"
   ],
   "overrides": {
-    "react-native": "0.86.3"
+    "next": {
+      "react": "18.3.1",
+      "react-dom": "18.3.1"
+    },
+    "next-auth": {
+      "react": "18.3.1"
+    },
+    "lucide-react": {
+      "react": "18.3.1"
+    },
+    "recharts": {
+      "react": "18.3.1",
+      "react-dom": "18.3.1"
+    },
+    "mobile": {
+      "react": "19.2.3",
+      "react-dom": "19.2.3",
+      "react-native": "0.86.3"
+    }
   }
 }
