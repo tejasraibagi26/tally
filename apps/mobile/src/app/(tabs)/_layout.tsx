@@ -4,20 +4,19 @@ import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { House, ArrowLeftRight, PiggyBank, Landmark } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useThemeColors } from "@/theme/useThemeColors";
-import { withAlpha } from "@/theme/colors";
 
 const { Icon, Label } = NativeTabs.Trigger;
 
-// A themed ripple instead of react-navigation's default black circle on
-// tap -- there's no prop for the ripple color on BottomTabNavigationOptions
-// itself, so this replaces the tab bar's button entirely with a plain
-// Pressable carrying an explicit android_ripple color.
-function RippleTabButton({ children, style, rippleColor, ...rest }: any) {
+// No ripple at all instead of react-navigation's default black circle on
+// tap -- there's no prop for this on BottomTabNavigationOptions itself, so
+// this replaces the tab bar's button entirely with a plain Pressable that
+// disables the Android ripple outright.
+function NoRippleTabButton({ children, style, ...rest }: any) {
   return (
     <Pressable
       {...rest}
       style={[{ flex: 1, alignItems: "center", justifyContent: "center" }, style]}
-      android_ripple={{ color: rippleColor, borderless: false }}
+      android_ripple={null}
     >
       {children}
     </Pressable>
@@ -30,18 +29,17 @@ function RippleTabButton({ children, style, rippleColor, ...rest }: any) {
 // looked wrong even after tinting the selection indicator (small icons,
 // unfamiliar proportions vs. the rest of the app) -- reverted to the
 // JS-rendered bar there, fixing the original black-ripple complaint
-// properly this time via RippleTabButton instead of accepting the default.
+// properly this time via NoRippleTabButton instead of accepting the default.
 function AndroidTabsLayout() {
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
-  const rippleColor = withAlpha(colors.brand, 0.14);
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.brand,
         tabBarInactiveTintColor: colors["text-3"],
-        tabBarButton: (props) => <RippleTabButton {...props} rippleColor={rippleColor} />,
+        tabBarButton: (props) => <NoRippleTabButton {...props} />,
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopWidth: 1,

@@ -1,16 +1,43 @@
-import { Platform, type ColorValue, type StyleProp, type ViewStyle } from "react-native";
+import { Platform, type ColorValue } from "react-native";
 import { Host } from "@expo/ui/swift-ui";
-import { Slider, type SliderProps } from "@expo/ui";
+import { Slider } from "@expo/ui";
+import { Host as ComposeHost, Slider as ComposeSlider } from "@expo/ui/jetpack-compose";
 
 // @expo/ui's Android Slider (Jetpack Compose, via requireNativeView) renders
 // as a plain native view with no intrinsic content size of its own -- same
 // failure mode as iOS's SwiftUI Host below, just without a console warning
 // to find it by: with no explicit width/height it collapses to 0x0 and is
-// silently invisible. @expo/ui's SliderProps type omits `style` even though
-// every native view manager honors it at the RN shadow-tree/layout level
-// regardless of what the module's own prop type declares -- this local cast
-// is only papering over that type gap, not a runtime workaround.
-const SizedSlider = Slider as React.ComponentType<SliderProps & { style?: StyleProp<ViewStyle> }>;
+// silently invisible. Unlike iOS, the universal `Slider` from "@expo/ui"
+// doesn't help here on Android: its Android implementation renders the bare
+// jetpack-compose Slider directly with no `<Host>` wrapper, and `style`
+// isn't even in its prop type -- it's destructured away before ever
+// reaching the native view, not merely mistyped. Sizing it means going
+// around the universal wrapper and using `@expo/ui/jetpack-compose`'s
+// `Host` + `Slider` directly, the same way the iOS branch below uses
+// `@expo/ui/swift-ui`'s `Host`.
+function AndroidSlider({
+  value,
+  onValueChange,
+  min,
+  max,
+  step,
+}: {
+  value: number;
+  onValueChange: (v: number) => void;
+  min: number;
+  max: number;
+  step?: number;
+}) {
+  // Jetpack Compose's Slider takes a step *count* between min/max, not an
+  // increment size -- same conversion @expo/ui's own community/slider
+  // wrapper does for its Android target.
+  const steps = step && step > 0 ? Math.max(0, Math.round((max - min) / step) - 1) : 0;
+  return (
+    <ComposeHost matchContents={{ vertical: true }} style={{ width: "100%" }}>
+      <ComposeSlider value={value} onValueChange={onValueChange} min={min} max={max} steps={steps} />
+    </ComposeHost>
+  );
+}
 
 // @expo/ui's SwiftUI-backed components must be mounted inside a <Host> from
 // '@expo/ui/swift-ui' on iOS -- without it, RN logs "A SwiftUI view ... is
@@ -38,5 +65,5 @@ export function AppSlider({
       </Host>
     );
   }
-  return <SizedSlider value={value} onValueChange={onValueChange} min={min} max={max} step={step} style={{ width: "100%", height: 34 }} />;
+  return <AndroidSlider value={value} onValueChange={onValueChange} min={min} max={max} step={step} />;
 }
