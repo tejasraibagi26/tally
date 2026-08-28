@@ -38,6 +38,8 @@ function RootNavigator() {
         <Stack.Screen name="more" options={{ presentation: "modal", headerShown: true, title: "More" }} />
         <Stack.Screen name="fire" options={{ headerShown: true, title: "FIRE Calculator" }} />
         <Stack.Screen name="subscriptions" options={{ headerShown: true, title: "Subscriptions" }} />
+        <Stack.Screen name="investments" options={{ headerShown: true, title: "Investments" }} />
+        <Stack.Screen name="settings" options={{ headerShown: true, title: "Settings" }} />
       </Stack.Protected>
       <Stack.Protected guard={status === "unauthenticated"}>
         <Stack.Screen name="login" />

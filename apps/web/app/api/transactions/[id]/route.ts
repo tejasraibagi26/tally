@@ -33,6 +33,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const category = t.categoryId
     ? await db.query.categories.findFirst({ where: eq(schema.categories.id, t.categoryId) })
     : null;
+  const account = await db.query.accounts.findFirst({ where: eq(schema.accounts.id, t.accountId) });
 
   return NextResponse.json({
     id: t.id,
@@ -41,6 +42,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     name: t.name,
     isPending: t.isPending,
     accountId: t.accountId,
+    accountName: account?.name ?? null,
+    accountMask: account?.mask ?? null,
     categoryId: t.categoryId,
     categoryName: category?.name ?? null,
     categoryColorSlot: category?.colorSlot ?? null,

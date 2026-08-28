@@ -1,6 +1,6 @@
 import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
-import { Wallet, TrendingUp, LogOut, ChevronRight } from "lucide-react-native";
+import { Wallet, TrendingUp, LineChart, Settings, LogOut, ChevronRight } from "lucide-react-native";
 import { useAuth } from "@/lib/AuthContext";
 
 function Row({ icon, label, onPress, destructive }: { icon: React.ReactNode; label: string; onPress: () => void; destructive?: boolean }) {
@@ -26,14 +26,20 @@ export default function MoreScreen() {
       {user && <Text className="font-ui text-[13px] text-text-2 mb-2">{user.email}</Text>}
 
       <View style={{ borderTopWidth: 1, borderTopColor: "#E4E1D9" }}>
-        <Row icon={<TrendingUp size={20} color="#524F47" strokeWidth={1.75} />} label="FIRE calculator" onPress={() => router.push("/fire")} />
+        <Row icon={<LineChart size={20} color="#524F47" strokeWidth={1.75} />} label="Investments" onPress={() => router.push("/investments")} />
+        <View style={{ borderTopWidth: 1, borderTopColor: "rgba(228,225,217,0.55)" }}>
+          <Row icon={<TrendingUp size={20} color="#524F47" strokeWidth={1.75} />} label="FIRE calculator" onPress={() => router.push("/fire")} />
+        </View>
         <View style={{ borderTopWidth: 1, borderTopColor: "rgba(228,225,217,0.55)" }}>
           <Row icon={<Wallet size={20} color="#524F47" strokeWidth={1.75} />} label="Subscriptions" onPress={() => router.push("/subscriptions")} />
         </View>
       </View>
 
       <View className="mt-6" style={{ borderTopWidth: 1, borderTopColor: "#E4E1D9" }}>
-        <Row icon={<LogOut size={20} color="#B23A2C" strokeWidth={1.75} />} label="Log out" destructive onPress={() => logout()} />
+        <Row icon={<Settings size={20} color="#524F47" strokeWidth={1.75} />} label="Settings" onPress={() => router.push("/settings")} />
+        <View style={{ borderTopWidth: 1, borderTopColor: "rgba(228,225,217,0.55)" }}>
+          <Row icon={<LogOut size={20} color="#B23A2C" strokeWidth={1.75} />} label="Log out" destructive onPress={() => logout()} />
+        </View>
       </View>
     </View>
   );

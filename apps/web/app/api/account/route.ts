@@ -12,6 +12,24 @@ const bodySchema = z.object({
   currentPassword: z.string().min(1),
 });
 
+export async function GET(req: Request) {
+  let userId: string;
+  try {
+    userId = await requireUserId(req);
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const [user] = await db
+    .select({ name: schema.users.name, email: schema.users.email, birthDate: schema.users.birthDate })
+    .from(schema.users)
+    .where(eq(schema.users.id, userId))
+    .limit(1);
+  if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+  return NextResponse.json(user);
+}
+
 // Updates name/email/birthDate. Email is the login identifier, so it (like a
 // password change) requires the current password — this isn't a "add a
 // field" form. birthDate isn't sensitive on its own, but it's bundled into

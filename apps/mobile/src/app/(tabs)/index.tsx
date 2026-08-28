@@ -11,13 +11,14 @@ import { MeterBar } from "@/components/ui/MeterBar";
 import { useAccounts } from "@/lib/queries/accounts";
 import { useOverview, useNetWorthTrend } from "@/lib/queries/overview";
 import { useTransactions } from "@/lib/queries/transactions";
+import { useCashFlowTrend } from "@/lib/queries/cashflow";
+import { useLiabilities } from "@/lib/queries/liabilities";
 import { amountColor } from "@/lib/amountColor";
 
 // MOBILE_DESIGN.md §5.2 -- hero net worth (unboxed, direct on canvas), a
-// single-line connections summary, "Budget this month" (top 3), "Upcoming",
-// and "Recent activity." The KPI stat-tile strip from the full spec is
-// deferred -- it needs a spend/income/cashflow aggregate endpoint that
-// doesn't exist yet; ship with what's already wired end to end.
+// KPI stat-tile strip (spend/income/cashflow/utilization), a single-line
+// connections summary, "Budget this month" (top 3), "Upcoming", and
+// "Recent activity."
 export default function OverviewScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -26,6 +27,8 @@ export default function OverviewScreen() {
   const overview = useOverview();
   const trend = useNetWorthTrend();
   const recent = useTransactions();
+  const cashFlow = useCashFlowTrend(2);
+  const liabilities = useLiabilities();
 
   const netCents = accounts.data?.totals.net ?? 0;
   const allSynced = accounts.data ? accounts.data.institutions.every((i) => i.badge === "good") : true;
@@ -39,12 +42,45 @@ export default function OverviewScreen() {
   const recentItems = recent.data?.pages[0]?.items.slice(0, 5) ?? [];
   const topBudgets = (overview.data?.budgets.categories ?? []).slice(0, 3);
 
+  const months = cashFlow.data?.months ?? [];
+  const currentMonth = months[months.length - 1];
+  const priorMonth = months.length > 1 ? months[months.length - 2] : undefined;
+  const utilizationPct = liabilities.data?.utilization.utilization != null ? Math.round(liabilities.data.utilization.utilization * 100) : null;
+
+  const kpiTiles = currentMonth
+    ? [
+        {
+          key: "spend",
+          label: "Spent this month",
+          cents: currentMonth.spend,
+          delta: priorMonth ? deltaLabel(currentMonth.spend, priorMonth.spend) : undefined,
+          bg: "#F6E7E4",
+        },
+        {
+          key: "income",
+          label: "Income",
+          cents: currentMonth.income,
+          delta: priorMonth ? deltaLabel(currentMonth.income, priorMonth.income) : undefined,
+          bg: "#E3F0EA",
+        },
+        {
+          key: "cashflow",
+          label: "Cash flow",
+          cents: currentMonth.cashFlow,
+          delta: priorMonth ? deltaLabel(currentMonth.cashFlow, priorMonth.cashFlow) : undefined,
+          bg: "#E6EFEA",
+        },
+      ]
+    : [];
+
   const refreshing = accounts.isFetching || overview.isFetching || trend.isFetching;
   function onRefresh() {
     queryClient.invalidateQueries({ queryKey: ["accounts"] });
     queryClient.invalidateQueries({ queryKey: ["overview"] });
     queryClient.invalidateQueries({ queryKey: ["networth-trend"] });
     queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    queryClient.invalidateQueries({ queryKey: ["cashflow"] });
+    queryClient.invalidateQueries({ queryKey: ["liabilities"] });
   }
 
   return (
@@ -110,6 +146,29 @@ export default function OverviewScreen() {
             <ChevronRight size={16} color="#14513F" strokeWidth={1.75} />
           </View>
         </Pressable>
+
+        {/* KPI row */}
+        {(kpiTiles.length > 0 || utilizationPct !== null) && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingRight: 20 }} style={{ marginHorizontal: -20 }}>
+            <View style={{ width: 8 }} />
+            {kpiTiles.map((tile) => (
+              <View key={tile.key} className="rounded-panel px-4 py-4 gap-1.5" style={{ width: 140, backgroundColor: tile.bg }}>
+                <Text className="font-ui-medium text-[11.5px] text-text-2">{tile.label}</Text>
+                <MoneyText cents={tile.cents} signed={tile.key === "cashflow"} className="font-ui-semibold text-[19px] text-text" />
+                {tile.delta && (
+                  <Text className="font-ui text-[11.5px] text-text-3">{tile.delta}</Text>
+                )}
+              </View>
+            ))}
+            {utilizationPct !== null && (
+              <View className="rounded-panel px-4 py-4 gap-1.5" style={{ width: 140, backgroundColor: "#E5EEFA" }}>
+                <Text className="font-ui-medium text-[11.5px] text-text-2">Credit utilization</Text>
+                <Text className="font-ui-semibold text-[19px] text-text">{utilizationPct}%</Text>
+                <Text className="font-ui text-[11.5px] text-text-3">of total limit</Text>
+              </View>
+            )}
+          </ScrollView>
+        )}
 
         {/* Budget this month */}
         {topBudgets.length > 0 && (
@@ -179,4 +238,10 @@ export default function OverviewScreen() {
       </View>
     </ScrollView>
   );
+}
+
+function deltaLabel(current: number, prior: number): string | undefined {
+  if (prior === 0) return undefined;
+  const pct = Math.round((Math.abs(current - prior) / Math.abs(prior)) * 100);
+  return `${current >= prior ? "+" : "-"}${pct}% vs last month`;
 }
