@@ -42,11 +42,29 @@ async function rawFetch(path: string, options: RequestInit, accessToken: string 
   return fetch(`${API_URL}${path}`, { ...options, headers });
 }
 
+// Shared by every concurrent 401 so a burst of requests (e.g. Overview's
+// several parallel queries all firing after the access token expired)
+// triggers exactly one refresh call instead of one per request -- with
+// refresh-token rotation on the server, a second concurrent call reusing
+// the same stored refresh token would just fail once the first has already
+// rotated it out.
+let inFlightRefresh: Promise<string | null> | null = null;
+
+function refreshOnce(): Promise<string | null> {
+  if (!refreshHandler) return Promise.resolve(null);
+  if (!inFlightRefresh) {
+    inFlightRefresh = refreshHandler().finally(() => {
+      inFlightRefresh = null;
+    });
+  }
+  return inFlightRefresh;
+}
+
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   let res = await rawFetch(path, options, inMemoryAccessToken);
 
   if (res.status === 401 && refreshHandler) {
-    const newToken = await refreshHandler();
+    const newToken = await refreshOnce();
     if (newToken) {
       res = await rawFetch(path, options, newToken);
     } else {
