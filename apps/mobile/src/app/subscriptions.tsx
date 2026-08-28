@@ -46,13 +46,13 @@ export default function SubscriptionsScreen() {
           <Text className="font-ui text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>
             Monthly
           </Text>
-          <MoneyText cents={Math.round(monthlyTotal)} className="font-display text-[24px] text-text" />
+          <MoneyText cents={Math.round(monthlyTotal)} className="font-display text-[24px] text-text" mask={false} />
         </View>
         <View>
           <Text className="font-ui text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>
             Annualized
           </Text>
-          <MoneyText cents={Math.round(monthlyTotal * 12)} className="font-display text-[24px] text-text" />
+          <MoneyText cents={Math.round(monthlyTotal * 12)} className="font-display text-[24px] text-text" mask={false} />
         </View>
       </Card>
 
@@ -75,7 +75,7 @@ export default function SubscriptionsScreen() {
                   {s.status === "at_risk" ? " · At risk" : ""}
                 </Text>
               </View>
-              <MoneyText cents={s.averageAmount} className="text-[14.5px] text-text" />
+              <MoneyText cents={s.averageAmount} className="text-[14.5px] text-text" mask={false} />
             </View>
           ))}
           {streams.length === 0 && <Text className="font-ui text-[14px] text-text-3 py-4">No subscriptions detected yet.</Text>}

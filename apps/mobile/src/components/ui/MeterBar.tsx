@@ -9,12 +9,16 @@ interface MeterBarProps {
   colorSlot: number;
   spentCents: number;
   budgetCents: number;
+  /** Passed through to MoneyText -- see its `mask` prop. Defaults to true
+   * (Overview's "Budget this month" card masks); the Budgets tab passes
+   * false, matching web's exclusion of budget figures from the toggle. */
+  mask?: boolean;
 }
 
 // DESIGN.md §8 "Meter bar" -- track in sunken gray, fill in the category's
 // series color, over-budget portion in negative. Series slot assignment is
 // fixed order (chartSeries), never cycled or re-derived per screen.
-export function MeterBar({ label, colorSlot, spentCents, budgetCents }: MeterBarProps) {
+export function MeterBar({ label, colorSlot, spentCents, budgetCents, mask = true }: MeterBarProps) {
   const colors = useThemeColors();
   const { colorScheme } = useColorScheme();
   const series = colorScheme === "dark" ? chartSeries.dark : chartSeries.light;
@@ -37,7 +41,7 @@ export function MeterBar({ label, colorSlot, spentCents, budgetCents }: MeterBar
           <Text className="font-ui-medium text-[14px] text-text">{label}</Text>
         </View>
         <Text className="font-ui text-[13px]" style={{ color: overBudget ? colors.negative : colors["text-2"] }}>
-          <MoneyText cents={spentCents} /> of <MoneyText cents={budgetCents} />
+          <MoneyText cents={spentCents} mask={mask} /> of <MoneyText cents={budgetCents} mask={mask} />
         </Text>
       </View>
       <View className="h-2 rounded-full bg-sunken flex-row overflow-hidden">

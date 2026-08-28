@@ -10,6 +10,7 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { View } from "react-native";
 import { AuthProvider, useAuth } from "@/lib/AuthContext";
+import { PrivacyProvider } from "@/lib/PrivacyContext";
 import { queryClient } from "@/lib/queryClient";
 import { fontsToLoad } from "@/theme/fonts";
 import { getStoredAppearanceMode } from "@/theme/appearance";
@@ -110,7 +111,9 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <RootNavigator />
+            <PrivacyProvider>
+              <RootNavigator />
+            </PrivacyProvider>
           </AuthProvider>
         </QueryClientProvider>
       </SafeAreaProvider>

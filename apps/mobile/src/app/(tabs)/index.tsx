@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { View, Text, ScrollView, Pressable, ActivityIndicator, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
-import { CircleCheck, ChevronRight, Ellipsis } from "lucide-react-native";
+import { CircleCheck, ChevronRight, Ellipsis, Eye, EyeOff } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LineChart } from "react-native-gifted-charts";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,6 +14,7 @@ import { useOverview, useNetWorthTrend } from "@/lib/queries/overview";
 import { useTransactions } from "@/lib/queries/transactions";
 import { useCashFlowTrend } from "@/lib/queries/cashflow";
 import { useLiabilities } from "@/lib/queries/liabilities";
+import { usePrivacy } from "@/lib/PrivacyContext";
 import { amountColor } from "@/lib/amountColor";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
@@ -33,6 +34,7 @@ export default function OverviewScreen() {
   const recent = useTransactions();
   const cashFlow = useCashFlowTrend(2);
   const liabilities = useLiabilities();
+  const { hidden, toggle: togglePrivacy } = usePrivacy();
 
   const netCents = accounts.data?.totals.net ?? 0;
   const allSynced = accounts.data ? accounts.data.institutions.every((i) => i.badge === "good") : true;
@@ -135,9 +137,14 @@ export default function OverviewScreen() {
         <Text className="font-ui-semibold text-[24px] text-text" style={{ letterSpacing: -0.3 }}>
           Overview
         </Text>
-        <Pressable onPress={() => router.push("/more")} hitSlop={12}>
-          <Ellipsis size={22} color={colors["text-2"]} strokeWidth={1.75} />
-        </Pressable>
+        <View className="flex-row items-center gap-4">
+          <Pressable onPress={togglePrivacy} hitSlop={12} accessibilityRole="switch" accessibilityLabel="Hide sensitive amounts" accessibilityState={{ checked: hidden }}>
+            {hidden ? <EyeOff size={20} color={colors["text-2"]} strokeWidth={1.75} /> : <Eye size={20} color={colors["text-2"]} strokeWidth={1.75} />}
+          </Pressable>
+          <Pressable onPress={() => router.push("/more")} hitSlop={12}>
+            <Ellipsis size={22} color={colors["text-2"]} strokeWidth={1.75} />
+          </Pressable>
+        </View>
       </View>
 
       <View className="gap-7 px-5 pt-3">

@@ -61,14 +61,14 @@ export default function BudgetsScreen() {
           <Card className="p-5 flex-row justify-between items-center">
             <Text className="font-ui text-[13.5px] text-text-2">Total this month</Text>
             <Text className="font-ui-semibold text-[14.5px] text-text">
-              <MoneyText cents={totalSpend} /> of <MoneyText cents={totalBudget} />
+              <MoneyText cents={totalSpend} mask={false} /> of <MoneyText cents={totalBudget} mask={false} />
             </Text>
           </Card>
 
           <Card className="p-5 gap-6">
             {data && data.budgets.length > 0 ? (
               data.budgets.map((b) => (
-                <MeterBar key={b.categoryId} label={b.categoryName} colorSlot={b.categoryColorSlot} spentCents={b.spend} budgetCents={b.amount + b.rolloverFromPrior} />
+                <MeterBar key={b.categoryId} label={b.categoryName} colorSlot={b.categoryColorSlot} spentCents={b.spend} budgetCents={b.amount + b.rolloverFromPrior} mask={false} />
               ))
             ) : (
               <Text className="font-ui text-[14px] text-text-3">No budgets set for this month.</Text>
