@@ -190,6 +190,13 @@ export default function OverviewScreen() {
                 height={56}
                 width={chartWidth}
                 adjustToWidth
+                // Even with hideYAxisText, gifted-charts reserves a hidden
+                // 10px y-axis label column by default (yAxisEmptyLabelWidth)
+                // and adds it on top of `width` -- the line's right end
+                // overflowed past the measured container by exactly that
+                // much. Forcing it to 0 removes the phantom reservation so
+                // the plotted width matches `width` exactly.
+                yAxisLabelWidth={0}
                 initialSpacing={0}
                 endSpacing={0}
                 thickness={2.5}

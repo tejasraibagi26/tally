@@ -216,6 +216,10 @@ export default function FireCalculatorScreen() {
                   height={120}
                   width={chartWidth}
                   adjustToWidth
+                  // See index.tsx's net worth chart -- gifted-charts reserves
+                  // a hidden 10px y-axis column on top of `width` even with
+                  // hideYAxisText, overflowing the line past the container.
+                  yAxisLabelWidth={0}
                   thickness={2.5}
                   color={colors.brand}
                   areaChart
