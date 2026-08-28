@@ -35,7 +35,7 @@ export function ScreenGlow({ height = 260 }: { height?: number }) {
   // numbers) -- light mode needed a noticeably higher alpha to actually be
   // visible instead of all but disappearing into the off-white canvas.
   const baseAlpha = colorScheme === "dark" ? 0.14 : 0.4;
-  const orbAlpha = 0.1;
+  const orbAlpha = 0.05;
   const orbSize = 560;
 
   const sweep = useSharedValue(-orbSize);
