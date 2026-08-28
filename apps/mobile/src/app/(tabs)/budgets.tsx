@@ -7,6 +7,7 @@ import { MeterBar } from "@/components/ui/MeterBar";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useBudgets, currentMonthParam } from "@/lib/queries/budgets";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { ScreenGlow } from "@/components/ui/ScreenGlow";
 
 function shiftMonth(month: string, delta: number): string {
   const d = new Date(month + "T00:00:00Z");
@@ -31,12 +32,14 @@ export default function BudgetsScreen() {
   const totalBudget = data?.budgets.reduce((s, b) => s + b.amount + b.rolloverFromPrior, 0) ?? 0;
 
   return (
-    <ScrollView
-      className="flex-1 bg-canvas"
-      contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 }}
-      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
-    >
-      <View className="px-5 pb-4">
+    <View className="flex-1 bg-canvas">
+      <ScreenGlow />
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 }}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
+      >
+        <View className="px-5 pb-4">
         <Text className="font-ui-semibold text-[24px] text-text mb-3" style={{ letterSpacing: -0.3 }}>
           Budgets
         </Text>
@@ -73,6 +76,7 @@ export default function BudgetsScreen() {
           </Card>
         </View>
       )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

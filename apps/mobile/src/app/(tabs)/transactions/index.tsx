@@ -11,6 +11,7 @@ import { TransactionFiltersSheet, type TransactionFilters } from "@/components/T
 import { useColorScheme } from "nativewind";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
+import { ScreenGlow } from "@/components/ui/ScreenGlow";
 
 // MOBILE_DESIGN.md §5.3 -- card list (not a table), infinite scroll, filter
 // pill instead of a sticky multi-field bar. Swipe-to-categorize is still
@@ -66,6 +67,7 @@ export default function TransactionsScreen() {
 
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+      <ScreenGlow />
       <View className="flex-row items-center justify-between px-5 pb-4">
         <Text className="font-ui-semibold text-[24px] text-text" style={{ letterSpacing: -0.3 }}>
           Transactions

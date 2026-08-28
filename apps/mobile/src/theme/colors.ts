@@ -17,16 +17,23 @@ export function colorsFor(scheme: "light" | "dark"): Record<string, string> {
   return scheme === "dark" ? darkColors : lightColors;
 }
 
+// RN has no color-mix()/opacity-modifier className the way web Tailwind
+// does (bg-brand/20) -- this is the one place that's needed, so a small
+// generic helper instead of a one-off per use site.
+export function withAlpha(hex: string, alpha: number): string {
+  const clean = hex.replace("#", "");
+  const r = parseInt(clean.slice(0, 2), 16);
+  const g = parseInt(clean.slice(2, 4), 16);
+  const b = parseInt(clean.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 // Row dividers use a softened border, not the full-opacity token (MOBILE_DESIGN.md
 // §3.4: "separation comes from air first, a faint line second") -- needs a
 // scheme-aware hex, not a hardcoded light rgba(), so it doesn't disappear
 // (too faint) or over-darken against a dark surface.
 export function hairline(colors: Record<string, string>): string {
-  const hex = colors.border!.replace("#", "");
-  const r = parseInt(hex.slice(0, 2), 16);
-  const g = parseInt(hex.slice(2, 4), 16);
-  const b = parseInt(hex.slice(4, 6), 16);
-  return `rgba(${r}, ${g}, ${b}, 0.55)`;
+  return withAlpha(colors.border!, 0.55);
 }
 
 /** DESIGN.md §7.1 -- fixed order, never cycled, never reused as a status color. */

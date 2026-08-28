@@ -9,6 +9,7 @@ import { usePlaidLink } from "@/lib/usePlaidLink";
 import { useSync } from "@/lib/queries/plaid";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
+import { ScreenGlow } from "@/components/ui/ScreenGlow";
 
 // MOBILE_DESIGN.md §5.5 -- grouped by institution, broken connections get a
 // critical badge + full-width Reconnect button, both wired to native Plaid
@@ -104,12 +105,14 @@ export default function AccountsScreen() {
   }
 
   return (
-    <ScrollView
-      className="flex-1 bg-canvas"
-      contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 }}
-      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
-    >
-      <View className="flex-row items-center justify-between px-5 pb-4">
+    <View className="flex-1 bg-canvas">
+      <ScreenGlow />
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 }}
+        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
+      >
+        <View className="flex-row items-center justify-between px-5 pb-4">
         <Text className="font-ui-semibold text-[24px] text-text" style={{ letterSpacing: -0.3 }}>
           Accounts
         </Text>
@@ -151,6 +154,7 @@ export default function AccountsScreen() {
           {data && data.institutions.length === 0 && <Text className="font-ui text-[14px] text-text-3">No accounts connected yet.</Text>}
         </View>
       )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }

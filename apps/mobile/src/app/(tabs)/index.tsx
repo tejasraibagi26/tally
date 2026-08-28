@@ -8,6 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { MeterBar } from "@/components/ui/MeterBar";
+import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useAccounts } from "@/lib/queries/accounts";
 import { useOverview, useNetWorthTrend } from "@/lib/queries/overview";
 import { useTransactions } from "@/lib/queries/transactions";
@@ -43,6 +44,21 @@ export default function OverviewScreen() {
   // here sliced to the last 12 *points* assuming monthly granularity, which
   // actually plotted only the most recent ~12 days.
   const chartData = useMemo(() => (trend.data?.points ?? []).map((p) => ({ value: p.net / 100 })), [trend.data]);
+
+  // gifted-charts' LineChart defaults its y-axis to start at 0 unless told
+  // otherwise, so a real net-worth trend (a large baseline with small
+  // day-to-day variation, e.g. $420k-$425k) renders as a nearly flat line
+  // pinned near the top -- web's recharts chart auto-scales to the data's
+  // own min/max (domain={["auto","auto"]}) instead. yAxisOffset reproduces
+  // that: start the visible range just under the data's actual minimum.
+  const chartYAxisOffset = useMemo(() => {
+    if (chartData.length < 2) return 0;
+    const values = chartData.map((d) => d.value);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const pad = (max - min) * 0.1 || Math.abs(min) * 0.02 || 1;
+    return min - pad;
+  }, [chartData]);
 
   const recentItems = recent.data?.pages[0]?.items.slice(0, 5) ?? [];
   const topBudgets = (overview.data?.budgets.categories ?? []).slice(0, 3);
@@ -92,12 +108,14 @@ export default function OverviewScreen() {
   }
 
   return (
-    <ScrollView
-      className="flex-1 bg-canvas"
-      contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brand} />}
-    >
-      <View className="flex-row items-center justify-between px-5 pb-1">
+    <View className="flex-1 bg-canvas">
+      <ScreenGlow />
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brand} />}
+      >
+        <View className="flex-row items-center justify-between px-5 pb-1">
         <Text className="font-ui-semibold text-[24px] text-text" style={{ letterSpacing: -0.3 }}>
           Overview
         </Text>
@@ -124,6 +142,7 @@ export default function OverviewScreen() {
               width={300}
               thickness={2.5}
               color={colors.brand}
+              yAxisOffset={chartYAxisOffset}
               areaChart
               startFillColor={colors["brand-subtle"]}
               endFillColor={colors["brand-subtle"]}
@@ -263,8 +282,9 @@ export default function OverviewScreen() {
             )}
           </Card>
         </View>
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
