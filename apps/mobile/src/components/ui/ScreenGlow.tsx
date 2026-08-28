@@ -5,7 +5,9 @@ import Animated, {
   Easing,
   useAnimatedStyle,
   useSharedValue,
+  withDelay,
   withRepeat,
+  withSequence,
   withTiming,
 } from "react-native-reanimated";
 import { useThemeColors } from "@/theme/useThemeColors";
@@ -27,20 +29,23 @@ export function ScreenGlow({ height = 260 }: { height?: number }) {
   // visible instead of all but disappearing into the off-white canvas.
   const alpha = colorScheme === "dark" ? 0.14 : 0.4;
 
+  // A continuous sine breathe read as static -- a real pulse needs a fast
+  // rise, a slower decay, and a pause between beats, not one smooth cycle.
   const pulse = useSharedValue(0);
   useEffect(() => {
     pulse.value = withRepeat(
-      withTiming(1, { duration: 2600, easing: Easing.inOut(Easing.sin) }),
+      withSequence(
+        withTiming(1, { duration: 450, easing: Easing.out(Easing.quad) }),
+        withTiming(0, { duration: 1100, easing: Easing.inOut(Easing.quad) }),
+        withDelay(500, withTiming(0, { duration: 0 })),
+      ),
       -1,
-      true,
     );
   }, [pulse]);
 
-  // A 0.7-1.0 swing on top of an already-subtle base alpha (0.14 dark /
-  // 0.4 light) was imperceptible -- widened so the breathing motion is
-  // actually visible instead of reading as static.
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: 0.35 + pulse.value * 0.65,
+    transform: [{ scale: 1 + pulse.value * 0.06 }],
   }));
 
   return (
