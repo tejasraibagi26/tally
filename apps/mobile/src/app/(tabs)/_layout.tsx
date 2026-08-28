@@ -24,6 +24,12 @@ export default function TabsLayout() {
         selected: { fontFamily: "Inter", fontSize: 10.5, color: colors.brand },
       }}
       rippleColor={withAlpha(colors.brand, 0.14)}
+      // Android's Material 3 selection indicator (the pill behind the
+      // selected icon) defaults to the platform theme's own color when
+      // unset -- a flat gray with zero relation to the app's palette,
+      // clashing hard against every other "selected" surface in the app
+      // (KPI tiles, chips), which all use a brand-tinted subtle background.
+      indicatorColor={colors["brand-subtle"]}
       backgroundColor={Platform.OS === "android" ? colors.surface : undefined}
     >
       <NativeTabs.Trigger name="index">
