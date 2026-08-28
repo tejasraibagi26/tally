@@ -93,7 +93,7 @@ export default function TransactionDetailScreen() {
         <>
           <ScrollView className="px-5" contentContainerStyle={{ gap: 24, paddingBottom: dirty ? 24 : insets.bottom + 40 }} keyboardShouldPersistTaps="handled">
             <View className="gap-1.5">
-              <MoneyText cents={t.amount} signed className="font-display text-[36px]" style={{ color: amountColor(t.amount, colors) }} />
+              <MoneyText cents={t.amount} signed mask={false} className="font-display text-[36px]" style={{ color: amountColor(t.amount, colors) }} />
               <Text className="font-ui-semibold text-[16px] text-text">{t.merchantName ?? t.name}</Text>
               <Text className="font-ui text-[13.5px] text-text-2">
                 {new Date(t.postedDate + "T00:00:00Z").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}
@@ -151,7 +151,7 @@ export default function TransactionDetailScreen() {
                 {t.splits.map((s, i) => (
                   <View key={i} className="flex-row justify-between">
                     <Text className="font-ui text-[14px] text-text">{s.note ?? "Split"}</Text>
-                    <MoneyText cents={s.amount} className="text-[14px] text-text" />
+                    <MoneyText cents={s.amount} mask={false} className="text-[14px] text-text" />
                   </View>
                 ))}
               </View>

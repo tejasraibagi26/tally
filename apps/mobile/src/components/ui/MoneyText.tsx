@@ -8,10 +8,12 @@ interface MoneyTextProps extends TextProps {
   abbreviate?: boolean;
   /** Tailwind text-color className, e.g. "text-positive" -- caller decides sign coloring per DESIGN.md §5.4. */
   className?: string;
-  /** Opt out of the "hide amounts" mask -- matches web's .money-class scoping,
-   * which deliberately excludes the Budgets and Subscriptions pages (those
-   * figures are budget targets/plans, not account balances or spend history,
-   * so masking them isn't meaningfully more private). Defaults to true. */
+  /** Opt out of the "hide amounts" mask. The toggle is meant to cover figures
+   * that reveal overall financial standing at a glance -- net worth, account
+   * balances, portfolio value/gain, FIRE numbers -- not every individual
+   * dollar figure in the app. Budgets/Subscriptions totals (plans, not
+   * balances) and per-line-item amounts (a single transaction, split, or
+   * holding) opt out via this prop. Defaults to true. */
   mask?: boolean;
 }
 

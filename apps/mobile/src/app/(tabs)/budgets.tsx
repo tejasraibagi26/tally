@@ -8,6 +8,7 @@ import { MoneyText } from "@/components/ui/MoneyText";
 import { useBudgets, currentMonthParam } from "@/lib/queries/budgets";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
+import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 
 function shiftMonth(month: string, delta: number): string {
   const d = new Date(month + "T00:00:00Z");
@@ -24,6 +25,7 @@ function monthLabel(month: string): string {
 // fixed footer outside the ScrollView); totals render inline for now.
 export default function BudgetsScreen() {
   const insets = useSafeAreaInsets();
+  const tabBarClearance = useTabBarBottomClearance();
   const colors = useThemeColors();
   const [month, setMonth] = useState(currentMonthParam());
   const { data, isLoading, refetch, isRefetching } = useBudgets(month);
@@ -36,7 +38,7 @@ export default function BudgetsScreen() {
       <ScreenGlow />
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 }}
+        contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 + tabBarClearance }}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
       >
         <View className="px-5 pb-4">

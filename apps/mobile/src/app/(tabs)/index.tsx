@@ -16,6 +16,7 @@ import { useTransactions } from "@/lib/queries/transactions";
 import { useCashFlowTrend } from "@/lib/queries/cashflow";
 import { useLiabilities } from "@/lib/queries/liabilities";
 import { usePrivacy } from "@/lib/PrivacyContext";
+import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { formatCents, formatPercent } from "@tally/core/money";
 import { amountColor } from "@/lib/amountColor";
 import { useThemeColors } from "@/theme/useThemeColors";
@@ -28,6 +29,7 @@ import { hairline } from "@/theme/colors";
 export default function OverviewScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const tabBarClearance = useTabBarBottomClearance();
   const queryClient = useQueryClient();
   const colors = useThemeColors();
   const accounts = useAccounts();
@@ -149,7 +151,7 @@ export default function OverviewScreen() {
       <ScreenGlow />
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 }}
+        contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 + tabBarClearance }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brand} />}
       >
         <View className="flex-row items-center justify-between px-5 pb-1">
@@ -265,7 +267,7 @@ export default function OverviewScreen() {
                 style={{ width: "48%" }}
               >
                 <Text className="font-ui-medium text-[11.5px] text-text-2">{tile.label}</Text>
-                <MoneyText cents={tile.cents} signed={tile.key === "cashflow"} className="font-ui-semibold text-[19px] text-text" numberOfLines={1} adjustsFontSizeToFit />
+                <MoneyText cents={tile.cents} signed={tile.key === "cashflow"} mask={false} className="font-ui-semibold text-[19px] text-text" numberOfLines={1} adjustsFontSizeToFit />
                 {tile.delta && (
                   <Text className="font-ui text-[11.5px] text-text-3" numberOfLines={1}>{tile.delta}</Text>
                 )}
@@ -313,7 +315,7 @@ export default function OverviewScreen() {
                   style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
                 >
                   <Text className="font-ui text-[14.5px] text-text">{bill.label}</Text>
-                  <MoneyText cents={bill.amount} className="text-[14.5px] text-text" />
+                  <MoneyText cents={bill.amount} mask={false} className="text-[14.5px] text-text" />
                 </View>
               ))}
             </Card>
@@ -343,7 +345,7 @@ export default function OverviewScreen() {
                       {t.merchantName ?? t.name}
                     </Text>
                   </View>
-                  <MoneyText cents={t.amount} signed className="text-[15px] font-ui-medium" style={{ color: amountColor(t.amount, colors) }} />
+                  <MoneyText cents={t.amount} signed mask={false} className="text-[15px] font-ui-medium" style={{ color: amountColor(t.amount, colors) }} />
                 </View>
               ))
             )}

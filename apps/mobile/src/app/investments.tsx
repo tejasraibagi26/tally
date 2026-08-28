@@ -167,7 +167,7 @@ export default function InvestmentsScreen() {
                     {h.ticker ?? "—"} · {formatQuantity(h.quantity)} sh
                   </Text>
                 </View>
-                <MoneyText cents={h.institutionValue} className="text-[15px] text-text" />
+                <MoneyText cents={h.institutionValue} mask={false} className="text-[15px] text-text" />
               </View>
             ))}
           </Card>
@@ -193,7 +193,7 @@ export default function InvestmentsScreen() {
                   </Text>
                   <Text className="font-ui text-[12px] text-text-2">{tx.date}</Text>
                 </View>
-                <MoneyText cents={tx.amount} signed className="text-[14.5px]" style={{ color: tx.amount < 0 ? colors.positive : colors.text }} />
+                <MoneyText cents={tx.amount} signed mask={false} className="text-[14.5px]" style={{ color: tx.amount < 0 ? colors.positive : colors.text }} />
               </View>
             ))}
           </Card>

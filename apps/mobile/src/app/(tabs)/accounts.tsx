@@ -11,6 +11,7 @@ import { useSync } from "@/lib/queries/plaid";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
+import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 
 // MOBILE_DESIGN.md §5.5 -- grouped by institution, broken connections get a
 // critical badge + full-width Reconnect button, both wired to native Plaid
@@ -135,6 +136,7 @@ function relativeTime(iso: string | null): string {
 
 export default function AccountsScreen() {
   const insets = useSafeAreaInsets();
+  const tabBarClearance = useTabBarBottomClearance();
   const colors = useThemeColors();
   const { data, isLoading, refetch, isRefetching } = useAccounts();
   const { openLink, isLinking, error } = usePlaidLink();
@@ -161,7 +163,7 @@ export default function AccountsScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 }}
+        contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 + tabBarClearance }}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
         keyboardShouldPersistTaps="handled"
       >

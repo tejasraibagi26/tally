@@ -11,6 +11,7 @@ import { TransactionFiltersSheet, type TransactionFilters } from "@/components/T
 import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
+import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 
 // MOBILE_DESIGN.md §5.3 -- card list (not a table), infinite scroll, filter
 // pill instead of a sticky multi-field bar. Swipe-to-categorize is still
@@ -35,6 +36,7 @@ function TransactionRowItem({ item, isLast, colors }: { item: TransactionRow; is
       <MoneyText
         cents={item.amount}
         signed
+        mask={false}
         className="text-[15px] font-ui-medium"
         style={{ color: amountColor(item.amount, colors), fontStyle: item.isPending ? "italic" : "normal" }}
       />
@@ -44,6 +46,7 @@ function TransactionRowItem({ item, isLast, colors }: { item: TransactionRow; is
 
 export default function TransactionsScreen() {
   const insets = useSafeAreaInsets();
+  const tabBarClearance = useTabBarBottomClearance();
   const colors = useThemeColors();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<TransactionFilters>({});
@@ -91,7 +94,7 @@ export default function TransactionsScreen() {
           keyExtractor={(item) => item.id}
           renderItem={({ item, index }) => <TransactionRowItem item={item} isLast={index === items.length - 1} colors={colors} />}
           className="mx-5 mb-5 rounded-card bg-surface"
-          contentContainerStyle={{ paddingBottom: 24 }}
+          contentContainerStyle={{ paddingBottom: 24 + tabBarClearance }}
           onEndReachedThreshold={0.4}
           onEndReached={() => hasNextPage && fetchNextPage()}
           refreshing={isRefetching}
