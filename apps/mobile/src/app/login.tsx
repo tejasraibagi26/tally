@@ -40,7 +40,7 @@ export default function LoginScreen() {
   }
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1 bg-canvas">
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1 bg-canvas">
       <View className="flex-1 justify-center px-8">
         <View className="items-center gap-3 mb-16">
           <TallyMark color={colors.brand} />

@@ -1,5 +1,5 @@
-import { useMemo } from "react";
-import { View, Text, ScrollView, Pressable, ActivityIndicator, RefreshControl } from "react-native";
+import { useMemo, useState } from "react";
+import { View, Text, ScrollView, Pressable, ActivityIndicator, RefreshControl, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { CircleCheck, ChevronRight, Ellipsis, Eye, EyeOff } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -15,6 +15,7 @@ import { useTransactions } from "@/lib/queries/transactions";
 import { useCashFlowTrend } from "@/lib/queries/cashflow";
 import { useLiabilities } from "@/lib/queries/liabilities";
 import { usePrivacy } from "@/lib/PrivacyContext";
+import { formatCents, formatPercent } from "@tally/core/money";
 import { amountColor } from "@/lib/amountColor";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
@@ -35,6 +36,14 @@ export default function OverviewScreen() {
   const cashFlow = useCashFlowTrend(2);
   const liabilities = useLiabilities();
   const { hidden, toggle: togglePrivacy } = usePrivacy();
+  const { width: windowWidth } = useWindowDimensions();
+  // The chart was hardcoded to 300 -- narrower than the available width on
+  // most phones (leaving a gap on the right) and wider than it on the
+  // smallest ones (clipping). Measured via onLayout on its wrapping View so
+  // it always spans exactly the hero section's real width; the window-width
+  // fallback (minus the screen's 40px of horizontal px-5 padding) avoids a
+  // flash of the old fixed width before the first layout pass.
+  const [chartWidth, setChartWidth] = useState(windowWidth - 40);
 
   const netCents = accounts.data?.totals.net ?? 0;
   const allSynced = accounts.data ? accounts.data.institutions.every((i) => i.badge === "good") : true;
@@ -92,6 +101,12 @@ export default function OverviewScreen() {
   // genuinely distinct tint, alongside negative (spend) and info (utilization).
   // The actual class per tile.key is chosen where it's rendered (a literal
   // className branch, not a string built here) -- see that comment for why.
+  // Matches web's StatTile "secondary" line for the same tile -- % of the
+  // month's total budget spent so far, alongside the vs.-last-month delta.
+  const totalBudgeted = overview.data?.budgets.totalBudgeted ?? 0;
+  const spendSecondary =
+    totalBudgeted > 0 ? `${formatPercent(currentMonth ? currentMonth.spend / totalBudgeted : 0)} of ${formatCents(totalBudgeted)} budget` : undefined;
+
   const kpiTiles = currentMonth
     ? [
         {
@@ -99,18 +114,21 @@ export default function OverviewScreen() {
           label: "Spent this month",
           cents: currentMonth.spend,
           delta: priorMonth ? deltaLabel(currentMonth.spend, priorMonth.spend) : undefined,
+          secondary: spendSecondary,
         },
         {
           key: "income",
           label: "Income",
           cents: currentMonth.income,
           delta: priorMonth ? deltaLabel(currentMonth.income, priorMonth.income) : undefined,
+          secondary: undefined as string | undefined,
         },
         {
           key: "cashflow",
           label: "Cash flow",
           cents: currentMonth.cashFlow,
           delta: priorMonth ? deltaLabel(currentMonth.cashFlow, priorMonth.cashFlow) : undefined,
+          secondary: undefined as string | undefined,
         },
       ]
     : [];
@@ -166,24 +184,29 @@ export default function OverviewScreen() {
             </View>
           )}
           {chartData.length > 1 && (
-            <LineChart
-              data={chartData}
-              height={56}
-              width={300}
-              thickness={2.5}
-              color={colors.brand}
-              yAxisOffset={chartYAxisOffset}
-              areaChart
-              startFillColor={colors["brand-subtle"]}
-              endFillColor={colors["brand-subtle"]}
-              startOpacity={0.9}
-              endOpacity={0.3}
-              hideDataPoints
-              hideYAxisText
-              hideAxesAndRules
-              disableScroll
-              curved
-            />
+            <View onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}>
+              <LineChart
+                data={chartData}
+                height={56}
+                width={chartWidth}
+                adjustToWidth
+                initialSpacing={0}
+                endSpacing={0}
+                thickness={2.5}
+                color={colors.brand}
+                yAxisOffset={chartYAxisOffset}
+                areaChart
+                startFillColor={colors["brand-subtle"]}
+                endFillColor={colors["brand-subtle"]}
+                startOpacity={0.9}
+                endOpacity={0.3}
+                hideDataPoints
+                hideYAxisText
+                hideAxesAndRules
+                disableScroll
+                curved
+              />
+            </View>
           )}
         </View>
 
@@ -234,6 +257,9 @@ export default function OverviewScreen() {
                 <MoneyText cents={tile.cents} signed={tile.key === "cashflow"} className="font-ui-semibold text-[19px] text-text" numberOfLines={1} adjustsFontSizeToFit />
                 {tile.delta && (
                   <Text className="font-ui text-[11.5px] text-text-3" numberOfLines={1}>{tile.delta}</Text>
+                )}
+                {tile.secondary && (
+                  <Text className="font-ui text-[11.5px] text-text-3" numberOfLines={1}>{tile.secondary}</Text>
                 )}
               </View>
             ))}

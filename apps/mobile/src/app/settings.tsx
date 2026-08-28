@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator, Alert } from "react-native";
+import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "nativewind";
@@ -186,6 +186,7 @@ export default function SettingsScreen() {
     <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
     <ScreenGlow />
     <ScreenBackButton />
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
     <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, gap: 24, paddingBottom: 40 }}>
       <ScreenTitle title="Settings" />
       {/* Profile */}
@@ -366,6 +367,7 @@ export default function SettingsScreen() {
         </Card>
       </View>
     </ScrollView>
+    </KeyboardAvoidingView>
     </View>
   );
 }

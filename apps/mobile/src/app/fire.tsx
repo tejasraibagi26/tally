@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Flame, Check } from "lucide-react-native";
 import { LineChart } from "react-native-gifted-charts";
@@ -133,6 +133,7 @@ export default function FireCalculatorScreen() {
     <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
       <ScreenGlow />
       <ScreenBackButton />
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
       <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
         <ScreenTitle
           title="FIRE Calculator"
@@ -250,6 +251,7 @@ export default function FireCalculatorScreen() {
           </View>
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }

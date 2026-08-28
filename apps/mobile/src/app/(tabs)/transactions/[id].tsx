@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, ActivityIndicator, Pressable, TextInput, Switch, Alert } from "react-native";
+import { View, Text, ScrollView, ActivityIndicator, Pressable, TextInput, Switch, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { X, ChevronRight, Trash2, Check } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -71,7 +71,7 @@ export default function TransactionDetailScreen() {
   }
 
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
       <Stack.Screen options={{ presentation: "modal" }} />
       <View className="flex-row items-center justify-between px-5 pb-4">
         <Text className="font-ui-semibold text-[18px] text-text">Transaction</Text>
@@ -181,7 +181,7 @@ export default function TransactionDetailScreen() {
           <CategoryPickerSheet visible={pickerOpen} onClose={() => setPickerOpen(false)} selectedId={categoryId} onSelect={markDirty(setCategoryId)} />
         </>
       )}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
