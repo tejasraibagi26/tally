@@ -60,6 +60,22 @@ export default function OverviewScreen() {
     return min - pad;
   }, [chartData]);
 
+  // Matches web's Overview page: walk the trend backwards for the most
+  // recent snapshot at/before a month ago, then compare against today's
+  // live total (not the trend's own last point, which can lag behind an
+  // in-progress balance refresh) -- no chip at all, rather than a
+  // misleading "0%", when there's no real history to compare against yet.
+  const netWorthDelta = useMemo(() => {
+    const points = trend.data?.points ?? [];
+    if (points.length < 2 || !accounts.data) return undefined;
+    const now = new Date();
+    const monthAgo = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, now.getUTCDate())).toISOString().slice(0, 10);
+    const prior = [...points].reverse().find((p) => p.asOfDate <= monthAgo)?.net;
+    if (prior == null || prior === 0) return undefined;
+    const change = (netCents - prior) / Math.abs(prior);
+    return { direction: change >= 0 ? ("up" as const) : ("down" as const), pct: Math.round(Math.abs(change) * 100) };
+  }, [trend.data, accounts.data, netCents]);
+
   const recentItems = recent.data?.pages[0]?.items.slice(0, 5) ?? [];
   const topBudgets = (overview.data?.budgets.categories ?? []).slice(0, 3);
 
@@ -133,7 +149,14 @@ export default function OverviewScreen() {
           {accounts.isLoading ? (
             <ActivityIndicator className="self-start" />
           ) : (
-            <MoneyText cents={netCents} className="font-display text-[50px] text-text" style={{ lineHeight: 52 }} />
+            <View className="gap-1">
+              <MoneyText cents={netCents} className="font-display text-[50px] text-text" style={{ lineHeight: 52 }} />
+              {netWorthDelta && (
+                <Text className="font-ui-medium text-[13px]" style={{ color: netWorthDelta.direction === "up" ? colors.positive : colors.negative }}>
+                  {netWorthDelta.direction === "up" ? "▲" : "▼"} {netWorthDelta.pct}% vs last month
+                </Text>
+              )}
+            </View>
           )}
           {chartData.length > 1 && (
             <LineChart

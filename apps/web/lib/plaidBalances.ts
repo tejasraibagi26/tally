@@ -42,6 +42,15 @@ export async function refreshAccountBalances(itemId: string, trigger: SyncTrigge
         .where(eq(schema.accounts.plaidAccountId, acct.account_id));
     }
 
+    // Balances-only syncs used to leave `lastSyncedAt`/`status` untouched --
+    // only the transactions sync path (plaidSync.ts) wrote them -- so the
+    // freshness badge and "Updated Nh ago" text kept showing whenever a
+    // transactions sync last ran, ignoring balance refreshes entirely.
+    await db
+      .update(schema.plaidItems)
+      .set({ lastSyncedAt: new Date(), status: "healthy" })
+      .where(eq(schema.plaidItems.id, itemId));
+
     await db.insert(schema.syncRuns).values({
       itemId,
       kind: "balances",
