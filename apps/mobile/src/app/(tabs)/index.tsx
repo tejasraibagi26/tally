@@ -8,6 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { MeterBar } from "@/components/ui/MeterBar";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useAccounts } from "@/lib/queries/accounts";
 import { useOverview, useNetWorthTrend } from "@/lib/queries/overview";
@@ -172,7 +173,10 @@ export default function OverviewScreen() {
             Net worth
           </Text>
           {accounts.isLoading ? (
-            <ActivityIndicator className="self-start" />
+            <View className="gap-2">
+              <Skeleton style={{ width: 220, height: 44 }} />
+              <Skeleton style={{ width: 130, height: 15 }} />
+            </View>
           ) : (
             <View className="gap-1">
               <MoneyText cents={netCents} className="font-display text-[50px] text-text" style={{ lineHeight: 52 }} />
