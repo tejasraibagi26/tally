@@ -1,5 +1,6 @@
 import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChevronLeft } from "lucide-react-native";
 import { useThemeColors } from "@/theme/useThemeColors";
 
@@ -37,12 +38,18 @@ export function ScreenHeader({ title, action }: { title: string; action?: React.
 
 // Fixed back chevron -- render as a sibling of the ScrollView (not inside
 // it), positioned absolutely so it stays on screen while the ScrollView's
-// content, including ScreenTitle, scrolls underneath it.
+// content, including ScreenTitle, scrolls underneath it. Computes its own
+// top inset rather than relying on the parent View's paddingTop: RN's
+// position:absolute is relative to the parent's border box, not its padding
+// box (unlike CSS on web) -- a `top` here is unaffected by the container's
+// paddingTop, so without this it renders flush against the physical screen
+// edge, under the status bar/notch.
 export function ScreenBackButton() {
   const router = useRouter();
   const colors = useThemeColors();
+  const insets = useSafeAreaInsets();
   return (
-    <Pressable onPress={() => router.back()} hitSlop={12} style={{ position: "absolute", top: 2, left: 20, zIndex: 10 }}>
+    <Pressable onPress={() => router.back()} hitSlop={12} style={{ position: "absolute", top: insets.top + 14, left: 20, zIndex: 10 }}>
       <ChevronLeft size={24} color={colors.text} strokeWidth={2} />
     </Pressable>
   );
