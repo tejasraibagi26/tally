@@ -75,6 +75,13 @@ function IosNativeTabsLayout() {
     <NativeTabs
       tintColor={colors.brand}
       iconColor={{ default: colors["text-3"], selected: colors.brand }}
+      // Left unset, iOS 26's floating "Liquid Glass" bar defaults to
+      // `minimizeBehavior: "automatic"` -- it auto-shrinks into a
+      // compact, severely label-truncated pill once a screen scrolls
+      // (confirmed live: "Overview"/"Transactions" collapsed to "Ov…"/
+      // "Transa…" on scroll). Pinned to "never" so it always renders at
+      // full size.
+      minimizeBehavior="never"
       labelStyle={{
         default: { fontFamily: "Inter", fontSize: 10.5, color: colors["text-3"] },
         selected: { fontFamily: "Inter", fontSize: 10.5, color: colors.brand },
