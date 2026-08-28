@@ -3,7 +3,9 @@ import { TrendingUp } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useHoldings, useInvestmentTransactions } from "@/lib/queries/investments";
-import { chartSeries } from "@/theme/colors";
+import { chartSeries, hairline } from "@/theme/colors";
+import { useThemeColors } from "@/theme/useThemeColors";
+import { useColorScheme } from "nativewind";
 
 function formatQuantity(q: string): string {
   const n = parseFloat(q);
@@ -17,6 +19,9 @@ function formatQuantity(q: string): string {
 // activity. Historical-return chart and multi-currency FX conversion on the
 // activity feed are left as web-only for now.
 export default function InvestmentsScreen() {
+  const colors = useThemeColors();
+  const { colorScheme } = useColorScheme();
+  const series = colorScheme === "dark" ? chartSeries.dark : chartSeries.light;
   const { data, isLoading } = useHoldings();
   const { data: activityData } = useInvestmentTransactions();
 
@@ -31,7 +36,7 @@ export default function InvestmentsScreen() {
   if (data.holdings.length === 0) {
     return (
       <View className="flex-1 bg-canvas items-center justify-center px-8 gap-3">
-        <TrendingUp size={28} color="#948F84" strokeWidth={1.5} />
+        <TrendingUp size={28} color={colors["text-3"]} strokeWidth={1.5} />
         <Text className="font-ui-semibold text-[16px] text-text text-center">Nothing invested here yet</Text>
         <Text className="font-ui text-[13.5px] text-text-2 text-center">
           Connect a brokerage account from the Accounts tab. Holdings usually appear within a minute.
@@ -66,7 +71,7 @@ export default function InvestmentsScreen() {
                 cents={data.unrealizedGain.gain}
                 signed
                 className="font-ui-semibold text-[16px]"
-                style={{ color: data.unrealizedGain.gain < 0 ? "#B23A2C" : "#0F7A57" }}
+                style={{ color: data.unrealizedGain.gain < 0 ? colors.negative : colors.positive }}
               />
             ) : (
               <Text className="font-ui text-[13px] text-text-3">No cost basis</Text>
@@ -81,7 +86,7 @@ export default function InvestmentsScreen() {
                 cents={data.simpleReturn.value}
                 signed
                 className="font-ui-semibold text-[16px]"
-                style={{ color: data.simpleReturn.value < 0 ? "#B23A2C" : "#0F7A57" }}
+                style={{ color: data.simpleReturn.value < 0 ? colors.negative : colors.positive }}
               />
             ) : (
               <Text className="font-ui text-[13px] text-text-3">Building history…</Text>
@@ -95,15 +100,15 @@ export default function InvestmentsScreen() {
           Allocation
         </Text>
         <Card className="p-5 gap-4">
-          <View className="flex-row h-3 rounded-full overflow-hidden" style={{ backgroundColor: "#EFEDE8" }}>
+          <View className="flex-row h-3 rounded-full overflow-hidden bg-sunken">
             {data.allocation.map((slice, i) => (
-              <View key={slice.label} style={{ width: `${slice.pct * 100}%`, backgroundColor: chartSeries.light[i % 8] }} />
+              <View key={slice.label} style={{ width: `${slice.pct * 100}%`, backgroundColor: series[i % 8] }} />
             ))}
           </View>
           <View className="flex-row flex-wrap gap-x-5 gap-y-2.5">
             {data.allocation.map((slice, i) => (
               <View key={slice.label} className="flex-row items-center gap-2">
-                <View style={{ width: 8, height: 8, borderRadius: 999, backgroundColor: chartSeries.light[i % 8] }} />
+                <View style={{ width: 8, height: 8, borderRadius: 999, backgroundColor: series[i % 8] }} />
                 <Text className="font-ui text-[13px] text-text">{slice.label}</Text>
                 <Text className="font-ui text-[13px] text-text-3">{Math.round(slice.pct * 100)}%</Text>
               </View>
@@ -123,7 +128,7 @@ export default function InvestmentsScreen() {
               <View
                 key={h.securityId}
                 className="flex-row items-center justify-between py-4"
-                style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: "rgba(228,225,217,0.55)" } : undefined}
+                style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
               >
                 <View className="gap-0.5 flex-1 pr-3">
                   <Text className="font-ui-semibold text-[15px] text-text" numberOfLines={1}>
@@ -150,7 +155,7 @@ export default function InvestmentsScreen() {
               <View
                 key={tx.id}
                 className="flex-row items-center justify-between py-4"
-                style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: "rgba(228,225,217,0.55)" } : undefined}
+                style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
               >
                 <View className="gap-0.5 flex-1 pr-3">
                   <Text className="font-ui-medium text-[14.5px] text-text" numberOfLines={1}>
@@ -159,7 +164,7 @@ export default function InvestmentsScreen() {
                   </Text>
                   <Text className="font-ui text-[12px] text-text-2">{tx.date}</Text>
                 </View>
-                <MoneyText cents={tx.amount} signed className="text-[14.5px]" style={{ color: tx.amount < 0 ? "#0F7A57" : "#1A1917" }} />
+                <MoneyText cents={tx.amount} signed className="text-[14.5px]" style={{ color: tx.amount < 0 ? colors.positive : colors.text }} />
               </View>
             ))}
           </Card>

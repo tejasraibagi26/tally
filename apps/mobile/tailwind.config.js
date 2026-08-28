@@ -77,13 +77,32 @@ const dark = {
   "series-8": "#e66767",
 };
 
+// Tokens that actually differ between light/dark (everything in
+// global.css's :root / .dark:root blocks) resolve through a CSS variable, so
+// a plain `bg-canvas` className -- with no `dark:` prefix needed -- already
+// follows the system/app color scheme. status-*/series-* are intentionally
+// left as static light-map hex: DESIGN.md fixes status colors across both
+// themes, and series colors are never consumed via className (only via
+// theme/colors.ts's raw chartSeries hex arrays), so they don't need a
+// scheme-reactive class binding at all.
+const CSS_VAR_TOKENS = [
+  "canvas", "surface", "surface-2", "sunken", "border", "border-strong",
+  "text", "text-2", "text-3", "brand", "brand-hover", "brand-subtle",
+  "brand-border", "on-brand", "positive", "negative", "warning", "info",
+  "positive-subtle", "negative-subtle", "warning-subtle", "info-subtle",
+];
+const themeColors = { ...light };
+for (const token of CSS_VAR_TOKENS) {
+  themeColors[token] = `var(--color-${token})`;
+}
+
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   presets: [require("nativewind/preset")],
   darkMode: "class",
   theme: {
     extend: {
-      colors: light,
+      colors: themeColors,
       // Each weight is a separate registered font file (see theme/fonts.ts's
       // useFonts call), not a single family RN can weight-match at render
       // time -- so "font-ui" + Tailwind's "font-semibold" utility would

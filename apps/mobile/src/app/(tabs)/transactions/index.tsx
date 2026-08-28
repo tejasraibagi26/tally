@@ -8,17 +8,20 @@ import { MoneyText } from "@/components/ui/MoneyText";
 import { useTransactions, type TransactionRow } from "@/lib/queries/transactions";
 import { amountColor } from "@/lib/amountColor";
 import { TransactionFiltersSheet, type TransactionFilters } from "@/components/TransactionFiltersSheet";
+import { useColorScheme } from "nativewind";
+import { useThemeColors } from "@/theme/useThemeColors";
+import { hairline } from "@/theme/colors";
 
 // MOBILE_DESIGN.md §5.3 -- card list (not a table), infinite scroll, filter
 // pill instead of a sticky multi-field bar. Swipe-to-categorize is still
 // deferred past this first cut; the filter sheet itself is wired below.
-function TransactionRowItem({ item, isLast }: { item: TransactionRow; isLast: boolean }) {
+function TransactionRowItem({ item, isLast, colors }: { item: TransactionRow; isLast: boolean; colors: ReturnType<typeof useThemeColors> }) {
   const router = useRouter();
   return (
     <Pressable
       onPress={() => router.push(`/(tabs)/transactions/${item.id}`)}
       className="flex-row items-center justify-between py-4 px-5"
-      style={!isLast ? { borderBottomWidth: 1, borderBottomColor: "rgba(228,225,217,0.55)" } : undefined}
+      style={!isLast ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
     >
       <View className="gap-0.5 flex-1 pr-3">
         <Text className="font-ui-semibold text-[15px] text-text" numberOfLines={1}>
@@ -29,13 +32,21 @@ function TransactionRowItem({ item, isLast }: { item: TransactionRow; isLast: bo
           {item.isPending ? " · Pending" : ""}
         </Text>
       </View>
-      <MoneyText cents={item.amount} signed className="text-[15px] font-ui-medium" style={{ color: amountColor(item.amount), fontStyle: item.isPending ? "italic" : "normal" }} />
+      <MoneyText
+        cents={item.amount}
+        signed
+        className="text-[15px] font-ui-medium"
+        style={{ color: amountColor(item.amount, colors), fontStyle: item.isPending ? "italic" : "normal" }}
+      />
     </Pressable>
   );
 }
 
 export default function TransactionsScreen() {
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
+  const { colorScheme } = useColorScheme();
+  const dark = colorScheme === "dark";
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<TransactionFilters>({});
 
@@ -62,13 +73,11 @@ export default function TransactionsScreen() {
       </View>
 
       <View className="px-5 pb-4">
-        <Pressable onPress={() => setFiltersOpen(true)} className="self-start flex-row items-center gap-2 rounded-full px-4 py-2.5" style={{ backgroundColor: "#E6EFEA" }}>
-          <ListFilter size={14} color="#14513F" strokeWidth={1.9} />
-          <Text className="font-ui-semibold text-[13.5px]" style={{ color: "#14513F" }}>
-            Filters
-          </Text>
+        <Pressable onPress={() => setFiltersOpen(true)} className="self-start flex-row items-center gap-2 rounded-full px-4 py-2.5 bg-brand-subtle">
+          <ListFilter size={14} color={colors.brand} strokeWidth={1.9} />
+          <Text className="font-ui-semibold text-[13.5px] text-brand">Filters</Text>
           {activeCount > 0 && (
-            <View className="rounded-full items-center justify-center" style={{ backgroundColor: "#14513F", minWidth: 18, height: 18, paddingHorizontal: 4 }}>
+            <View className="rounded-full items-center justify-center bg-brand" style={{ minWidth: 18, height: 18, paddingHorizontal: 4 }}>
               <Text className="font-ui-semibold text-[11px] text-on-brand">{activeCount}</Text>
             </View>
           )}
@@ -81,9 +90,9 @@ export default function TransactionsScreen() {
         <FlatList
           data={items}
           keyExtractor={(item) => item.id}
-          renderItem={({ item, index }) => <TransactionRowItem item={item} isLast={index === items.length - 1} />}
+          renderItem={({ item, index }) => <TransactionRowItem item={item} isLast={index === items.length - 1} colors={colors} />}
           className="mx-5 rounded-card bg-surface"
-          style={{ shadowColor: "#1A1917", shadowOpacity: 0.07, shadowRadius: 12, shadowOffset: { width: 0, height: 2 }, elevation: 2 }}
+          style={{ shadowColor: "#000000", shadowOpacity: dark ? 0.35 : 0.07, shadowRadius: 12, shadowOffset: { width: 0, height: 2 }, elevation: dark ? 0 : 2 }}
           contentContainerStyle={{ paddingBottom: 24 }}
           onEndReachedThreshold={0.4}
           onEndReached={() => hasNextPage && fetchNextPage()}

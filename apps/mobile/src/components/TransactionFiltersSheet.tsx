@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Modal, View, Text, Pressable, ScrollView } from "react-native";
 import { X } from "lucide-react-native";
 import { useAccounts } from "@/lib/queries/accounts";
+import { useThemeColors } from "@/theme/useThemeColors";
 
 export interface TransactionFilters {
   account?: string;
@@ -20,14 +21,8 @@ function lastMonthRange(): { from: string; to: string } {
 
 function Chip({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
   return (
-    <Pressable
-      onPress={onPress}
-      className="px-4 py-2.5 rounded-full mr-2 mb-2"
-      style={{ backgroundColor: selected ? "#14513F" : "#F9F8F5" }}
-    >
-      <Text className="font-ui-medium text-[13.5px]" style={{ color: selected ? "#FFFFFF" : "#1A1917" }}>
-        {label}
-      </Text>
+    <Pressable onPress={onPress} className={`px-4 py-2.5 rounded-full mr-2 mb-2 ${selected ? "bg-brand" : "bg-surface-2"}`}>
+      <Text className={`font-ui-medium text-[13.5px] ${selected ? "text-on-brand" : "text-text"}`}>{label}</Text>
     </Pressable>
   );
 }
@@ -48,6 +43,7 @@ export function TransactionFiltersSheet({
   filters: TransactionFilters;
   onApply: (filters: TransactionFilters) => void;
 }) {
+  const colors = useThemeColors();
   const [draft, setDraft] = useState<TransactionFilters>(filters);
   const { data: accounts } = useAccounts();
   const allAccounts = [...(accounts?.institutions.flatMap((i) => i.accounts) ?? []), ...(accounts?.unlinkedAccounts ?? [])];
@@ -64,7 +60,7 @@ export function TransactionFiltersSheet({
         <View className="flex-row items-center justify-between px-5 pt-5 pb-3">
           <Text className="font-ui-semibold text-[18px] text-text">Filters</Text>
           <Pressable onPress={onClose} hitSlop={12}>
-            <X size={22} color="#524F47" />
+            <X size={22} color={colors["text-2"]} />
           </Pressable>
         </View>
 

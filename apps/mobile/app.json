@@ -8,8 +8,7 @@
     "scheme": "tally",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "com.tejasraibagi.tally",
-      "icon": "./assets/expo.icon"
+      "bundleIdentifier": "com.tejasraibagi.tally"
     },
     "android": {
       "package": "com.tejasraibagi.tally",
@@ -34,7 +33,11 @@
         {
           "backgroundColor": "#F5F4F0",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 76,
+          "dark": {
+            "backgroundColor": "#111110",
+            "image": "./assets/images/splash-icon-dark.png"
+          }
         }
       ]
     ],

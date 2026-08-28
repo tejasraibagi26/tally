@@ -3,22 +3,24 @@ import { View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingVi
 import Svg, { Path } from "react-native-svg";
 import { useAuth } from "@/lib/AuthContext";
 import { ApiError } from "@/lib/api";
+import { useThemeColors } from "@/theme/useThemeColors";
 
 // MOBILE_DESIGN.md §5.1 -- centered form, filled (borderless) inputs, full
 // pill primary button, no sign-up flow (single-user personal app).
-function TallyMark() {
+function TallyMark({ color }: { color: string }) {
   return (
     <Svg width={36} height={36} viewBox="0 0 34 34" fill="none">
-      <Path d="M6 6V28" stroke="#14513F" strokeWidth={2.25} strokeLinecap="round" />
-      <Path d="M12.7 6V28" stroke="#14513F" strokeWidth={2.25} strokeLinecap="round" />
-      <Path d="M19.4 6V28" stroke="#14513F" strokeWidth={2.25} strokeLinecap="round" />
-      <Path d="M26.1 6V28" stroke="#14513F" strokeWidth={2.25} strokeLinecap="round" />
-      <Path d="M3.5 22L28.5 12" stroke="#14513F" strokeWidth={2.25} strokeLinecap="round" />
+      <Path d="M6 6V28" stroke={color} strokeWidth={2.25} strokeLinecap="round" />
+      <Path d="M12.7 6V28" stroke={color} strokeWidth={2.25} strokeLinecap="round" />
+      <Path d="M19.4 6V28" stroke={color} strokeWidth={2.25} strokeLinecap="round" />
+      <Path d="M26.1 6V28" stroke={color} strokeWidth={2.25} strokeLinecap="round" />
+      <Path d="M3.5 22L28.5 12" stroke={color} strokeWidth={2.25} strokeLinecap="round" />
     </Svg>
   );
 }
 
 export default function LoginScreen() {
+  const colors = useThemeColors();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,7 +43,7 @@ export default function LoginScreen() {
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1 bg-canvas">
       <View className="flex-1 justify-center px-8">
         <View className="items-center gap-3 mb-16">
-          <TallyMark />
+          <TallyMark color={colors.brand} />
           <Text className="font-display text-[32px] text-text">Tally</Text>
         </View>
 
@@ -50,7 +52,7 @@ export default function LoginScreen() {
             value={email}
             onChangeText={setEmail}
             placeholder="Email"
-            placeholderTextColor="#6A665E"
+            placeholderTextColor={colors["text-3"]}
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="email-address"
@@ -60,7 +62,7 @@ export default function LoginScreen() {
             value={password}
             onChangeText={setPassword}
             placeholder="Password"
-            placeholderTextColor="#6A665E"
+            placeholderTextColor={colors["text-3"]}
             secureTextEntry
             className="h-14 rounded-control bg-surface-2 px-[18px] text-[15.5px] font-ui text-text"
           />

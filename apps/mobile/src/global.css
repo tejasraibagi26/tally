@@ -1,3 +1,59 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Light/dark values must stay in sync with tailwind.config.js's `light`/`dark`
+   hex maps by hand -- this file is the only place NativeWind's `dark:`
+   variant reads from; theme/colors.ts's lightColors/darkColors re-export the
+   same two maps for code that needs a raw hex value instead of a className. */
+@layer base {
+  :root {
+    --color-canvas: #F5F4F0;
+    --color-surface: #FCFCFB;
+    --color-surface-2: #F9F8F5;
+    --color-sunken: #EFEDE8;
+    --color-border: #E4E1D9;
+    --color-border-strong: #938C7D;
+    --color-text: #1A1917;
+    --color-text-2: #524F47;
+    --color-text-3: #6A665E;
+    --color-brand: #14513F;
+    --color-brand-hover: #0E3E30;
+    --color-brand-subtle: #E6EFEA;
+    --color-brand-border: #BFD6CB;
+    --color-on-brand: #FFFFFF;
+    --color-positive: #0F7A57;
+    --color-negative: #B23A2C;
+    --color-warning: #8A5A00;
+    --color-info: #2A78D6;
+    --color-positive-subtle: #E3F0EA;
+    --color-negative-subtle: #F6E7E4;
+    --color-warning-subtle: #F5EEDC;
+    --color-info-subtle: #E5EEFA;
+  }
+
+  .dark:root {
+    --color-canvas: #111110;
+    --color-surface: #1A1A19;
+    --color-surface-2: #232320;
+    --color-sunken: #0C0C0B;
+    --color-border: #2B2B28;
+    --color-border-strong: #3D3D38;
+    --color-text: #F2F1ED;
+    --color-text-2: #A8A69D;
+    --color-text-3: #77756D;
+    --color-brand: #4FB394;
+    --color-brand-hover: #6AC5A9;
+    --color-brand-subtle: #14251F;
+    --color-brand-border: #234438;
+    --color-on-brand: #0C1A15;
+    --color-positive: #4FC49B;
+    --color-negative: #F0846B;
+    --color-warning: #E0A94A;
+    --color-info: #3987E5;
+    --color-positive-subtle: #12271F;
+    --color-negative-subtle: #2B1A16;
+    --color-warning-subtle: #2A2213;
+    --color-info-subtle: #111F2E;
+  }
+}

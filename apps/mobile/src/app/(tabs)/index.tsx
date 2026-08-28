@@ -14,6 +14,8 @@ import { useTransactions } from "@/lib/queries/transactions";
 import { useCashFlowTrend } from "@/lib/queries/cashflow";
 import { useLiabilities } from "@/lib/queries/liabilities";
 import { amountColor } from "@/lib/amountColor";
+import { useThemeColors } from "@/theme/useThemeColors";
+import { hairline } from "@/theme/colors";
 
 // MOBILE_DESIGN.md §5.2 -- hero net worth (unboxed, direct on canvas), a
 // KPI stat-tile strip (spend/income/cashflow/utilization), a single-line
@@ -23,6 +25,7 @@ export default function OverviewScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+  const colors = useThemeColors();
   const accounts = useAccounts();
   const overview = useOverview();
   const trend = useNetWorthTrend();
@@ -54,21 +57,21 @@ export default function OverviewScreen() {
           label: "Spent this month",
           cents: currentMonth.spend,
           delta: priorMonth ? deltaLabel(currentMonth.spend, priorMonth.spend) : undefined,
-          bg: "#F6E7E4",
+          bgClass: "bg-negative-subtle",
         },
         {
           key: "income",
           label: "Income",
           cents: currentMonth.income,
           delta: priorMonth ? deltaLabel(currentMonth.income, priorMonth.income) : undefined,
-          bg: "#E3F0EA",
+          bgClass: "bg-positive-subtle",
         },
         {
           key: "cashflow",
           label: "Cash flow",
           cents: currentMonth.cashFlow,
           delta: priorMonth ? deltaLabel(currentMonth.cashFlow, priorMonth.cashFlow) : undefined,
-          bg: "#E6EFEA",
+          bgClass: "bg-brand-subtle",
         },
       ]
     : [];
@@ -87,14 +90,14 @@ export default function OverviewScreen() {
     <ScrollView
       className="flex-1 bg-canvas"
       contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 }}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#14513F" />}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brand} />}
     >
       <View className="flex-row items-center justify-between px-5 pb-1">
         <Text className="font-ui-semibold text-[24px] text-text" style={{ letterSpacing: -0.3 }}>
           Overview
         </Text>
         <Pressable onPress={() => router.push("/more")} hitSlop={12}>
-          <Ellipsis size={22} color="#524F47" strokeWidth={1.75} />
+          <Ellipsis size={22} color={colors["text-2"]} strokeWidth={1.75} />
         </Pressable>
       </View>
 
@@ -115,10 +118,10 @@ export default function OverviewScreen() {
               height={56}
               width={300}
               thickness={2.5}
-              color="#14513F"
+              color={colors.brand}
               areaChart
-              startFillColor="#E6EFEA"
-              endFillColor="#E6EFEA"
+              startFillColor={colors["brand-subtle"]}
+              endFillColor={colors["brand-subtle"]}
               startOpacity={0.9}
               endOpacity={0.3}
               hideDataPoints
@@ -132,10 +135,10 @@ export default function OverviewScreen() {
 
         {/* Connections status */}
         <Pressable onPress={() => router.push("/(tabs)/accounts")}>
-          <View className="rounded-panel flex-row items-center justify-between px-[18px] py-4" style={{ backgroundColor: "#E6EFEA" }}>
+          <View className="rounded-panel flex-row items-center justify-between px-[18px] py-4 bg-brand-subtle">
             <View className="flex-row items-center gap-2.5">
-              <CircleCheck size={17} color="#14513F" strokeWidth={2} />
-              <Text className="font-ui-medium text-[14.5px]" style={{ color: "#14513F" }}>
+              <CircleCheck size={17} color={colors.brand} strokeWidth={2} />
+              <Text className="font-ui-medium text-[14.5px] text-brand">
                 {brokenCount > 0
                   ? `${brokenCount} connection${brokenCount === 1 ? "" : "s"} needs attention`
                   : allSynced
@@ -143,7 +146,7 @@ export default function OverviewScreen() {
                     : "Sync in progress"}
               </Text>
             </View>
-            <ChevronRight size={16} color="#14513F" strokeWidth={1.75} />
+            <ChevronRight size={16} color={colors.brand} strokeWidth={1.75} />
           </View>
         </Pressable>
 
@@ -152,7 +155,7 @@ export default function OverviewScreen() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingRight: 20 }} style={{ marginHorizontal: -20 }}>
             <View style={{ width: 8 }} />
             {kpiTiles.map((tile) => (
-              <View key={tile.key} className="rounded-panel px-4 py-4 gap-1.5" style={{ width: 140, backgroundColor: tile.bg }}>
+              <View key={tile.key} className={`rounded-panel px-4 py-4 gap-1.5 ${tile.bgClass}`} style={{ width: 140 }}>
                 <Text className="font-ui-medium text-[11.5px] text-text-2">{tile.label}</Text>
                 <MoneyText cents={tile.cents} signed={tile.key === "cashflow"} className="font-ui-semibold text-[19px] text-text" />
                 {tile.delta && (
@@ -161,7 +164,7 @@ export default function OverviewScreen() {
               </View>
             ))}
             {utilizationPct !== null && (
-              <View className="rounded-panel px-4 py-4 gap-1.5" style={{ width: 140, backgroundColor: "#E5EEFA" }}>
+              <View className="rounded-panel px-4 py-4 gap-1.5 bg-info-subtle" style={{ width: 140 }}>
                 <Text className="font-ui-medium text-[11.5px] text-text-2">Credit utilization</Text>
                 <Text className="font-ui-semibold text-[19px] text-text">{utilizationPct}%</Text>
                 <Text className="font-ui text-[11.5px] text-text-3">of total limit</Text>
@@ -196,7 +199,7 @@ export default function OverviewScreen() {
                 <View
                   key={`${bill.label}-${bill.dueDate}`}
                   className="flex-row items-center justify-between py-4"
-                  style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: "rgba(228,225,217,0.55)" } : undefined}
+                  style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
                 >
                   <Text className="font-ui text-[14.5px] text-text">{bill.label}</Text>
                   <MoneyText cents={bill.amount} className="text-[14.5px] text-text" />
@@ -222,14 +225,14 @@ export default function OverviewScreen() {
                 <View
                   key={t.id}
                   className="flex-row items-center justify-between py-4"
-                  style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: "rgba(228,225,217,0.55)" } : undefined}
+                  style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
                 >
                   <View className="gap-0.5 flex-1 pr-3">
                     <Text className="font-ui-semibold text-[15px] text-text" numberOfLines={1}>
                       {t.merchantName ?? t.name}
                     </Text>
                   </View>
-                  <MoneyText cents={t.amount} signed className="text-[15px] font-ui-medium" style={{ color: amountColor(t.amount) }} />
+                  <MoneyText cents={t.amount} signed className="text-[15px] font-ui-medium" style={{ color: amountColor(t.amount, colors) }} />
                 </View>
               ))
             )}

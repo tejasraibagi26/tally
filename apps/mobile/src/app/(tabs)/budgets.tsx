@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/Card";
 import { MeterBar } from "@/components/ui/MeterBar";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useBudgets, currentMonthParam } from "@/lib/queries/budgets";
+import { useThemeColors } from "@/theme/useThemeColors";
 
 function shiftMonth(month: string, delta: number): string {
   const d = new Date(month + "T00:00:00Z");
@@ -22,6 +23,7 @@ function monthLabel(month: string): string {
 // fixed footer outside the ScrollView); totals render inline for now.
 export default function BudgetsScreen() {
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
   const [month, setMonth] = useState(currentMonthParam());
   const { data, isLoading, refetch, isRefetching } = useBudgets(month);
 
@@ -32,7 +34,7 @@ export default function BudgetsScreen() {
     <ScrollView
       className="flex-1 bg-canvas"
       contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 }}
-      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#14513F" />}
+      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
     >
       <View className="px-5 pb-4">
         <Text className="font-ui-semibold text-[24px] text-text mb-3" style={{ letterSpacing: -0.3 }}>
@@ -40,11 +42,11 @@ export default function BudgetsScreen() {
         </Text>
         <View className="flex-row items-center justify-between">
           <Pressable onPress={() => setMonth((m) => shiftMonth(m, -1))} hitSlop={12}>
-            <ChevronLeft size={20} color="#524F47" />
+            <ChevronLeft size={20} color={colors["text-2"]} />
           </Pressable>
           <Text className="font-ui-semibold text-[15px] text-text">{monthLabel(month)}</Text>
           <Pressable onPress={() => setMonth((m) => shiftMonth(m, 1))} hitSlop={12}>
-            <ChevronRight size={20} color="#524F47" />
+            <ChevronRight size={20} color={colors["text-2"]} />
           </Pressable>
         </View>
       </View>

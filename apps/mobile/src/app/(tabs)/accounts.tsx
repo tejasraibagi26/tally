@@ -1,16 +1,20 @@
-import { View, Text, ScrollView, ActivityIndicator, Pressable, RefreshControl } from "react-native";
+import { View, Text, ScrollView, ActivityIndicator, Pressable, RefreshControl, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Plus } from "lucide-react-native";
+import { Plus, RefreshCw } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { StatusChip } from "@/components/ui/StatusChip";
 import { useAccounts, type Institution, type AccountRow } from "@/lib/queries/accounts";
 import { usePlaidLink } from "@/lib/usePlaidLink";
+import { useSync } from "@/lib/queries/plaid";
+import { useThemeColors } from "@/theme/useThemeColors";
+import { hairline } from "@/theme/colors";
 
 // MOBILE_DESIGN.md §5.5 -- grouped by institution, broken connections get a
 // critical badge + full-width Reconnect button, both wired to native Plaid
 // Link (Phase 5). See usePlaidLink.ts for the OAuth-redirect caveat.
 function InstitutionCard({ institution, onReconnect, reconnecting }: { institution: Institution; onReconnect: () => void; reconnecting: boolean }) {
+  const colors = useThemeColors();
   const initial = (institution.institutionName ?? "?").charAt(0).toUpperCase();
   const broken = institution.badge === "critical";
 
@@ -18,10 +22,8 @@ function InstitutionCard({ institution, onReconnect, reconnecting }: { instituti
     <Card className="overflow-hidden">
       <View className="flex-row items-center justify-between px-5 pt-[18px] pb-4">
         <View className="flex-row items-center gap-3">
-          <View className="w-8 h-8 rounded-full items-center justify-center" style={{ backgroundColor: broken ? "#F6E7E4" : "#E6EFEA" }}>
-            <Text className="font-ui-semibold text-[13px]" style={{ color: broken ? "#B23A2C" : "#14513F" }}>
-              {initial}
-            </Text>
+          <View className={`w-8 h-8 rounded-full items-center justify-center ${broken ? "bg-negative-subtle" : "bg-brand-subtle"}`}>
+            <Text className={`font-ui-semibold text-[13px] ${broken ? "text-negative" : "text-brand"}`}>{initial}</Text>
           </View>
           <View>
             <Text className="font-ui-semibold text-[15px] text-text">{institution.institutionName ?? "Unknown"}</Text>
@@ -32,7 +34,7 @@ function InstitutionCard({ institution, onReconnect, reconnecting }: { instituti
       </View>
 
       {institution.accounts.map((a, i) => (
-        <AccountLine key={a.id} account={a} showTopBorder={i > 0} />
+        <AccountLine key={a.id} account={a} showTopBorder={i > 0} colors={colors} />
       ))}
 
       {broken && (
@@ -46,11 +48,11 @@ function InstitutionCard({ institution, onReconnect, reconnecting }: { instituti
   );
 }
 
-function AccountLine({ account, showTopBorder }: { account: AccountRow; showTopBorder: boolean }) {
+function AccountLine({ account, showTopBorder, colors }: { account: AccountRow; showTopBorder: boolean; colors: ReturnType<typeof useThemeColors> }) {
   return (
     <View
       className="flex-row items-center justify-between px-5 py-3.5"
-      style={showTopBorder ? { borderTopWidth: 1, borderTopColor: "rgba(228,225,217,0.55)" } : undefined}
+      style={showTopBorder ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined}
     >
       <View className="gap-0.5">
         <Text className="font-ui-medium text-[14.5px] text-text">{account.name}</Text>
@@ -75,37 +77,61 @@ function relativeTime(iso: string | null): string {
 
 export default function AccountsScreen() {
   const insets = useSafeAreaInsets();
+  const colors = useThemeColors();
   const { data, isLoading, refetch, isRefetching } = useAccounts();
   const { openLink, isLinking, error } = usePlaidLink();
+  const sync = useSync();
+
+  async function handleSync() {
+    try {
+      const res = await sync.mutateAsync(["balances"]);
+      const failed = res.results.filter((r) => r.failures.length > 0);
+      if (failed.length > 0) {
+        Alert.alert(
+          "Some accounts didn't sync",
+          failed.map((f) => `${f.institutionName ?? "An account"}: ${f.failures.map((x) => x.label).join(", ")}`).join("\n"),
+        );
+      }
+    } catch {
+      Alert.alert("Sync failed", "Please try again in a moment.");
+    }
+  }
 
   return (
     <ScrollView
       className="flex-1 bg-canvas"
       contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 }}
-      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#14513F" />}
+      refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
     >
       <View className="flex-row items-center justify-between px-5 pb-4">
         <Text className="font-ui-semibold text-[24px] text-text" style={{ letterSpacing: -0.3 }}>
           Accounts
         </Text>
-        <Pressable
-          onPress={() => openLink("create")}
-          disabled={isLinking}
-          className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50"
-          style={{ backgroundColor: "#E6EFEA" }}
-        >
-          {isLinking ? <ActivityIndicator size="small" color="#14513F" /> : <Plus size={15} color="#14513F" strokeWidth={2} />}
-          <Text className="font-ui-semibold text-[13px]" style={{ color: "#14513F" }}>
-            Add
-          </Text>
-        </Pressable>
+        <View className="flex-row items-center gap-2">
+          {data && data.institutions.length > 0 && (
+            <Pressable
+              onPress={handleSync}
+              disabled={sync.isPending}
+              className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50 bg-brand-subtle"
+            >
+              {sync.isPending ? <ActivityIndicator size="small" color={colors.brand} /> : <RefreshCw size={14} color={colors.brand} strokeWidth={2} />}
+              <Text className="font-ui-semibold text-[13px] text-brand">Sync</Text>
+            </Pressable>
+          )}
+          <Pressable
+            onPress={() => openLink("create")}
+            disabled={isLinking}
+            className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50 bg-brand-subtle"
+          >
+            {isLinking ? <ActivityIndicator size="small" color={colors.brand} /> : <Plus size={15} color={colors.brand} strokeWidth={2} />}
+            <Text className="font-ui-semibold text-[13px] text-brand">Add</Text>
+          </Pressable>
+        </View>
       </View>
 
       {error && (
-        <View className="mx-5 mb-4 rounded-control px-4 py-3" style={{ backgroundColor: "#F6E7E4" }}>
-          <Text className="font-ui text-[13.5px]" style={{ color: "#B23A2C" }}>
-            {error}
-          </Text>
+        <View className="mx-5 mb-4 rounded-control px-4 py-3 bg-negative-subtle">
+          <Text className="font-ui text-[13.5px] text-negative">{error}</Text>
         </View>
       )}
 

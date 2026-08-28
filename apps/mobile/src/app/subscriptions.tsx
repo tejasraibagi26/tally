@@ -2,6 +2,8 @@ import { View, Text, ScrollView, ActivityIndicator } from "react-native";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useSubscriptions, type RecurringStream } from "@/lib/queries/subscriptions";
+import { useThemeColors } from "@/theme/useThemeColors";
+import { hairline } from "@/theme/colors";
 
 const FREQUENCY_LABEL: Record<RecurringStream["frequency"], string> = {
   weekly: "Weekly",
@@ -23,6 +25,7 @@ const MONTHLY_MULTIPLIER: Record<RecurringStream["frequency"], number> = {
 // totals for monthly/annualized spend, at-risk/cancelled get the same
 // status-badge treatment as connection health.
 export default function SubscriptionsScreen() {
+  const colors = useThemeColors();
   const { data, isLoading } = useSubscriptions();
   const streams = (data?.streams ?? []).filter((s) => s.status !== "cancelled");
 
@@ -53,7 +56,7 @@ export default function SubscriptionsScreen() {
             <View
               key={s.id}
               className="flex-row items-center justify-between py-4"
-              style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: "rgba(228,225,217,0.55)" } : undefined}
+              style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
             >
               <View className="gap-0.5 flex-1 pr-3">
                 <Text className="font-ui-semibold text-[15px] text-text" numberOfLines={1}>

@@ -1,10 +1,53 @@
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator, Alert } from "react-native";
 import { useRouter } from "expo-router";
-import { ChevronRight, Link2 } from "lucide-react-native";
+import { useColorScheme } from "nativewind";
+import { ChevronRight, Link2, Sun, Moon, Smartphone } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { useAccountProfile, useUpdateAccountProfile, useChangePassword, useWipeAccount } from "@/lib/queries/account";
 import { ApiError } from "@/lib/api";
+import { useThemeColors } from "@/theme/useThemeColors";
+import { type AppearanceMode, getStoredAppearanceMode, storeAppearanceMode } from "@/theme/appearance";
+
+const APPEARANCE_OPTIONS: { mode: AppearanceMode; label: string; Icon: typeof Sun }[] = [
+  { mode: "light", label: "Light", Icon: Sun },
+  { mode: "dark", label: "Dark", Icon: Moon },
+  { mode: "system", label: "System", Icon: Smartphone },
+];
+
+function AppearancePicker() {
+  const colors = useThemeColors();
+  const { setColorScheme } = useColorScheme();
+  const [selected, setSelected] = useState<AppearanceMode>("system");
+
+  useEffect(() => {
+    getStoredAppearanceMode().then(setSelected);
+  }, []);
+
+  async function choose(mode: AppearanceMode) {
+    setSelected(mode);
+    await storeAppearanceMode(mode);
+    setColorScheme(mode);
+  }
+
+  return (
+    <View className="flex-row gap-2">
+      {APPEARANCE_OPTIONS.map(({ mode, label, Icon }) => {
+        const active = selected === mode;
+        return (
+          <Pressable
+            key={mode}
+            onPress={() => choose(mode)}
+            className={`flex-1 items-center gap-1.5 py-3 rounded-control ${active ? "bg-brand-subtle" : "bg-surface-2"}`}
+          >
+            <Icon size={18} color={active ? colors.brand : colors["text-2"]} strokeWidth={1.9} />
+            <Text className={`font-ui-medium text-[12.5px] ${active ? "text-brand" : "text-text-2"}`}>{label}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
 
 function Field({ label, value, onChangeText, placeholder, secure, keyboardType }: {
   label: string;
@@ -14,6 +57,7 @@ function Field({ label, value, onChangeText, placeholder, secure, keyboardType }
   secure?: boolean;
   keyboardType?: "email-address" | "default";
 }) {
+  const colors = useThemeColors();
   return (
     <View className="gap-1.5">
       <Text className="font-ui-medium text-[12px] text-text-2" style={{ textTransform: "uppercase" }}>
@@ -23,7 +67,7 @@ function Field({ label, value, onChangeText, placeholder, secure, keyboardType }
         value={value}
         onChangeText={onChangeText}
         placeholder={placeholder}
-        placeholderTextColor="#6A665E"
+        placeholderTextColor={colors["text-3"]}
         secureTextEntry={secure}
         keyboardType={keyboardType}
         autoCapitalize="none"
@@ -45,6 +89,7 @@ function errorMessage(err: unknown, fallback: string): string {
 // for now rather than half-ported.
 export default function SettingsScreen() {
   const router = useRouter();
+  const colors = useThemeColors();
   const { data: profile, isLoading } = useAccountProfile();
   const updateProfile = useUpdateAccountProfile();
   const changePassword = useChangePassword();
@@ -180,6 +225,16 @@ export default function SettingsScreen() {
         </Card>
       </View>
 
+      {/* Appearance */}
+      <View className="gap-3">
+        <Text className="font-ui-semibold text-[13px] text-text-2" style={{ textTransform: "uppercase" }}>
+          Appearance
+        </Text>
+        <Card className="p-3">
+          <AppearancePicker />
+        </Card>
+      </View>
+
       {/* Password */}
       <View className="gap-3">
         <Text className="font-ui-semibold text-[13px] text-text-2" style={{ textTransform: "uppercase" }}>
@@ -225,9 +280,9 @@ export default function SettingsScreen() {
         </Text>
         <Card className="px-5">
           <Pressable onPress={() => router.push("/(tabs)/accounts")} className="flex-row items-center gap-3 py-4">
-            <Link2 size={18} color="#524F47" strokeWidth={1.75} />
+            <Link2 size={18} color={colors["text-2"]} strokeWidth={1.75} />
             <Text className="flex-1 font-ui-medium text-[14.5px] text-text">Accounts & connections</Text>
-            <ChevronRight size={16} color="#948F84" />
+            <ChevronRight size={16} color={colors["text-3"]} />
           </Pressable>
         </Card>
       </View>
@@ -237,7 +292,7 @@ export default function SettingsScreen() {
         <Text className="font-ui-semibold text-[13px] text-negative" style={{ textTransform: "uppercase" }}>
           Danger zone
         </Text>
-        <Card className="p-5 gap-4" style={{ borderWidth: 1, borderColor: "#B23A2C" }}>
+        <Card className="p-5 gap-4" style={{ borderWidth: 1, borderColor: colors.negative }}>
           <Text className="font-ui text-[13.5px] text-text-2">
             Disconnects every institution and permanently deletes all synced financial data.
           </Text>
@@ -258,17 +313,15 @@ export default function SettingsScreen() {
                   onPress={confirmWipe}
                   disabled={wipeAccount.isPending || !wipePassword}
                   className="flex-1 h-11 rounded-full items-center justify-center disabled:opacity-50"
-                  style={{ backgroundColor: "#B23A2C" }}
+                  style={{ backgroundColor: colors.negative }}
                 >
                   {wipeAccount.isPending ? <ActivityIndicator color="#FFFFFF" /> : <Text className="font-ui-semibold text-[14px] text-on-brand">Wipe data</Text>}
                 </Pressable>
               </View>
             </>
           ) : (
-            <Pressable onPress={() => setWiping(true)} className="h-11 rounded-full items-center justify-center" style={{ backgroundColor: "#F6E7E4" }}>
-              <Text className="font-ui-semibold text-[14px]" style={{ color: "#B23A2C" }}>
-                Wipe all data
-              </Text>
+            <Pressable onPress={() => setWiping(true)} className="h-11 rounded-full items-center justify-center bg-negative-subtle">
+              <Text className="font-ui-semibold text-[14px] text-negative">Wipe all data</Text>
             </Pressable>
           )}
         </Card>
