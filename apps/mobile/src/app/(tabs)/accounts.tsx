@@ -21,16 +21,20 @@ function InstitutionCard({ institution, onReconnect, reconnecting }: { instituti
   return (
     <Card className="overflow-hidden">
       <View className="flex-row items-center justify-between px-5 pt-[18px] pb-4">
-        <View className="flex-row items-center gap-3">
+        <View className="flex-row items-center gap-3 flex-1 pr-3">
           <View className={`w-8 h-8 rounded-full items-center justify-center ${broken ? "bg-negative-subtle" : "bg-brand-subtle"}`}>
             <Text className={`font-ui-semibold text-[13px] ${broken ? "text-negative" : "text-brand"}`}>{initial}</Text>
           </View>
-          <View>
-            <Text className="font-ui-semibold text-[15px] text-text">{institution.institutionName ?? "Unknown"}</Text>
+          <View className="flex-1">
+            <Text className="font-ui-semibold text-[15px] text-text" numberOfLines={1}>
+              {institution.institutionName ?? "Unknown"}
+            </Text>
             <Text className="font-ui text-[12px] text-text-2">{relativeTime(institution.lastSyncedAt)}</Text>
           </View>
         </View>
-        <StatusChip status={institution.badge} />
+        <View style={{ flexShrink: 0 }}>
+          <StatusChip status={institution.badge} />
+        </View>
       </View>
 
       {institution.accounts.map((a, i) => (
@@ -54,15 +58,17 @@ function AccountLine({ account, showTopBorder, colors }: { account: AccountRow; 
       className="flex-row items-center justify-between px-5 py-3.5"
       style={showTopBorder ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined}
     >
-      <View className="gap-0.5">
-        <Text className="font-ui-medium text-[14.5px] text-text">{account.name}</Text>
+      <View className="gap-0.5 flex-1 pr-3">
+        <Text className="font-ui-medium text-[14.5px] text-text" numberOfLines={1}>
+          {account.name}
+        </Text>
         {account.mask && (
           <Text className="text-[12px] text-text-2" style={{ fontFamily: "JetBrainsMono" }}>
             ····{account.mask}
           </Text>
         )}
       </View>
-      <MoneyText cents={account.currentBalance ?? 0} className="text-[15px] text-text" />
+      <MoneyText cents={account.currentBalance ?? 0} className="text-[15px] text-text" style={{ flexShrink: 0 }} />
     </View>
   );
 }
