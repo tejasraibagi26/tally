@@ -39,6 +39,14 @@
             "image": "./assets/images/splash-icon-dark.png"
           }
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
       ]
     ],
     "experiments": {
