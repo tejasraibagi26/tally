@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { House, Receipt, PiggyBank, Landmark } from "lucide-react-native";
+import { House, ArrowLeftRight, PiggyBank, Landmark } from "lucide-react-native";
 import { useColorScheme } from "nativewind";
 import { useThemeColors } from "@/theme/useThemeColors";
 
@@ -37,7 +37,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="index" options={{ title: "Overview", tabBarIcon: ({ color, size }) => <House color={color} size={size} strokeWidth={1.9} /> }} />
       <Tabs.Screen
         name="transactions"
-        options={{ title: "Transactions", tabBarIcon: ({ color, size }) => <Receipt color={color} size={size} strokeWidth={1.9} /> }}
+        options={{ title: "Transactions", tabBarIcon: ({ color, size }) => <ArrowLeftRight color={color} size={size} strokeWidth={1.9} /> }}
       />
       <Tabs.Screen name="budgets" options={{ title: "Budgets", tabBarIcon: ({ color, size }) => <PiggyBank color={color} size={size} strokeWidth={1.9} /> }} />
       <Tabs.Screen
