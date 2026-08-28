@@ -78,6 +78,11 @@ export default function InvestmentsScreen() {
   }
 
   const activity = activityData?.transactions.slice(0, 10) ?? [];
+  // "Portfolio value" sums holdings after converting each to a single
+  // currency (apps/web/lib/portfolio.ts) -- account balances elsewhere in
+  // the app are shown unconverted, so this total can look "wrong" next to
+  // a foreign-currency account's own balance unless it's labeled.
+  const hasForeignCurrencyHoldings = data.holdings.some((h) => h.originalCurrency !== h.currency);
 
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
@@ -88,7 +93,7 @@ export default function InvestmentsScreen() {
       <Card className="p-5 gap-5">
         <View className="gap-1">
           <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
-            Portfolio value
+            Portfolio value{hasForeignCurrencyHoldings ? ` · converted to ${data.holdings[0]!.currency}` : ""}
           </Text>
           <MoneyText cents={data.value} className="font-display text-text" style={{ fontSize: rf(32) }} />
         </View>

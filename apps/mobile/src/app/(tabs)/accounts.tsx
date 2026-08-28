@@ -17,7 +17,17 @@ import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 // MOBILE_DESIGN.md §5.5 -- grouped by institution, broken connections get a
 // critical badge + full-width Reconnect button, both wired to native Plaid
 // Link (Phase 5). See usePlaidLink.ts for the OAuth-redirect caveat.
-function InstitutionCard({ institution, onReconnect, reconnecting }: { institution: Institution; onReconnect: () => void; reconnecting: boolean }) {
+function InstitutionCard({
+  institution,
+  onReconnect,
+  reconnecting,
+  baseCurrency,
+}: {
+  institution: Institution;
+  onReconnect: () => void;
+  reconnecting: boolean;
+  baseCurrency?: string;
+}) {
   const colors = useThemeColors();
   const rf = useRF();
   const initial = (institution.institutionName ?? "?").charAt(0).toUpperCase();
@@ -43,7 +53,7 @@ function InstitutionCard({ institution, onReconnect, reconnecting }: { instituti
       </View>
 
       {institution.accounts.map((a, i) => (
-        <AccountLine key={a.id} account={a} showTopBorder={i > 0} colors={colors} />
+        <AccountLine key={a.id} account={a} showTopBorder={i > 0} colors={colors} baseCurrency={baseCurrency} />
       ))}
 
       {broken && (
@@ -57,7 +67,17 @@ function InstitutionCard({ institution, onReconnect, reconnecting }: { instituti
   );
 }
 
-function AccountLine({ account, showTopBorder, colors }: { account: AccountRow; showTopBorder: boolean; colors: ReturnType<typeof useThemeColors> }) {
+function AccountLine({
+  account,
+  showTopBorder,
+  colors,
+  baseCurrency,
+}: {
+  account: AccountRow;
+  showTopBorder: boolean;
+  colors: ReturnType<typeof useThemeColors>;
+  baseCurrency?: string;
+}) {
   const [editing, setEditing] = useState(false);
   const [input, setInput] = useState(account.nickname ?? "");
   const updateNickname = useUpdateAccountNickname(account.id);
@@ -124,7 +144,12 @@ function AccountLine({ account, showTopBorder, colors }: { account: AccountRow; 
         </View>
         <Pencil size={12} color={colors["text-3"]} strokeWidth={2} />
       </Pressable>
-      <MoneyText cents={account.currentBalance ?? 0} className="text-text" style={{ flexShrink: 0, fontSize: rf(15) }} />
+      <View style={{ flexShrink: 0, alignItems: "flex-end" }}>
+        <MoneyText cents={account.currentBalance ?? 0} className="text-text" style={{ fontSize: rf(15) }} />
+        {baseCurrency && account.currency !== baseCurrency && (
+          <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(11) }}>{account.currency}</Text>
+        )}
+      </View>
     </View>
   );
 }
@@ -209,7 +234,13 @@ export default function AccountsScreen() {
       ) : (
         <View className="gap-5 px-5">
           {data?.institutions.map((inst) => (
-            <InstitutionCard key={inst.id} institution={inst} onReconnect={() => openLink("update", inst.id)} reconnecting={isLinking} />
+            <InstitutionCard
+              key={inst.id}
+              institution={inst}
+              onReconnect={() => openLink("update", inst.id)}
+              reconnecting={isLinking}
+              baseCurrency={data?.totals.currency}
+            />
           ))}
           {data && data.institutions.length === 0 && <Text className="font-ui text-text-3" style={{ fontSize: rf(14) }}>No accounts connected yet.</Text>}
         </View>
