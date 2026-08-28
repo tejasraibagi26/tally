@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform, useWindowDimensions } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Flame, Check } from "lucide-react-native";
 import { LineChart } from "react-native-gifted-charts";
@@ -40,6 +40,16 @@ export default function FireCalculatorScreen() {
   const { data: defaults, isLoading: loadingDefaults } = useFireDefaults();
   const { data: settingsData, isLoading: loadingSettings } = useFireSettings();
   const saveSettings = useSaveFireSettings();
+  const { width: windowWidth } = useWindowDimensions();
+  // Without an explicit width, gifted-charts falls back to a fixed
+  // per-point spacing rather than stretching to fill the Card -- with this
+  // series' point count that left the plotted line short of the container,
+  // reading as pushed off to the right instead of starting flush at the
+  // left edge like the rest of the screen's content. Measured via onLayout
+  // so it always matches the Card's real width; window-width fallback
+  // (minus the screen's 40px of ScrollView padding + the Card's 32px of
+  // p-4 padding) avoids a flash of the wrong width before first layout.
+  const [chartWidth, setChartWidth] = useState(windowWidth - 72);
 
   const [expensesInput, setExpensesInput] = useState("");
   const [contributionInput, setContributionInput] = useState("");
@@ -200,23 +210,27 @@ export default function FireCalculatorScreen() {
               <Text className="font-ui text-[11.5px] text-text-3">Now → {horizonYears}y</Text>
             </View>
             <Card className="p-4 pt-5 gap-2">
-              <LineChart
-                data={chartData}
-                height={120}
-                thickness={2.5}
-                color={colors.brand}
-                areaChart
-                startFillColor={colors["brand-subtle"]}
-                endFillColor={colors["brand-subtle"]}
-                startOpacity={0.9}
-                endOpacity={0.3}
-                hideDataPoints
-                hideYAxisText
-                hideAxesAndRules
-                curved
-                initialSpacing={0}
-                endSpacing={0}
-              />
+              <View onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}>
+                <LineChart
+                  data={chartData}
+                  height={120}
+                  width={chartWidth}
+                  adjustToWidth
+                  thickness={2.5}
+                  color={colors.brand}
+                  areaChart
+                  startFillColor={colors["brand-subtle"]}
+                  endFillColor={colors["brand-subtle"]}
+                  startOpacity={0.9}
+                  endOpacity={0.3}
+                  hideDataPoints
+                  hideYAxisText
+                  hideAxesAndRules
+                  curved
+                  initialSpacing={0}
+                  endSpacing={0}
+                />
+              </View>
               <View className="flex-row items-center justify-between pt-1" style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
                 <View className="gap-0.5">
                   <Text className="font-ui text-[10.5px] text-text-3">Today</Text>

@@ -50,11 +50,11 @@ export default function MoreScreen() {
   }
 
   return (
-    // fitToContents sizes the native sheet to exactly this View's measured
-    // height -- the bottom safe-area inset (home indicator zone) has to be
-    // included here explicitly, or the sheet stops short of the true screen
-    // edge and leaves a gap showing the blurred screen behind it.
-    <View className="bg-canvas px-5" style={{ paddingTop: 22, paddingBottom: insets.bottom + 16 }}>
+    // The sheet itself is a fixed 46% of screen height (_layout.tsx's
+    // sheetAllowedDetents), not sized to this content -- without flex-1 here,
+    // this View is only as tall as its own rows, and the native sheet's own
+    // (light, even in dark mode) background shows through as a bar below it.
+    <View className="flex-1 bg-canvas px-5" style={{ paddingTop: 22, paddingBottom: insets.bottom + 16 }}>
       <View className="items-center mb-3">
         <Text className="font-ui-semibold text-[16px] text-text">More</Text>
       </View>
