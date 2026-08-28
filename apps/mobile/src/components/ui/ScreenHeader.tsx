@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChevronLeft } from "lucide-react-native";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useRF } from "@/theme/responsiveFont";
 
 // Matches the tab screens' own top-left title treatment (Overview, Budgets,
 // etc.) instead of the native nav header -- these screens are pushed, not
@@ -21,13 +22,14 @@ import { useThemeColors } from "@/theme/useThemeColors";
 export function ScreenHeader({ title, action }: { title: string; action?: React.ReactNode }) {
   const router = useRouter();
   const colors = useThemeColors();
+  const rf = useRF();
   return (
     <View className="flex-row items-center justify-between px-5 pb-4">
       <View className="flex-row items-center gap-3">
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <ChevronLeft size={24} color={colors.text} strokeWidth={2} />
         </Pressable>
-        <Text className="font-ui-semibold text-[22px] text-text" style={{ letterSpacing: -0.3 }}>
+        <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(22) }}>
           {title}
         </Text>
       </View>
@@ -60,9 +62,10 @@ export function ScreenBackButton() {
 // leaves room for the fixed chevron (20 left inset + 24 icon + 12 gap = 56,
 // minus the ScrollView's own 20px horizontal padding).
 export function ScreenTitle({ title, action }: { title: string; action?: React.ReactNode }) {
+  const rf = useRF();
   return (
     <View className="flex-row items-center justify-between" style={{ paddingLeft: 36 }}>
-      <Text className="font-ui-semibold text-[22px] text-text" style={{ letterSpacing: -0.3 }}>
+      <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(22) }}>
         {title}
       </Text>
       {action}

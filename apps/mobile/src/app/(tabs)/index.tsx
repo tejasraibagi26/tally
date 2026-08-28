@@ -21,6 +21,7 @@ import { formatCents, formatPercent } from "@tally/core/money";
 import { amountColor } from "@/lib/amountColor";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
+import { useRF } from "@/theme/responsiveFont";
 
 // MOBILE_DESIGN.md §5.2 -- hero net worth (unboxed, direct on canvas), a
 // KPI stat-tile strip (spend/income/cashflow/utilization), a single-line
@@ -32,6 +33,7 @@ export default function OverviewScreen() {
   const tabBarClearance = useTabBarBottomClearance();
   const queryClient = useQueryClient();
   const colors = useThemeColors();
+  const rf = useRF();
   const accounts = useAccounts();
   const overview = useOverview();
   const trend = useNetWorthTrend();
@@ -156,7 +158,7 @@ export default function OverviewScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brand} />}
       >
         <View className="flex-row items-center justify-between px-5 pb-1">
-        <Text className="font-ui-semibold text-[24px] text-text" style={{ letterSpacing: -0.3 }}>
+        <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(24) }}>
           Overview
         </Text>
         <View className="flex-row items-center gap-4">
@@ -172,7 +174,7 @@ export default function OverviewScreen() {
       <View className="gap-7 px-5 pt-3">
         {/* Hero net worth -- unboxed, per MOBILE_DESIGN.md */}
         <View className="gap-3">
-          <Text className="font-ui-medium text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>
+          <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
             Net worth
           </Text>
           {accounts.isLoading ? (
@@ -182,9 +184,9 @@ export default function OverviewScreen() {
             </View>
           ) : (
             <View className="gap-1">
-              <MoneyText cents={netCents} className="font-display text-[60px] text-text" style={{ lineHeight: 62 }} />
+              <MoneyText cents={netCents} className="font-display text-text" style={{ lineHeight: 62, fontSize: rf(60) }} />
               {netWorthDelta && (
-                <Text className="font-ui-medium text-[13px]" style={{ color: netWorthDelta.direction === "up" ? colors.positive : colors.negative }}>
+                <Text className="font-ui-medium" style={{ color: netWorthDelta.direction === "up" ? colors.positive : colors.negative, fontSize: rf(13) }}>
                   {netWorthDelta.direction === "up" ? "▲" : "▼"} {netWorthDelta.pct}% vs last month
                 </Text>
               )}
@@ -229,7 +231,7 @@ export default function OverviewScreen() {
           <View className="rounded-panel flex-row items-center justify-between px-[18px] py-4 bg-brand-subtle">
             <View className="flex-row items-center gap-2.5">
               <CircleCheck size={17} color={colors.brand} strokeWidth={2} />
-              <Text className="font-ui-medium text-[14.5px] text-brand">
+              <Text className="font-ui-medium text-brand" style={{ fontSize: rf(14.5) }}>
                 {brokenCount > 0
                   ? `${brokenCount} connection${brokenCount === 1 ? "" : "s"} needs attention`
                   : allSynced
@@ -267,21 +269,21 @@ export default function OverviewScreen() {
                 }
                 style={{ width: "48%" }}
               >
-                <Text className="font-ui-medium text-[11.5px] text-text-2">{tile.label}</Text>
-                <MoneyText cents={tile.cents} signed={tile.key === "cashflow"} mask={false} className="font-ui-semibold text-[19px] text-text" numberOfLines={1} adjustsFontSizeToFit />
+                <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(11.5) }}>{tile.label}</Text>
+                <MoneyText cents={tile.cents} signed={tile.key === "cashflow"} mask={false} className="font-ui-semibold text-text" style={{ fontSize: rf(19) }} numberOfLines={1} adjustsFontSizeToFit />
                 {tile.delta && (
-                  <Text className="font-ui text-[11.5px] text-text-3" numberOfLines={1}>{tile.delta}</Text>
+                  <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }} numberOfLines={1}>{tile.delta}</Text>
                 )}
                 {tile.secondary && (
-                  <Text className="font-ui text-[11.5px] text-text-3" numberOfLines={1}>{tile.secondary}</Text>
+                  <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }} numberOfLines={1}>{tile.secondary}</Text>
                 )}
               </View>
             ))}
             {utilizationPct !== null && (
               <View className="rounded-panel px-4 py-4 gap-1.5 bg-info-subtle" style={{ width: "48%" }}>
-                <Text className="font-ui-medium text-[11.5px] text-text-2">Credit utilization</Text>
-                <Text className="font-ui-semibold text-[19px] text-text">{utilizationPct}%</Text>
-                <Text className="font-ui text-[11.5px] text-text-3">of total limit</Text>
+                <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(11.5) }}>Credit utilization</Text>
+                <Text className="font-ui-semibold text-text" style={{ fontSize: rf(19) }}>{utilizationPct}%</Text>
+                <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>of total limit</Text>
               </View>
             )}
           </View>
@@ -291,9 +293,9 @@ export default function OverviewScreen() {
         {topBudgets.length > 0 && (
           <View className="gap-4">
             <View className="flex-row items-center justify-between">
-              <Text className="font-ui-semibold text-[18px] text-text">Budget this month</Text>
+              <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Budget this month</Text>
               <Pressable onPress={() => router.push("/(tabs)/budgets")}>
-                <Text className="font-ui-semibold text-[13.5px] text-brand">View all</Text>
+                <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13.5) }}>View all</Text>
               </Pressable>
             </View>
             <Card className="p-5 gap-5">
@@ -307,7 +309,7 @@ export default function OverviewScreen() {
         {/* Upcoming */}
         {overview.data && overview.data.upcomingBills.length > 0 && (
           <View className="gap-4">
-            <Text className="font-ui-semibold text-[18px] text-text">Upcoming</Text>
+            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Upcoming</Text>
             <Card className="px-5">
               {overview.data.upcomingBills.slice(0, 3).map((bill, i, arr) => (
                 <View
@@ -315,8 +317,8 @@ export default function OverviewScreen() {
                   className="flex-row items-center justify-between py-4"
                   style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
                 >
-                  <Text className="font-ui text-[14.5px] text-text">{bill.label}</Text>
-                  <MoneyText cents={bill.amount} mask={false} className="text-[14.5px] text-text" />
+                  <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>{bill.label}</Text>
+                  <MoneyText cents={bill.amount} mask={false} className="text-text" style={{ fontSize: rf(14.5) }} />
                 </View>
               ))}
             </Card>
@@ -326,14 +328,14 @@ export default function OverviewScreen() {
         {/* Recent activity */}
         <View className="gap-4">
           <View className="flex-row items-center justify-between">
-            <Text className="font-ui-semibold text-[18px] text-text">Recent activity</Text>
+            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Recent activity</Text>
             <Pressable onPress={() => router.push("/(tabs)/transactions")}>
-              <Text className="font-ui-semibold text-[13.5px] text-brand">View all</Text>
+              <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13.5) }}>View all</Text>
             </Pressable>
           </View>
           <Card className="px-5">
             {recentItems.length === 0 ? (
-              <Text className="font-ui text-[14px] text-text-3 py-4">Nothing here yet.</Text>
+              <Text className="font-ui text-text-3 py-4" style={{ fontSize: rf(14) }}>Nothing here yet.</Text>
             ) : (
               recentItems.map((t, i, arr) => (
                 <View
@@ -342,11 +344,11 @@ export default function OverviewScreen() {
                   style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
                 >
                   <View className="gap-0.5 flex-1 pr-3">
-                    <Text className="font-ui-semibold text-[15px] text-text" numberOfLines={1}>
+                    <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15) }} numberOfLines={1}>
                       {t.merchantName ?? t.name}
                     </Text>
                   </View>
-                  <MoneyText cents={t.amount} signed mask={false} className="text-[15px] font-ui-medium" style={{ color: amountColor(t.amount, colors) }} />
+                  <MoneyText cents={t.amount} signed mask={false} className="font-ui-medium" style={{ color: amountColor(t.amount, colors), fontSize: rf(15) }} />
                 </View>
               ))
             )}

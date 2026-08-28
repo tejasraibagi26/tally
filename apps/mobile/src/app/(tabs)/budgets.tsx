@@ -9,6 +9,7 @@ import { useBudgets, currentMonthParam } from "@/lib/queries/budgets";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
+import { useRF } from "@/theme/responsiveFont";
 
 function shiftMonth(month: string, delta: number): string {
   const d = new Date(month + "T00:00:00Z");
@@ -27,6 +28,7 @@ export default function BudgetsScreen() {
   const insets = useSafeAreaInsets();
   const tabBarClearance = useTabBarBottomClearance();
   const colors = useThemeColors();
+  const rf = useRF();
   const [month, setMonth] = useState(currentMonthParam());
   const { data, isLoading, refetch, isRefetching } = useBudgets(month);
 
@@ -43,14 +45,14 @@ export default function BudgetsScreen() {
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
       >
         <View className="px-5 pb-4">
-        <Text className="font-ui-semibold text-[24px] text-text mb-3" style={{ letterSpacing: -0.3 }}>
+        <Text className="font-ui-semibold text-text mb-3" style={{ letterSpacing: -0.3, fontSize: rf(24) }}>
           Budgets
         </Text>
         <View className="flex-row items-center justify-between">
           <Pressable onPress={() => setMonth((m) => shiftMonth(m, -1))} hitSlop={12}>
             <ChevronLeft size={20} color={colors["text-2"]} />
           </Pressable>
-          <Text className="font-ui-semibold text-[15px] text-text">{monthLabel(month)}</Text>
+          <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15) }}>{monthLabel(month)}</Text>
           <Pressable onPress={() => setMonth((m) => shiftMonth(m, 1))} hitSlop={12}>
             <ChevronRight size={20} color={colors["text-2"]} />
           </Pressable>
@@ -62,8 +64,8 @@ export default function BudgetsScreen() {
       ) : (
         <View className="px-5 gap-4">
           <Card className="p-5 flex-row justify-between items-center">
-            <Text className="font-ui text-[13.5px] text-text-2">Total this month</Text>
-            <Text className="font-ui-semibold text-[14.5px] text-text">
+            <Text className="font-ui text-text-2" style={{ fontSize: rf(13.5) }}>Total this month</Text>
+            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(14.5) }}>
               <MoneyText cents={totalSpend} mask={false} /> of <MoneyText cents={totalBudget} mask={false} />
             </Text>
           </Card>
@@ -74,7 +76,7 @@ export default function BudgetsScreen() {
                 <MeterBar key={b.categoryId} label={b.categoryName} colorSlot={b.categoryColorSlot} spentCents={b.spend} budgetCents={b.amount + b.rolloverFromPrior} mask={false} />
               ))
             ) : (
-              <Text className="font-ui text-[14px] text-text-3">No budgets set for this month.</Text>
+              <Text className="font-ui text-text-3" style={{ fontSize: rf(14) }}>No budgets set for this month.</Text>
             )}
           </Card>
         </View>

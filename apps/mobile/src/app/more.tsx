@@ -5,6 +5,7 @@ import { Wallet, TrendingUp, LineChart, Settings, LogOut, ChevronRight } from "l
 import { useAuth } from "@/lib/AuthContext";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
+import { useRF } from "@/theme/responsiveFont";
 
 function Row({
   icon,
@@ -19,11 +20,12 @@ function Row({
   destructive?: boolean;
   colors: ReturnType<typeof useThemeColors>;
 }) {
+  const rf = useRF();
   return (
     <Pressable onPress={onPress} className="flex-row items-center justify-between py-4 active:opacity-70">
       <View className="flex-row items-center gap-3">
         {icon}
-        <Text className="font-ui-medium text-[15px]" style={{ color: destructive ? colors.negative : colors.text }}>
+        <Text className="font-ui-medium" style={{ color: destructive ? colors.negative : colors.text, fontSize: rf(15) }}>
           {label}
         </Text>
       </View>
@@ -42,6 +44,7 @@ export default function MoreScreen() {
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const { logout, user } = useAuth();
+  const rf = useRF();
   const soft = { borderTopWidth: 1, borderTopColor: hairline(colors) };
 
   function go(href: Href) {
@@ -56,9 +59,9 @@ export default function MoreScreen() {
     // (light, even in dark mode) background shows through as a bar below it.
     <View className="flex-1 bg-canvas px-5" style={{ paddingTop: 22, paddingBottom: insets.bottom + 16 }}>
       <View className="items-center mb-3">
-        <Text className="font-ui-semibold text-[16px] text-text">More</Text>
+        <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }}>More</Text>
       </View>
-      {user && <Text className="font-ui text-[13px] text-text-2 mb-1 px-1">{user.email}</Text>}
+      {user && <Text className="font-ui text-text-2 mb-1 px-1" style={{ fontSize: rf(13) }}>{user.email}</Text>}
 
       <View>
         <Row icon={<LineChart size={20} color={colors["text-2"]} strokeWidth={1.75} />} label="Investments" onPress={() => go("/investments")} colors={colors} />

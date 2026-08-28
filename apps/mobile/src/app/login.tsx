@@ -3,6 +3,7 @@ import { View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingVi
 import Svg, { Path } from "react-native-svg";
 import { useAuth } from "@/lib/AuthContext";
 import { ApiError, NetworkError } from "@/lib/api";
+import { useRF } from "@/theme/responsiveFont";
 import { useThemeColors } from "@/theme/useThemeColors";
 
 // MOBILE_DESIGN.md §5.1 -- centered form, filled (borderless) inputs, full
@@ -21,6 +22,7 @@ function TallyMark({ color }: { color: string }) {
 
 export default function LoginScreen() {
   const colors = useThemeColors();
+  const rf = useRF();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,7 +54,7 @@ export default function LoginScreen() {
       >
         <View className="items-center gap-3 mb-16">
           <TallyMark color={colors.brand} />
-          <Text className="font-display text-[32px] text-text">Tally</Text>
+          <Text className="font-display text-text" style={{ fontSize: rf(32) }}>Tally</Text>
         </View>
 
         <View className="gap-3.5">
@@ -64,7 +66,8 @@ export default function LoginScreen() {
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="email-address"
-            className="h-14 rounded-control bg-surface-2 px-[18px] text-[15.5px] font-ui text-text"
+            className="h-14 rounded-control bg-surface-2 px-[18px] font-ui text-text"
+            style={{ fontSize: rf(15.5) }}
           />
           <TextInput
             value={password}
@@ -72,17 +75,18 @@ export default function LoginScreen() {
             placeholder="Password"
             placeholderTextColor={colors["text-3"]}
             secureTextEntry
-            className="h-14 rounded-control bg-surface-2 px-[18px] text-[15.5px] font-ui text-text"
+            className="h-14 rounded-control bg-surface-2 px-[18px] font-ui text-text"
+            style={{ fontSize: rf(15.5) }}
           />
 
-          {error && <Text className="font-ui text-[13.5px] text-negative px-1">{error}</Text>}
+          {error && <Text className="font-ui text-negative px-1" style={{ fontSize: rf(13.5) }}>{error}</Text>}
 
           <Pressable
             onPress={handleLogin}
             disabled={loading || !email || !password}
             className="h-14 rounded-full bg-brand items-center justify-center mt-2 active:opacity-90 disabled:opacity-40"
           >
-            {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text className="text-[15.5px] font-ui-semibold text-on-brand">Log in</Text>}
+            {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15.5) }}>Log in</Text>}
           </Pressable>
         </View>
       </ScrollView>

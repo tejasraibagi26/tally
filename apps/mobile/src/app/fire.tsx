@@ -11,6 +11,7 @@ import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { ScreenHeader, ScreenBackButton, ScreenTitle } from "@/components/ui/ScreenHeader";
 import { AppSlider } from "@/components/ui/AppSlider";
 import { useFireDefaults, useFireSettings, useSaveFireSettings } from "@/lib/queries/fire";
+import { useRF } from "@/theme/responsiveFont";
 import { useThemeColors } from "@/theme/useThemeColors";
 
 // Matches apps/web/components/fire/FireCalculator.tsx: server-seeded
@@ -21,14 +22,15 @@ import { useThemeColors } from "@/theme/useThemeColors";
 // no progress bar, banner, chart, or save, a much thinner port than the
 // rest of the app's screens.
 function Field({ label, value, onChangeText }: { label: string; value: string; onChangeText: (v: string) => void }) {
+  const rf = useRF();
   return (
     <View className="gap-1.5" style={{ width: "48%" }}>
-      <Text className="font-ui-medium text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>
+      <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
         {label}
       </Text>
       <View className="flex-row items-center h-12 rounded-control bg-surface-2 px-[14px]">
-        <Text className="font-ui text-[13px] text-text-3 mr-1">$</Text>
-        <TextInput value={value} onChangeText={onChangeText} keyboardType="decimal-pad" className="flex-1 font-ui text-[14.5px] text-text" />
+        <Text className="font-ui text-text-3 mr-1" style={{ fontSize: rf(13) }}>$</Text>
+        <TextInput value={value} onChangeText={onChangeText} keyboardType="decimal-pad" className="flex-1 font-ui text-text" style={{ fontSize: rf(14.5) }} />
       </View>
     </View>
   );
@@ -36,6 +38,7 @@ function Field({ label, value, onChangeText }: { label: string; value: string; o
 
 export default function FireCalculatorScreen() {
   const colors = useThemeColors();
+  const rf = useRF();
   const insets = useSafeAreaInsets();
   const { data: defaults, isLoading: loadingDefaults } = useFireDefaults();
   const { data: settingsData, isLoading: loadingSettings } = useFireSettings();
@@ -126,8 +129,8 @@ export default function FireCalculatorScreen() {
         <ScreenHeader title="FIRE Calculator" />
         <View className="flex-1 items-center justify-center px-8 gap-3">
           <Flame size={28} color={colors["text-3"]} strokeWidth={1.5} />
-          <Text className="font-ui-semibold text-[16px] text-text text-center">Connect an account to get started</Text>
-          <Text className="font-ui text-[13.5px] text-text-2 text-center">
+          <Text className="font-ui-semibold text-text text-center" style={{ fontSize: rf(16) }}>Connect an account to get started</Text>
+          <Text className="font-ui text-text-2 text-center" style={{ fontSize: rf(13.5) }}>
             The calculator uses your investable net worth and spending history to seed sensible defaults, which you can always adjust by hand.
           </Text>
         </View>
@@ -158,7 +161,7 @@ export default function FireCalculatorScreen() {
               ) : (
                 <>
                   <Check size={15} color="#FFFFFF" strokeWidth={2.5} />
-                  <Text className="font-ui-semibold text-[13px] text-on-brand">{saved ? "Saved" : "Save"}</Text>
+                  <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(13) }}>{saved ? "Saved" : "Save"}</Text>
                 </>
               )}
             </Pressable>
@@ -166,36 +169,36 @@ export default function FireCalculatorScreen() {
         />
         <Card className="p-5 gap-3">
           <View className="flex-row items-baseline justify-between">
-            <Text className="font-ui-medium text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>
+            <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
               FIRE number
             </Text>
-            <MoneyText cents={target} className="font-display text-[26px] text-text" />
+            <MoneyText cents={target} className="font-display text-text" style={{ fontSize: rf(26) }} />
           </View>
           <View className="h-2 rounded-full bg-sunken overflow-hidden">
             <View className="h-full rounded-full bg-brand" style={{ width: `${barPct * 100}%` }} />
           </View>
           <View className="flex-row items-center justify-between">
-            <Text className="font-ui text-[12px] text-text-3">
-              <MoneyText cents={investableNetWorth} className="text-[12px] text-text-3" /> invested today
+            <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>
+              <MoneyText cents={investableNetWorth} className="text-text-3" style={{ fontSize: rf(12) }} /> invested today
             </Text>
-            <Text className="font-ui text-[12px] text-text-3">{formatPercent(progress || 0)} of the way there</Text>
+            <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>{formatPercent(progress || 0)} of the way there</Text>
           </View>
         </Card>
 
         <View className={`rounded-control px-4 py-3.5 ${bannerBg}`}>
           {alreadyThere ? (
-            <Text className={`font-ui-medium text-[14.5px] ${bannerText}`}>You&apos;ve already hit your FIRE number 🎉</Text>
+            <Text className={`font-ui-medium ${bannerText}`} style={{ fontSize: rf(14.5) }}>You&apos;ve already hit your FIRE number 🎉</Text>
           ) : years == null ? (
-            <Text className={`font-ui-medium text-[14.5px] ${bannerText}`}>Not reachable with these inputs. Raise the contribution or expected return.</Text>
+            <Text className={`font-ui-medium ${bannerText}`} style={{ fontSize: rf(14.5) }}>Not reachable with these inputs. Raise the contribution or expected return.</Text>
           ) : (
             <View className="gap-1">
-              <Text className={`font-ui-medium text-[14.5px] ${bannerText}`}>{years.toFixed(1)} years to FIRE at this pace</Text>
+              <Text className={`font-ui-medium ${bannerText}`} style={{ fontSize: rf(14.5) }}>{years.toFixed(1)} years to FIRE at this pace</Text>
               {ageResult ? (
-                <Text className="font-ui text-[12.5px] text-text-2">
+                <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>
                   You&apos;ll be {Math.round(ageResult.age)} in {ageResult.year}
                 </Text>
               ) : (
-                <Text className="font-ui text-[12.5px] text-text-3">Add your birthdate in Settings to see the age you&apos;ll hit this at, not just years away.</Text>
+                <Text className="font-ui text-text-3" style={{ fontSize: rf(12.5) }}>Add your birthdate in Settings to see the age you&apos;ll hit this at, not just years away.</Text>
               )}
             </View>
           )}
@@ -204,10 +207,10 @@ export default function FireCalculatorScreen() {
         {chartData.length > 1 && (
           <View className="gap-2">
             <View className="flex-row items-baseline justify-between">
-              <Text className="font-ui-semibold text-[13px] text-text-2" style={{ textTransform: "uppercase" }}>
+              <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(13) }}>
                 Projection
               </Text>
-              <Text className="font-ui text-[11.5px] text-text-3">Now → {horizonYears}y</Text>
+              <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>Now → {horizonYears}y</Text>
             </View>
             <Card className="p-4 pt-5 gap-2">
               <View onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}>
@@ -237,12 +240,12 @@ export default function FireCalculatorScreen() {
               </View>
               <View className="flex-row items-center justify-between pt-1" style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
                 <View className="gap-0.5">
-                  <Text className="font-ui text-[10.5px] text-text-3">Today</Text>
-                  <MoneyText cents={investableNetWorth} className="font-ui-semibold text-[13.5px] text-text" />
+                  <Text className="font-ui text-text-3" style={{ fontSize: rf(10.5) }}>Today</Text>
+                  <MoneyText cents={investableNetWorth} className="font-ui-semibold text-text" style={{ fontSize: rf(13.5) }} />
                 </View>
                 <View className="items-end gap-0.5">
-                  <Text className="font-ui text-[10.5px] text-text-3">In {horizonYears} years</Text>
-                  <MoneyText cents={endValue} className="font-ui-semibold text-[13.5px] text-text" />
+                  <Text className="font-ui text-text-3" style={{ fontSize: rf(10.5) }}>In {horizonYears} years</Text>
+                  <MoneyText cents={endValue} className="font-ui-semibold text-text" style={{ fontSize: rf(13.5) }} />
                 </View>
               </View>
             </Card>
@@ -256,13 +259,13 @@ export default function FireCalculatorScreen() {
 
         <View className="gap-5">
           <View className="gap-2">
-            <Text className="font-ui-medium text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>
+            <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
               Safe withdrawal rate: {formatPercent(swr)}
             </Text>
             <AppSlider value={swr} onValueChange={setSwr} min={0.01} max={0.1} step={0.001} tint={colors.brand} />
           </View>
           <View className="gap-2">
-            <Text className="font-ui-medium text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>
+            <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
               Expected annual return: {formatPercent(expectedReturn)}
             </Text>
             <AppSlider value={expectedReturn} onValueChange={setExpectedReturn} min={-0.05} max={0.15} step={0.001} tint={colors.brand} />

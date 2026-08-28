@@ -11,6 +11,7 @@ import { useThemeColors } from "@/theme/useThemeColors";
 import { type AppearanceMode, getStoredAppearanceMode, storeAppearanceMode } from "@/theme/appearance";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { ScreenHeader, ScreenBackButton, ScreenTitle } from "@/components/ui/ScreenHeader";
+import { useRF } from "@/theme/responsiveFont";
 
 const APPEARANCE_OPTIONS: { mode: AppearanceMode; label: string; Icon: typeof Sun }[] = [
   { mode: "light", label: "Light", Icon: Sun },
@@ -21,6 +22,7 @@ const APPEARANCE_OPTIONS: { mode: AppearanceMode; label: string; Icon: typeof Su
 function AppearancePicker() {
   const colors = useThemeColors();
   const { setColorScheme } = useColorScheme();
+  const rf = useRF();
   const [selected, setSelected] = useState<AppearanceMode>("system");
 
   useEffect(() => {
@@ -44,7 +46,7 @@ function AppearancePicker() {
             className={`flex-1 items-center gap-1.5 py-3 rounded-control ${active ? "bg-brand-subtle" : "bg-surface-2"}`}
           >
             <Icon size={18} color={active ? colors.brand : colors["text-2"]} strokeWidth={1.9} />
-            <Text className={`font-ui-medium text-[12.5px] ${active ? "text-brand" : "text-text-2"}`}>{label}</Text>
+            <Text className={`font-ui-medium ${active ? "text-brand" : "text-text-2"}`} style={{ fontSize: rf(12.5) }}>{label}</Text>
           </Pressable>
         );
       })}
@@ -61,9 +63,10 @@ function Field({ label, value, onChangeText, placeholder, secure, keyboardType }
   keyboardType?: "email-address" | "default";
 }) {
   const colors = useThemeColors();
+  const rf = useRF();
   return (
     <View className="gap-1.5">
-      <Text className="font-ui-medium text-[12px] text-text-2" style={{ textTransform: "uppercase" }}>
+      <Text className="font-ui-medium text-text-2" style={{ textTransform: "uppercase", fontSize: rf(12) }}>
         {label}
       </Text>
       <TextInput
@@ -74,7 +77,8 @@ function Field({ label, value, onChangeText, placeholder, secure, keyboardType }
         secureTextEntry={secure}
         keyboardType={keyboardType}
         autoCapitalize="none"
-        className="h-12 rounded-control bg-surface-2 px-[14px] font-ui text-[14.5px] text-text"
+        className="h-12 rounded-control bg-surface-2 px-[14px] font-ui text-text"
+        style={{ fontSize: rf(14.5) }}
       />
     </View>
   );
@@ -94,6 +98,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
+  const rf = useRF();
   const { data: profile, isLoading } = useAccountProfile();
   const updateProfile = useUpdateAccountProfile();
   const changePassword = useChangePassword();
@@ -191,7 +196,7 @@ export default function SettingsScreen() {
       <ScreenTitle title="Settings" />
       {/* Profile */}
       <View className="gap-3">
-        <Text className="font-ui-semibold text-[13px] text-text-2" style={{ textTransform: "uppercase" }}>
+        <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(13) }}>
           Profile
         </Text>
         <Card className="p-5 gap-4">
@@ -213,7 +218,7 @@ export default function SettingsScreen() {
                   className="flex-1 h-11 rounded-full flex-row items-center justify-center gap-1.5 bg-surface-2"
                 >
                   <X size={15} color={colors["text-2"]} strokeWidth={2} />
-                  <Text className="font-ui-medium text-[14px] text-text">Cancel</Text>
+                  <Text className="font-ui-medium text-text" style={{ fontSize: rf(14) }}>Cancel</Text>
                 </Pressable>
                 <Pressable
                   onPress={saveProfile}
@@ -225,7 +230,7 @@ export default function SettingsScreen() {
                   ) : (
                     <>
                       <Check size={15} color="#FFFFFF" strokeWidth={2.5} />
-                      <Text className="font-ui-semibold text-[14px] text-on-brand">Save</Text>
+                      <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14) }}>Save</Text>
                     </>
                   )}
                 </Pressable>
@@ -234,13 +239,13 @@ export default function SettingsScreen() {
           ) : (
             <>
               <View className="gap-1">
-                <Text className="font-ui-semibold text-[16px] text-text">{profile.name || "No name set"}</Text>
-                <Text className="font-ui text-[13.5px] text-text-2">{profile.email}</Text>
-                {profile.birthDate && <Text className="font-ui text-[13.5px] text-text-2">Born {profile.birthDate}</Text>}
+                <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }}>{profile.name || "No name set"}</Text>
+                <Text className="font-ui text-text-2" style={{ fontSize: rf(13.5) }}>{profile.email}</Text>
+                {profile.birthDate && <Text className="font-ui text-text-2" style={{ fontSize: rf(13.5) }}>Born {profile.birthDate}</Text>}
               </View>
               <Pressable onPress={() => setEditingProfile(true)} className="h-11 rounded-full flex-row items-center justify-center gap-1.5 bg-surface-2">
                 <Pencil size={14} color={colors.text} strokeWidth={2} />
-                <Text className="font-ui-medium text-[14px] text-text">Edit profile</Text>
+                <Text className="font-ui-medium text-text" style={{ fontSize: rf(14) }}>Edit profile</Text>
               </Pressable>
             </>
           )}
@@ -249,7 +254,7 @@ export default function SettingsScreen() {
 
       {/* Appearance */}
       <View className="gap-3">
-        <Text className="font-ui-semibold text-[13px] text-text-2" style={{ textTransform: "uppercase" }}>
+        <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(13) }}>
           Appearance
         </Text>
         <Card className="p-3">
@@ -259,7 +264,7 @@ export default function SettingsScreen() {
 
       {/* Password */}
       <View className="gap-3">
-        <Text className="font-ui-semibold text-[13px] text-text-2" style={{ textTransform: "uppercase" }}>
+        <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(13) }}>
           Password
         </Text>
         <Card className="p-5 gap-4">
@@ -277,7 +282,7 @@ export default function SettingsScreen() {
                   className="flex-1 h-11 rounded-full flex-row items-center justify-center gap-1.5 bg-surface-2"
                 >
                   <X size={15} color={colors["text-2"]} strokeWidth={2} />
-                  <Text className="font-ui-medium text-[14px] text-text">Cancel</Text>
+                  <Text className="font-ui-medium text-text" style={{ fontSize: rf(14) }}>Cancel</Text>
                 </Pressable>
                 <Pressable
                   onPress={savePassword}
@@ -289,7 +294,7 @@ export default function SettingsScreen() {
                   ) : (
                     <>
                       <Check size={15} color="#FFFFFF" strokeWidth={2.5} />
-                      <Text className="font-ui-semibold text-[14px] text-on-brand">Change</Text>
+                      <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14) }}>Change</Text>
                     </>
                   )}
                 </Pressable>
@@ -298,7 +303,7 @@ export default function SettingsScreen() {
           ) : (
             <Pressable onPress={() => setChangingPassword(true)} className="h-11 rounded-full flex-row items-center justify-center gap-1.5 bg-surface-2">
               <Lock size={14} color={colors.text} strokeWidth={2} />
-              <Text className="font-ui-medium text-[14px] text-text">Change password</Text>
+              <Text className="font-ui-medium text-text" style={{ fontSize: rf(14) }}>Change password</Text>
             </Pressable>
           )}
         </Card>
@@ -306,13 +311,13 @@ export default function SettingsScreen() {
 
       {/* Connections */}
       <View className="gap-3">
-        <Text className="font-ui-semibold text-[13px] text-text-2" style={{ textTransform: "uppercase" }}>
+        <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(13) }}>
           Data
         </Text>
         <Card className="px-5">
           <Pressable onPress={() => router.push("/(tabs)/accounts")} className="flex-row items-center gap-3 py-4">
             <Link2 size={18} color={colors["text-2"]} strokeWidth={1.75} />
-            <Text className="flex-1 font-ui-medium text-[14.5px] text-text">Accounts & connections</Text>
+            <Text className="flex-1 font-ui-medium text-text" style={{ fontSize: rf(14.5) }}>Accounts & connections</Text>
             <ChevronRight size={16} color={colors["text-3"]} />
           </Pressable>
         </Card>
@@ -320,11 +325,11 @@ export default function SettingsScreen() {
 
       {/* Danger zone */}
       <View className="gap-3">
-        <Text className="font-ui-semibold text-[13px] text-negative" style={{ textTransform: "uppercase" }}>
+        <Text className="font-ui-semibold text-negative" style={{ textTransform: "uppercase", fontSize: rf(13) }}>
           Danger zone
         </Text>
         <Card className="p-5 gap-4" style={{ borderWidth: 1, borderColor: colors.negative }}>
-          <Text className="font-ui text-[13.5px] text-text-2">
+          <Text className="font-ui text-text-2" style={{ fontSize: rf(13.5) }}>
             Disconnects every institution and permanently deletes all synced financial data.
           </Text>
           {wiping ? (
@@ -339,7 +344,7 @@ export default function SettingsScreen() {
                   className="flex-1 h-11 rounded-full flex-row items-center justify-center gap-1.5 bg-surface-2"
                 >
                   <X size={15} color={colors["text-2"]} strokeWidth={2} />
-                  <Text className="font-ui-medium text-[14px] text-text">Cancel</Text>
+                  <Text className="font-ui-medium text-text" style={{ fontSize: rf(14) }}>Cancel</Text>
                 </Pressable>
                 <Pressable
                   onPress={confirmWipe}
@@ -352,7 +357,7 @@ export default function SettingsScreen() {
                   ) : (
                     <>
                       <Trash2 size={14} color="#FFFFFF" strokeWidth={2} />
-                      <Text className="font-ui-semibold text-[14px] text-on-brand">Wipe data</Text>
+                      <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14) }}>Wipe data</Text>
                     </>
                   )}
                 </Pressable>
@@ -361,7 +366,7 @@ export default function SettingsScreen() {
           ) : (
             <Pressable onPress={() => setWiping(true)} className="h-11 rounded-full flex-row items-center justify-center gap-1.5 bg-negative-subtle">
               <Trash2 size={14} color={colors.negative} strokeWidth={2} />
-              <Text className="font-ui-semibold text-[14px] text-negative">Wipe all data</Text>
+              <Text className="font-ui-semibold text-negative" style={{ fontSize: rf(14) }}>Wipe all data</Text>
             </Pressable>
           )}
         </Card>

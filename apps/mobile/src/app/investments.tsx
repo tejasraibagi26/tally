@@ -6,6 +6,7 @@ import { MoneyText } from "@/components/ui/MoneyText";
 import { useHoldings, useInvestmentTransactions } from "@/lib/queries/investments";
 import { useSync } from "@/lib/queries/plaid";
 import { chartSeries, hairline } from "@/theme/colors";
+import { useRF } from "@/theme/responsiveFont";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useColorScheme } from "nativewind";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
@@ -24,6 +25,7 @@ function formatQuantity(q: string): string {
 // activity feed are left as web-only for now.
 export default function InvestmentsScreen() {
   const colors = useThemeColors();
+  const rf = useRF();
   const insets = useSafeAreaInsets();
   const { colorScheme } = useColorScheme();
   const series = colorScheme === "dark" ? chartSeries.dark : chartSeries.light;
@@ -38,7 +40,7 @@ export default function InvestmentsScreen() {
       className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50 bg-brand-subtle"
     >
       {sync.isPending ? <ActivityIndicator size="small" color={colors.brand} /> : <RefreshCw size={14} color={colors.brand} strokeWidth={2} />}
-      <Text className="font-ui-semibold text-[13px] text-brand">Sync holdings</Text>
+      <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Sync holdings</Text>
     </Pressable>
   );
 
@@ -61,8 +63,8 @@ export default function InvestmentsScreen() {
         <ScreenHeader title="Investments" action={syncAction} />
         <View className="flex-1 items-center justify-center px-8 gap-3">
           <TrendingUp size={28} color={colors["text-3"]} strokeWidth={1.5} />
-          <Text className="font-ui-semibold text-[16px] text-text text-center">Nothing invested here yet</Text>
-          <Text className="font-ui text-[13.5px] text-text-2 text-center">
+          <Text className="font-ui-semibold text-text text-center" style={{ fontSize: rf(16) }}>Nothing invested here yet</Text>
+          <Text className="font-ui text-text-2 text-center" style={{ fontSize: rf(13.5) }}>
             Connect a brokerage account from the Accounts tab. Holdings usually appear within a minute.
           </Text>
         </View>
@@ -85,47 +87,47 @@ export default function InvestmentsScreen() {
       <ScreenTitle title="Investments" action={syncAction} />
       <Card className="p-5 gap-5">
         <View className="gap-1">
-          <Text className="font-ui-medium text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>
+          <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
             Portfolio value
           </Text>
-          <MoneyText cents={data.value} className="font-display text-[32px] text-text" />
+          <MoneyText cents={data.value} className="font-display text-text" style={{ fontSize: rf(32) }} />
         </View>
         <View className="flex-row gap-6">
           <View className="flex-1 gap-1">
-            <Text className="font-ui-medium text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>
+            <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
               Unrealized gain
             </Text>
             {data.unrealizedGain.hasCostBasis ? (
               <MoneyText
                 cents={data.unrealizedGain.gain}
                 signed
-                className="font-ui-semibold text-[16px]"
-                style={{ color: data.unrealizedGain.gain < 0 ? colors.negative : colors.positive }}
+                className="font-ui-semibold"
+                style={{ color: data.unrealizedGain.gain < 0 ? colors.negative : colors.positive, fontSize: rf(16) }}
               />
             ) : (
-              <Text className="font-ui text-[13px] text-text-3">No cost basis</Text>
+              <Text className="font-ui text-text-3" style={{ fontSize: rf(13) }}>No cost basis</Text>
             )}
           </View>
           <View className="flex-1 gap-1">
-            <Text className="font-ui-medium text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>
+            <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
               Simple return
             </Text>
             {data.simpleReturn.hasHistory ? (
               <MoneyText
                 cents={data.simpleReturn.value}
                 signed
-                className="font-ui-semibold text-[16px]"
-                style={{ color: data.simpleReturn.value < 0 ? colors.negative : colors.positive }}
+                className="font-ui-semibold"
+                style={{ color: data.simpleReturn.value < 0 ? colors.negative : colors.positive, fontSize: rf(16) }}
               />
             ) : (
-              <Text className="font-ui text-[13px] text-text-3">Building history…</Text>
+              <Text className="font-ui text-text-3" style={{ fontSize: rf(13) }}>Building history…</Text>
             )}
           </View>
         </View>
       </Card>
 
       <View className="gap-3">
-        <Text className="font-ui-semibold text-[13px] text-text-2" style={{ textTransform: "uppercase" }}>
+        <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(13) }}>
           Allocation
         </Text>
         <Card className="p-5 gap-4">
@@ -138,8 +140,8 @@ export default function InvestmentsScreen() {
             {data.allocation.map((slice, i) => (
               <View key={slice.label} className="flex-row items-center gap-2">
                 <View style={{ width: 8, height: 8, borderRadius: 999, backgroundColor: series[i % 8] }} />
-                <Text className="font-ui text-[13px] text-text">{slice.label}</Text>
-                <Text className="font-ui text-[13px] text-text-3">{Math.round(slice.pct * 100)}%</Text>
+                <Text className="font-ui text-text" style={{ fontSize: rf(13) }}>{slice.label}</Text>
+                <Text className="font-ui text-text-3" style={{ fontSize: rf(13) }}>{Math.round(slice.pct * 100)}%</Text>
               </View>
             ))}
           </View>
@@ -149,8 +151,8 @@ export default function InvestmentsScreen() {
       {[...holdingsByAccount.entries()].map(([accountId, accountHoldings]) => (
         <View key={accountId} className="gap-3">
           <View className="flex-row items-center justify-between">
-            <Text className="font-ui-semibold text-[15px] text-text">{accountHoldings[0]?.accountName ?? "Account"}</Text>
-            <MoneyText cents={accountHoldings.reduce((s, h) => s + h.institutionValue, 0)} className="font-ui-medium text-[14px] text-text-2" />
+            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15) }}>{accountHoldings[0]?.accountName ?? "Account"}</Text>
+            <MoneyText cents={accountHoldings.reduce((s, h) => s + h.institutionValue, 0)} className="font-ui-medium text-text-2" style={{ fontSize: rf(14) }} />
           </View>
           <Card className="px-5">
             {accountHoldings.map((h, i, arr) => (
@@ -160,14 +162,14 @@ export default function InvestmentsScreen() {
                 style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
               >
                 <View className="gap-0.5 flex-1 pr-3">
-                  <Text className="font-ui-semibold text-[15px] text-text" numberOfLines={1}>
+                  <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15) }} numberOfLines={1}>
                     {h.securityName ?? "Unknown security"}
                   </Text>
-                  <Text className="font-ui text-[12.5px] text-text-2">
+                  <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>
                     {h.ticker ?? "—"} · {formatQuantity(h.quantity)} sh
                   </Text>
                 </View>
-                <MoneyText cents={h.institutionValue} mask={false} className="text-[15px] text-text" />
+                <MoneyText cents={h.institutionValue} mask={false} className="text-text" style={{ fontSize: rf(15) }} />
               </View>
             ))}
           </Card>
@@ -176,7 +178,7 @@ export default function InvestmentsScreen() {
 
       {activity.length > 0 && (
         <View className="gap-3">
-          <Text className="font-ui-semibold text-[13px] text-text-2" style={{ textTransform: "uppercase" }}>
+          <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(13) }}>
             Recent activity
           </Text>
           <Card className="px-5">
@@ -187,13 +189,13 @@ export default function InvestmentsScreen() {
                 style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
               >
                 <View className="gap-0.5 flex-1 pr-3">
-                  <Text className="font-ui-medium text-[14.5px] text-text" numberOfLines={1}>
+                  <Text className="font-ui-medium text-text" style={{ fontSize: rf(14.5) }} numberOfLines={1}>
                     {tx.name ?? tx.securityName ?? "Transaction"}
                     {tx.ticker ? ` · ${tx.ticker}` : ""}
                   </Text>
-                  <Text className="font-ui text-[12px] text-text-2">{tx.date}</Text>
+                  <Text className="font-ui text-text-2" style={{ fontSize: rf(12) }}>{tx.date}</Text>
                 </View>
-                <MoneyText cents={tx.amount} signed mask={false} className="text-[14.5px]" style={{ color: tx.amount < 0 ? colors.positive : colors.text }} />
+                <MoneyText cents={tx.amount} signed mask={false} style={{ color: tx.amount < 0 ? colors.positive : colors.text, fontSize: rf(14.5) }} />
               </View>
             ))}
           </Card>

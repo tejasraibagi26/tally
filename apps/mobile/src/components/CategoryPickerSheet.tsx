@@ -5,6 +5,7 @@ import { useColorScheme } from "nativewind";
 import { useCategories } from "@/lib/queries/categories";
 import { chartSeries } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useRF } from "@/theme/responsiveFont";
 
 // Mirrors web's SearchableSelect used in TransactionDetailPanel.tsx for
 // category assignment: a search field filters the flat list by name
@@ -22,6 +23,7 @@ export function CategoryPickerSheet({
   onSelect: (categoryId: string | null) => void;
 }) {
   const colors = useThemeColors();
+  const rf = useRF();
   const { colorScheme } = useColorScheme();
   const series = colorScheme === "dark" ? chartSeries.dark : chartSeries.light;
   const { data } = useCategories();
@@ -45,7 +47,7 @@ export function CategoryPickerSheet({
       <Pressable className="flex-1" style={{ backgroundColor: "rgba(26,25,23,0.4)" }} onPress={handleClose} />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="bg-canvas rounded-t-panel" style={{ maxHeight: "75%" }}>
         <View className="flex-row items-center justify-between px-5 pt-5 pb-3">
-          <Text className="font-ui-semibold text-[18px] text-text">Category</Text>
+          <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Category</Text>
           <Pressable onPress={handleClose} hitSlop={12}>
             <X size={22} color={colors["text-2"]} />
           </Pressable>
@@ -59,7 +61,8 @@ export function CategoryPickerSheet({
             placeholderTextColor={colors["text-3"]}
             autoCapitalize="none"
             autoCorrect={false}
-            className="flex-1 font-ui text-[14.5px] text-text"
+            className="flex-1 font-ui text-text"
+            style={{ fontSize: rf(14.5) }}
           />
           {query.length > 0 && (
             <Pressable onPress={() => setQuery("")} hitSlop={8}>
@@ -73,7 +76,7 @@ export function CategoryPickerSheet({
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 24 }}
-          ListEmptyComponent={<Text className="font-ui text-[14px] text-text-3 px-5 py-6">No categories match "{query}".</Text>}
+          ListEmptyComponent={<Text className="font-ui text-text-3 px-5 py-6" style={{ fontSize: rf(14) }}>No categories match "{query}".</Text>}
           renderItem={({ item }) => {
             const selected = item.id === selectedId;
             return (
@@ -93,7 +96,7 @@ export function CategoryPickerSheet({
                       backgroundColor: item.colorSlot ? series[(item.colorSlot - 1) % 8] : colors["text-3"],
                     }}
                   />
-                  <Text className="font-ui text-[15px] text-text">{item.name}</Text>
+                  <Text className="font-ui text-text" style={{ fontSize: rf(15) }}>{item.name}</Text>
                 </View>
                 {selected && <Check size={18} color={colors.brand} />}
               </Pressable>

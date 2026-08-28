@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useSubscriptions, type RecurringStream } from "@/lib/queries/subscriptions";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useRF } from "@/theme/responsiveFont";
 import { hairline } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { ScreenBackButton, ScreenTitle } from "@/components/ui/ScreenHeader";
@@ -29,6 +30,7 @@ const MONTHLY_MULTIPLIER: Record<RecurringStream["frequency"], number> = {
 // status-badge treatment as connection health.
 export default function SubscriptionsScreen() {
   const colors = useThemeColors();
+  const rf = useRF();
   const insets = useSafeAreaInsets();
   const { data, isLoading } = useSubscriptions();
   const streams = (data?.streams ?? []).filter((s) => s.status !== "cancelled");
@@ -43,16 +45,16 @@ export default function SubscriptionsScreen() {
       <ScreenTitle title="Subscriptions" />
       <Card className="p-5 flex-row justify-between">
         <View>
-          <Text className="font-ui text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>
+          <Text className="font-ui tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
             Monthly
           </Text>
-          <MoneyText cents={Math.round(monthlyTotal)} className="font-display text-[24px] text-text" mask={false} />
+          <MoneyText cents={Math.round(monthlyTotal)} className="font-display text-text" mask={false} style={{ fontSize: rf(24) }} />
         </View>
         <View>
-          <Text className="font-ui text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>
+          <Text className="font-ui tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
             Annualized
           </Text>
-          <MoneyText cents={Math.round(monthlyTotal * 12)} className="font-display text-[24px] text-text" mask={false} />
+          <MoneyText cents={Math.round(monthlyTotal * 12)} className="font-display text-text" mask={false} style={{ fontSize: rf(24) }} />
         </View>
       </Card>
 
@@ -67,18 +69,18 @@ export default function SubscriptionsScreen() {
               style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
             >
               <View className="gap-0.5 flex-1 pr-3">
-                <Text className="font-ui-semibold text-[15px] text-text" numberOfLines={1}>
+                <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15) }} numberOfLines={1}>
                   {s.description ?? s.merchantKey}
                 </Text>
-                <Text className="font-ui text-[12.5px] text-text-2">
+                <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>
                   {FREQUENCY_LABEL[s.frequency]}
                   {s.status === "at_risk" ? " · At risk" : ""}
                 </Text>
               </View>
-              <MoneyText cents={s.averageAmount} className="text-[14.5px] text-text" mask={false} />
+              <MoneyText cents={s.averageAmount} className="text-text" mask={false} style={{ fontSize: rf(14.5) }} />
             </View>
           ))}
-          {streams.length === 0 && <Text className="font-ui text-[14px] text-text-3 py-4">No subscriptions detected yet.</Text>}
+          {streams.length === 0 && <Text className="font-ui text-text-3 py-4" style={{ fontSize: rf(14) }}>No subscriptions detected yet.</Text>}
         </Card>
       )}
     </ScrollView>

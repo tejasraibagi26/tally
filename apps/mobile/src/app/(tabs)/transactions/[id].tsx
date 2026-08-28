@@ -10,6 +10,7 @@ import { useCategories } from "@/lib/queries/categories";
 import { amountColor } from "@/lib/amountColor";
 import { CategoryPickerSheet } from "@/components/CategoryPickerSheet";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useRF } from "@/theme/responsiveFont";
 
 // MOBILE_DESIGN.md §5.4 -- the web side panel's mobile equivalent, now with
 // the same core edit surface as TransactionDetailPanel.tsx: category,
@@ -21,6 +22,7 @@ export default function TransactionDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
+  const rf = useRF();
   const { data: t, isLoading } = useTransaction(id);
   const { data: categoriesData } = useCategories();
   const updateTransaction = useUpdateTransaction(id ?? "");
@@ -74,7 +76,7 @@ export default function TransactionDetailScreen() {
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
       <Stack.Screen options={{ presentation: "modal" }} />
       <View className="flex-row items-center justify-between px-5 pb-4">
-        <Text className="font-ui-semibold text-[18px] text-text">Transaction</Text>
+        <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Transaction</Text>
         <View className="flex-row items-center gap-4">
           {t && (
             <Pressable onPress={confirmDelete} hitSlop={12}>
@@ -93,9 +95,9 @@ export default function TransactionDetailScreen() {
         <>
           <ScrollView className="px-5" showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 24, paddingBottom: dirty ? 24 : insets.bottom + 40 }} keyboardShouldPersistTaps="handled">
             <View className="gap-1.5">
-              <MoneyText cents={t.amount} signed mask={false} className="font-display text-[36px]" style={{ color: amountColor(t.amount, colors) }} />
-              <Text className="font-ui-semibold text-[16px] text-text">{t.merchantName ?? t.name}</Text>
-              <Text className="font-ui text-[13.5px] text-text-2">
+              <MoneyText cents={t.amount} signed mask={false} className="font-display" style={{ color: amountColor(t.amount, colors), fontSize: rf(36) }} />
+              <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }}>{t.merchantName ?? t.name}</Text>
+              <Text className="font-ui text-text-2" style={{ fontSize: rf(13.5) }}>
                 {new Date(t.postedDate + "T00:00:00Z").toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}
               </Text>
             </View>
@@ -105,30 +107,30 @@ export default function TransactionDetailScreen() {
               <DetailRow label="Status" value={t.isPending ? "Pending" : "Posted"} />
               <DetailRow label="Original description" value={t.name} mono />
               <View className="flex-row items-center justify-between">
-                <Text className="font-ui text-[14px] text-text-2">Reviewed</Text>
+                <Text className="font-ui text-text-2" style={{ fontSize: rf(14) }}>Reviewed</Text>
                 <Switch value={reviewed} onValueChange={markDirty(setReviewed)} trackColor={{ true: colors.brand }} />
               </View>
               <View className="flex-row items-center justify-between">
-                <Text className="font-ui text-[14px] text-text-2">Exclude from budget</Text>
+                <Text className="font-ui text-text-2" style={{ fontSize: rf(14) }}>Exclude from budget</Text>
                 <Switch value={excluded} onValueChange={markDirty(setExcluded)} trackColor={{ true: colors.brand }} />
               </View>
             </View>
 
             <View className="gap-2 pt-2" style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
-              <Text className="font-ui-semibold text-[12px] text-text-2" style={{ textTransform: "uppercase" }}>
+              <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(12) }}>
                 Category
               </Text>
               <Pressable
                 onPress={() => setPickerOpen(true)}
                 className="flex-row items-center justify-between h-12 rounded-control bg-surface-2 px-[14px]"
               >
-                <Text className="font-ui text-[14.5px] text-text">{currentCategory?.name ?? (categoryId ? prettifyPfc(t.pfcDetailed) : "Uncategorized")}</Text>
+                <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>{currentCategory?.name ?? (categoryId ? prettifyPfc(t.pfcDetailed) : "Uncategorized")}</Text>
                 <ChevronRight size={16} color={colors["text-3"]} />
               </Pressable>
             </View>
 
             <View className="gap-2">
-              <Text className="font-ui-semibold text-[12px] text-text-2" style={{ textTransform: "uppercase" }}>
+              <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(12) }}>
                 Note
               </Text>
               <TextInput
@@ -138,20 +140,20 @@ export default function TransactionDetailScreen() {
                 placeholderTextColor={colors["text-3"]}
                 multiline
                 numberOfLines={3}
-                className="rounded-control bg-surface-2 px-[14px] py-3 font-ui text-[14px] text-text"
-                style={{ minHeight: 72, textAlignVertical: "top" }}
+                className="rounded-control bg-surface-2 px-[14px] py-3 font-ui text-text"
+                style={{ minHeight: 72, textAlignVertical: "top", fontSize: rf(14) }}
               />
             </View>
 
             {t.splits.length > 0 && (
               <View className="gap-2 pt-2" style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
-                <Text className="font-ui-semibold text-[12px] text-text-2" style={{ textTransform: "uppercase" }}>
+                <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(12) }}>
                   Split
                 </Text>
                 {t.splits.map((s, i) => (
                   <View key={i} className="flex-row justify-between">
-                    <Text className="font-ui text-[14px] text-text">{s.note ?? "Split"}</Text>
-                    <MoneyText cents={s.amount} mask={false} className="text-[14px] text-text" />
+                    <Text className="font-ui text-text" style={{ fontSize: rf(14) }}>{s.note ?? "Split"}</Text>
+                    <MoneyText cents={s.amount} mask={false} className="text-text" style={{ fontSize: rf(14) }} />
                   </View>
                 ))}
               </View>
@@ -171,7 +173,7 @@ export default function TransactionDetailScreen() {
                 ) : (
                   <>
                     <Check size={17} color="#FFFFFF" strokeWidth={2.5} />
-                    <Text className="font-ui-semibold text-[15px] text-on-brand">Save changes</Text>
+                    <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>Save changes</Text>
                   </>
                 )}
               </Pressable>
@@ -186,10 +188,11 @@ export default function TransactionDetailScreen() {
 }
 
 function DetailRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  const rf = useRF();
   return (
     <View className="flex-row justify-between">
-      <Text className="font-ui text-[14px] text-text-2">{label}</Text>
-      <Text className="font-ui text-[14px] text-text" style={mono ? { fontFamily: "JetBrainsMono", fontSize: 12.5 } : undefined}>
+      <Text className="font-ui text-text-2" style={{ fontSize: rf(14) }}>{label}</Text>
+      <Text className="font-ui text-text" style={mono ? { fontFamily: "JetBrainsMono", fontSize: 12.5 } : { fontSize: rf(14) }}>
         {value}
       </Text>
     </View>

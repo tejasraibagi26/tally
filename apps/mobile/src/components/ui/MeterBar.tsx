@@ -3,6 +3,7 @@ import { useColorScheme } from "nativewind";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { chartSeries } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useRF } from "@/theme/responsiveFont";
 
 interface MeterBarProps {
   label: string;
@@ -20,6 +21,7 @@ interface MeterBarProps {
 // fixed order (chartSeries), never cycled or re-derived per screen.
 export function MeterBar({ label, colorSlot, spentCents, budgetCents, mask = true }: MeterBarProps) {
   const colors = useThemeColors();
+  const rf = useRF();
   const { colorScheme } = useColorScheme();
   const series = colorScheme === "dark" ? chartSeries.dark : chartSeries.light;
   const seriesColor = series[(colorSlot - 1) % series.length] ?? series[0]!;
@@ -38,9 +40,9 @@ export function MeterBar({ label, colorSlot, spentCents, budgetCents, mask = tru
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-1.5">
           <View style={{ width: 8, height: 8, borderRadius: 999, backgroundColor: seriesColor }} />
-          <Text className="font-ui-medium text-[14px] text-text">{label}</Text>
+          <Text className="font-ui-medium text-text" style={{ fontSize: rf(14) }}>{label}</Text>
         </View>
-        <Text className="font-ui text-[13px]" style={{ color: overBudget ? colors.negative : colors["text-2"] }}>
+        <Text className="font-ui" style={{ color: overBudget ? colors.negative : colors["text-2"], fontSize: rf(13) }}>
           <MoneyText cents={spentCents} mask={mask} /> of <MoneyText cents={budgetCents} mask={mask} />
         </Text>
       </View>

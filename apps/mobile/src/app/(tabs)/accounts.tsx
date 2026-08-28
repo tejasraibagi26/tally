@@ -9,6 +9,7 @@ import { useAccounts, useUpdateAccountNickname, type Institution, type AccountRo
 import { usePlaidLink } from "@/lib/usePlaidLink";
 import { useSync } from "@/lib/queries/plaid";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useRF } from "@/theme/responsiveFont";
 import { hairline } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
@@ -18,6 +19,7 @@ import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 // Link (Phase 5). See usePlaidLink.ts for the OAuth-redirect caveat.
 function InstitutionCard({ institution, onReconnect, reconnecting }: { institution: Institution; onReconnect: () => void; reconnecting: boolean }) {
   const colors = useThemeColors();
+  const rf = useRF();
   const initial = (institution.institutionName ?? "?").charAt(0).toUpperCase();
   const broken = institution.badge === "critical";
 
@@ -26,13 +28,13 @@ function InstitutionCard({ institution, onReconnect, reconnecting }: { instituti
       <View className="flex-row items-center justify-between px-5 pt-[18px] pb-4">
         <View className="flex-row items-center gap-3 flex-1 pr-3">
           <View className={`w-8 h-8 rounded-full items-center justify-center ${broken ? "bg-negative-subtle" : "bg-brand-subtle"}`}>
-            <Text className={`font-ui-semibold text-[13px] ${broken ? "text-negative" : "text-brand"}`}>{initial}</Text>
+            <Text className={`font-ui-semibold ${broken ? "text-negative" : "text-brand"}`} style={{ fontSize: rf(13) }}>{initial}</Text>
           </View>
           <View className="flex-1">
-            <Text className="font-ui-semibold text-[15px] text-text" numberOfLines={1}>
+            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15) }} numberOfLines={1}>
               {institution.institutionName ?? "Unknown"}
             </Text>
-            <Text className="font-ui text-[12px] text-text-2">{relativeTime(institution.lastSyncedAt)}</Text>
+            <Text className="font-ui text-text-2" style={{ fontSize: rf(12) }}>{relativeTime(institution.lastSyncedAt)}</Text>
           </View>
         </View>
         <View style={{ flexShrink: 0 }}>
@@ -47,7 +49,7 @@ function InstitutionCard({ institution, onReconnect, reconnecting }: { instituti
       {broken && (
         <View className="px-5 pb-5 pt-1">
           <Pressable onPress={onReconnect} disabled={reconnecting} className="h-12 rounded-full items-center justify-center bg-brand active:opacity-90 disabled:opacity-50">
-            {reconnecting ? <ActivityIndicator color="#FFFFFF" /> : <Text className="font-ui-semibold text-[14.5px] text-on-brand">Reconnect</Text>}
+            {reconnecting ? <ActivityIndicator color="#FFFFFF" /> : <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14.5) }}>Reconnect</Text>}
           </Pressable>
         </View>
       )}
@@ -59,6 +61,7 @@ function AccountLine({ account, showTopBorder, colors }: { account: AccountRow; 
   const [editing, setEditing] = useState(false);
   const [input, setInput] = useState(account.nickname ?? "");
   const updateNickname = useUpdateAccountNickname(account.id);
+  const rf = useRF();
 
   function save() {
     updateNickname.mutate(input.trim() || null, { onSuccess: () => setEditing(false) });
@@ -83,8 +86,8 @@ function AccountLine({ account, showTopBorder, colors }: { account: AccountRow; 
           // input in the app (Field in settings.tsx/fire.tsx); the explicit
           // style guards against the same clipping regardless of platform
           // vertical-centering defaults.
-          className="flex-1 h-12 rounded-control bg-surface-2 px-3 font-ui text-[14px] text-text"
-          style={{ paddingVertical: 0, textAlignVertical: "center" }}
+          className="flex-1 h-12 rounded-control bg-surface-2 px-3 font-ui text-text"
+          style={{ paddingVertical: 0, textAlignVertical: "center", fontSize: rf(14) }}
         />
         <Pressable onPress={save} disabled={updateNickname.isPending} hitSlop={10}>
           <Check size={18} color={colors.positive} strokeWidth={2.25} />
@@ -110,18 +113,18 @@ function AccountLine({ account, showTopBorder, colors }: { account: AccountRow; 
     >
       <Pressable onPress={() => setEditing(true)} className="flex-row items-center gap-1.5 flex-1 pr-3">
         <View className="gap-0.5 flex-1">
-          <Text className="font-ui-medium text-[14.5px] text-text" numberOfLines={1}>
+          <Text className="font-ui-medium text-text" style={{ fontSize: rf(14.5) }} numberOfLines={1}>
             {account.name}
           </Text>
           {account.mask && (
-            <Text className="text-[12px] text-text-2" style={{ fontFamily: "JetBrainsMono" }}>
+            <Text className="text-text-2" style={{ fontFamily: "JetBrainsMono", fontSize: rf(12) }}>
               ····{account.mask}
             </Text>
           )}
         </View>
         <Pencil size={12} color={colors["text-3"]} strokeWidth={2} />
       </Pressable>
-      <MoneyText cents={account.currentBalance ?? 0} className="text-[15px] text-text" style={{ flexShrink: 0 }} />
+      <MoneyText cents={account.currentBalance ?? 0} className="text-text" style={{ flexShrink: 0, fontSize: rf(15) }} />
     </View>
   );
 }
@@ -138,6 +141,7 @@ export default function AccountsScreen() {
   const insets = useSafeAreaInsets();
   const tabBarClearance = useTabBarBottomClearance();
   const colors = useThemeColors();
+  const rf = useRF();
   const { data, isLoading, refetch, isRefetching } = useAccounts();
   const { openLink, isLinking, error } = usePlaidLink();
   const sync = useSync();
@@ -169,7 +173,7 @@ export default function AccountsScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View className="flex-row items-center justify-between px-5 pb-4">
-        <Text className="font-ui-semibold text-[24px] text-text" style={{ letterSpacing: -0.3 }}>
+        <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(24) }}>
           Accounts
         </Text>
         <View className="flex-row items-center gap-2">
@@ -180,7 +184,7 @@ export default function AccountsScreen() {
               className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50 bg-brand-subtle"
             >
               {sync.isPending ? <ActivityIndicator size="small" color={colors.brand} /> : <RefreshCw size={14} color={colors.brand} strokeWidth={2} />}
-              <Text className="font-ui-semibold text-[13px] text-brand">Sync</Text>
+              <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Sync</Text>
             </Pressable>
           )}
           <Pressable
@@ -189,14 +193,14 @@ export default function AccountsScreen() {
             className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50 bg-brand-subtle"
           >
             {isLinking ? <ActivityIndicator size="small" color={colors.brand} /> : <Plus size={15} color={colors.brand} strokeWidth={2} />}
-            <Text className="font-ui-semibold text-[13px] text-brand">Add</Text>
+            <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Add</Text>
           </Pressable>
         </View>
       </View>
 
       {error && (
         <View className="mx-5 mb-4 rounded-control px-4 py-3 bg-negative-subtle">
-          <Text className="font-ui text-[13.5px] text-negative">{error}</Text>
+          <Text className="font-ui text-negative" style={{ fontSize: rf(13.5) }}>{error}</Text>
         </View>
       )}
 
@@ -207,7 +211,7 @@ export default function AccountsScreen() {
           {data?.institutions.map((inst) => (
             <InstitutionCard key={inst.id} institution={inst} onReconnect={() => openLink("update", inst.id)} reconnecting={isLinking} />
           ))}
-          {data && data.institutions.length === 0 && <Text className="font-ui text-[14px] text-text-3">No accounts connected yet.</Text>}
+          {data && data.institutions.length === 0 && <Text className="font-ui text-text-3" style={{ fontSize: rf(14) }}>No accounts connected yet.</Text>}
         </View>
       )}
       </ScrollView>

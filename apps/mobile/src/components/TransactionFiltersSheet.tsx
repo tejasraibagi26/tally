@@ -3,6 +3,7 @@ import { Modal, View, Text, Pressable, ScrollView } from "react-native";
 import { X } from "lucide-react-native";
 import { useAccounts } from "@/lib/queries/accounts";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useRF } from "@/theme/responsiveFont";
 
 export interface TransactionFilters {
   account?: string;
@@ -20,9 +21,10 @@ function lastMonthRange(): { from: string; to: string } {
 }
 
 function Chip({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+  const rf = useRF();
   return (
     <Pressable onPress={onPress} className={`px-4 py-2.5 rounded-full mr-2 mb-2 ${selected ? "bg-brand" : "bg-surface-2"}`}>
-      <Text className={`font-ui-medium text-[13.5px] ${selected ? "text-on-brand" : "text-text"}`}>{label}</Text>
+      <Text className={`font-ui-medium ${selected ? "text-on-brand" : "text-text"}`} style={{ fontSize: rf(13.5) }}>{label}</Text>
     </Pressable>
   );
 }
@@ -44,6 +46,7 @@ export function TransactionFiltersSheet({
   onApply: (filters: TransactionFilters) => void;
 }) {
   const colors = useThemeColors();
+  const rf = useRF();
   const [draft, setDraft] = useState<TransactionFilters>(filters);
   const { data: accounts } = useAccounts();
   const allAccounts = [...(accounts?.institutions.flatMap((i) => i.accounts) ?? []), ...(accounts?.unlinkedAccounts ?? [])];
@@ -58,14 +61,14 @@ export function TransactionFiltersSheet({
       <Pressable className="flex-1" style={{ backgroundColor: "rgba(26,25,23,0.4)" }} onPress={onClose} />
       <View className="bg-canvas rounded-t-panel" style={{ maxHeight: "80%" }}>
         <View className="flex-row items-center justify-between px-5 pt-5 pb-3">
-          <Text className="font-ui-semibold text-[18px] text-text">Filters</Text>
+          <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Filters</Text>
           <Pressable onPress={onClose} hitSlop={12}>
             <X size={22} color={colors["text-2"]} />
           </Pressable>
         </View>
 
         <ScrollView className="px-5" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 12 }}>
-          <Text className="font-ui-semibold text-[12px] text-text-2 mb-2" style={{ textTransform: "uppercase" }}>
+          <Text className="font-ui-semibold text-text-2 mb-2" style={{ textTransform: "uppercase", fontSize: rf(12) }}>
             Date range
           </Text>
           <View className="flex-row flex-wrap mb-4">
@@ -73,7 +76,7 @@ export function TransactionFiltersSheet({
             <Chip label="Last month" selected={isLastMonth} onPress={() => setDraft((d) => ({ ...d, ...lastMonthRange() }))} />
           </View>
 
-          <Text className="font-ui-semibold text-[12px] text-text-2 mb-2" style={{ textTransform: "uppercase" }}>
+          <Text className="font-ui-semibold text-text-2 mb-2" style={{ textTransform: "uppercase", fontSize: rf(12) }}>
             Account
           </Text>
           <View className="flex-row flex-wrap mb-4">
@@ -83,7 +86,7 @@ export function TransactionFiltersSheet({
             ))}
           </View>
 
-          <Text className="font-ui-semibold text-[12px] text-text-2 mb-2" style={{ textTransform: "uppercase" }}>
+          <Text className="font-ui-semibold text-text-2 mb-2" style={{ textTransform: "uppercase", fontSize: rf(12) }}>
             Status
           </Text>
           <View className="flex-row flex-wrap mb-2">
@@ -100,7 +103,7 @@ export function TransactionFiltersSheet({
             }}
             className="h-14 rounded-full bg-brand items-center justify-center active:opacity-90"
           >
-            <Text className="font-ui-semibold text-[15px] text-on-brand">Apply filters</Text>
+            <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>Apply filters</Text>
           </Pressable>
           <Pressable
             onPress={() => {
@@ -110,7 +113,7 @@ export function TransactionFiltersSheet({
             }}
             className="h-12 items-center justify-center"
           >
-            <Text className="font-ui-medium text-[14px] text-text-2">Clear all</Text>
+            <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(14) }}>Clear all</Text>
           </Pressable>
         </View>
       </View>

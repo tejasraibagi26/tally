@@ -2,6 +2,7 @@ import { View, Text } from "react-native";
 import { CircleCheck, TriangleAlert } from "lucide-react-native";
 import type { ItemBadge } from "@/lib/queries/accounts";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useRF } from "@/theme/responsiveFont";
 
 // DESIGN.md §5.3 -- status colors are fixed in both themes, never reused as
 // a series color; always ship with an icon + label, never color alone. The
@@ -20,11 +21,12 @@ function configFor(colors: ReturnType<typeof useThemeColors>): Record<ItemBadge,
 
 export function StatusChip({ status }: { status: ItemBadge }) {
   const colors = useThemeColors();
+  const rf = useRF();
   const c = configFor(colors)[status];
   return (
     <View className="flex-row items-center gap-1" style={{ backgroundColor: c.bg, borderRadius: 999, paddingVertical: 4, paddingHorizontal: 11 }}>
       <c.Icon size={10} color={c.fg} strokeWidth={2.5} />
-      <Text className="font-ui-semibold text-[11.5px]" style={{ color: c.fg }}>
+      <Text className="font-ui-semibold" style={{ color: c.fg, fontSize: rf(11.5) }}>
         {c.label}
       </Text>
     </View>
