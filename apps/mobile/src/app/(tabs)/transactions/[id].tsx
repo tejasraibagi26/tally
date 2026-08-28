@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView, ActivityIndicator, Pressable, TextInput, Switch, Alert } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
-import { X, ChevronRight, Trash2 } from "lucide-react-native";
+import { X, ChevronRight, Trash2, Check } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { prettifyPfc } from "@tally/core/pfc";
 import { MoneyText } from "@/components/ui/MoneyText";
@@ -163,10 +163,17 @@ export default function TransactionDetailScreen() {
               <Pressable
                 onPress={save}
                 disabled={updateTransaction.isPending}
-                className="h-13 rounded-full bg-brand items-center justify-center active:opacity-90 disabled:opacity-50"
+                className="rounded-full bg-brand flex-row items-center justify-center gap-2 active:opacity-90 disabled:opacity-50"
                 style={{ height: 52 }}
               >
-                {updateTransaction.isPending ? <ActivityIndicator color="#FFFFFF" /> : <Text className="font-ui-semibold text-[15px] text-on-brand">Save changes</Text>}
+                {updateTransaction.isPending ? (
+                  <ActivityIndicator color="#FFFFFF" />
+                ) : (
+                  <>
+                    <Check size={17} color="#FFFFFF" strokeWidth={2.5} />
+                    <Text className="font-ui-semibold text-[15px] text-on-brand">Save changes</Text>
+                  </>
+                )}
               </Pressable>
             </View>
           )}

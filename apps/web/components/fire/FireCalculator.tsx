@@ -34,8 +34,14 @@ export function FireCalculator({
   const router = useRouter();
   const [swr, setSwr] = useState(savedSettings ? parseFloat(savedSettings.swr) : 0.04);
   const [expectedReturn, setExpectedReturn] = useState(savedSettings ? parseFloat(savedSettings.expectedReturn) : 0.07);
-  const [expensesInput, setExpensesInput] = useState(((savedSettings?.annualExpensesOverride ?? defaultAnnualExpenses) / 100).toFixed(0));
-  const [contributionInput, setContributionInput] = useState(((savedSettings?.monthlyContributionOverride ?? defaultMonthlyContribution) / 100).toFixed(0));
+  // Always the freshly computed trailing-12-month default, never a stale
+  // saved override -- these are facts about actual spending, not tunable
+  // assumptions, so a real change in spending shows up immediately instead
+  // of being shadowed by whatever was true the last time settings were
+  // saved. SWR/expected return above ARE genuine assumptions, so those
+  // still come from savedSettings when present.
+  const [expensesInput, setExpensesInput] = useState((defaultAnnualExpenses / 100).toFixed(0));
+  const [contributionInput, setContributionInput] = useState((defaultMonthlyContribution / 100).toFixed(0));
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 

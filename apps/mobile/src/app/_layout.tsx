@@ -88,10 +88,13 @@ function RootNavigator() {
               headerShown: false,
             }}
           />
-          <Stack.Screen name="fire" options={{ headerShown: true, title: "FIRE Calculator" }} />
-          <Stack.Screen name="subscriptions" options={{ headerShown: true, title: "Subscriptions" }} />
-          <Stack.Screen name="investments" options={{ headerShown: true, title: "Investments" }} />
-          <Stack.Screen name="settings" options={{ headerShown: true, title: "Settings" }} />
+          {/* headerShown: false here too -- these screens render their own
+              top-left title (ScreenHeader) matching the tab screens' own
+              header treatment, instead of the native centered-title bar. */}
+          <Stack.Screen name="fire" options={{ headerShown: false }} />
+          <Stack.Screen name="subscriptions" options={{ headerShown: false }} />
+          <Stack.Screen name="investments" options={{ headerShown: false }} />
+          <Stack.Screen name="settings" options={{ headerShown: false }} />
         </Stack.Protected>
         <Stack.Protected guard={status === "unauthenticated"}>
           <Stack.Screen name="login" />

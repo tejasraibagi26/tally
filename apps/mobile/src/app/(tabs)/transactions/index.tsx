@@ -8,7 +8,6 @@ import { MoneyText } from "@/components/ui/MoneyText";
 import { useTransactions, type TransactionRow } from "@/lib/queries/transactions";
 import { amountColor } from "@/lib/amountColor";
 import { TransactionFiltersSheet, type TransactionFilters } from "@/components/TransactionFiltersSheet";
-import { useColorScheme } from "nativewind";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
@@ -46,8 +45,6 @@ function TransactionRowItem({ item, isLast, colors }: { item: TransactionRow; is
 export default function TransactionsScreen() {
   const insets = useSafeAreaInsets();
   const colors = useThemeColors();
-  const { colorScheme } = useColorScheme();
-  const dark = colorScheme === "dark";
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filters, setFilters] = useState<TransactionFilters>({});
 
@@ -94,7 +91,6 @@ export default function TransactionsScreen() {
           keyExtractor={(item) => item.id}
           renderItem={({ item, index }) => <TransactionRowItem item={item} isLast={index === items.length - 1} colors={colors} />}
           className="mx-5 mb-5 rounded-card bg-surface"
-          style={{ shadowColor: "#000000", shadowOpacity: dark ? 0 : 0.07, shadowRadius: 12, shadowOffset: { width: 0, height: 2 }, elevation: dark ? 0 : 2 }}
           contentContainerStyle={{ paddingBottom: 24 }}
           onEndReachedThreshold={0.4}
           onEndReached={() => hasNextPage && fetchNextPage()}

@@ -53,13 +53,14 @@ export function usePlaidLink() {
             token: linkToken,
             onSuccess: (success) => resolve(success.publicToken),
             onExit: (exit) => {
-              if (exit.error) {
-                // Temporary: surface the real Plaid error code/type instead of
-                // a generic message -- both mobile and web (LinkButton.tsx)
-                // currently treat any onExit error as a hard failure, but a
-                // plain "closed without linking" tap is reportedly producing
-                // one here too, so the actual errorCode is needed to tell a
-                // real failure apart from an SDK quirk.
+              // Confirmed live: on a plain "closed without linking" tap, the
+              // iOS SDK still calls onExit with a non-null but *empty*
+              // error object (no errorCode/errorMessage) -- Plaid's own docs
+              // say error should be null/undefined for a normal cancel, but
+              // in practice it isn't here. Gate on errorCode specifically
+              // instead of just truthiness of `error`, so an empty object
+              // reads as a cancel like it's supposed to.
+              if (exit.error?.errorCode) {
                 console.error("Plaid Link exited with error", exit.error, exit.metadata);
                 reject(new Error(`${exit.error.errorCode}: ${exit.error.errorMessage || exit.error.displayMessage || "no message"}`));
               } else {

@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator, Alert } from "react-native";
 import { useRouter } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "nativewind";
-import { ChevronRight, Link2, Sun, Moon, Smartphone } from "lucide-react-native";
+import { ChevronRight, Link2, Sun, Moon, Smartphone, Pencil, Lock, Trash2, Check, X } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { useAccountProfile, useUpdateAccountProfile, useChangePassword, useWipeAccount } from "@/lib/queries/account";
 import { ApiError } from "@/lib/api";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { type AppearanceMode, getStoredAppearanceMode, storeAppearanceMode } from "@/theme/appearance";
+import { ScreenGlow } from "@/components/ui/ScreenGlow";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
 
 const APPEARANCE_OPTIONS: { mode: AppearanceMode; label: string; Icon: typeof Sun }[] = [
   { mode: "light", label: "Light", Icon: Sun },
@@ -90,6 +93,7 @@ function errorMessage(err: unknown, fallback: string): string {
 export default function SettingsScreen() {
   const router = useRouter();
   const colors = useThemeColors();
+  const insets = useSafeAreaInsets();
   const { data: profile, isLoading } = useAccountProfile();
   const updateProfile = useUpdateAccountProfile();
   const changePassword = useChangePassword();
@@ -168,14 +172,21 @@ export default function SettingsScreen() {
 
   if (isLoading || !profile) {
     return (
-      <View className="flex-1 bg-canvas items-center justify-center">
-        <ActivityIndicator />
+      <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+        <ScreenGlow />
+        <ScreenHeader title="Settings" />
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator />
+        </View>
       </View>
     );
   }
 
   return (
-    <ScrollView className="flex-1 bg-canvas" contentContainerStyle={{ padding: 20, gap: 24, paddingBottom: 40 }}>
+    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+    <ScreenGlow />
+    <ScreenHeader title="Settings" />
+    <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, gap: 24, paddingBottom: 40 }}>
       {/* Profile */}
       <View className="gap-3">
         <Text className="font-ui-semibold text-[13px] text-text-2" style={{ textTransform: "uppercase" }}>
@@ -197,16 +208,24 @@ export default function SettingsScreen() {
                     setEmail(profile.email);
                     setBirthDate(profile.birthDate ?? "");
                   }}
-                  className="flex-1 h-11 rounded-full items-center justify-center bg-surface-2"
+                  className="flex-1 h-11 rounded-full flex-row items-center justify-center gap-1.5 bg-surface-2"
                 >
+                  <X size={15} color={colors["text-2"]} strokeWidth={2} />
                   <Text className="font-ui-medium text-[14px] text-text">Cancel</Text>
                 </Pressable>
                 <Pressable
                   onPress={saveProfile}
                   disabled={updateProfile.isPending || !profilePassword}
-                  className="flex-1 h-11 rounded-full items-center justify-center bg-brand disabled:opacity-50"
+                  className="flex-1 h-11 rounded-full flex-row items-center justify-center gap-1.5 bg-brand disabled:opacity-50"
                 >
-                  {updateProfile.isPending ? <ActivityIndicator color="#FFFFFF" /> : <Text className="font-ui-semibold text-[14px] text-on-brand">Save</Text>}
+                  {updateProfile.isPending ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <>
+                      <Check size={15} color="#FFFFFF" strokeWidth={2.5} />
+                      <Text className="font-ui-semibold text-[14px] text-on-brand">Save</Text>
+                    </>
+                  )}
                 </Pressable>
               </View>
             </>
@@ -217,7 +236,8 @@ export default function SettingsScreen() {
                 <Text className="font-ui text-[13.5px] text-text-2">{profile.email}</Text>
                 {profile.birthDate && <Text className="font-ui text-[13.5px] text-text-2">Born {profile.birthDate}</Text>}
               </View>
-              <Pressable onPress={() => setEditingProfile(true)} className="h-11 rounded-full items-center justify-center bg-surface-2">
+              <Pressable onPress={() => setEditingProfile(true)} className="h-11 rounded-full flex-row items-center justify-center gap-1.5 bg-surface-2">
+                <Pencil size={14} color={colors.text} strokeWidth={2} />
                 <Text className="font-ui-medium text-[14px] text-text">Edit profile</Text>
               </Pressable>
             </>
@@ -252,21 +272,30 @@ export default function SettingsScreen() {
                     setCurrentPw("");
                     setNewPw("");
                   }}
-                  className="flex-1 h-11 rounded-full items-center justify-center bg-surface-2"
+                  className="flex-1 h-11 rounded-full flex-row items-center justify-center gap-1.5 bg-surface-2"
                 >
+                  <X size={15} color={colors["text-2"]} strokeWidth={2} />
                   <Text className="font-ui-medium text-[14px] text-text">Cancel</Text>
                 </Pressable>
                 <Pressable
                   onPress={savePassword}
                   disabled={changePassword.isPending || !currentPw || !newPw}
-                  className="flex-1 h-11 rounded-full items-center justify-center bg-brand disabled:opacity-50"
+                  className="flex-1 h-11 rounded-full flex-row items-center justify-center gap-1.5 bg-brand disabled:opacity-50"
                 >
-                  {changePassword.isPending ? <ActivityIndicator color="#FFFFFF" /> : <Text className="font-ui-semibold text-[14px] text-on-brand">Change</Text>}
+                  {changePassword.isPending ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <>
+                      <Check size={15} color="#FFFFFF" strokeWidth={2.5} />
+                      <Text className="font-ui-semibold text-[14px] text-on-brand">Change</Text>
+                    </>
+                  )}
                 </Pressable>
               </View>
             </>
           ) : (
-            <Pressable onPress={() => setChangingPassword(true)} className="h-11 rounded-full items-center justify-center bg-surface-2">
+            <Pressable onPress={() => setChangingPassword(true)} className="h-11 rounded-full flex-row items-center justify-center gap-1.5 bg-surface-2">
+              <Lock size={14} color={colors.text} strokeWidth={2} />
               <Text className="font-ui-medium text-[14px] text-text">Change password</Text>
             </Pressable>
           )}
@@ -305,27 +334,37 @@ export default function SettingsScreen() {
                     setWiping(false);
                     setWipePassword("");
                   }}
-                  className="flex-1 h-11 rounded-full items-center justify-center bg-surface-2"
+                  className="flex-1 h-11 rounded-full flex-row items-center justify-center gap-1.5 bg-surface-2"
                 >
+                  <X size={15} color={colors["text-2"]} strokeWidth={2} />
                   <Text className="font-ui-medium text-[14px] text-text">Cancel</Text>
                 </Pressable>
                 <Pressable
                   onPress={confirmWipe}
                   disabled={wipeAccount.isPending || !wipePassword}
-                  className="flex-1 h-11 rounded-full items-center justify-center disabled:opacity-50"
+                  className="flex-1 h-11 rounded-full flex-row items-center justify-center gap-1.5 disabled:opacity-50"
                   style={{ backgroundColor: colors.negative }}
                 >
-                  {wipeAccount.isPending ? <ActivityIndicator color="#FFFFFF" /> : <Text className="font-ui-semibold text-[14px] text-on-brand">Wipe data</Text>}
+                  {wipeAccount.isPending ? (
+                    <ActivityIndicator color="#FFFFFF" />
+                  ) : (
+                    <>
+                      <Trash2 size={14} color="#FFFFFF" strokeWidth={2} />
+                      <Text className="font-ui-semibold text-[14px] text-on-brand">Wipe data</Text>
+                    </>
+                  )}
                 </Pressable>
               </View>
             </>
           ) : (
-            <Pressable onPress={() => setWiping(true)} className="h-11 rounded-full items-center justify-center bg-negative-subtle">
+            <Pressable onPress={() => setWiping(true)} className="h-11 rounded-full flex-row items-center justify-center gap-1.5 bg-negative-subtle">
+              <Trash2 size={14} color={colors.negative} strokeWidth={2} />
               <Text className="font-ui-semibold text-[14px] text-negative">Wipe all data</Text>
             </Pressable>
           )}
         </Card>
       </View>
     </ScrollView>
+    </View>
   );
 }

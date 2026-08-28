@@ -1,9 +1,12 @@
 import { View, Text, ScrollView, ActivityIndicator } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useSubscriptions, type RecurringStream } from "@/lib/queries/subscriptions";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
+import { ScreenGlow } from "@/components/ui/ScreenGlow";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
 
 const FREQUENCY_LABEL: Record<RecurringStream["frequency"], string> = {
   weekly: "Weekly",
@@ -26,13 +29,17 @@ const MONTHLY_MULTIPLIER: Record<RecurringStream["frequency"], number> = {
 // status-badge treatment as connection health.
 export default function SubscriptionsScreen() {
   const colors = useThemeColors();
+  const insets = useSafeAreaInsets();
   const { data, isLoading } = useSubscriptions();
   const streams = (data?.streams ?? []).filter((s) => s.status !== "cancelled");
 
   const monthlyTotal = streams.reduce((sum, s) => sum + s.averageAmount * MONTHLY_MULTIPLIER[s.frequency], 0);
 
   return (
-    <ScrollView className="flex-1 bg-canvas" contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: 40 }}>
+    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+    <ScreenGlow />
+    <ScreenHeader title="Subscriptions" />
+    <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
       <Card className="p-5 flex-row justify-between">
         <View>
           <Text className="font-ui text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>
@@ -74,5 +81,6 @@ export default function SubscriptionsScreen() {
         </Card>
       )}
     </ScrollView>
+    </View>
   );
 }

@@ -1,4 +1,5 @@
 import { View, Text, ScrollView, ActivityIndicator } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TrendingUp } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
@@ -6,6 +7,8 @@ import { useHoldings, useInvestmentTransactions } from "@/lib/queries/investment
 import { chartSeries, hairline } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useColorScheme } from "nativewind";
+import { ScreenGlow } from "@/components/ui/ScreenGlow";
+import { ScreenHeader } from "@/components/ui/ScreenHeader";
 
 function formatQuantity(q: string): string {
   const n = parseFloat(q);
@@ -20,6 +23,7 @@ function formatQuantity(q: string): string {
 // activity feed are left as web-only for now.
 export default function InvestmentsScreen() {
   const colors = useThemeColors();
+  const insets = useSafeAreaInsets();
   const { colorScheme } = useColorScheme();
   const series = colorScheme === "dark" ? chartSeries.dark : chartSeries.light;
   const { data, isLoading } = useHoldings();
@@ -27,20 +31,28 @@ export default function InvestmentsScreen() {
 
   if (isLoading || !data) {
     return (
-      <View className="flex-1 bg-canvas items-center justify-center">
-        <ActivityIndicator />
+      <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+        <ScreenGlow />
+        <ScreenHeader title="Investments" />
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator />
+        </View>
       </View>
     );
   }
 
   if (data.holdings.length === 0) {
     return (
-      <View className="flex-1 bg-canvas items-center justify-center px-8 gap-3">
-        <TrendingUp size={28} color={colors["text-3"]} strokeWidth={1.5} />
-        <Text className="font-ui-semibold text-[16px] text-text text-center">Nothing invested here yet</Text>
-        <Text className="font-ui text-[13.5px] text-text-2 text-center">
-          Connect a brokerage account from the Accounts tab. Holdings usually appear within a minute.
-        </Text>
+      <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+        <ScreenGlow />
+        <ScreenHeader title="Investments" />
+        <View className="flex-1 items-center justify-center px-8 gap-3">
+          <TrendingUp size={28} color={colors["text-3"]} strokeWidth={1.5} />
+          <Text className="font-ui-semibold text-[16px] text-text text-center">Nothing invested here yet</Text>
+          <Text className="font-ui text-[13.5px] text-text-2 text-center">
+            Connect a brokerage account from the Accounts tab. Holdings usually appear within a minute.
+          </Text>
+        </View>
       </View>
     );
   }
@@ -53,7 +65,10 @@ export default function InvestmentsScreen() {
   const activity = activityData?.transactions.slice(0, 10) ?? [];
 
   return (
-    <ScrollView className="flex-1 bg-canvas" contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: 40 }}>
+    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+    <ScreenGlow />
+    <ScreenHeader title="Investments" />
+    <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
       <Card className="p-5 gap-5">
         <View className="gap-1">
           <Text className="font-ui-medium text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>
@@ -171,5 +186,6 @@ export default function InvestmentsScreen() {
         </View>
       )}
     </ScrollView>
+    </View>
   );
 }

@@ -49,8 +49,18 @@ export interface NetWorthPoint {
   liabilities: number;
 }
 
-/** §9 "12-month trend" — whatever daily snapshots exist within the window; there's no history before this feature shipped, so a fresh install just shows fewer points. */
+/**
+ * §9 "12-month trend" — whatever daily snapshots exist within the window;
+ * there's no history before this feature shipped, so a fresh install just
+ * shows fewer points. Refreshes today's snapshot first (same computation
+ * the nightly cron uses, just on-demand) so the trend's last point always
+ * reflects live account balances -- without this, the chart's rightmost
+ * point could lag up to a day behind the hero net-worth figure shown
+ * alongside it, which is computed fresh from current balances every time.
+ */
 export async function netWorthTrend(userId: string, days = 365): Promise<NetWorthPoint[]> {
+  await computeAndStoreNetWorthSnapshot(userId, new Date().toISOString().slice(0, 10));
+
   const since = new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10);
   const rows = await db
     .select({ asOfDate: schema.netWorthSnapshots.asOfDate, net: schema.netWorthSnapshots.net, assets: schema.netWorthSnapshots.assets, liabilities: schema.netWorthSnapshots.liabilities })

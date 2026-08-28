@@ -1,19 +1,16 @@
 import { Tabs } from "expo-router";
 import { House, ArrowLeftRight, PiggyBank, Landmark } from "lucide-react-native";
-import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useThemeColors } from "@/theme/useThemeColors";
 
 // MOBILE_DESIGN.md §2 -- 4-tab bottom bar (Overview / Transactions / Budgets
-// / Accounts), flat chrome with a soft upward shadow instead of a hairline
-// (§3.4's Wealthsimple-inspired texture). Dark mode drops the shadow to a
-// flat top hairline instead (a light shadow reads as a halo on a dark
-// surface), same rule Card.tsx follows.
+// / Accounts). Originally a soft upward shadow (§3.4's Wealthsimple-inspired
+// texture); dropped for a flat hairline in both themes -- Android's
+// elevation renders a much harder-edged shadow than iOS's shadowRadius blur
+// at the same nominal value, and it read as too heavy there.
 export default function TabsLayout() {
   const colors = useThemeColors();
-  const { colorScheme } = useColorScheme();
   const insets = useSafeAreaInsets();
-  const dark = colorScheme === "dark";
   return (
     <Tabs
       screenOptions={{
@@ -22,7 +19,7 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: colors["text-3"],
         tabBarStyle: {
           backgroundColor: colors.surface,
-          borderTopWidth: dark ? 1 : 0,
+          borderTopWidth: 1,
           borderTopColor: colors.border,
           // A fixed height/paddingBottom opts the tab bar out of
           // react-navigation's own safe-area handling, so the bottom inset
@@ -32,11 +29,6 @@ export default function TabsLayout() {
           height: 62 + insets.bottom,
           paddingBottom: Math.max(insets.bottom, 10),
           paddingTop: 8,
-          shadowColor: "#000000",
-          shadowOpacity: dark ? 0 : 0.08,
-          shadowRadius: 16,
-          shadowOffset: { width: 0, height: -4 },
-          elevation: dark ? 0 : 8,
         },
         tabBarLabelStyle: { fontSize: 10.5, fontFamily: "Inter" },
       }}
