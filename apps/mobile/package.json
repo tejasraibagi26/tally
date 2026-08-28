@@ -54,7 +54,9 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "update:preview": "EXPO_PUBLIC_API_URL=https://tally.useuplift.live eas update --channel preview",
+    "update:production": "EXPO_PUBLIC_API_URL=https://tally.useuplift.live eas update --channel production"
   },
   "private": true
 }
