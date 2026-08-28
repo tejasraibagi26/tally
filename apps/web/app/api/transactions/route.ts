@@ -129,6 +129,12 @@ export async function GET(req: Request) {
     splitsByTransaction.set(s.transactionId, [...(splitsByTransaction.get(s.transactionId) ?? []), { categoryId: s.categoryId, amount: s.amount, note: s.note }]);
   }
 
+  // Resolved here (not left to the client) so mobile doesn't need its own
+  // categories fetch + cross-reference just to show a name instead of a raw
+  // Plaid PFC code -- one source of truth for "what does this category
+  // display as," same categories list the filter grouping already fetched.
+  const categoryById = new Map(categories.map((c) => [c.id, c]));
+
   const items = rows.map((t) => ({
     id: t.id,
     postedDate: t.postedDate,
@@ -137,6 +143,8 @@ export async function GET(req: Request) {
     isPending: t.isPending,
     accountId: t.accountId,
     categoryId: t.categoryId,
+    categoryName: t.categoryId ? (categoryById.get(t.categoryId)?.name ?? null) : null,
+    categoryColorSlot: t.categoryId ? (categoryById.get(t.categoryId)?.colorSlot ?? null) : null,
     categorySource: t.categorySource,
     pfcDetailed: t.pfcDetailed,
     amount: t.amount,

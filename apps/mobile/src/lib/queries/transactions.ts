@@ -15,6 +15,8 @@ export interface TransactionRow {
   isPending: boolean;
   accountId: string;
   categoryId: string | null;
+  categoryName: string | null;
+  categoryColorSlot: number | null;
   categorySource: string | null;
   pfcDetailed: string | null;
   amount: number;

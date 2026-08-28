@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { formatCents } from "@tally/core/money";
-import { prettifyPfc } from "@/lib/pfc";
+import { prettifyPfc } from "@tally/core/pfc";
 import { TransactionDetailPanel, type TransactionDetailData, type DetailCategoryOption, type DetailSplit } from "@/components/transactions/TransactionDetailPanel";
 
 export interface TransactionRowData {

@@ -1,4 +1,4 @@
-import { prettifyPfc, prettifyPfcChild, pfcColorSlot } from "@/lib/pfc";
+import { prettifyPfc, prettifyPfcChild, pfcColorSlot } from "@tally/core/pfc";
 import type { categoryKindEnum } from "@/db/schema";
 
 export type CategoryKind = (typeof categoryKindEnum.enumValues)[number];

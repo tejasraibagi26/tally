@@ -30,6 +30,10 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     .from(schema.transactionSplits)
     .where(inArray(schema.transactionSplits.transactionId, [t.id]));
 
+  const category = t.categoryId
+    ? await db.query.categories.findFirst({ where: eq(schema.categories.id, t.categoryId) })
+    : null;
+
   return NextResponse.json({
     id: t.id,
     postedDate: t.postedDate,
@@ -38,6 +42,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     isPending: t.isPending,
     accountId: t.accountId,
     categoryId: t.categoryId,
+    categoryName: category?.name ?? null,
+    categoryColorSlot: category?.colorSlot ?? null,
     categorySource: t.categorySource,
     pfcDetailed: t.pfcDetailed,
     amount: t.amount,

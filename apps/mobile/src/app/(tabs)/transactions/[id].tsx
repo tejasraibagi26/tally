@@ -2,6 +2,7 @@ import { View, Text, ScrollView, ActivityIndicator, Pressable } from "react-nati
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { X } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { prettifyPfc } from "@tally/core/pfc";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useTransaction } from "@/lib/queries/transactions";
 import { amountColor } from "@/lib/amountColor";
@@ -39,7 +40,7 @@ export default function TransactionDetailScreen() {
           </View>
 
           <View className="gap-3 pt-2" style={{ borderTopWidth: 1, borderTopColor: "#E4E1D9" }}>
-            <DetailRow label="Category" value={t.pfcDetailed ?? "Uncategorized"} />
+            <DetailRow label="Category" value={t.categoryName ?? prettifyPfc(t.pfcDetailed)} />
             <DetailRow label="Status" value={t.isPending ? "Pending" : "Posted"} />
             {t.notes && <DetailRow label="Notes" value={t.notes} />}
           </View>

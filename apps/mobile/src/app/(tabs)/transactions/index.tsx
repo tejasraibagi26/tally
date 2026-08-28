@@ -3,6 +3,7 @@ import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ListFilter } from "lucide-react-native";
+import { prettifyPfc } from "@tally/core/pfc";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useTransactions, type TransactionRow } from "@/lib/queries/transactions";
 import { amountColor } from "@/lib/amountColor";
@@ -24,7 +25,7 @@ function TransactionRowItem({ item, isLast }: { item: TransactionRow; isLast: bo
           {item.merchantName ?? item.name}
         </Text>
         <Text className="font-ui text-[12.5px] text-text-2" numberOfLines={1}>
-          {item.pfcDetailed ?? "Uncategorized"}
+          {item.categoryName ?? prettifyPfc(item.pfcDetailed)}
           {item.isPending ? " · Pending" : ""}
         </Text>
       </View>
