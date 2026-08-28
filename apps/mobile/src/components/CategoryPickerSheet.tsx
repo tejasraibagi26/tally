@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Modal, View, Text, Pressable, FlatList, TextInput } from "react-native";
+import { Modal, View, Text, Pressable, FlatList, TextInput, KeyboardAvoidingView, Platform } from "react-native";
 import { X, Check, Search } from "lucide-react-native";
 import { useColorScheme } from "nativewind";
 import { useCategories } from "@/lib/queries/categories";
@@ -43,7 +43,7 @@ export function CategoryPickerSheet({
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
       <Pressable className="flex-1" style={{ backgroundColor: "rgba(26,25,23,0.4)" }} onPress={handleClose} />
-      <View className="bg-canvas rounded-t-panel" style={{ maxHeight: "75%" }}>
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="bg-canvas rounded-t-panel" style={{ maxHeight: "75%" }}>
         <View className="flex-row items-center justify-between px-5 pt-5 pb-3">
           <Text className="font-ui-semibold text-[18px] text-text">Category</Text>
           <Pressable onPress={handleClose} hitSlop={12}>
@@ -99,7 +99,7 @@ export function CategoryPickerSheet({
             );
           }}
         />
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }

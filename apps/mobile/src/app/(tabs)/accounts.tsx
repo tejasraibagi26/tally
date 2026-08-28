@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TextInput, ScrollView, ActivityIndicator, Pressable, RefreshControl, Alert } from "react-native";
+import { View, Text, TextInput, ScrollView, ActivityIndicator, Pressable, RefreshControl, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Plus, RefreshCw, Pencil, Check, X } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
@@ -158,10 +158,12 @@ export default function AccountsScreen() {
   return (
     <View className="flex-1 bg-canvas">
       <ScreenGlow />
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 }}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
+        keyboardShouldPersistTaps="handled"
       >
         <View className="flex-row items-center justify-between px-5 pb-4">
         <Text className="font-ui-semibold text-[24px] text-text" style={{ letterSpacing: -0.3 }}>
@@ -206,6 +208,7 @@ export default function AccountsScreen() {
         </View>
       )}
       </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 }

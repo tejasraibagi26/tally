@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import { useAuth } from "@/lib/AuthContext";
 import { ApiError } from "@/lib/api";
@@ -41,7 +41,10 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1 bg-canvas">
-      <View className="flex-1 justify-center px-8">
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingHorizontal: 32 }}
+        keyboardShouldPersistTaps="handled"
+      >
         <View className="items-center gap-3 mb-16">
           <TallyMark color={colors.brand} />
           <Text className="font-display text-[32px] text-text">Tally</Text>
@@ -77,7 +80,7 @@ export default function LoginScreen() {
             {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text className="text-[15.5px] font-ui-semibold text-on-brand">Log in</Text>}
           </Pressable>
         </View>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
