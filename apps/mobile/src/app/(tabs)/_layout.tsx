@@ -1,48 +1,47 @@
-import { Tabs } from "expo-router";
-import { House, ArrowLeftRight, PiggyBank, Landmark } from "lucide-react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Platform } from "react-native";
+import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { withAlpha } from "@/theme/colors";
 
-// MOBILE_DESIGN.md §2 -- 4-tab bottom bar (Overview / Transactions / Budgets
-// / Accounts). Originally a soft upward shadow (§3.4's Wealthsimple-inspired
-// texture); dropped for a flat hairline in both themes -- Android's
-// elevation renders a much harder-edged shadow than iOS's shadowRadius blur
-// at the same nominal value, and it read as too heavy there.
+const { Icon, Label } = NativeTabs.Trigger;
+
+// A genuinely native tab bar (UITabBarController on iOS, Material 3
+// NavigationBar on Android) instead of the JS-rendered one this replaced --
+// on iOS this automatically picks up the OS's own tab bar chrome (the
+// floating "Liquid Glass" pill on iOS 26+, whatever came before it on older
+// versions) with zero glass-specific code here; on Android it fixes the
+// stock black circular press ripple by giving it a themed color instead of
+// (and lets the OS handle safe-area/gesture-bar insets itself, so none of
+// the manual insets math the old JS tab bar needed applies here).
 export default function TabsLayout() {
   const colors = useThemeColors();
-  const insets = useSafeAreaInsets();
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.brand,
-        tabBarInactiveTintColor: colors["text-3"],
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopWidth: 1,
-          borderTopColor: colors.border,
-          // A fixed height/paddingBottom opts the tab bar out of
-          // react-navigation's own safe-area handling, so the bottom inset
-          // (iOS home indicator, Android's gesture-nav bar) has to be added
-          // back in by hand -- without it, Android's gesture bar sits right
-          // on top of the tab labels.
-          height: 62 + insets.bottom,
-          paddingBottom: Math.max(insets.bottom, 10),
-          paddingTop: 8,
-        },
-        tabBarLabelStyle: { fontSize: 10.5, fontFamily: "Inter" },
+    <NativeTabs
+      tintColor={colors.brand}
+      iconColor={{ default: colors["text-3"], selected: colors.brand }}
+      labelStyle={{
+        default: { fontFamily: "Inter", fontSize: 10.5, color: colors["text-3"] },
+        selected: { fontFamily: "Inter", fontSize: 10.5, color: colors.brand },
       }}
+      rippleColor={withAlpha(colors.brand, 0.14)}
+      backgroundColor={Platform.OS === "android" ? colors.surface : undefined}
     >
-      <Tabs.Screen name="index" options={{ title: "Overview", tabBarIcon: ({ color, size }) => <House color={color} size={size} strokeWidth={1.9} /> }} />
-      <Tabs.Screen
-        name="transactions"
-        options={{ title: "Transactions", tabBarIcon: ({ color, size }) => <ArrowLeftRight color={color} size={size} strokeWidth={1.9} /> }}
-      />
-      <Tabs.Screen name="budgets" options={{ title: "Budgets", tabBarIcon: ({ color, size }) => <PiggyBank color={color} size={size} strokeWidth={1.9} /> }} />
-      <Tabs.Screen
-        name="accounts"
-        options={{ title: "Accounts", tabBarIcon: ({ color, size }) => <Landmark color={color} size={size} strokeWidth={1.9} /> }}
-      />
-    </Tabs>
+      <NativeTabs.Trigger name="index">
+        <Icon sf={{ default: "house", selected: "house.fill" }} md="home" />
+        <Label>Overview</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="transactions">
+        <Icon sf="arrow.left.arrow.right" md="swap_horiz" />
+        <Label>Transactions</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="budgets">
+        <Icon sf={{ default: "chart.pie", selected: "chart.pie.fill" }} md="savings" />
+        <Label>Budgets</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="accounts">
+        <Icon sf={{ default: "building.columns", selected: "building.columns.fill" }} md="account_balance" />
+        <Label>Accounts</Label>
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }
