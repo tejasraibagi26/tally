@@ -38,6 +38,9 @@ export function useSync() {
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
       queryClient.invalidateQueries({ queryKey: ["overview"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      // Prefix match -- covers both ["investments","holdings"] and
+      // ["investments","transactions"] (see lib/queries/investments.ts).
+      queryClient.invalidateQueries({ queryKey: ["investments"] });
     },
   });
 }

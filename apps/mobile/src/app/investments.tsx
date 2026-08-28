@@ -1,9 +1,10 @@
-import { View, Text, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, ActivityIndicator, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { TrendingUp } from "lucide-react-native";
+import { TrendingUp, RefreshCw } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useHoldings, useInvestmentTransactions } from "@/lib/queries/investments";
+import { useSync } from "@/lib/queries/plaid";
 import { chartSeries, hairline } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useColorScheme } from "nativewind";
@@ -28,6 +29,18 @@ export default function InvestmentsScreen() {
   const series = colorScheme === "dark" ? chartSeries.dark : chartSeries.light;
   const { data, isLoading } = useHoldings();
   const { data: activityData } = useInvestmentTransactions();
+  const sync = useSync();
+
+  const syncAction = (
+    <Pressable
+      onPress={() => sync.mutate(["holdings", "investments"])}
+      disabled={sync.isPending}
+      className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50 bg-brand-subtle"
+    >
+      {sync.isPending ? <ActivityIndicator size="small" color={colors.brand} /> : <RefreshCw size={14} color={colors.brand} strokeWidth={2} />}
+      <Text className="font-ui-semibold text-[13px] text-brand">Sync holdings</Text>
+    </Pressable>
+  );
 
   if (isLoading || !data) {
     return (
@@ -45,7 +58,7 @@ export default function InvestmentsScreen() {
     return (
       <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
         <ScreenGlow />
-        <ScreenHeader title="Investments" />
+        <ScreenHeader title="Investments" action={syncAction} />
         <View className="flex-1 items-center justify-center px-8 gap-3">
           <TrendingUp size={28} color={colors["text-3"]} strokeWidth={1.5} />
           <Text className="font-ui-semibold text-[16px] text-text text-center">Nothing invested here yet</Text>
@@ -69,7 +82,7 @@ export default function InvestmentsScreen() {
     <ScreenGlow />
     <ScreenBackButton />
     <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
-      <ScreenTitle title="Investments" />
+      <ScreenTitle title="Investments" action={syncAction} />
       <Card className="p-5 gap-5">
         <View className="gap-1">
           <Text className="font-ui-medium text-[11px] tracking-wide text-text-2" style={{ textTransform: "uppercase" }}>
