@@ -37,10 +37,12 @@ export default function OverviewScreen() {
   const allSynced = accounts.data ? accounts.data.institutions.every((i) => i.badge === "good") : true;
   const brokenCount = accounts.data ? accounts.data.institutions.filter((i) => i.badge === "critical").length : 0;
 
-  const chartData = useMemo(
-    () => (trend.data?.points ?? []).slice(-12).map((p) => ({ value: p.net / 100 })),
-    [trend.data],
-  );
+  // /api/analytics/networth returns one point per day (nightly net-worth
+  // snapshots), not one per month -- matches web's NetWorthChart.tsx, which
+  // plots every point in the 12-month window unsliced. An earlier version
+  // here sliced to the last 12 *points* assuming monthly granularity, which
+  // actually plotted only the most recent ~12 days.
+  const chartData = useMemo(() => (trend.data?.points ?? []).map((p) => ({ value: p.net / 100 })), [trend.data]);
 
   const recentItems = recent.data?.pages[0]?.items.slice(0, 5) ?? [];
   const topBudgets = (overview.data?.budgets.categories ?? []).slice(0, 3);
