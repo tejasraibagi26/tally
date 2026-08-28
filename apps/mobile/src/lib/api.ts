@@ -35,11 +35,37 @@ export class ApiError extends Error {
   }
 }
 
+// Distinct from ApiError (a real HTTP response the server sent back):
+// this is thrown when fetch() itself never got a response at all -- no
+// connectivity, DNS failure, a dropped connection mid-request. Callers
+// (e.g. login.tsx) can show "check your connection" instead of a generic
+// error, since this specifically isn't the server's fault.
+export class NetworkError extends Error {}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// A single automatic retry after a flaky connection's first failure --
+// confirmed live (production logs showed zero requests ever arriving for
+// a "login failed" report on a weak/roaming connection) that a bare
+// fetch() with no retry turns a one-off network hiccup into a dead end.
+// Only retries the network-layer failure itself, not HTTP error responses
+// (a real 401/500 is not retried here).
 async function rawFetch(path: string, options: RequestInit, accessToken: string | null): Promise<Response> {
   const headers = new Headers(options.headers);
   if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
   if (options.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
-  return fetch(`${API_URL}${path}`, { ...options, headers });
+  try {
+    return await fetch(`${API_URL}${path}`, { ...options, headers });
+  } catch {
+    await delay(800);
+    try {
+      return await fetch(`${API_URL}${path}`, { ...options, headers });
+    } catch {
+      throw new NetworkError("Couldn't reach the server. Check your connection and try again.");
+    }
+  }
 }
 
 // Shared by every concurrent 401 so a burst of requests (e.g. Overview's
