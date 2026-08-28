@@ -52,6 +52,12 @@ export default function OverviewScreen() {
   const priorMonth = months.length > 1 ? months[months.length - 2] : undefined;
   const utilizationPct = liabilities.data?.utilization.utilization != null ? Math.round(liabilities.data.utilization.utilization * 100) : null;
 
+  // Cash flow deliberately isn't brand-subtle: it's nearly the same hex as
+  // positive-subtle (Income) in both themes (both a muted evergreen), so the
+  // two tiles read as the same color -- warning-subtle (amber) is the 4th
+  // genuinely distinct tint, alongside negative (spend) and info (utilization).
+  // The actual class per tile.key is chosen where it's rendered (a literal
+  // className branch, not a string built here) -- see that comment for why.
   const kpiTiles = currentMonth
     ? [
         {
@@ -59,25 +65,18 @@ export default function OverviewScreen() {
           label: "Spent this month",
           cents: currentMonth.spend,
           delta: priorMonth ? deltaLabel(currentMonth.spend, priorMonth.spend) : undefined,
-          bgClass: "bg-negative-subtle",
         },
         {
           key: "income",
           label: "Income",
           cents: currentMonth.income,
           delta: priorMonth ? deltaLabel(currentMonth.income, priorMonth.income) : undefined,
-          bgClass: "bg-positive-subtle",
         },
         {
           key: "cashflow",
           label: "Cash flow",
           cents: currentMonth.cashFlow,
           delta: priorMonth ? deltaLabel(currentMonth.cashFlow, priorMonth.cashFlow) : undefined,
-          // brand-subtle and positive-subtle are nearly the same hex in both
-          // themes (both a muted evergreen), so Income and Cash flow read as
-          // the same color -- warning-subtle (amber) is the 4th genuinely
-          // distinct tint, alongside negative (spend) and info (utilization).
-          bgClass: "bg-warning-subtle",
         },
       ]
     : [];
@@ -164,7 +163,24 @@ export default function OverviewScreen() {
         {(kpiTiles.length > 0 || utilizationPct !== null) && (
           <View className="flex-row flex-wrap" style={{ gap: 12 }}>
             {kpiTiles.map((tile) => (
-              <View key={tile.key} className={`rounded-panel px-4 py-4 gap-1.5 ${tile.bgClass}`} style={{ width: "48%" }}>
+              <View
+                key={tile.key}
+                // Literal per-branch classNames, not a template-literal
+                // interpolation of a data-array string -- NativeWind only
+                // generates CSS for utility classes it can statically see
+                // inside a className expression. bg-warning-subtle was only
+                // ever referenced via ${tile.bgClass} (unresolvable) and had
+                // no other literal usage anywhere in the app, so it silently
+                // produced no style at all (transparent tile, no error).
+                className={
+                  tile.key === "spend"
+                    ? "rounded-panel px-4 py-4 gap-1.5 bg-negative-subtle"
+                    : tile.key === "income"
+                      ? "rounded-panel px-4 py-4 gap-1.5 bg-positive-subtle"
+                      : "rounded-panel px-4 py-4 gap-1.5 bg-warning-subtle"
+                }
+                style={{ width: "48%" }}
+              >
                 <Text className="font-ui-medium text-[11.5px] text-text-2">{tile.label}</Text>
                 <MoneyText cents={tile.cents} signed={tile.key === "cashflow"} className="font-ui-semibold text-[19px] text-text" numberOfLines={1} adjustsFontSizeToFit />
                 {tile.delta && (
