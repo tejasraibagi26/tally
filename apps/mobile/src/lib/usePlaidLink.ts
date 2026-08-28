@@ -53,8 +53,18 @@ export function usePlaidLink() {
             token: linkToken,
             onSuccess: (success) => resolve(success.publicToken),
             onExit: (exit) => {
-              if (exit.error) reject(new Error(exit.error.errorMessage ?? "Plaid Link exited with an error"));
-              else resolve(null); // user cancelled -- not an error
+              if (exit.error) {
+                // Temporary: surface the real Plaid error code/type instead of
+                // a generic message -- both mobile and web (LinkButton.tsx)
+                // currently treat any onExit error as a hard failure, but a
+                // plain "closed without linking" tap is reportedly producing
+                // one here too, so the actual errorCode is needed to tell a
+                // real failure apart from an SDK quirk.
+                console.error("Plaid Link exited with error", exit.error, exit.metadata);
+                reject(new Error(`${exit.error.errorCode}: ${exit.error.errorMessage || exit.error.displayMessage || "no message"}`));
+              } else {
+                resolve(null); // user cancelled -- not an error
+              }
             },
             onEvent: () => {},
           })

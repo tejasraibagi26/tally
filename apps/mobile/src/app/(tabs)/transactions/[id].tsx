@@ -91,7 +91,7 @@ export default function TransactionDetailScreen() {
         <ActivityIndicator className="mt-8" />
       ) : (
         <>
-          <ScrollView className="px-5" contentContainerStyle={{ gap: 24, paddingBottom: 40 }} keyboardShouldPersistTaps="handled">
+          <ScrollView className="px-5" contentContainerStyle={{ gap: 24, paddingBottom: dirty ? 24 : insets.bottom + 40 }} keyboardShouldPersistTaps="handled">
             <View className="gap-1.5">
               <MoneyText cents={t.amount} signed className="font-display text-[36px]" style={{ color: amountColor(t.amount, colors) }} />
               <Text className="font-ui-semibold text-[16px] text-text">{t.merchantName ?? t.name}</Text>
@@ -159,7 +159,7 @@ export default function TransactionDetailScreen() {
           </ScrollView>
 
           {dirty && (
-            <View className="px-5 pb-8 pt-3" style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
+            <View className="px-5 pt-3" style={{ borderTopWidth: 1, borderTopColor: colors.border, paddingBottom: insets.bottom + 16 }}>
               <Pressable
                 onPress={save}
                 disabled={updateTransaction.isPending}

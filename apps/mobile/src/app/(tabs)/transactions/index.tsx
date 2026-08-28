@@ -92,7 +92,7 @@ export default function TransactionsScreen() {
           keyExtractor={(item) => item.id}
           renderItem={({ item, index }) => <TransactionRowItem item={item} isLast={index === items.length - 1} colors={colors} />}
           className="mx-5 rounded-card bg-surface"
-          style={{ shadowColor: "#000000", shadowOpacity: dark ? 0.35 : 0.07, shadowRadius: 12, shadowOffset: { width: 0, height: 2 }, elevation: dark ? 0 : 2 }}
+          style={{ shadowColor: "#000000", shadowOpacity: dark ? 0 : 0.07, shadowRadius: 12, shadowOffset: { width: 0, height: 2 }, elevation: dark ? 0 : 2 }}
           contentContainerStyle={{ paddingBottom: 24 }}
           onEndReachedThreshold={0.4}
           onEndReached={() => hasNextPage && fetchNextPage()}

@@ -73,7 +73,11 @@ export default function OverviewScreen() {
           label: "Cash flow",
           cents: currentMonth.cashFlow,
           delta: priorMonth ? deltaLabel(currentMonth.cashFlow, priorMonth.cashFlow) : undefined,
-          bgClass: "bg-brand-subtle",
+          // brand-subtle and positive-subtle are nearly the same hex in both
+          // themes (both a muted evergreen), so Income and Cash flow read as
+          // the same color -- warning-subtle (amber) is the 4th genuinely
+          // distinct tint, alongside negative (spend) and info (utilization).
+          bgClass: "bg-warning-subtle",
         },
       ]
     : [];
@@ -152,27 +156,30 @@ export default function OverviewScreen() {
           </View>
         </Pressable>
 
-        {/* KPI row */}
+        {/* KPI row -- a wrapping 2-column grid rather than a fixed-width
+            horizontal scroll: at 140px-wide tiles, a horizontal ScrollView
+            clips the last tile's text right at the screen edge on
+            narrower/denser phones (nothing left to scroll to reveal the
+            rest), which read as broken rather than "swipe for more." */}
         {(kpiTiles.length > 0 || utilizationPct !== null) && (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingRight: 20 }} style={{ marginHorizontal: -20 }}>
-            <View style={{ width: 8 }} />
+          <View className="flex-row flex-wrap" style={{ gap: 12 }}>
             {kpiTiles.map((tile) => (
-              <View key={tile.key} className={`rounded-panel px-4 py-4 gap-1.5 ${tile.bgClass}`} style={{ width: 140 }}>
+              <View key={tile.key} className={`rounded-panel px-4 py-4 gap-1.5 ${tile.bgClass}`} style={{ width: "48%" }}>
                 <Text className="font-ui-medium text-[11.5px] text-text-2">{tile.label}</Text>
-                <MoneyText cents={tile.cents} signed={tile.key === "cashflow"} className="font-ui-semibold text-[19px] text-text" />
+                <MoneyText cents={tile.cents} signed={tile.key === "cashflow"} className="font-ui-semibold text-[19px] text-text" numberOfLines={1} adjustsFontSizeToFit />
                 {tile.delta && (
-                  <Text className="font-ui text-[11.5px] text-text-3">{tile.delta}</Text>
+                  <Text className="font-ui text-[11.5px] text-text-3" numberOfLines={1}>{tile.delta}</Text>
                 )}
               </View>
             ))}
             {utilizationPct !== null && (
-              <View className="rounded-panel px-4 py-4 gap-1.5 bg-info-subtle" style={{ width: 140 }}>
+              <View className="rounded-panel px-4 py-4 gap-1.5 bg-info-subtle" style={{ width: "48%" }}>
                 <Text className="font-ui-medium text-[11.5px] text-text-2">Credit utilization</Text>
                 <Text className="font-ui-semibold text-[19px] text-text">{utilizationPct}%</Text>
                 <Text className="font-ui text-[11.5px] text-text-3">of total limit</Text>
               </View>
             )}
-          </ScrollView>
+          </View>
         )}
 
         {/* Budget this month */}

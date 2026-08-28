@@ -15,7 +15,7 @@ export function Card({ className, style, ...props }: ViewProps) {
       style={[
         {
           shadowColor: "#000000",
-          shadowOpacity: dark ? 0.35 : 0.07,
+          shadowOpacity: dark ? 0 : 0.07,
           shadowRadius: 12,
           shadowOffset: { width: 0, height: 2 },
           elevation: dark ? 0 : 2,
