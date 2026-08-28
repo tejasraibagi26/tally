@@ -38,6 +38,7 @@ export default function BudgetsScreen() {
       <ScreenGlow />
       <ScrollView
         className="flex-1"
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 + tabBarClearance }}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
       >

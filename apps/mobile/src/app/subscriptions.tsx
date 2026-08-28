@@ -39,7 +39,7 @@ export default function SubscriptionsScreen() {
     <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
     <ScreenGlow />
     <ScreenBackButton />
-    <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
+    <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
       <ScreenTitle title="Subscriptions" />
       <Card className="p-5 flex-row justify-between">
         <View>

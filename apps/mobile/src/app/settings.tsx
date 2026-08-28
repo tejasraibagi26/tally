@@ -187,7 +187,7 @@ export default function SettingsScreen() {
     <ScreenGlow />
     <ScreenBackButton />
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-    <ScrollView className="flex-1" contentContainerStyle={{ paddingHorizontal: 20, gap: 24, paddingBottom: 40 }}>
+    <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 24, paddingBottom: 40 }}>
       <ScreenTitle title="Settings" />
       {/* Profile */}
       <View className="gap-3">

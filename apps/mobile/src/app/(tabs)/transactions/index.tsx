@@ -94,6 +94,7 @@ export default function TransactionsScreen() {
           keyExtractor={(item) => item.id}
           renderItem={({ item, index }) => <TransactionRowItem item={item} isLast={index === items.length - 1} colors={colors} />}
           className="mx-5 mb-5 rounded-card bg-surface"
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 24 + tabBarClearance }}
           onEndReachedThreshold={0.4}
           onEndReached={() => hasNextPage && fetchNextPage()}

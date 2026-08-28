@@ -91,7 +91,7 @@ export default function TransactionDetailScreen() {
         <ActivityIndicator className="mt-8" />
       ) : (
         <>
-          <ScrollView className="px-5" contentContainerStyle={{ gap: 24, paddingBottom: dirty ? 24 : insets.bottom + 40 }} keyboardShouldPersistTaps="handled">
+          <ScrollView className="px-5" showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 24, paddingBottom: dirty ? 24 : insets.bottom + 40 }} keyboardShouldPersistTaps="handled">
             <View className="gap-1.5">
               <MoneyText cents={t.amount} signed mask={false} className="font-display text-[36px]" style={{ color: amountColor(t.amount, colors) }} />
               <Text className="font-ui-semibold text-[16px] text-text">{t.merchantName ?? t.name}</Text>

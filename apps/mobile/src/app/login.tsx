@@ -46,6 +46,7 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1 bg-canvas">
       <ScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingHorizontal: 32 }}
         keyboardShouldPersistTaps="handled"
       >

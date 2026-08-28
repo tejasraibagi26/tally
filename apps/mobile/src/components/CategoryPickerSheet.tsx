@@ -71,6 +71,7 @@ export function CategoryPickerSheet({
           data={items}
           keyExtractor={(item) => item.id ?? "uncategorized"}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 24 }}
           ListEmptyComponent={<Text className="font-ui text-[14px] text-text-3 px-5 py-6">No categories match "{query}".</Text>}
           renderItem={({ item }) => {

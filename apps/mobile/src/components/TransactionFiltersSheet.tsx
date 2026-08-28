@@ -64,7 +64,7 @@ export function TransactionFiltersSheet({
           </Pressable>
         </View>
 
-        <ScrollView className="px-5" contentContainerStyle={{ paddingBottom: 12 }}>
+        <ScrollView className="px-5" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 12 }}>
           <Text className="font-ui-semibold text-[12px] text-text-2 mb-2" style={{ textTransform: "uppercase" }}>
             Date range
           </Text>
