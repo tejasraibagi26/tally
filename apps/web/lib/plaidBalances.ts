@@ -1,6 +1,6 @@
 import { eq, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { plaidClient, getAccessToken } from "@/lib/plaid";
+import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
 import type { SyncTrigger } from "@/lib/plaidSync";
 
@@ -51,13 +51,23 @@ export async function refreshAccountBalances(itemId: string, trigger: SyncTrigge
       added: balances.data.accounts.length,
     });
   } catch (err) {
+    // The generic AxiosError message ("Request failed with status code 400")
+    // was the only thing ever recorded/logged here -- Plaid's actual
+    // error_code/error_message (in err.response.data, several levels deep in
+    // the Axios error) gets truncated to "[Object]" by console.error's
+    // default inspection depth and was never pulled out for the sync_runs
+    // row either, making a failed balance refresh nearly undiagnosable
+    // after the fact.
+    const code = plaidErrorCode(err);
+    const message = err instanceof Error ? err.message : "unknown error";
+    console.error(`refreshAccountBalances failed for item ${itemId}`, { code, message });
     await db.insert(schema.syncRuns).values({
       itemId,
       kind: "balances",
       trigger,
       startedAt,
       finishedAt: new Date(),
-      error: err instanceof Error ? err.message : "unknown error",
+      error: code ? `${code}: ${message}` : message,
     });
     throw err;
   }

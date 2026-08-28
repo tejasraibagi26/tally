@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { requireUserId } from "@/lib/session";
 import { refreshAccountBalances } from "@/lib/plaidBalances";
 import { recordAudit } from "@/lib/audit";
+import { plaidErrorCode } from "@/lib/plaid";
 
 // Lighter-weight than "Sync now" (which also pulls transactions/holdings/
 // investments/liabilities) — just the balances, for the 3-dot menu's
@@ -38,7 +39,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     });
     return NextResponse.json({ ok: true });
   } catch (err) {
-    console.error(`Balance refresh failed for item ${id}`, err);
+    // err's own .response is truncated to "[Object]" by console.error's
+    // default inspection depth, hiding Plaid's actual error_code/message --
+    // pull it out explicitly (refreshAccountBalances also logs this now,
+    // but this route's own catch never did).
+    console.error(`Balance refresh failed for item ${id}`, { code: plaidErrorCode(err), message: err instanceof Error ? err.message : err });
     return NextResponse.json({ error: "Refresh failed" }, { status: 502 });
   }
 }
