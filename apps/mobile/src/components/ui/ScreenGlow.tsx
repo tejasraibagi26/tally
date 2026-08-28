@@ -36,7 +36,7 @@ export function ScreenGlow({ height = 260 }: { height?: number }) {
   // visible instead of all but disappearing into the off-white canvas.
   const baseAlpha = colorScheme === "dark" ? 0.14 : 0.4;
   const orbAlpha = 0.1;
-  const orbSize = 380;
+  const orbSize = 560;
 
   const sweep = useSharedValue(-orbSize);
   useEffect(() => {
