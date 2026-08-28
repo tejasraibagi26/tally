@@ -16,25 +16,24 @@ import { withAlpha } from "@/theme/colors";
 
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
-// A soft brand-tinted glow pinned behind the top of a tab screen -- sits
-// behind the header/hero content, not inside the ScrollView, so it stays
-// fixed at the top instead of scrolling away with the content. A
-// horizontal band (transparent -> brand -> transparent) that travels left
-// to right, vanishes off the right edge, pauses briefly, then instantly
-// resets to the left and starts again -- a one-way loop, not a back-and-
-// forth ping-pong. Uses a plain View transform (translateX) rather than an
-// animated SVG gradient prop -- react-native-svg doesn't reliably re-paint
-// a <Rect>'s referenced gradient def when only the def's own props change
-// via Reanimated, so an earlier version rendered but never actually moved.
-export function ScreenGlow({ height = 260 }: { height?: number }) {
+// A soft brand-tinted glow pinned to the very top edge of a tab screen --
+// sits behind the header/hero content, not inside the ScrollView, so it
+// stays fixed at the top instead of scrolling away with the content. A
+// thin line (not a tall wash covering the hero area) whose brightness
+// (transparent -> brand -> transparent) travels left to right, vanishes
+// off the right edge, pauses briefly, then instantly resets to the left
+// and starts again -- a one-way loop, not a back-and-forth ping-pong. Uses
+// a plain View transform (translateX) rather than an animated SVG gradient
+// prop -- react-native-svg doesn't reliably re-paint a <Rect>'s referenced
+// gradient def when only the def's own props change via Reanimated, so an
+// earlier version rendered but never actually moved.
+export function ScreenGlow({ height = 4 }: { height?: number }) {
   const colors = useThemeColors();
   const { colorScheme } = useColorScheme();
   const { width } = useWindowDimensions();
-  // A dark-on-light wash reads far more subtly than the same alpha of a
-  // light tint on a near-black canvas (display contrast, not just the
-  // numbers) -- light mode needed a noticeably higher alpha to actually be
-  // visible instead of all but disappearing into the off-white canvas.
-  const alpha = colorScheme === "dark" ? 0.14 : 0.4;
+  // A thin line needs far more opacity than a tall soft wash did to read
+  // as a visible highlight rather than disappearing into the canvas.
+  const alpha = colorScheme === "dark" ? 0.8 : 0.9;
   const bandWidth = Math.max(width * 0.6, 220);
 
   const sweep = useSharedValue(-bandWidth);
