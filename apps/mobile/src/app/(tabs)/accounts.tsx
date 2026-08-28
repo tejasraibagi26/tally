@@ -76,7 +76,14 @@ function AccountLine({ account, showTopBorder, colors }: { account: AccountRow; 
           placeholder={account.realName}
           placeholderTextColor={colors["text-3"]}
           maxLength={60}
-          className="flex-1 h-10 rounded-control bg-surface-2 px-3 font-ui text-[14px] text-text"
+          // h-10 clipped the tops of ascenders/tall letters (e.g. "TD CC") --
+          // Inter's line-height needs more than 40px of box to center inside
+          // without crowding the top edge. h-12 matches every other text
+          // input in the app (Field in settings.tsx/fire.tsx); the explicit
+          // style guards against the same clipping regardless of platform
+          // vertical-centering defaults.
+          className="flex-1 h-12 rounded-control bg-surface-2 px-3 font-ui text-[14px] text-text"
+          style={{ paddingVertical: 0, textAlignVertical: "center" }}
         />
         <Pressable onPress={save} disabled={updateNickname.isPending} hitSlop={10}>
           <Check size={18} color={colors.positive} strokeWidth={2.25} />
