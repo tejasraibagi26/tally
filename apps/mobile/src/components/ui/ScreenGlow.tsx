@@ -2,6 +2,7 @@ import { useColorScheme } from "nativewind";
 import { useEffect } from "react";
 import Animated, {
   Easing,
+  useAnimatedProps,
   useAnimatedStyle,
   useSharedValue,
   withDelay,
@@ -12,13 +13,17 @@ import Animated, {
 import Svg, { Defs, RadialGradient, Rect, Stop } from "react-native-svg";
 import { useThemeColors } from "@/theme/useThemeColors";
 
+const AnimatedRadialGradient = Animated.createAnimatedComponent(RadialGradient);
+
 // A soft brand-tinted glow pinned behind the top of a tab screen -- sits
 // behind the header/hero content, not inside the ScrollView, so it stays
 // fixed at the top instead of scrolling away with the content. Radial
-// (centered, fading outward in every direction) rather than linear (a flat
-// top-to-bottom band) so it reads as a light source, not a tinted strip.
-// Pulses like a heartbeat -- fast rise, slower decay, a pause between beats
-// -- rather than a continuous breathe, which read as static motion.
+// (fading outward in every direction from a point) rather than linear (a
+// flat top-to-bottom band) so it reads as a light source, not a tinted
+// strip. Two animations layered on top of that light source: a heartbeat
+// brightness pulse (fast rise, slower decay, a pause -- a continuous
+// breathe read as static), and the light source itself sweeping left to
+// right and back, off-screen at both ends so it doesn't pop in/out.
 export function ScreenGlow({ height = 260 }: { height?: number }) {
   const colors = useThemeColors();
   const { colorScheme } = useColorScheme();
@@ -40,9 +45,18 @@ export function ScreenGlow({ height = 260 }: { height?: number }) {
     );
   }, [pulse]);
 
+  const sweep = useSharedValue(-15);
+  useEffect(() => {
+    sweep.value = withRepeat(withTiming(115, { duration: 3400, easing: Easing.inOut(Easing.sin) }), -1, true);
+  }, [sweep]);
+
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: 0.35 + pulse.value * 0.65,
     transform: [{ scale: 1 + pulse.value * 0.06 }],
+  }));
+
+  const animatedGradientProps = useAnimatedProps(() => ({
+    cx: `${sweep.value}%`,
   }));
 
   return (
@@ -52,10 +66,10 @@ export function ScreenGlow({ height = 260 }: { height?: number }) {
     >
       <Svg width="100%" height="100%">
         <Defs>
-          <RadialGradient id="glow" cx="50%" cy="0%" rx="65%" ry="100%">
+          <AnimatedRadialGradient id="glow" animatedProps={animatedGradientProps} cy="0%" rx="40%" ry="100%">
             <Stop offset="0" stopColor={colors.brand} stopOpacity={alpha} />
             <Stop offset="1" stopColor={colors.brand} stopOpacity={0} />
-          </RadialGradient>
+          </AnimatedRadialGradient>
         </Defs>
         <Rect width="100%" height="100%" fill="url(#glow)" />
       </Svg>

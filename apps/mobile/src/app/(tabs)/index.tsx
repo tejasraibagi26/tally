@@ -182,7 +182,7 @@ export default function OverviewScreen() {
             </View>
           ) : (
             <View className="gap-1">
-              <MoneyText cents={netCents} className="font-display text-[50px] text-text" style={{ lineHeight: 52 }} />
+              <MoneyText cents={netCents} className="font-display text-[60px] text-text" style={{ lineHeight: 62 }} />
               {netWorthDelta && (
                 <Text className="font-ui-medium text-[13px]" style={{ color: netWorthDelta.direction === "up" ? colors.positive : colors.negative }}>
                   {netWorthDelta.direction === "up" ? "▲" : "▼"} {netWorthDelta.pct}% vs last month
