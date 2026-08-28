@@ -1,4 +1,3 @@
-import { LinearGradient } from "expo-linear-gradient";
 import { useColorScheme } from "nativewind";
 import { useEffect } from "react";
 import Animated, {
@@ -10,16 +9,16 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import Svg, { Defs, RadialGradient, Rect, Stop } from "react-native-svg";
 import { useThemeColors } from "@/theme/useThemeColors";
-import { withAlpha } from "@/theme/colors";
-
-const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 // A soft brand-tinted glow pinned behind the top of a tab screen -- sits
 // behind the header/hero content, not inside the ScrollView, so it stays
-// fixed at the top instead of scrolling away with the content. Breathes
-// gently rather than sitting static, so it reads as alive without being
-// distracting.
+// fixed at the top instead of scrolling away with the content. Radial
+// (centered, fading outward in every direction) rather than linear (a flat
+// top-to-bottom band) so it reads as a light source, not a tinted strip.
+// Pulses like a heartbeat -- fast rise, slower decay, a pause between beats
+// -- rather than a continuous breathe, which read as static motion.
 export function ScreenGlow({ height = 260 }: { height?: number }) {
   const colors = useThemeColors();
   const { colorScheme } = useColorScheme();
@@ -29,8 +28,6 @@ export function ScreenGlow({ height = 260 }: { height?: number }) {
   // visible instead of all but disappearing into the off-white canvas.
   const alpha = colorScheme === "dark" ? 0.14 : 0.4;
 
-  // A continuous sine breathe read as static -- a real pulse needs a fast
-  // rise, a slower decay, and a pause between beats, not one smooth cycle.
   const pulse = useSharedValue(0);
   useEffect(() => {
     pulse.value = withRepeat(
@@ -49,13 +46,19 @@ export function ScreenGlow({ height = 260 }: { height?: number }) {
   }));
 
   return (
-    <AnimatedLinearGradient
-      colors={[withAlpha(colors.brand, alpha), withAlpha(colors.brand, 0)]}
-      style={[
-        { position: "absolute" as const, top: 0, left: 0, right: 0, height },
-        animatedStyle,
-      ]}
+    <Animated.View
       pointerEvents="none"
-    />
+      style={[{ position: "absolute", top: 0, left: 0, right: 0, height }, animatedStyle]}
+    >
+      <Svg width="100%" height="100%">
+        <Defs>
+          <RadialGradient id="glow" cx="50%" cy="0%" rx="65%" ry="100%">
+            <Stop offset="0" stopColor={colors.brand} stopOpacity={alpha} />
+            <Stop offset="1" stopColor={colors.brand} stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Rect width="100%" height="100%" fill="url(#glow)" />
+      </Svg>
+    </Animated.View>
   );
 }
