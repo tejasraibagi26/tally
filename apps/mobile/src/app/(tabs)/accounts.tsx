@@ -1,10 +1,11 @@
-import { View, Text, ScrollView, ActivityIndicator, Pressable, RefreshControl, Alert } from "react-native";
+import { useState } from "react";
+import { View, Text, TextInput, ScrollView, ActivityIndicator, Pressable, RefreshControl, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Plus, RefreshCw } from "lucide-react-native";
+import { Plus, RefreshCw, Pencil, Check, X } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { StatusChip } from "@/components/ui/StatusChip";
-import { useAccounts, type Institution, type AccountRow } from "@/lib/queries/accounts";
+import { useAccounts, useUpdateAccountNickname, type Institution, type AccountRow } from "@/lib/queries/accounts";
 import { usePlaidLink } from "@/lib/usePlaidLink";
 import { useSync } from "@/lib/queries/plaid";
 import { useThemeColors } from "@/theme/useThemeColors";
@@ -54,21 +55,64 @@ function InstitutionCard({ institution, onReconnect, reconnecting }: { instituti
 }
 
 function AccountLine({ account, showTopBorder, colors }: { account: AccountRow; showTopBorder: boolean; colors: ReturnType<typeof useThemeColors> }) {
+  const [editing, setEditing] = useState(false);
+  const [input, setInput] = useState(account.nickname ?? "");
+  const updateNickname = useUpdateAccountNickname(account.id);
+
+  function save() {
+    updateNickname.mutate(input.trim() || null, { onSuccess: () => setEditing(false) });
+  }
+
+  if (editing) {
+    return (
+      <View
+        className="flex-row items-center gap-2 px-5 py-3"
+        style={showTopBorder ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined}
+      >
+        <TextInput
+          autoFocus
+          value={input}
+          onChangeText={setInput}
+          placeholder={account.realName}
+          placeholderTextColor={colors["text-3"]}
+          maxLength={60}
+          className="flex-1 h-10 rounded-control bg-surface-2 px-3 font-ui text-[14px] text-text"
+        />
+        <Pressable onPress={save} disabled={updateNickname.isPending} hitSlop={10}>
+          <Check size={18} color={colors.positive} strokeWidth={2.25} />
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            setEditing(false);
+            setInput(account.nickname ?? "");
+          }}
+          disabled={updateNickname.isPending}
+          hitSlop={10}
+        >
+          <X size={18} color={colors["text-3"]} strokeWidth={2.25} />
+        </Pressable>
+      </View>
+    );
+  }
+
   return (
     <View
       className="flex-row items-center justify-between px-5 py-3.5"
       style={showTopBorder ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined}
     >
-      <View className="gap-0.5 flex-1 pr-3">
-        <Text className="font-ui-medium text-[14.5px] text-text" numberOfLines={1}>
-          {account.name}
-        </Text>
-        {account.mask && (
-          <Text className="text-[12px] text-text-2" style={{ fontFamily: "JetBrainsMono" }}>
-            ····{account.mask}
+      <Pressable onPress={() => setEditing(true)} className="flex-row items-center gap-1.5 flex-1 pr-3">
+        <View className="gap-0.5 flex-1">
+          <Text className="font-ui-medium text-[14.5px] text-text" numberOfLines={1}>
+            {account.name}
           </Text>
-        )}
-      </View>
+          {account.mask && (
+            <Text className="text-[12px] text-text-2" style={{ fontFamily: "JetBrainsMono" }}>
+              ····{account.mask}
+            </Text>
+          )}
+        </View>
+        <Pencil size={12} color={colors["text-3"]} strokeWidth={2} />
+      </Pressable>
       <MoneyText cents={account.currentBalance ?? 0} className="text-[15px] text-text" style={{ flexShrink: 0 }} />
     </View>
   );

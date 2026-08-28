@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { generateDuePaychecks } from "@/lib/incomeSchedule";
+import { accountDisplayName } from "@tally/core/accountName";
 
 export async function GET(req: Request) {
   let userId: string;
@@ -23,6 +24,7 @@ export async function GET(req: Request) {
       dayAnchors: schema.incomeSchedules.dayAnchors,
       active: schema.incomeSchedules.active,
       accountName: schema.accounts.name,
+      accountNickname: schema.accounts.nickname,
       accountMask: schema.accounts.mask,
       categoryName: schema.categories.name,
     })
@@ -31,7 +33,9 @@ export async function GET(req: Request) {
     .leftJoin(schema.categories, eq(schema.incomeSchedules.categoryId, schema.categories.id))
     .where(eq(schema.incomeSchedules.userId, userId));
 
-  return NextResponse.json({ schedules });
+  return NextResponse.json({
+    schedules: schedules.map((s) => ({ ...s, accountName: s.accountName != null ? accountDisplayName(s.accountName, s.accountNickname) : s.accountName })),
+  });
 }
 
 // Anchors: 1-31 (a day of month) or 0 ("last day of the month") — resolved

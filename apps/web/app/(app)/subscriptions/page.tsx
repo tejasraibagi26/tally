@@ -8,6 +8,7 @@ import { StatusBadge, type Status } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { NextDueDateEditor } from "@/components/subscriptions/NextDueDateEditor";
 import { AddBillForm } from "@/components/subscriptions/AddBillForm";
+import { accountDisplayName } from "@tally/core/accountName";
 
 const FREQUENCY_MONTHLY_MULTIPLIER: Record<string, number> = {
   weekly: 52 / 12,
@@ -45,6 +46,7 @@ export default async function SubscriptionsPage() {
       manualNextDueDate: schema.recurringStreams.manualNextDueDate,
       status: schema.recurringStreams.status,
       accountName: schema.accounts.name,
+      accountNickname: schema.accounts.nickname,
       accountMask: schema.accounts.mask,
       categoryName: schema.categories.name,
       categoryColorSlot: schema.categories.colorSlot,
@@ -54,10 +56,11 @@ export default async function SubscriptionsPage() {
     .leftJoin(schema.categories, eq(schema.recurringStreams.categoryId, schema.categories.id))
     .where(eq(schema.recurringStreams.userId, userId));
 
-  const accounts = await db
-    .select({ id: schema.accounts.id, name: schema.accounts.name, mask: schema.accounts.mask })
+  const accountRows = await db
+    .select({ id: schema.accounts.id, name: schema.accounts.name, nickname: schema.accounts.nickname, mask: schema.accounts.mask })
     .from(schema.accounts)
     .where(eq(schema.accounts.userId, userId));
+  const accounts = accountRows.map((a) => ({ id: a.id, name: accountDisplayName(a.name, a.nickname), mask: a.mask }));
   const expenseCategories = await db
     .select({ id: schema.categories.id, name: schema.categories.name })
     .from(schema.categories)
@@ -129,7 +132,7 @@ export default async function SubscriptionsPage() {
                     )}
                   </span>
                   <span className="font-mono text-xs text-text-2 truncate">
-                    {s.accountName ? `${s.accountName} ····${s.accountMask ?? "----"}` : "—"}
+                    {s.accountName ? `${accountDisplayName(s.accountName, s.accountNickname)} ····${s.accountMask ?? "----"}` : "—"}
                   </span>
                   <span className="text-[13.5px] text-text-2">{FREQUENCY_LABEL[s.frequency] ?? s.frequency}</span>
                   <span className={`text-right text-[15px] tabular ${s.averageAmount > 0 ? "text-positive" : "text-text"}`}>

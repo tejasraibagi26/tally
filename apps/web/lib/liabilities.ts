@@ -5,6 +5,7 @@ import { computeUtilization, type CreditAccountLike, type UtilizationResult } fr
 export interface CreditCardRow {
   accountId: string;
   name: string;
+  nickname: string | null;
   mask: string | null;
   currentBalance: number;
   creditLimit: number | null;
@@ -27,6 +28,7 @@ export async function creditCardsForUser(userId: string): Promise<CreditCardRow[
     .select({
       accountId: schema.accounts.id,
       name: schema.accounts.name,
+      nickname: schema.accounts.nickname,
       mask: schema.accounts.mask,
       currentBalance: schema.accounts.currentBalance,
       creditLimit: schema.accounts.creditLimit,
@@ -40,6 +42,7 @@ export async function creditCardsForUser(userId: string): Promise<CreditCardRow[
   return rows.map((r) => ({
     accountId: r.accountId,
     name: r.name,
+    nickname: r.nickname,
     mask: r.mask,
     currentBalance: r.currentBalance ?? 0,
     creditLimit: r.creditLimit,

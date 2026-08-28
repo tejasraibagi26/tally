@@ -8,6 +8,7 @@ import { AccountForm } from "@/components/settings/AccountForm";
 import { PasswordForm } from "@/components/settings/PasswordForm";
 import { DangerZone } from "@/components/settings/DangerZone";
 import { IncomeScheduleManager } from "@/components/settings/IncomeScheduleManager";
+import { accountDisplayName } from "@tally/core/accountName";
 
 function GroupLabel({ children }: { children: string }) {
   return <div className="text-xs font-medium uppercase tracking-[0.06em] text-text-3 px-1">{children}</div>;
@@ -44,10 +45,11 @@ export default async function SettingsPage() {
   const [user] = await db.select().from(schema.users).where(eq(schema.users.id, userId)).limit(1);
   const items = await db.select({ id: schema.plaidItems.id }).from(schema.plaidItems).where(eq(schema.plaidItems.userId, userId));
 
-  const accounts = await db
-    .select({ id: schema.accounts.id, name: schema.accounts.name, mask: schema.accounts.mask })
+  const accountRows = await db
+    .select({ id: schema.accounts.id, name: schema.accounts.name, nickname: schema.accounts.nickname, mask: schema.accounts.mask })
     .from(schema.accounts)
     .where(eq(schema.accounts.userId, userId));
+  const accounts = accountRows.map((a) => ({ id: a.id, name: accountDisplayName(a.name, a.nickname), mask: a.mask }));
   const incomeCategories = await db
     .select({ id: schema.categories.id, name: schema.categories.name })
     .from(schema.categories)
@@ -62,6 +64,7 @@ export default async function SettingsPage() {
       dayAnchors: schema.incomeSchedules.dayAnchors,
       active: schema.incomeSchedules.active,
       accountName: schema.accounts.name,
+      accountNickname: schema.accounts.nickname,
       accountMask: schema.accounts.mask,
       categoryName: schema.categories.name,
     })
@@ -69,6 +72,10 @@ export default async function SettingsPage() {
     .leftJoin(schema.accounts, eq(schema.incomeSchedules.accountId, schema.accounts.id))
     .leftJoin(schema.categories, eq(schema.incomeSchedules.categoryId, schema.categories.id))
     .where(eq(schema.incomeSchedules.userId, userId));
+  const incomeSchedulesForDisplay = incomeSchedules.map(({ accountNickname, ...s }) => ({
+    ...s,
+    accountName: s.accountName != null ? accountDisplayName(s.accountName, accountNickname) : s.accountName,
+  }));
 
   return (
     <div className="max-w-[720px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-8">
@@ -102,7 +109,7 @@ export default async function SettingsPage() {
             <IncomeScheduleManager
               accounts={accounts}
               categories={incomeCategories}
-              schedules={incomeSchedules}
+              schedules={incomeSchedulesForDisplay}
             />
           </div>
         </Card>

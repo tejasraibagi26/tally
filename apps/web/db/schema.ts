@@ -152,6 +152,10 @@ export const accounts = pgTable("accounts", {
   itemId: uuid("item_id").references(() => plaidItems.id, { onDelete: "cascade" }),
   plaidAccountId: text("plaid_account_id").unique(),
   name: text("name").notNull(),
+  // User-set display name, shown in place of `name` everywhere an account
+  // is rendered -- see @tally/core/accountName. Null means "use the real
+  // Plaid name," not "no nickname was ever considered."
+  nickname: text("nickname"),
   officialName: text("official_name"),
   mask: text("mask"),
   type: text("type").notNull(), // depository | credit | investment | loan

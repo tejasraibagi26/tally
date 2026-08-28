@@ -7,6 +7,7 @@ import { Card, CardHeader } from "@/components/ui/Card";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { CreditLimitEditor } from "@/components/cards/CreditLimitEditor";
+import { AccountNicknameEditor } from "@/components/accounts/AccountNicknameEditor";
 import { SyncButton } from "@/components/plaid/SyncButton";
 import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
 import { cn } from "@/lib/cn";
@@ -103,7 +104,7 @@ export default async function CardsPage() {
               <div className="flex flex-col h-full">
                 <div className="flex items-center gap-3 p-4 border-b border-border flex-none">
                   <div className="flex flex-col gap-1 flex-1 min-w-0">
-                    <span className="font-semibold text-base text-text truncate">{card.name}</span>
+                    <AccountNicknameEditor accountId={card.accountId} name={card.name} nickname={card.nickname} className="font-semibold text-base text-text" />
                     <span className="font-mono text-xs text-text-3">····{card.mask ?? "----"}</span>
                   </div>
                   {liability?.isOverdue && <StatusBadge status="critical" label="Overdue" />}

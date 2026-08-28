@@ -1,6 +1,7 @@
 import { and, asc, eq, gte, lt, lte } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { monthRange, shiftMonth } from "@tally/core/budgetMath";
+import { accountDisplayName } from "@tally/core/accountName";
 
 export interface CashFlowMonth {
   month: string; // YYYY-MM-01
@@ -230,6 +231,7 @@ export async function upcomingBills(userId: string, withinDays = 30): Promise<Up
   const cards = await db
     .select({
       name: schema.accounts.name,
+      nickname: schema.accounts.nickname,
       accountId: schema.accounts.id,
       amount: schema.liabilitiesCredit.minimumPaymentAmount,
       dueDate: schema.liabilitiesCredit.nextPaymentDueDate,
@@ -248,7 +250,7 @@ export async function upcomingBills(userId: string, withinDays = 30): Promise<Up
     })),
     ...cards.map((c) => ({
       type: "card" as const,
-      label: `${c.name} payment`,
+      label: `${accountDisplayName(c.name, c.nickname)} payment`,
       amount: c.amount ?? 0,
       dueDate: c.dueDate!,
       accountId: c.accountId,

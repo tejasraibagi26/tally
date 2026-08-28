@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { and, desc, eq, gte, lte } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
+import { accountDisplayName } from "@tally/core/accountName";
 
 function csvEscape(value: string): string {
   return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
@@ -37,6 +38,7 @@ export async function GET(req: Request) {
       amount: schema.transactions.amount,
       currency: schema.transactions.currency,
       accountName: schema.accounts.name,
+      accountNickname: schema.accounts.nickname,
       accountMask: schema.accounts.mask,
       categoryName: schema.categories.name,
       isPending: schema.transactions.isPending,
@@ -53,8 +55,10 @@ export async function GET(req: Request) {
 
   const filenameRange = from || to ? `_${from ?? "start"}_${to ?? "end"}` : "";
 
+  const exportRows = rows.map(({ accountNickname, ...r }) => ({ ...r, accountName: accountDisplayName(r.accountName, accountNickname) }));
+
   if (format === "json") {
-    return new NextResponse(JSON.stringify({ transactions: rows }, null, 2), {
+    return new NextResponse(JSON.stringify({ transactions: exportRows }, null, 2), {
       headers: {
         "Content-Type": "application/json",
         "Content-Disposition": `attachment; filename="tally-transactions${filenameRange}.json"`,
@@ -64,7 +68,7 @@ export async function GET(req: Request) {
 
   const header = ["Date", "Merchant", "Description", "Amount", "Currency", "Account", "Category", "Pending", "Transfer", "Notes", "Tags"];
   const lines = [header.join(",")];
-  for (const r of rows) {
+  for (const r of exportRows) {
     lines.push(
       [
         r.postedDate,

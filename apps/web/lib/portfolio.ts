@@ -2,6 +2,7 @@ import { and, eq, gte, inArray, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { computeAllocation, computeSimpleReturn, type AllocationSlice, type HoldingLike } from "@tally/core/portfolioMath";
 import { toNetWorthCurrency, NET_WORTH_CURRENCY } from "@tally/core/fx";
+import { accountDisplayName } from "@tally/core/accountName";
 
 export interface HoldingRow {
   accountId: string;
@@ -24,10 +25,11 @@ export function currenciesInvolved(holdings: HoldingRow[]): string[] {
 }
 
 async function investmentAccountIds(userId: string): Promise<{ id: string; name: string }[]> {
-  return db
-    .select({ id: schema.accounts.id, name: schema.accounts.name })
+  const rows = await db
+    .select({ id: schema.accounts.id, name: schema.accounts.name, nickname: schema.accounts.nickname })
     .from(schema.accounts)
     .where(and(eq(schema.accounts.userId, userId), eq(schema.accounts.type, "investment")));
+  return rows.map((r) => ({ id: r.id, name: accountDisplayName(r.name, r.nickname) }));
 }
 
 /** §9 "Portfolio value"/"Allocation": the latest holdings snapshot per investment account (dates can differ slightly account to account). */

@@ -6,7 +6,16 @@ import { requireUserId } from "@/lib/session";
 
 // null clears the override and lets Plaid own the field again (see the
 // creditLimitIsManual guards in lib/plaidBalances.ts and the exchange route).
-const bodySchema = z.object({ creditLimit: z.number().min(0).max(100_000_000).nullable() });
+// Both fields are optional so a nickname edit doesn't require re-sending
+// creditLimit (and vice versa) -- each PATCH only touches what it's given.
+// nickname: "" (or whitespace-only) is treated as null, clearing the
+// override back to the real Plaid name -- see @tally/core/accountName.
+const bodySchema = z
+  .object({
+    creditLimit: z.number().min(0).max(100_000_000).nullable().optional(),
+    nickname: z.string().max(60).nullable().optional(),
+  })
+  .refine((v) => v.creditLimit !== undefined || v.nickname !== undefined, "No fields to update");
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
@@ -31,11 +40,24 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const creditLimit = parsed.data.creditLimit != null ? Math.round(parsed.data.creditLimit * 100) : null;
+  const updates: Partial<typeof schema.accounts.$inferInsert> = {};
+  const response: { ok: true; creditLimit?: number | null; nickname?: string | null } = { ok: true };
+  if (parsed.data.creditLimit !== undefined) {
+    const creditLimit = parsed.data.creditLimit != null ? Math.round(parsed.data.creditLimit * 100) : null;
+    updates.creditLimit = creditLimit;
+    updates.creditLimitIsManual = creditLimit != null;
+    response.creditLimit = creditLimit;
+  }
+  if (parsed.data.nickname !== undefined) {
+    const nickname = parsed.data.nickname?.trim() || null;
+    updates.nickname = nickname;
+    response.nickname = nickname;
+  }
+
   await db
     .update(schema.accounts)
-    .set({ creditLimit, creditLimitIsManual: creditLimit != null })
+    .set(updates)
     .where(and(eq(schema.accounts.id, id), eq(schema.accounts.userId, userId)));
 
-  return NextResponse.json({ ok: true, creditLimit });
+  return NextResponse.json(response);
 }

@@ -13,7 +13,8 @@
     "./recurringDetection": "./src/recurringDetection.ts",
     "./money": "./src/money.ts",
     "./fx": "./src/fx.ts",
-    "./pfc": "./src/pfc.ts"
+    "./pfc": "./src/pfc.ts",
+    "./accountName": "./src/accountName.ts"
   },
   "scripts": {
     "test": "vitest run",

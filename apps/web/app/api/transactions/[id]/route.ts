@@ -4,6 +4,7 @@ import { eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { applyRulesToExistingTransactions } from "@/lib/categorize";
+import { accountDisplayName } from "@tally/core/accountName";
 
 const splitSchema = z.object({ categoryId: z.string().uuid(), amount: z.number().int(), note: z.string().max(200).nullable().optional() });
 
@@ -42,7 +43,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     name: t.name,
     isPending: t.isPending,
     accountId: t.accountId,
-    accountName: account?.name ?? null,
+    accountName: account ? accountDisplayName(account.name, account.nickname) : null,
     accountMask: account?.mask ?? null,
     categoryId: t.categoryId,
     categoryName: category?.name ?? null,

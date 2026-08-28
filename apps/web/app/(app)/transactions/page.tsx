@@ -10,6 +10,7 @@ import { TransactionsList, type TransactionRowData, type AccountLookup } from "@
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { groupCategoryOptions, categoryIdsInGroup } from "@/lib/categoryOptions";
 import { monthLastDay } from "@tally/core/budgetMath";
+import { accountDisplayName } from "@tally/core/accountName";
 import Link from "next/link";
 
 const PAGE_SIZE = 50;
@@ -78,7 +79,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   const itemById = new Map(items.map((i) => [i.id, i]));
   const accountsById: Record<string, AccountLookup> = {};
   for (const a of accounts) {
-    accountsById[a.id] = { name: a.name, mask: a.mask, plaidItemLabel: (a.itemId && itemById.get(a.itemId)?.plaidItemId) || null };
+    accountsById[a.id] = { name: accountDisplayName(a.name, a.nickname), mask: a.mask, plaidItemLabel: (a.itemId && itemById.get(a.itemId)?.plaidItemId) || null };
   }
 
   const categories = await db.query.categories.findMany({
@@ -246,7 +247,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
             buttonPlaceholder="All accounts"
             placeholder="Search accounts…"
             className="w-52"
-            options={[{ value: "", label: "All accounts" }, ...accounts.map((a) => ({ value: a.id, label: `${a.name} ····${a.mask ?? "----"}` }))]}
+            options={[{ value: "", label: "All accounts" }, ...accounts.map((a) => ({ value: a.id, label: `${accountDisplayName(a.name, a.nickname)} ····${a.mask ?? "----"}` }))]}
           />
           <SearchableSelect
             name="category"

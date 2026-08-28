@@ -9,6 +9,7 @@ import { RuleRow } from "@/components/rules/RuleRow";
 import { summarizeMatch, summarizeActions } from "@/lib/ruleSummary";
 import { groupCategoryOptions } from "@/lib/categoryOptions";
 import type { RuleActions, RuleMatch } from "@tally/core/rulesEngine";
+import { accountDisplayName } from "@tally/core/accountName";
 
 export default async function RulesPage() {
   const userId = await requireUserId();
@@ -23,7 +24,7 @@ export default async function RulesPage() {
   ]);
 
   const categoryNameById = new Map(categories.map((c) => [c.id, c.name]));
-  const accountNameById = new Map(accounts.map((a) => [a.id, a.name]));
+  const accountNameById = new Map(accounts.map((a) => [a.id, accountDisplayName(a.name, a.nickname)]));
   const groupedCategories = groupCategoryOptions(categories);
 
   return (
@@ -37,7 +38,7 @@ export default async function RulesPage() {
         <CardHeader title="New rule" />
         <RuleForm
           categories={groupedCategories}
-          accounts={accounts.map((a) => ({ id: a.id, name: `${a.name} ····${a.mask ?? "----"}` }))}
+          accounts={accounts.map((a) => ({ id: a.id, name: `${accountDisplayName(a.name, a.nickname)} ····${a.mask ?? "----"}` }))}
         />
       </Card>
 

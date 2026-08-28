@@ -15,6 +15,7 @@ import { SyncFailureToast } from "@/components/plaid/SyncFailureToast";
 import { MOCK_MODE } from "@/lib/config";
 import { itemStatusToBadge } from "@/lib/freshness";
 import { toNetWorthCurrency, NET_WORTH_CURRENCY } from "@tally/core/fx";
+import { AccountNicknameEditor } from "@/components/accounts/AccountNicknameEditor";
 
 function relativeTime(date: Date | null): string {
   if (!date) return "Never synced";
@@ -169,7 +170,7 @@ export default async function AccountsPage() {
                         className="grid grid-cols-[1fr_auto] gap-4 items-center px-4 py-3 border-b border-border last:border-b-0"
                       >
                         <div className="flex flex-col gap-1 min-w-0">
-                          <span className="text-[15px] text-text">{acct.name}</span>
+                          <AccountNicknameEditor accountId={acct.id} name={acct.name} nickname={acct.nickname} className="text-[15px] text-text" />
                           <span className="font-mono text-xs text-text-3">
                             {acct.subtype ?? acct.type} ····{acct.mask ?? "----"}
                           </span>

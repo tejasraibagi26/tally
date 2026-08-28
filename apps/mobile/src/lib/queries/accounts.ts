@@ -1,9 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
-import { apiGet } from "@/lib/api";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiGet, apiPatch } from "@/lib/api";
 
 export interface AccountRow {
   id: string;
   name: string;
+  // The real Plaid name and raw nickname, alongside `name` (already resolved
+  // to nickname ?? realName by the server) -- needed to seed and label the
+  // rename editor without re-deriving the fallback client-side.
+  realName: string;
+  nickname: string | null;
   mask: string | null;
   type: string;
   subtype: string | null;
@@ -34,5 +39,17 @@ export function useAccounts() {
   return useQuery({
     queryKey: ["accounts"],
     queryFn: () => apiGet<AccountsResponse>("/api/accounts"),
+  });
+}
+
+export function useUpdateAccountNickname(accountId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (nickname: string | null) => apiPatch<{ ok: true; nickname?: string | null }>(`/api/accounts/${accountId}`, { nickname }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["overview"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    },
   });
 }

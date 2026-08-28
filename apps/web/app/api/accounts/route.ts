@@ -4,6 +4,7 @@ import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { itemStatusToBadge } from "@/lib/freshness";
 import { toNetWorthCurrency, NET_WORTH_CURRENCY } from "@tally/core/fx";
+import { accountDisplayName } from "@tally/core/accountName";
 
 // List endpoint for the mobile app's Accounts screen (MOBILE_DESIGN.md §5.5) —
 // the web app's app/(app)/accounts/page.tsx has always queried the DB
@@ -49,7 +50,9 @@ export async function GET(req: Request) {
     badge: itemStatusToBadge(item.status, item.lastSyncedAt, item.transactionsUpdateStatus),
     accounts: (accountsByItem.get(item.id) ?? []).map((a) => ({
       id: a.id,
-      name: a.name,
+      name: accountDisplayName(a.name, a.nickname),
+      realName: a.name,
+      nickname: a.nickname,
       mask: a.mask,
       type: a.type,
       subtype: a.subtype,
@@ -63,7 +66,9 @@ export async function GET(req: Request) {
     institutions,
     unlinkedAccounts: unlinkedAccounts.map((a) => ({
       id: a.id,
-      name: a.name,
+      name: accountDisplayName(a.name, a.nickname),
+      realName: a.name,
+      nickname: a.nickname,
       mask: a.mask,
       type: a.type,
       subtype: a.subtype,
