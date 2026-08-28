@@ -1,14 +1,16 @@
 import { View, Text, ScrollView, ActivityIndicator, Pressable, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Plus } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { StatusChip } from "@/components/ui/StatusChip";
 import { useAccounts, type Institution, type AccountRow } from "@/lib/queries/accounts";
+import { usePlaidLink } from "@/lib/usePlaidLink";
 
 // MOBILE_DESIGN.md §5.5 -- grouped by institution, broken connections get a
-// critical badge + full-width Reconnect button. Native Plaid Link (add /
-// reconnect) is Phase E -- the button here is a placeholder until that lands.
-function InstitutionCard({ institution }: { institution: Institution }) {
+// critical badge + full-width Reconnect button, both wired to native Plaid
+// Link (Phase 5). See usePlaidLink.ts for the OAuth-redirect caveat.
+function InstitutionCard({ institution, onReconnect, reconnecting }: { institution: Institution; onReconnect: () => void; reconnecting: boolean }) {
   const initial = (institution.institutionName ?? "?").charAt(0).toUpperCase();
   const broken = institution.badge === "critical";
 
@@ -35,8 +37,8 @@ function InstitutionCard({ institution }: { institution: Institution }) {
 
       {broken && (
         <View className="px-5 pb-5 pt-1">
-          <Pressable className="h-12 rounded-full items-center justify-center bg-brand active:opacity-90">
-            <Text className="font-ui-semibold text-[14.5px] text-on-brand">Reconnect</Text>
+          <Pressable onPress={onReconnect} disabled={reconnecting} className="h-12 rounded-full items-center justify-center bg-brand active:opacity-90 disabled:opacity-50">
+            {reconnecting ? <ActivityIndicator color="#FFFFFF" /> : <Text className="font-ui-semibold text-[14.5px] text-on-brand">Reconnect</Text>}
           </Pressable>
         </View>
       )}
@@ -74,6 +76,7 @@ function relativeTime(iso: string | null): string {
 export default function AccountsScreen() {
   const insets = useSafeAreaInsets();
   const { data, isLoading, refetch, isRefetching } = useAccounts();
+  const { openLink, isLinking, error } = usePlaidLink();
 
   return (
     <ScrollView
@@ -81,18 +84,37 @@ export default function AccountsScreen() {
       contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 }}
       refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#14513F" />}
     >
-      <View className="px-5 pb-4">
+      <View className="flex-row items-center justify-between px-5 pb-4">
         <Text className="font-ui-semibold text-[24px] text-text" style={{ letterSpacing: -0.3 }}>
           Accounts
         </Text>
+        <Pressable
+          onPress={() => openLink("create")}
+          disabled={isLinking}
+          className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50"
+          style={{ backgroundColor: "#E6EFEA" }}
+        >
+          {isLinking ? <ActivityIndicator size="small" color="#14513F" /> : <Plus size={15} color="#14513F" strokeWidth={2} />}
+          <Text className="font-ui-semibold text-[13px]" style={{ color: "#14513F" }}>
+            Add
+          </Text>
+        </Pressable>
       </View>
+
+      {error && (
+        <View className="mx-5 mb-4 rounded-control px-4 py-3" style={{ backgroundColor: "#F6E7E4" }}>
+          <Text className="font-ui text-[13.5px]" style={{ color: "#B23A2C" }}>
+            {error}
+          </Text>
+        </View>
+      )}
 
       {isLoading ? (
         <ActivityIndicator className="mt-8" />
       ) : (
         <View className="gap-5 px-5">
           {data?.institutions.map((inst) => (
-            <InstitutionCard key={inst.id} institution={inst} />
+            <InstitutionCard key={inst.id} institution={inst} onReconnect={() => openLink("update", inst.id)} reconnecting={isLinking} />
           ))}
           {data && data.institutions.length === 0 && <Text className="font-ui text-[14px] text-text-3">No accounts connected yet.</Text>}
         </View>
