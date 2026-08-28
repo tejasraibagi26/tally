@@ -1,11 +1,56 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { applyRulesToExistingTransactions } from "@/lib/categorize";
 
 const splitSchema = z.object({ categoryId: z.string().uuid(), amount: z.number().int(), note: z.string().max(200).nullable().optional() });
+
+// Detail endpoint for the mobile app's transaction detail sheet
+// (MOBILE_DESIGN.md §5.4) -- the web app renders detail inline from its
+// already-fetched list, so this never existed until mobile needed a
+// standalone fetch. Same shape as a row from GET /api/transactions.
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  let userId: string;
+  try {
+    userId = await requireUserId(req);
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const [t] = await db.select().from(schema.transactions).where(eq(schema.transactions.id, id)).limit(1);
+  if (!t || t.userId !== userId) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const splitRows = await db
+    .select({ categoryId: schema.transactionSplits.categoryId, amount: schema.transactionSplits.amount, note: schema.transactionSplits.note })
+    .from(schema.transactionSplits)
+    .where(inArray(schema.transactionSplits.transactionId, [t.id]));
+
+  return NextResponse.json({
+    id: t.id,
+    postedDate: t.postedDate,
+    merchantName: t.merchantName,
+    name: t.name,
+    isPending: t.isPending,
+    accountId: t.accountId,
+    categoryId: t.categoryId,
+    categorySource: t.categorySource,
+    pfcDetailed: t.pfcDetailed,
+    amount: t.amount,
+    currency: t.currency,
+    reviewed: t.reviewed,
+    notes: t.notes,
+    tags: t.tags,
+    excludedFromBudget: t.excludedFromBudget,
+    plaidTransactionId: t.plaidTransactionId,
+    isManual: t.isManual,
+    splits: splitRows.filter((s) => s.categoryId).map((s) => ({ categoryId: s.categoryId as string, amount: s.amount, note: s.note })),
+  });
+}
 
 const patchSchema = z.object({
   categoryId: z.string().uuid().nullable().optional(),
