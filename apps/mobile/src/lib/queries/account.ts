@@ -5,6 +5,7 @@ export interface AccountProfile {
   name: string | null;
   email: string;
   birthDate: string | null;
+  recapsEnabled: boolean;
 }
 
 export function useAccountProfile() {
@@ -27,6 +28,17 @@ export function useUpdateAccountProfile() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (patch: AccountPatch) => apiPatch<{ ok: true; emailChanged: boolean }>("/api/account", patch),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["account"] }),
+  });
+}
+
+// Not bundled into useUpdateAccountProfile's PATCH /api/account (password-gated,
+// for name/email/birthDate) -- this toggle is non-sensitive and hits its own
+// PATCH /api/settings/recaps endpoint, same as the web app's RecapsToggle.
+export function useUpdateRecaps() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (enabled: boolean) => apiPatch<{ ok: true }>("/api/settings/recaps", { enabled }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["account"] }),
   });
 }

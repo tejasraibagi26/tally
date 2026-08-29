@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, ScrollView, TextInput, Pressable, Switch, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "nativewind";
 import { ChevronRight, Link2, Sun, Moon, Smartphone, Pencil, Lock, Trash2, Check, X } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
-import { useAccountProfile, useUpdateAccountProfile, useChangePassword, useWipeAccount } from "@/lib/queries/account";
+import { useAccountProfile, useUpdateAccountProfile, useUpdateRecaps, useChangePassword, useWipeAccount } from "@/lib/queries/account";
 import { ApiError } from "@/lib/api";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { type AppearanceMode, getStoredAppearanceMode, storeAppearanceMode } from "@/theme/appearance";
@@ -101,6 +101,7 @@ export default function SettingsScreen() {
   const rf = useRF();
   const { data: profile, isLoading } = useAccountProfile();
   const updateProfile = useUpdateAccountProfile();
+  const updateRecaps = useUpdateRecaps();
   const changePassword = useChangePassword();
   const wipeAccount = useWipeAccount();
 
@@ -109,13 +110,24 @@ export default function SettingsScreen() {
   const [email, setEmail] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [profilePassword, setProfilePassword] = useState("");
+  const [recapsEnabled, setRecapsEnabled] = useState(true);
 
   useEffect(() => {
     if (!profile) return;
     setName(profile.name ?? "");
     setEmail(profile.email);
     setBirthDate(profile.birthDate ?? "");
+    setRecapsEnabled(profile.recapsEnabled);
   }, [profile]);
+
+  async function toggleRecaps(next: boolean) {
+    setRecapsEnabled(next);
+    try {
+      await updateRecaps.mutateAsync(next);
+    } catch {
+      setRecapsEnabled(!next);
+    }
+  }
 
   const [changingPassword, setChangingPassword] = useState(false);
   const [currentPw, setCurrentPw] = useState("");
@@ -259,6 +271,24 @@ export default function SettingsScreen() {
         </Text>
         <Card className="p-3">
           <AppearancePicker />
+        </Card>
+      </View>
+
+      {/* Notifications */}
+      <View className="gap-3">
+        <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(13) }}>
+          Notifications
+        </Text>
+        <Card className="p-5">
+          <View className="flex-row items-center justify-between gap-4">
+            <View className="flex-1 gap-0.5">
+              <Text className="font-ui-medium text-text" style={{ fontSize: rf(14.5) }}>Monthly recap email</Text>
+              <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>
+                A summary of income, spend, budgets, and net worth on the 1st of each month.
+              </Text>
+            </View>
+            <Switch value={recapsEnabled} onValueChange={toggleRecaps} trackColor={{ true: colors.brand }} />
+          </View>
         </Card>
       </View>
 

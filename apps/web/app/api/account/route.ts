@@ -21,7 +21,7 @@ export async function GET(req: Request) {
   }
 
   const [user] = await db
-    .select({ name: schema.users.name, email: schema.users.email, birthDate: schema.users.birthDate })
+    .select({ name: schema.users.name, email: schema.users.email, birthDate: schema.users.birthDate, recapsEnabled: schema.users.recapsEnabled })
     .from(schema.users)
     .where(eq(schema.users.id, userId))
     .limit(1);
