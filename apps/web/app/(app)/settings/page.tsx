@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { and, eq, isNull, or } from "drizzle-orm";
-import { User, Lock, Download, Link2, Wand2, Wallet, ChevronRight, AlertTriangle, type LucideIcon } from "lucide-react";
+import { User, Lock, Download, Link2, Wand2, Wallet, Mail, ChevronRight, AlertTriangle, type LucideIcon } from "lucide-react";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -8,6 +8,7 @@ import { AccountForm } from "@/components/settings/AccountForm";
 import { PasswordForm } from "@/components/settings/PasswordForm";
 import { DangerZone } from "@/components/settings/DangerZone";
 import { IncomeScheduleManager } from "@/components/settings/IncomeScheduleManager";
+import { RecapsToggle } from "@/components/settings/RecapsToggle";
 import { accountDisplayName } from "@tally/core/accountName";
 
 function GroupLabel({ children }: { children: string }) {
@@ -93,6 +94,16 @@ export default async function SettingsPage() {
           <CardHeader title="Password" action={<Lock size={17} strokeWidth={1.75} className="text-text-3" />} />
           <div className="p-5">
             <PasswordForm />
+          </div>
+        </Card>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <GroupLabel>Notifications</GroupLabel>
+        <Card>
+          <CardHeader title="Email" action={<Mail size={17} strokeWidth={1.75} className="text-text-3" />} />
+          <div className="p-5">
+            <RecapsToggle initialEnabled={user?.recapsEnabled ?? true} />
           </div>
         </Card>
       </div>

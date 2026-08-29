@@ -84,6 +84,7 @@ export const users = pgTable("users", {
   birthDate: date("birth_date"),
   timezone: text("timezone").notNull().default("America/New_York"),
   baseCurrency: text("base_currency").notNull().default("USD"),
+  recapsEnabled: boolean("recaps_enabled").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -470,6 +471,21 @@ export const fireSettings = pgTable("fire_settings", {
   monthlyContributionOverride: bigint("monthly_contribution_override", { mode: "number" }),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// One row per user per month a recap email was (or will be) sent for.
+// Doubles as the cron's idempotency check (skip a user once `sentAt` is set)
+// and as the only history of past FIRE projections — next month's job reads
+// this row's `yearsToFire` to report "N years sooner than last month" (there
+// is otherwise no stored history of fireSettings/projections over time).
+export const monthlyRecaps = pgTable("monthly_recaps", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  month: date("month").notNull(),
+  yearsToFire: numeric("years_to_fire", { precision: 6, scale: 2 }),
+  sentAt: timestamp("sent_at", { withTimezone: true }),
+}, (t) => ({
+  uniq: uniqueIndex("monthly_recaps_user_month_idx").on(t.userId, t.month),
+}));
 
 export const webhookEvents = pgTable("webhook_events", {
   id: uuid("id").primaryKey().defaultRandom(),
