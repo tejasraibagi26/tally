@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { View, Text, Pressable, FlatList, TextInput } from "react-native";
 import { X, Check, Search } from "lucide-react-native";
 import { useColorScheme } from "nativewind";
-import { useCategories } from "@/lib/queries/categories";
+import { useCategories, type Category } from "@/lib/queries/categories";
 import { chartSeries } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
@@ -17,26 +17,36 @@ export function CategoryPickerSheet({
   onClose,
   selectedId,
   onSelect,
+  categories: categoriesOverride,
+  includeUncategorized = true,
 }: {
   visible: boolean;
   onClose: () => void;
   selectedId: string | null;
   onSelect: (categoryId: string | null) => void;
+  /** Defaults to every category (transaction categorization's use case) --
+   * pass a pre-filtered list instead for a narrower picker, e.g. AddBudgetSheet's
+   * expense-kind, not-yet-budgeted-this-month subset. */
+  categories?: Category[];
+  /** The transaction-categorization "Uncategorized" pseudo-item doesn't make
+   * sense for a picker where every result must be a real category (e.g.
+   * AddBudgetSheet, which always attaches the budget to one). */
+  includeUncategorized?: boolean;
 }) {
   const colors = useThemeColors();
   const rf = useRF();
   const { colorScheme } = useColorScheme();
   const series = colorScheme === "dark" ? chartSeries.dark : chartSeries.light;
   const { data } = useCategories();
-  const categories = data?.categories ?? [];
+  const categories = categoriesOverride ?? data?.categories ?? [];
   const [query, setQuery] = useState("");
 
   const items = useMemo(() => {
-    const all = [{ id: null as string | null, name: "Uncategorized", colorSlot: 0 }, ...categories];
+    const all = includeUncategorized ? [{ id: null as string | null, name: "Uncategorized", colorSlot: 0 }, ...categories] : categories;
     const q = query.trim().toLowerCase();
     if (!q) return all;
     return all.filter((c) => c.name.toLowerCase().includes(q));
-  }, [categories, query]);
+  }, [categories, query, includeUncategorized]);
 
   function handleClose() {
     setQuery("");

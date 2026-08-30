@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { View, Text, ScrollView, ActivityIndicator, Pressable, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ChevronLeft, ChevronRight } from "lucide-react-native";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { MeterBar } from "@/components/ui/MeterBar";
 import { MoneyText } from "@/components/ui/MoneyText";
@@ -10,6 +10,7 @@ import { useThemeColors } from "@/theme/useThemeColors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { useRF } from "@/theme/responsiveFont";
+import { AddBudgetSheet } from "@/components/AddBudgetSheet";
 
 function shiftMonth(month: string, delta: number): string {
   const d = new Date(month + "T00:00:00Z");
@@ -31,6 +32,7 @@ export default function BudgetsScreen() {
   const rf = useRF();
   const [month, setMonth] = useState(currentMonthParam());
   const { data, isLoading, refetch, isRefetching } = useBudgets(month);
+  const [addOpen, setAddOpen] = useState(false);
 
   const totalSpend = data?.budgets.reduce((s, b) => s + b.spend, 0) ?? 0;
   const totalBudget = data?.budgets.reduce((s, b) => s + b.amount + b.rolloverFromPrior, 0) ?? 0;
@@ -45,9 +47,14 @@ export default function BudgetsScreen() {
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
       >
         <View className="px-5 pb-4">
-        <Text className="font-ui-semibold text-text mb-3" style={{ letterSpacing: -0.3, fontSize: rf(24) }}>
-          Budgets
-        </Text>
+        <View className="flex-row items-center justify-between mb-3">
+          <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(24) }}>
+            Budgets
+          </Text>
+          <Pressable onPress={() => setAddOpen(true)} hitSlop={12} className="items-center justify-center rounded-full bg-brand" style={{ width: 34, height: 34 }}>
+            <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
+          </Pressable>
+        </View>
         <View className="flex-row items-center justify-between">
           <Pressable onPress={() => setMonth((m) => shiftMonth(m, -1))} hitSlop={12}>
             <ChevronLeft size={20} color={colors["text-2"]} />
@@ -82,6 +89,12 @@ export default function BudgetsScreen() {
         </View>
       )}
       </ScrollView>
+      <AddBudgetSheet
+        visible={addOpen}
+        onClose={() => setAddOpen(false)}
+        month={month}
+        budgetedCategoryIds={data?.budgets.map((b) => b.categoryId) ?? []}
+      />
     </View>
   );
 }

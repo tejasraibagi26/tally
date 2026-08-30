@@ -6,7 +6,7 @@ import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { hairline } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
-import { ScreenTitle, useScreenContentTop } from "@/components/ui/ScreenHeader";
+import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { Trash2 } from "lucide-react-native";
 
 const FREQUENCY_LABEL: Record<RecurringStream["frequency"], string> = {
@@ -53,7 +53,6 @@ export default function SubscriptionsScreen() {
     <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
     <ScreenGlow />
     <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
-      <ScreenTitle title="Subscriptions" />
       <Card className="p-5 flex-row justify-between">
         <View>
           <Text className="font-ui tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>

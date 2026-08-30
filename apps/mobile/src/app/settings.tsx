@@ -9,7 +9,7 @@ import { ApiError } from "@/lib/api";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { type AppearanceMode, getStoredAppearanceMode, storeAppearanceMode } from "@/theme/appearance";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
-import { ScreenHeader, ScreenTitle, useScreenContentTop } from "@/components/ui/ScreenHeader";
+import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { useRF } from "@/theme/responsiveFont";
 
 const APPEARANCE_OPTIONS: { mode: AppearanceMode; label: string; Icon: typeof Sun }[] = [
@@ -190,7 +190,6 @@ export default function SettingsScreen() {
     return (
       <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
         <ScreenGlow />
-        <ScreenHeader title="Settings" />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator />
         </View>
@@ -203,7 +202,6 @@ export default function SettingsScreen() {
     <ScreenGlow />
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
     <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never" contentContainerStyle={{ paddingHorizontal: 20, gap: 24, paddingBottom: 40 }}>
-      <ScreenTitle title="Settings" />
       {/* Profile */}
       <View className="gap-3">
         <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(13) }}>

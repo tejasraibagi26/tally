@@ -1,4 +1,5 @@
 import { View, Text, ScrollView, ActivityIndicator, Pressable } from "react-native";
+import { Stack } from "expo-router";
 import { TrendingUp, RefreshCw } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
@@ -9,7 +10,7 @@ import { useRF } from "@/theme/responsiveFont";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useColorScheme } from "nativewind";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
-import { ScreenHeader, ScreenTitle, useScreenContentTop } from "@/components/ui/ScreenHeader";
+import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 
 function formatQuantity(q: string): string {
   const n = parseFloat(q);
@@ -47,7 +48,6 @@ export default function InvestmentsScreen() {
     return (
       <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
         <ScreenGlow />
-        <ScreenHeader title="Investments" />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator />
         </View>
@@ -58,8 +58,8 @@ export default function InvestmentsScreen() {
   if (data.holdings.length === 0) {
     return (
       <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
+        <Stack.Screen options={{ headerRight: () => syncAction }} />
         <ScreenGlow />
-        <ScreenHeader title="Investments" action={syncAction} />
         <View className="flex-1 items-center justify-center px-8 gap-3">
           <TrendingUp size={28} color={colors["text-3"]} strokeWidth={1.5} />
           <Text className="font-ui-semibold text-text text-center" style={{ fontSize: rf(16) }}>Nothing invested here yet</Text>
@@ -85,9 +85,9 @@ export default function InvestmentsScreen() {
 
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
+    <Stack.Screen options={{ headerRight: () => syncAction }} />
     <ScreenGlow />
     <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
-      <ScreenTitle title="Investments" action={syncAction} />
       <Card className="p-5 gap-5">
         <View className="gap-1">
           <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>

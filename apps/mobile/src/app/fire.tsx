@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform, useWindowDimensions } from "react-native";
+import { Stack } from "expo-router";
 import { Flame, Check } from "lucide-react-native";
 import { LineChart } from "react-native-gifted-charts";
 import { fireNumber, fireProgressPct, yearsToFire, ageAsOf, fireAgeAndYear, projectionSeries } from "@tally/core/fireMath";
@@ -7,7 +8,7 @@ import { formatPercent } from "@tally/core/money";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
-import { ScreenHeader, ScreenTitle, useScreenContentTop } from "@/components/ui/ScreenHeader";
+import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { AppSlider } from "@/components/ui/AppSlider";
 import { useFireDefaults, useFireSettings, useSaveFireSettings } from "@/lib/queries/fire";
 import { useRF } from "@/theme/responsiveFont";
@@ -113,7 +114,6 @@ export default function FireCalculatorScreen() {
     return (
       <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
         <ScreenGlow />
-        <ScreenHeader title="FIRE Calculator" />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator />
         </View>
@@ -125,7 +125,6 @@ export default function FireCalculatorScreen() {
     return (
       <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
         <ScreenGlow />
-        <ScreenHeader title="FIRE Calculator" />
         <View className="flex-1 items-center justify-center px-8 gap-3">
           <Flame size={28} color={colors["text-3"]} strokeWidth={1.5} />
           <Text className="font-ui-semibold text-text text-center" style={{ fontSize: rf(16) }}>Connect an account to get started</Text>
@@ -141,30 +140,29 @@ export default function FireCalculatorScreen() {
   const bannerBg = alreadyThere ? "bg-positive-subtle" : years == null ? "bg-warning-subtle" : "bg-brand-subtle";
   const bannerText = alreadyThere ? "text-positive" : years == null ? "text-warning" : "text-text";
 
+  const saveAction = (
+    <Pressable
+      onPress={save}
+      disabled={saveSettings.isPending}
+      className="h-9 px-4 rounded-full flex-row items-center gap-1.5 justify-center bg-brand disabled:opacity-50"
+    >
+      {saveSettings.isPending ? (
+        <ActivityIndicator color="#FFFFFF" size="small" />
+      ) : (
+        <>
+          <Check size={15} color="#FFFFFF" strokeWidth={2.5} />
+          <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(13) }}>{saved ? "Saved" : "Save"}</Text>
+        </>
+      )}
+    </Pressable>
+  );
+
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
+      <Stack.Screen options={{ headerRight: () => saveAction }} />
       <ScreenGlow />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
-        <ScreenTitle
-          title="FIRE Calculator"
-          action={
-            <Pressable
-              onPress={save}
-              disabled={saveSettings.isPending}
-              className="h-9 px-4 rounded-full flex-row items-center gap-1.5 justify-center bg-brand disabled:opacity-50"
-            >
-              {saveSettings.isPending ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
-              ) : (
-                <>
-                  <Check size={15} color="#FFFFFF" strokeWidth={2.5} />
-                  <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(13) }}>{saved ? "Saved" : "Save"}</Text>
-                </>
-              )}
-            </Pressable>
-          }
-        />
         <Card className="p-5 gap-3">
           <View className="flex-row items-baseline justify-between">
             <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
