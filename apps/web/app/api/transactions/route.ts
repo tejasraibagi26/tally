@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { and, desc, eq, gte, ilike, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
@@ -167,4 +168,68 @@ export async function GET(req: Request) {
     pagination: { page, pageSize: PAGE_SIZE, total, totalPages },
     dateRange: { from: fromFilter, to: toFilter, isExplicit: hasExplicitDateFilter },
   });
+}
+
+const createSchema = z.object({
+  accountId: z.string().uuid(),
+  postedDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  name: z.string().trim().min(1).max(200),
+  // Cents, always positive on the wire -- `kind` decides the stored sign
+  // (expenses negative, income positive) so callers never have to remember
+  // the sign convention themselves.
+  amount: z.number().int().positive(),
+  kind: z.enum(["expense", "income"]),
+  categoryId: z.string().uuid().nullable().optional(),
+  notes: z.string().max(2000).nullable().optional(),
+});
+
+// A purchase Plaid never saw -- cash, a bank this app isn't linked to, or
+// just something the user wants tracked without waiting on a sync. Always
+// isManual + categorySource "manual" (see schema.ts's isManual comment):
+// sync only ever matches rows by plaidTransactionId, so this row is safe
+// from being touched or duplicated by the next sync, and it's what lets the
+// user delete it again from the detail panel.
+export async function POST(req: Request) {
+  let userId: string;
+  try {
+    userId = await requireUserId(req);
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const parsed = createSchema.safeParse(await req.json().catch(() => ({})));
+  if (!parsed.success) {
+    return NextResponse.json({ error: "Invalid request", issues: parsed.error.issues }, { status: 400 });
+  }
+  const { accountId, postedDate, name, amount, kind, categoryId, notes } = parsed.data;
+
+  const account = await db.query.accounts.findFirst({ where: eq(schema.accounts.id, accountId) });
+  if (!account || account.userId !== userId) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  if (categoryId) {
+    const category = await db.query.categories.findFirst({ where: eq(schema.categories.id, categoryId) });
+    if (!category || (category.userId !== null && category.userId !== userId)) {
+      return NextResponse.json({ error: "Invalid category" }, { status: 400 });
+    }
+  }
+
+  const [created] = await db
+    .insert(schema.transactions)
+    .values({
+      userId,
+      accountId,
+      amount: kind === "expense" ? -amount : amount,
+      currency: account.currency,
+      postedDate,
+      name,
+      categoryId: categoryId ?? null,
+      categorySource: "manual",
+      notes: notes ?? null,
+      isManual: true,
+    })
+    .returning();
+
+  return NextResponse.json({ transaction: created }, { status: 201 });
 }

@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
-import { Modal, View, Text, Pressable, FlatList, TextInput, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, Pressable, FlatList, TextInput, KeyboardAvoidingView, Platform } from "react-native";
 import { X, Check, Search } from "lucide-react-native";
 import { useColorScheme } from "nativewind";
 import { useCategories } from "@/lib/queries/categories";
 import { chartSeries } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
+import { Sheet } from "@/components/ui/Sheet";
 
 // Mirrors web's SearchableSelect used in TransactionDetailPanel.tsx for
 // category assignment: a search field filters the flat list by name
@@ -43,10 +44,9 @@ export function CategoryPickerSheet({
   }
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
-      <Pressable className="flex-1" style={{ backgroundColor: "rgba(26,25,23,0.4)" }} onPress={handleClose} />
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="bg-canvas rounded-t-panel" style={{ maxHeight: "75%" }}>
-        <View className="flex-row items-center justify-between px-5 pt-5 pb-3">
+    <Sheet visible={visible} onClose={handleClose} maxHeight="75%">
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+        <View className="flex-row items-center justify-between px-5 pt-1 pb-3">
           <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Category</Text>
           <Pressable onPress={handleClose} hitSlop={12}>
             <X size={22} color={colors["text-2"]} />
@@ -104,6 +104,6 @@ export function CategoryPickerSheet({
           }}
         />
       </KeyboardAvoidingView>
-    </Modal>
+    </Sheet>
   );
 }

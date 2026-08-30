@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiGet, apiPatch, apiDelete } from "@/lib/api";
+import { apiGet, apiPatch, apiPost, apiDelete } from "@/lib/api";
 
 export interface TransactionSplit {
   categoryId: string;
@@ -84,6 +84,30 @@ export function useDeleteTransaction(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () => apiDelete(`/api/transactions/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    },
+  });
+}
+
+export interface NewTransaction {
+  accountId: string;
+  postedDate: string;
+  name: string;
+  // Cents, always positive -- kind decides the stored sign, matching
+  // POST /api/transactions' contract exactly.
+  amount: number;
+  kind: "expense" | "income";
+  categoryId?: string | null;
+}
+
+// For a purchase Plaid never saw -- cash, an unlinked account, or just
+// something the user wants tracked right away. Mirrors web's
+// AddTransactionForm.tsx (same endpoint, same isManual row it creates).
+export function useCreateTransaction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: NewTransaction) => apiPost<{ transaction: TransactionRow }>("/api/transactions", body),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },

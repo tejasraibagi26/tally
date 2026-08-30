@@ -2,12 +2,13 @@ import { useMemo, useState } from "react";
 import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ListFilter } from "lucide-react-native";
+import { ListFilter, Plus } from "lucide-react-native";
 import { prettifyPfc } from "@tally/core/pfc";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useTransactions, type TransactionRow } from "@/lib/queries/transactions";
 import { amountColor } from "@/lib/amountColor";
 import { TransactionFiltersSheet, type TransactionFilters } from "@/components/TransactionFiltersSheet";
+import { AddTransactionSheet } from "@/components/AddTransactionSheet";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { hairline } from "@/theme/colors";
@@ -52,6 +53,7 @@ export default function TransactionsScreen() {
   const colors = useThemeColors();
   const rf = useRF();
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
   const [filters, setFilters] = useState<TransactionFilters>({});
 
   const queryFilters = useMemo(() => {
@@ -69,46 +71,55 @@ export default function TransactionsScreen() {
   const items = data?.pages.flatMap((p) => p.items) ?? [];
 
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+    <View className="flex-1 bg-canvas">
       <ScreenGlow />
-      <View className="flex-row items-center justify-between px-5 pb-4">
-        <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(24) }}>
-          Transactions
-        </Text>
-      </View>
-
-      <View className="px-5 pb-4">
-        <Pressable onPress={() => setFiltersOpen(true)} className="self-start flex-row items-center gap-2 rounded-full px-4 py-2.5 bg-brand-subtle">
-          <ListFilter size={14} color={colors.brand} strokeWidth={1.9} />
-          <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13.5) }}>Filters</Text>
-          {activeCount > 0 && (
-            <View className="rounded-full items-center justify-center bg-brand" style={{ minWidth: 18, height: 18, paddingHorizontal: 4 }}>
-              <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(11) }}>{activeCount}</Text>
+      <FlatList
+        data={items}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item, index }) => <TransactionRowItem item={item} isLast={index === items.length - 1} colors={colors} />}
+        className="flex-1 mx-5 mb-5 rounded-card bg-surface overflow-hidden"
+        style={{ marginTop: insets.top + 12 }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 24 + tabBarClearance }}
+        onEndReachedThreshold={0.4}
+        onEndReached={() => hasNextPage && fetchNextPage()}
+        refreshing={isRefetching}
+        onRefresh={refetch}
+        ListHeaderComponent={
+          <View className="bg-canvas px-5 pt-1 pb-4">
+            <View className="flex-row items-center justify-between">
+              <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(24) }}>
+                Transactions
+              </Text>
+              <View className="flex-row items-center gap-2">
+                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} className="items-center justify-center rounded-full bg-brand" style={{ width: 34, height: 34 }}>
+                  <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
+                </Pressable>
+                <Pressable onPress={() => setFiltersOpen(true)} className="flex-row items-center gap-2 rounded-full px-4 py-2.5 bg-brand-subtle">
+                  <ListFilter size={14} color={colors.brand} strokeWidth={1.9} />
+                  <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13.5) }}>Filters</Text>
+                  {activeCount > 0 && (
+                    <View className="rounded-full items-center justify-center bg-brand" style={{ minWidth: 18, height: 18, paddingHorizontal: 4 }}>
+                      <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(11) }}>{activeCount}</Text>
+                    </View>
+                  )}
+                </Pressable>
+              </View>
             </View>
-          )}
-        </Pressable>
-      </View>
-
-      {isLoading ? (
-        <ActivityIndicator className="mt-8" />
-      ) : (
-        <FlatList
-          data={items}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item, index }) => <TransactionRowItem item={item} isLast={index === items.length - 1} colors={colors} />}
-          className="mx-5 mb-5 rounded-card bg-surface"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 24 + tabBarClearance }}
-          onEndReachedThreshold={0.4}
-          onEndReached={() => hasNextPage && fetchNextPage()}
-          refreshing={isRefetching}
-          onRefresh={refetch}
-          ListEmptyComponent={<Text className="font-ui text-text-3 p-6" style={{ fontSize: rf(14) }}>No transactions in this range.</Text>}
-          ListFooterComponent={isFetchingNextPage ? <ActivityIndicator className="py-4" /> : null}
-        />
-      )}
+          </View>
+        }
+        ListEmptyComponent={
+          isLoading ? (
+            <ActivityIndicator className="mt-8" />
+          ) : (
+            <Text className="font-ui text-text-3 p-6" style={{ fontSize: rf(14) }}>No transactions in this range.</Text>
+          )
+        }
+        ListFooterComponent={isFetchingNextPage ? <ActivityIndicator className="py-4" /> : null}
+      />
 
       <TransactionFiltersSheet visible={filtersOpen} onClose={() => setFiltersOpen(false)} filters={filters} onApply={setFilters} />
+      <AddTransactionSheet visible={addOpen} onClose={() => setAddOpen(false)} />
     </View>
   );
 }

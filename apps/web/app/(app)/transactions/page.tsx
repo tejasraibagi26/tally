@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { SyncButton } from "@/components/plaid/SyncButton";
 import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
 import { TransactionsList, type TransactionRowData, type AccountLookup } from "@/components/transactions/TransactionsList";
+import { AddTransactionForm } from "@/components/transactions/AddTransactionForm";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { groupCategoryOptions, categoryIdsInGroup } from "@/lib/categoryOptions";
 import { monthLastDay } from "@tally/core/budgetMath";
@@ -228,6 +229,13 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
           </Link>
           <SyncButton products={["transactions"]} loadingMessage="Syncing your transactions. This can take a moment." />
         </div>
+      </div>
+
+      <div className="flex-none">
+        <AddTransactionForm
+          accounts={accounts.map((a) => ({ id: a.id, name: accountDisplayName(a.name, a.nickname), mask: a.mask }))}
+          categories={categoryOptions}
+        />
       </div>
 
       <SyncFailureBanner />

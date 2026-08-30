@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Modal, View, Text, Pressable, ScrollView } from "react-native";
+import { View, Text, Pressable, ScrollView } from "react-native";
 import { X } from "lucide-react-native";
 import { useAccounts } from "@/lib/queries/accounts";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
+import { Sheet } from "@/components/ui/Sheet";
 
 export interface TransactionFilters {
   account?: string;
@@ -30,10 +31,9 @@ function Chip({ label, selected, onPress }: { label: string; selected: boolean; 
 }
 
 // Bottom-sheet-style filter modal for Transactions -- MOBILE_DESIGN.md §5.3's
-// "filter bottom sheet" (built with the built-in Modal rather than a
-// dedicated sheet library, which hasn't been added -- see the [id] screen's
-// comment on the same tradeoff). Covers the same fields GET /api/transactions
-// already supports: date range, account, pending-only.
+// "filter bottom sheet," built on the shared Sheet shell (ui/Sheet.tsx).
+// Covers the same fields GET /api/transactions already supports: date
+// range, account, pending-only.
 export function TransactionFiltersSheet({
   visible,
   onClose,
@@ -57,10 +57,9 @@ export function TransactionFiltersSheet({
   })();
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable className="flex-1" style={{ backgroundColor: "rgba(26,25,23,0.4)" }} onPress={onClose} />
-      <View className="bg-canvas rounded-t-panel" style={{ maxHeight: "80%" }}>
-        <View className="flex-row items-center justify-between px-5 pt-5 pb-3">
+    <Sheet visible={visible} onClose={onClose} maxHeight="80%">
+      <View>
+        <View className="flex-row items-center justify-between px-5 pt-1 pb-3">
           <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Filters</Text>
           <Pressable onPress={onClose} hitSlop={12}>
             <X size={22} color={colors["text-2"]} />
@@ -117,6 +116,6 @@ export function TransactionFiltersSheet({
           </Pressable>
         </View>
       </View>
-    </Modal>
+    </Sheet>
   );
 }
