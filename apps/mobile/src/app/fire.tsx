@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform, useWindowDimensions } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Flame, Check } from "lucide-react-native";
 import { LineChart } from "react-native-gifted-charts";
 import { fireNumber, fireProgressPct, yearsToFire, ageAsOf, fireAgeAndYear, projectionSeries } from "@tally/core/fireMath";
@@ -8,7 +7,7 @@ import { formatPercent } from "@tally/core/money";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
-import { ScreenHeader, ScreenBackButton, ScreenTitle } from "@/components/ui/ScreenHeader";
+import { ScreenHeader, ScreenTitle, useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { AppSlider } from "@/components/ui/AppSlider";
 import { useFireDefaults, useFireSettings, useSaveFireSettings } from "@/lib/queries/fire";
 import { useRF } from "@/theme/responsiveFont";
@@ -39,7 +38,7 @@ function Field({ label, value, onChangeText }: { label: string; value: string; o
 export default function FireCalculatorScreen() {
   const colors = useThemeColors();
   const rf = useRF();
-  const insets = useSafeAreaInsets();
+  const contentTop = useScreenContentTop();
   const { data: defaults, isLoading: loadingDefaults } = useFireDefaults();
   const { data: settingsData, isLoading: loadingSettings } = useFireSettings();
   const saveSettings = useSaveFireSettings();
@@ -112,7 +111,7 @@ export default function FireCalculatorScreen() {
 
   if (loadingDefaults || loadingSettings || !initialized) {
     return (
-      <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+      <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
         <ScreenGlow />
         <ScreenHeader title="FIRE Calculator" />
         <View className="flex-1 items-center justify-center">
@@ -124,7 +123,7 @@ export default function FireCalculatorScreen() {
 
   if (defaults && !defaults.hasAccounts) {
     return (
-      <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+      <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
         <ScreenGlow />
         <ScreenHeader title="FIRE Calculator" />
         <View className="flex-1 items-center justify-center px-8 gap-3">
@@ -143,11 +142,10 @@ export default function FireCalculatorScreen() {
   const bannerText = alreadyThere ? "text-positive" : years == null ? "text-warning" : "text-text";
 
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+    <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
       <ScreenGlow />
-      <ScreenBackButton />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
         <ScreenTitle
           title="FIRE Calculator"
           action={

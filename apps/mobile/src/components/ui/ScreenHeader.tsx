@@ -1,70 +1,72 @@
-import { View, Text, Pressable } from "react-native";
+import { Pressable, View, Text } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChevronLeft } from "lucide-react-native";
-import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
+import { useThemeColors } from "@/theme/useThemeColors";
 
-// Matches the tab screens' own top-left title treatment (Overview, Budgets,
-// etc.) instead of the native nav header -- these screens are pushed, not
-// tabs, so they still need an explicit way back; the native header's
-// centered title + "Back" label is replaced with a chevron beside a
-// left-aligned title, consistent with the rest of the app's headers.
-// `action` renders a small control at the header's right end (e.g. FIRE's
-// "Save" button, which used to be a full-width pill at the bottom of the
-// screen -- moved here to stop eating a large chunk of vertical space).
-//
-// For non-scrolling states (loading/empty) this is the whole header. For a
-// screen with a ScrollView, use ScreenBackButton (fixed, outside the
-// ScrollView) + ScreenTitle (scrolls with the content) instead, so only the
-// back chevron stays put -- matching a native large-title nav bar rather
-// than a header that scrolls away as one block with the page.
-export function ScreenHeader({ title, action }: { title: string; action?: React.ReactNode }) {
+// These screens (fire, subscriptions, investments, settings) are pushed via
+// the native Stack with headerShown: true + headerTransparent: true + an
+// empty headerTitle (see _layout.tsx) -- the header reserves no layout
+// space of its own, so the screen's own content starts right under the
+// status bar exactly like the tab screens' top-left title (Overview,
+// Budgets, etc.) does, instead of leaving a dead gap for a reserved native
+// bar. The back control is a real, always-fixed native header element (not
+// part of the ScrollView, so it can never drift out of alignment on scroll
+// the way a hand-rolled absolutely-positioned chevron once did here) -- on
+// iOS that's the platform's own default (e.g. iOS 26's glass pill); on
+// Android, native-stack renders no back arrow at all when the header is
+// both transparent and title-less (tested on-device), so _layout.tsx
+// supplies NativeBackButton as an explicit headerLeft there instead.
+export function useScreenContentTop(extra = 12): number {
+  const insets = useSafeAreaInsets();
+  return insets.top + extra;
+}
+
+// Android's headerLeft override (see _layout.tsx) -- same circular
+// bg-surface-2 treatment as the rest of the app's icon buttons, since
+// there's no native back arrow to fall back on once the header goes
+// transparent + title-less on this platform.
+export function NativeBackButton() {
   const router = useRouter();
   const colors = useThemeColors();
+  return (
+    <Pressable onPress={() => router.back()} hitSlop={8} className="w-8 h-8 rounded-full items-center justify-center bg-surface-2 ml-3">
+      <ChevronLeft size={20} color={colors.text} strokeWidth={2} />
+    </Pressable>
+  );
+}
+
+// Left clearance so a title row doesn't render underneath whatever back
+// control the native header puts in its top-left corner -- an approximation
+// (real native back controls vary by platform/OS version, e.g. iOS 26's
+// glass pill isn't the same width as Android's plain chevron) rather than a
+// pixel-exact match, the same way any native app leaves breathing room next
+// to a system back button instead of hugging it exactly.
+const BACK_CONTROL_CLEARANCE = 52;
+
+// Standalone title, for a non-scrolling state (loading/empty) rendered
+// directly inside the screen's padded outer View rather than a ScrollView.
+export function ScreenHeader({ title, action }: { title: string; action?: React.ReactNode }) {
   const rf = useRF();
   return (
-    <View className="flex-row items-center justify-between px-5 pb-4">
-      <View className="flex-row items-center gap-3">
-        <Pressable onPress={() => router.back()} hitSlop={12}>
-          <ChevronLeft size={24} color={colors.text} strokeWidth={2} />
-        </Pressable>
-        <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(22) }}>
-          {title}
-        </Text>
-      </View>
+    <View className="flex-row items-center justify-between pr-5 pb-4" style={{ paddingLeft: BACK_CONTROL_CLEARANCE }}>
+      <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(22) }}>
+        {title}
+      </Text>
       {action}
     </View>
   );
 }
 
-// Fixed back chevron -- render as a sibling of the ScrollView (not inside
-// it), positioned absolutely so it stays on screen while the ScrollView's
-// content, including ScreenTitle, scrolls underneath it. Computes its own
-// top inset rather than relying on the parent View's paddingTop: RN's
-// position:absolute is relative to the parent's border box, not its padding
-// box (unlike CSS on web) -- a `top` here is unaffected by the container's
-// paddingTop, so without this it renders flush against the physical screen
-// edge, under the status bar/notch.
-export function ScreenBackButton() {
-  const router = useRouter();
-  const colors = useThemeColors();
-  const insets = useSafeAreaInsets();
-  return (
-    <Pressable onPress={() => router.back()} hitSlop={12} style={{ position: "absolute", top: insets.top + 14, left: 20, zIndex: 10 }}>
-      <ChevronLeft size={24} color={colors.text} strokeWidth={2} />
-    </Pressable>
-  );
-}
-
-// Title + optional action, meant to be the first child inside the
-// ScrollView's content -- pairs with ScreenBackButton. `paddingLeft`
-// leaves room for the fixed chevron (20 left inset + 24 icon + 12 gap = 56,
-// minus the ScrollView's own 20px horizontal padding).
+// Same title treatment, for use as the first child inside a ScrollView
+// whose contentContainerStyle already supplies paddingHorizontal for every
+// row -- paddingLeft here is in addition to that, unlike ScreenHeader's
+// standalone pr-5.
 export function ScreenTitle({ title, action }: { title: string; action?: React.ReactNode }) {
   const rf = useRF();
   return (
-    <View className="flex-row items-center justify-between" style={{ paddingLeft: 36 }}>
+    <View className="flex-row items-center justify-between pb-1" style={{ paddingLeft: BACK_CONTROL_CLEARANCE - 20 }}>
       <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(22) }}>
         {title}
       </Text>

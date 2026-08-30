@@ -8,8 +8,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import { AuthProvider, useAuth } from "@/lib/AuthContext";
+import { NativeBackButton } from "@/components/ui/ScreenHeader";
 import { PrivacyProvider } from "@/lib/PrivacyContext";
 import { queryClient } from "@/lib/queryClient";
 import { fontsToLoad } from "@/theme/fonts";
@@ -89,13 +90,24 @@ function RootNavigator() {
               headerShown: false,
             }}
           />
-          {/* headerShown: false here too -- these screens render their own
-              top-left title (ScreenHeader) matching the tab screens' own
-              header treatment, instead of the native centered-title bar. */}
-          <Stack.Screen name="fire" options={{ headerShown: false }} />
-          <Stack.Screen name="subscriptions" options={{ headerShown: false }} />
-          <Stack.Screen name="investments" options={{ headerShown: false }} />
-          <Stack.Screen name="settings" options={{ headerShown: false }} />
+          {/* Real native header, fully transparent (reserves no layout
+              space -- content starts right under the status bar, same tight
+              spacing as the tab screens' own top-left title) with an empty
+              title -- these screens render their own top-left title
+              (ScreenHeader/ScreenTitle) as ordinary scrolling content,
+              matching Overview/Budgets/etc.'s whole-page-scroll treatment
+              instead of a separate fixed chevron. The back control itself
+              is native and always fixed (never part of the ScrollView, so
+              it can't drift out of alignment the way a hand-rolled
+              absolutely-positioned chevron once did here): iOS gets the
+              platform's own default (e.g. iOS 26's glass pill) for free;
+              Android's native-stack renders no back arrow at all once the
+              header is both transparent and title-less (tested on-device),
+              so it gets NativeBackButton as an explicit headerLeft instead. */}
+          <Stack.Screen name="fire" options={{ headerShown: true, headerTransparent: true, headerTitle: "", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
+          <Stack.Screen name="subscriptions" options={{ headerShown: true, headerTransparent: true, headerTitle: "", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
+          <Stack.Screen name="investments" options={{ headerShown: true, headerTransparent: true, headerTitle: "", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
+          <Stack.Screen name="settings" options={{ headerShown: true, headerTransparent: true, headerTitle: "", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
         </Stack.Protected>
         <Stack.Protected guard={status === "unauthenticated"}>
           <Stack.Screen name="login" />

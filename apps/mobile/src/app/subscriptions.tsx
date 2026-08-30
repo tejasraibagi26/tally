@@ -1,5 +1,4 @@
 import { View, Text, ScrollView, ActivityIndicator, Pressable, Alert } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useSubscriptions, useDeleteSubscription, type RecurringStream } from "@/lib/queries/subscriptions";
@@ -7,7 +6,7 @@ import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { hairline } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
-import { ScreenBackButton, ScreenTitle } from "@/components/ui/ScreenHeader";
+import { ScreenTitle, useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { Trash2 } from "lucide-react-native";
 
 const FREQUENCY_LABEL: Record<RecurringStream["frequency"], string> = {
@@ -32,7 +31,7 @@ const MONTHLY_MULTIPLIER: Record<RecurringStream["frequency"], number> = {
 export default function SubscriptionsScreen() {
   const colors = useThemeColors();
   const rf = useRF();
-  const insets = useSafeAreaInsets();
+  const contentTop = useScreenContentTop();
   const { data, isLoading } = useSubscriptions();
   const deleteSubscription = useDeleteSubscription();
   const streams = (data?.streams ?? []).filter((s) => s.status !== "cancelled");
@@ -51,10 +50,9 @@ export default function SubscriptionsScreen() {
   const monthlyTotal = expenseStreams.reduce((sum, s) => sum + Math.abs(s.averageAmount) * MONTHLY_MULTIPLIER[s.frequency], 0);
 
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+    <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
     <ScreenGlow />
-    <ScreenBackButton />
-    <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
+    <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
       <ScreenTitle title="Subscriptions" />
       <Card className="p-5 flex-row justify-between">
         <View>

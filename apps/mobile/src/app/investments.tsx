@@ -1,5 +1,4 @@
 import { View, Text, ScrollView, ActivityIndicator, Pressable } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TrendingUp, RefreshCw } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
@@ -10,7 +9,7 @@ import { useRF } from "@/theme/responsiveFont";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useColorScheme } from "nativewind";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
-import { ScreenHeader, ScreenBackButton, ScreenTitle } from "@/components/ui/ScreenHeader";
+import { ScreenHeader, ScreenTitle, useScreenContentTop } from "@/components/ui/ScreenHeader";
 
 function formatQuantity(q: string): string {
   const n = parseFloat(q);
@@ -26,7 +25,7 @@ function formatQuantity(q: string): string {
 export default function InvestmentsScreen() {
   const colors = useThemeColors();
   const rf = useRF();
-  const insets = useSafeAreaInsets();
+  const contentTop = useScreenContentTop();
   const { colorScheme } = useColorScheme();
   const series = colorScheme === "dark" ? chartSeries.dark : chartSeries.light;
   const { data, isLoading } = useHoldings();
@@ -46,7 +45,7 @@ export default function InvestmentsScreen() {
 
   if (isLoading || !data) {
     return (
-      <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+      <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
         <ScreenGlow />
         <ScreenHeader title="Investments" />
         <View className="flex-1 items-center justify-center">
@@ -58,7 +57,7 @@ export default function InvestmentsScreen() {
 
   if (data.holdings.length === 0) {
     return (
-      <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+      <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
         <ScreenGlow />
         <ScreenHeader title="Investments" action={syncAction} />
         <View className="flex-1 items-center justify-center px-8 gap-3">
@@ -85,10 +84,9 @@ export default function InvestmentsScreen() {
   const hasForeignCurrencyHoldings = data.holdings.some((h) => h.originalCurrency !== h.currency);
 
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+    <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
     <ScreenGlow />
-    <ScreenBackButton />
-    <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
+    <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
       <ScreenTitle title="Investments" action={syncAction} />
       <Card className="p-5 gap-5">
         <View className="gap-1">

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView, TextInput, Pressable, Switch, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useColorScheme } from "nativewind";
 import { ChevronRight, Link2, Sun, Moon, Smartphone, Pencil, Lock, Trash2, Check, X } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
@@ -10,7 +9,7 @@ import { ApiError } from "@/lib/api";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { type AppearanceMode, getStoredAppearanceMode, storeAppearanceMode } from "@/theme/appearance";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
-import { ScreenHeader, ScreenBackButton, ScreenTitle } from "@/components/ui/ScreenHeader";
+import { ScreenHeader, ScreenTitle, useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { useRF } from "@/theme/responsiveFont";
 
 const APPEARANCE_OPTIONS: { mode: AppearanceMode; label: string; Icon: typeof Sun }[] = [
@@ -97,7 +96,7 @@ function errorMessage(err: unknown, fallback: string): string {
 export default function SettingsScreen() {
   const router = useRouter();
   const colors = useThemeColors();
-  const insets = useSafeAreaInsets();
+  const contentTop = useScreenContentTop();
   const rf = useRF();
   const { data: profile, isLoading } = useAccountProfile();
   const updateProfile = useUpdateAccountProfile();
@@ -189,7 +188,7 @@ export default function SettingsScreen() {
 
   if (isLoading || !profile) {
     return (
-      <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+      <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
         <ScreenGlow />
         <ScreenHeader title="Settings" />
         <View className="flex-1 items-center justify-center">
@@ -200,11 +199,10 @@ export default function SettingsScreen() {
   }
 
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
+    <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
     <ScreenGlow />
-    <ScreenBackButton />
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-    <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 24, paddingBottom: 40 }}>
+    <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never" contentContainerStyle={{ paddingHorizontal: 20, gap: 24, paddingBottom: 40 }}>
       <ScreenTitle title="Settings" />
       {/* Profile */}
       <View className="gap-3">

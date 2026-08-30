@@ -6,6 +6,7 @@ import Link from "next/link";
 import { formatCents, formatPercent } from "@tally/core/money";
 import { fireNumber, fireProgressPct, yearsToFire, projectionSeries, ageAsOf, fireAgeAndYear } from "@tally/core/fireMath";
 import { Button } from "@/components/ui/Button";
+import { RangeSlider } from "@/components/ui/RangeSlider";
 import { FireProjectionChart } from "@/components/charts/FireProjectionChart";
 import { cn } from "@/lib/cn";
 
@@ -119,28 +120,12 @@ export function FireCalculator({
 
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Safe withdrawal rate: {formatPercent(swr)}</span>
-          <input
-            type="range"
-            min={0.01}
-            max={0.1}
-            step={0.001}
-            value={swr}
-            onChange={(e) => setSwr(parseFloat(e.target.value))}
-            className="w-full accent-[var(--brand)]"
-          />
+          <RangeSlider min={0.01} max={0.1} step={0.001} value={swr} onChange={setSwr} />
         </label>
 
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Expected annual return: {formatPercent(expectedReturn)}</span>
-          <input
-            type="range"
-            min={-0.05}
-            max={0.15}
-            step={0.001}
-            value={expectedReturn}
-            onChange={(e) => setExpectedReturn(parseFloat(e.target.value))}
-            className="w-full accent-[var(--brand)]"
-          />
+          <RangeSlider min={-0.05} max={0.15} step={0.001} value={expectedReturn} onChange={setExpectedReturn} />
         </label>
       </div>
 
