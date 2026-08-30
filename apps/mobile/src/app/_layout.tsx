@@ -56,6 +56,7 @@ function RootNavigator() {
         screenOptions={{
           headerShown: false,
           headerBackTitle: "Back",
+          headerBackButtonDisplayMode: "minimal",
           headerStyle: { backgroundColor: colors.surface },
           headerTintColor: colors.text,
           headerTitleStyle: { color: colors.text },
@@ -63,7 +64,7 @@ function RootNavigator() {
         }}
       >
         <Stack.Protected guard={status === "authenticated"}>
-          <Stack.Screen name="(tabs)" options={{ headerBackTitle: "" }} />
+          <Stack.Screen name="(tabs)" />
           {/* A true content-sized bottom sheet (native detents), not a full-screen
               modal -- fixes both the giant dead space below the last row and the
               "feels like a full page" complaint. Rows close this sheet (router.back())
