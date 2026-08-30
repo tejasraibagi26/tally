@@ -95,6 +95,15 @@ export default async function InvestmentsPage() {
           <span className="font-display text-3xl text-text tabular money">{formatCents(value)}</span>
         </div>
         <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
+          <span className="text-xs font-medium uppercase tracking-wide text-text-3">Amount invested</span>
+          {simpleReturn.hasHistory ? (
+            <span className="font-display text-3xl text-text tabular money">{formatCents(simpleReturn.investedValue)}</span>
+          ) : (
+            <span className="text-text-3 text-[15px]">Building history…</span>
+          )}
+          <span className="text-xs text-text-3">Starting balance plus contributions since</span>
+        </div>
+        <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Unrealized gain</span>
           {gain.hasCostBasis ? (
             <span className={`font-display text-3xl tabular money ${gain.gain < 0 ? "text-negative" : "text-positive"}`}>

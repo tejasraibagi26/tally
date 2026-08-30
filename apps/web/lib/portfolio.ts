@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, or, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { computeAllocation, computeSimpleReturn, type AllocationSlice, type HoldingLike } from "@tally/core/portfolioMath";
 import { toNetWorthCurrency, NET_WORTH_CURRENCY } from "@tally/core/fx";
@@ -114,16 +114,32 @@ export function unrealizedGain(holdings: HoldingRow[]): { gain: number; hasCostB
  * times. `hasHistory` tells the UI whether to show the number or a
  * "still building history" state.
  *
- * Net contributions come from Plaid's `transfer` investment-transaction
- * type, sign-flipped per Plaid's documented convention (positive amount =
- * cash debited from the account, e.g. a withdrawal; negative = cash
- * credited, e.g. a deposit) to read as "external money in minus money out."
- * Not verified against live Sandbox data — check this against a real
- * transfer before trusting the number in production.
+ * Net contributions come from Plaid investment transactions that represent
+ * real external cash movement, not market activity: `type: "transfer"`
+ * (e.g. brokerage-to-brokerage in-kind transfers) AND `type: "cash"` with
+ * subtype "contribution" | "deposit" | "withdrawal" -- payroll 401k
+ * contributions and manual deposits/withdrawals land in the latter bucket,
+ * per Plaid's investment-transaction-types schema (type "transfer" alone
+ * does NOT cover them, despite the name). Missing that bucket previously
+ * meant a contribution got counted entirely as "return" instead of being
+ * subtracted out. `subtype: "distribution"` is deliberately left out for
+ * now -- it's ambiguous between a retirement-account rollover-in (should
+ * count as a contribution) and a plan distribution paid out (shouldn't) --
+ * revisit if it turns out to matter for real accounts.
+ *
+ * Sign-flipped per Plaid's documented amount convention (positive = cash
+ * debited from the account, e.g. a withdrawal; negative = cash credited,
+ * e.g. a deposit) to read as "external money in minus money out," uniformly
+ * across every included type/subtype.
+ *
+ * `investedValue` (startValue + netContributions) is the other half of the
+ * same equation: `value === endValue - investedValue` always holds, so a UI
+ * showing both "amount invested" and "simple return" stays internally
+ * consistent by construction.
  */
-export async function portfolioSimpleReturn(userId: string): Promise<{ value: number; hasHistory: boolean }> {
+export async function portfolioSimpleReturn(userId: string): Promise<{ value: number; investedValue: number; hasHistory: boolean }> {
   const accounts = await investmentAccountIds(userId);
-  if (accounts.length === 0) return { value: 0, hasHistory: false };
+  if (accounts.length === 0) return { value: 0, investedValue: 0, hasHistory: false };
   const accountIds = accounts.map((a) => a.id);
 
   const dateRows = await db
@@ -135,7 +151,7 @@ export async function portfolioSimpleReturn(userId: string): Promise<{ value: nu
     .from(schema.holdings)
     .where(inArray(schema.holdings.accountId, accountIds))
     .groupBy(schema.holdings.accountId);
-  if (dateRows.length === 0) return { value: 0, hasHistory: false };
+  if (dateRows.length === 0) return { value: 0, investedValue: 0, hasHistory: false };
 
   let hasHistory = false;
   let startValue = 0;
@@ -166,7 +182,7 @@ export async function portfolioSimpleReturn(userId: string): Promise<{ value: nu
     for (const r of startRows) startValue += await toNetWorthCurrency(r.v, r.currency);
     for (const r of endRows) endValue += await toNetWorthCurrency(r.v, r.currency);
   }
-  if (!earliestDate || !hasHistory) return { value: 0, hasHistory };
+  if (!earliestDate || !hasHistory) return { value: 0, investedValue: 0, hasHistory };
 
   const contribRows = await db
     .select({ amount: schema.investmentTransactions.amount, currency: schema.investmentTransactions.currency })
@@ -174,13 +190,17 @@ export async function portfolioSimpleReturn(userId: string): Promise<{ value: nu
     .where(
       and(
         inArray(schema.investmentTransactions.accountId, accountIds),
-        eq(schema.investmentTransactions.type, "transfer"),
+        or(
+          eq(schema.investmentTransactions.type, "transfer"),
+          and(eq(schema.investmentTransactions.type, "cash"), inArray(schema.investmentTransactions.subtype, ["contribution", "deposit", "withdrawal"])),
+        ),
         gte(schema.investmentTransactions.date, earliestDate),
       ),
     );
   let contribTotal = 0;
   for (const r of contribRows) contribTotal += await toNetWorthCurrency(r.amount, r.currency);
   const netContributions = -contribTotal;
+  const investedValue = startValue + netContributions;
 
-  return { value: computeSimpleReturn(endValue, startValue, netContributions), hasHistory };
+  return { value: computeSimpleReturn(endValue, startValue, netContributions), investedValue, hasHistory };
 }

@@ -27,7 +27,7 @@ export interface HoldingsResponse {
   value: number;
   allocation: AllocationSlice[];
   unrealizedGain: { gain: number; hasCostBasis: boolean };
-  simpleReturn: { value: number; hasHistory: boolean };
+  simpleReturn: { value: number; investedValue: number; hasHistory: boolean };
 }
 
 export function useHoldings() {

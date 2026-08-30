@@ -52,6 +52,11 @@ const BROKERAGE_TRANSACTIONS: MockInvestmentTransactionSeed[] = [
 
 const ROTH_TRANSACTIONS: MockInvestmentTransactionSeed[] = [
   { daysAgo: 15, ticker: "VOO", name: "Buy VOO", quantity: 2, amount: 1025.54, price: 512.77, type: "buy", subtype: "buy" },
+  // type:"cash" subtype:"contribution" (payroll/manual retirement contributions) is a distinct
+  // bucket from type:"transfer" -- portfolioSimpleReturn previously only matched "transfer" and
+  // silently missed this, counting real contributions as "return." Exercising it here so that
+  // regression doesn't slip back in unnoticed the way it did the first time.
+  { daysAgo: 8, ticker: null, name: "Contribution", quantity: 0, amount: -500, price: 0, type: "cash", subtype: "contribution" },
 ];
 
 export function investmentTransactionsForSubtype(subtype: string): MockInvestmentTransactionSeed[] {

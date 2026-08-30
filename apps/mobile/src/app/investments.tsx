@@ -100,6 +100,16 @@ export default function InvestmentsScreen() {
         <View className="flex-row gap-6">
           <View className="flex-1 gap-1">
             <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
+              Invested
+            </Text>
+            {data.simpleReturn.hasHistory ? (
+              <MoneyText cents={data.simpleReturn.investedValue} className="font-ui-semibold text-text" style={{ fontSize: rf(16) }} />
+            ) : (
+              <Text className="font-ui text-text-3" style={{ fontSize: rf(13) }}>Building history…</Text>
+            )}
+          </View>
+          <View className="flex-1 gap-1">
+            <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
               Unrealized gain
             </Text>
             {data.unrealizedGain.hasCostBasis ? (
