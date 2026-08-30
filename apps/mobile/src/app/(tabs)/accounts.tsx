@@ -133,16 +133,18 @@ function AccountLine({
     >
       <Pressable onPress={() => setEditing(true)} className="flex-row items-center gap-1.5 flex-1 pr-3">
         <View className="gap-0.5 flex-1">
-          <Text className="font-ui-medium text-text" style={{ fontSize: rf(14.5) }} numberOfLines={1}>
-            {account.name}
-          </Text>
+          <View className="flex-row items-center gap-1.5">
+            <Text className="font-ui-medium text-text" style={{ fontSize: rf(14.5), flexShrink: 1 }} numberOfLines={1}>
+              {account.name}
+            </Text>
+            <Pencil size={12} color={colors["text-3"]} strokeWidth={2} />
+          </View>
           {account.mask && (
             <Text className="text-text-2" style={{ fontFamily: "JetBrainsMono", fontSize: rf(12) }}>
               ····{account.mask}
             </Text>
           )}
         </View>
-        <Pencil size={12} color={colors["text-3"]} strokeWidth={2} />
       </Pressable>
       <View style={{ flexShrink: 0, alignItems: "flex-end" }}>
         <MoneyText cents={account.currentBalance ?? 0} className="text-text" style={{ fontSize: rf(15) }} />
