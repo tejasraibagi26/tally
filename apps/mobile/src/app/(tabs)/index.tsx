@@ -67,19 +67,23 @@ export default function OverviewScreen() {
   // pinned near the top -- web's recharts chart auto-scales to the data's
   // own min/max (domain={["auto","auto"]}) instead. yAxisOffset reproduces
   // that: start the visible range just under the data's actual minimum.
-  // maxValue mirrors the same padding at the top: without it, the highest
+  // maxValue gives the top the same kind of headroom: without it, the highest
   // data point sits exactly at the chart's top edge, and `curved`'s cubic
   // bezier segments routinely overshoot past their endpoints -- with zero
   // headroom above, that overshoot (and the areaChart fill under it) was
   // getting clipped flat by the SVG canvas boundary instead of rendering
-  // the little bulge a curved line is supposed to have.
+  // the little bulge a curved line is supposed to have. That overshoot is
+  // only ever a few px, though -- mirroring the bottom's full 10% pad up top
+  // ate ~17% of the chart's height as dead space and made the whole curve
+  // read as flatter than the data actually is, so the top gets a much
+  // smaller fraction of the same pad, just enough to clear the bezier.
   const { chartYAxisOffset, chartMaxValue } = useMemo(() => {
     if (chartData.length < 2) return { chartYAxisOffset: 0, chartMaxValue: undefined };
     const values = chartData.map((d) => d.value);
     const min = Math.min(...values);
     const max = Math.max(...values);
     const pad = (max - min) * 0.1 || Math.abs(min) * 0.02 || 1;
-    return { chartYAxisOffset: min - pad, chartMaxValue: max + pad };
+    return { chartYAxisOffset: min - pad, chartMaxValue: max + pad * 0.25 };
   }, [chartData]);
 
   // Matches web's Overview page: walk the trend backwards for the most
