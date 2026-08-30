@@ -67,13 +67,19 @@ export default function OverviewScreen() {
   // pinned near the top -- web's recharts chart auto-scales to the data's
   // own min/max (domain={["auto","auto"]}) instead. yAxisOffset reproduces
   // that: start the visible range just under the data's actual minimum.
-  const chartYAxisOffset = useMemo(() => {
-    if (chartData.length < 2) return 0;
+  // maxValue mirrors the same padding at the top: without it, the highest
+  // data point sits exactly at the chart's top edge, and `curved`'s cubic
+  // bezier segments routinely overshoot past their endpoints -- with zero
+  // headroom above, that overshoot (and the areaChart fill under it) was
+  // getting clipped flat by the SVG canvas boundary instead of rendering
+  // the little bulge a curved line is supposed to have.
+  const { chartYAxisOffset, chartMaxValue } = useMemo(() => {
+    if (chartData.length < 2) return { chartYAxisOffset: 0, chartMaxValue: undefined };
     const values = chartData.map((d) => d.value);
     const min = Math.min(...values);
     const max = Math.max(...values);
     const pad = (max - min) * 0.1 || Math.abs(min) * 0.02 || 1;
-    return min - pad;
+    return { chartYAxisOffset: min - pad, chartMaxValue: max + pad };
   }, [chartData]);
 
   // Matches web's Overview page: walk the trend backwards for the most
@@ -211,6 +217,7 @@ export default function OverviewScreen() {
                 thickness={2.5}
                 color={colors.brand}
                 yAxisOffset={chartYAxisOffset}
+                maxValue={chartMaxValue}
                 areaChart
                 startFillColor={colors["brand-subtle"]}
                 endFillColor={colors["brand-subtle"]}
