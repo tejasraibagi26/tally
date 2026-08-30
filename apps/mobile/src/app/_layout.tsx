@@ -63,7 +63,7 @@ function RootNavigator() {
         }}
       >
         <Stack.Protected guard={status === "authenticated"}>
-          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="(tabs)" options={{ headerBackTitle: "" }} />
           {/* A true content-sized bottom sheet (native detents), not a full-screen
               modal -- fixes both the giant dead space below the last row and the
               "feels like a full page" complaint. Rows close this sheet (router.back())
@@ -120,10 +120,10 @@ function RootNavigator() {
               header reserves no layout space, so content needs manual
               padding to clear it; Android's opaque one already reserves its
               own space, so content needs none. */}
-          <Stack.Screen name="fire" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerTitle: "FIRE Calculator", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
-          <Stack.Screen name="subscriptions" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerTitle: "Subscriptions", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
-          <Stack.Screen name="investments" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerTitle: "Investments", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
-          <Stack.Screen name="settings" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerTitle: "Settings", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
+          <Stack.Screen name="fire" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerStyle: Platform.OS === "ios" ? { backgroundColor: "transparent" } : { backgroundColor: colors.surface }, headerTitle: "FIRE Calculator", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
+          <Stack.Screen name="subscriptions" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerStyle: Platform.OS === "ios" ? { backgroundColor: "transparent" } : { backgroundColor: colors.surface }, headerTitle: "Subscriptions", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
+          <Stack.Screen name="investments" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerStyle: Platform.OS === "ios" ? { backgroundColor: "transparent" } : { backgroundColor: colors.surface }, headerTitle: "Investments", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
+          <Stack.Screen name="settings" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerStyle: Platform.OS === "ios" ? { backgroundColor: "transparent" } : { backgroundColor: colors.surface }, headerTitle: "Settings", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
         </Stack.Protected>
         <Stack.Protected guard={status === "unauthenticated"}>
           <Stack.Screen name="login" />
