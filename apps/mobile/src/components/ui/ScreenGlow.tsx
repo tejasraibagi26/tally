@@ -26,7 +26,7 @@ import { withAlpha } from "@/theme/colors";
 // doesn't reliably re-paint a <Rect>'s referenced gradient def when only
 // the def's own props (e.g. cx) change via Reanimated, so an earlier
 // version that animated the gradient directly rendered but never moved.
-export function ScreenGlow({ height = 260 }: { height?: number }) {
+export function ScreenGlow({ height = 380 }: { height?: number }) {
   const colors = useThemeColors();
   const { colorScheme } = useColorScheme();
   const { width } = useWindowDimensions();
