@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { View, Text, Pressable, FlatList, TextInput, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, Pressable, FlatList, TextInput } from "react-native";
 import { X, Check, Search } from "lucide-react-native";
 import { useColorScheme } from "nativewind";
 import { useCategories } from "@/lib/queries/categories";
@@ -45,7 +45,10 @@ export function CategoryPickerSheet({
 
   return (
     <Sheet visible={visible} onClose={handleClose} maxHeight="75%">
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+      {/* Keyboard avoidance now lives in Sheet.tsx itself, around the sheet's outer
+          positioning -- a KeyboardAvoidingView here, nested inside the already-positioned
+          sheet, couldn't move it above the keyboard. */}
+      <>
         <View className="flex-row items-center justify-between px-5 pt-1 pb-3">
           <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Category</Text>
           <Pressable onPress={handleClose} hitSlop={12}>
@@ -103,7 +106,7 @@ export function CategoryPickerSheet({
             );
           }}
         />
-      </KeyboardAvoidingView>
+      </>
     </Sheet>
   );
 }

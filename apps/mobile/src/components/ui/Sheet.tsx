@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { AccessibilityInfo, Dimensions, Modal, Pressable, View, type ViewStyle } from "react-native";
+import { AccessibilityInfo, Dimensions, KeyboardAvoidingView, Modal, Platform, Pressable, View, type ViewStyle } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Extrapolation,
@@ -102,7 +102,15 @@ export function Sheet({
         <Animated.View style={[{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "#000000" }, backdropStyle]}>
           <Pressable style={{ flex: 1 }} onPress={onClose} />
         </Animated.View>
-        <View style={{ flex: 1, justifyContent: "flex-end" }} pointerEvents="box-none">
+        {/* Keyboard avoidance lives here, around the sheet's own bottom-anchoring container --
+            not inside a consumer's children, which sit inside an already-positioned
+            Animated.View and can't move it. "padding" on iOS pads this container's bottom by
+            the keyboard height, which pushes the flex-end-anchored sheet up above it. */}
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1, justifyContent: "flex-end" }}
+          pointerEvents="box-none"
+        >
           <Animated.View className="bg-canvas rounded-t-panel overflow-hidden" style={[{ maxHeight }, sheetStyle]}>
             <GestureDetector gesture={panGesture}>
               <View style={{ alignItems: "center", paddingTop: 8, paddingBottom: 4 }} hitSlop={{ top: 12, bottom: 12, left: 48, right: 48 }}>
@@ -111,7 +119,7 @@ export function Sheet({
             </GestureDetector>
             {children}
           </Animated.View>
-        </View>
+        </KeyboardAvoidingView>
       </View>
     </Modal>
   );

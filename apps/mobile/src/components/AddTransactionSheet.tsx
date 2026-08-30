@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, Pressable, TextInput, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, TextInput, ScrollView, Platform, ActivityIndicator } from "react-native";
 import { useColorScheme } from "nativewind";
 import { X, ChevronRight, Calendar } from "lucide-react-native";
 import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
@@ -105,7 +105,10 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
 
   return (
     <Sheet visible={visible} onClose={handleClose} maxHeight="85%">
-      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"}>
+      {/* Keyboard avoidance now lives in Sheet.tsx itself, around the sheet's outer
+          positioning -- a KeyboardAvoidingView here, nested inside the already-positioned
+          sheet, couldn't move it above the keyboard. */}
+      <>
         <View className="flex-row items-center justify-between px-5 pt-1 pb-3">
           <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Add transaction</Text>
           <Pressable onPress={handleClose} hitSlop={12}>
@@ -219,7 +222,7 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
             )}
           </Pressable>
         </View>
-      </KeyboardAvoidingView>
+      </>
 
       <CategoryPickerSheet visible={pickerOpen} onClose={() => setPickerOpen(false)} selectedId={categoryId} onSelect={setCategoryId} />
     </Sheet>
