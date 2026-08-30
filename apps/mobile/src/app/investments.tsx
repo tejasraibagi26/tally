@@ -108,17 +108,17 @@ export default function InvestmentsScreen() {
           </View>
           <View className="flex-1 gap-1">
             <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
-              Unrealized gain
+              Simple return
             </Text>
-            {data.unrealizedGain.hasCostBasis ? (
+            {data.simpleReturn.hasHistory ? (
               <MoneyText
-                cents={data.unrealizedGain.gain}
+                cents={data.simpleReturn.value}
                 signed
                 className="font-ui-semibold"
-                style={{ color: data.unrealizedGain.gain < 0 ? colors.negative : colors.positive, fontSize: rf(16) }}
+                style={{ color: data.simpleReturn.value < 0 ? colors.negative : colors.positive, fontSize: rf(16) }}
               />
             ) : (
-              <Text className="font-ui text-text-3" style={{ fontSize: rf(13) }}>No cost basis</Text>
+              <Text className="font-ui text-text-3" style={{ fontSize: rf(13) }}>Building history…</Text>
             )}
           </View>
         </View>
