@@ -34,7 +34,9 @@ export function ScreenGlow({ height = 260 }: { height?: number }) {
   // light tint on a near-black canvas (display contrast, not just the
   // numbers) -- light mode needed a noticeably higher alpha to actually be
   // visible instead of all but disappearing into the off-white canvas.
-  const baseAlpha = colorScheme === "dark" ? 0.14 : 0.4;
+  // Canvas is literal #000000 (not the old #111110), so the same tint reads
+  // stronger against it than it used to -- alpha trimmed down to compensate.
+  const baseAlpha = colorScheme === "dark" ? 0.11 : 0.4;
   const orbAlpha = 0.05;
   const orbSize = 560;
 

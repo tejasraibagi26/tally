@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { View, Text, FlatList, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, FlatList, Pressable, ActivityIndicator, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ListFilter, Plus } from "lucide-react-native";
@@ -73,50 +73,55 @@ export default function TransactionsScreen() {
   return (
     <View className="flex-1 bg-canvas">
       <ScreenGlow />
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => <TransactionRowItem item={item} isLast={index === items.length - 1} colors={colors} />}
-        className="flex-1 mx-5 mb-5 rounded-card bg-surface overflow-hidden"
-        style={{ marginTop: insets.top + 12 }}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 24 + tabBarClearance }}
-        onEndReachedThreshold={0.4}
-        onEndReached={() => hasNextPage && fetchNextPage()}
-        refreshing={isRefetching}
-        onRefresh={refetch}
-        ListHeaderComponent={
-          <View className="bg-canvas px-5 pt-1 pb-4">
-            <View className="flex-row items-center justify-between">
-              <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(24) }}>
-                Transactions
-              </Text>
-              <View className="flex-row items-center gap-2">
-                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} className="items-center justify-center rounded-full bg-brand" style={{ width: 34, height: 34 }}>
-                  <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
-                </Pressable>
-                <Pressable onPress={() => setFiltersOpen(true)} className="flex-row items-center gap-2 rounded-full px-4 py-2.5 bg-brand-subtle">
-                  <ListFilter size={14} color={colors.brand} strokeWidth={1.9} />
-                  <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13.5) }}>Filters</Text>
-                  {activeCount > 0 && (
-                    <View className="rounded-full items-center justify-center bg-brand" style={{ minWidth: 18, height: 18, paddingHorizontal: 4 }}>
-                      <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(11) }}>{activeCount}</Text>
-                    </View>
-                  )}
-                </Pressable>
+
+      {/* Card chrome (margin/rounding/background) lives on this wrapping View, not on the
+          FlatList itself -- NativeWind's FlatList binding uses remapProps (not cssInterop),
+          which silently drops className-driven margin/rounding/background on FlatList. The
+          header rides inside as ListHeaderComponent so it scrolls away with the rest of the
+          screen, same as every other tab, instead of staying pinned above it. */}
+      <View className="flex-1 mx-5 mb-5 rounded-card bg-surface overflow-hidden" style={{ marginTop: insets.top + 12 }}>
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item, index }) => <TransactionRowItem item={item} isLast={index === items.length - 1} colors={colors} />}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 24 + tabBarClearance }}
+          onEndReachedThreshold={0.4}
+          onEndReached={() => hasNextPage && fetchNextPage()}
+          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
+          ListHeaderComponent={
+            <View className="bg-surface px-5 pt-5 pb-4">
+              <View className="flex-row items-center justify-between">
+                <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(24) }}>
+                  Transactions
+                </Text>
+                <View className="flex-row items-center gap-2">
+                  <Pressable onPress={() => setAddOpen(true)} hitSlop={12} className="items-center justify-center rounded-full bg-brand" style={{ width: 34, height: 34 }}>
+                    <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
+                  </Pressable>
+                  <Pressable onPress={() => setFiltersOpen(true)} className="flex-row items-center gap-2 rounded-full px-4 py-2.5 bg-brand-subtle">
+                    <ListFilter size={14} color={colors.brand} strokeWidth={1.9} />
+                    <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13.5) }}>Filters</Text>
+                    {activeCount > 0 && (
+                      <View className="rounded-full items-center justify-center bg-brand" style={{ minWidth: 18, height: 18, paddingHorizontal: 4 }}>
+                        <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(11) }}>{activeCount}</Text>
+                      </View>
+                    )}
+                  </Pressable>
+                </View>
               </View>
             </View>
-          </View>
-        }
-        ListEmptyComponent={
-          isLoading ? (
-            <ActivityIndicator className="mt-8" />
-          ) : (
-            <Text className="font-ui text-text-3 p-6" style={{ fontSize: rf(14) }}>No transactions in this range.</Text>
-          )
-        }
-        ListFooterComponent={isFetchingNextPage ? <ActivityIndicator className="py-4" /> : null}
-      />
+          }
+          ListEmptyComponent={
+            isLoading ? (
+              <ActivityIndicator className="mt-8" />
+            ) : (
+              <Text className="font-ui text-text-3 p-6" style={{ fontSize: rf(14) }}>No transactions in this range.</Text>
+            )
+          }
+          ListFooterComponent={isFetchingNextPage ? <ActivityIndicator className="py-4" /> : null}
+        />
+      </View>
 
       <TransactionFiltersSheet visible={filtersOpen} onClose={() => setFiltersOpen(false)} filters={filters} onApply={setFilters} />
       <AddTransactionSheet visible={addOpen} onClose={() => setAddOpen(false)} />

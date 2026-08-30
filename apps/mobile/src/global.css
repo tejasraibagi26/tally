@@ -32,28 +32,32 @@
     --color-info-subtle: #E5EEFA;
   }
 
+  /* True OLED black (not a tinted near-black) -- canvas/sunken are literal
+     #000000, surface/surface-2 promoted to carry all the elevation contrast.
+     brand and positive are separated 36° apart in hue (jade vs. grass) so a
+     primary button and a gains figure never read as the same green. */
   .dark:root {
-    --color-canvas: #111110;
-    --color-surface: #1A1A19;
-    --color-surface-2: #232320;
-    --color-sunken: #0C0C0B;
-    --color-border: #2B2B28;
-    --color-border-strong: #3D3D38;
-    --color-text: #F2F1ED;
-    --color-text-2: #A8A69D;
-    --color-text-3: #77756D;
-    --color-brand: #4FB394;
-    --color-brand-hover: #6AC5A9;
-    --color-brand-subtle: #14251F;
-    --color-brand-border: #234438;
-    --color-on-brand: #0C1A15;
-    --color-positive: #4FC49B;
-    --color-negative: #F0846B;
-    --color-warning: #E0A94A;
-    --color-info: #3987E5;
-    --color-positive-subtle: #12271F;
-    --color-negative-subtle: #2B1A16;
-    --color-warning-subtle: #2A2213;
-    --color-info-subtle: #111F2E;
+    --color-canvas: #000000;
+    --color-surface: #151918;
+    --color-surface-2: #242928;
+    --color-sunken: #000000;
+    --color-border: #2F3736;
+    --color-border-strong: #566160;
+    --color-text: #F5F5F4;
+    --color-text-2: #B2B6AF;
+    --color-text-3: #868B84;
+    --color-brand: #53C6AF;
+    --color-brand-hover: #70D7C2;
+    --color-brand-subtle: #0F2420;
+    --color-brand-border: #244740;
+    --color-on-brand: #081614;
+    --color-positive: #55CE6D;
+    --color-negative: #F37B68;
+    --color-warning: #E4A944;
+    --color-info: #4791EB;
+    --color-positive-subtle: #112214;
+    --color-negative-subtle: #29130F;
+    --color-warning-subtle: #271F11;
+    --color-info-subtle: #101B28;
   }
 }
