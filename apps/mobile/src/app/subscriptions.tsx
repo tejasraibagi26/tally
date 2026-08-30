@@ -1,13 +1,14 @@
-import { View, Text, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, ActivityIndicator, Pressable, Alert } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
-import { useSubscriptions, type RecurringStream } from "@/lib/queries/subscriptions";
+import { useSubscriptions, useDeleteSubscription, type RecurringStream } from "@/lib/queries/subscriptions";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { hairline } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { ScreenBackButton, ScreenTitle } from "@/components/ui/ScreenHeader";
+import { Trash2 } from "lucide-react-native";
 
 const FREQUENCY_LABEL: Record<RecurringStream["frequency"], string> = {
   weekly: "Weekly",
@@ -33,9 +34,21 @@ export default function SubscriptionsScreen() {
   const rf = useRF();
   const insets = useSafeAreaInsets();
   const { data, isLoading } = useSubscriptions();
+  const deleteSubscription = useDeleteSubscription();
   const streams = (data?.streams ?? []).filter((s) => s.status !== "cancelled");
 
-  const monthlyTotal = streams.reduce((sum, s) => sum + s.averageAmount * MONTHLY_MULTIPLIER[s.frequency], 0);
+  function confirmRemove(s: RecurringStream) {
+    Alert.alert(`Remove "${s.description ?? s.merchantKey}"?`, "Transactions it already posted stay in your history.", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Remove", style: "destructive", onPress: () => deleteSubscription.mutate(s.id) },
+    ]);
+  }
+
+  // Matches the web Subscriptions page: only expense streams (negative
+  // amounts) count toward Monthly/Annualized — a paycheck or other income
+  // stream shouldn't inflate what looks like a spend total.
+  const expenseStreams = streams.filter((s) => s.averageAmount < 0);
+  const monthlyTotal = expenseStreams.reduce((sum, s) => sum + Math.abs(s.averageAmount) * MONTHLY_MULTIPLIER[s.frequency], 0);
 
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: insets.top + 12 }}>
@@ -78,6 +91,11 @@ export default function SubscriptionsScreen() {
                 </Text>
               </View>
               <MoneyText cents={s.averageAmount} className="text-text" mask={false} style={{ fontSize: rf(14.5) }} />
+              {s.isManual && (
+                <Pressable onPress={() => confirmRemove(s)} hitSlop={10} className="ml-3">
+                  <Trash2 size={16} color={colors["text-3"]} />
+                </Pressable>
+              )}
             </View>
           ))}
           {streams.length === 0 && <Text className="font-ui text-text-3 py-4" style={{ fontSize: rf(14) }}>No subscriptions detected yet.</Text>}

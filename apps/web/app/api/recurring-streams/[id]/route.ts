@@ -56,3 +56,38 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   return NextResponse.json({ stream, generated });
 }
+
+// Only a manually-added stream (AddBillForm's "+ Add a bill") can be removed
+// here — an auto-detected one comes back on the next detectRecurringForUser
+// run as long as its underlying transactions still exist, so deleting it
+// would just be undone by the next sync.
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  let userId: string;
+  try {
+    userId = await requireUserId(req);
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  const [existing] = await db
+    .select({ id: schema.recurringStreams.id, userId: schema.recurringStreams.userId, isManual: schema.recurringStreams.isManual })
+    .from(schema.recurringStreams)
+    .where(eq(schema.recurringStreams.id, id))
+    .limit(1);
+  if (!existing || existing.userId !== userId) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  if (!existing.isManual) {
+    return NextResponse.json({ error: "Only manually-added bills can be removed" }, { status: 400 });
+  }
+
+  // Synthetic transactions generateDueManualBillPayments posted for this
+  // stream stay behind (transactions.recurringStreamId has no FK constraint,
+  // so it's left pointing at a since-deleted row) — matches how deleting an
+  // income schedule leaves its past paychecks in place; the user may still
+  // want that spending history in Budgets/Transactions.
+  await db.delete(schema.recurringStreams).where(eq(schema.recurringStreams.id, id));
+
+  return NextResponse.json({ ok: true });
+}

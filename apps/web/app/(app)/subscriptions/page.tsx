@@ -8,6 +8,7 @@ import { StatusBadge, type Status } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { NextDueDateEditor } from "@/components/subscriptions/NextDueDateEditor";
 import { AddBillForm } from "@/components/subscriptions/AddBillForm";
+import { RemoveBillButton } from "@/components/subscriptions/RemoveBillButton";
 import { accountDisplayName } from "@tally/core/accountName";
 
 const FREQUENCY_MONTHLY_MULTIPLIER: Record<string, number> = {
@@ -45,6 +46,7 @@ export default async function SubscriptionsPage() {
       predictedNextDate: schema.recurringStreams.predictedNextDate,
       manualNextDueDate: schema.recurringStreams.manualNextDueDate,
       status: schema.recurringStreams.status,
+      isManual: schema.recurringStreams.isManual,
       accountName: schema.accounts.name,
       accountNickname: schema.accounts.nickname,
       accountMask: schema.accounts.mask,
@@ -106,7 +108,7 @@ export default async function SubscriptionsPage() {
 
           <Card className="overflow-hidden">
             <div className="overflow-x-auto">
-              <div className="grid grid-cols-[minmax(180px,1fr)_140px_150px_130px_130px_220px_130px] gap-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 min-w-[1090px]">
+              <div className="grid grid-cols-[minmax(180px,1fr)_140px_150px_130px_130px_220px_130px_80px] gap-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 min-w-[1170px]">
                 <span>Merchant</span>
                 <span>Category</span>
                 <span>Account</span>
@@ -114,11 +116,12 @@ export default async function SubscriptionsPage() {
                 <span className="text-right">Amount</span>
                 <span>Next date</span>
                 <span>Status</span>
+                <span></span>
               </div>
               {streams.map((s) => (
                 <div
                   key={s.id}
-                  className="grid grid-cols-[minmax(180px,1fr)_140px_150px_130px_130px_220px_130px] gap-3 items-center px-4 py-2.5 border-b border-border last:border-b-0 min-w-[1090px]"
+                  className="grid grid-cols-[minmax(180px,1fr)_140px_150px_130px_130px_220px_130px_80px] gap-3 items-center px-4 py-2.5 border-b border-border last:border-b-0 min-w-[1170px]"
                 >
                   <span className="text-[15px] text-text truncate">{s.description ?? s.merchantKey}</span>
                   <span className="flex items-center gap-1.5 min-w-0">
@@ -147,6 +150,7 @@ export default async function SubscriptionsPage() {
                       label={s.status === "active" ? "Active" : s.status === "at_risk" ? "At risk" : "Cancelled"}
                     />
                   )}
+                  {s.isManual && <RemoveBillButton streamId={s.id} description={s.description ?? s.merchantKey} />}
                 </div>
               ))}
             </div>

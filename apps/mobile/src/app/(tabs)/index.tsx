@@ -15,6 +15,8 @@ import { useOverview, useNetWorthTrend } from "@/lib/queries/overview";
 import { useTransactions } from "@/lib/queries/transactions";
 import { useCashFlowTrend } from "@/lib/queries/cashflow";
 import { useLiabilities } from "@/lib/queries/liabilities";
+import { useCategoryBreakdown } from "@/lib/queries/spendBreakdown";
+import { CategorySpendBar } from "@/components/charts/CategorySpendBar";
 import { usePrivacy } from "@/lib/PrivacyContext";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { formatCents, formatPercent } from "@tally/core/money";
@@ -40,6 +42,7 @@ export default function OverviewScreen() {
   const recent = useTransactions();
   const cashFlow = useCashFlowTrend(2);
   const liabilities = useLiabilities();
+  const breakdown = useCategoryBreakdown();
   const { hidden, toggle: togglePrivacy } = usePrivacy();
   const { width: windowWidth } = useWindowDimensions();
   // The chart was hardcoded to 300 -- narrower than the available width on
@@ -158,6 +161,7 @@ export default function OverviewScreen() {
     queryClient.invalidateQueries({ queryKey: ["transactions"] });
     queryClient.invalidateQueries({ queryKey: ["cashflow"] });
     queryClient.invalidateQueries({ queryKey: ["liabilities"] });
+    queryClient.invalidateQueries({ queryKey: ["category-breakdown"] });
   }
 
   return (
@@ -298,6 +302,16 @@ export default function OverviewScreen() {
               {topBudgets.map((b) => (
                 <MeterBar key={b.categoryId} label={b.categoryName} colorSlot={b.categoryColorSlot} spentCents={b.spend} budgetCents={b.amount + b.rolloverFromPrior} mask={false} />
               ))}
+            </Card>
+          </View>
+        )}
+
+        {/* Where it went */}
+        {(breakdown.data?.rows.length ?? 0) > 0 && (
+          <View className="gap-4">
+            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Where it went</Text>
+            <Card className="p-5">
+              <CategorySpendBar rows={breakdown.data!.rows} />
             </Card>
           </View>
         )}
