@@ -118,12 +118,6 @@ export default function OverviewScreen() {
   const priorMonth = months.length > 1 ? months[months.length - 2] : undefined;
   const utilizationPct = liabilities.data?.utilization.utilization != null ? Math.round(liabilities.data.utilization.utilization * 100) : null;
 
-  // Cash flow deliberately isn't brand-subtle: it's nearly the same hex as
-  // positive-subtle (Income) in both themes (both a muted evergreen), so the
-  // two tiles read as the same color -- warning-subtle (amber) is the 4th
-  // genuinely distinct tint, alongside negative (spend) and info (utilization).
-  // The actual class per tile.key is chosen where it's rendered (a literal
-  // className branch, not a string built here) -- see that comment for why.
   // Matches web's StatTile "secondary" line for the same tile -- % of the
   // month's total budget spent so far, alongside the vs.-last-month delta.
   const totalBudgeted = overview.data?.budgets.totalBudgeted ?? 0;
@@ -270,24 +264,7 @@ export default function OverviewScreen() {
         {(kpiTiles.length > 0 || utilizationPct !== null) && (
           <View className="flex-row flex-wrap" style={{ gap: 12 }}>
             {kpiTiles.map((tile) => (
-              <View
-                key={tile.key}
-                // Literal per-branch classNames, not a template-literal
-                // interpolation of a data-array string -- NativeWind only
-                // generates CSS for utility classes it can statically see
-                // inside a className expression. bg-warning-subtle was only
-                // ever referenced via ${tile.bgClass} (unresolvable) and had
-                // no other literal usage anywhere in the app, so it silently
-                // produced no style at all (transparent tile, no error).
-                className={
-                  tile.key === "spend"
-                    ? "rounded-panel px-4 py-4 gap-1.5 bg-negative-subtle"
-                    : tile.key === "income"
-                      ? "rounded-panel px-4 py-4 gap-1.5 bg-positive-subtle"
-                      : "rounded-panel px-4 py-4 gap-1.5 bg-warning-subtle"
-                }
-                style={{ width: "48%" }}
-              >
+              <View key={tile.key} className="rounded-panel px-4 py-4 gap-1.5 bg-surface" style={{ width: "48%" }}>
                 <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(11.5) }}>{tile.label}</Text>
                 <MoneyText cents={tile.cents} signed={tile.key === "cashflow"} mask={false} className="font-ui-semibold text-text" style={{ fontSize: rf(19) }} numberOfLines={1} adjustsFontSizeToFit />
                 {tile.delta && (
@@ -299,7 +276,7 @@ export default function OverviewScreen() {
               </View>
             ))}
             {utilizationPct !== null && (
-              <View className="rounded-panel px-4 py-4 gap-1.5 bg-info-subtle" style={{ width: "48%" }}>
+              <View className="rounded-panel px-4 py-4 gap-1.5 bg-surface" style={{ width: "48%" }}>
                 <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(11.5) }}>Credit utilization</Text>
                 <Text className="font-ui-semibold text-text" style={{ fontSize: rf(19) }}>{utilizationPct}%</Text>
                 <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>of total limit</Text>
