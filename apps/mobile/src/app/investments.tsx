@@ -121,21 +121,6 @@ export default function InvestmentsScreen() {
               <Text className="font-ui text-text-3" style={{ fontSize: rf(13) }}>No cost basis</Text>
             )}
           </View>
-          <View className="flex-1 gap-1">
-            <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
-              Simple return
-            </Text>
-            {data.simpleReturn.hasHistory ? (
-              <MoneyText
-                cents={data.simpleReturn.value}
-                signed
-                className="font-ui-semibold"
-                style={{ color: data.simpleReturn.value < 0 ? colors.negative : colors.positive, fontSize: rf(16) }}
-              />
-            ) : (
-              <Text className="font-ui text-text-3" style={{ fontSize: rf(13) }}>Building history…</Text>
-            )}
-          </View>
         </View>
       </Card>
 
