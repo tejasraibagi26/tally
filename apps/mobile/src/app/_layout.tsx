@@ -90,24 +90,33 @@ function RootNavigator() {
               headerShown: false,
             }}
           />
-          {/* Real native header, fully transparent (reserves no layout
-              space -- content starts right under the status bar, same tight
-              spacing as the tab screens' own top-left title) with an empty
-              title -- these screens render their own top-left title
-              (ScreenHeader/ScreenTitle) as ordinary scrolling content,
-              matching Overview/Budgets/etc.'s whole-page-scroll treatment
-              instead of a separate fixed chevron. The back control itself
+          {/* Real native header with an empty title -- these screens render
+              their own top-left title (ScreenHeader/ScreenTitle) as
+              ordinary scrolling content below it. The back control itself
               is native and always fixed (never part of the ScrollView, so
               it can't drift out of alignment the way a hand-rolled
-              absolutely-positioned chevron once did here): iOS gets the
-              platform's own default (e.g. iOS 26's glass pill) for free;
-              Android's native-stack renders no back arrow at all once the
-              header is both transparent and title-less (tested on-device),
-              so it gets NativeBackButton as an explicit headerLeft instead. */}
-          <Stack.Screen name="fire" options={{ headerShown: true, headerTransparent: true, headerTitle: "", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
-          <Stack.Screen name="subscriptions" options={{ headerShown: true, headerTransparent: true, headerTitle: "", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
-          <Stack.Screen name="investments" options={{ headerShown: true, headerTransparent: true, headerTitle: "", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
-          <Stack.Screen name="settings" options={{ headerShown: true, headerTransparent: true, headerTitle: "", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
+              absolutely-positioned chevron once did here). headerTransparent
+              only applies on iOS: react-native-screens' native-stack
+              doesn't support a real transparent floating header on Android
+              (tested on-device -- headerTransparent: true there still
+              renders a solid opaque bar), so Android gets the platform's
+              own normal toolbar instead, which is the native Android
+              pattern for a pushed screen anyway (root/tab screens like
+              Overview stay header-less since those aren't pushed) --
+              accepted tradeoff: it reserves real vertical space Overview's
+              screens don't have. Both platforms need NativeBackButton as an
+              explicit headerLeft: native-stack renders no back arrow at all
+              once headerTitle is empty, transparent or not (tested). iOS
+              still gets its own default back control regardless, since
+              headerLeft is only set for Android below. useScreenContentTop
+              (ScreenHeader.tsx) matches this split: iOS's transparent
+              header reserves no layout space, so content needs manual
+              padding to clear it; Android's opaque one already reserves its
+              own space, so content needs none. */}
+          <Stack.Screen name="fire" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerTitle: "", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
+          <Stack.Screen name="subscriptions" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerTitle: "", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
+          <Stack.Screen name="investments" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerTitle: "", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
+          <Stack.Screen name="settings" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerTitle: "", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
         </Stack.Protected>
         <Stack.Protected guard={status === "unauthenticated"}>
           <Stack.Screen name="login" />
