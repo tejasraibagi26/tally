@@ -73,17 +73,25 @@ export default function OverviewScreen() {
   // headroom above, that overshoot (and the areaChart fill under it) was
   // getting clipped flat by the SVG canvas boundary instead of rendering
   // the little bulge a curved line is supposed to have. That overshoot is
-  // only ever a few px, though -- mirroring the bottom's full 10% pad up top
-  // ate ~17% of the chart's height as dead space and made the whole curve
-  // read as flatter than the data actually is, so the top gets a much
-  // smaller fraction of the same pad, just enough to clear the bezier.
+  // only ever a few px, though, so the top gets a much smaller fraction of
+  // the same pad than the bottom does -- just enough to clear the bezier.
+  //
+  // gifted-charts subtracts yAxisOffset from every value *before* plotting
+  // (Y = (value - yAxisOffset) / maxValue * height), so maxValue has to be
+  // expressed on that same offset-adjusted scale -- NOT the raw net-worth
+  // scale. Passing the raw `max` here divides a tiny adjusted numerator
+  // (a few thousand dollars of actual variance) by the full ~$400k+ raw
+  // balance, which pins every point within a percent of the bottom of the
+  // chart -- the line renders as almost a dead-straight line pinned low,
+  // not the flattened-but-still-curved line a too-generous pad would give.
   const { chartYAxisOffset, chartMaxValue } = useMemo(() => {
     if (chartData.length < 2) return { chartYAxisOffset: 0, chartMaxValue: undefined };
     const values = chartData.map((d) => d.value);
     const min = Math.min(...values);
     const max = Math.max(...values);
     const pad = (max - min) * 0.1 || Math.abs(min) * 0.02 || 1;
-    return { chartYAxisOffset: min - pad, chartMaxValue: max + pad * 0.25 };
+    const yAxisOffset = min - pad;
+    return { chartYAxisOffset: yAxisOffset, chartMaxValue: max - yAxisOffset + pad * 0.25 };
   }, [chartData]);
 
   // Matches web's Overview page: walk the trend backwards for the most
