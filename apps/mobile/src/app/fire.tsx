@@ -147,10 +147,10 @@ export default function FireCalculatorScreen() {
       className="h-9 px-4 rounded-full flex-row items-center gap-1.5 justify-center bg-brand disabled:opacity-50"
     >
       {saveSettings.isPending ? (
-        <ActivityIndicator color="#FFFFFF" size="small" />
+        <ActivityIndicator color={colors["on-brand"]} size="small" />
       ) : (
         <>
-          <Check size={15} color="#FFFFFF" strokeWidth={2.5} />
+          <Check size={15} color={colors["on-brand"]} strokeWidth={2.5} />
           <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(13) }}>{saved ? "Saved" : "Save"}</Text>
         </>
       )}
