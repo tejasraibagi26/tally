@@ -150,7 +150,12 @@ export default async function SubscriptionsPage() {
                   </span>
                   <NextDueDateEditor streamId={s.id} predictedNextDate={s.predictedNextDate} manualNextDueDate={s.manualNextDueDate} />
                   {s.manualNextDueDate ? (
-                    <StatusBadge status="syncing" label="Manual" />
+                    // "Manual" (removable) is a real "+ Add a bill" entry; an
+                    // auto-detected stream whose due date was merely
+                    // overridden isn't the same thing — same badge color
+                    // would otherwise look identical to a removable bill
+                    // right next to a Remove button that never appears for it.
+                    <StatusBadge status="syncing" label={s.isManual ? "Manual" : "Overridden"} />
                   ) : (
                     <StatusBadge
                       status={statusBadge(s.status)}

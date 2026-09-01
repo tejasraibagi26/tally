@@ -10,6 +10,7 @@ import { Card, CardHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SyncButton } from "@/components/plaid/SyncButton";
 import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
+import { RecentActivityList } from "@/components/investments/RecentActivityList";
 
 function formatQuantity(q: string): string {
   const n = parseFloat(q);
@@ -52,7 +53,10 @@ export default async function InvestmentsPage() {
         .leftJoin(schema.securities, eq(schema.investmentTransactions.securityId, schema.securities.id))
         .where(inArray(schema.investmentTransactions.accountId, investmentAccountIds))
         .orderBy(desc(schema.investmentTransactions.date))
-        .limit(20)
+        // A few pages' worth for RecentActivityList's client-side pagination
+        // (8/page) — this is a "recent" preview, not the full history, so a
+        // fixed cap rather than a real offset-paginated query.
+        .limit(40)
     : [];
   const activity = await Promise.all(rawActivity.map(async (tx) => ({ ...tx, amount: await toNetWorthCurrency(tx.amount, tx.currency) })));
 
@@ -196,17 +200,7 @@ export default async function InvestmentsPage() {
       {activity.length > 0 && (
         <Card>
           <CardHeader title="Recent activity" />
-          {activity.map((tx) => (
-            <div key={tx.id} className="flex items-center gap-3 px-4 py-2.5 border-b border-border last:border-b-0">
-              <span className="font-mono text-[13px] text-text-3 tabular w-24 flex-none">{tx.date}</span>
-              <span className="text-[15px] text-text flex-1 min-w-0 truncate">
-                {tx.name}
-                {tx.ticker && <span className="text-text-3"> · {tx.ticker}</span>}
-              </span>
-              <span className="text-xs text-text-3">{tx.subtype}</span>
-              <span className={`text-right text-[15px] tabular money ${tx.amount < 0 ? "text-positive" : "text-text"}`}>{formatCents(tx.amount, { signed: true })}</span>
-            </div>
-          ))}
+          <RecentActivityList activity={activity} />
         </Card>
       )}
     </div>
