@@ -70,10 +70,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   return NextResponse.json({ stream, generated });
 }
 
-// Only a manually-added stream (AddBillForm's "+ Add a bill") can be removed
-// here — an auto-detected one comes back on the next detectRecurringForUser
-// run as long as its underlying transactions still exist, so deleting it
-// would just be undone by the next sync.
+// Any stream can be removed here, manually-added or auto-detected — note
+// for the latter that it comes back on the next detectRecurringForUser run
+// as long as its underlying transactions still exist and still cluster the
+// same way, so this is "hide it for now," not a permanent dismissal.
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
@@ -84,15 +84,12 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
   const { id } = await params;
   const [existing] = await db
-    .select({ id: schema.recurringStreams.id, userId: schema.recurringStreams.userId, isManual: schema.recurringStreams.isManual })
+    .select({ id: schema.recurringStreams.id, userId: schema.recurringStreams.userId })
     .from(schema.recurringStreams)
     .where(eq(schema.recurringStreams.id, id))
     .limit(1);
   if (!existing || existing.userId !== userId) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
-  if (!existing.isManual) {
-    return NextResponse.json({ error: "Only manually-added bills can be removed" }, { status: 400 });
   }
 
   // Synthetic transactions generateDueManualBillPayments posted for this

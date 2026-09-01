@@ -70,7 +70,10 @@ export default function SubscriptionsScreen() {
   const streams = (data?.streams ?? []).filter((s) => s.status !== "cancelled");
 
   function confirmRemove(s: RecurringStream) {
-    Alert.alert(`Remove "${s.description ?? s.merchantKey}"?`, "Transactions it already posted stay in your history.", [
+    const message = s.isManual
+      ? "Transactions it already posted stay in your history."
+      : "Transactions it already posted stay in your history, but it may come back automatically if the same charge keeps recurring.";
+    Alert.alert(`Remove "${s.description ?? s.merchantKey}"?`, message, [
       { text: "Cancel", style: "cancel" },
       { text: "Remove", style: "destructive", onPress: () => deleteSubscription.mutate(s.id) },
     ]);
@@ -122,11 +125,9 @@ export default function SubscriptionsScreen() {
                 {s.frequency === "annual" && s.averageAmount < 0 && <AmortizeChip stream={s} />}
               </View>
               <MoneyText cents={s.averageAmount} className="text-text" mask={false} style={{ fontSize: rf(14.5) }} />
-              {s.isManual && (
-                <Pressable onPress={() => confirmRemove(s)} hitSlop={10} className="ml-3">
-                  <Trash2 size={16} color={colors["text-3"]} />
-                </Pressable>
-              )}
+              <Pressable onPress={() => confirmRemove(s)} hitSlop={10} className="ml-3">
+                <Trash2 size={16} color={colors["text-3"]} />
+              </Pressable>
             </View>
           ))}
           {streams.length === 0 && <Text className="font-ui text-text-3 py-4" style={{ fontSize: rf(14) }}>No subscriptions detected yet.</Text>}
