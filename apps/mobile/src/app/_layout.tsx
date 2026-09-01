@@ -133,6 +133,7 @@ function RootNavigator() {
           <Stack.Screen name="subscriptions" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerStyle: Platform.OS === "ios" ? { backgroundColor: "transparent" } : { backgroundColor: colors.surface }, headerTitle: "Subscriptions", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
           <Stack.Screen name="investments" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerStyle: Platform.OS === "ios" ? { backgroundColor: "transparent" } : { backgroundColor: colors.surface }, headerTitle: "Investments", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
           <Stack.Screen name="settings" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerStyle: Platform.OS === "ios" ? { backgroundColor: "transparent" } : { backgroundColor: colors.surface }, headerTitle: "Settings", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
+          <Stack.Screen name="income-schedules" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerStyle: Platform.OS === "ios" ? { backgroundColor: "transparent" } : { backgroundColor: colors.surface }, headerTitle: "Income schedules", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
         </Stack.Protected>
         <Stack.Protected guard={status === "unauthenticated"}>
           <Stack.Screen name="login" />

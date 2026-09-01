@@ -120,6 +120,31 @@ export function apiGet<T>(path: string): Promise<T> {
   return apiFetch<T>(path, { method: "GET" });
 }
 
+// Same auth/retry/refresh handling as apiFetch, but for an endpoint that
+// returns a raw body instead of JSON -- currently just /api/export (CSV/JSON
+// file content with a Content-Disposition header meant for a browser
+// download, not a JSON API response).
+export async function apiGetText(path: string): Promise<string> {
+  let res = await rawFetch(path, { method: "GET" }, inMemoryAccessToken);
+
+  if (res.status === 401 && refreshHandler) {
+    const newToken = await refreshOnce();
+    if (newToken) {
+      res = await rawFetch(path, { method: "GET" }, newToken);
+    } else {
+      onSessionExpired?.();
+      throw new ApiError(401, "Session expired");
+    }
+  }
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({ error: res.statusText }));
+    throw new ApiError(res.status, body.error ?? res.statusText);
+  }
+
+  return res.text();
+}
+
 export function apiPost<T>(path: string, body?: unknown): Promise<T> {
   return apiFetch<T>(path, { method: "POST", body: body ? JSON.stringify(body) : undefined });
 }
