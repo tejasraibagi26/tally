@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Check, SplitSquareVertical } from "lucide-react";
 import { SidePanel } from "@/components/ui/SidePanel";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { formatCents } from "@tally/core/money";
@@ -328,14 +329,18 @@ export function TransactionDetailPanel({
 
         {transaction.amount < 0 && (
           transaction.recurringStreamId || markedAnnual ? (
-            <span className="text-[13px] text-text-3">Marked as annual — spread {formatCents(Math.round(Math.abs(transaction.amount) / 12))}/mo across the budget.</span>
+            <div className="flex items-center gap-2 h-8 px-3 rounded-full w-fit bg-positive-subtle text-positive text-[13px] font-medium">
+              <Check size={13} strokeWidth={2.5} />
+              Marked as annual — spread {formatCents(Math.round(Math.abs(transaction.amount) / 12))}/mo across the budget
+            </div>
           ) : (
             <button
               type="button"
               onClick={markAnnual}
               disabled={markingAnnual}
-              className="text-[13px] text-brand text-left w-fit disabled:opacity-40"
+              className="flex items-center gap-2 h-8 px-3 rounded-full w-fit bg-brand-subtle text-brand border border-dashed border-brand-border text-[13px] font-medium hover:bg-brand-border/40 disabled:opacity-40"
             >
+              <SplitSquareVertical size={13} strokeWidth={2} />
               {markingAnnual ? "Marking…" : "Mark as annual subscription — spread cost across 12 months"}
             </button>
           )

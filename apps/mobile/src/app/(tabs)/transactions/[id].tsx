@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView, ActivityIndicator, Pressable, TextInput, Switch, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
-import { X, ChevronRight, Trash2, Check } from "lucide-react-native";
+import { X, ChevronRight, Trash2, Check, SplitSquareVertical } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { prettifyPfc } from "@tally/core/pfc";
 import { MoneyText } from "@/components/ui/MoneyText";
@@ -118,13 +118,25 @@ export default function TransactionDetailScreen() {
               </View>
               {t.amount < 0 &&
                 (t.recurringStreamId ? (
-                  <Text className="font-ui text-text-3" style={{ fontSize: rf(12.5) }}>
-                    Marked as annual — spread {formatCents(Math.round(Math.abs(t.amount) / 12))}/mo across the budget.
-                  </Text>
+                  <View
+                    className="flex-row items-center gap-1.5 self-start px-3 rounded-full"
+                    style={{ height: 32, backgroundColor: colors["positive-subtle"] }}
+                  >
+                    <Check size={13} color={colors.positive} strokeWidth={2.5} />
+                    <Text className="font-ui-medium" style={{ fontSize: rf(12.5), color: colors.positive }}>
+                      Marked as annual — spread {formatCents(Math.round(Math.abs(t.amount) / 12))}/mo
+                    </Text>
+                  </View>
                 ) : (
-                  <Pressable onPress={() => markAnnual.mutate()} disabled={markAnnual.isPending} hitSlop={8}>
+                  <Pressable
+                    onPress={() => markAnnual.mutate()}
+                    disabled={markAnnual.isPending}
+                    className="flex-row items-center gap-1.5 self-start px-3 rounded-full disabled:opacity-40"
+                    style={{ height: 32, backgroundColor: colors["brand-subtle"], borderWidth: 1, borderStyle: "dashed", borderColor: colors["brand-border"] }}
+                  >
+                    <SplitSquareVertical size={13} color={colors.brand} strokeWidth={2} />
                     <Text className="font-ui-medium text-brand" style={{ fontSize: rf(13) }}>
-                      {markAnnual.isPending ? "Marking…" : "Mark as annual subscription — spread cost across 12 months"}
+                      {markAnnual.isPending ? "Marking…" : "Mark as annual subscription"}
                     </Text>
                   </Pressable>
                 ))}
