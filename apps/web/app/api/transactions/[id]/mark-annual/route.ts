@@ -32,13 +32,24 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   const merchantKey = normalizeMerchantKey(txn.merchantName ?? txn.name);
-  const predictedNextDate = addDays(txn.postedDate, 365);
 
   const [existing] = await db
-    .select({ id: schema.recurringStreams.id, lastDate: schema.recurringStreams.lastDate, predictedNextDate: schema.recurringStreams.predictedNextDate })
+    .select({ id: schema.recurringStreams.id, lastDate: schema.recurringStreams.lastDate })
     .from(schema.recurringStreams)
     .where(and(eq(schema.recurringStreams.userId, userId), eq(schema.recurringStreams.merchantKey, merchantKey), eq(schema.recurringStreams.accountId, txn.accountId)))
     .limit(1);
+
+  // The most recent of the two known occurrences — an existing stream may
+  // predate this transaction (or vice versa) if detection had already
+  // clustered this merchant under some other cadence before the user
+  // confirmed it's actually annual.
+  const lastDate = existing?.lastDate && existing.lastDate > txn.postedDate ? existing.lastDate : txn.postedDate;
+  // Always recomputed from that date, never preserved from `existing` — a
+  // prior (non-annual) detection pass could have left a predictedNextDate
+  // just weeks out, which would make generateDueManualBillPayments's
+  // due-date loop produce zero candidate months and silently generate
+  // nothing once amortizeMonthly forces it to be read as an annual due date.
+  const predictedNextDate = addDays(lastDate, 365);
 
   const [stream] = existing
     ? await db
@@ -48,11 +59,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           amortizeMonthly: true,
           categoryId: txn.categoryId,
           averageAmount: txn.amount,
-          // Keep detection's own dates if it already has some — a single
-          // manually-marked transaction shouldn't regress a stream detection
-          // already anchored with real data.
-          lastDate: existing.lastDate ?? txn.postedDate,
-          predictedNextDate: existing.predictedNextDate ?? predictedNextDate,
+          lastDate,
+          predictedNextDate,
         })
         .where(eq(schema.recurringStreams.id, existing.id))
         .returning()

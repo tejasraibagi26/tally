@@ -46,7 +46,7 @@ function currentMonthStart(): string {
  */
 export async function generateDueManualBillPayments(stream: ManualBillStream): Promise<number> {
   if (!stream.accountId) return 0;
-  const dueDate = stream.manualNextDueDate ?? (stream.amortizeMonthly ? stream.predictedNextDate : null);
+  let dueDate = stream.manualNextDueDate ?? (stream.amortizeMonthly ? stream.predictedNextDate : null);
   if (!dueDate) return 0;
 
   const amortizing = stream.amortizeMonthly === true;
@@ -57,9 +57,27 @@ export async function generateDueManualBillPayments(stream: ManualBillStream): P
   // once that real charge is excluded from spend — see excludeAmortizedRealCharges.
   const startMonth = amortizing && stream.lastDate ? stream.lastDate.slice(0, 7) + "-01" : currentMonthStart();
 
+  // Self-heals a stale predictedNextDate inherited from a stream that
+  // existed under some other (non-annual) cadence before amortizeMonthly
+  // was turned on — without this, a due date left in the past or only a
+  // few weeks out silently produces zero candidate months below, forever,
+  // since there's no user-facing way to retrigger this once a transaction
+  // already shows "Marked as annual."
+  if (amortizing && dueDate <= startMonth) {
+    dueDate = shiftMonth(startMonth, 12);
+  }
+
+  // Compared against the due date's own month-start (not the raw due date)
+  // for the amortizing path specifically, so a due date that isn't the 1st
+  // (e.g. "2027-08-15") doesn't pull in one extra trailing month — 13
+  // installments instead of 12. Left as a raw-date comparison for the
+  // pre-existing manual-bill path to avoid changing behavior nothing here
+  // asked to touch.
+  const upperBound = amortizing ? dueDate.slice(0, 7) + "-01" : dueDate;
+
   const candidates: string[] = [];
   let month = startMonth;
-  while (month < dueDate && candidates.length < MAX_MONTHS) {
+  while (month < upperBound && candidates.length < MAX_MONTHS) {
     candidates.push(month);
     month = shiftMonth(month, 1);
   }
