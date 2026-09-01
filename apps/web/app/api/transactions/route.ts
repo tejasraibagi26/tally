@@ -100,6 +100,7 @@ export async function GET(req: Request) {
     location: schema.transactions.location,
     plaidTransactionId: schema.transactions.plaidTransactionId,
     isManual: schema.transactions.isManual,
+    recurringStreamId: schema.transactions.recurringStreamId,
   };
 
   const [rows, countRows] = await Promise.all([
@@ -157,6 +158,7 @@ export async function GET(req: Request) {
     locationLabel: locationLabel(t.location),
     plaidTransactionId: t.plaidTransactionId,
     isManual: t.isManual,
+    recurringStreamId: t.recurringStreamId,
     splits: splitsByTransaction.get(t.id) ?? [],
   }));
 

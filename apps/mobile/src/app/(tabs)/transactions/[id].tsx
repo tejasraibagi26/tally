@@ -5,7 +5,8 @@ import { X, ChevronRight, Trash2, Check } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { prettifyPfc } from "@tally/core/pfc";
 import { MoneyText } from "@/components/ui/MoneyText";
-import { useTransaction, useUpdateTransaction, useDeleteTransaction } from "@/lib/queries/transactions";
+import { useTransaction, useUpdateTransaction, useDeleteTransaction, useMarkAnnual } from "@/lib/queries/transactions";
+import { formatCents } from "@tally/core/money";
 import { useCategories } from "@/lib/queries/categories";
 import { amountColor } from "@/lib/amountColor";
 import { CategoryPickerSheet } from "@/components/CategoryPickerSheet";
@@ -27,6 +28,7 @@ export default function TransactionDetailScreen() {
   const { data: categoriesData } = useCategories();
   const updateTransaction = useUpdateTransaction(id ?? "");
   const deleteTransaction = useDeleteTransaction(id ?? "");
+  const markAnnual = useMarkAnnual(id ?? "");
 
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
@@ -114,6 +116,18 @@ export default function TransactionDetailScreen() {
                 <Text className="font-ui text-text-2" style={{ fontSize: rf(14) }}>Exclude from budget</Text>
                 <Switch value={excluded} onValueChange={markDirty(setExcluded)} trackColor={{ true: colors.brand }} />
               </View>
+              {t.amount < 0 &&
+                (t.recurringStreamId ? (
+                  <Text className="font-ui text-text-3" style={{ fontSize: rf(12.5) }}>
+                    Marked as annual — spread {formatCents(Math.round(Math.abs(t.amount) / 12))}/mo across the budget.
+                  </Text>
+                ) : (
+                  <Pressable onPress={() => markAnnual.mutate()} disabled={markAnnual.isPending} hitSlop={8}>
+                    <Text className="font-ui-medium text-brand" style={{ fontSize: rf(13) }}>
+                      {markAnnual.isPending ? "Marking…" : "Mark as annual subscription — spread cost across 12 months"}
+                    </Text>
+                  </Pressable>
+                ))}
             </View>
 
             <View className="gap-2 pt-2" style={{ borderTopWidth: 1, borderTopColor: colors.border }}>

@@ -1,13 +1,46 @@
 import { View, Text, ScrollView, ActivityIndicator, Pressable, Alert } from "react-native";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
-import { useSubscriptions, useDeleteSubscription, type RecurringStream } from "@/lib/queries/subscriptions";
+import { useSubscriptions, useDeleteSubscription, useSetAmortizeMonthly, type RecurringStream } from "@/lib/queries/subscriptions";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { hairline } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
-import { Trash2 } from "lucide-react-native";
+import { Trash2, Check, SplitSquareVertical } from "lucide-react-native";
+
+// Same "chip, not plain text" treatment as web's AmortizeToggle.tsx --
+// annual only (the other cadences already post real monthly-ish charges of
+// their own, nothing to smooth).
+function AmortizeChip({ stream }: { stream: RecurringStream }) {
+  const rf = useRF();
+  const colors = useThemeColors();
+  const setAmortize = useSetAmortizeMonthly();
+
+  return (
+    <Pressable
+      onPress={() => setAmortize.mutate({ id: stream.id, amortizeMonthly: !stream.amortizeMonthly })}
+      disabled={setAmortize.isPending}
+      className="flex-row items-center gap-1 self-start px-2 rounded-full mt-1 disabled:opacity-40"
+      style={{
+        height: 22,
+        backgroundColor: stream.amortizeMonthly ? colors["positive-subtle"] : colors["brand-subtle"],
+        borderWidth: stream.amortizeMonthly ? 0 : 1,
+        borderStyle: "dashed",
+        borderColor: colors["brand-border"],
+      }}
+    >
+      {stream.amortizeMonthly ? (
+        <Check size={10} color={colors.positive} strokeWidth={2.5} />
+      ) : (
+        <SplitSquareVertical size={10} color={colors.brand} strokeWidth={2} />
+      )}
+      <Text className="font-ui-medium" style={{ fontSize: rf(11), color: stream.amortizeMonthly ? colors.positive : colors.brand }}>
+        {setAmortize.isPending ? "…" : stream.amortizeMonthly ? "Spread across months" : "Spread across months?"}
+      </Text>
+    </Pressable>
+  );
+}
 
 const FREQUENCY_LABEL: Record<RecurringStream["frequency"], string> = {
   weekly: "Weekly",
@@ -86,6 +119,7 @@ export default function SubscriptionsScreen() {
                   {FREQUENCY_LABEL[s.frequency]}
                   {s.status === "at_risk" ? " · At risk" : ""}
                 </Text>
+                {s.frequency === "annual" && s.averageAmount < 0 && <AmortizeChip stream={s} />}
               </View>
               <MoneyText cents={s.averageAmount} className="text-text" mask={false} style={{ fontSize: rf(14.5) }} />
               {s.isManual && (
