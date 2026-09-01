@@ -14,6 +14,12 @@ import { useRF } from "@/theme/responsiveFont";
 import { hairline } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { EmptyPeriodIllustration } from "@/components/transactions/EmptyPeriodIllustration";
+
+function currentMonthLabel(): string {
+  return new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
+}
 
 // MOBILE_DESIGN.md §5.3 -- card list (not a table), infinite scroll, filter
 // pill instead of a sticky multi-field bar. Swipe-to-categorize is still
@@ -128,8 +134,16 @@ export default function TransactionsScreen() {
         ListEmptyComponent={
           isLoading ? (
             <ActivityIndicator className="mt-8" />
+          ) : activeCount === 0 ? (
+            <View className="rounded-card bg-surface p-8 mt-2">
+              <EmptyState
+                illustration={<EmptyPeriodIllustration />}
+                title={`No transactions in ${currentMonthLabel()}`}
+                description="Nothing's posted yet this month."
+              />
+            </View>
           ) : (
-            <Text className="font-ui text-text-3 rounded-card bg-surface p-6" style={{ fontSize: rf(14) }}>No transactions in this range.</Text>
+            <Text className="font-ui text-text-3 rounded-card bg-surface p-6" style={{ fontSize: rf(14) }}>No transactions match these filters.</Text>
           )
         }
         ListFooterComponent={isFetchingNextPage ? <ActivityIndicator className="py-4" /> : null}
