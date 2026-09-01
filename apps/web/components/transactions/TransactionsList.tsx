@@ -115,6 +115,11 @@ export function TransactionsList({
                     Manual
                   </span>
                 )}
+                {t.excludedFromBudget && (
+                  <span className="flex-none px-1.5 py-0.5 rounded-full bg-sunken text-text-3 text-[11px] font-medium uppercase tracking-wide">
+                    Excluded
+                  </span>
+                )}
               </span>
               <span className={`text-right flex-none text-[15px] tabular money ${amountColorClass(t.amount)}`}>{formatCents(t.amount, { signed: true })}</span>
             </div>
@@ -143,6 +148,11 @@ export function TransactionsList({
               {t.isManual && (
                 <span className="flex-none px-1.5 py-0.5 rounded-full bg-sunken text-text-3 text-[11px] font-medium uppercase tracking-wide">
                   Manual
+                </span>
+              )}
+              {t.excludedFromBudget && (
+                <span className="flex-none px-1.5 py-0.5 rounded-full bg-sunken text-text-3 text-[11px] font-medium uppercase tracking-wide">
+                  Excluded
                 </span>
               )}
             </span>

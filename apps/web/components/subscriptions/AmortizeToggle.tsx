@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Check, SplitSquareVertical } from "lucide-react";
 
 export function AmortizeToggle({ streamId, amortizeMonthly }: { streamId: string; amortizeMonthly: boolean }) {
   const router = useRouter();
@@ -32,11 +33,23 @@ export function AmortizeToggle({ streamId, amortizeMonthly }: { streamId: string
       title={amortizeMonthly ? "Charged once a year, but spread 1/12 across every month's budget. Click to stop spreading it." : "Click to spread this annual charge as 1/12 across every month's budget instead of hitting one month all at once."}
       className={
         amortizeMonthly
-          ? "text-[12px] text-positive whitespace-nowrap disabled:opacity-40"
-          : "text-[12px] text-brand whitespace-nowrap disabled:opacity-40"
+          ? "inline-flex items-center gap-1 self-start h-[22px] px-2 rounded-full text-[11.5px] font-medium whitespace-nowrap bg-positive-subtle text-positive hover:brightness-95 disabled:opacity-40"
+          : "inline-flex items-center gap-1 self-start h-[22px] px-2 rounded-full text-[11.5px] font-medium whitespace-nowrap bg-brand-subtle text-brand border border-dashed border-brand-border hover:bg-brand-border/40 disabled:opacity-40"
       }
     >
-      {saving ? "…" : amortizeMonthly ? "Spread across months ✓" : "Spread across months?"}
+      {saving ? (
+        "…"
+      ) : amortizeMonthly ? (
+        <>
+          <Check size={11} strokeWidth={2.5} />
+          Spread across months
+        </>
+      ) : (
+        <>
+          <SplitSquareVertical size={11} strokeWidth={2} />
+          Spread across months?
+        </>
+      )}
     </button>
   );
 }
