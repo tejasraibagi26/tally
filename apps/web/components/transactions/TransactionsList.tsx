@@ -34,6 +34,15 @@ export interface AccountLookup {
   plaidItemLabel: string | null;
 }
 
+// Only an amortized installment's label ends in "(n/total)" (see
+// recurringBillGeneration.ts's labelFor) — a manual-bill backfill posts at
+// its stream's plain description/merchant name instead. Cheaper than a
+// join just to tell the two synthetic-transaction cases apart for badging.
+const AMORTIZED_INSTALLMENT_RE = /\(\d+\/\d+\)$/;
+function isAmortizedInstallment(name: string): boolean {
+  return AMORTIZED_INSTALLMENT_RE.test(name);
+}
+
 function amountColorClass(cents: number): string {
   if (cents > 0) return "text-positive";
   if (cents < 0) return "text-negative";
@@ -111,9 +120,15 @@ export function TransactionsList({
                   </span>
                 )}
                 {t.isManual && (
-                  <span className="flex-none px-1.5 py-0.5 rounded-full bg-sunken text-text-3 text-[11px] font-medium uppercase tracking-wide">
-                    Manual
-                  </span>
+                  isAmortizedInstallment(t.merchantName ?? t.name) ? (
+                    <span className="flex-none px-1.5 py-0.5 rounded-full bg-positive-subtle text-positive text-[11px] font-medium uppercase tracking-wide">
+                      Spread
+                    </span>
+                  ) : (
+                    <span className="flex-none px-1.5 py-0.5 rounded-full bg-sunken text-text-3 text-[11px] font-medium uppercase tracking-wide">
+                      Manual
+                    </span>
+                  )
                 )}
                 {t.excludedFromBudget && (
                   <span className="flex-none px-1.5 py-0.5 rounded-full bg-sunken text-text-3 text-[11px] font-medium uppercase tracking-wide">
@@ -146,9 +161,15 @@ export function TransactionsList({
                 </span>
               )}
               {t.isManual && (
-                <span className="flex-none px-1.5 py-0.5 rounded-full bg-sunken text-text-3 text-[11px] font-medium uppercase tracking-wide">
-                  Manual
-                </span>
+                isAmortizedInstallment(t.merchantName ?? t.name) ? (
+                  <span className="flex-none px-1.5 py-0.5 rounded-full bg-positive-subtle text-positive text-[11px] font-medium uppercase tracking-wide">
+                    Spread
+                  </span>
+                ) : (
+                  <span className="flex-none px-1.5 py-0.5 rounded-full bg-sunken text-text-3 text-[11px] font-medium uppercase tracking-wide">
+                    Manual
+                  </span>
+                )
               )}
               {t.excludedFromBudget && (
                 <span className="flex-none px-1.5 py-0.5 rounded-full bg-sunken text-text-3 text-[11px] font-medium uppercase tracking-wide">

@@ -21,6 +21,14 @@ function currentMonthLabel(): string {
   return new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
 
+// Matches web's TransactionsList.tsx: only an amortized installment's label
+// ends in "(n/total)" (see recurringBillGeneration.ts's labelFor) -- a
+// manual-bill backfill posts at its plain description/merchant name instead.
+const AMORTIZED_INSTALLMENT_RE = /\(\d+\/\d+\)$/;
+function isAmortizedInstallment(name: string): boolean {
+  return AMORTIZED_INSTALLMENT_RE.test(name);
+}
+
 // MOBILE_DESIGN.md §5.3 -- card list (not a table), infinite scroll, filter
 // pill instead of a sticky multi-field bar. Swipe-to-categorize is still
 // deferred past this first cut; the filter sheet itself is wired below.
@@ -51,6 +59,8 @@ function TransactionRowItem({ item, isFirst, isLast, colors }: { item: Transacti
         <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }} numberOfLines={1}>
           {item.categoryName ?? prettifyPfc(item.pfcDetailed)}
           {item.isPending ? " · Pending" : ""}
+          {item.isManual && isAmortizedInstallment(item.merchantName ?? item.name) ? " · Spread" : ""}
+          {item.excludedFromBudget ? " · Excluded" : ""}
         </Text>
       </View>
       <MoneyText
