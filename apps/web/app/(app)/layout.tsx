@@ -1,20 +1,33 @@
 import { redirect } from "next/navigation";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, gte, lt, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, schema } from "@/db";
 import { SideNav } from "@/components/nav/SideNav";
 import { MobileNav } from "@/components/nav/MobileNav";
 import { MOCK_MODE } from "@/lib/config";
+import { monthRange } from "@tally/core/budgetMath";
+
+function currentMonth(): string {
+  const now = new Date();
+  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)).toISOString().slice(0, 10);
+}
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
   const userId = (session.user as { id: string }).id;
+  // Matches the Transactions page's own default (unfiltered) view, which
+  // defaults to the current month — this nav badge should read as "how many
+  // are waiting in Transactions right now," not an all-time total.
+  const { start, end } = monthRange(currentMonth());
 
   const [[user], [txnCount], [acctCount], [cardCount]] = await Promise.all([
     db.select({ name: schema.users.name, email: schema.users.email }).from(schema.users).where(eq(schema.users.id, userId)).limit(1),
-    db.select({ count: sql<number>`count(*)::int` }).from(schema.transactions).where(eq(schema.transactions.userId, userId)),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(schema.transactions)
+      .where(and(eq(schema.transactions.userId, userId), gte(schema.transactions.postedDate, start), lt(schema.transactions.postedDate, end))),
     db.select({ count: sql<number>`count(*)::int` }).from(schema.accounts).where(eq(schema.accounts.userId, userId)),
     db
       .select({ count: sql<number>`count(*)::int` })
