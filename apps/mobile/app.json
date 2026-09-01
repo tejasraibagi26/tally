@@ -8,7 +8,10 @@
     "scheme": "tally",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "com.tejasraibagi.tally"
+      "bundleIdentifier": "com.tejasraibagi.tally",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Tally uses Face ID to keep your financial data private when the app's lock is turned on."
+      }
     },
     "android": {
       "package": "com.tejasraibagi.tally",
@@ -27,6 +30,7 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
+      "expo-local-authentication",
       "expo-font",
       [
         "expo-splash-screen",

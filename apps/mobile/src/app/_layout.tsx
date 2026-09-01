@@ -20,7 +20,7 @@ import { useThemeColors } from "@/theme/useThemeColors";
 SplashScreen.preventAutoHideAsync();
 
 function RootNavigator() {
-  const { status } = useAuth();
+  const { status, isLocked } = useAuth();
   const [fontsLoaded] = useFonts(fontsToLoad);
   const { setColorScheme } = useColorScheme();
   const colors = useThemeColors();
@@ -63,7 +63,15 @@ function RootNavigator() {
           headerTitleAlign: "left",
         }}
       >
-        <Stack.Protected guard={status === "authenticated"}>
+        {/* Split from the authenticated branch below rather than an overlay
+            on top of it -- (tabs) and the pushed screens are never mounted
+            while locked, so there's nothing for a screenshot/app-switcher
+            preview (or just a glance at the screen) to leak underneath the
+            lock screen. */}
+        <Stack.Protected guard={status === "authenticated" && isLocked}>
+          <Stack.Screen name="lock" />
+        </Stack.Protected>
+        <Stack.Protected guard={status === "authenticated" && !isLocked}>
           <Stack.Screen name="(tabs)" />
           {/* A true content-sized bottom sheet (native detents), not a full-screen
               modal -- fixes both the giant dead space below the last row and the

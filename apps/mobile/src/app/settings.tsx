@@ -2,15 +2,54 @@ import { useEffect, useState } from "react";
 import { View, Text, ScrollView, TextInput, Pressable, Switch, ActivityIndicator, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
+import * as LocalAuthentication from "expo-local-authentication";
 import { ChevronRight, Link2, Sun, Moon, Smartphone, Pencil, Lock, Trash2, Check, X } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { useAccountProfile, useUpdateAccountProfile, useUpdateRecaps, useChangePassword, useWipeAccount } from "@/lib/queries/account";
+import { useAuth } from "@/lib/AuthContext";
 import { ApiError } from "@/lib/api";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { type AppearanceMode, getStoredAppearanceMode, storeAppearanceMode } from "@/theme/appearance";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { useRF } from "@/theme/responsiveFont";
+
+function BiometricLockToggle() {
+  const colors = useThemeColors();
+  const rf = useRF();
+  const { biometricLockEnabled, setBiometricLockEnabled } = useAuth();
+  const [busy, setBusy] = useState(false);
+
+  async function toggle(next: boolean) {
+    if (next) {
+      const [hasHardware, isEnrolled] = await Promise.all([LocalAuthentication.hasHardwareAsync(), LocalAuthentication.isEnrolledAsync()]);
+      if (!hasHardware || !isEnrolled) {
+        Alert.alert(
+          "Set up Face ID / fingerprint first",
+          "Your device doesn't have biometrics (or a passcode) set up yet — add one in your device's system settings, then try again.",
+        );
+        return;
+      }
+    }
+    setBusy(true);
+    await setBiometricLockEnabled(next);
+    setBusy(false);
+  }
+
+  return (
+    <Card className="p-5">
+      <View className="flex-row items-center justify-between gap-4">
+        <View className="flex-1 gap-0.5">
+          <Text className="font-ui-medium text-text" style={{ fontSize: rf(14.5) }}>Require Face ID / fingerprint</Text>
+          <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>
+            Locks Tally every time it's backgrounded, so anyone else picking up your phone can't see your finances.
+          </Text>
+        </View>
+        <Switch value={biometricLockEnabled} onValueChange={toggle} disabled={busy} trackColor={{ true: colors.brand }} />
+      </View>
+    </Card>
+  );
+}
 
 const APPEARANCE_OPTIONS: { mode: AppearanceMode; label: string; Icon: typeof Sun }[] = [
   { mode: "light", label: "Light", Icon: Sun },
@@ -268,6 +307,14 @@ export default function SettingsScreen() {
         <Card className="p-3">
           <AppearancePicker />
         </Card>
+      </View>
+
+      {/* Security */}
+      <View className="gap-3">
+        <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(13) }}>
+          Security
+        </Text>
+        <BiometricLockToggle />
       </View>
 
       {/* Notifications */}
