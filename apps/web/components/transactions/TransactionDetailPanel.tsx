@@ -40,6 +40,7 @@ export interface TransactionDetailData {
   accountMask: string | null;
   plaidItemLabel: string | null;
   isManual: boolean;
+  recurringStreamId: string | null;
   splits: DetailSplit[];
 }
 
@@ -71,6 +72,8 @@ export function TransactionDetailPanel({
   const [editingSplits, setEditingSplits] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [markingAnnual, setMarkingAnnual] = useState(false);
+  const [markedAnnual, setMarkedAnnual] = useState(false);
 
   useEffect(() => {
     if (!transaction) return;
@@ -85,6 +88,7 @@ export function TransactionDetailPanel({
     setPreviewCount(null);
     setSplits(transaction.splits);
     setEditingSplits(false);
+    setMarkedAnnual(false);
   }, [transaction]);
 
   if (!transaction) return null;
@@ -158,6 +162,20 @@ export function TransactionDetailPanel({
       console.error(err);
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function markAnnual() {
+    setMarkingAnnual(true);
+    try {
+      const res = await fetch(`/api/transactions/${transaction!.id}/mark-annual`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed to mark as annual");
+      setMarkedAnnual(true);
+      router.refresh();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setMarkingAnnual(false);
     }
   }
 
@@ -307,6 +325,21 @@ export function TransactionDetailPanel({
           <input type="checkbox" checked={excluded} onChange={(e) => setExcluded(e.target.checked)} />
           Exclude from budget
         </label>
+
+        {transaction.amount < 0 && (
+          transaction.recurringStreamId || markedAnnual ? (
+            <span className="text-[13px] text-text-3">Marked as annual — spread {formatCents(Math.round(Math.abs(transaction.amount) / 12))}/mo across the budget.</span>
+          ) : (
+            <button
+              type="button"
+              onClick={markAnnual}
+              disabled={markingAnnual}
+              className="text-[13px] text-brand text-left w-fit disabled:opacity-40"
+            >
+              {markingAnnual ? "Marking…" : "Mark as annual subscription — spread cost across 12 months"}
+            </button>
+          )
+        )}
 
         <div className="h-px bg-border" />
 

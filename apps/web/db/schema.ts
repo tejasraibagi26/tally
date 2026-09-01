@@ -285,11 +285,13 @@ export const transactions = pgTable("transactions", {
   // row would just come back on the next sync.
   isManual: boolean("is_manual").notNull().default(false),
   incomeScheduleId: uuid("income_schedule_id").references(() => incomeSchedules.id, { onDelete: "set null" }),
-  // Set only for a row lib/recurringBillGeneration.ts fabricated from a
-  // manually-added bill (recurringStreams.isManual) — no .references() here
-  // since recurringStreams is declared further down this file; matches how
-  // categories.parentId/transferGroupId skip an explicit FK for the same
-  // forward-reference reason.
+  // Set for a row lib/recurringBillGeneration.ts fabricated from a
+  // manually-added bill or an amortizeMonthly stream (recurringStreams.isManual
+  // / .amortizeMonthly), OR on the real Plaid-synced transaction an
+  // amortizeMonthly stream matches (see excludedFromBudget below) — no
+  // .references() here since recurringStreams is declared further down this
+  // file; matches how categories.parentId/transferGroupId skip an explicit FK
+  // for the same forward-reference reason.
   recurringStreamId: uuid("recurring_stream_id"),
   raw: jsonb("raw"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -442,6 +444,17 @@ export const recurringStreams = pgTable("recurring_streams", {
   // already gets real Plaid transactions on its own; synthesizing one
   // alongside would double-count it.
   isManual: boolean("is_manual").notNull().default(false),
+  // Only meaningful for frequency = "annual". When true, the real once-a-year
+  // Plaid charge is excluded from budget spend (see transactions matched to
+  // this stream) and lib/recurringBillGeneration.ts instead posts
+  // averageAmount/12 as a synthetic transaction every month, so a single
+  // annual renewal doesn't blow one month's category budget. Defaults false
+  // even for an auto-detected annual stream — detection only needs 2
+  // occurrences to surface an annual candidate (see recurringDetection.ts),
+  // which is too little evidence to start amortizing without the user
+  // confirming via "mark as annual" first. Never reset by
+  // detectRecurringForUser's upsert once the user has turned it on.
+  amortizeMonthly: boolean("amortize_monthly").notNull().default(false),
 }, (t) => ({
   userIdx: index("recurring_user_idx").on(t.userId),
   uniq: uniqueIndex("recurring_user_merchant_account_idx").on(t.userId, t.merchantKey, t.accountId),

@@ -1,0 +1,1 @@
+ALTER TABLE "recurring_streams" ADD COLUMN "amortize_monthly" boolean DEFAULT false NOT NULL;

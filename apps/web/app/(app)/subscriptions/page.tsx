@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { StatusBadge, type Status } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { NextDueDateEditor } from "@/components/subscriptions/NextDueDateEditor";
+import { AmortizeToggle } from "@/components/subscriptions/AmortizeToggle";
 import { AddBillForm } from "@/components/subscriptions/AddBillForm";
 import { RemoveBillButton } from "@/components/subscriptions/RemoveBillButton";
 import { accountDisplayName } from "@tally/core/accountName";
@@ -47,6 +48,7 @@ export default async function SubscriptionsPage() {
       manualNextDueDate: schema.recurringStreams.manualNextDueDate,
       status: schema.recurringStreams.status,
       isManual: schema.recurringStreams.isManual,
+      amortizeMonthly: schema.recurringStreams.amortizeMonthly,
       accountName: schema.accounts.name,
       accountNickname: schema.accounts.nickname,
       accountMask: schema.accounts.mask,
@@ -123,7 +125,12 @@ export default async function SubscriptionsPage() {
                   key={s.id}
                   className="grid grid-cols-[minmax(180px,1fr)_140px_150px_130px_130px_220px_130px_80px] gap-3 items-center px-4 py-2.5 border-b border-border last:border-b-0 min-w-[1170px]"
                 >
-                  <span className="text-[15px] text-text truncate">{s.description ?? s.merchantKey}</span>
+                  <span className="flex flex-col min-w-0">
+                    <span className="text-[15px] text-text truncate">{s.description ?? s.merchantKey}</span>
+                    {s.frequency === "annual" && s.averageAmount < 0 && (
+                      <AmortizeToggle streamId={s.id} amortizeMonthly={s.amortizeMonthly} />
+                    )}
+                  </span>
                   <span className="flex items-center gap-1.5 min-w-0">
                     {s.categoryName ? (
                       <>

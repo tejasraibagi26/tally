@@ -138,6 +138,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     location: schema.transactions.location,
     plaidTransactionId: schema.transactions.plaidTransactionId,
     isManual: schema.transactions.isManual,
+    recurringStreamId: schema.transactions.recurringStreamId,
   };
 
   const [rows, countRows, anyTxRow] = await Promise.all([
@@ -189,6 +190,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     locationLabel: locationLabel(t.location),
     plaidTransactionId: t.plaidTransactionId,
     isManual: t.isManual,
+    recurringStreamId: t.recurringStreamId,
     splits: splitsByTransaction.get(t.id) ?? [],
   }));
 

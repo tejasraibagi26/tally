@@ -1,6 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { detectRecurringStreams, normalizeMerchantKey, type RecurringCandidate } from "@tally/core/recurringDetection";
+import { excludeAmortizedRealCharges, generateDueManualBillPaymentsForAllStreams } from "@/lib/recurringBillGeneration";
 
 /**
  * Re-runs recurring detection (§7.5) over the user's full non-transfer,
@@ -59,4 +60,11 @@ export async function detectRecurringForUser(userId: string): Promise<void> {
         set: values,
       });
   }
+
+  // For any stream the user has confirmed as amortizeMonthly (whether via
+  // "mark as annual" or — in a later run — because detection re-found it):
+  // keep its real Plaid charge excluded from budget spend, and (re)generate
+  // this cycle's /12 synthetic installments. No-op for every other stream.
+  await excludeAmortizedRealCharges(userId);
+  await generateDueManualBillPaymentsForAllStreams(userId);
 }

@@ -58,6 +58,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     excludedFromBudget: t.excludedFromBudget,
     plaidTransactionId: t.plaidTransactionId,
     isManual: t.isManual,
+    recurringStreamId: t.recurringStreamId,
     splits: splitRows.filter((s) => s.categoryId).map((s) => ({ categoryId: s.categoryId as string, amount: s.amount, note: s.note })),
   });
 }

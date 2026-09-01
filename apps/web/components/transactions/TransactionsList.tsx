@@ -24,6 +24,7 @@ export interface TransactionRowData {
   locationLabel: string | null;
   plaidTransactionId: string | null;
   isManual: boolean;
+  recurringStreamId: string | null;
   splits: DetailSplit[];
 }
 
@@ -80,6 +81,7 @@ export function TransactionsList({
       accountMask: account?.mask ?? null,
       plaidItemLabel: account?.plaidItemLabel ?? null,
       isManual: row.isManual,
+      recurringStreamId: row.recurringStreamId,
       splits: row.splits,
     };
   }

@@ -122,6 +122,22 @@ describe("detectRecurringStreams", () => {
     expect(detectRecurringStreams(txs, "2026-03-05")[0]?.averageAmount).toBe(-1200);
   });
 
+  it("promotes a 2-occurrence annual pair (~365 day gap) to a low-confidence candidate", () => {
+    const txs = [
+      tx({ id: "1", amount: -13900, postedDate: "2025-03-10" }),
+      tx({ id: "2", amount: -13900, postedDate: "2026-03-12" }), // 367 days later
+    ];
+    const streams = detectRecurringStreams(txs, "2026-03-15");
+    expect(streams).toHaveLength(1);
+    expect(streams[0]).toMatchObject({ frequency: "annual", status: "active" });
+    expect(streams[0]!.confidence).toBeLessThan(0.5);
+  });
+
+  it("does not promote a 2-occurrence pair outside the annual gap band", () => {
+    const txs = [tx({ id: "1", postedDate: "2026-01-01" }), tx({ id: "2", postedDate: "2026-06-01" })]; // ~151 days
+    expect(detectRecurringStreams(txs, "2026-06-05")).toHaveLength(0);
+  });
+
   it("keeps confidence within [0, 1]", () => {
     const txs = [
       tx({ id: "1", postedDate: "2026-01-01" }),
