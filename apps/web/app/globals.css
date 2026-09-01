@@ -354,6 +354,43 @@ body {
   }
 }
 
+/* components/transactions/EmptyPeriodIllustration.tsx — the calendar card's
+   idle rock, the checked-day ring pulsing outward, and the drifting sparkles
+   around it. */
+@keyframes empty-card-tilt {
+  0%, 100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+@keyframes empty-ring-pulse {
+  0% {
+    r: 4;
+    opacity: 0.85;
+  }
+  100% {
+    r: 10;
+    opacity: 0;
+  }
+}
+
+@keyframes empty-sparkle-drift {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

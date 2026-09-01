@@ -7,6 +7,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { SyncButton } from "@/components/plaid/SyncButton";
 import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
 import { TransactionsList, type TransactionRowData, type AccountLookup } from "@/components/transactions/TransactionsList";
+import { EmptyPeriodIllustration } from "@/components/transactions/EmptyPeriodIllustration";
 import { AddTransactionForm } from "@/components/transactions/AddTransactionForm";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { groupCategoryOptions, categoryIdsInGroup } from "@/lib/categoryOptions";
@@ -315,7 +316,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
             />
           ) : !hasFilters ? (
             <EmptyState
-              icon={Receipt}
+              illustration={<EmptyPeriodIllustration />}
               title={`No transactions in ${monthLabel(thisMonth)}`}
               description="Nothing's posted yet this month. Use the date filters above to look at a different period."
             />
