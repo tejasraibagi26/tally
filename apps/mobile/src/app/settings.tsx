@@ -6,7 +6,7 @@ import * as LocalAuthentication from "expo-local-authentication";
 import { ChevronRight, Link2, Wallet, Download, Sun, Moon, Smartphone, Pencil, Lock, Trash2, Check, X } from "lucide-react-native";
 import { exportTransactions } from "@/lib/exportData";
 import { Card } from "@/components/ui/Card";
-import { useAccountProfile, useUpdateAccountProfile, useUpdateRecaps, useSendTestRecap, useChangePassword, useWipeAccount } from "@/lib/queries/account";
+import { useAccountProfile, useUpdateAccountProfile, useUpdateRecaps, useChangePassword, useWipeAccount } from "@/lib/queries/account";
 import { useAuth } from "@/lib/AuthContext";
 import { ApiError } from "@/lib/api";
 import { useThemeColors } from "@/theme/useThemeColors";
@@ -141,7 +141,6 @@ export default function SettingsScreen() {
   const { data: profile, isLoading } = useAccountProfile();
   const updateProfile = useUpdateAccountProfile();
   const updateRecaps = useUpdateRecaps();
-  const testRecap = useSendTestRecap();
   const changePassword = useChangePassword();
   const wipeAccount = useWipeAccount();
 
@@ -151,9 +150,6 @@ export default function SettingsScreen() {
   const [birthDate, setBirthDate] = useState("");
   const [profilePassword, setProfilePassword] = useState("");
   const [recapsEnabled, setRecapsEnabled] = useState(true);
-  const [testRecapStatus, setTestRecapStatus] = useState<
-    { kind: "sent"; monthLabel: string } | { kind: "skipped" } | { kind: "error"; message: string } | null
-  >(null);
 
   useEffect(() => {
     if (!profile) return;
@@ -169,16 +165,6 @@ export default function SettingsScreen() {
       await updateRecaps.mutateAsync(next);
     } catch {
       setRecapsEnabled(!next);
-    }
-  }
-
-  async function sendTestRecap() {
-    setTestRecapStatus(null);
-    try {
-      const data = await testRecap.mutateAsync();
-      setTestRecapStatus(data.result.status === "sent" ? { kind: "sent", monthLabel: data.result.monthLabel } : { kind: "skipped" });
-    } catch (err) {
-      setTestRecapStatus({ kind: "error", message: errorMessage(err, "Something went wrong") });
     }
   }
 
@@ -357,7 +343,7 @@ export default function SettingsScreen() {
         <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(13) }}>
           Notifications
         </Text>
-        <Card className="p-5 gap-4">
+        <Card className="p-5">
           <View className="flex-row items-center justify-between gap-4">
             <View className="flex-1 gap-0.5">
               <Text className="font-ui-medium text-text" style={{ fontSize: rf(14.5) }}>Monthly recap email</Text>
@@ -366,31 +352,6 @@ export default function SettingsScreen() {
               </Text>
             </View>
             <Switch value={recapsEnabled} onValueChange={toggleRecaps} trackColor={{ true: colors.brand }} />
-          </View>
-          <View className="gap-2 pt-3" style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
-            <View className="flex-row items-center justify-between gap-4">
-              <Text className="flex-1 font-ui text-text-2" style={{ fontSize: rf(12.5) }}>
-                Preview this month&apos;s recap, sent to your own inbox right now.
-              </Text>
-              <Pressable
-                onPress={sendTestRecap}
-                disabled={testRecap.isPending}
-                className="h-9 px-3.5 rounded-full items-center justify-center bg-surface-2 disabled:opacity-50"
-              >
-                <Text className="font-ui-medium text-text" style={{ fontSize: rf(13) }}>
-                  {testRecap.isPending ? "Sending…" : "Send test recap"}
-                </Text>
-              </Pressable>
-            </View>
-            {testRecapStatus?.kind === "sent" && (
-              <Text className="font-ui text-positive" style={{ fontSize: rf(12.5) }}>Sent — check your inbox for the {testRecapStatus.monthLabel} recap.</Text>
-            )}
-            {testRecapStatus?.kind === "skipped" && (
-              <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>Nothing sent — no accounts connected yet.</Text>
-            )}
-            {testRecapStatus?.kind === "error" && (
-              <Text className="font-ui text-negative" style={{ fontSize: rf(12.5) }}>{testRecapStatus.message}</Text>
-            )}
           </View>
         </Card>
       </View>

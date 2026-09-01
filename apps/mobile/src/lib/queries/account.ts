@@ -49,22 +49,6 @@ export function useChangePassword() {
   });
 }
 
-// Matches apps/web/components/settings/SendTestRecapButton.tsx's contract
-// exactly (POST /api/settings/recaps/test, session-authed, sends only to
-// the caller) -- the test route skips the already-sent/no-activity checks
-// the real monthly cron applies, so "skipped" here only ever means no
-// accounts connected yet.
-export interface TestRecapResult {
-  ok: true;
-  result: { status: "sent" | "skipped"; monthLabel: string };
-}
-
-export function useSendTestRecap() {
-  return useMutation({
-    mutationFn: () => apiPost<TestRecapResult>("/api/settings/recaps/test", {}),
-  });
-}
-
 export function useWipeAccount() {
   const queryClient = useQueryClient();
   return useMutation({
