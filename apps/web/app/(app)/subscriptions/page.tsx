@@ -4,12 +4,9 @@ import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { formatCents } from "@tally/core/money";
 import { Card } from "@/components/ui/Card";
-import { StatusBadge, type Status } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { NextDueDateEditor } from "@/components/subscriptions/NextDueDateEditor";
-import { AmortizeToggle } from "@/components/subscriptions/AmortizeToggle";
 import { AddBillForm } from "@/components/subscriptions/AddBillForm";
-import { RemoveBillButton } from "@/components/subscriptions/RemoveBillButton";
+import { SubscriptionsTable } from "@/components/subscriptions/SubscriptionsTable";
 import { accountDisplayName } from "@tally/core/accountName";
 
 const FREQUENCY_MONTHLY_MULTIPLIER: Record<string, number> = {
@@ -19,20 +16,6 @@ const FREQUENCY_MONTHLY_MULTIPLIER: Record<string, number> = {
   quarterly: 1 / 3,
   annual: 1 / 12,
 };
-
-const FREQUENCY_LABEL: Record<string, string> = {
-  weekly: "Weekly",
-  biweekly: "Every 2 weeks",
-  monthly: "Monthly",
-  quarterly: "Quarterly",
-  annual: "Annual",
-};
-
-function statusBadge(status: string): Status {
-  if (status === "active") return "good";
-  if (status === "at_risk") return "warning";
-  return "critical"; // cancelled
-}
 
 export default async function SubscriptionsPage() {
   const userId = await requireUserId();
@@ -109,63 +92,7 @@ export default async function SubscriptionsPage() {
           </Card>
 
           <Card className="overflow-hidden">
-            <div className="overflow-x-auto">
-              <div className="grid grid-cols-[minmax(180px,1fr)_140px_150px_130px_130px_220px_130px_80px] gap-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 min-w-[1170px]">
-                <span>Merchant</span>
-                <span>Category</span>
-                <span>Account</span>
-                <span>Cadence</span>
-                <span className="text-right">Amount</span>
-                <span>Next date</span>
-                <span>Status</span>
-                <span></span>
-              </div>
-              {streams.map((s) => (
-                <div
-                  key={s.id}
-                  className="grid grid-cols-[minmax(180px,1fr)_140px_150px_130px_130px_220px_130px_80px] gap-3 items-center px-4 py-2.5 border-b border-border last:border-b-0 min-w-[1170px]"
-                >
-                  <span className="flex flex-col min-w-0">
-                    <span className="text-[15px] text-text truncate">{s.description ?? s.merchantKey}</span>
-                    {s.frequency === "annual" && s.averageAmount < 0 && (
-                      <AmortizeToggle streamId={s.id} amortizeMonthly={s.amortizeMonthly} />
-                    )}
-                  </span>
-                  <span className="flex items-center gap-1.5 min-w-0">
-                    {s.categoryName ? (
-                      <>
-                        <span className="w-1.5 h-1.5 rounded-full flex-none" style={{ background: `var(--series-${s.categoryColorSlot})` }} />
-                        <span className="text-[13px] text-text-2 truncate">{s.categoryName}</span>
-                      </>
-                    ) : (
-                      <span className="text-[13px] text-text-3">—</span>
-                    )}
-                  </span>
-                  <span className="font-mono text-xs text-text-2 truncate">
-                    {s.accountName ? `${accountDisplayName(s.accountName, s.accountNickname)} ····${s.accountMask ?? "----"}` : "—"}
-                  </span>
-                  <span className="text-[13.5px] text-text-2">{FREQUENCY_LABEL[s.frequency] ?? s.frequency}</span>
-                  <span className={`text-right text-[15px] tabular ${s.averageAmount > 0 ? "text-positive" : "text-text"}`}>
-                    {formatCents(s.averageAmount, { signed: true })}
-                  </span>
-                  <NextDueDateEditor streamId={s.id} predictedNextDate={s.predictedNextDate} manualNextDueDate={s.manualNextDueDate} />
-                  {s.manualNextDueDate ? (
-                    // "Manual" (removable) is a real "+ Add a bill" entry; an
-                    // auto-detected stream whose due date was merely
-                    // overridden isn't the same thing — same badge color
-                    // would otherwise look identical to a removable bill
-                    // right next to a Remove button that never appears for it.
-                    <StatusBadge status="syncing" label={s.isManual ? "Manual" : "Overridden"} />
-                  ) : (
-                    <StatusBadge
-                      status={statusBadge(s.status)}
-                      label={s.status === "active" ? "Active" : s.status === "at_risk" ? "At risk" : "Cancelled"}
-                    />
-                  )}
-                  {s.isManual && <RemoveBillButton streamId={s.id} description={s.description ?? s.merchantKey} />}
-                </div>
-              ))}
-            </div>
+            <SubscriptionsTable streams={streams} />
           </Card>
         </>
       )}

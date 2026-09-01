@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
 
 /** Removes a manually-added bill (AddBillForm's "+ Add a bill") — the only
  * kind of recurringStreams row this is allowed for; an auto-detected stream
@@ -28,9 +29,11 @@ export function RemoveBillButton({ streamId, description }: { streamId: string; 
       type="button"
       onClick={() => void remove()}
       disabled={removing}
-      className="text-xs text-text-3 hover:text-negative disabled:opacity-40 flex-none"
+      title="Remove"
+      aria-label="Remove"
+      className="w-7 h-7 flex-none rounded-control flex items-center justify-center text-text-3 hover:text-negative hover:bg-negative-subtle disabled:opacity-40"
     >
-      {removing ? "…" : "Remove"}
+      <Trash2 size={15} strokeWidth={1.75} />
     </button>
   );
 }
