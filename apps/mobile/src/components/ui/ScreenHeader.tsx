@@ -24,12 +24,20 @@ export function useScreenContentTop(extra = 12): number {
 
 // Android's headerLeft override (see _layout.tsx) -- native-stack renders no
 // back arrow at all once headerTitle is empty (tested); same circular
-// bg-surface-2 treatment as the rest of the app's icon buttons.
+// bg-surface-2 treatment as the rest of the app's icon buttons. android_ripple
+// disabled for the same reason as (tabs)/_layout.tsx's NoRippleTabButton --
+// the default ripple draws its own rectangular highlight over this tile,
+// which already provides its own pressed-state affordance via bg-surface-2.
 export function NativeBackButton() {
   const router = useRouter();
   const colors = useThemeColors();
   return (
-    <Pressable onPress={() => router.back()} hitSlop={8} className="w-8 h-8 rounded-full items-center justify-center bg-surface-2 ml-3">
+    <Pressable
+      onPress={() => router.back()}
+      hitSlop={8}
+      android_ripple={null}
+      className="w-8 h-8 rounded-full items-center justify-center bg-surface-2 ml-3"
+    >
       <ChevronLeft size={20} color={colors.text} strokeWidth={2} />
     </Pressable>
   );
