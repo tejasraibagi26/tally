@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { RefreshCw, UserPlus, Unplug } from "lucide-react";
+import { RefreshCw, KeyRound, Unplug } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { LoadingOverlay } from "@/components/ui/LoadingOverlay";
 import { usePlaidLinkFlow } from "@/lib/usePlaidLinkFlow";
@@ -16,11 +16,13 @@ export function ItemActionsMenu({ itemId, institutionName }: { itemId: string; i
   const menuRef = useRef<HTMLDivElement>(null);
   // Update-mode Link with account_selection_enabled (see
   // app/api/plaid/link-token/route.ts) — same flow the broken-connection
-  // "Reconnect" banner uses, just available regardless of connection health
-  // so a newly-added account inside the institution's own login (e.g. a
-  // second checking account) can be granted access without deleting and
+  // "Reconnect" banner uses, just available regardless of connection health.
+  // "Manage access" rather than "Add account" since this same flow also
+  // covers reauthenticating a still-healthy-but-stale login, not just
+  // granting access to a newly-added account (e.g. a second checking
+  // account inside the same institution login) without deleting and
   // re-adding the whole connection.
-  const { start: startAddAccount, loading: addAccountLoading, syncing: addAccountSyncing } = usePlaidLinkFlow("update", itemId);
+  const { start: startManageAccess, loading: manageAccessLoading, syncing: manageAccessSyncing } = usePlaidLinkFlow("update", itemId);
 
   useEffect(() => {
     if (!open) return;
@@ -72,7 +74,7 @@ export function ItemActionsMenu({ itemId, institutionName }: { itemId: string; i
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setOpen((v) => !v)}
-        disabled={busy !== null || addAccountLoading || addAccountSyncing}
+        disabled={busy !== null || manageAccessLoading || manageAccessSyncing}
         aria-label="Connection actions"
         aria-haspopup="menu"
         aria-expanded={open}
@@ -98,12 +100,12 @@ export function ItemActionsMenu({ itemId, institutionName }: { itemId: string; i
             role="menuitem"
             onClick={() => {
               setOpen(false);
-              startAddAccount();
+              startManageAccess();
             }}
             className="flex items-center gap-2.5 px-3 py-2 text-[13.5px] text-text hover:bg-sunken text-left"
           >
-            <UserPlus size={14} strokeWidth={1.75} className="text-text-3 flex-none" />
-            Add account
+            <KeyRound size={14} strokeWidth={1.75} className="text-text-3 flex-none" />
+            Manage access
           </button>
           <button
             role="menuitem"
@@ -140,7 +142,7 @@ export function ItemActionsMenu({ itemId, institutionName }: { itemId: string; i
       />
 
       {busy && <LoadingOverlay message={busy === "refresh" ? "Refreshing balances…" : "Revoking connection…"} />}
-      {(addAccountLoading || addAccountSyncing) && <LoadingOverlay message="Connecting to your institution…" />}
+      {(manageAccessLoading || manageAccessSyncing) && <LoadingOverlay message="Connecting to your institution…" />}
     </div>
   );
 }
