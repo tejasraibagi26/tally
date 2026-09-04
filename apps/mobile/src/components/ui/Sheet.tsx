@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { AccessibilityInfo, Dimensions, KeyboardAvoidingView, Modal, Platform, Pressable, View, type ViewStyle } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   Extrapolation,
@@ -42,6 +43,7 @@ export function Sheet({
   maxHeight?: ViewStyle["maxHeight"];
 }) {
   const colors = useThemeColors();
+  const insets = useSafeAreaInsets();
   const [mounted, setMounted] = useState(visible);
   const [reduceMotion, setReduceMotion] = useState(false);
   const translateY = useSharedValue(SCREEN_HEIGHT);
@@ -111,7 +113,10 @@ export function Sheet({
           style={{ flex: 1, justifyContent: "flex-end" }}
           pointerEvents="box-none"
         >
-          <Animated.View className="bg-surface rounded-t-panel overflow-hidden" style={[{ maxHeight }, sheetStyle]}>
+          <Animated.View
+            className="bg-surface rounded-t-panel overflow-hidden"
+            style={[{ maxHeight, paddingBottom: insets.bottom }, sheetStyle]}
+          >
             <GestureDetector gesture={panGesture}>
               <View style={{ alignItems: "center", paddingTop: 8, paddingBottom: 4 }} hitSlop={{ top: 12, bottom: 12, left: 48, right: 48 }}>
                 <View style={{ width: 36, height: 5, borderRadius: 999, backgroundColor: withAlpha(colors["text-3"], 0.35) }} />
