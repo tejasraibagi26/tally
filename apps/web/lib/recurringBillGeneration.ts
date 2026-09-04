@@ -220,6 +220,30 @@ function amountBand(amountCents: number): number {
   return Math.round(Math.abs(amountCents) / 100);
 }
 
+/**
+ * Undoes everything amortizeMonthly did to a stream's transactions — for
+ * turning the "Spread across months" toggle back off, or removing the
+ * stream entirely (see the PATCH/DELETE handlers in
+ * app/api/recurring-streams/[id]/route.ts, the only two callers). Unlike a
+ * manual bill's synthetic payments (a real lump sum that actually
+ * happened, just spread for display — worth keeping as history), an
+ * amortized installment has no meaning without the amortization that
+ * generated it: no money moved on that date, it was only ever 1/12 of the
+ * real charge. Deletes those, and clears recurringStreamId +
+ * excludedFromBudget on the real charge itself — what
+ * TransactionDetailPanel.tsx reads to decide a transaction is still
+ * "Marked as annual," and what gates the "Mark as annual" button from
+ * showing again — so turning amortization off actually turns it off
+ * instead of leaving the original transaction permanently stuck.
+ */
+export async function undoAmortization(streamId: string): Promise<void> {
+  await db.delete(schema.transactions).where(and(eq(schema.transactions.recurringStreamId, streamId), eq(schema.transactions.isManual, true)));
+  await db
+    .update(schema.transactions)
+    .set({ recurringStreamId: null, excludedFromBudget: false })
+    .where(and(eq(schema.transactions.recurringStreamId, streamId), eq(schema.transactions.isManual, false)));
+}
+
 export async function excludeAmortizedRealCharges(userId: string): Promise<number> {
   const streams = await db
     .select({

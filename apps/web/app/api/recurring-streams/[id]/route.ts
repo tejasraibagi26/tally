@@ -3,7 +3,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
-import { excludeAmortizedRealCharges, generateDueManualBillPayments } from "@/lib/recurringBillGeneration";
+import { excludeAmortizedRealCharges, generateDueManualBillPayments, undoAmortization } from "@/lib/recurringBillGeneration";
 
 const patchSchema = z.object({
   manualNextDueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
@@ -28,7 +28,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const { id } = await params;
   const [existing] = await db
-    .select({ id: schema.recurringStreams.id, userId: schema.recurringStreams.userId })
+    .select({ id: schema.recurringStreams.id, userId: schema.recurringStreams.userId, amortizeMonthly: schema.recurringStreams.amortizeMonthly })
     .from(schema.recurringStreams)
     .where(eq(schema.recurringStreams.id, id))
     .limit(1);
@@ -55,6 +55,14 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     .returning();
   if (!stream) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  // Turning "Spread across months" back off — undo the installments and
+  // the real charge's exclusion, same cleanup DELETE runs, so the toggle
+  // going off actually reverts everything instead of leaving stale
+  // installments and a permanently-"Marked as annual" transaction behind.
+  if (existing.amortizeMonthly && !stream.amortizeMonthly) {
+    await undoAmortization(id);
   }
 
   // Only a manually-added bill or an amortizeMonthly stream gets synthetic
@@ -84,7 +92,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
   const { id } = await params;
   const [existing] = await db
-    .select({ id: schema.recurringStreams.id, userId: schema.recurringStreams.userId })
+    .select({ id: schema.recurringStreams.id, userId: schema.recurringStreams.userId, amortizeMonthly: schema.recurringStreams.amortizeMonthly })
     .from(schema.recurringStreams)
     .where(eq(schema.recurringStreams.id, id))
     .limit(1);
@@ -92,11 +100,15 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  // Synthetic transactions generateDueManualBillPayments posted for this
-  // stream stay behind (transactions.recurringStreamId has no FK constraint,
-  // so it's left pointing at a since-deleted row) — matches how deleting an
-  // income schedule leaves its past paychecks in place; the user may still
-  // want that spending history in Budgets/Transactions.
+  if (existing.amortizeMonthly) {
+    await undoAmortization(id);
+  }
+
+  // Synthetic transactions a manual bill (not amortizing) posted stay
+  // behind (transactions.recurringStreamId has no FK constraint, so it's
+  // left pointing at a since-deleted row) — matches how deleting an income
+  // schedule leaves its past paychecks in place; the user may still want
+  // that spending history in Budgets/Transactions.
   await db.delete(schema.recurringStreams).where(eq(schema.recurringStreams.id, id));
 
   return NextResponse.json({ ok: true });
