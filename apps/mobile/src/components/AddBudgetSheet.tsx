@@ -108,7 +108,7 @@ export function AddBudgetSheet({
 
               <View className="flex-row items-center justify-between">
                 <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>Rollover unused</Text>
-                <Switch value={rollover} onValueChange={setRollover} trackColor={{ true: colors.brand }} />
+                <Switch value={rollover} onValueChange={setRollover} trackColor={{ false: colors["border-strong"], true: colors.brand }} ios_backgroundColor={colors["border-strong"]} />
               </View>
               <View className="flex-row items-center justify-between gap-3">
                 <View className="flex-1 gap-0.5">
@@ -117,7 +117,7 @@ export function AddBudgetSheet({
                     A fixed charge like rent or insurance — skips the burn-rate projection, which assumes spend accrues gradually through the month.
                   </Text>
                 </View>
-                <Switch value={fixed} onValueChange={setFixed} trackColor={{ true: colors.brand }} />
+                <Switch value={fixed} onValueChange={setFixed} trackColor={{ false: colors["border-strong"], true: colors.brand }} ios_backgroundColor={colors["border-strong"]} />
               </View>
 
               {error && <Text className="font-ui text-negative" style={{ fontSize: rf(13) }}>{error}</Text>}

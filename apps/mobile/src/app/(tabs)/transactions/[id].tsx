@@ -111,11 +111,11 @@ export default function TransactionDetailScreen() {
               <DetailRow label="Original description" value={t.name} mono />
               <View className="flex-row items-center justify-between">
                 <Text className="font-ui text-text-2" style={{ fontSize: rf(14) }}>Reviewed</Text>
-                <Switch value={reviewed} onValueChange={markDirty(setReviewed)} trackColor={{ true: colors.brand }} />
+                <Switch value={reviewed} onValueChange={markDirty(setReviewed)} trackColor={{ false: colors["border-strong"], true: colors.brand }} ios_backgroundColor={colors["border-strong"]} />
               </View>
               <View className="flex-row items-center justify-between">
                 <Text className="font-ui text-text-2" style={{ fontSize: rf(14) }}>Exclude from budget</Text>
-                <Switch value={excluded} onValueChange={markDirty(setExcluded)} trackColor={{ true: colors.brand }} />
+                <Switch value={excluded} onValueChange={markDirty(setExcluded)} trackColor={{ false: colors["border-strong"], true: colors.brand }} ios_backgroundColor={colors["border-strong"]} />
               </View>
               {t.amount < 0 &&
                 (t.recurringStreamId ? (

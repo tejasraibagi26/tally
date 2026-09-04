@@ -46,7 +46,7 @@ function BiometricLockToggle() {
             Locks Tally every time it's backgrounded, so anyone else picking up your phone can't see your finances.
           </Text>
         </View>
-        <Switch value={biometricLockEnabled} onValueChange={toggle} disabled={busy} trackColor={{ true: colors.brand }} />
+        <Switch value={biometricLockEnabled} onValueChange={toggle} disabled={busy} trackColor={{ false: colors["border-strong"], true: colors.brand }} ios_backgroundColor={colors["border-strong"]} />
       </View>
     </Card>
   );
@@ -351,7 +351,7 @@ export default function SettingsScreen() {
                 A summary of income, spend, budgets, and net worth on the 1st of each month.
               </Text>
             </View>
-            <Switch value={recapsEnabled} onValueChange={toggleRecaps} trackColor={{ true: colors.brand }} />
+            <Switch value={recapsEnabled} onValueChange={toggleRecaps} trackColor={{ false: colors["border-strong"], true: colors.brand }} ios_backgroundColor={colors["border-strong"]} />
           </View>
         </Card>
       </View>
