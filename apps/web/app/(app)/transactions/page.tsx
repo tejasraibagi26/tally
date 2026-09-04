@@ -11,6 +11,7 @@ import { EmptyPeriodIllustration } from "@/components/transactions/EmptyPeriodIl
 import { AddTransactionForm } from "@/components/transactions/AddTransactionForm";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { groupCategoryOptions, categoryIdsInGroup } from "@/lib/categoryOptions";
+import { clearOrphanedRecurringStreamRefs } from "@/lib/recurringBillGeneration";
 import { monthLastDay } from "@tally/core/budgetMath";
 import { accountDisplayName } from "@tally/core/accountName";
 import Link from "next/link";
@@ -53,6 +54,9 @@ interface SearchParams {
 
 export default async function TransactionsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const userId = await requireUserId();
+  // Self-heals a transaction left stuck "Marked as annual" by a stream
+  // deleted before undoAmortization existed — see clearOrphanedRecurringStreamRefs.
+  await clearOrphanedRecurringStreamRefs(userId);
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
   const accountFilter = sp.account ?? "";

@@ -12,6 +12,7 @@ import { amountColor } from "@/lib/amountColor";
 import { CategoryPickerSheet } from "@/components/CategoryPickerSheet";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
+import { withAlpha } from "@/theme/colors";
 
 // MOBILE_DESIGN.md §5.4 -- the web side panel's mobile equivalent, now with
 // the same core edit surface as TransactionDetailPanel.tsx: category,
@@ -118,25 +119,26 @@ export default function TransactionDetailScreen() {
               </View>
               {t.amount < 0 &&
                 (t.recurringStreamId ? (
-                  <View
-                    className="flex-row items-center gap-1.5 self-start px-3 rounded-full"
-                    style={{ height: 32, backgroundColor: colors["positive-subtle"] }}
-                  >
-                    <Check size={13} color={colors.positive} strokeWidth={2.5} />
-                    <Text className="font-ui-medium" style={{ fontSize: rf(12.5), color: colors.positive }}>
-                      Marked as annual — spread {formatCents(Math.round(Math.abs(t.amount) / 12))}/mo
+                  <View className="flex-row items-start gap-2.5 p-3 rounded-control" style={{ backgroundColor: colors["positive-subtle"] }}>
+                    <View className="flex-none rounded-full p-1" style={{ backgroundColor: withAlpha(colors.positive, 0.15) }}>
+                      <Check size={12} color={colors.positive} strokeWidth={2.5} />
+                    </View>
+                    <Text className="font-ui-medium flex-1" style={{ fontSize: rf(13), lineHeight: rf(18), color: colors.positive }}>
+                      Marked as annual · spread {formatCents(Math.round(Math.abs(t.amount) / 12))}/mo across the budget
                     </Text>
                   </View>
                 ) : (
                   <Pressable
                     onPress={() => markAnnual.mutate()}
                     disabled={markAnnual.isPending}
-                    className="flex-row items-center gap-1.5 self-start px-3 rounded-full disabled:opacity-40"
-                    style={{ height: 32, backgroundColor: colors["brand-subtle"], borderWidth: 1, borderStyle: "dashed", borderColor: colors["brand-border"] }}
+                    className="flex-row items-start gap-2.5 p-3 rounded-control disabled:opacity-40"
+                    style={{ backgroundColor: colors["brand-subtle"], borderWidth: 1, borderStyle: "dashed", borderColor: colors["brand-border"] }}
                   >
-                    <SplitSquareVertical size={13} color={colors.brand} strokeWidth={2} />
-                    <Text className="font-ui-medium text-brand" style={{ fontSize: rf(13) }}>
-                      {markAnnual.isPending ? "Marking…" : "Mark as annual subscription"}
+                    <View className="flex-none rounded-full p-1" style={{ backgroundColor: withAlpha(colors.brand, 0.15) }}>
+                      <SplitSquareVertical size={12} color={colors.brand} strokeWidth={2} />
+                    </View>
+                    <Text className="font-ui-medium text-brand flex-1" style={{ fontSize: rf(13), lineHeight: rf(18) }}>
+                      {markAnnual.isPending ? "Marking…" : "Mark as annual subscription · spread cost across 12 months"}
                     </Text>
                   </Pressable>
                 ))}

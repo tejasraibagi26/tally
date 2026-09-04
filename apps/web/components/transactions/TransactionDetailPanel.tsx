@@ -329,19 +329,27 @@ export function TransactionDetailPanel({
 
         {transaction.amount < 0 && (
           transaction.recurringStreamId || markedAnnual ? (
-            <div className="flex items-center gap-2 h-8 px-3 rounded-full w-fit bg-positive-subtle text-positive text-[13px] font-medium">
-              <Check size={13} strokeWidth={2.5} />
-              Marked as annual — spread {formatCents(Math.round(Math.abs(transaction.amount) / 12))}/mo across the budget
+            <div className="flex items-start gap-2.5 p-3 rounded-control bg-positive-subtle text-positive">
+              <span className="relative top-0.5 flex-none rounded-full bg-positive/15 p-1">
+                <Check size={12} strokeWidth={2.5} />
+              </span>
+              <span className="text-[13.5px] font-medium leading-snug">
+                Marked as annual · spread {formatCents(Math.round(Math.abs(transaction.amount) / 12))}/mo across the budget
+              </span>
             </div>
           ) : (
             <button
               type="button"
               onClick={markAnnual}
               disabled={markingAnnual}
-              className="flex items-center gap-2 h-8 px-3 rounded-full w-fit bg-brand-subtle text-brand border border-dashed border-brand-border text-[13px] font-medium hover:bg-brand-border/40 disabled:opacity-40"
+              className="flex items-start gap-2.5 p-3 rounded-control bg-brand-subtle text-brand border border-dashed border-brand-border text-left hover:bg-brand-border/40 disabled:opacity-40"
             >
-              <SplitSquareVertical size={13} strokeWidth={2} />
-              {markingAnnual ? "Marking…" : "Mark as annual subscription — spread cost across 12 months"}
+              <span className="relative top-0.5 flex-none rounded-full bg-brand/15 p-1">
+                <SplitSquareVertical size={12} strokeWidth={2} />
+              </span>
+              <span className="text-[13.5px] font-medium leading-snug">
+                {markingAnnual ? "Marking…" : "Mark as annual subscription · spread cost across 12 months"}
+              </span>
             </button>
           )
         )}

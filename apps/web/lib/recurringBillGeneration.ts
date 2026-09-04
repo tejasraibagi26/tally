@@ -1,4 +1,4 @@
-import { and, eq, inArray, or } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, notInArray, or } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { shiftMonth } from "@tally/core/budgetMath";
 import { normalizeMerchantKey } from "@tally/core/recurringDetection";
@@ -242,6 +242,37 @@ export async function undoAmortization(streamId: string): Promise<void> {
     .update(schema.transactions)
     .set({ recurringStreamId: null, excludedFromBudget: false })
     .where(and(eq(schema.transactions.recurringStreamId, streamId), eq(schema.transactions.isManual, false)));
+}
+
+/**
+ * Self-heals real transactions left stuck by a stream deleted before
+ * undoAmortization existed — recurringStreamId has no FK constraint, so
+ * those still point at a row that's gone, and TransactionDetailPanel.tsx
+ * (or the mobile detail screen) reads exactly that field to decide a
+ * transaction is still "Marked as annual" with no button to undo it.
+ * Scoped to isManual = false (real transactions) only: an orphaned
+ * *synthetic* row's stream type (amortizing vs. a manual bill's real,
+ * worth-keeping lump-sum history) can't be told apart anymore once the
+ * stream itself is gone, so this only touches what's safe to always
+ * revert — the real charge going back to counting normally. Cheap
+ * (typically zero rows) and safe to call on every transaction list/detail
+ * read, not just after a fresh delete.
+ */
+export async function clearOrphanedRecurringStreamRefs(userId: string): Promise<number> {
+  const liveStreamIds = db.select({ id: schema.recurringStreams.id }).from(schema.recurringStreams);
+  const result = await db
+    .update(schema.transactions)
+    .set({ recurringStreamId: null, excludedFromBudget: false })
+    .where(
+      and(
+        eq(schema.transactions.userId, userId),
+        eq(schema.transactions.isManual, false),
+        isNotNull(schema.transactions.recurringStreamId),
+        notInArray(schema.transactions.recurringStreamId, liveStreamIds),
+      ),
+    )
+    .returning({ id: schema.transactions.id });
+  return result.length;
 }
 
 export async function excludeAmortizedRealCharges(userId: string): Promise<number> {

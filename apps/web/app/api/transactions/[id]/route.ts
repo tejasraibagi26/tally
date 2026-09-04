@@ -4,6 +4,7 @@ import { eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { applyRulesToExistingTransactions } from "@/lib/categorize";
+import { clearOrphanedRecurringStreamRefs } from "@/lib/recurringBillGeneration";
 import { accountDisplayName } from "@tally/core/accountName";
 
 const splitSchema = z.object({ categoryId: z.string().uuid(), amount: z.number().int(), note: z.string().max(200).nullable().optional() });
@@ -21,6 +22,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   }
 
   const { id } = await params;
+  // Self-heals a transaction left stuck "Marked as annual" by a stream
+  // deleted before undoAmortization existed — see clearOrphanedRecurringStreamRefs.
+  await clearOrphanedRecurringStreamRefs(userId);
   const [t] = await db.select().from(schema.transactions).where(eq(schema.transactions.id, id)).limit(1);
   if (!t || t.userId !== userId) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });

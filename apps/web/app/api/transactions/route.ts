@@ -4,6 +4,7 @@ import { and, desc, eq, gte, ilike, inArray, isNull, lte, or, sql } from "drizzl
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { categoryIdsInGroup } from "@/lib/categoryOptions";
+import { clearOrphanedRecurringStreamRefs } from "@/lib/recurringBillGeneration";
 import { monthLastDay } from "@tally/core/budgetMath";
 
 const PAGE_SIZE = 50;
@@ -35,6 +36,10 @@ export async function GET(req: Request) {
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  // Self-heals a transaction left stuck "Marked as annual" by a stream
+  // deleted before undoAmortization existed — see clearOrphanedRecurringStreamRefs.
+  await clearOrphanedRecurringStreamRefs(userId);
 
   const url = new URL(req.url);
   const sp = url.searchParams;
