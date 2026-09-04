@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { View, Text, TextInput, ScrollView, ActivityIndicator, Pressable, RefreshControl, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Plus, RefreshCw, KeyRound, Pencil, Check, X } from "lucide-react-native";
+import { Plus, RefreshCw, MoreHorizontal, Pencil, Check, X } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { StatusChip } from "@/components/ui/StatusChip";
+import { InstitutionActionsSheet } from "@/components/InstitutionActionsSheet";
 import { useAccounts, useUpdateAccountNickname, type Institution, type AccountRow } from "@/lib/queries/accounts";
 import { usePlaidLink } from "@/lib/usePlaidLink";
 import { useSync } from "@/lib/queries/plaid";
@@ -20,13 +21,13 @@ import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 function InstitutionCard({
   institution,
   onReconnect,
-  onManageAccess,
+  onOpenMenu,
   reconnecting,
   baseCurrency,
 }: {
   institution: Institution;
   onReconnect: () => void;
-  onManageAccess: () => void;
+  onOpenMenu: () => void;
   reconnecting: boolean;
   baseCurrency?: string;
 }) {
@@ -51,20 +52,18 @@ function InstitutionCard({
         </View>
         <View className="flex-row items-center gap-2" style={{ flexShrink: 0 }}>
           <StatusChip status={institution.badge} />
-          {/* Update-mode Link with account_selection_enabled (see
-              apps/web/app/api/plaid/link-token/route.ts) -- always available,
-              not just when broken. "Manage access" (not "Add account") since
-              this same flow also covers reauthenticating a still-healthy-but-
-              stale login, not just granting access to a newly-added account
-              (e.g. a second checking account inside the same institution
-              login) without deleting and re-adding the connection. */}
+          {/* Opens InstitutionActionsSheet (Refresh balances / Manage access /
+              Revoke connection) -- a bare KeyRound icon here read as
+              decorative rather than tappable; "⋯" is the established
+              affordance for "more actions" and matches
+              components/plaid/ItemActionsMenu.tsx's web equivalent. */}
           <Pressable
-            onPress={onManageAccess}
+            onPress={onOpenMenu}
             hitSlop={8}
-            accessibilityLabel="Manage access"
+            accessibilityLabel="Connection actions"
             className="w-7 h-7 rounded-full items-center justify-center bg-sunken"
           >
-            <KeyRound size={14} color={colors["text-2"]} strokeWidth={2} />
+            <MoreHorizontal size={16} color={colors["text-2"]} strokeWidth={2} />
           </Pressable>
         </View>
       </View>
@@ -189,6 +188,8 @@ export default function AccountsScreen() {
   const { data, isLoading, refetch, isRefetching } = useAccounts();
   const { openLink, isLinking, error } = usePlaidLink();
   const sync = useSync();
+  const [menuInstitutionId, setMenuInstitutionId] = useState<string | null>(null);
+  const menuInstitution = data?.institutions.find((i) => i.id === menuInstitutionId) ?? null;
 
   async function handleSync() {
     try {
@@ -257,7 +258,7 @@ export default function AccountsScreen() {
               key={inst.id}
               institution={inst}
               onReconnect={() => openLink("update", inst.id)}
-              onManageAccess={() => openLink("update", inst.id)}
+              onOpenMenu={() => setMenuInstitutionId(inst.id)}
               reconnecting={isLinking}
               baseCurrency={data?.totals.currency}
             />
@@ -267,6 +268,16 @@ export default function AccountsScreen() {
       )}
       </ScrollView>
       </KeyboardAvoidingView>
+
+      {menuInstitution && (
+        <InstitutionActionsSheet
+          visible={menuInstitutionId !== null}
+          onClose={() => setMenuInstitutionId(null)}
+          itemId={menuInstitution.id}
+          institutionName={menuInstitution.institutionName ?? "this institution"}
+          onManageAccess={() => openLink("update", menuInstitution.id)}
+        />
+      )}
     </View>
   );
 }

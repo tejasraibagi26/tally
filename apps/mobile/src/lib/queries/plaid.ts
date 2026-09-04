@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiPost } from "@/lib/api";
+import { apiPost, apiDelete } from "@/lib/api";
 
 // Server-side only: builds a short-lived Link token. This is the only Plaid
 // string that ever reaches the client (never an access_token) -- same
@@ -30,6 +30,35 @@ interface SyncResult {
 // POST /api/sync endpoint. Mobile's Accounts screen was missing this
 // entirely (only had Reconnect for a fully-broken item), so a "needs
 // sync"/stale connection had no manual CTA at all.
+// Matches apps/web/app/api/items/[id]/refresh-balances/route.ts's contract
+// exactly — lighter-weight than useSync (balances only, one item), backing
+// the institution actions sheet's "Refresh balances" row.
+export function useRefreshItemBalances(itemId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => apiPost<{ ok: true }>(`/api/items/${itemId}/refresh-balances`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["overview"] });
+    },
+  });
+}
+
+// Matches apps/web/app/api/items/[id]/route.ts's DELETE contract exactly —
+// removes the item from Plaid (best-effort) and deletes everything locally
+// tied to it. Backs the institution actions sheet's "Revoke connection" row.
+export function useRevokeItem(itemId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => apiDelete<{ ok: true }>(`/api/items/${itemId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["overview"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    },
+  });
+}
+
 export function useSync() {
   const queryClient = useQueryClient();
   return useMutation({
