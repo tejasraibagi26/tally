@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { RefreshCw, Unplug } from "lucide-react";
+import { RefreshCw, UserPlus, Unplug } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { LoadingOverlay } from "@/components/ui/LoadingOverlay";
+import { usePlaidLinkFlow } from "@/lib/usePlaidLinkFlow";
 import { cn } from "@/lib/cn";
 
 export function ItemActionsMenu({ itemId, institutionName }: { itemId: string; institutionName: string }) {
@@ -13,6 +14,13 @@ export function ItemActionsMenu({ itemId, institutionName }: { itemId: string; i
   const [confirmRevoke, setConfirmRevoke] = useState(false);
   const [busy, setBusy] = useState<"refresh" | "revoke" | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  // Update-mode Link with account_selection_enabled (see
+  // app/api/plaid/link-token/route.ts) — same flow the broken-connection
+  // "Reconnect" banner uses, just available regardless of connection health
+  // so a newly-added account inside the institution's own login (e.g. a
+  // second checking account) can be granted access without deleting and
+  // re-adding the whole connection.
+  const { start: startAddAccount, loading: addAccountLoading, syncing: addAccountSyncing } = usePlaidLinkFlow("update", itemId);
 
   useEffect(() => {
     if (!open) return;
@@ -64,7 +72,7 @@ export function ItemActionsMenu({ itemId, institutionName }: { itemId: string; i
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setOpen((v) => !v)}
-        disabled={busy !== null}
+        disabled={busy !== null || addAccountLoading || addAccountSyncing}
         aria-label="Connection actions"
         aria-haspopup="menu"
         aria-expanded={open}
@@ -85,6 +93,17 @@ export function ItemActionsMenu({ itemId, institutionName }: { itemId: string; i
           >
             <RefreshCw size={14} strokeWidth={1.75} className="text-text-3 flex-none" />
             Refresh balances
+          </button>
+          <button
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              startAddAccount();
+            }}
+            className="flex items-center gap-2.5 px-3 py-2 text-[13.5px] text-text hover:bg-sunken text-left"
+          >
+            <UserPlus size={14} strokeWidth={1.75} className="text-text-3 flex-none" />
+            Add account
           </button>
           <button
             role="menuitem"
@@ -121,6 +140,7 @@ export function ItemActionsMenu({ itemId, institutionName }: { itemId: string; i
       />
 
       {busy && <LoadingOverlay message={busy === "refresh" ? "Refreshing balances…" : "Revoking connection…"} />}
+      {(addAccountLoading || addAccountSyncing) && <LoadingOverlay message="Connecting to your institution…" />}
     </div>
   );
 }

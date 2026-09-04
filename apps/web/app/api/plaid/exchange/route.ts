@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { sql } from "drizzle-orm";
 import { CountryCode } from "plaid";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { plaidClient, encryptAccessToken, PLAID_COUNTRY_CODES } from "@/lib/plaid";
+import { upsertAccountsForItem } from "@/lib/plaidAccounts";
 import { syncTransactionsForItem } from "@/lib/plaidSync";
 import { syncHoldingsForItem, syncInvestmentTransactionsForItem } from "@/lib/plaidInvestments";
 import { syncLiabilitiesForItem } from "@/lib/plaidLiabilities";
@@ -104,43 +104,7 @@ export async function POST(req: Request) {
       after: { institutionName, institutionId },
     });
 
-    const accountsRes = await plaidClient.accountsGet({ access_token: accessToken });
-    for (const acct of accountsRes.data.accounts) {
-      const limitCents = acct.balances.limit != null ? Math.round(acct.balances.limit * 100) : null;
-      await db
-        .insert(schema.accounts)
-        .values({
-          userId,
-          itemId: item.id,
-          plaidAccountId: acct.account_id,
-          name: acct.name,
-          officialName: acct.official_name ?? null,
-          mask: acct.mask ?? null,
-          type: acct.type,
-          subtype: acct.subtype ?? null,
-          currency: acct.balances.iso_currency_code ?? "USD",
-          currentBalance: acct.balances.current != null ? Math.round(acct.balances.current * 100) : null,
-          availableBalance: acct.balances.available != null ? Math.round(acct.balances.available * 100) : null,
-          creditLimit: limitCents,
-          balanceAsOf: new Date(),
-        })
-        .onConflictDoUpdate({
-          target: schema.accounts.plaidAccountId,
-          set: {
-            currentBalance: acct.balances.current != null ? Math.round(acct.balances.current * 100) : null,
-            availableBalance: acct.balances.available != null ? Math.round(acct.balances.available * 100) : null,
-            // Re-linking an existing account: Plaid reporting a limit wins;
-            // Plaid reporting nothing preserves a manually-entered one — see
-            // the matching guard in lib/plaidBalances.ts.
-            creditLimit:
-              limitCents != null
-                ? limitCents
-                : sql`case when ${schema.accounts.creditLimitIsManual} then ${schema.accounts.creditLimit} else null end`,
-            creditLimitIsManual: limitCents != null ? false : sql`${schema.accounts.creditLimitIsManual}`,
-            balanceAsOf: new Date(),
-          },
-        });
-    }
+    await upsertAccountsForItem(item.id, userId, accessToken);
 
     // Kick off the first pull of everything immediately rather than waiting
     // for a webhook — failure here doesn't fail the link, the item just

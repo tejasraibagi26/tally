@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { View, Text, TextInput, ScrollView, ActivityIndicator, Pressable, RefreshControl, Alert, KeyboardAvoidingView, Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Plus, RefreshCw, Pencil, Check, X } from "lucide-react-native";
+import { Plus, RefreshCw, UserPlus, Pencil, Check, X } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { StatusChip } from "@/components/ui/StatusChip";
@@ -20,11 +20,13 @@ import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 function InstitutionCard({
   institution,
   onReconnect,
+  onAddAccount,
   reconnecting,
   baseCurrency,
 }: {
   institution: Institution;
   onReconnect: () => void;
+  onAddAccount: () => void;
   reconnecting: boolean;
   baseCurrency?: string;
 }) {
@@ -47,8 +49,16 @@ function InstitutionCard({
             <Text className="font-ui text-text-2" style={{ fontSize: rf(12) }}>{relativeTime(institution.lastSyncedAt)}</Text>
           </View>
         </View>
-        <View style={{ flexShrink: 0 }}>
+        <View className="flex-row items-center gap-2" style={{ flexShrink: 0 }}>
           <StatusChip status={institution.badge} />
+          {/* Update-mode Link with account_selection_enabled (see
+              apps/web/app/api/plaid/link-token/route.ts) -- always available,
+              not just when broken, so a newly-added account inside this same
+              institution login (e.g. a second checking account) can be
+              granted access without deleting and re-adding the connection. */}
+          <Pressable onPress={onAddAccount} hitSlop={8} className="w-7 h-7 rounded-full items-center justify-center bg-sunken">
+            <UserPlus size={14} color={colors["text-2"]} strokeWidth={2} />
+          </Pressable>
         </View>
       </View>
 
@@ -240,6 +250,7 @@ export default function AccountsScreen() {
               key={inst.id}
               institution={inst}
               onReconnect={() => openLink("update", inst.id)}
+              onAddAccount={() => openLink("update", inst.id)}
               reconnecting={isLinking}
               baseCurrency={data?.totals.currency}
             />

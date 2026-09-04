@@ -1,6 +1,7 @@
 import { sql, eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
+import { upsertAccountsForItem } from "@/lib/plaidAccounts";
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
 import { seedMockTransactionsForItem } from "@/lib/mock/seedTransactions";
 import { toPlaidOwnedFields, mergeTransactionUpdate } from "@/lib/transactionSync/mapPlaidTransaction";
@@ -53,6 +54,24 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
     }
 
     const accessToken = await getAccessToken(itemId);
+
+    // Only on a manual sync (always what runs right after an update-mode
+    // Link session, whether that was a plain reauth or the user selected an
+    // additional account via account_selection_enabled) — an extra
+    // accountsGet call on every webhook/cron-triggered sync isn't worth the
+    // Plaid API load just to catch the rare case of an account appearing
+    // without the user ever going through update mode. Must run before the
+    // transactions loop below: a new account has to exist in `accounts`
+    // before reconcileTransactions can attach anything to it, or those
+    // transactions get silently skipped (see the "unknown account" branch
+    // in reconcileTransactions).
+    if (trigger === "manual") {
+      try {
+        await upsertAccountsForItem(itemId, item.userId, accessToken);
+      } catch (err) {
+        console.error(`upsertAccountsForItem failed for item ${itemId}`, err);
+      }
+    }
 
     const added: PlaidTransaction[] = [];
     const modified: PlaidTransaction[] = [];
