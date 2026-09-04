@@ -111,7 +111,7 @@ export function Sheet({
           style={{ flex: 1, justifyContent: "flex-end" }}
           pointerEvents="box-none"
         >
-          <Animated.View className="bg-canvas rounded-t-panel overflow-hidden" style={[{ maxHeight }, sheetStyle]}>
+          <Animated.View className="bg-surface rounded-t-panel overflow-hidden" style={[{ maxHeight }, sheetStyle]}>
             <GestureDetector gesture={panGesture}>
               <View style={{ alignItems: "center", paddingTop: 8, paddingBottom: 4 }} hitSlop={{ top: 12, bottom: 12, left: 48, right: 48 }}>
                 <View style={{ width: 36, height: 5, borderRadius: 999, backgroundColor: withAlpha(colors["text-3"], 0.35) }} />
