@@ -57,7 +57,7 @@ export function TransactionFiltersSheet({
   })();
 
   return (
-    <Sheet visible={visible} onClose={onClose} maxHeight="80%">
+    <Sheet visible={visible} onClose={onClose} maxHeight="85%">
       <View>
         <View className="flex-row items-center justify-between px-5 pt-1 pb-3">
           <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Filters</Text>

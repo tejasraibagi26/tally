@@ -34,7 +34,7 @@ export function Sheet({
   visible,
   onClose,
   children,
-  maxHeight = "85%",
+  maxHeight = "90%",
 }: {
   visible: boolean;
   onClose: () => void;

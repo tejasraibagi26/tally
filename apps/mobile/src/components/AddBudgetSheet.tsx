@@ -71,7 +71,7 @@ export function AddBudgetSheet({
   }
 
   return (
-    <Sheet visible={visible} onClose={handleClose} maxHeight="75%">
+    <Sheet visible={visible} onClose={handleClose} maxHeight="80%">
       <>
         <View className="flex-row items-center justify-between px-5 pt-1 pb-3">
           <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Add budget</Text>

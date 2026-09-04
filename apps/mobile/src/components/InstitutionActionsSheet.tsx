@@ -63,7 +63,7 @@ export function InstitutionActionsSheet({
   }
 
   return (
-    <Sheet visible={visible} onClose={onClose} maxHeight="40%">
+    <Sheet visible={visible} onClose={onClose} maxHeight="55%">
       <View className="px-5 pt-1 pb-2">
         <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }} numberOfLines={1}>
           {institutionName}

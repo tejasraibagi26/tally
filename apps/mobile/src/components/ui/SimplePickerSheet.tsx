@@ -36,7 +36,7 @@ export function SimplePickerSheet({
   const rf = useRF();
 
   return (
-    <Sheet visible={visible} onClose={onClose} maxHeight="75%">
+    <Sheet visible={visible} onClose={onClose} maxHeight="80%">
       <View className="flex-row items-center justify-between px-5 pt-1 pb-3">
         <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>{title}</Text>
         <Pressable onPress={onClose} hitSlop={12}>

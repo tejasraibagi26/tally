@@ -104,7 +104,7 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
   }
 
   return (
-    <Sheet visible={visible} onClose={handleClose} maxHeight="85%">
+    <Sheet visible={visible} onClose={handleClose} maxHeight="90%">
       {/* Keyboard avoidance now lives in Sheet.tsx itself, around the sheet's outer
           positioning -- a KeyboardAvoidingView here, nested inside the already-positioned
           sheet, couldn't move it above the keyboard. */}
