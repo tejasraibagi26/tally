@@ -81,6 +81,29 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
     // request omits `cursor` entirely rather than resending a literal empty
     // string, which some APIs treat differently from the field being absent.
     let cursor = item.transactionsCursor || undefined;
+
+    // An account can end up with zero transactions not because it's
+    // genuinely empty, but because a prior webhook/cron sync saw its
+    // Plaid-reported transactions before the account row existed here (e.g.
+    // it was just authorized via update-mode Link's account_selection_enabled,
+    // racing the post-Link manual sync) and permanently dropped them — see
+    // the "unknown account" skip below. Since /transactions/sync never
+    // re-delivers a diff page once the cursor has advanced past it, the only
+    // way back is a full historical re-pull. Bounded to manual "Sync now"
+    // (user-initiated, infrequent) so this can't turn into a standing cost
+    // on every cron/webhook run for accounts that are just legitimately new.
+    if (trigger === "manual" && cursor) {
+      const emptyAccountRows = await db.execute<{ count: number }>(sql`
+        select count(*)::int as count
+        from accounts a
+        where a.item_id = ${itemId}
+          and not exists (select 1 from transactions t where t.account_id = a.id)
+      `);
+      if ((emptyAccountRows[0]?.count ?? 0) > 0) {
+        cursor = undefined;
+      }
+    }
+
     let hasMore = true;
     // Last page's value wins — the only one that matters is where things
     // stood once the loop below finished.
@@ -101,7 +124,7 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
       transactionsUpdateStatus = res.data.transactions_update_status;
     }
 
-    const result = await reconcileTransactions(item.userId, itemId, added, modified, removed, cursor, transactionsUpdateStatus);
+    const result = await reconcileTransactions(item.userId, itemId, accessToken, added, modified, removed, cursor, transactionsUpdateStatus);
 
     // Best-effort enrichment: categorization/transfer-pairing failures must
     // never fail the sync itself (the cursor already advanced and the core
@@ -162,6 +185,7 @@ async function recordSyncRun(itemId: string, trigger: SyncTrigger, startedAt: Da
 async function reconcileTransactions(
   userId: string,
   itemId: string,
+  accessToken: string,
   added: PlaidTransaction[],
   modified: PlaidTransaction[],
   removed: { transaction_id: string }[],
@@ -179,13 +203,34 @@ async function reconcileTransactions(
 
   // Plaid's own account_id -> our internal accounts.id.
   const plaidAccountIds = [...new Set(incoming.map((t) => t.account_id))];
-  const accountRows = plaidAccountIds.length
+  let accountRows = plaidAccountIds.length
     ? await db
         .select({ id: schema.accounts.id, plaidAccountId: schema.accounts.plaidAccountId })
         .from(schema.accounts)
         .where(inArray(schema.accounts.plaidAccountId, plaidAccountIds))
     : [];
-  const accountIdByPlaidId = new Map(accountRows.map((a) => [a.plaidAccountId, a.id]));
+  let accountIdByPlaidId = new Map(accountRows.map((a) => [a.plaidAccountId, a.id]));
+
+  // Self-heal: a transaction can reference a Plaid account we haven't stored
+  // yet — e.g. it was just authorized via update-mode Link's
+  // account_selection_enabled, but this sync is a webhook/cron run, which
+  // (unlike "manual") never calls upsertAccountsForItem, or a concurrent
+  // manual sync lost the advisory-lock race. Fetch the current account list
+  // once and retry the mapping instead of permanently dropping the
+  // transaction below (the cursor still advances past this page either way,
+  // so a missed account here never gets a second chance).
+  if (plaidAccountIds.some((id) => !accountIdByPlaidId.has(id))) {
+    try {
+      await upsertAccountsForItem(itemId, userId, accessToken);
+      accountRows = await db
+        .select({ id: schema.accounts.id, plaidAccountId: schema.accounts.plaidAccountId })
+        .from(schema.accounts)
+        .where(inArray(schema.accounts.plaidAccountId, plaidAccountIds));
+      accountIdByPlaidId = new Map(accountRows.map((a) => [a.plaidAccountId, a.id]));
+    } catch (err) {
+      console.error(`upsertAccountsForItem (self-heal) failed for item ${itemId}`, err);
+    }
+  }
 
   const incomingIds = incoming.map((t) => t.transaction_id);
   const existingRows = incomingIds.length
