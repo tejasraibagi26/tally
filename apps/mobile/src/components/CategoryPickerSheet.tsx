@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { View, Text, Pressable, FlatList, TextInput } from "react-native";
-import { X, Check, Search } from "lucide-react-native";
+import { View, Text, Pressable, FlatList, TextInput, ActivityIndicator } from "react-native";
+import { X, Check, Search, Plus } from "lucide-react-native";
 import { useColorScheme } from "nativewind";
-import { useCategories, type Category } from "@/lib/queries/categories";
+import { useCategories, useCreateCategory, type Category } from "@/lib/queries/categories";
 import { chartSeries } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
@@ -19,11 +19,12 @@ export function CategoryPickerSheet({
   onSelect,
   categories: categoriesOverride,
   includeUncategorized = true,
+  allowCreate = false,
 }: {
   visible: boolean;
   onClose: () => void;
   selectedId: string | null;
-  onSelect: (categoryId: string | null) => void;
+  onSelect: (categoryId: string | null, categoryName?: string) => void;
   /** Defaults to every category (transaction categorization's use case) --
    * pass a pre-filtered list instead for a narrower picker, e.g. AddBudgetSheet's
    * expense-kind, not-yet-budgeted-this-month subset. */
@@ -32,6 +33,11 @@ export function CategoryPickerSheet({
    * sense for a picker where every result must be a real category (e.g.
    * AddBudgetSheet, which always attaches the budget to one). */
   includeUncategorized?: boolean;
+  /** Shows a "+ New category" row that creates an expense category inline via
+   * POST /api/categories, then selects it -- e.g. AddBudgetSheet, where the
+   * user may want to budget a category that doesn't exist yet. Mirrors web's
+   * AddBudgetForm.tsx "+ New category" option. */
+  allowCreate?: boolean;
 }) {
   const colors = useThemeColors();
   const rf = useRF();
@@ -40,6 +46,9 @@ export function CategoryPickerSheet({
   const { data } = useCategories();
   const categories = categoriesOverride ?? data?.categories ?? [];
   const [query, setQuery] = useState("");
+  const createCategory = useCreateCategory();
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState("");
 
   const items = useMemo(() => {
     const all = includeUncategorized ? [{ id: null as string | null, name: "Uncategorized", colorSlot: 0 }, ...categories] : categories;
@@ -50,7 +59,21 @@ export function CategoryPickerSheet({
 
   function handleClose() {
     setQuery("");
+    setCreating(false);
+    setNewName("");
     onClose();
+  }
+
+  async function submitNewCategory() {
+    const name = newName.trim();
+    if (!name || createCategory.isPending) return;
+    try {
+      const { category } = await createCategory.mutateAsync({ name, kind: "expense" });
+      onSelect(category.id, category.name);
+      handleClose();
+    } catch {
+      // leave creating mode open with the typed name so the user can retry
+    }
   }
 
   return (
@@ -83,6 +106,43 @@ export function CategoryPickerSheet({
             </Pressable>
           )}
         </View>
+        {allowCreate && (
+          creating ? (
+            <View className="mx-5 mb-2 flex-row items-center gap-2">
+              <TextInput
+                autoFocus
+                value={newName}
+                onChangeText={setNewName}
+                placeholder="New category name"
+                placeholderTextColor={colors["text-3"]}
+                onSubmitEditing={submitNewCategory}
+                returnKeyType="done"
+                className="flex-1 rounded-control bg-surface-2 px-3.5 font-ui text-text"
+                style={{ height: 42, fontSize: rf(14.5) }}
+              />
+              <Pressable
+                onPress={submitNewCategory}
+                disabled={!newName.trim() || createCategory.isPending}
+                className="rounded-control bg-brand items-center justify-center px-4 disabled:opacity-50"
+                style={{ height: 42 }}
+              >
+                {createCategory.isPending ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14) }}>Add</Text>
+                )}
+              </Pressable>
+              <Pressable onPress={() => { setCreating(false); setNewName(""); }} hitSlop={8}>
+                <X size={18} color={colors["text-3"]} />
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable onPress={() => setCreating(true)} className="flex-row items-center gap-2.5 px-5 py-3">
+              <Plus size={16} color={colors.brand} />
+              <Text className="font-ui text-brand" style={{ fontSize: rf(15) }}>New category</Text>
+            </Pressable>
+          )
+        )}
         <FlatList
           data={items}
           keyExtractor={(item) => item.id ?? "uncategorized"}
@@ -95,7 +155,7 @@ export function CategoryPickerSheet({
             return (
               <Pressable
                 onPress={() => {
-                  onSelect(item.id);
+                  onSelect(item.id, item.name);
                   handleClose();
                 }}
                 className="flex-row items-center justify-between px-5 py-3.5"
