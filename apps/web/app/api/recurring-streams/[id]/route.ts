@@ -78,10 +78,14 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   return NextResponse.json({ stream, generated });
 }
 
-// Any stream can be removed here, manually-added or auto-detected — note
-// for the latter that it comes back on the next detectRecurringForUser run
-// as long as its underlying transactions still exist and still cluster the
-// same way, so this is "hide it for now," not a permanent dismissal.
+// Any stream can be removed here, manually-added or auto-detected. A
+// manually-added bill is hard deleted — nothing ever recreates it. An
+// auto-detected stream is soft-deleted (dismissedAt) instead of dropping the
+// row outright: detectRecurringForUser's upsert (lib/recurring.ts) targets
+// (userId, merchantKey, accountId), so a hard delete would just let the next
+// sync re-insert a fresh "active" row the moment the same charge posts
+// again. Every stream listing filters dismissedAt IS NULL, so this is a
+// permanent removal from the user's point of view.
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
@@ -92,7 +96,12 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
   const { id } = await params;
   const [existing] = await db
-    .select({ id: schema.recurringStreams.id, userId: schema.recurringStreams.userId, amortizeMonthly: schema.recurringStreams.amortizeMonthly })
+    .select({
+      id: schema.recurringStreams.id,
+      userId: schema.recurringStreams.userId,
+      isManual: schema.recurringStreams.isManual,
+      amortizeMonthly: schema.recurringStreams.amortizeMonthly,
+    })
     .from(schema.recurringStreams)
     .where(eq(schema.recurringStreams.id, id))
     .limit(1);
@@ -104,12 +113,22 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     await undoAmortization(id);
   }
 
-  // Synthetic transactions a manual bill (not amortizing) posted stay
-  // behind (transactions.recurringStreamId has no FK constraint, so it's
-  // left pointing at a since-deleted row) — matches how deleting an income
-  // schedule leaves its past paychecks in place; the user may still want
-  // that spending history in Budgets/Transactions.
-  await db.delete(schema.recurringStreams).where(eq(schema.recurringStreams.id, id));
+  if (existing.isManual) {
+    // Synthetic transactions a manual bill (not amortizing) posted stay
+    // behind (transactions.recurringStreamId has no FK constraint, so it's
+    // left pointing at a since-deleted row) — matches how deleting an income
+    // schedule leaves its past paychecks in place; the user may still want
+    // that spending history in Budgets/Transactions.
+    await db.delete(schema.recurringStreams).where(eq(schema.recurringStreams.id, id));
+  } else {
+    // amortizeMonthly is reset alongside dismissedAt so this row can never
+    // be picked up again by generateDueManualBillPaymentsForAllStreams's
+    // isManual/amortizeMonthly filter now that it lives on indefinitely.
+    await db
+      .update(schema.recurringStreams)
+      .set({ dismissedAt: new Date(), amortizeMonthly: false })
+      .where(eq(schema.recurringStreams.id, id));
+  }
 
   return NextResponse.json({ ok: true });
 }

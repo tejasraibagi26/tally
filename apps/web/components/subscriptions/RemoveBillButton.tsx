@@ -5,19 +5,15 @@ import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 
 /** Removes any recurringStreams row — a manually-added bill (AddBillForm's
- * "+ Add a bill") stays gone; an auto-detected stream can come back on the
- * next detectRecurringForUser run if its underlying transactions still
- * cluster the same way, so the confirm copy sets that expectation instead
- * of promising something the delete can't guarantee for that case. */
-export function RemoveBillButton({ streamId, description, isManual }: { streamId: string; description: string; isManual: boolean }) {
+ * "+ Add a bill") is hard deleted, an auto-detected stream is soft-deleted
+ * (dismissedAt), but either way it stays gone: detectRecurringForUser skips
+ * reactivating a dismissed row even if the same charge keeps recurring. */
+export function RemoveBillButton({ streamId, description }: { streamId: string; description: string }) {
   const router = useRouter();
   const [removing, setRemoving] = useState(false);
 
   async function remove() {
-    const warning = isManual
-      ? `Remove "${description}"? Transactions it already posted stay in your history.`
-      : `Remove "${description}"? Transactions it already posted stay in your history, but it may come back automatically if the same charge keeps recurring.`;
-    if (!window.confirm(warning)) return;
+    if (!window.confirm(`Remove "${description}"? Transactions it already posted stay in your history.`)) return;
     setRemoving(true);
     try {
       const res = await fetch(`/api/recurring-streams/${streamId}`, { method: "DELETE" });

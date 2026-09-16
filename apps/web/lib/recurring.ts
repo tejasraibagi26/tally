@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { detectRecurringStreams, normalizeMerchantKey, type RecurringCandidate } from "@tally/core/recurringDetection";
 import { excludeAmortizedRealCharges, generateDueManualBillPaymentsForAllStreams } from "@/lib/recurringBillGeneration";
@@ -8,7 +8,9 @@ import { excludeAmortizedRealCharges, generateDueManualBillPaymentsForAllStreams
  * non-pending transaction history. Cheap enough to run after every sync at
  * this app's scale (hundreds–thousands of transactions); a previously
  * detected stream naturally transitions active → at_risk → cancelled on
- * later runs since its transactions remain in the candidate set.
+ * later runs since its transactions remain in the candidate set. A stream
+ * the user removed from Subscriptions stays dismissed — see the upsert's
+ * `where` below.
  */
 export async function detectRecurringForUser(userId: string): Promise<void> {
   const rows = await db
@@ -58,6 +60,10 @@ export async function detectRecurringForUser(userId: string): Promise<void> {
       .onConflictDoUpdate({
         target: [schema.recurringStreams.userId, schema.recurringStreams.merchantKey, schema.recurringStreams.accountId],
         set: values,
+        // Never resurrect a stream the user dismissed via RemoveBillButton —
+        // without this, the same merchant/account clustering the same way on
+        // a later run would silently flip it back to visible.
+        where: isNull(schema.recurringStreams.dismissedAt),
       });
   }
 

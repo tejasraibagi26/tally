@@ -41,7 +41,7 @@ export default async function SubscriptionsPage() {
     .from(schema.recurringStreams)
     .leftJoin(schema.accounts, eq(schema.recurringStreams.accountId, schema.accounts.id))
     .leftJoin(schema.categories, eq(schema.recurringStreams.categoryId, schema.categories.id))
-    .where(eq(schema.recurringStreams.userId, userId));
+    .where(and(eq(schema.recurringStreams.userId, userId), isNull(schema.recurringStreams.dismissedAt)));
 
   const accountRows = await db
     .select({ id: schema.accounts.id, name: schema.accounts.name, nickname: schema.accounts.nickname, mask: schema.accounts.mask })

@@ -70,10 +70,7 @@ export default function SubscriptionsScreen() {
   const streams = (data?.streams ?? []).filter((s) => s.status !== "cancelled");
 
   function confirmRemove(s: RecurringStream) {
-    const message = s.isManual
-      ? "Transactions it already posted stay in your history."
-      : "Transactions it already posted stay in your history, but it may come back automatically if the same charge keeps recurring.";
-    Alert.alert(`Remove "${s.description ?? s.merchantKey}"?`, message, [
+    Alert.alert(`Remove "${s.description ?? s.merchantKey}"?`, "Transactions it already posted stay in your history.", [
       { text: "Cancel", style: "cancel" },
       { text: "Remove", style: "destructive", onPress: () => deleteSubscription.mutate(s.id) },
     ]);

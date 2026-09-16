@@ -455,6 +455,17 @@ export const recurringStreams = pgTable("recurring_streams", {
   // confirming via "mark as annual" first. Never reset by
   // detectRecurringForUser's upsert once the user has turned it on.
   amortizeMonthly: boolean("amortize_monthly").notNull().default(false),
+  // Set when the user removes this stream from Subscriptions
+  // (RemoveBillButton) and it isn't a manually-added bill (those are hard
+  // deleted instead, since nothing ever recreates them). Soft-deleting an
+  // auto-detected stream instead of dropping the row lets
+  // detectRecurringForUser's upsert (lib/recurring.ts) recognize it on a
+  // later run and skip reactivating it, since the same (userId, merchantKey,
+  // accountId) triple would otherwise just get re-inserted as a fresh
+  // "active" row the next time its transactions cluster the same way. Every
+  // stream listing (Subscriptions page, GET /api/recurring) filters this
+  // column IS NULL.
+  dismissedAt: timestamp("dismissed_at", { withTimezone: true }),
 }, (t) => ({
   userIdx: index("recurring_user_idx").on(t.userId),
   uniq: uniqueIndex("recurring_user_merchant_account_idx").on(t.userId, t.merchantKey, t.accountId),

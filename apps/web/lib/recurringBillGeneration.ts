@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNotNull, notInArray, or } from "drizzle-orm";
+import { and, eq, inArray, isNotNull, isNull, notInArray, or } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { shiftMonth } from "@tally/core/budgetMath";
 import { normalizeMerchantKey } from "@tally/core/recurringDetection";
@@ -197,6 +197,7 @@ export async function generateDueManualBillPaymentsForAllStreams(userId?: string
     .where(
       and(
         or(eq(schema.recurringStreams.isManual, true), eq(schema.recurringStreams.amortizeMonthly, true)),
+        isNull(schema.recurringStreams.dismissedAt),
         userId ? eq(schema.recurringStreams.userId, userId) : undefined,
       ),
     );

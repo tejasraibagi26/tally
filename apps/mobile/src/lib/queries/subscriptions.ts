@@ -34,9 +34,9 @@ export function useSetAmortizeMonthly() {
   });
 }
 
-// Only a manually-added bill (AddBillForm's web equivalent — isManual) can
-// be removed; an auto-detected stream has no delete route since it'd just
-// reappear on the next sync. Matches web's RemoveBillButton.tsx.
+// Any stream can be removed — a manually-added bill is hard deleted, an
+// auto-detected stream is soft-deleted server-side so it stays gone even if
+// the same charge keeps recurring. Matches web's RemoveBillButton.tsx.
 export function useDeleteSubscription() {
   const queryClient = useQueryClient();
   return useMutation({

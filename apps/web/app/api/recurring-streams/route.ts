@@ -44,30 +44,34 @@ export async function POST(req: Request) {
 
   const merchantKey = normalizeMerchantKey(description);
   const [existing] = await db
-    .select({ id: schema.recurringStreams.id })
+    .select({ id: schema.recurringStreams.id, dismissedAt: schema.recurringStreams.dismissedAt })
     .from(schema.recurringStreams)
     .where(and(eq(schema.recurringStreams.userId, userId), eq(schema.recurringStreams.merchantKey, merchantKey), eq(schema.recurringStreams.accountId, accountId)))
     .limit(1);
-  if (existing) {
+  if (existing && existing.dismissedAt === null) {
     return NextResponse.json({ error: "Already tracked — set its next due date from the list instead of adding it again" }, { status: 409 });
   }
 
-  const [stream] = await db
-    .insert(schema.recurringStreams)
-    .values({
-      userId,
-      merchantKey,
-      description,
-      accountId,
-      categoryId: categoryId ?? null,
-      averageAmount: -amount,
-      frequency: "monthly",
-      manualNextDueDate,
-      status: "active",
-      transactionIds: [],
-      isManual: true,
-    })
-    .returning();
+  // (userId, merchantKey, accountId) is unique, so a previously-dismissed
+  // row for this same merchant/account (RemoveBillButton) is revived in
+  // place instead of inserted — a fresh insert would violate that constraint.
+  const values = {
+    userId,
+    merchantKey,
+    description,
+    accountId,
+    categoryId: categoryId ?? null,
+    averageAmount: -amount,
+    frequency: "monthly" as const,
+    manualNextDueDate,
+    status: "active" as const,
+    transactionIds: [],
+    isManual: true,
+    dismissedAt: null,
+  };
+  const [stream] = existing
+    ? await db.update(schema.recurringStreams).set(values).where(eq(schema.recurringStreams.id, existing.id)).returning()
+    : await db.insert(schema.recurringStreams).values(values).returning();
   if (!stream) {
     return NextResponse.json({ error: "Failed to create bill" }, { status: 500 });
   }
