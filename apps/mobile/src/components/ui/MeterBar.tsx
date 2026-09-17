@@ -43,7 +43,11 @@ export function MeterBar({ label, colorSlot, spentCents, budgetCents, mask = tru
           <Text className="font-ui-medium text-text" style={{ fontSize: rf(14) }}>{label}</Text>
         </View>
         <Text className="font-ui" style={{ color: overBudget ? colors.negative : colors["text-2"], fontSize: rf(13) }}>
-          <MoneyText cents={spentCents} mask={mask} /> of <MoneyText cents={budgetCents} mask={mask} />
+          {overBudget ? (
+            <>Overspent by <MoneyText cents={spentCents - budgetCents} mask={mask} /></>
+          ) : (
+            <><MoneyText cents={spentCents} mask={mask} /> of <MoneyText cents={budgetCents} mask={mask} /></>
+          )}
         </Text>
       </View>
       <View className="h-2 rounded-full bg-sunken flex-row overflow-hidden">
