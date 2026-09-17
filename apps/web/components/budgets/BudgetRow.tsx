@@ -123,7 +123,7 @@ export function BudgetRow({ budget, daysElapsed, daysInMonth }: { budget: Budget
         ) : (
           <div className="flex flex-wrap items-center gap-3 basis-full sm:basis-auto">
             <span className={cn("text-[15px] tabular", overBudget ? "text-negative" : "text-text")}>
-              {formatCents(budget.remaining)} left
+              {overBudget ? `Overspent by ${formatCents(Math.abs(budget.remaining))}` : `${formatCents(budget.remaining)} left`}
             </span>
             <span className="text-xs text-text-3 tabular">of {formatCents(budget.amount)}</span>
             <Link
