@@ -9,7 +9,6 @@ import { PasswordForm } from "@/components/settings/PasswordForm";
 import { DangerZone } from "@/components/settings/DangerZone";
 import { IncomeScheduleManager } from "@/components/settings/IncomeScheduleManager";
 import { RecapsToggle } from "@/components/settings/RecapsToggle";
-import { SendTestRecapButton } from "@/components/settings/SendTestRecapButton";
 import { accountDisplayName } from "@tally/core/accountName";
 
 function GroupLabel({ children }: { children: string }) {
@@ -105,7 +104,6 @@ export default async function SettingsPage() {
           <CardHeader title="Email" action={<Mail size={17} strokeWidth={1.75} className="text-text-3" />} />
           <div className="p-5">
             <RecapsToggle initialEnabled={user?.recapsEnabled ?? true} />
-            <SendTestRecapButton />
           </div>
         </Card>
       </div>
