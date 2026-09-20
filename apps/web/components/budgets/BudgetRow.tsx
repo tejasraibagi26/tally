@@ -105,7 +105,7 @@ export function BudgetRow({ budget, daysElapsed, daysInMonth }: { budget: Budget
               <input type="checkbox" checked={rollover} onChange={(e) => setRollover(e.target.checked)} />
               Rollover
             </label>
-            <label className="flex items-center gap-1 text-xs text-text-2" title="A fixed charge like rent or insurance — skips the burn-rate projection">
+            <label className="flex items-center gap-1 text-xs text-text-2" title="A fixed charge like rent or insurance. Skips the burn-rate projection">
               <input type="checkbox" checked={fixed} onChange={(e) => setFixed(e.target.checked)} />
               Fixed
             </label>

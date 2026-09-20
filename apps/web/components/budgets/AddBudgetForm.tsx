@@ -97,7 +97,7 @@ export function AddBudgetForm({ month, categories }: { month: string; categories
         <input type="checkbox" checked={rollover} onChange={(e) => setRollover(e.target.checked)} />
         Rollover unused
       </label>
-      <label className="flex items-center gap-1.5 text-sm text-text-2" title="A fixed charge like rent or insurance — skips the burn-rate projection, which assumes spend accrues gradually through the month">
+      <label className="flex items-center gap-1.5 text-sm text-text-2" title="A fixed charge like rent or insurance. Skips the burn-rate projection, which assumes spend accrues gradually through the month">
         <input type="checkbox" checked={fixed} onChange={(e) => setFixed(e.target.checked)} />
         Fixed amount
       </label>

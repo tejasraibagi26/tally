@@ -234,7 +234,7 @@ export function IncomeScheduleManager({
                 + add a second payday
               </button>
             )}
-            <span className="text-text-3">— moved to the preceding Friday if it lands on a weekend</span>
+            <span className="text-text-3">(moved to the preceding Friday if it lands on a weekend)</span>
           </div>
 
           {error && <p className="text-sm text-negative">{error}</p>}

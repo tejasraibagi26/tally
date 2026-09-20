@@ -45,7 +45,7 @@ export default function LockScreen() {
         </Text>
         {failed && (
           <Text className="font-ui text-text-2 text-center" style={{ fontSize: rf(14) }}>
-            Couldn&apos;t verify it&apos;s you — try again.
+            Couldn&apos;t verify it&apos;s you. Try again.
           </Text>
         )}
         <Pressable onPress={attempt} disabled={attempting} className="rounded-full bg-brand px-6 py-3 mt-2 disabled:opacity-50">

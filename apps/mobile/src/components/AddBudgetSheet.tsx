@@ -81,7 +81,7 @@ export function AddBudgetSheet({
         <View className="px-5 gap-4" style={{ paddingBottom: 8 }}>
           {availableCategories.length === 0 && (
             <Text className="font-ui text-text-3" style={{ fontSize: rf(13) }}>
-              Every expense category already has a budget this month — add a new one below.
+              Every expense category already has a budget this month. Add a new one below.
             </Text>
           )}
           <Pressable
@@ -114,7 +114,7 @@ export function AddBudgetSheet({
             <View className="flex-1 gap-0.5">
               <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>Fixed amount</Text>
               <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>
-                A fixed charge like rent or insurance — skips the burn-rate projection, which assumes spend accrues gradually through the month.
+                A fixed charge like rent or insurance. Skips the burn-rate projection, which assumes spend accrues gradually through the month.
               </Text>
             </View>
             <Switch value={fixed} onValueChange={setFixed} trackColor={{ false: colors["border-strong"], true: colors.brand }} ios_backgroundColor={colors["border-strong"]} />

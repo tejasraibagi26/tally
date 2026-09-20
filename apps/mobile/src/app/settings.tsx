@@ -27,7 +27,7 @@ function BiometricLockToggle() {
       if (!hasHardware || !isEnrolled) {
         Alert.alert(
           "Set up Face ID / fingerprint first",
-          "Your device doesn't have biometrics (or a passcode) set up yet — add one in your device's system settings, then try again.",
+          "Your device doesn't have biometrics (or a passcode) set up yet. Add one in your device's system settings, then try again.",
         );
         return;
       }

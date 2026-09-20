@@ -108,7 +108,7 @@ export function AccountForm({
             setSaved(false);
           }}
         />
-        <span className="text-xs text-text-3">Optional — lets the FIRE calculator show the age you&apos;ll reach it, not just years away.</span>
+        <span className="text-xs text-text-3">Optional. Lets the FIRE calculator show the age you&apos;ll reach it, not just years away.</span>
       </div>
 
       {hasChanges && (

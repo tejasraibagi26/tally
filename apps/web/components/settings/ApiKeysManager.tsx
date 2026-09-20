@@ -103,21 +103,21 @@ export function ApiKeysManager({ apiKeys, shortcutsEndpoint }: { apiKeys: ApiKey
         <p className="text-[13.5px] text-text-2">
           Send a <code className="text-[13px] text-text bg-sunken px-1.5 py-0.5 rounded">POST</code> with header{" "}
           <code className="text-[13px] text-text bg-sunken px-1.5 py-0.5 rounded">Authorization: Bearer &lt;token&gt;</code> and a JSON
-          body of <code className="text-[13px] text-text bg-sunken px-1.5 py-0.5 rounded">{"{ name, amount, card, date }"}</code> (all
-          strings — it parses "CA$16.95"-style amounts and matches "card" against your account names).
+          body of <code className="text-[13px] text-text bg-sunken px-1.5 py-0.5 rounded">{"{ name, amount, card, date }"}</code>, all
+          strings. It parses "CA$16.95"-style amounts and matches "card" against your account names.
         </p>
         <details className="text-[13.5px] text-text-2">
           <summary className="cursor-pointer text-brand select-none">Set this up in Apple Shortcuts</summary>
           <ol className="list-decimal list-inside flex flex-col gap-1 mt-2">
             <li>Create a token below and copy it.</li>
             <li>In Shortcuts, add a "Get Contents of URL" action, set to the endpoint above.</li>
-            <li>Method: POST. Headers: add Authorization → Bearer &lt;your token&gt;.</li>
+            <li>Method: POST. Headers: add Authorization, value Bearer &lt;your token&gt;.</li>
             <li>
               Request Body: JSON, with keys <code className="text-[13px] text-text bg-sunken px-1 rounded">name</code>,{" "}
               <code className="text-[13px] text-text bg-sunken px-1 rounded">amount</code>,{" "}
-              <code className="text-[13px] text-text bg-sunken px-1 rounded">card</code>,{" "}
-              <code className="text-[13px] text-text bg-sunken px-1 rounded">date</code> — fill each from the
-              notification text your automation trigger provides.
+              <code className="text-[13px] text-text bg-sunken px-1 rounded">card</code>, and{" "}
+              <code className="text-[13px] text-text bg-sunken px-1 rounded">date</code>, filled from the notification
+              text your automation trigger provides.
             </li>
           </ol>
         </details>
@@ -125,7 +125,7 @@ export function ApiKeysManager({ apiKeys, shortcutsEndpoint }: { apiKeys: ApiKey
 
       {revealedKey && (
         <div className="flex flex-col gap-2 p-3 rounded-control bg-warning-subtle border border-warning/30">
-          <p className="text-[13.5px] text-text">Copy this key now — it won&apos;t be shown again.</p>
+          <p className="text-[13.5px] text-text">Copy this key now. It won&apos;t be shown again.</p>
           <CopyRow value={revealedKey} />
           <button onClick={() => setRevealedKey(null)} className="self-start text-[13px] text-text-2 hover:text-text">
             Done

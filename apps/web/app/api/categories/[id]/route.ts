@@ -86,7 +86,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   const childCount = childCountRows[0]?.count ?? 0;
 
   if (txCount > 0 || budgetCount > 0 || childCount > 0) {
-    return NextResponse.json({ error: "Category is in use — reassign or merge it first" }, { status: 409 });
+    return NextResponse.json({ error: "Category is in use. Reassign or merge it first" }, { status: 409 });
   }
 
   await db.delete(schema.categories).where(eq(schema.categories.id, id));

@@ -49,7 +49,7 @@ export async function POST(req: Request) {
     .where(and(eq(schema.recurringStreams.userId, userId), eq(schema.recurringStreams.merchantKey, merchantKey), eq(schema.recurringStreams.accountId, accountId)))
     .limit(1);
   if (existing && existing.dismissedAt === null) {
-    return NextResponse.json({ error: "Already tracked — set its next due date from the list instead of adding it again" }, { status: 409 });
+    return NextResponse.json({ error: "Already tracked. Set its next due date from the list instead of adding it again" }, { status: 409 });
   }
 
   // (userId, merchantKey, accountId) is unique, so a previously-dismissed

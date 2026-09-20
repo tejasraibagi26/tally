@@ -247,7 +247,7 @@ export default function IncomeSchedulesScreen() {
 
             {!isLoading && (data?.schedules.length ?? 0) === 0 && !adding && (
               <Text className="font-ui text-text-3" style={{ fontSize: rf(13.5) }}>
-                No income schedules yet — add one for a paycheck Plaid doesn&apos;t reliably catch.
+                No income schedules yet. Add one for a paycheck Plaid doesn&apos;t reliably catch.
               </Text>
             )}
           </>
