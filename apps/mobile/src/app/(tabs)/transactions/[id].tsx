@@ -79,11 +79,19 @@ export default function TransactionDetailScreen() {
   }
 
   return (
-    // 22px fixed, no insets.top -- matches more.tsx's own modal screen: a
-    // "modal" presentation already reserves its own space above the content,
-    // so adding the device's safe-area inset on top of that double-counted
-    // it (the ~130px dead space above the title this screen used to have).
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1 bg-surface" style={{ paddingTop: 22 }}>
+    // iOS's "modal" (card) presentation already reserves its own space above
+    // the content, so adding insets.top on top of that double-counted it (the
+    // ~130px dead space above the title this screen used to have) -- a fixed
+    // 22px is enough there. Android's "modal" draws edge-to-edge under the
+    // status bar instead, so it still needs the real inset (more.tsx's sheet
+    // looked like a counterexample, but it's bottom-anchored at 46% height
+    // and never reaches the status bar either way -- not actually evidence
+    // either platform's full-height modal skips the inset).
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1 bg-surface"
+      style={{ paddingTop: Platform.OS === "ios" ? 22 : insets.top + 12 }}
+    >
       <Stack.Screen options={{ presentation: "modal" }} />
       <View className="flex-row items-center justify-between px-5 pb-4">
         <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Transaction</Text>
