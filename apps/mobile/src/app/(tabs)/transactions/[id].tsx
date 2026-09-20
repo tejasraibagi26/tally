@@ -76,7 +76,7 @@ export default function TransactionDetailScreen() {
   }
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1 bg-surface-2" style={{ paddingTop: insets.top + 12 }}>
+    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1 bg-surface" style={{ paddingTop: insets.top + 12 }}>
       <Stack.Screen options={{ presentation: "modal" }} />
       <View className="flex-row items-center justify-between px-5 pb-4">
         <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Transaction</Text>
@@ -150,7 +150,7 @@ export default function TransactionDetailScreen() {
               </Text>
               <Pressable
                 onPress={() => setPickerOpen(true)}
-                className="flex-row items-center justify-between h-12 rounded-control bg-sunken px-[14px]"
+                className="flex-row items-center justify-between h-12 rounded-control bg-surface-2 px-[14px]"
               >
                 <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>{currentCategory?.name ?? (categoryId ? prettifyPfc(t.pfcDetailed) : "Uncategorized")}</Text>
                 <ChevronRight size={16} color={colors["text-3"]} />
@@ -168,7 +168,7 @@ export default function TransactionDetailScreen() {
                 placeholderTextColor={colors["text-3"]}
                 multiline
                 numberOfLines={3}
-                className="rounded-control bg-sunken px-[14px] py-3 font-ui text-text"
+                className="rounded-control bg-surface-2 px-[14px] py-3 font-ui text-text"
                 style={{ minHeight: 72, textAlignVertical: "top", fontSize: rf(14) }}
               />
             </View>

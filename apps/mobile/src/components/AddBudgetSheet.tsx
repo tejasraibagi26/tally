@@ -86,14 +86,14 @@ export function AddBudgetSheet({
           )}
           <Pressable
             onPress={() => setPickerOpen(true)}
-            className="flex-row items-center justify-between rounded-control bg-sunken px-[14px]"
+            className="flex-row items-center justify-between rounded-control bg-surface-2 px-[14px]"
             style={{ height: 46 }}
           >
             <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>{categoryName ?? "Choose category"}</Text>
             <ChevronRight size={16} color={colors["text-3"]} />
           </Pressable>
 
-          <View className="flex-row items-center rounded-control bg-sunken px-[14px]" style={{ height: 46 }}>
+          <View className="flex-row items-center rounded-control bg-surface-2 px-[14px]" style={{ height: 46 }}>
             <Text className="font-ui text-text-3" style={{ fontSize: rf(14.5) }}>$</Text>
             <TextInput
               value={amountInput}

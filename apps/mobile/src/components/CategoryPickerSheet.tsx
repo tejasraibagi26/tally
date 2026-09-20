@@ -88,7 +88,7 @@ export function CategoryPickerSheet({
             <X size={22} color={colors["text-2"]} />
           </Pressable>
         </View>
-        <View className="mx-5 mb-2 flex-row items-center gap-2 rounded-control bg-sunken px-3.5" style={{ height: 42 }}>
+        <View className="mx-5 mb-2 flex-row items-center gap-2 rounded-control bg-surface-2 px-3.5" style={{ height: 42 }}>
           <Search size={16} color={colors["text-3"]} strokeWidth={2} />
           <TextInput
             value={query}
@@ -117,7 +117,7 @@ export function CategoryPickerSheet({
                 placeholderTextColor={colors["text-3"]}
                 onSubmitEditing={submitNewCategory}
                 returnKeyType="done"
-                className="flex-1 rounded-control bg-sunken px-3.5 font-ui text-text"
+                className="flex-1 rounded-control bg-surface-2 px-3.5 font-ui text-text"
                 style={{ height: 42, fontSize: rf(14.5) }}
               />
               <Pressable

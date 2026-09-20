@@ -24,7 +24,7 @@ function lastMonthRange(): { from: string; to: string } {
 function Chip({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
   const rf = useRF();
   return (
-    <Pressable onPress={onPress} className={`px-4 py-2.5 rounded-full mr-2 mb-2 ${selected ? "bg-brand" : "bg-sunken"}`}>
+    <Pressable onPress={onPress} className={`px-4 py-2.5 rounded-full mr-2 mb-2 ${selected ? "bg-brand" : "bg-surface-2"}`}>
       <Text className={`font-ui-medium ${selected ? "text-on-brand" : "text-text"}`} style={{ fontSize: rf(13.5) }}>{label}</Text>
     </Pressable>
   );

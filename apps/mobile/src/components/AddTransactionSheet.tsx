@@ -121,14 +121,14 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
             <Pressable
               onPress={() => setKind("expense")}
               className="flex-1 items-center justify-center"
-              style={{ backgroundColor: kind === "expense" ? colors["negative-subtle"] : colors["surface-2"] }}
+              style={{ backgroundColor: kind === "expense" ? colors["negative-subtle"] : colors.surface }}
             >
               <Text className="font-ui-semibold" style={{ fontSize: rf(14), color: kind === "expense" ? colors.negative : colors["text-2"] }}>Expense</Text>
             </Pressable>
             <Pressable
               onPress={() => setKind("income")}
               className="flex-1 items-center justify-center"
-              style={{ backgroundColor: kind === "income" ? colors["positive-subtle"] : colors["surface-2"] }}
+              style={{ backgroundColor: kind === "income" ? colors["positive-subtle"] : colors.surface }}
             >
               <Text className="font-ui-semibold" style={{ fontSize: rf(14), color: kind === "income" ? colors.positive : colors["text-2"] }}>Income</Text>
             </Pressable>
@@ -139,11 +139,11 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
             onChangeText={setName}
             placeholder="Description"
             placeholderTextColor={colors["text-3"]}
-            className="rounded-control bg-sunken px-[14px] font-ui text-text"
+            className="rounded-control bg-surface-2 px-[14px] font-ui text-text"
             style={{ height: 46, fontSize: rf(14.5) }}
           />
 
-          <View className="flex-row items-center rounded-control bg-sunken px-[14px]" style={{ height: 46 }}>
+          <View className="flex-row items-center rounded-control bg-surface-2 px-[14px]" style={{ height: 46 }}>
             <Text className="font-ui text-text-3" style={{ fontSize: rf(14.5) }}>$</Text>
             <TextInput
               value={amountInput}
@@ -158,7 +158,7 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
 
           <Pressable
             onPress={openDatePicker}
-            className="flex-row items-center justify-between rounded-control bg-sunken px-[14px]"
+            className="flex-row items-center justify-between rounded-control bg-surface-2 px-[14px]"
             style={{ height: 46 }}
           >
             <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>{formatDisplayDate(date)}</Text>
@@ -180,7 +180,7 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
 
           <Pressable
             onPress={() => setPickerOpen(true)}
-            className="flex-row items-center justify-between rounded-control bg-sunken px-[14px]"
+            className="flex-row items-center justify-between rounded-control bg-surface-2 px-[14px]"
             style={{ height: 46 }}
           >
             <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>{category?.name ?? "Uncategorized"}</Text>
@@ -196,7 +196,7 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
                     key={a.id}
                     onPress={() => setAccountId(a.id)}
                     className="px-4 py-2.5 rounded-full"
-                    style={{ backgroundColor: selected ? colors.brand : colors.sunken }}
+                    style={{ backgroundColor: selected ? colors.brand : colors["surface-2"] }}
                   >
                     <Text className="font-ui-medium" style={{ fontSize: rf(13.5), color: selected ? colors["on-brand"] : colors.text }}>
                       {a.name}{a.mask ? ` ····${a.mask}` : ""}
