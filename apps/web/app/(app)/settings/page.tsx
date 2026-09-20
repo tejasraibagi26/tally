@@ -95,6 +95,12 @@ export default async function SettingsPage() {
     lastUsedAt: k.lastUsedAt?.toISOString() ?? null,
     createdAt: k.createdAt.toISOString(),
   }));
+  // APP_URL is the canonical host (see app/api/cron/monthly-recap/route.ts
+  // for the same convention) -- falls back to the deployment's own preview
+  // hostname, then localhost, so this never renders a bare relative path
+  // someone would have to guess a host for.
+  const appHost = process.env.APP_URL ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+  const shortcutsEndpoint = `${appHost.replace(/\/$/, "")}/api/shortcuts/transactions`;
 
   return (
     <div className="max-w-[720px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-8">
@@ -182,13 +188,9 @@ export default async function SettingsPage() {
           <CardHeader title="API tokens" action={<KeyRound size={17} strokeWidth={1.75} className="text-text-3" />} />
           <div className="p-5 flex flex-col gap-3">
             <p className="text-text-2 text-sm">
-              For automations like Apple Shortcuts: create a token, then POST to{" "}
-              <code className="text-[13px] text-text bg-sunken px-1.5 py-0.5 rounded">/api/shortcuts/transactions</code> with
-              an <code className="text-[13px] text-text bg-sunken px-1.5 py-0.5 rounded">Authorization: Bearer &lt;token&gt;</code> header
-              and a JSON body of <code className="text-[13px] text-text bg-sunken px-1.5 py-0.5 rounded">{"{ name, amount, card, date }"}</code> (all
-              strings — it parses "CA$16.95"-style amounts and card names against your accounts).
+              For automations like Apple Shortcuts: create a token below, then have your automation send it a transaction.
             </p>
-            <ApiKeysManager apiKeys={apiKeysForDisplay} />
+            <ApiKeysManager apiKeys={apiKeysForDisplay} shortcutsEndpoint={shortcutsEndpoint} />
           </div>
         </Card>
       </div>

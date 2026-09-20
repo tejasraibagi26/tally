@@ -17,7 +17,34 @@ function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
 
-export function ApiKeysManager({ apiKeys }: { apiKeys: ApiKeyData[] }) {
+function CopyRow({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  return (
+    <div className="flex items-center gap-2">
+      <code className="flex-1 min-w-0 truncate px-2.5 py-2 rounded-control bg-surface border border-border-strong text-[13px] text-text font-mono">
+        {value}
+      </code>
+      <button
+        onClick={copy}
+        className="h-9 px-3 flex-none inline-flex items-center gap-1.5 rounded-control bg-surface border border-border-strong text-sm font-medium text-text hover:bg-sunken"
+      >
+        {copied ? <Check size={14} strokeWidth={2} /> : <Copy size={14} strokeWidth={2} />}
+        {copied ? "Copied" : "Copy"}
+      </button>
+    </div>
+  );
+}
+
+export function ApiKeysManager({ apiKeys, shortcutsEndpoint }: { apiKeys: ApiKeyData[]; shortcutsEndpoint: string }) {
   const router = useRouter();
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState("");
@@ -25,7 +52,6 @@ export function ApiKeysManager({ apiKeys }: { apiKeys: ApiKeyData[] }) {
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -55,17 +81,6 @@ export function ApiKeysManager({ apiKeys }: { apiKeys: ApiKeyData[] }) {
     }
   }
 
-  async function copyKey() {
-    if (!revealedKey) return;
-    try {
-      await navigator.clipboard.writeText(revealedKey);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
   async function remove(key: ApiKeyData) {
     if (!window.confirm(`Revoke "${key.name}"? Anything still using it (a Shortcut, a script) will stop working immediately.`)) return;
     setBusyId(key.id);
@@ -82,21 +97,36 @@ export function ApiKeysManager({ apiKeys }: { apiKeys: ApiKeyData[] }) {
 
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2.5 p-3 rounded-control bg-surface-2 border border-border">
+        <p className="text-[13px] text-text-3 uppercase tracking-wide font-medium">Endpoint</p>
+        <CopyRow value={shortcutsEndpoint} />
+        <p className="text-[13.5px] text-text-2">
+          Send a <code className="text-[13px] text-text bg-sunken px-1.5 py-0.5 rounded">POST</code> with header{" "}
+          <code className="text-[13px] text-text bg-sunken px-1.5 py-0.5 rounded">Authorization: Bearer &lt;token&gt;</code> and a JSON
+          body of <code className="text-[13px] text-text bg-sunken px-1.5 py-0.5 rounded">{"{ name, amount, card, date }"}</code> (all
+          strings — it parses "CA$16.95"-style amounts and matches "card" against your account names).
+        </p>
+        <details className="text-[13.5px] text-text-2">
+          <summary className="cursor-pointer text-brand select-none">Set this up in Apple Shortcuts</summary>
+          <ol className="list-decimal list-inside flex flex-col gap-1 mt-2">
+            <li>Create a token below and copy it.</li>
+            <li>In Shortcuts, add a "Get Contents of URL" action, set to the endpoint above.</li>
+            <li>Method: POST. Headers: add Authorization → Bearer &lt;your token&gt;.</li>
+            <li>
+              Request Body: JSON, with keys <code className="text-[13px] text-text bg-sunken px-1 rounded">name</code>,{" "}
+              <code className="text-[13px] text-text bg-sunken px-1 rounded">amount</code>,{" "}
+              <code className="text-[13px] text-text bg-sunken px-1 rounded">card</code>,{" "}
+              <code className="text-[13px] text-text bg-sunken px-1 rounded">date</code> — fill each from the
+              notification text your automation trigger provides.
+            </li>
+          </ol>
+        </details>
+      </div>
+
       {revealedKey && (
         <div className="flex flex-col gap-2 p-3 rounded-control bg-warning-subtle border border-warning/30">
           <p className="text-[13.5px] text-text">Copy this key now — it won&apos;t be shown again.</p>
-          <div className="flex items-center gap-2">
-            <code className="flex-1 min-w-0 truncate px-2.5 py-2 rounded-control bg-surface border border-border-strong text-[13px] text-text font-mono">
-              {revealedKey}
-            </code>
-            <button
-              onClick={copyKey}
-              className="h-9 px-3 flex-none inline-flex items-center gap-1.5 rounded-control bg-surface border border-border-strong text-sm font-medium text-text hover:bg-sunken"
-            >
-              {copied ? <Check size={14} strokeWidth={2} /> : <Copy size={14} strokeWidth={2} />}
-              {copied ? "Copied" : "Copy"}
-            </button>
-          </div>
+          <CopyRow value={revealedKey} />
           <button onClick={() => setRevealedKey(null)} className="self-start text-[13px] text-text-2 hover:text-text">
             Done
           </button>
