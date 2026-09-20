@@ -8,6 +8,7 @@ import { useCategories } from "@/lib/queries/categories";
 import { useCreateTransaction } from "@/lib/queries/transactions";
 import { CategoryPickerSheet } from "@/components/CategoryPickerSheet";
 import { Sheet } from "@/components/ui/Sheet";
+import { SimplePickerSheet } from "@/components/ui/SimplePickerSheet";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 
@@ -47,6 +48,7 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
   const [date, setDate] = useState(() => new Date());
   const [showIOSPicker, setShowIOSPicker] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickingAccount, setPickingAccount] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const selectedAccount = allAccounts.find((a) => a.id === accountId) ?? allAccounts[0];
@@ -60,6 +62,7 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
     setCategoryId(null);
     setDate(new Date());
     setShowIOSPicker(false);
+    setPickingAccount(false);
     setError(null);
   }
 
@@ -187,24 +190,21 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
             <ChevronRight size={16} color={colors["text-3"]} />
           </Pressable>
 
+          {/* Chip cloud didn't scale to someone with several linked accounts
+              -- single-select picker row instead, same pattern as the
+              category row right above and TransactionFiltersSheet's account
+              filter, so the full list scrolls inside its own sheet. */}
           {allAccounts.length > 0 && (
-            <View className="flex-row flex-wrap gap-2">
-              {allAccounts.map((a) => {
-                const selected = (accountId ?? allAccounts[0]?.id) === a.id;
-                return (
-                  <Pressable
-                    key={a.id}
-                    onPress={() => setAccountId(a.id)}
-                    className="px-4 py-2.5 rounded-full"
-                    style={{ backgroundColor: selected ? colors.brand : colors["surface-2"] }}
-                  >
-                    <Text className="font-ui-medium" style={{ fontSize: rf(13.5), color: selected ? colors["on-brand"] : colors.text }}>
-                      {a.name}{a.mask ? ` ····${a.mask}` : ""}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
+            <Pressable
+              onPress={() => setPickingAccount(true)}
+              className="flex-row items-center justify-between rounded-control bg-surface-2 px-[14px]"
+              style={{ height: 46 }}
+            >
+              <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>
+                {selectedAccount ? `${selectedAccount.name}${selectedAccount.mask ? ` ····${selectedAccount.mask}` : ""}` : "Choose account"}
+              </Text>
+              <ChevronRight size={16} color={colors["text-3"]} />
+            </Pressable>
           )}
 
           {error && <Text className="font-ui text-negative" style={{ fontSize: rf(13) }}>{error}</Text>}
@@ -225,6 +225,14 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
       </>
 
       <CategoryPickerSheet visible={pickerOpen} onClose={() => setPickerOpen(false)} selectedId={categoryId} onSelect={setCategoryId} />
+      <SimplePickerSheet
+        visible={pickingAccount}
+        onClose={() => setPickingAccount(false)}
+        title="Account"
+        items={allAccounts.map((a) => ({ id: a.id, label: a.name, sublabel: a.mask ? `····${a.mask}` : undefined }))}
+        selectedId={accountId ?? allAccounts[0]?.id ?? null}
+        onSelect={setAccountId}
+      />
     </Sheet>
   );
 }
