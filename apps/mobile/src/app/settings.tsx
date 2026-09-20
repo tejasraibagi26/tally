@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TextInput, Pressable, Switch, ActivityIndicator
 import { useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import * as LocalAuthentication from "expo-local-authentication";
-import { ChevronRight, Link2, Wallet, Download, Sun, Moon, Smartphone, Pencil, Lock, Trash2, Check, X } from "lucide-react-native";
+import { ChevronRight, Link2, Wallet, Download, KeyRound, Sun, Moon, Smartphone, Pencil, Lock, Trash2, Check, X } from "lucide-react-native";
 import { exportTransactions } from "@/lib/exportData";
 import { Card } from "@/components/ui/Card";
 import { useAccountProfile, useUpdateAccountProfile, useUpdateRecaps, useChangePassword, useWipeAccount } from "@/lib/queries/account";
@@ -419,10 +419,15 @@ export default function SettingsScreen() {
             <Text className="flex-1 font-ui-medium text-text" style={{ fontSize: rf(14.5) }}>Income schedules</Text>
             <ChevronRight size={16} color={colors["text-3"]} />
           </Pressable>
-          <Pressable onPress={chooseExportFormat} disabled={exporting} className="flex-row items-center gap-3 py-4 disabled:opacity-50">
+          <Pressable onPress={chooseExportFormat} disabled={exporting} className="flex-row items-center gap-3 py-4 disabled:opacity-50" style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}>
             <Download size={18} color={colors["text-2"]} strokeWidth={1.75} />
             <Text className="flex-1 font-ui-medium text-text" style={{ fontSize: rf(14.5) }}>{exporting ? "Exporting…" : "Export transactions"}</Text>
             {exporting && <ActivityIndicator size="small" />}
+          </Pressable>
+          <Pressable onPress={() => router.push("/api-tokens")} className="flex-row items-center gap-3 py-4">
+            <KeyRound size={18} color={colors["text-2"]} strokeWidth={1.75} />
+            <Text className="flex-1 font-ui-medium text-text" style={{ fontSize: rf(14.5) }}>API tokens</Text>
+            <ChevronRight size={16} color={colors["text-3"]} />
           </Pressable>
         </Card>
       </View>
