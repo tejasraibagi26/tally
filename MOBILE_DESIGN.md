@@ -304,12 +304,82 @@ at top, swipe-down or backdrop-tap to dismiss.
 
 ### 5.6 Budgets (Phase C)
 
-Month stepper at top (‹ August 2026 ›, swipe left/right also changes month).
-Per-category meter rows, same spec as `DESIGN.md §8` "Meter bar" — track,
-fill in category series color, over-budget portion in `--negative`, dashed
-projection marker. Grouped by parent category with a subtotal row per group,
-footer totals row pinned above the tab bar (not scrolled away) so the overall
-"X of Y this month" figure stays visible while scrolling categories.
+Full parity target with the web Budgets page (`apps/web/app/(app)/budgets/page.tsx`)
+— web is the reference implementation; every behavior below exists there today
+unless marked **(mobile-only addition)** or **(open question, not on web either)**.
+
+- **Header**: "Budgets" title + "{N} categories budgeted" count, matching
+  web's header line.
+- **Month stepper**: chevrons (‹ August 2026 ›) as today, *plus* swipe
+  left/right on the list to change month — an addition beyond web (which only
+  has the chevron links), kept because it's a natural native gesture here.
+  Changing month always refetches from `GET /api/budgets?month=`; the current
+  calendar month silently seeds itself from the prior month's rows if it has
+  none yet (server-side behavior already in `ensureMonthSeeded`, nothing for
+  mobile to implement) — never true for a past/future month browsed via the
+  stepper.
+- **Summary row**: three stat tiles — Budgeted, Spent, Remaining — same
+  horizontally-scrollable stat-tile strip pattern as the Overview KPI row
+  (§5.2), replacing the current single "Total this month" card so mobile
+  shows the same three figures web's summary cards do. Remaining colored
+  `--negative` when over, `--positive` otherwise. Hidden entirely when there
+  are zero budget rows for the month (same gate as web).
+- **Category rows** (`MeterBar`): per-category meter bar, unchanged track/fill
+  mechanics from `DESIGN.md §8` "Meter bar," with three fill-color tiers
+  matching web — series color under 80% of budget, `--warning` at ≥80% and
+  not yet over, `--negative` for the overage portion once over. Row text:
+  "$X of $Y" normally, "Overspent by $X" once over (already implemented).
+  Rollover amount shown as a small "+$X rollover" tag next to the category
+  name when nonzero, matching web.
+- **Burn-rate projection marker**: dashed vertical marker on the meter bar +
+  "Projected $X by month end" caption beneath, using `@tally/core`'s
+  `computeBurnRateProjection` (`spend_to_date / days_elapsed × days_in_month`)
+  — shown only when viewing the current month *and* the budget is not
+  `isFixedAmount` (a fixed-amount budget like rent/insurance posts once and
+  doesn't accrue, so a burn-rate projection is meaningless for it), same gate
+  as web's `BudgetRow`/`BudgetMeterList`. Not implemented on mobile today —
+  the flag is captured on create but never consulted for rendering.
+- **Row tap → edit sheet**: tapping a category row opens a bottom sheet (the
+  existing `AddBudgetSheet`, generalized to also prefill/edit) with the same
+  fields as add — amount, Rollover switch, Fixed-amount switch — plus:
+  - **"View transactions"** — routes to the Transactions tab filtered to
+    that category + the viewed month's date range, `transfer` and `excluded`
+    both off, mirroring web's per-row "View" link into
+    `/transactions?category=<id>&from=<month>&to=<monthLastDay>&transfer=0&excluded=0`.
+  - **"Remove budget"** — destructive action, confirm before calling
+    `DELETE /api/budgets`, matching web's confirm-then-delete row action.
+  Both are entirely missing today; only create exists (`AddBudgetSheet`
+  with no corresponding edit/delete path).
+- **Add flow**: unchanged — "+" opens a sheet with a category picker limited
+  to not-yet-budgeted expense categories, with inline "create a new category"
+  support, submitting the same upsert (`PUT /api/budgets`) web's Add form
+  uses.
+- **Footer totals**: pinned above the tab bar (not scrolled away), so the
+  overall Budgeted/Spent/Remaining figures stay visible while scrolling
+  categories — needs a fixed footer view outside the `ScrollView`; today the
+  summary renders inline at the top of the scroll instead (called out as
+  deferred in the screen's own code comment).
+- **Empty state**: icon + "No budgets yet" + a description naming the viewed
+  month, matching web's `EmptyState` treatment — today it's a bare line of
+  text with no icon or CTA.
+- **Loading state**: shape-matched skeleton rows (per `DESIGN.md §8`
+  "Skeletons," same convention already used on Transactions) instead of a
+  bare spinner.
+- **Error state**: an `isError` branch with a retry action — not read from
+  `useBudgets` today, so a failed fetch currently has no visible error UI.
+- Amounts on this screen are **never masked** by the app's "hide amounts"
+  privacy toggle, matching web (a budget figure without its amount isn't
+  useful) — already correct on both platforms, keep it that way.
+
+**Open question, not on web either** — `DESIGN.md §10` calls for per-category
+rows "grouped by parent category with a subtotal row per group" and
+"'Copy last month' and 'Set from 3-month average' actions," but the actual
+web implementation never built either: budgets render as a flat list sorted
+by spend, and the only "copy last month" behavior is the invisible
+current-month auto-seed described above, with no user-facing button on
+either platform. Don't silently port these to mobile as a parity item — if
+they're wanted, they're new functionality on *both* platforms and should be
+scoped as their own piece of work, not folded into this parity pass.
 
 ### 5.7 Subscriptions (Phase C)
 
@@ -379,3 +449,8 @@ Respect the OS reduce-motion setting per §4 above.
   any mobile-specific legend treatment beyond the pill dot already specced in
   `DESIGN.md §8` "Category pill" — likely not, revisit only if a category
   legend screen is added later.
+- Whether Budgets' parent-category grouping/subtotals and the "Copy last
+  month" / "Set from 3-month average" bulk actions (specced in
+  `DESIGN.md §10` but never built on web — see §5.6) should actually be
+  built at all, and if so on which platform first. Cross-platform decision,
+  not a mobile-parity item.
