@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { AccessibilityInfo, Dimensions, KeyboardAvoidingView, Modal, Platform, Pressable, View, type ViewStyle } from "react-native";
+import { AccessibilityInfo, Dimensions, Keyboard, KeyboardAvoidingView, Modal, Platform, Pressable, View, type ViewStyle } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -46,11 +46,27 @@ export function Sheet({
   const insets = useSafeAreaInsets();
   const [mounted, setMounted] = useState(visible);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
   const translateY = useSharedValue(SCREEN_HEIGHT);
   const dragStart = useSharedValue(0);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then(setReduceMotion);
+  }, []);
+
+  useEffect(() => {
+    // The bottom safe-area padding below is only for clearing the home
+    // indicator -- once the keyboard is docked it already covers that
+    // strip, so keeping the padding just leaves a dead gap above the
+    // keyboard (between it and a sheet's own submit button).
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const showSub = Keyboard.addListener(showEvent, () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardVisible(false));
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
   }, []);
 
   useEffect(() => {
@@ -115,7 +131,7 @@ export function Sheet({
         >
           <Animated.View
             className="bg-surface rounded-t-panel overflow-hidden"
-            style={[{ maxHeight, paddingBottom: insets.bottom }, sheetStyle]}
+            style={[{ maxHeight, paddingBottom: keyboardVisible ? 0 : insets.bottom }, sheetStyle]}
           >
             <GestureDetector gesture={panGesture}>
               <View style={{ alignItems: "center", paddingTop: 8, paddingBottom: 4 }} hitSlop={{ top: 12, bottom: 12, left: 48, right: 48 }}>
