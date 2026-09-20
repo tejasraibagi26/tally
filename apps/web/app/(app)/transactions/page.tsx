@@ -59,7 +59,11 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   await clearOrphanedRecurringStreamRefs(userId);
   const sp = await searchParams;
   const q = (sp.q ?? "").trim();
+  // Comma-joined for a multi-account filter (mobile's filter sheet supports
+  // selecting several accounts at once); a bare single id still works the
+  // same as before.
   const accountFilter = sp.account ?? "";
+  const accountIds = accountFilter.split(",").map((s) => s.trim()).filter(Boolean);
   const pendingOnly = sp.pending === "1";
   const page = Math.max(1, parseInt(sp.page ?? "1", 10) || 1);
   const categoryFilter = sp.category ?? "";
@@ -95,7 +99,8 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   const categoryOptions = groupCategoryOptions(categories);
 
   const conditions = [eq(schema.transactions.userId, userId)];
-  if (accountFilter) conditions.push(eq(schema.transactions.accountId, accountFilter));
+  if (accountIds.length === 1) conditions.push(eq(schema.transactions.accountId, accountIds[0]!));
+  else if (accountIds.length > 1) conditions.push(inArray(schema.transactions.accountId, accountIds));
   if (pendingOnly) conditions.push(eq(schema.transactions.isPending, true));
   // A parent category (e.g. "Medical") rolls up every transaction filed under one of its
   // subcategories (e.g. "Dental care") too — selecting the parent shouldn't show nothing just

@@ -85,7 +85,7 @@ export default function TransactionsScreen() {
 
   const queryFilters = useMemo(() => {
     const out: Record<string, string> = {};
-    if (filters.account) out.account = filters.account;
+    if (filters.account?.length) out.account = filters.account.join(",");
     if (filters.pending) out.pending = filters.pending;
     if (filters.from) out.from = filters.from;
     if (filters.to) out.to = filters.to;

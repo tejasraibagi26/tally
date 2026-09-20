@@ -44,7 +44,11 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const sp = url.searchParams;
   const q = (sp.get("q") ?? "").trim();
+  // Comma-joined for a multi-account filter (mobile's filter sheet supports
+  // selecting several accounts at once); a bare single id still works the
+  // same as before.
   const accountFilter = sp.get("account") ?? "";
+  const accountIds = accountFilter.split(",").map((s) => s.trim()).filter(Boolean);
   const pendingOnly = sp.get("pending") === "1";
   const page = Math.max(1, parseInt(sp.get("page") ?? "1", 10) || 1);
   const categoryFilter = sp.get("category") ?? "";
@@ -64,7 +68,8 @@ export async function GET(req: Request) {
   });
 
   const conditions = [eq(schema.transactions.userId, userId)];
-  if (accountFilter) conditions.push(eq(schema.transactions.accountId, accountFilter));
+  if (accountIds.length === 1) conditions.push(eq(schema.transactions.accountId, accountIds[0]!));
+  else if (accountIds.length > 1) conditions.push(inArray(schema.transactions.accountId, accountIds));
   if (pendingOnly) conditions.push(eq(schema.transactions.isPending, true));
   if (categoryFilter) conditions.push(inArray(schema.transactions.categoryId, categoryIdsInGroup(categoryFilter, categories)));
   if (fromFilter) conditions.push(gte(schema.transactions.postedDate, fromFilter));
