@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { and, eq, isNull, or } from "drizzle-orm";
-import { User, Lock, Download, Link2, Wand2, Wallet, Mail, ChevronRight, AlertTriangle, type LucideIcon } from "lucide-react";
+import { and, desc, eq, isNull, or } from "drizzle-orm";
+import { User, Lock, Download, Link2, Wand2, Wallet, Mail, KeyRound, ChevronRight, AlertTriangle, type LucideIcon } from "lucide-react";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -9,6 +9,7 @@ import { PasswordForm } from "@/components/settings/PasswordForm";
 import { DangerZone } from "@/components/settings/DangerZone";
 import { IncomeScheduleManager } from "@/components/settings/IncomeScheduleManager";
 import { RecapsToggle } from "@/components/settings/RecapsToggle";
+import { ApiKeysManager } from "@/components/settings/ApiKeysManager";
 import { accountDisplayName } from "@tally/core/accountName";
 
 function GroupLabel({ children }: { children: string }) {
@@ -76,6 +77,23 @@ export default async function SettingsPage() {
   const incomeSchedulesForDisplay = incomeSchedules.map(({ accountNickname, ...s }) => ({
     ...s,
     accountName: s.accountName != null ? accountDisplayName(s.accountName, accountNickname) : s.accountName,
+  }));
+
+  const apiKeys = await db
+    .select({
+      id: schema.apiKeys.id,
+      name: schema.apiKeys.name,
+      keyPrefix: schema.apiKeys.keyPrefix,
+      lastUsedAt: schema.apiKeys.lastUsedAt,
+      createdAt: schema.apiKeys.createdAt,
+    })
+    .from(schema.apiKeys)
+    .where(eq(schema.apiKeys.userId, userId))
+    .orderBy(desc(schema.apiKeys.createdAt));
+  const apiKeysForDisplay = apiKeys.map((k) => ({
+    ...k,
+    lastUsedAt: k.lastUsedAt?.toISOString() ?? null,
+    createdAt: k.createdAt.toISOString(),
   }));
 
   return (
@@ -155,6 +173,23 @@ export default async function SettingsPage() {
             description="Auto-categorize transactions as they come in"
             href="/rules"
           />
+        </Card>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <GroupLabel>Developer</GroupLabel>
+        <Card>
+          <CardHeader title="API tokens" action={<KeyRound size={17} strokeWidth={1.75} className="text-text-3" />} />
+          <div className="p-5 flex flex-col gap-3">
+            <p className="text-text-2 text-sm">
+              For automations like Apple Shortcuts: create a token, then POST to{" "}
+              <code className="text-[13px] text-text bg-sunken px-1.5 py-0.5 rounded">/api/shortcuts/transactions</code> with
+              an <code className="text-[13px] text-text bg-sunken px-1.5 py-0.5 rounded">Authorization: Bearer &lt;token&gt;</code> header
+              and a JSON body of <code className="text-[13px] text-text bg-sunken px-1.5 py-0.5 rounded">{"{ name, amount, card, date }"}</code> (all
+              strings — it parses "CA$16.95"-style amounts and card names against your accounts).
+            </p>
+            <ApiKeysManager apiKeys={apiKeysForDisplay} />
+          </div>
         </Card>
       </div>
 

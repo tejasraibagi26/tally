@@ -143,6 +143,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     location: schema.transactions.location,
     plaidTransactionId: schema.transactions.plaidTransactionId,
     isManual: schema.transactions.isManual,
+    source: schema.transactions.source,
     recurringStreamId: schema.transactions.recurringStreamId,
   };
 
@@ -195,6 +196,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     locationLabel: locationLabel(t.location),
     plaidTransactionId: t.plaidTransactionId,
     isManual: t.isManual,
+    source: t.source,
     recurringStreamId: t.recurringStreamId,
     splits: splitsByTransaction.get(t.id) ?? [],
   }));

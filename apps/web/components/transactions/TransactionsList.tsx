@@ -24,6 +24,7 @@ export interface TransactionRowData {
   locationLabel: string | null;
   plaidTransactionId: string | null;
   isManual: boolean;
+  source: string | null;
   recurringStreamId: string | null;
   splits: DetailSplit[];
 }
@@ -41,6 +42,17 @@ export interface AccountLookup {
 const AMORTIZED_INSTALLMENT_RE = /\(\d+\/\d+\)$/;
 function isAmortizedInstallment(name: string): boolean {
   return AMORTIZED_INSTALLMENT_RE.test(name);
+}
+
+// Badge text for an isManual row: an amortized installment or a bill
+// backfill (name-pattern check, see above) reads "Spread"; a row the
+// Shortcuts intake endpoint fabricated (`source: "shortcut"` --
+// app/api/shortcuts/transactions) reads "Apple Pay" since that's how it was
+// actually captured, not hand-typed; everything else is a real manual entry.
+function manualBadgeLabel(t: Pick<TransactionRowData, "name" | "merchantName" | "source">): string {
+  if (isAmortizedInstallment(t.merchantName ?? t.name)) return "Spread";
+  if (t.source === "shortcut") return "Apple Pay";
+  return "Manual";
 }
 
 function amountColorClass(cents: number): string {
@@ -126,7 +138,7 @@ export function TransactionsList({
                     </span>
                   ) : (
                     <span className="flex-none px-1.5 py-0.5 rounded-full bg-sunken text-text-3 text-[11px] font-medium uppercase tracking-wide">
-                      Manual
+                      {manualBadgeLabel(t)}
                     </span>
                   )
                 )}
@@ -167,7 +179,7 @@ export function TransactionsList({
                   </span>
                 ) : (
                   <span className="flex-none px-1.5 py-0.5 rounded-full bg-sunken text-text-3 text-[11px] font-medium uppercase tracking-wide">
-                    Manual
+                    {manualBadgeLabel(t)}
                   </span>
                 )
               )}

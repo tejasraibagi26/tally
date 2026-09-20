@@ -105,6 +105,7 @@ export async function GET(req: Request) {
     location: schema.transactions.location,
     plaidTransactionId: schema.transactions.plaidTransactionId,
     isManual: schema.transactions.isManual,
+    source: schema.transactions.source,
     recurringStreamId: schema.transactions.recurringStreamId,
   };
 
@@ -163,6 +164,7 @@ export async function GET(req: Request) {
     locationLabel: locationLabel(t.location),
     plaidTransactionId: t.plaidTransactionId,
     isManual: t.isManual,
+    source: t.source,
     recurringStreamId: t.recurringStreamId,
     splits: splitsByTransaction.get(t.id) ?? [],
   }));

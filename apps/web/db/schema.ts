@@ -102,6 +102,25 @@ export const mobileRefreshTokens = pgTable("mobile_refresh_tokens", {
   deviceInfo: text("device_info"),
 });
 
+// Long-lived bearer tokens for server-to-server / automation callers (Apple
+// Shortcuts, etc.) that can't do NextAuth's cookie flow or the mobile app's
+// short-lived-JWT-plus-refresh dance. Same posture as mobileRefreshTokens —
+// only a hash is stored, so a leaked row is useless, and a key is revoked by
+// deleting it. See lib/apiKeyAuth.ts.
+export const apiKeys = pgTable("api_keys", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  keyHash: text("key_hash").notNull().unique(),
+  // Unhashed prefix of the key (e.g. "tly_ab12"), stored only so a key can be
+  // identified in a list without ever re-displaying the full secret.
+  keyPrefix: text("key_prefix").notNull(),
+  lastUsedAt: timestamp("last_used_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  userIdx: index("api_keys_user_idx").on(t.userId),
+}));
+
 export const plaidItems = pgTable("plaid_items", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
@@ -284,6 +303,11 @@ export const transactions = pgTable("transactions", {
   // the "Delete" action in the transaction detail panel, since a Plaid-synced
   // row would just come back on the next sync.
   isManual: boolean("is_manual").notNull().default(false),
+  // Null for a hand-typed manual entry. Set to a specific origin (currently
+  // just "shortcut") for an isManual row fabricated by an automation, so the
+  // UI can badge it with something more accurate than "Manual" — see
+  // TransactionsList.tsx's badge logic and app/api/shortcuts/transactions.
+  source: text("source"),
   incomeScheduleId: uuid("income_schedule_id").references(() => incomeSchedules.id, { onDelete: "set null" }),
   // Set for a row lib/recurringBillGeneration.ts fabricated from a
   // manually-added bill or an amortizeMonthly stream (recurringStreams.isManual
@@ -560,10 +584,15 @@ export const usersRelations = relations(users, ({ many }) => ({
   items: many(plaidItems),
   accounts: many(accounts),
   mobileRefreshTokens: many(mobileRefreshTokens),
+  apiKeys: many(apiKeys),
 }));
 
 export const mobileRefreshTokensRelations = relations(mobileRefreshTokens, ({ one }) => ({
   user: one(users, { fields: [mobileRefreshTokens.userId], references: [users.id] }),
+}));
+
+export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
+  user: one(users, { fields: [apiKeys.userId], references: [users.id] }),
 }));
 
 export const plaidItemsRelations = relations(plaidItems, ({ one, many }) => ({
