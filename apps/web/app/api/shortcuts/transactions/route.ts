@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
@@ -6,6 +6,13 @@ import { requireApiKeyUserId } from "@/lib/apiKeyAuth";
 import { categorizeTransactions } from "@/lib/categorize";
 import { accountDisplayName } from "@tally/core/accountName";
 import { AmbiguousAccountError, matchAccountByCardName, parseAmountToCents, parseShortcutDate } from "@/lib/shortcutTransaction";
+
+// Apple Shortcuts kills a silent "run without asking" background automation
+// after ~30s of execution -- there's no way to raise that budget from our
+// side, so the only lever we have is keeping this route's response as fast
+// as possible. Categorization is deferred to run after the response goes
+// out (via `after()`, Next 15.1+) rather than blocking the reply on it.
+export const maxDuration = 30;
 
 // Public intake endpoint for the Apple Shortcuts automation: "when I make an
 // Apple Pay transaction" -> get the notification's Transaction/Amount/
@@ -107,28 +114,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Failed to create transaction" }, { status: 500 });
   }
 
-  await categorizeTransactions(userId, [created.id]);
-
-  const [final] = await db
-    .select({
-      id: schema.transactions.id,
-      name: schema.transactions.name,
-      amount: schema.transactions.amount,
-      currency: schema.transactions.currency,
-      postedDate: schema.transactions.postedDate,
-      accountId: schema.transactions.accountId,
-      categoryId: schema.transactions.categoryId,
-      categoryName: schema.categories.name,
-    })
-    .from(schema.transactions)
-    .leftJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))
-    .where(eq(schema.transactions.id, created.id))
-    .limit(1);
+  // Runs after the response is sent -- keeps categorization (rules lookup,
+  // the update, an optional split insert) off the response's critical path.
+  after(() => categorizeTransactions(userId, [created.id]));
 
   return NextResponse.json(
     {
       transaction: {
-        ...final,
+        id: created.id,
+        name: created.name,
+        amount: created.amount,
+        currency: created.currency,
+        postedDate: created.postedDate,
+        accountId: created.accountId,
+        // Category isn't resolved yet -- it's applied moments later by the
+        // deferred categorizeTransactions call above.
+        categoryId: null,
+        categoryName: null,
         accountName: accountDisplayName(account.name, account.nickname),
       },
     },
