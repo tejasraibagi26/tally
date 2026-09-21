@@ -43,7 +43,7 @@ export default function InvestmentsScreen() {
     <Pressable
       onPress={() => sync.mutate(["holdings", "investments"])}
       disabled={sync.isPending}
-      className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50 bg-brand-subtle"
+      className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50"
     >
       {sync.isPending ? <ActivityIndicator size="small" color={colors.brand} /> : <RefreshCw size={14} color={colors.brand} strokeWidth={2} />}
       <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Sync holdings</Text>

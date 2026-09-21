@@ -144,14 +144,14 @@ export default function FireCalculatorScreen() {
     <Pressable
       onPress={save}
       disabled={saveSettings.isPending}
-      className="h-9 px-4 rounded-full flex-row items-center gap-1.5 justify-center bg-brand disabled:opacity-50"
+      className="h-9 px-3 rounded-full flex-row items-center gap-1.5 justify-center disabled:opacity-50"
     >
       {saveSettings.isPending ? (
-        <ActivityIndicator color={colors["on-brand"]} size="small" />
+        <ActivityIndicator color={colors.brand} size="small" />
       ) : (
         <>
-          <Check size={15} color={colors["on-brand"]} strokeWidth={2.5} />
-          <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(13) }}>{saved ? "Saved" : "Save"}</Text>
+          <Check size={15} color={colors.brand} strokeWidth={2.5} />
+          <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>{saved ? "Saved" : "Save"}</Text>
         </>
       )}
     </Pressable>
