@@ -122,16 +122,21 @@ function RootNavigator() {
               headerTitle was empty, tested); iOS keeps its own default back
               control (e.g. iOS 26's glass pill) since headerLeft is only
               set for Android below. Per-screen action buttons (FIRE's
-              Save, Investments' Sync) now live in headerRight, set from
-              inside each screen via its own <Stack.Screen options={{...}}/>
-              -- see fire.tsx/investments.tsx. useScreenContentTop
+              Save) now live in headerRight, set from inside the screen via
+              its own <Stack.Screen options={{...}}/> -- see fire.tsx.
+              Investments moved under (tabs)/ instead (still reached only
+              from the More sheet, not a visible tab button) specifically to
+              drop this native header -- a custom headerRight view there was
+              picking up iOS 26's automatic glass bar-button chrome around
+              its Sync action; screens in (tabs)/ render their own
+              in-content header like Budgets does, with no native chrome to
+              pick that up. useScreenContentTop
               (ScreenHeader.tsx) matches the transparency split: iOS's
               header reserves no layout space, so content needs manual
               padding to clear it; Android's opaque one already reserves its
               own space, so content needs none. */}
           <Stack.Screen name="fire" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerStyle: Platform.OS === "ios" ? { backgroundColor: "transparent" } : { backgroundColor: colors.surface }, headerTitle: "FIRE Calculator", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
           <Stack.Screen name="subscriptions" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerStyle: Platform.OS === "ios" ? { backgroundColor: "transparent" } : { backgroundColor: colors.surface }, headerTitle: "Subscriptions", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
-          <Stack.Screen name="investments" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerStyle: Platform.OS === "ios" ? { backgroundColor: "transparent" } : { backgroundColor: colors.surface }, headerTitle: "Investments", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
           <Stack.Screen name="settings" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerStyle: Platform.OS === "ios" ? { backgroundColor: "transparent" } : { backgroundColor: colors.surface }, headerTitle: "Settings", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
           <Stack.Screen name="income-schedules" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerStyle: Platform.OS === "ios" ? { backgroundColor: "transparent" } : { backgroundColor: colors.surface }, headerTitle: "Income schedules", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
           <Stack.Screen name="api-tokens" options={{ headerShown: true, headerTransparent: Platform.OS === "ios", headerStyle: Platform.OS === "ios" ? { backgroundColor: "transparent" } : { backgroundColor: colors.surface }, headerTitle: "API tokens", headerBackTitle: "", headerLeft: Platform.OS === "android" ? NativeBackButton : undefined }} />
