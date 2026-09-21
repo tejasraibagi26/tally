@@ -32,14 +32,11 @@ function daysInMonthOf(month: string): number {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
 }
 
-const FOOTER_HEIGHT = 60;
-
-// MOBILE_DESIGN.md §5.6. Footer totals are pinned above the tab bar (an
-// absolutely-positioned bar outside the ScrollView, not the ScrollView's own
-// last child) so "Budgeted/Spent/Remaining" stays on screen while the
-// category list scrolls independently -- this was deferred in the original
-// cut; still deferred: swipe-left/right month navigation, and parent-category
-// grouping/"copy last month" bulk actions (neither exists on web either).
+// MOBILE_DESIGN.md §5.6, revised: the Budgeted/Spent/Remaining summary lives
+// in the header instead of pinned above the tab bar (an earlier pass tried
+// pinning it there) -- still deferred: swipe-left/right month navigation,
+// and parent-category grouping/"copy last month" bulk actions (neither
+// exists on web either).
 export default function BudgetsScreen() {
   const insets = useSafeAreaInsets();
   const tabBarClearance = useTabBarBottomClearance();
@@ -74,7 +71,7 @@ export default function BudgetsScreen() {
       <ScrollView
         style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 }}
+        contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 + tabBarClearance }}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
       >
         <View className="px-5 pb-4">
@@ -100,6 +97,30 @@ export default function BudgetsScreen() {
               <ChevronRight size={20} color={colors["text-2"]} />
             </Pressable>
           </View>
+
+          {hasBudgets && (
+            <View className="flex-row items-center justify-around bg-surface rounded-card mt-4" style={{ paddingVertical: 14, paddingHorizontal: 12 }}>
+              <View className="items-center">
+                <Text className="font-ui text-text-3" style={{ fontSize: rf(10), letterSpacing: 0.4, textTransform: "uppercase" }}>Budgeted</Text>
+                <MoneyText cents={totalBudget} mask={false} className="font-ui-semibold text-text" style={{ fontSize: rf(14) }} />
+              </View>
+              <View style={{ width: 1, height: 28, backgroundColor: hairline(colors) }} />
+              <View className="items-center">
+                <Text className="font-ui text-text-3" style={{ fontSize: rf(10), letterSpacing: 0.4, textTransform: "uppercase" }}>Spent</Text>
+                <MoneyText cents={totalSpend} mask={false} className="font-ui-semibold text-text" style={{ fontSize: rf(14) }} />
+              </View>
+              <View style={{ width: 1, height: 28, backgroundColor: hairline(colors) }} />
+              <View className="items-center">
+                <Text className="font-ui text-text-3" style={{ fontSize: rf(10), letterSpacing: 0.4, textTransform: "uppercase" }}>Remaining</Text>
+                <MoneyText
+                  cents={Math.abs(totalRemaining)}
+                  mask={false}
+                  className="font-ui-semibold"
+                  style={{ fontSize: rf(14), color: totalRemaining < 0 ? colors.negative : colors.text }}
+                />
+              </View>
+            </View>
+          )}
         </View>
 
         {isLoading ? (
@@ -149,43 +170,6 @@ export default function BudgetsScreen() {
           </View>
         )}
       </ScrollView>
-
-      {hasBudgets && (
-        // A normal flex sibling after the ScrollView, not position:absolute --
-        // that's what makes it "pinned": it doesn't scroll with the list, but
-        // it also doesn't need any guessed offset against the tab bar's real
-        // on-screen footprint, which two prior attempts (bottom: tabBarClearance,
-        // then bottom: 0) both got wrong in opposite directions (a gap above
-        // the floating pill, then hidden behind it). The spacer View right
-        // below this one, sized to tabBarClearance, is the same mechanism
-        // every other screen already uses correctly as scroll-content trailing
-        // padding -- reused here structurally instead of as a position offset.
-        <View
-          className="flex-row items-center justify-around bg-surface"
-          style={{ height: FOOTER_HEIGHT, borderTopWidth: 1, borderTopColor: hairline(colors), paddingHorizontal: 12 }}
-        >
-          <View className="items-center">
-            <Text className="font-ui text-text-3" style={{ fontSize: rf(10), letterSpacing: 0.4, textTransform: "uppercase" }}>Budgeted</Text>
-            <MoneyText cents={totalBudget} mask={false} className="font-ui-semibold text-text" style={{ fontSize: rf(14) }} />
-          </View>
-          <View style={{ width: 1, height: 28, backgroundColor: hairline(colors) }} />
-          <View className="items-center">
-            <Text className="font-ui text-text-3" style={{ fontSize: rf(10), letterSpacing: 0.4, textTransform: "uppercase" }}>Spent</Text>
-            <MoneyText cents={totalSpend} mask={false} className="font-ui-semibold text-text" style={{ fontSize: rf(14) }} />
-          </View>
-          <View style={{ width: 1, height: 28, backgroundColor: hairline(colors) }} />
-          <View className="items-center">
-            <Text className="font-ui text-text-3" style={{ fontSize: rf(10), letterSpacing: 0.4, textTransform: "uppercase" }}>Remaining</Text>
-            <MoneyText
-              cents={Math.abs(totalRemaining)}
-              mask={false}
-              className="font-ui-semibold"
-              style={{ fontSize: rf(14), color: totalRemaining < 0 ? colors.negative : colors.text }}
-            />
-          </View>
-        </View>
-      )}
-      <View style={{ height: tabBarClearance }} />
 
       <AddBudgetSheet
         visible={addOpen}
