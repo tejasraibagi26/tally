@@ -72,9 +72,9 @@ export default function BudgetsScreen() {
     <View className="flex-1 bg-canvas">
       <ScreenGlow />
       <ScrollView
-        className="flex-1"
+        style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 + (hasBudgets ? FOOTER_HEIGHT : 0) + tabBarClearance }}
+        contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 }}
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
       >
         <View className="px-5 pb-4">
@@ -151,14 +151,17 @@ export default function BudgetsScreen() {
       </ScrollView>
 
       {hasBudgets && (
+        // A normal flex sibling after the ScrollView, not position:absolute --
+        // that's what makes it "pinned": it doesn't scroll with the list, but
+        // it also doesn't need any guessed offset against the tab bar's real
+        // on-screen footprint, which two prior attempts (bottom: tabBarClearance,
+        // then bottom: 0) both got wrong in opposite directions (a gap above
+        // the floating pill, then hidden behind it). The spacer View right
+        // below this one, sized to tabBarClearance, is the same mechanism
+        // every other screen already uses correctly as scroll-content trailing
+        // padding -- reused here structurally instead of as a position offset.
         <View
-          // bottom: 0, not tabBarClearance -- this screen's own container
-          // already ends flush at the floating tab bar's top edge (see
-          // useTabBarBottomClearance's comment); tabBarClearance is the
-          // amount scrollable content needs as trailing padding to clear
-          // the tab bar, not an offset a fixed, non-scrolling bar like this
-          // one should be pushed up by again.
-          className="absolute left-0 right-0 bottom-0 flex-row items-center justify-around bg-surface"
+          className="flex-row items-center justify-around bg-surface"
           style={{ height: FOOTER_HEIGHT, borderTopWidth: 1, borderTopColor: hairline(colors), paddingHorizontal: 12 }}
         >
           <View className="items-center">
@@ -182,6 +185,7 @@ export default function BudgetsScreen() {
           </View>
         </View>
       )}
+      <View style={{ height: tabBarClearance }} />
 
       <AddBudgetSheet
         visible={addOpen}
