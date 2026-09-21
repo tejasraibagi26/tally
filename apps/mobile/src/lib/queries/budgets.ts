@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiGet, apiPut } from "@/lib/api";
+import { apiGet, apiPut, apiFetch } from "@/lib/api";
 
 export interface BudgetLine {
   categoryId: string;
@@ -39,11 +39,31 @@ export interface NewBudget {
 }
 
 // Mirrors web's AddBudgetForm.tsx -- same PUT /api/budgets contract
-// (upsert by userId+month+categoryId).
+// (upsert by userId+month+categoryId). Also what an edit save calls --
+// there's no separate update endpoint, it's the same upsert.
 export function useSaveBudget() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: NewBudget) => apiPut<{ budget: unknown }>("/api/budgets", body),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["budgets", variables.month] });
+    },
+  });
+}
+
+export interface DeleteBudget {
+  month: string;
+  categoryId: string;
+}
+
+// Mirrors web's BudgetRow.tsx "Remove" action -- DELETE /api/budgets by
+// month+categoryId. apiDelete has no body param (nothing else needed one
+// yet), so this goes through apiFetch directly, same as apiPut/apiPost do
+// internally.
+export function useDeleteBudget() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: DeleteBudget) => apiFetch<{ ok: true }>("/api/budgets", { method: "DELETE", body: JSON.stringify(body) }),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["budgets", variables.month] });
     },

@@ -14,6 +14,10 @@ export interface TransactionFilters {
   pending?: "1";
   from?: string;
   to?: string;
+  /** Not settable from this sheet's own fields -- only ever arrives as an
+   * initial deep-link filter from Budgets' "View transactions" (which also
+   * always pairs it with transfer=0/excluded=0, matching web's link exactly). */
+  category?: string;
 }
 
 function lastMonthRange(): { from: string; to: string } {

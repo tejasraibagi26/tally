@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { View, Text, FlatList, Pressable, ActivityIndicator, RefreshControl } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ListFilter, Plus } from "lucide-react-native";
 import { prettifyPfc } from "@tally/core/pfc";
@@ -81,7 +81,13 @@ export default function TransactionsScreen() {
   const rf = useRF();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-  const [filters, setFilters] = useState<TransactionFilters>({});
+  // Budgets' "View transactions" deep-links here with a category + the
+  // viewed month's range (router.push params) -- seed the filter state from
+  // them once, same as web's /transactions?category=…&from=…&to=… link.
+  const deepLink = useLocalSearchParams<{ category?: string; from?: string; to?: string }>();
+  const [filters, setFilters] = useState<TransactionFilters>(() =>
+    deepLink.category ? { category: deepLink.category, from: deepLink.from, to: deepLink.to } : {},
+  );
 
   const queryFilters = useMemo(() => {
     const out: Record<string, string> = {};
@@ -89,9 +95,19 @@ export default function TransactionsScreen() {
     if (filters.pending) out.pending = filters.pending;
     if (filters.from) out.from = filters.from;
     if (filters.to) out.to = filters.to;
+    if (filters.category) {
+      // Mirrors web's BudgetRow.tsx link exactly: a category deep-link always
+      // excludes transfers and budget-excluded rows too, not just the category.
+      out.category = filters.category;
+      out.transfer = "0";
+      out.excluded = "0";
+    }
     return out;
   }, [filters]);
-  const activeCount = Object.keys(queryFilters).length;
+  // -2 when a category deep-link is active: transfer/excluded ride along
+  // automatically (see queryFilters above) and shouldn't inflate the badge
+  // as if they were separately chosen.
+  const activeCount = Object.keys(queryFilters).length - (filters.category ? 2 : 0);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, refetch, isRefetching } = useTransactions(queryFilters);
 
