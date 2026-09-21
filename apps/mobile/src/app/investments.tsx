@@ -1,0 +1,211 @@
+import { View, Text, ScrollView, ActivityIndicator, Pressable } from "react-native";
+import { TrendingUp, RefreshCw } from "lucide-react-native";
+import { Card } from "@/components/ui/Card";
+import { MoneyText } from "@/components/ui/MoneyText";
+import { useHoldings, useInvestmentTransactions } from "@/lib/queries/investments";
+import { useSync } from "@/lib/queries/plaid";
+import { chartSeries, hairline } from "@/theme/colors";
+import { useRF } from "@/theme/responsiveFont";
+import { useThemeColors } from "@/theme/useThemeColors";
+import { useColorScheme } from "nativewind";
+import { ScreenGlow } from "@/components/ui/ScreenGlow";
+import { useScreenContentTop } from "@/components/ui/ScreenHeader";
+
+function formatQuantity(q: string): string {
+  const n = parseFloat(q);
+  if (!Number.isFinite(n)) return q;
+  return Number.isInteger(n) ? n.toString() : n.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+}
+
+// MOBILE_DESIGN.md-style adaptation of apps/web/app/(app)/investments/page.tsx:
+// portfolio value/gain/return stat row, allocation bar, holdings grouped by
+// account as card lists (web's wide table collapses to stacked rows), recent
+// activity. Historical-return chart and multi-currency FX conversion on the
+// activity feed are left as web-only for now.
+export default function InvestmentsScreen() {
+  const colors = useThemeColors();
+  const rf = useRF();
+  const contentTop = useScreenContentTop();
+  const { colorScheme } = useColorScheme();
+  const series = colorScheme === "dark" ? chartSeries.dark : chartSeries.light;
+  const { data, isLoading } = useHoldings();
+  const { data: activityData } = useInvestmentTransactions();
+  const sync = useSync();
+
+  // Rendered as normal in-content JS, not a native headerRight -- a custom
+  // view placed in the native header picks up iOS 26's automatic "Liquid
+  // Glass" bar-button chrome (the same treatment the native back button
+  // gets), which showed up as an unwanted ring/glow around this pill. The
+  // header stays transparent (ScreenGlow still shows through); only this
+  // button moved out of the native chrome, matching how Accounts screen's
+  // identical Sync/Add pills already render in-content with no such issue.
+  const syncAction = (
+    <Pressable
+      onPress={() => sync.mutate(["holdings", "investments"])}
+      disabled={sync.isPending}
+      className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50 bg-brand-subtle"
+    >
+      {sync.isPending ? <ActivityIndicator size="small" color={colors.brand} /> : <RefreshCw size={14} color={colors.brand} strokeWidth={2} />}
+      <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Sync holdings</Text>
+    </Pressable>
+  );
+
+  if (isLoading || !data) {
+    return (
+      <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
+        <ScreenGlow />
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator />
+        </View>
+      </View>
+    );
+  }
+
+  if (data.holdings.length === 0) {
+    return (
+      <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
+        <ScreenGlow />
+        <View className="px-5 pt-2 items-end">{syncAction}</View>
+        <View className="flex-1 items-center justify-center px-8 gap-3">
+          <TrendingUp size={28} color={colors["text-3"]} strokeWidth={1.5} />
+          <Text className="font-ui-semibold text-text text-center" style={{ fontSize: rf(16) }}>Nothing invested here yet</Text>
+          <Text className="font-ui text-text-2 text-center" style={{ fontSize: rf(13.5) }}>
+            Connect a brokerage account from the Accounts tab. Holdings usually appear within a minute.
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  const holdingsByAccount = new Map<string, typeof data.holdings>();
+  for (const h of data.holdings) {
+    holdingsByAccount.set(h.accountId, [...(holdingsByAccount.get(h.accountId) ?? []), h]);
+  }
+
+  const activity = activityData?.transactions.slice(0, 10) ?? [];
+  // "Portfolio value" sums holdings after converting each to a single
+  // currency (apps/web/lib/portfolio.ts) -- account balances elsewhere in
+  // the app are shown unconverted, so this total can look "wrong" next to
+  // a foreign-currency account's own balance unless it's labeled.
+  const hasForeignCurrencyHoldings = data.holdings.some((h) => h.originalCurrency !== h.currency);
+
+  return (
+    <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
+    <ScreenGlow />
+    <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
+      <View className="items-end">{syncAction}</View>
+      <Card className="p-5 gap-5">
+        <View className="gap-1">
+          <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
+            Portfolio value{hasForeignCurrencyHoldings ? ` · converted to ${data.holdings[0]!.currency}` : ""}
+          </Text>
+          <MoneyText cents={data.value} className="font-display text-text" style={{ fontSize: rf(32) }} />
+        </View>
+        <View className="flex-row gap-6">
+          <View className="flex-1 gap-1">
+            <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
+              Invested
+            </Text>
+            {data.simpleReturn.hasHistory ? (
+              <MoneyText cents={data.simpleReturn.investedValue} className="font-ui-semibold text-text" style={{ fontSize: rf(16) }} />
+            ) : (
+              <Text className="font-ui text-text-3" style={{ fontSize: rf(13) }}>Building history…</Text>
+            )}
+          </View>
+          <View className="flex-1 gap-1">
+            <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
+              Simple return
+            </Text>
+            {data.simpleReturn.hasHistory ? (
+              <MoneyText
+                cents={data.simpleReturn.value}
+                signed
+                className="font-ui-semibold"
+                style={{ color: data.simpleReturn.value < 0 ? colors.negative : colors.positive, fontSize: rf(16) }}
+              />
+            ) : (
+              <Text className="font-ui text-text-3" style={{ fontSize: rf(13) }}>Building history…</Text>
+            )}
+          </View>
+        </View>
+      </Card>
+
+      <View className="gap-3">
+        <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(13) }}>
+          Allocation
+        </Text>
+        <Card className="p-5 gap-4">
+          <View className="flex-row h-3 rounded-full overflow-hidden bg-sunken">
+            {data.allocation.map((slice, i) => (
+              <View key={slice.label} style={{ width: `${slice.pct * 100}%`, backgroundColor: series[i % 8] }} />
+            ))}
+          </View>
+          <View className="flex-row flex-wrap gap-x-5 gap-y-2.5">
+            {data.allocation.map((slice, i) => (
+              <View key={slice.label} className="flex-row items-center gap-2">
+                <View style={{ width: 8, height: 8, borderRadius: 999, backgroundColor: series[i % 8] }} />
+                <Text className="font-ui text-text" style={{ fontSize: rf(13) }}>{slice.label}</Text>
+                <Text className="font-ui text-text-3" style={{ fontSize: rf(13) }}>{Math.round(slice.pct * 100)}%</Text>
+              </View>
+            ))}
+          </View>
+        </Card>
+      </View>
+
+      {[...holdingsByAccount.entries()].map(([accountId, accountHoldings]) => (
+        <View key={accountId} className="gap-3">
+          <View className="flex-row items-center justify-between">
+            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15) }}>{accountHoldings[0]?.accountName ?? "Account"}</Text>
+            <MoneyText cents={accountHoldings.reduce((s, h) => s + h.institutionValue, 0)} className="font-ui-medium text-text-2" style={{ fontSize: rf(14) }} />
+          </View>
+          <Card className="px-5">
+            {accountHoldings.map((h, i, arr) => (
+              <View
+                key={h.securityId}
+                className="flex-row items-center justify-between py-4"
+                style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
+              >
+                <View className="gap-0.5 flex-1 pr-3">
+                  <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15) }} numberOfLines={1}>
+                    {h.securityName ?? "Unknown security"}
+                  </Text>
+                  <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>
+                    {h.ticker ?? "—"} · {formatQuantity(h.quantity)} sh
+                  </Text>
+                </View>
+                <MoneyText cents={h.institutionValue} mask={false} className="text-text" style={{ fontSize: rf(15) }} />
+              </View>
+            ))}
+          </Card>
+        </View>
+      ))}
+
+      {activity.length > 0 && (
+        <View className="gap-3">
+          <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(13) }}>
+            Recent activity
+          </Text>
+          <Card className="px-5">
+            {activity.map((tx, i, arr) => (
+              <View
+                key={tx.id}
+                className="flex-row items-center justify-between py-4"
+                style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
+              >
+                <View className="gap-0.5 flex-1 pr-3">
+                  <Text className="font-ui-medium text-text" style={{ fontSize: rf(14.5) }} numberOfLines={1}>
+                    {tx.name ?? tx.securityName ?? "Transaction"}
+                    {tx.ticker ? ` · ${tx.ticker}` : ""}
+                  </Text>
+                  <Text className="font-ui text-text-2" style={{ fontSize: rf(12) }}>{tx.date}</Text>
+                </View>
+                <MoneyText cents={tx.amount} signed mask={false} style={{ color: tx.amount < 0 ? colors.positive : colors.text, fontSize: rf(14.5) }} />
+              </View>
+            ))}
+          </Card>
+        </View>
+      )}
+    </ScrollView>
+    </View>
+  );
+}

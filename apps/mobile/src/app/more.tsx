@@ -64,7 +64,7 @@ export default function MoreScreen() {
       {user && <Text className="font-ui text-text-2 mb-1 px-1" style={{ fontSize: rf(13) }}>{user.email}</Text>}
 
       <View>
-        <Row icon={<LineChart size={20} color={colors["text-2"]} strokeWidth={1.75} />} label="Investments" onPress={() => go("/(tabs)/investments")} colors={colors} />
+        <Row icon={<LineChart size={20} color={colors["text-2"]} strokeWidth={1.75} />} label="Investments" onPress={() => go("/investments")} colors={colors} />
         <View style={soft}>
           <Row icon={<TrendingUp size={20} color={colors["text-2"]} strokeWidth={1.75} />} label="FIRE calculator" onPress={() => go("/fire")} colors={colors} />
         </View>
