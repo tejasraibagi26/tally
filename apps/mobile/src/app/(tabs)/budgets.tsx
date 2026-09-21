@@ -152,8 +152,14 @@ export default function BudgetsScreen() {
 
       {hasBudgets && (
         <View
-          className="absolute left-0 right-0 flex-row items-center justify-around bg-surface"
-          style={{ bottom: tabBarClearance, height: FOOTER_HEIGHT, borderTopWidth: 1, borderTopColor: hairline(colors), paddingHorizontal: 12 }}
+          // bottom: 0, not tabBarClearance -- this screen's own container
+          // already ends flush at the floating tab bar's top edge (see
+          // useTabBarBottomClearance's comment); tabBarClearance is the
+          // amount scrollable content needs as trailing padding to clear
+          // the tab bar, not an offset a fixed, non-scrolling bar like this
+          // one should be pushed up by again.
+          className="absolute left-0 right-0 bottom-0 flex-row items-center justify-around bg-surface"
+          style={{ height: FOOTER_HEIGHT, borderTopWidth: 1, borderTopColor: hairline(colors), paddingHorizontal: 12 }}
         >
           <View className="items-center">
             <Text className="font-ui text-text-3" style={{ fontSize: rf(10), letterSpacing: 0.4, textTransform: "uppercase" }}>Budgeted</Text>
