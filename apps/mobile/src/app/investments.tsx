@@ -1,5 +1,4 @@
 import { View, Text, ScrollView, ActivityIndicator, Pressable } from "react-native";
-import { Stack } from "expo-router";
 import { TrendingUp, RefreshCw } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
@@ -33,6 +32,13 @@ export default function InvestmentsScreen() {
   const { data: activityData } = useInvestmentTransactions();
   const sync = useSync();
 
+  // Rendered as normal in-content JS, not a native headerRight -- a custom
+  // view placed in the native header picks up iOS 26's automatic "Liquid
+  // Glass" bar-button chrome (the same treatment the native back button
+  // gets), which showed up as an unwanted ring/glow around this pill. The
+  // header stays transparent (ScreenGlow still shows through); only this
+  // button moved out of the native chrome, matching how Accounts screen's
+  // identical Sync/Add pills already render in-content with no such issue.
   const syncAction = (
     <Pressable
       onPress={() => sync.mutate(["holdings", "investments"])}
@@ -58,8 +64,8 @@ export default function InvestmentsScreen() {
   if (data.holdings.length === 0) {
     return (
       <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
-        <Stack.Screen options={{ headerRight: () => syncAction }} />
         <ScreenGlow />
+        <View className="px-5 pt-2 items-end">{syncAction}</View>
         <View className="flex-1 items-center justify-center px-8 gap-3">
           <TrendingUp size={28} color={colors["text-3"]} strokeWidth={1.5} />
           <Text className="font-ui-semibold text-text text-center" style={{ fontSize: rf(16) }}>Nothing invested here yet</Text>
@@ -85,9 +91,9 @@ export default function InvestmentsScreen() {
 
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
-    <Stack.Screen options={{ headerRight: () => syncAction }} />
     <ScreenGlow />
     <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
+      <View className="items-end">{syncAction}</View>
       <Card className="p-5 gap-5">
         <View className="gap-1">
           <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
