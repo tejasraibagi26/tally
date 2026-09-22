@@ -41,6 +41,20 @@ export async function GET(req: Request) {
   const totalAssets = accounts.reduce((sum, a, i) => (a.type === "depository" || a.type === "investment" ? sum + convertedForTotals[i]! : sum), 0);
   const totalLiabilities = accounts.reduce((sum, a, i) => (a.type === "credit" || a.type === "loan" ? sum + convertedForTotals[i]! : sum), 0);
 
+  // Per-connection net, mirroring the web page's card footer. Two wrinkles the
+  // client can't reproduce from the rows it receives: currentBalance is stored
+  // positive for every type — a card's balance is what's owed, not held — so
+  // credit/loan has to be subtracted, and an institution can hold accounts in
+  // more than one currency (TD's CAD + USD chequing), which makes a raw sum of
+  // the rows wrong rather than merely unconverted. Both are already solved
+  // here, so the total ships converted to NET_WORTH_CURRENCY alongside totals.
+  const convertedById = new Map(accounts.map((a, i) => [a.id, convertedForTotals[i]!]));
+  const itemTotal = (itemAccounts: typeof accounts) =>
+    itemAccounts.reduce((sum, a) => {
+      const converted = convertedById.get(a.id) ?? 0;
+      return sum + (a.type === "credit" || a.type === "loan" ? -converted : converted);
+    }, 0);
+
   const institutions = items.map((item) => ({
     id: item.id,
     institutionId: item.institutionId,
@@ -48,6 +62,7 @@ export async function GET(req: Request) {
     status: item.status,
     lastSyncedAt: item.lastSyncedAt,
     badge: itemStatusToBadge(item.status, item.lastSyncedAt, item.transactionsUpdateStatus),
+    total: itemTotal(accountsByItem.get(item.id) ?? []),
     accounts: (accountsByItem.get(item.id) ?? []).map((a) => ({
       id: a.id,
       name: accountDisplayName(a.name, a.nickname),

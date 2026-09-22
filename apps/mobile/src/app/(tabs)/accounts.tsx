@@ -72,6 +72,24 @@ function InstitutionCard({
         <AccountLine key={a.id} account={a} showTopBorder={i > 0} colors={colors} baseCurrency={baseCurrency} />
       ))}
 
+      {institution.accounts.length > 0 && (
+        <View
+          className="flex-row items-center justify-between px-5 py-3.5"
+          style={{ borderTopWidth: 1, borderTopColor: hairline(colors) }}
+        >
+          <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(13) }}>Total</Text>
+          <View className="flex-row items-baseline gap-1.5" style={{ flexShrink: 0 }}>
+            <MoneyText cents={institution.total} className="font-ui-semibold text-text" style={{ fontSize: rf(15) }} />
+            {/* The rows above are each labeled in their own currency, so a
+                mixed-currency connection's total would otherwise look like it
+                disagrees with them -- name the currency it was converted into. */}
+            {baseCurrency && institution.accounts.some((a) => a.currency !== baseCurrency) && (
+              <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(11) }}>{baseCurrency}</Text>
+            )}
+          </View>
+        </View>
+      )}
+
       {broken && (
         <View className="px-5 pb-5 pt-1">
           <Pressable onPress={onReconnect} disabled={reconnecting} className="h-12 rounded-full items-center justify-center bg-brand active:opacity-90 disabled:opacity-50">

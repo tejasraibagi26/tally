@@ -26,6 +26,10 @@ export interface Institution {
   status: string;
   lastSyncedAt: string | null;
   badge: ItemBadge;
+  /** Net across this connection's accounts, already signed (credit/loan
+   * subtracted) and converted to `totals.currency` server-side -- the rows
+   * below stay in their own currency, so this can't be summed client-side. */
+  total: number;
   accounts: AccountRow[];
 }
 
