@@ -162,6 +162,9 @@ export default function TransactionsScreen() {
                 Transactions
               </Text>
               <View className="flex-row items-center gap-2">
+                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} className="items-center justify-center rounded-full bg-brand" style={{ width: 34, height: 34 }}>
+                  <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
+                </Pressable>
                 <Pressable
                   onPress={handleSync}
                   disabled={sync.isPending}
@@ -171,9 +174,6 @@ export default function TransactionsScreen() {
                   style={{ width: 34, height: 34 }}
                 >
                   {sync.isPending ? <ActivityIndicator size="small" color={colors.brand} /> : <RefreshCw size={15} color={colors.brand} strokeWidth={2} />}
-                </Pressable>
-                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} className="items-center justify-center rounded-full bg-brand" style={{ width: 34, height: 34 }}>
-                  <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
                 </Pressable>
                 <Pressable onPress={() => setFiltersOpen(true)} className="flex-row items-center gap-2 rounded-full px-4 py-2.5 bg-brand-subtle">
                   <ListFilter size={14} color={colors.brand} strokeWidth={1.9} />
