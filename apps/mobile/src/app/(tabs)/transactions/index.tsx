@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
-import { View, Text, FlatList, Pressable, ActivityIndicator, RefreshControl } from "react-native";
+import { View, Text, FlatList, Pressable, ActivityIndicator, RefreshControl, Alert } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ListFilter, Plus } from "lucide-react-native";
+import { ListFilter, Plus, RefreshCw } from "lucide-react-native";
 import { prettifyPfc } from "@tally/core/pfc";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useTransactions, type TransactionRow } from "@/lib/queries/transactions";
+import { useSync } from "@/lib/queries/plaid";
 import { amountColor } from "@/lib/amountColor";
 import { TransactionFiltersSheet, type TransactionFilters } from "@/components/TransactionFiltersSheet";
 import { AddTransactionSheet } from "@/components/AddTransactionSheet";
@@ -81,6 +82,7 @@ export default function TransactionsScreen() {
   const rf = useRF();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const sync = useSync();
   // Budgets' "View transactions" deep-links here with a category + the
   // viewed month's range (router.push params) -- seed the filter state from
   // them once, same as web's /transactions?category=…&from=…&to=… link.
@@ -110,6 +112,25 @@ export default function TransactionsScreen() {
   const activeCount = Object.keys(queryFilters).length - (filters.category ? 2 : 0);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, refetch, isRefetching } = useTransactions(queryFilters);
+
+  // Matches web's transactions page (SyncButton products={["transactions"]})
+  // -- syncs every item's transactions, not just balances, since this is the
+  // one screen where a stale row (a pending charge that's since posted, a
+  // merchant name Plaid only fills in after settlement) is the whole point.
+  async function handleSync() {
+    try {
+      const res = await sync.mutateAsync(["transactions"]);
+      const failed = res.results.filter((r) => r.failures.length > 0);
+      if (failed.length > 0) {
+        Alert.alert(
+          "Some accounts didn't sync",
+          failed.map((f) => `${f.institutionName ?? "An account"}: ${f.failures.map((x) => x.label).join(", ")}`).join("\n"),
+        );
+      }
+    } catch {
+      Alert.alert("Sync failed", "Please try again in a moment.");
+    }
+  }
 
   const items = data?.pages.flatMap((p) => p.items) ?? [];
 
@@ -141,6 +162,16 @@ export default function TransactionsScreen() {
                 Transactions
               </Text>
               <View className="flex-row items-center gap-2">
+                <Pressable
+                  onPress={handleSync}
+                  disabled={sync.isPending}
+                  hitSlop={12}
+                  accessibilityLabel="Sync transactions"
+                  className="items-center justify-center rounded-full bg-brand-subtle disabled:opacity-50"
+                  style={{ width: 34, height: 34 }}
+                >
+                  {sync.isPending ? <ActivityIndicator size="small" color={colors.brand} /> : <RefreshCw size={15} color={colors.brand} strokeWidth={2} />}
+                </Pressable>
                 <Pressable onPress={() => setAddOpen(true)} hitSlop={12} className="items-center justify-center rounded-full bg-brand" style={{ width: 34, height: 34 }}>
                   <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
                 </Pressable>
