@@ -17,9 +17,11 @@
  * footer (monospace, muted "Build" label, a top border separating it from
  * the profile row) plus a real button style for the Transactions filter
  * bar's "Clear" (was a bare text link with no visual relation to the rest
- * of the bar's bordered controls).
+ * of the bar's bordered controls). 1.5.5 closes out the icon-tooltip sweep
+ * -- the recap-email switch on Settings was the one remaining control with
+ * neither a visible label nor a title/aria-label.
  */
-export const APP_VERSION = "1.5.4";
+export const APP_VERSION = "1.5.5";
 
 /**
  * Bump by exactly 1 on every deploy, regardless of whether APP_VERSION's
@@ -29,4 +31,4 @@ export const APP_VERSION = "1.5.4";
  * was added rather than starting over at 1, so it reads as a real build
  * count instead of implying the app just started existing.
  */
-export const BUILD_NUMBER = 233;
+export const BUILD_NUMBER = 234;

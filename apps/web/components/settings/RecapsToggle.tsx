@@ -34,6 +34,8 @@ export function RecapsToggle({ initialEnabled }: { initialEnabled: boolean }) {
         type="button"
         role="switch"
         aria-checked={enabled}
+        aria-label="Monthly recap email"
+        title={enabled ? "Turn off monthly recap email" : "Turn on monthly recap email"}
         disabled={loading}
         onClick={toggle}
         className={`relative h-6 w-11 flex-none rounded-full transition-colors ${enabled ? "bg-brand" : "bg-border-strong"} disabled:opacity-60`}
