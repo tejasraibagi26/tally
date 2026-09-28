@@ -62,6 +62,19 @@ export default function OverviewScreen() {
   // computed one) so the outer ScrollView gets locked at the instant of
   // touchdown, before that computation or any drag has happened.
   const [isScrubbingChart, setIsScrubbingChart] = useState(false);
+  // gifted-charts' own pointerConfig.onTouchStart/onTouchEnd turned out to
+  // only be wired up on one of its two internal render paths (it picks
+  // between them based on isAnimated, which this chart doesn't pin) -- on
+  // the other path they're simply never called, which is why the hover
+  // wasn't resetting on release. Raw View touch props (below, on the
+  // wrapping View) fire for any touch inside that subtree regardless of
+  // which descendant ends up owning the gesture responder, so they don't
+  // depend on gifted-charts' internal wiring at all. pointerConfig's own
+  // callbacks are left in place underneath as harmless redundant paths.
+  function endChartScrub() {
+    setIsScrubbingChart(false);
+    setHoverIndex(null);
+  }
 
   const netCents = accounts.data?.totals.net ?? 0;
   const allSynced = accounts.data ? accounts.data.institutions.every((i) => i.badge === "good") : true;
@@ -241,7 +254,12 @@ export default function OverviewScreen() {
             </View>
           )}
           {chartData.length > 1 && (
-            <View onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}>
+            <View
+              onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}
+              onTouchStart={() => setIsScrubbingChart(true)}
+              onTouchEnd={endChartScrub}
+              onTouchCancel={endChartScrub}
+            >
               <LineChart
                 data={chartData}
                 height={56}
@@ -278,11 +296,12 @@ export default function OverviewScreen() {
                 // setState is deferred a tick (setTimeout 0) to stay out of
                 // React's render phase; it renders nothing itself (null) --
                 // no floating bubble, since the hero figure already is one.
-                // onTouchStart locks the outer ScrollView (see its
-                // scrollEnabled prop above) before any drag/gesture
-                // arbitration can happen; onTouchEnd/onPointerLeave
-                // (release, or a stray mouse-out during on-device web
-                // preview) unlock it again and snap back to the live figure.
+                // The onTouchStart/onTouchEnd/onResponderEnd/onPointerLeave
+                // below are redundant with the wrapping View's own touch
+                // props above (which are what actually drive
+                // isScrubbingChart/endChartScrub reliably -- see the
+                // isScrubbingChart declaration for why) -- left in as
+                // harmless extra reset paths in case they do fire.
                 pointerConfig={{
                   pointerStripHeight: 56,
                   pointerStripColor: colors.brand,
@@ -298,22 +317,9 @@ export default function OverviewScreen() {
                     return null;
                   },
                   onTouchStart: () => setIsScrubbingChart(true),
-                  onTouchEnd: () => {
-                    setIsScrubbingChart(false);
-                    setHoverIndex(null);
-                  },
-                  // Redundant with onTouchEnd for the normal release case --
-                  // kept as a second reset path so an interrupted gesture
-                  // (an incoming call, a system swipe stealing the touch
-                  // mid-drag) can't leave scrollEnabled stuck false.
-                  onResponderEnd: () => {
-                    setIsScrubbingChart(false);
-                    setHoverIndex(null);
-                  },
-                  onPointerLeave: () => {
-                    setIsScrubbingChart(false);
-                    setHoverIndex(null);
-                  },
+                  onTouchEnd: endChartScrub,
+                  onResponderEnd: endChartScrub,
+                  onPointerLeave: endChartScrub,
                 }}
               />
             </View>

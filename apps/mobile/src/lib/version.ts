@@ -16,9 +16,15 @@
  * net worth chart's slide-to-scrub (minor). 1.4.1 is a fix to that same
  * scrub gesture -- the outer ScrollView now locks (scrollEnabled=false) the
  * instant a touch lands on the chart, so a mid-drag vertical wobble can no
- * longer hand the gesture to page scrolling instead of the chart.
+ * longer hand the gesture to page scrolling instead of the chart. 1.4.2
+ * fixes that fix: gifted-charts' pointerConfig.onTouchStart/onTouchEnd
+ * turned out to only be wired on one of its two internal render paths, so
+ * the reset on release wasn't firing reliably. The scroll-lock and the
+ * hover reset now both come from the wrapping View's own onTouchStart/
+ * onTouchEnd/onTouchCancel instead, which fire regardless of which
+ * descendant ends up owning the touch responder.
  */
-export const APP_VERSION = "1.4.1";
+export const APP_VERSION = "1.4.2";
 
 /**
  * Bump by exactly 1 on every release, regardless of whether APP_VERSION's
@@ -28,4 +34,4 @@ export const APP_VERSION = "1.4.1";
  * was added (235) rather than starting over at 1, so it reads as a real
  * build count instead of implying the app just started existing.
  */
-export const BUILD_NUMBER = 236;
+export const BUILD_NUMBER = 237;
