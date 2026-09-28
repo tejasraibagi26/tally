@@ -9,7 +9,7 @@ import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
 import { TransactionsList, type TransactionRowData, type AccountLookup } from "@/components/transactions/TransactionsList";
 import { EmptyPeriodIllustration } from "@/components/transactions/EmptyPeriodIllustration";
 import { AddTransactionForm } from "@/components/transactions/AddTransactionForm";
-import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { TransactionsFilterBar } from "@/components/transactions/TransactionsFilterBar";
 import { groupCategoryOptions, categoryIdsInGroup } from "@/lib/categoryOptions";
 import { clearOrphanedRecurringStreamRefs } from "@/lib/recurringBillGeneration";
 import { monthLastDay } from "@tally/core/budgetMath";
@@ -97,6 +97,24 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     orderBy: (c, { asc }) => [asc(c.name)],
   });
   const categoryOptions = groupCategoryOptions(categories);
+  const accountSelectOptions = [
+    { value: "", label: "All accounts" },
+    ...accounts.map((a) => ({ value: a.id, label: `${accountDisplayName(a.name, a.nickname)} ····${a.mask ?? "----"}` })),
+  ];
+  const categorySelectOptions = [
+    { value: "", label: "All categories" },
+    ...categoryOptions.map((c) => ({ value: c.id, label: c.name, colorSlot: c.colorSlot, indent: c.indent })),
+  ];
+  // Drill-down-only params a link from Overview/Budgets can arrive with
+  // (kind/transfer/excluded so it can reproduce a metric's exact underlying
+  // set, merchant from a merchant-breakdown link) -- not editable from the
+  // filter bar itself, just carried through unchanged on every filter
+  // change it makes, same as the old form's hidden inputs did on submit.
+  const passthroughParams: Record<string, string> = {};
+  if (merchantFilter) passthroughParams.merchant = merchantFilter;
+  if (kindFilter) passthroughParams.kind = kindFilter;
+  if (transferFilter != null) passthroughParams.transfer = transferFilter ? "1" : "0";
+  if (excludedFilter != null) passthroughParams.excluded = excludedFilter ? "1" : "0";
 
   const conditions = [eq(schema.transactions.userId, userId)];
   if (accountIds.length === 1) conditions.push(eq(schema.transactions.accountId, accountIds[0]!));
@@ -255,61 +273,19 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
       <SyncFailureBanner />
 
       <Card className="p-3 flex-none">
-        <form method="get" className="flex items-center gap-2 flex-wrap">
-          <input
-            type="text"
-            name="q"
-            defaultValue={q}
-            placeholder="Search merchant or description"
-            className="flex-1 min-w-[220px] h-9 rounded-control bg-surface-2 border border-border-strong px-3 text-[15px] text-text placeholder:text-text-3 focus:outline-none focus:ring-2 focus:ring-info"
-          />
-          <SearchableSelect
-            name="account"
-            defaultValue={accountFilter}
-            buttonPlaceholder="All accounts"
-            placeholder="Search accounts…"
-            className="w-52"
-            options={[{ value: "", label: "All accounts" }, ...accounts.map((a) => ({ value: a.id, label: `${accountDisplayName(a.name, a.nickname)} ····${a.mask ?? "----"}` }))]}
-          />
-          <SearchableSelect
-            name="category"
-            defaultValue={categoryFilter}
-            buttonPlaceholder="All categories"
-            placeholder="Search categories…"
-            className="w-52"
-            options={[{ value: "", label: "All categories" }, ...categoryOptions.map((c) => ({ value: c.id, label: c.name, colorSlot: c.colorSlot, indent: c.indent }))]}
-          />
-          <input
-            type="date"
-            name="from"
-            defaultValue={fromFilter}
-            aria-label="From date"
-            className="h-9 rounded-control bg-surface border border-border-strong px-2 text-sm text-text"
-          />
-          <input
-            type="date"
-            name="to"
-            defaultValue={toFilter}
-            aria-label="To date"
-            className="h-9 rounded-control bg-surface border border-border-strong px-2 text-sm text-text"
-          />
-          {merchantFilter && <input type="hidden" name="merchant" value={merchantFilter} />}
-          {kindFilter && <input type="hidden" name="kind" value={kindFilter} />}
-          {transferFilter != null && <input type="hidden" name="transfer" value={transferFilter ? "1" : "0"} />}
-          {excludedFilter != null && <input type="hidden" name="excluded" value={excludedFilter ? "1" : "0"} />}
-          <label className="flex items-center gap-1.5 text-sm text-text-2 px-1">
-            <input type="checkbox" name="pending" value="1" defaultChecked={pendingOnly} />
-            Pending only
-          </label>
-          <button type="submit" className="h-9 px-3 rounded-control bg-surface border border-border-strong text-sm font-medium text-text hover:bg-sunken">
-            Filter
-          </button>
-          {hasFilters && (
-            <Link href="/transactions" className="text-sm text-text-2 px-2">
-              Clear
-            </Link>
-          )}
-        </form>
+        <TransactionsFilterBar
+          initialQ={q}
+          initialAccount={accountFilter}
+          initialCategory={categoryFilter}
+          initialFrom={fromFilter}
+          initialTo={toFilter}
+          initialPending={pendingOnly}
+          defaultFrom={thisMonth}
+          defaultTo={monthLastDay(thisMonth)}
+          accountOptions={accountSelectOptions}
+          categoryOptions={categorySelectOptions}
+          passthrough={passthroughParams}
+        />
         {merchantFilter && (
           <div className="pt-2 text-[13px] text-text-2">
             Filtered to merchant <span className="text-text font-medium">{merchantFilter}</span>

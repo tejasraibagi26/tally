@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
-import { View, Text, FlatList, Pressable, ActivityIndicator, RefreshControl, Alert } from "react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { View, Text, TextInput, FlatList, Pressable, ActivityIndicator, RefreshControl, Alert } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ListFilter, Plus, RefreshCw } from "lucide-react-native";
+import { ListFilter, Plus, RefreshCw, Search, X } from "lucide-react-native";
 import { prettifyPfc } from "@tally/core/pfc";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useTransactions, type TransactionRow } from "@/lib/queries/transactions";
@@ -91,8 +91,27 @@ export default function TransactionsScreen() {
     deepLink.category ? { category: deepLink.category, from: deepLink.from, to: deepLink.to } : {},
   );
 
+  // Matches web's transactions page search box: the input updates instantly
+  // (searchInput) so typing never feels laggy, but the actual query
+  // (searchQuery, what drives queryFilters/react-query below) waits for a
+  // 400ms pause so it's not re-fetching on every keystroke.
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function handleSearchChange(value: string) {
+    setSearchInput(value);
+    if (searchDebounce.current) clearTimeout(searchDebounce.current);
+    searchDebounce.current = setTimeout(() => setSearchQuery(value.trim()), 400);
+  }
+  useEffect(() => {
+    return () => {
+      if (searchDebounce.current) clearTimeout(searchDebounce.current);
+    };
+  }, []);
+
   const queryFilters = useMemo(() => {
     const out: Record<string, string> = {};
+    if (searchQuery) out.q = searchQuery;
     if (filters.account?.length) out.account = filters.account.join(",");
     if (filters.pending) out.pending = filters.pending;
     if (filters.from) out.from = filters.from;
@@ -105,11 +124,12 @@ export default function TransactionsScreen() {
       out.excluded = "0";
     }
     return out;
-  }, [filters]);
+  }, [filters, searchQuery]);
   // -2 when a category deep-link is active: transfer/excluded ride along
   // automatically (see queryFilters above) and shouldn't inflate the badge
-  // as if they were separately chosen.
-  const activeCount = Object.keys(queryFilters).length - (filters.category ? 2 : 0);
+  // as if they were separately chosen. Search isn't counted here -- it has
+  // its own visible input, same as web doesn't fold search into its Filters count.
+  const activeCount = Object.keys(queryFilters).length - (filters.category ? 2 : 0) - (searchQuery ? 1 : 0);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, refetch, isRefetching } = useTransactions(queryFilters);
 
@@ -186,12 +206,39 @@ export default function TransactionsScreen() {
                 </Pressable>
               </View>
             </View>
+
+            <View className="flex-row items-center gap-2 rounded-control bg-surface-2 px-3.5 mt-3" style={{ height: 42 }}>
+              <Search size={16} color={colors["text-3"]} strokeWidth={2} />
+              <TextInput
+                value={searchInput}
+                onChangeText={handleSearchChange}
+                placeholder="Search merchant or description"
+                placeholderTextColor={colors["text-3"]}
+                autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="search"
+                className="flex-1 font-ui text-text"
+                style={{ fontSize: rf(14.5), paddingVertical: 0 }}
+              />
+              {searchInput.length > 0 && (
+                <Pressable
+                  onPress={() => {
+                    if (searchDebounce.current) clearTimeout(searchDebounce.current);
+                    setSearchInput("");
+                    setSearchQuery("");
+                  }}
+                  hitSlop={8}
+                >
+                  <X size={15} color={colors["text-3"]} strokeWidth={2} />
+                </Pressable>
+              )}
+            </View>
           </View>
         }
         ListEmptyComponent={
           isLoading ? (
             <ActivityIndicator className="mt-8" />
-          ) : activeCount === 0 ? (
+          ) : activeCount === 0 && !searchQuery ? (
             <View className="rounded-card bg-surface p-8 mt-2">
               <EmptyState
                 illustration={<EmptyPeriodIllustration />}
