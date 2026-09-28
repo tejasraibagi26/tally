@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
 import { useRF } from "@/theme/responsiveFont";
+import { APP_VERSION, BUILD_NUMBER } from "@/lib/version";
 
 function Row({
   icon,
@@ -77,6 +78,15 @@ export default function MoreScreen() {
         <View style={soft}>
           <Row icon={<LogOut size={20} color={colors.negative} strokeWidth={1.75} />} label="Log out" destructive onPress={() => logout()} colors={colors} />
         </View>
+      </View>
+
+      <View className="items-center pt-4 mt-3" style={soft}>
+        <Text
+          className="text-text-3"
+          style={{ fontFamily: "JetBrainsMono", letterSpacing: 0.2, fontSize: rf(10.5) }}
+        >
+          Build v{APP_VERSION} · {BUILD_NUMBER}
+        </Text>
       </View>
     </View>
   );
