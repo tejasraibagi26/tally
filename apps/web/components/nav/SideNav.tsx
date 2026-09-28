@@ -8,6 +8,7 @@ import { LogoMark } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PrivacyToggle } from "@/components/PrivacyToggle";
 import { SignOutButton } from "@/components/nav/SignOutButton";
+import { APP_VERSION } from "@/lib/version";
 
 /**
  * Pixel-matched to the Claude Design canvas (TallyNav.dc.html): 240px shell,
@@ -158,6 +159,10 @@ export function SideNav({
           </Link>
           <SignOutButton />
         </div>
+
+        <span className="text-[11px] leading-none text-text-3 px-2" title={`Tally v${APP_VERSION}`}>
+          v{APP_VERSION}
+        </span>
       </div>
     </nav>
   );
