@@ -19,16 +19,19 @@
  * bar's "Clear" (was a bare text link with no visual relation to the rest
  * of the bar's bordered controls). 1.5.5 closes out the icon-tooltip sweep
  * -- the recap-email switch on Settings was the one remaining control with
- * neither a visible label nor a title/aria-label.
+ * neither a visible label nor a title/aria-label. 1.5.6 swaps the plain
+ * incrementing BUILD_NUMBER below for a real build SHA (see BUILD_SHA).
  */
-export const APP_VERSION = "1.5.5";
+export const APP_VERSION = "1.5.6";
 
 /**
- * Bump by exactly 1 on every deploy, regardless of whether APP_VERSION's
- * minor or patch moved -- unlike semver, this is just "how many times has
- * this shipped," a finer-grained counter for telling two builds on the same
- * version apart. Seeded from this repo's commit count at the time this file
- * was added rather than starting over at 1, so it reads as a real build
- * count instead of implying the app just started existing.
+ * A short (7-char) git commit SHA identifying the exact commit this build
+ * was compiled from -- resolved once at build time in next.config.ts
+ * (VERCEL_GIT_COMMIT_SHA on Vercel, `git rev-parse` locally) and inlined
+ * into the client bundle via NEXT_PUBLIC_BUILD_SHA. Unlike a hand-maintained
+ * counter, this can't drift out of sync with what's actually deployed --
+ * there's nothing to remember to bump. "dev" is only ever seen if both the
+ * env var and a local git checkout are unavailable (e.g. building from a
+ * source tarball with no .git directory).
  */
-export const BUILD_NUMBER = 234;
+export const BUILD_SHA = process.env.NEXT_PUBLIC_BUILD_SHA ?? "dev";

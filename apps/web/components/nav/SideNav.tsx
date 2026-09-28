@@ -8,7 +8,7 @@ import { LogoMark } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PrivacyToggle } from "@/components/PrivacyToggle";
 import { SignOutButton } from "@/components/nav/SignOutButton";
-import { APP_VERSION, BUILD_NUMBER } from "@/lib/version";
+import { APP_VERSION, BUILD_SHA } from "@/lib/version";
 
 /**
  * Pixel-matched to the Claude Design canvas (TallyNav.dc.html): 240px shell,
@@ -168,19 +168,19 @@ export function SideNav({
           <span className="relative group/version">
             <span
               tabIndex={0}
-              title={`Tally version ${APP_VERSION}, build ${BUILD_NUMBER}`}
+              title={`Tally version ${APP_VERSION}, build ${BUILD_SHA}`}
               className="flex items-center gap-1.5 font-mono text-[10.5px] tracking-[0.03em] text-text-3 cursor-default"
             >
               <span className="uppercase text-text-3/70">Build</span>
               <span className="text-text-2">v{APP_VERSION}</span>
               <span className="text-text-3/50">·</span>
-              <span className="text-text-3/70">{BUILD_NUMBER}</span>
+              <span className="text-text-3/70">{BUILD_SHA}</span>
             </span>
             <span
               role="tooltip"
               className="pointer-events-none absolute left-1/2 bottom-full mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-control bg-text px-2 py-1 text-[11px] font-sans text-canvas opacity-0 transition-opacity duration-100 group-hover/version:opacity-100 group-focus-within/version:opacity-100 z-30"
             >
-              Tally version {APP_VERSION}, build {BUILD_NUMBER}
+              Tally version {APP_VERSION}, build {BUILD_SHA}
             </span>
           </span>
         </div>
