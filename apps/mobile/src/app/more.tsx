@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
 import { useRF } from "@/theme/responsiveFont";
-import { APP_VERSION, BUILD_NUMBER } from "@/lib/version";
+import { APP_VERSION, BUILD_SHA } from "@/lib/version";
 
 function Row({
   icon,
@@ -85,7 +85,7 @@ export default function MoreScreen() {
           className="text-text-3"
           style={{ fontFamily: "JetBrainsMono", letterSpacing: 0.2, fontSize: rf(10.5) }}
         >
-          Build v{APP_VERSION} · {BUILD_NUMBER}
+          Build v{APP_VERSION} · {BUILD_SHA}
         </Text>
       </View>
     </View>

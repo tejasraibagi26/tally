@@ -1,3 +1,5 @@
+import Constants from "expo-constants";
+
 /**
  * The app's displayed build version, shown at the bottom of the More sheet
  * (more.tsx) -- the mobile equivalent of web's SideNav profile-footer
@@ -22,16 +24,18 @@
  * the reset on release wasn't firing reliably. The scroll-lock and the
  * hover reset now both come from the wrapping View's own onTouchStart/
  * onTouchEnd/onTouchCancel instead, which fire regardless of which
- * descendant ends up owning the touch responder.
+ * descendant ends up owning the touch responder. 1.4.3 swaps the plain
+ * incrementing BUILD_NUMBER below for a real build SHA (see BUILD_SHA).
  */
-export const APP_VERSION = "1.4.2";
+export const APP_VERSION = "1.4.3";
 
 /**
- * Bump by exactly 1 on every release, regardless of whether APP_VERSION's
- * minor or patch moved -- unlike semver, this is just "how many times has
- * this shipped," a finer-grained counter for telling two builds on the same
- * version apart. Seeded from the repo's commit count at the time this file
- * was added (235) rather than starting over at 1, so it reads as a real
- * build count instead of implying the app just started existing.
+ * A short (7-char) git commit SHA identifying the exact commit this build
+ * was compiled from -- computed in app.config.js (EAS_BUILD_GIT_COMMIT_HASH
+ * on an EAS Build/Update, `git rev-parse` locally), added to `extra`, and
+ * read back here via expo-constants. Unlike a hand-maintained counter, this
+ * can't drift out of sync with what's actually running -- there's nothing
+ * to remember to bump. "dev" is only ever seen if both are unavailable
+ * (e.g. a Metro bundle built from a source tree with no .git directory).
  */
-export const BUILD_NUMBER = 237;
+export const BUILD_SHA: string = Constants.expoConfig?.extra?.buildSha ?? "dev";
