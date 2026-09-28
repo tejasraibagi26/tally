@@ -57,6 +57,11 @@ export default function OverviewScreen() {
   // hero figure and its subtitle below read off this instead of the live
   // totals while it's set, then snap back to normal on release.
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  // True for the duration of a finger touching the chart -- separate from
+  // hoverIndex (which only reflects a resolved point once gifted-charts has
+  // computed one) so the outer ScrollView gets locked at the instant of
+  // touchdown, before that computation or any drag has happened.
+  const [isScrubbingChart, setIsScrubbingChart] = useState(false);
 
   const netCents = accounts.data?.totals.net ?? 0;
   const allSynced = accounts.data ? accounts.data.institutions.every((i) => i.badge === "good") : true;
@@ -185,6 +190,16 @@ export default function OverviewScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 + tabBarClearance }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brand} />}
+        // A finger landing on the chart still has to win the touch responder
+        // race against this ScrollView's own pan gesture -- without this,
+        // that race is what made scrubbing feel unreliable (a vertical
+        // wobble mid-drag could hand the touch to the scroll view instead
+        // of the chart). scrollEnabled is flipped off the instant a touch
+        // lands on the chart (pointerConfig.onTouchStart below) and back on
+        // at release/onTouchEnd, removing the ScrollView from contention
+        // entirely for the duration of a scrub instead of relying on
+        // gesture arbitration to pick the right one.
+        scrollEnabled={!isScrubbingChart}
       >
         <View className="flex-row items-center justify-between px-5 pb-1">
         <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(24) }}>
@@ -263,8 +278,11 @@ export default function OverviewScreen() {
                 // setState is deferred a tick (setTimeout 0) to stay out of
                 // React's render phase; it renders nothing itself (null) --
                 // no floating bubble, since the hero figure already is one.
-                // onTouchEnd/onPointerLeave (release, or a stray mouse-out
-                // during on-device web preview) snap it back to the live figure.
+                // onTouchStart locks the outer ScrollView (see its
+                // scrollEnabled prop above) before any drag/gesture
+                // arbitration can happen; onTouchEnd/onPointerLeave
+                // (release, or a stray mouse-out during on-device web
+                // preview) unlock it again and snap back to the live figure.
                 pointerConfig={{
                   pointerStripHeight: 56,
                   pointerStripColor: colors.brand,
@@ -279,8 +297,23 @@ export default function OverviewScreen() {
                     setTimeout(() => setHoverIndex(pointerIndex), 0);
                     return null;
                   },
-                  onTouchEnd: () => setHoverIndex(null),
-                  onPointerLeave: () => setHoverIndex(null),
+                  onTouchStart: () => setIsScrubbingChart(true),
+                  onTouchEnd: () => {
+                    setIsScrubbingChart(false);
+                    setHoverIndex(null);
+                  },
+                  // Redundant with onTouchEnd for the normal release case --
+                  // kept as a second reset path so an interrupted gesture
+                  // (an incoming call, a system swipe stealing the touch
+                  // mid-drag) can't leave scrollEnabled stuck false.
+                  onResponderEnd: () => {
+                    setIsScrubbingChart(false);
+                    setHoverIndex(null);
+                  },
+                  onPointerLeave: () => {
+                    setIsScrubbingChart(false);
+                    setHoverIndex(null);
+                  },
                 }}
               />
             </View>

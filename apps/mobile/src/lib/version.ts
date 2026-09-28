@@ -13,9 +13,12 @@
  * institution totals on Accounts and a transactions sync button (two
  * minors), the button reorder (patch), search + the View-transactions
  * deep-link/Clear-all bug fixes on Transactions (minor + patch), and the
- * net worth chart's slide-to-scrub (minor).
+ * net worth chart's slide-to-scrub (minor). 1.4.1 is a fix to that same
+ * scrub gesture -- the outer ScrollView now locks (scrollEnabled=false) the
+ * instant a touch lands on the chart, so a mid-drag vertical wobble can no
+ * longer hand the gesture to page scrolling instead of the chart.
  */
-export const APP_VERSION = "1.4.0";
+export const APP_VERSION = "1.4.1";
 
 /**
  * Bump by exactly 1 on every release, regardless of whether APP_VERSION's
@@ -25,4 +28,4 @@ export const APP_VERSION = "1.4.0";
  * was added (235) rather than starting over at 1, so it reads as a real
  * build count instead of implying the app just started existing.
  */
-export const BUILD_NUMBER = 235;
+export const BUILD_NUMBER = 236;
