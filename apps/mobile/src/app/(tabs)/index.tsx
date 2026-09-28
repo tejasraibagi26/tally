@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { View, Text, ScrollView, Pressable, ActivityIndicator, RefreshControl, useWindowDimensions } from "react-native";
+import { useMemo, useRef, useState } from "react";
+import { View, Text, ScrollView, Pressable, ActivityIndicator, RefreshControl, useWindowDimensions, PanResponder } from "react-native";
 import { useRouter } from "expo-router";
 import { CircleCheck, ChevronRight, Ellipsis, Eye, EyeOff } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -57,23 +57,22 @@ export default function OverviewScreen() {
   // hero figure and its subtitle below read off this instead of the live
   // totals while it's set, then snap back to normal on release.
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
-  // True for the duration of a finger touching the chart -- separate from
-  // hoverIndex (which only reflects a resolved point once gifted-charts has
-  // computed one) so the outer ScrollView gets locked at the instant of
-  // touchdown, before that computation or any drag has happened.
+  // True for the duration of a finger touching the chart -- locks the outer
+  // ScrollView (its scrollEnabled prop below) for the same duration.
   const [isScrubbingChart, setIsScrubbingChart] = useState(false);
-  // gifted-charts' own pointerConfig.onTouchStart/onTouchEnd turned out to
-  // only be wired up on one of its two internal render paths (it picks
-  // between them based on isAnimated, which this chart doesn't pin) -- on
-  // the other path they're simply never called, which is why the hover
-  // wasn't resetting on release. Raw View touch props (below, on the
-  // wrapping View) fire for any touch inside that subtree regardless of
-  // which descendant ends up owning the gesture responder, so they don't
-  // depend on gifted-charts' internal wiring at all. pointerConfig's own
-  // callbacks are left in place underneath as harmless redundant paths.
+  // Touch x-position local to the chart, in px -- drives the vertical
+  // scrub-position indicator drawn over the chart. null when not touching.
+  const [touchX, setTouchX] = useState<number | null>(null);
+  // Persists across a single gesture's Grant→Move events (see
+  // chartPanResponder below); doesn't need "fresh each render" treatment
+  // the way chartWidth/chartData do, since it's written once at Grant and
+  // only ever read within that same still-in-progress gesture.
+  const chartPageXRef = useRef(0);
+
   function endChartScrub() {
     setIsScrubbingChart(false);
     setHoverIndex(null);
+    setTouchX(null);
   }
 
   const netCents = accounts.data?.totals.net ?? 0;
@@ -86,6 +85,52 @@ export default function OverviewScreen() {
   // here sliced to the last 12 *points* assuming monthly granularity, which
   // actually plotted only the most recent ~12 days.
   const chartData = useMemo(() => (trend.data?.points ?? []).map((p) => ({ value: p.net / 100 })), [trend.data]);
+
+  function updateChartHoverFromLocalX(localX: number, width: number, pointCount: number) {
+    const clamped = Math.max(0, Math.min(width, localX));
+    setTouchX(clamped);
+    if (pointCount < 2 || width <= 0) return;
+    const idx = Math.round((clamped / width) * (pointCount - 1));
+    setHoverIndex(Math.max(0, Math.min(pointCount - 1, idx)));
+  }
+
+  // Two library-dependent approaches (gifted-charts' pointerConfig touch
+  // callbacks, then a wrapping View's raw onTouchStart/End/Cancel) both
+  // turned out not to fire reliably on release -- gifted-charts wires its
+  // pointerConfig touch hooks on only one of two internal render paths, and
+  // apparently the outer View's raw touch props aren't guaranteed either
+  // once a descendant has claimed the responder. This owns the gesture
+  // directly instead: a PanResponder computes the touched index itself (no
+  // dependency on gifted-charts' pointer system at all), and
+  // onPanResponderRelease/Terminate -- core React Native touch-lifecycle
+  // callbacks, not a third-party library's potentially-partial wiring --
+  // are what reset it back to the live figure.
+  //
+  // Recreated only when the chart's own width or point count changes (not
+  // on every hoverIndex/touchX update mid-drag), so a gesture in progress
+  // keeps the same handler instance throughout -- but this still never
+  // closes over a stale chartWidth/chartData the way a mount-once
+  // useRef(PanResponder.create(...)) would have.
+  const chartPanResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderTerminationRequest: () => false,
+        onPanResponderGrant: (evt) => {
+          setIsScrubbingChart(true);
+          chartPageXRef.current = evt.nativeEvent.pageX - evt.nativeEvent.locationX;
+          updateChartHoverFromLocalX(evt.nativeEvent.locationX, chartWidth, chartData.length);
+        },
+        onPanResponderMove: (_evt, gestureState) => {
+          updateChartHoverFromLocalX(gestureState.moveX - chartPageXRef.current, chartWidth, chartData.length);
+        },
+        onPanResponderRelease: endChartScrub,
+        onPanResponderTerminate: endChartScrub,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [chartWidth, chartData.length],
+  );
 
   // 1:1 with chartData -- both come from the same trend.data.points map
   // above, unsliced, so a chart pointerIndex indexes this directly.
@@ -207,11 +252,10 @@ export default function OverviewScreen() {
         // race against this ScrollView's own pan gesture -- without this,
         // that race is what made scrubbing feel unreliable (a vertical
         // wobble mid-drag could hand the touch to the scroll view instead
-        // of the chart). scrollEnabled is flipped off the instant a touch
-        // lands on the chart (pointerConfig.onTouchStart below) and back on
-        // at release/onTouchEnd, removing the ScrollView from contention
-        // entirely for the duration of a scrub instead of relying on
-        // gesture arbitration to pick the right one.
+        // of the chart). scrollEnabled is flipped off at onPanResponderGrant
+        // (chartPanResponder below) and back on at release/terminate,
+        // removing the ScrollView from contention entirely for the
+        // duration of a scrub instead of relying on gesture arbitration.
         scrollEnabled={!isScrubbingChart}
       >
         <View className="flex-row items-center justify-between px-5 pb-1">
@@ -256,9 +300,8 @@ export default function OverviewScreen() {
           {chartData.length > 1 && (
             <View
               onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}
-              onTouchStart={() => setIsScrubbingChart(true)}
-              onTouchEnd={endChartScrub}
-              onTouchCancel={endChartScrub}
+              style={{ height: 56 }}
+              {...chartPanResponder.panHandlers}
             >
               <LineChart
                 data={chartData}
@@ -288,40 +331,20 @@ export default function OverviewScreen() {
                 hideAxesAndRules
                 disableScroll
                 curved
-                // Slide-to-scrub: drag anywhere on the line and the hero
-                // figure/subtitle above swap to that point's value/date
-                // (hoverIndex, read by heroCents/hoveredDateLabel above).
-                // pointerLabelComponent is the library's hook for reading
-                // the touched point, but it's invoked mid-render, so the
-                // setState is deferred a tick (setTimeout 0) to stay out of
-                // React's render phase; it renders nothing itself (null) --
-                // no floating bubble, since the hero figure already is one.
-                // The onTouchStart/onTouchEnd/onResponderEnd/onPointerLeave
-                // below are redundant with the wrapping View's own touch
-                // props above (which are what actually drive
-                // isScrubbingChart/endChartScrub reliably -- see the
-                // isScrubbingChart declaration for why) -- left in as
-                // harmless extra reset paths in case they do fire.
-                pointerConfig={{
-                  pointerStripHeight: 56,
-                  pointerStripColor: colors.brand,
-                  pointerStripWidth: 1,
-                  pointerColor: colors.brand,
-                  radius: 5,
-                  activatePointersInstantlyOnTouch: true,
-                  autoAdjustPointerLabelPosition: false,
-                  pointerLabelWidth: 0,
-                  pointerLabelHeight: 0,
-                  pointerLabelComponent: (_items: unknown, _secondary: unknown, pointerIndex: number) => {
-                    setTimeout(() => setHoverIndex(pointerIndex), 0);
-                    return null;
-                  },
-                  onTouchStart: () => setIsScrubbingChart(true),
-                  onTouchEnd: endChartScrub,
-                  onResponderEnd: endChartScrub,
-                  onPointerLeave: endChartScrub,
-                }}
               />
+              {/* Slide-to-scrub position indicator -- a plain vertical guide
+                  rather than a dot pinned exactly to the curve, since that
+                  would mean re-deriving gifted-charts' own internal y-scaling
+                  (yAxisOffset/maxValue) rather than something owned here.
+                  Touch handling for the whole gesture (including this x
+                  position) is chartPanResponder above; the hero figure/date
+                  above read off the same hoverIndex it sets. */}
+              {touchX != null && (
+                <View
+                  pointerEvents="none"
+                  style={{ position: "absolute", left: touchX - 0.75, top: 0, width: 1.5, height: 56, backgroundColor: colors.brand, opacity: 0.55 }}
+                />
+              )}
             </View>
           )}
         </View>

@@ -26,8 +26,15 @@ import Constants from "expo-constants";
  * onTouchEnd/onTouchCancel instead, which fire regardless of which
  * descendant ends up owning the touch responder. 1.4.3 swaps the plain
  * incrementing BUILD_NUMBER below for a real build SHA (see BUILD_SHA).
+ * 1.4.4 replaces the touch-detection approach entirely, again: neither
+ * gifted-charts' pointerConfig callbacks nor a wrapping View's raw touch
+ * props turned out to reliably fire on release. A PanResponder now owns
+ * the chart's gesture directly -- it computes the touched index itself
+ * (no gifted-charts pointer system involved at all) and resets on
+ * onPanResponderRelease/Terminate, core React Native touch-lifecycle
+ * callbacks rather than a third-party library's partial wiring.
  */
-export const APP_VERSION = "1.4.3";
+export const APP_VERSION = "1.4.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
