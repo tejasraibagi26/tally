@@ -11,11 +11,15 @@
  * transactions sync button on mobile (minor), the transactions filter bar
  * rebuild -- instant search, month/range date picking, multi-select
  * accounts (two more minors), then the View-transactions/Clear-button bug
- * fixes and the icon-tooltip sweep (patches). 1.5.3 is this footer's own
+ * fixes and the icon-tooltip sweep (patches). 1.5.3 was this footer's own
  * display fix -- centered layout, "build vX.Y.Z (N)" format, a tooltip that
- * actually shows on hover.
+ * actually shows on hover. 1.5.4 is a follow-up typography pass on that same
+ * footer (monospace, muted "Build" label, a top border separating it from
+ * the profile row) plus a real button style for the Transactions filter
+ * bar's "Clear" (was a bare text link with no visual relation to the rest
+ * of the bar's bordered controls).
  */
-export const APP_VERSION = "1.5.3";
+export const APP_VERSION = "1.5.4";
 
 /**
  * Bump by exactly 1 on every deploy, regardless of whether APP_VERSION's
@@ -25,4 +29,4 @@ export const APP_VERSION = "1.5.3";
  * was added rather than starting over at 1, so it reads as a real build
  * count instead of implying the app just started existing.
  */
-export const BUILD_NUMBER = 232;
+export const BUILD_NUMBER = 233;

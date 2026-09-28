@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CalendarRange, CalendarDays } from "lucide-react";
+import { CalendarRange, CalendarDays, FilterX } from "lucide-react";
 import { shiftMonth, monthLastDay } from "@tally/core/budgetMath";
 import { SearchableSelect, type SearchableSelectOption } from "@/components/ui/SearchableSelect";
 import { MultiSelect, type MultiSelectOption } from "@/components/ui/MultiSelect";
@@ -242,7 +242,12 @@ export function TransactionsFilterBar({
       </label>
 
       {hasFilters && (
-        <Link href="/transactions" className="text-sm text-text-2 px-2">
+        <Link
+          href="/transactions"
+          title="Clear all filters"
+          className="h-9 px-3 flex-none flex items-center gap-1.5 rounded-control bg-surface border border-border-strong text-sm font-medium text-text-2 hover:text-negative hover:border-negative/40 hover:bg-negative-subtle"
+        >
+          <FilterX size={14} strokeWidth={2} />
           Clear
         </Link>
       )}

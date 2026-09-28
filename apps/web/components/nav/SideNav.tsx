@@ -164,21 +164,26 @@ export function SideNav({
             long, uninterrupted hover before it appears, some suppress it
             inside a scroll container) -- this pairs it with a CSS-only
             tooltip bubble that shows on :hover/:focus immediately, no JS. */}
-        <span className="relative group/version self-center">
-          <span
-            tabIndex={0}
-            title={`Tally version ${APP_VERSION}, build ${BUILD_NUMBER}`}
-            className="block text-[11px] leading-none text-text-3 text-center cursor-default"
-          >
-            build v{APP_VERSION} ({BUILD_NUMBER})
+        <div className="pt-2.5 border-t border-border flex justify-center">
+          <span className="relative group/version">
+            <span
+              tabIndex={0}
+              title={`Tally version ${APP_VERSION}, build ${BUILD_NUMBER}`}
+              className="flex items-center gap-1.5 font-mono text-[10.5px] tracking-[0.03em] text-text-3 cursor-default"
+            >
+              <span className="uppercase text-text-3/70">Build</span>
+              <span className="text-text-2">v{APP_VERSION}</span>
+              <span className="text-text-3/50">·</span>
+              <span className="text-text-3/70">{BUILD_NUMBER}</span>
+            </span>
+            <span
+              role="tooltip"
+              className="pointer-events-none absolute left-1/2 bottom-full mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-control bg-text px-2 py-1 text-[11px] font-sans text-canvas opacity-0 transition-opacity duration-100 group-hover/version:opacity-100 group-focus-within/version:opacity-100 z-30"
+            >
+              Tally version {APP_VERSION}, build {BUILD_NUMBER}
+            </span>
           </span>
-          <span
-            role="tooltip"
-            className="pointer-events-none absolute left-1/2 bottom-full mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-control bg-text px-2 py-1 text-[11px] text-canvas opacity-0 transition-opacity duration-100 group-hover/version:opacity-100 group-focus-within/version:opacity-100 z-30"
-          >
-            Tally version {APP_VERSION}, build {BUILD_NUMBER}
-          </span>
-        </span>
+        </div>
       </div>
     </nav>
   );
