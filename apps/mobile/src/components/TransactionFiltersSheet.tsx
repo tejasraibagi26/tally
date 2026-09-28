@@ -85,11 +85,16 @@ export function TransactionFiltersSheet({
   onClose,
   filters,
   onApply,
+  onClearAll,
 }: {
   visible: boolean;
   onClose: () => void;
   filters: TransactionFilters;
   onApply: (filters: TransactionFilters) => void;
+  /** Called instead of onApply({}) by "Clear all" when the screen has state
+   * beyond what this sheet owns (e.g. Transactions' search box) that also
+   * needs resetting. Falls back to onApply({}) if omitted. */
+  onClearAll?: () => void;
 }) {
   const colors = useThemeColors();
   const rf = useRF();
@@ -243,7 +248,8 @@ export function TransactionFiltersSheet({
           <Pressable
             onPress={() => {
               setDraft({});
-              onApply({});
+              if (onClearAll) onClearAll();
+              else onApply({});
               onClose();
             }}
             className="h-12 items-center justify-center"

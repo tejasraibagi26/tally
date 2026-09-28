@@ -84,12 +84,18 @@ export default function TransactionsScreen() {
   const [addOpen, setAddOpen] = useState(false);
   const sync = useSync();
   // Budgets' "View transactions" deep-links here with a category + the
-  // viewed month's range (router.push params) -- seed the filter state from
-  // them once, same as web's /transactions?category=…&from=…&to=… link.
+  // viewed month's range (router.push params), same as web's
+  // /transactions?category=…&from=…&to=… link. This has to be a useEffect,
+  // not a useState initializer -- expo-router keeps this tab's screen
+  // mounted once you've visited it, so a second "View transactions" tap
+  // (any category, any month) only ever updates deepLink's values on an
+  // already-mounted component; a useState initializer runs once per mount
+  // and would silently ignore every deep link after the first.
   const deepLink = useLocalSearchParams<{ category?: string; from?: string; to?: string }>();
-  const [filters, setFilters] = useState<TransactionFilters>(() =>
-    deepLink.category ? { category: deepLink.category, from: deepLink.from, to: deepLink.to } : {},
-  );
+  const [filters, setFilters] = useState<TransactionFilters>({});
+  useEffect(() => {
+    if (deepLink.category) setFilters({ category: deepLink.category, from: deepLink.from, to: deepLink.to });
+  }, [deepLink.category, deepLink.from, deepLink.to]);
 
   // Matches web's transactions page search box: the input updates instantly
   // (searchInput) so typing never feels laggy, but the actual query
@@ -130,6 +136,19 @@ export default function TransactionsScreen() {
   // as if they were separately chosen. Search isn't counted here -- it has
   // its own visible input, same as web doesn't fold search into its Filters count.
   const activeCount = Object.keys(queryFilters).length - (filters.category ? 2 : 0) - (searchQuery ? 1 : 0);
+  const hasAnyFilter = activeCount > 0 || Boolean(searchQuery);
+
+  // The sheet's own "Clear all" only ever touched `filters` -- it had
+  // nothing to do with `searchQuery`/`searchInput` before those existed on
+  // this screen, so it silently stopped fully clearing once search shipped.
+  // Also backs the inline "Clear filters" pill below, the only way to drop
+  // a deep-linked category+month filter without opening the sheet at all.
+  function clearAllFilters() {
+    setFilters({});
+    if (searchDebounce.current) clearTimeout(searchDebounce.current);
+    setSearchInput("");
+    setSearchQuery("");
+  }
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, refetch, isRefetching } = useTransactions(queryFilters);
 
@@ -233,6 +252,21 @@ export default function TransactionsScreen() {
                 </Pressable>
               )}
             </View>
+
+            {/* Deep-linked category/date filters (Budgets' "View transactions") have no
+                other visible trace on this screen -- without this, the only way to
+                discover you're filtered at all, let alone clear it, was opening the
+                Filters sheet and finding "Clear all" at the bottom of it. */}
+            {activeCount > 0 && (
+              <View className="flex-row items-center justify-between mt-2.5 px-1">
+                <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>
+                  {activeCount} filter{activeCount === 1 ? "" : "s"} applied
+                </Text>
+                <Pressable onPress={clearAllFilters} hitSlop={8}>
+                  <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(12.5) }}>Clear filters</Text>
+                </Pressable>
+              </View>
+            )}
           </View>
         }
         ListEmptyComponent={
@@ -253,7 +287,13 @@ export default function TransactionsScreen() {
         ListFooterComponent={isFetchingNextPage ? <ActivityIndicator className="py-4" /> : null}
       />
 
-      <TransactionFiltersSheet visible={filtersOpen} onClose={() => setFiltersOpen(false)} filters={filters} onApply={setFilters} />
+      <TransactionFiltersSheet
+        visible={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        filters={filters}
+        onApply={setFilters}
+        onClearAll={clearAllFilters}
+      />
       <AddTransactionSheet visible={addOpen} onClose={() => setAddOpen(false)} />
     </View>
   );
