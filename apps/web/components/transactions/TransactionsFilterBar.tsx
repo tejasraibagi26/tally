@@ -180,6 +180,7 @@ export function TransactionsFilterBar({
             onClick={() => goToMonth(shiftMonth(from, -1))}
             className="w-7 h-7 flex items-center justify-center text-text-2 hover:text-text"
             aria-label="Previous month"
+            title="Previous month"
           >
             ←
           </button>
@@ -189,6 +190,7 @@ export function TransactionsFilterBar({
             onClick={() => goToMonth(shiftMonth(from, 1))}
             className="w-7 h-7 flex items-center justify-center text-text-2 hover:text-text"
             aria-label="Next month"
+            title="Next month"
           >
             →
           </button>

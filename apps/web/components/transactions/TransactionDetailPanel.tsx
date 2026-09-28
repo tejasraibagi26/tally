@@ -202,7 +202,7 @@ export function TransactionDetailPanel({
       <div className="flex flex-col gap-5 p-5">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Transaction</span>
-          <button onClick={onClose} aria-label="Close" className="text-text-3 hover:text-text text-lg leading-none">
+          <button onClick={onClose} aria-label="Close" title="Close" className="text-text-3 hover:text-text text-lg leading-none">
             ×
           </button>
         </div>
@@ -394,7 +394,7 @@ export function TransactionDetailPanel({
                     onChange={(e) => updateSplit(i, { amount: Math.round(parseFloat(e.target.value || "0") * 100) })}
                     className="w-24 h-9 rounded-control bg-surface-2 border border-border-strong px-2 text-sm text-text tabular"
                   />
-                  <button onClick={() => removeSplit(i)} className="text-text-3 hover:text-negative text-sm">
+                  <button onClick={() => removeSplit(i)} aria-label="Remove split" title="Remove split" className="text-text-3 hover:text-negative text-sm">
                     ×
                   </button>
                 </div>

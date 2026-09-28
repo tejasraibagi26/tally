@@ -60,7 +60,7 @@ export function AccountNicknameEditor({
             maxLength={60}
             className="h-8 flex-1 min-w-0 rounded-control bg-surface-2 border border-border-strong px-2 text-sm text-text"
           />
-          <button type="submit" disabled={saving} className="text-positive disabled:opacity-40 flex-none" aria-label="Save nickname">
+          <button type="submit" disabled={saving} className="text-positive disabled:opacity-40 flex-none" aria-label="Save nickname" title="Save">
             <Check size={16} />
           </button>
           <button
@@ -72,6 +72,7 @@ export function AccountNicknameEditor({
             }}
             className="text-text-3 disabled:opacity-40 flex-none"
             aria-label="Cancel"
+            title="Cancel"
           >
             <X size={16} />
           </button>

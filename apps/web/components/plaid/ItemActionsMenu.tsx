@@ -76,6 +76,7 @@ export function ItemActionsMenu({ itemId, institutionName }: { itemId: string; i
         onClick={() => setOpen((v) => !v)}
         disabled={busy !== null || manageAccessLoading || manageAccessSyncing}
         aria-label="Connection actions"
+        title="Connection actions"
         aria-haspopup="menu"
         aria-expanded={open}
         className="w-7 h-7 flex-none flex items-center justify-center rounded-control text-text-3 hover:text-text hover:bg-sunken text-base disabled:opacity-40"

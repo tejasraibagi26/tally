@@ -100,7 +100,7 @@ export function SideNav({
           <span className="font-display text-2xl leading-none text-text">Tally</span>
         </div>
         {onClose && (
-          <button onClick={onClose} aria-label="Close menu" className="w-7 h-7 flex items-center justify-center text-text-3 hover:text-text">
+          <button onClick={onClose} aria-label="Close menu" title="Close menu" className="w-7 h-7 flex items-center justify-center text-text-3 hover:text-text">
             <X size={18} strokeWidth={1.75} />
           </button>
         )}

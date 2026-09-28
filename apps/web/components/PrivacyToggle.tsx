@@ -26,6 +26,7 @@ export function PrivacyToggle() {
       role="switch"
       aria-checked={hidden}
       aria-label="Hide sensitive amounts"
+      title={hidden ? "Show amounts" : "Hide amounts"}
       className={cn(
         "relative inline-flex items-center flex-none w-[52px] h-7 rounded-full border border-border-strong transition-colors duration-300",
         hidden ? "bg-sunken" : "bg-surface-2",

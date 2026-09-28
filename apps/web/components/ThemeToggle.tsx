@@ -29,6 +29,7 @@ export function ThemeToggle() {
       role="switch"
       aria-checked={isDark}
       aria-label="Toggle color theme"
+      title={isDark ? "Switch to light theme" : "Switch to dark theme"}
       className={cn(
         "relative inline-flex items-center flex-none w-[52px] h-7 rounded-full border border-border-strong transition-colors duration-300",
         isDark ? "bg-sunken" : "bg-surface-2",

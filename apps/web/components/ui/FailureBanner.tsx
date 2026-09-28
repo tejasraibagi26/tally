@@ -29,7 +29,7 @@ export function FailureBanner({ items, onDismiss }: { items: FailureBannerItem[]
           </span>
         ))}
       </div>
-      <button type="button" onClick={onDismiss} aria-label="Dismiss" className="text-text-3 hover:text-text flex-none">
+      <button type="button" onClick={onDismiss} aria-label="Dismiss" title="Dismiss" className="text-text-3 hover:text-text flex-none">
         <X size={14} strokeWidth={1.75} />
       </button>
     </div>
