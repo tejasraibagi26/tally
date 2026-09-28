@@ -52,6 +52,11 @@ export default function OverviewScreen() {
   // fallback (minus the screen's 40px of horizontal px-5 padding) avoids a
   // flash of the old fixed width before the first layout pass.
   const [chartWidth, setChartWidth] = useState(windowWidth - 40);
+  // Index into trend.data.points/chartData currently under a finger dragging
+  // across the net worth chart, or null when nothing's being touched -- the
+  // hero figure and its subtitle below read off this instead of the live
+  // totals while it's set, then snap back to normal on release.
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   const netCents = accounts.data?.totals.net ?? 0;
   const allSynced = accounts.data ? accounts.data.institutions.every((i) => i.badge === "good") : true;
@@ -63,6 +68,14 @@ export default function OverviewScreen() {
   // here sliced to the last 12 *points* assuming monthly granularity, which
   // actually plotted only the most recent ~12 days.
   const chartData = useMemo(() => (trend.data?.points ?? []).map((p) => ({ value: p.net / 100 })), [trend.data]);
+
+  // 1:1 with chartData -- both come from the same trend.data.points map
+  // above, unsliced, so a chart pointerIndex indexes this directly.
+  const hoveredPoint = hoverIndex != null ? (trend.data?.points[hoverIndex] ?? null) : null;
+  const heroCents = hoveredPoint ? hoveredPoint.net : netCents;
+  const hoveredDateLabel = hoveredPoint
+    ? new Date(hoveredPoint.asOfDate + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })
+    : null;
 
   // gifted-charts' LineChart defaults its y-axis to start at 0 unless told
   // otherwise, so a real net-worth trend (a large baseline with small
@@ -200,11 +213,15 @@ export default function OverviewScreen() {
             </View>
           ) : (
             <View className="gap-1">
-              <MoneyText cents={netCents} className="font-display text-text" style={{ lineHeight: rf(62), fontSize: rf(60) }} />
-              {netWorthDelta && (
-                <Text className="font-ui-medium" style={{ color: netWorthDelta.direction === "up" ? colors.positive : colors.negative, fontSize: rf(13) }}>
-                  {netWorthDelta.direction === "up" ? "▲" : "▼"} {netWorthDelta.pct}% vs last month
-                </Text>
+              <MoneyText cents={heroCents} className="font-display text-text" style={{ lineHeight: rf(62), fontSize: rf(60) }} />
+              {hoveredDateLabel ? (
+                <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(13) }}>{hoveredDateLabel}</Text>
+              ) : (
+                netWorthDelta && (
+                  <Text className="font-ui-medium" style={{ color: netWorthDelta.direction === "up" ? colors.positive : colors.negative, fontSize: rf(13) }}>
+                    {netWorthDelta.direction === "up" ? "▲" : "▼"} {netWorthDelta.pct}% vs last month
+                  </Text>
+                )
               )}
             </View>
           )}
@@ -238,6 +255,33 @@ export default function OverviewScreen() {
                 hideAxesAndRules
                 disableScroll
                 curved
+                // Slide-to-scrub: drag anywhere on the line and the hero
+                // figure/subtitle above swap to that point's value/date
+                // (hoverIndex, read by heroCents/hoveredDateLabel above).
+                // pointerLabelComponent is the library's hook for reading
+                // the touched point, but it's invoked mid-render, so the
+                // setState is deferred a tick (setTimeout 0) to stay out of
+                // React's render phase; it renders nothing itself (null) --
+                // no floating bubble, since the hero figure already is one.
+                // onTouchEnd/onPointerLeave (release, or a stray mouse-out
+                // during on-device web preview) snap it back to the live figure.
+                pointerConfig={{
+                  pointerStripHeight: 56,
+                  pointerStripColor: colors.brand,
+                  pointerStripWidth: 1,
+                  pointerColor: colors.brand,
+                  radius: 5,
+                  activatePointersInstantlyOnTouch: true,
+                  autoAdjustPointerLabelPosition: false,
+                  pointerLabelWidth: 0,
+                  pointerLabelHeight: 0,
+                  pointerLabelComponent: (_items: unknown, _secondary: unknown, pointerIndex: number) => {
+                    setTimeout(() => setHoverIndex(pointerIndex), 0);
+                    return null;
+                  },
+                  onTouchEnd: () => setHoverIndex(null),
+                  onPointerLeave: () => setHoverIndex(null),
+                }}
               />
             </View>
           )}
