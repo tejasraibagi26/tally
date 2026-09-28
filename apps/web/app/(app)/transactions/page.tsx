@@ -97,10 +97,11 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     orderBy: (c, { asc }) => [asc(c.name)],
   });
   const categoryOptions = groupCategoryOptions(categories);
-  const accountSelectOptions = [
-    { value: "", label: "All accounts" },
-    ...accounts.map((a) => ({ value: a.id, label: `${accountDisplayName(a.name, a.nickname)} ····${a.mask ?? "----"}` })),
-  ];
+  // No "All accounts" placeholder entry here (unlike categorySelectOptions
+  // below) -- MultiSelect's empty-selection state already reads "All
+  // accounts" from its buttonPlaceholder, so a selectable "" row would be
+  // meaningless alongside real picks.
+  const accountSelectOptions = accounts.map((a) => ({ value: a.id, label: `${accountDisplayName(a.name, a.nickname)} ····${a.mask ?? "----"}` }));
   const categorySelectOptions = [
     { value: "", label: "All categories" },
     ...categoryOptions.map((c) => ({ value: c.id, label: c.name, colorSlot: c.colorSlot, indent: c.indent })),

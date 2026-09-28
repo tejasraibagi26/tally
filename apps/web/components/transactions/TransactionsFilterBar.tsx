@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { CalendarRange, CalendarDays } from "lucide-react";
 import { shiftMonth, monthLastDay } from "@tally/core/budgetMath";
 import { SearchableSelect, type SearchableSelectOption } from "@/components/ui/SearchableSelect";
+import { MultiSelect, type MultiSelectOption } from "@/components/ui/MultiSelect";
 
 function monthLabel(month: string): string {
   return new Date(month + "T00:00:00Z").toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
@@ -26,7 +28,7 @@ interface Props {
   // looks like, not empty strings.
   defaultFrom: string;
   defaultTo: string;
-  accountOptions: SearchableSelectOption[];
+  accountOptions: MultiSelectOption[];
   categoryOptions: SearchableSelectOption[];
   // Drill-down-only params (kind/transfer/excluded/merchant) set by a link
   // from Overview/Budgets, not editable from this bar -- carried through
@@ -147,11 +149,12 @@ export function TransactionsFilterBar({
         placeholder="Search merchant or description"
         className="flex-1 min-w-[220px] h-9 rounded-control bg-surface-2 border border-border-strong px-3 text-[15px] text-text placeholder:text-text-3 focus:outline-none focus:ring-2 focus:ring-info"
       />
-      <SearchableSelect
-        value={account}
-        onChange={(v) => {
-          setAccount(v);
-          navigate({ account: v });
+      <MultiSelect
+        values={account ? account.split(",") : []}
+        onChange={(values) => {
+          const joined = values.join(",");
+          setAccount(joined);
+          navigate({ account: joined });
         }}
         buttonPlaceholder="All accounts"
         placeholder="Search accounts…"
@@ -214,8 +217,14 @@ export function TransactionsFilterBar({
           />
         </>
       )}
-      <button type="button" onClick={toggleDateMode} className="text-sm text-text-2 px-1.5 whitespace-nowrap hover:text-text">
-        {dateMode === "month" ? "Custom range" : "Month view"}
+      <button
+        type="button"
+        onClick={toggleDateMode}
+        title={dateMode === "month" ? "Switch to a custom date range" : "Switch to month view"}
+        aria-label={dateMode === "month" ? "Switch to a custom date range" : "Switch to month view"}
+        className="w-9 h-9 flex-none flex items-center justify-center rounded-control bg-surface border border-border-strong text-text-2 hover:text-text hover:bg-sunken"
+      >
+        {dateMode === "month" ? <CalendarRange size={15} strokeWidth={2} /> : <CalendarDays size={15} strokeWidth={2} />}
       </button>
 
       <label className="flex items-center gap-1.5 text-sm text-text-2 px-1">
