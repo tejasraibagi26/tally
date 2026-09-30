@@ -54,9 +54,10 @@ import Constants from "expo-constants";
  * OLED black, higher-contrast text and borders, raised sheets). 1.8.1 adds
  * a changelog screen, opened by tapping the build line in the More sheet.
  * 1.9.0 makes Android's tab bar translucent and floating, and drops the
- * circle behind Android's back button.
+ * circle behind Android's back button. 1.9.1 lightens that tab bar's tint
+ * (85% → 60%) so it actually reads as see-through in dark mode.
  */
-export const APP_VERSION = "1.9.0";
+export const APP_VERSION = "1.9.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

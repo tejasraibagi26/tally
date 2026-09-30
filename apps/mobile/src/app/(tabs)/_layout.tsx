@@ -43,13 +43,16 @@ function AndroidTabsLayout() {
         tabBarInactiveTintColor: colors["text-3"],
         tabBarButton: (props) => <NoRippleTabButton {...props} />,
         // Translucent and floating: position "absolute" lets each screen's
-        // content scroll underneath, faintly visible through a canvas tint
-        // at 85% -- readable labels without a native blur module (which
-        // would need a new build). Tab screens pad their scroll content by
+        // content scroll underneath, visible through a canvas tint -- no
+        // native blur module (that would need a new build). 60%, not
+        // higher: on the near-black dark canvas an 85% tint was
+        // indistinguishable from solid (cards are only one step lighter
+        // than the page, so they vanished under it), which read as a plain
+        // black bar. Tab screens pad their scroll content by
         // useTabBarBottomClearance() so the last row clears the bar.
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: withAlpha(colors.canvas, 0.85),
+          backgroundColor: withAlpha(colors.canvas, 0.6),
           borderTopWidth: 1,
           borderTopColor: withAlpha(colors.border, 0.6),
           elevation: 0,
