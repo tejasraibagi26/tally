@@ -1,4 +1,5 @@
 import type { Transaction as PlaidTransaction } from "plaid";
+import { DEFAULT_CURRENCY } from "@tally/core/fx";
 
 /**
  * Plaid convention: positive amount = money leaving the account (spend),
@@ -40,7 +41,7 @@ export function toPlaidOwnedFields(t: PlaidTransaction): PlaidOwnedFields {
     pendingTransactionId: t.pending_transaction_id ?? null,
     isPending: t.pending,
     amount: toInternalAmountCents(t.amount),
-    currency: t.iso_currency_code ?? t.unofficial_currency_code ?? "USD",
+    currency: t.iso_currency_code ?? t.unofficial_currency_code ?? DEFAULT_CURRENCY,
     postedDate: t.date,
     authorizedDate: t.authorized_date ?? null,
     name: t.name,

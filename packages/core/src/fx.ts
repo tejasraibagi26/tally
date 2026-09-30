@@ -13,6 +13,9 @@
 
 export const NET_WORTH_CURRENCY = process.env.NET_WORTH_CURRENCY || "CAD";
 
+/** What to assume when a source (Plaid, a missing account) doesn't say what currency an amount is in. */
+export const DEFAULT_CURRENCY = "CAD";
+
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // ECB rates only update once a day anyway; this just bounds how often we ask.
 
 let cache: { base: string; fetchedAt: number; rates: Record<string, number> } | null = null;

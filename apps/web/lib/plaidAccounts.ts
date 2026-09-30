@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { plaidClient } from "@/lib/plaid";
+import { DEFAULT_CURRENCY } from "@tally/core/fx";
 
 /**
  * Upserts every account Plaid currently reports for this item — the same
@@ -30,7 +31,7 @@ export async function upsertAccountsForItem(itemId: string, userId: string, acce
         mask: acct.mask ?? null,
         type: acct.type,
         subtype: acct.subtype ?? null,
-        currency: acct.balances.iso_currency_code ?? "USD",
+        currency: acct.balances.iso_currency_code ?? DEFAULT_CURRENCY,
         currentBalance: acct.balances.current != null ? Math.round(acct.balances.current * 100) : null,
         availableBalance: acct.balances.available != null ? Math.round(acct.balances.available * 100) : null,
         creditLimit: limitCents,

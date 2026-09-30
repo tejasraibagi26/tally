@@ -1,6 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { duePayDates, type DayAnchor } from "@tally/core/incomeScheduleMath";
+import { DEFAULT_CURRENCY } from "@tally/core/fx";
 
 interface ScheduleRow {
   id: string;
@@ -47,7 +48,7 @@ export async function generateDuePaychecks(schedule: ScheduleRow, throughDate: s
       accountId: schedule.accountId,
       isPending: false,
       amount: schedule.amount,
-      currency: account?.currency ?? "USD",
+      currency: account?.currency ?? DEFAULT_CURRENCY,
       postedDate,
       name: schedule.label,
       merchantName: schedule.label,

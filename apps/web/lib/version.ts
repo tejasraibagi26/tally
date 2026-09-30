@@ -26,8 +26,9 @@
  * currency now comes from the security's listing exchange. 1.5.8 makes
  * that hold on future syncs too: a price counts as the market quote within
  * a relative band (not to the cent), and a missing exchange is logged.
+ * 1.5.9 assumes CAD (not USD) wherever a synced amount has no currency.
  */
-export const APP_VERSION = "1.5.8";
+export const APP_VERSION = "1.5.9";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

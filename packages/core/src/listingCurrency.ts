@@ -1,3 +1,5 @@
+import { DEFAULT_CURRENCY } from "./fx";
+
 /**
  * The currency a security's market price is quoted in, derived from the
  * exchange it's listed on (ISO 10383 MIC) rather than from any
@@ -55,7 +57,7 @@ export function holdingPriceCurrency(opts: {
   holdingCurrency: string | null | undefined;
 }): string {
   if (opts.priceIsMarketPrice) {
-    return listingCurrency(opts.mic, opts.ticker) ?? opts.securityCurrency ?? opts.holdingCurrency ?? "USD";
+    return listingCurrency(opts.mic, opts.ticker) ?? opts.securityCurrency ?? opts.holdingCurrency ?? DEFAULT_CURRENCY;
   }
-  return opts.holdingCurrency ?? opts.securityCurrency ?? "USD";
+  return opts.holdingCurrency ?? opts.securityCurrency ?? DEFAULT_CURRENCY;
 }

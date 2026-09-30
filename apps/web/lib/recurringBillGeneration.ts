@@ -2,6 +2,7 @@ import { and, eq, inArray, isNotNull, isNull, notInArray, or } from "drizzle-orm
 import { db, schema } from "@/db";
 import { shiftMonth } from "@tally/core/budgetMath";
 import { normalizeMerchantKey } from "@tally/core/recurringDetection";
+import { DEFAULT_CURRENCY } from "@tally/core/fx";
 
 interface ManualBillStream {
   id: string;
@@ -160,7 +161,7 @@ export async function generateDueManualBillPayments(stream: ManualBillStream): P
       accountId: stream.accountId!,
       isPending: false,
       amount,
-      currency: account?.currency ?? "USD",
+      currency: account?.currency ?? DEFAULT_CURRENCY,
       postedDate,
       name: labelFor(postedDate),
       merchantName: labelFor(postedDate),

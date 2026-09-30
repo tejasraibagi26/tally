@@ -7,6 +7,7 @@ import { recordSyncRun } from "@/lib/syncRuns";
 import { holdingPriceCurrency, isMarketQuote, listingCurrency } from "@tally/core/listingCurrency";
 import type { SyncTrigger } from "@/lib/plaidSync";
 import type { Holding, InvestmentTransaction, Security } from "plaid";
+import { DEFAULT_CURRENCY } from "@tally/core/fx";
 
 // §6.4 coverage reality: not every institution supports Investments, and
 // some are holdings-only. These codes mean "nothing to sync here", not
@@ -28,7 +29,7 @@ async function upsertSecurities(securities: Security[]): Promise<Map<string, str
         isCashEquivalent: sec.is_cash_equivalent ?? false,
         closePrice: sec.close_price != null ? Math.round(sec.close_price * 100) : null,
         closePriceAsOf: sec.close_price_as_of ?? null,
-        currency: sec.iso_currency_code ?? sec.unofficial_currency_code ?? "USD",
+        currency: sec.iso_currency_code ?? sec.unofficial_currency_code ?? DEFAULT_CURRENCY,
         sector: sec.sector,
       })
       .onConflictDoUpdate({
@@ -246,7 +247,7 @@ async function reconcileInvestmentTransactions(securities: Security[], rows: Inv
         fees: r.fees != null ? Math.round(r.fees * 100) : null,
         type: r.type,
         subtype: r.subtype,
-        currency: r.iso_currency_code ?? r.unofficial_currency_code ?? "USD",
+        currency: r.iso_currency_code ?? r.unofficial_currency_code ?? DEFAULT_CURRENCY,
       })
       .onConflictDoNothing({ target: schema.investmentTransactions.plaidInvestmentTransactionId });
   }
