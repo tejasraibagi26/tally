@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.10.0",
+    date: "2026-09-30",
+    changes: [{ kind: "improved", text: "Refreshed light mode, matching the web app: cards stand out more clearly from the background, borders are easier to see, and gains are a distinct green from buttons and links." }],
+  },
+  {
     version: "1.9.2",
     date: "2026-09-30",
     changes: [

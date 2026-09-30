@@ -7,31 +7,32 @@
    variant reads from; theme/colors.ts's lightColors/darkColors re-export the
    same two maps for code that needs a raw hex value instead of a className. */
 @layer base {
+  /* Light values are web's "light v2" (web v1.12.0, mobile v1.10.0). */
   :root {
-    --color-canvas: #F5F4F0;
-    --color-surface: #FCFCFB;
-    --color-surface-2: #F9F8F5;
-    --color-sunken: #EFEDE8;
-    --color-border: #E4E1D9;
-    --color-border-strong: #938C7D;
+    --color-canvas: #F1F0EC;
+    --color-surface: #FFFFFF;
+    --color-surface-2: #F8F8F5;
+    --color-sunken: #ECEBE6;
+    --color-border: #E3E1DB;
+    --color-border-strong: #8A877E;
     --color-text: #1A1917;
-    --color-text-2: #524F47;
-    --color-text-3: #6A665E;
+    --color-text-2: #4D4B45;
+    --color-text-3: #65635C;
     --color-brand: #14513F;
     --color-brand-hover: #0E3E30;
-    --color-brand-subtle: #E6EFEA;
-    --color-brand-border: #BFD6CB;
+    --color-brand-subtle: #E4EEE9;
+    --color-brand-border: #B9D2C6;
     --color-on-brand: #FFFFFF;
-    --color-positive: #0F7A57;
-    --color-negative: #B23A2C;
-    --color-warning: #8A5A00;
-    --color-info: #2A78D6;
-    --color-positive-subtle: #E3F0EA;
-    --color-negative-subtle: #F6E7E4;
-    --color-warning-subtle: #F5EEDC;
-    --color-info-subtle: #E5EEFA;
-    --color-raised: #FCFCFB;
-    --color-raised-hover: #F2F0EB;
+    --color-positive: #237A3B;
+    --color-negative: #B3372A;
+    --color-warning: #835600;
+    --color-info: #2466C6;
+    --color-positive-subtle: #E6F1E8;
+    --color-negative-subtle: #F8E8E5;
+    --color-warning-subtle: #F6EEDA;
+    --color-info-subtle: #E6EEFA;
+    --color-raised: #FFFFFF;
+    --color-raised-hover: #F3F2EE;
   }
 
   /* Same palette as web's dark theme (apps/web/app/globals.css, "dark v2",

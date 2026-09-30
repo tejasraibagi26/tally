@@ -3,34 +3,40 @@
 @tailwind utilities;
 
 :root {
+  /* Light theme ("light v2", web v1.12.0 / mobile v1.10.0). White cards on a
+     deeper, less yellow canvas (card:canvas 1.14:1, was 1.07); info 5.54:1
+     (failed AA at 4.30 -- it's also the focus ring); border-strong 3.01:1 on
+     sunken; positive moved greener, off the brand hue, so gains don't read
+     as links (the same fix dark v2 made). Keep in sync with
+     apps/mobile/src/global.css and apps/mobile/tailwind.config.js. */
   color-scheme: light;
-  --canvas: #F5F4F0;
-  --surface: #FCFCFB;
-  --surface-2: #F9F8F5;
-  --sunken: #EFEDE8;
-  --border: #E4E1D9;
-  --border-strong: #938C7D;
+  --canvas: #F1F0EC;
+  --surface: #FFFFFF;
+  --surface-2: #F8F8F5;
+  --sunken: #ECEBE6;
+  --border: #E3E1DB;
+  --border-strong: #8A877E;
   --text: #1A1917;
-  --text-2: #524F47;
-  --text-3: #6A665E;
+  --text-2: #4D4B45;
+  --text-3: #65635C;
   --brand: #14513F;
   --brand-hover: #0E3E30;
-  --brand-subtle: #E6EFEA;
-  --brand-border: #BFD6CB;
+  --brand-subtle: #E4EEE9;
+  --brand-border: #B9D2C6;
   --on-brand: #FFFFFF;
-  --positive: #0F7A57;
-  --negative: #B23A2C;
-  --warning: #8A5A00;
-  --info: #2A78D6;
-  --positive-subtle: #E3F0EA;
-  --negative-subtle: #F6E7E4;
-  --warning-subtle: #F5EEDC;
-  --info-subtle: #E5EEFA;
+  --positive: #237A3B;
+  --negative: #B3372A;
+  --warning: #835600;
+  --info: #2466C6;
+  --positive-subtle: #E6F1E8;
+  --negative-subtle: #F8E8E5;
+  --warning-subtle: #F6EEDA;
+  --info-subtle: #E6EEFA;
   /* Floating layers -- menus, dropdowns, popovers, modals, side sheets,
      chart tooltips -- and their row hover. Same as --surface in light
      (shadows carry the lift there); dark lifts them a step above cards. */
-  --raised: #FCFCFB;
-  --raised-hover: #F2F0EB;
+  --raised: #FFFFFF;
+  --raised-hover: #F3F2EE;
 
   --status-good: #0CA30C;
   --status-warning: #FAB219;
@@ -51,7 +57,7 @@
   --radius-panel: 16px;
 
   --shadow-raised: 0 1px 2px rgba(26,25,23,.06);
-  --shadow-overlay: 0 12px 32px -8px rgba(26,25,23,.14);
+  --shadow-overlay: 0 12px 32px -8px rgba(26,25,23,.16), 0 2px 6px rgba(26,25,23,.05);
 }
 
 @media (prefers-color-scheme: dark) {

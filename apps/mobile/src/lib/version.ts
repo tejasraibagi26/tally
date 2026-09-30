@@ -58,9 +58,10 @@ import Constants from "expo-constants";
  * (85% → 60%) so it actually reads as see-through in dark mode. 1.9.2
  * reverts that bottom tab bar change (a misread request -- the ask was
  * the top bar) and makes the pushed screens' top bar transparent on
- * Android via a custom TransparentHeader.
+ * Android via a custom TransparentHeader. 1.10.0 adopts web's refined
+ * light palette ("light v2", web v1.12.0).
  */
-export const APP_VERSION = "1.9.2";
+export const APP_VERSION = "1.10.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

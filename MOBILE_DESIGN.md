@@ -72,24 +72,24 @@ values into components; import from the shared module.
 
 | Token | Hex |
 |---|---|
-| canvas | `#F5F4F0` |
-| surface | `#FCFCFB` |
-| surface-2 | `#F9F8F5` |
-| sunken | `#EFEDE8` |
-| border | `#E4E1D9` |
-| border-strong | `#938C7D` |
+| canvas | `#F1F0EC` |
+| surface | `#FFFFFF` |
+| surface-2 | `#F8F8F5` |
+| sunken | `#ECEBE6` |
+| border | `#E3E1DB` |
+| border-strong | `#8A877E` |
 | text | `#1A1917` |
-| text-2 | `#524F47` |
-| text-3 | `#6A665E` |
+| text-2 | `#4D4B45` |
+| text-3 | `#65635C` |
 | brand | `#14513F` |
 | brand-hover (→ pressed state) | `#0E3E30` |
-| brand-subtle | `#E6EFEA` |
-| brand-border | `#BFD6CB` |
+| brand-subtle | `#E4EEE9` |
+| brand-border | `#B9D2C6` |
 | on-brand | `#FFFFFF` |
-| positive | `#0F7A57` |
-| negative | `#B23A2C` |
-| warning | `#8A5A00` |
-| info | `#2A78D6` |
+| positive | `#237A3B` |
+| negative | `#B3372A` |
+| warning | `#835600` |
+| info | `#2466C6` |
 
 ### 3.2 Color — dark
 

@@ -12,7 +12,7 @@ import { formatPercent } from "@tally/core/money";
 // colorSlot). Hex values are globals.css's LIGHT theme --series-1..8 — the
 // email forces color-scheme:light, so dark-theme tokens would never apply.
 const SERIES_COLORS = ["#1baf7a", "#eb6834", "#2a78d6", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"];
-const OTHER_COLOR = "#938C7D";
+const OTHER_COLOR = "#8A877E";
 
 const FREQUENCY_MONTHLY_MULTIPLIER: Record<string, number> = {
   weekly: 52 / 12,

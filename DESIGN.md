@@ -28,11 +28,11 @@ TYPE
   small 13.5; label 12/500 uppercase with 0.06em tracking; mono 12.5.
 
 COLOR — light
-  canvas #F5F4F0 · surface #FCFCFB · surface-2 #F9F8F5 · sunken #EFEDE8
-  border #E4E1D9 · border-strong #938C7D
-  text #1A1917 · text-2 #524F47 · text-3 #6A665E
-  brand #14513F (evergreen) · brand-hover #0E3E30 · brand-subtle #E6EFEA
-  positive #0F7A57 · negative #B23A2C · warning #8A5A00 · info #2A78D6
+  canvas #F1F0EC · surface #FFFFFF · surface-2 #F8F8F5 · sunken #ECEBE6
+  border #E3E1DB · border-strong #8A877E
+  text #1A1917 · text-2 #4D4B45 · text-3 #65635C
+  brand #14513F (evergreen) · brand-hover #0E3E30 · brand-subtle #E4EEE9
+  positive #237A3B · negative #B3372A · warning #835600 · info #2466C6
 
 COLOR — dark
   canvas #111110 · surface #1A1A19 · surface-2 #232320 · sunken #0C0C0B
@@ -143,26 +143,28 @@ chart legend) in both light and dark.
 
 ### 5.1 Light
 
+"Light v2" (web v1.12.0 / mobile v1.10.0). Measured on `--surface`: card:canvas 1.14:1, `--text-3` 6.01 (5.04 on sunken), `--border-strong` 3.59 (3.01 on sunken), `--info` 5.54, `--positive` 5.36. Positive sits at a greener hue than the brand so gains don't read as links.
+
 | Token | Hex | Use |
 |---|---|---|
-| `--canvas` | `#F5F4F0` | App background |
-| `--surface` | `#FCFCFB` | Cards, tables, chart surface |
-| `--surface-2` | `#F9F8F5` | Nested/secondary surface |
-| `--sunken` | `#EFEDE8` | Wells, table header, input rest |
-| `--border` | `#E4E1D9` | Hairlines, dividers |
-| `--border-strong` | `#938C7D` | Input border, focused container |
+| `--canvas` | `#F1F0EC` | App background |
+| `--surface` | `#FFFFFF` | Cards, tables, chart surface |
+| `--surface-2` | `#F8F8F5` | Nested/secondary surface |
+| `--sunken` | `#ECEBE6` | Wells, table header, input rest |
+| `--border` | `#E3E1DB` | Hairlines, dividers |
+| `--border-strong` | `#8A877E` | Input border, focused container |
 | `--text` | `#1A1917` | Primary |
-| `--text-2` | `#524F47` | Secondary, labels |
-| `--text-3` | `#6A665E` | Tertiary, placeholders, axis |
+| `--text-2` | `#4D4B45` | Secondary, labels |
+| `--text-3` | `#65635C` | Tertiary, placeholders, axis |
 | `--brand` | `#14513F` | Primary action, active nav |
 | `--brand-hover` | `#0E3E30` | Hover/pressed |
-| `--brand-subtle` | `#E6EFEA` | Selected row, brand-tinted chip |
-| `--brand-border` | `#BFD6CB` | Border on brand-subtle |
+| `--brand-subtle` | `#E4EEE9` | Selected row, brand-tinted chip |
+| `--brand-border` | `#B9D2C6` | Border on brand-subtle |
 | `--on-brand` | `#FFFFFF` | Text on brand |
-| `--positive` | `#0F7A57` | Income, gains |
-| `--negative` | `#B23A2C` | Spend, losses, over budget |
-| `--warning` | `#8A5A00` | Approaching limit |
-| `--info` | `#2A78D6` | Neutral emphasis, focus ring |
+| `--positive` | `#237A3B` | Income, gains |
+| `--negative` | `#B3372A` | Spend, losses, over budget |
+| `--warning` | `#835600` | Approaching limit |
+| `--info` | `#2466C6` | Neutral emphasis, focus ring |
 
 ### 5.2 Dark
 
@@ -206,7 +208,7 @@ Status colors **always ship with an icon and a text label**. On the light surfac
 - **Elevation** — hairlines first, shadow second:
   - `rest`: border only.
   - `raised`: `0 1px 2px rgba(26,25,23,.06)`.
-  - `overlay` (menus, popovers): `0 12px 32px -8px rgba(26,25,23,.14)` + border.
+  - `overlay` (menus, popovers): `0 12px 32px -8px rgba(26,25,23,.16), 0 2px 6px rgba(26,25,23,.05)` + border. The 2px contact layer keeps white menus from floating vaguely over white cards.
   - Dark mode: drop the shadow, raise `--surface-2` one step instead.
 - **Focus:** 2px `--info` ring at 2px offset, on every interactive element, always visible on keyboard.
 
@@ -227,7 +229,7 @@ Status colors **always ship with an icon and a text label**. On the light surfac
 | 7 | violet | `#4a3aa7` | `#9085e9` |
 | 8 | red | `#e34948` | `#e66767` |
 
-This exact **order** is the colorblind-safety mechanism, not a preference. It was validated against light surface `#FCFCFB` and dark surface `#1A1A19`: worst adjacent-pair CVD separation ΔE 9.2 light / 9.4 dark (target ≥8), worst normal-vision separation 19.6 light / 19.3 dark (floor ≥15). Re-ordering or swapping a hex invalidates that — re-run the validator if you must.
+This exact **order** is the colorblind-safety mechanism, not a preference. It was validated against light surface `#FCFCFB` (light v2 moved it to `#FFFFFF`, under 1 ΔE away, so it still holds) and dark surface `#1A1A19`: worst adjacent-pair CVD separation ΔE 9.2 light / 9.4 dark (target ≥8), worst normal-vision separation 19.6 light / 19.3 dark (floor ≥15). Re-ordering or swapping a hex invalidates that — re-run the validator if you must.
 
 **Rules**
 - Assign slots in fixed order and **never cycle**. A 9th category becomes "Other".
@@ -384,19 +386,19 @@ Respect `prefers-reduced-motion: reduce` — replace movement with an instant st
 ```css
 :root {
   color-scheme: light;
-  --canvas:#F5F4F0; --surface:#FCFCFB; --surface-2:#F9F8F5; --sunken:#EFEDE8;
-  --border:#E4E1D9; --border-strong:#938C7D;
-  --text:#1A1917; --text-2:#524F47; --text-3:#6A665E;
-  --brand:#14513F; --brand-hover:#0E3E30; --brand-subtle:#E6EFEA;
-  --brand-border:#BFD6CB; --on-brand:#FFFFFF;
-  --positive:#0F7A57; --negative:#B23A2C; --warning:#8A5A00; --info:#2A78D6;
+  --canvas:#F1F0EC; --surface:#FFFFFF; --surface-2:#F8F8F5; --sunken:#ECEBE6;
+  --border:#E3E1DB; --border-strong:#8A877E;
+  --text:#1A1917; --text-2:#4D4B45; --text-3:#65635C;
+  --brand:#14513F; --brand-hover:#0E3E30; --brand-subtle:#E4EEE9;
+  --brand-border:#B9D2C6; --on-brand:#FFFFFF;
+  --positive:#237A3B; --negative:#B3372A; --warning:#835600; --info:#2466C6;
   --status-good:#0CA30C; --status-warning:#FAB219;
   --status-serious:#EC835A; --status-critical:#D03B3B;
   --series-1:#1baf7a; --series-2:#eb6834; --series-3:#2a78d6; --series-4:#eda100;
   --series-5:#e87ba4; --series-6:#008300; --series-7:#4a3aa7; --series-8:#e34948;
   --radius-control:8px; --radius-card:12px; --radius-panel:16px;
   --shadow-raised:0 1px 2px rgba(26,25,23,.06);
-  --shadow-overlay:0 12px 32px -8px rgba(26,25,23,.14);
+  --shadow-overlay:0 12px 32px -8px rgba(26,25,23,.16), 0 2px 6px rgba(26,25,23,.05);
   --font-ui:"Inter",ui-sans-serif,system-ui,sans-serif;
   --font-display:"Instrument Serif",Georgia,serif;
   --font-mono:"JetBrains Mono",ui-monospace,monospace;

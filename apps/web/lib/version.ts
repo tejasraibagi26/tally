@@ -42,9 +42,11 @@
  * 1.10.1 adds a changelog page, linked quietly from the bottom of Settings.
  * 1.10.2 reworks its layout (version rail, changes grouped by kind).
  * 1.11.0 makes the refined dark palette the only dark mode and removes the
- * preview toggle.
+ * preview toggle. 1.12.0 refines light mode ("light v2"): white cards on a
+ * deeper canvas, AA-passing info/focus ring and input borders, and a
+ * greener positive that no longer matches the brand.
  */
-export const APP_VERSION = "1.11.0";
+export const APP_VERSION = "1.12.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

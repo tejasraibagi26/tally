@@ -24,15 +24,15 @@ function budgetRowHtml(b: MonthlyRecapData["budgets"][number]): string {
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;">
         <tr>
           <td style="font-family:'Inter', sans-serif; font-size:14px; color:#1A1917;">${name}</td>
-          <td align="right" style="font-family:'JetBrains Mono', ui-monospace, Consolas, monospace; font-size:13px; color:#B23A2C;">${spend} / ${budgeted}</td>
+          <td align="right" style="font-family:'JetBrains Mono', ui-monospace, Consolas, monospace; font-size:13px; color:#B3372A;">${spend} / ${budgeted}</td>
         </tr>
       </table>
       <table role="presentation" width="240" cellpadding="0" cellspacing="0" border="0" style="margin:-10px 0 4px 0;">
         <tr style="height:6px;">
-          <td width="240" height="6" style="background-color:#B23A2C; border-radius:3px; font-size:0; line-height:0;">&nbsp;</td>
+          <td width="240" height="6" style="background-color:#B3372A; border-radius:3px; font-size:0; line-height:0;">&nbsp;</td>
         </tr>
       </table>
-      <div style="font-family:'Inter', sans-serif; font-size:12px; color:#B23A2C; padding-bottom:16px;">${formatCents(b.overBy)} over budget</div>`;
+      <div style="font-family:'Inter', sans-serif; font-size:12px; color:#B3372A; padding-bottom:16px;">${formatCents(b.overBy)} over budget</div>`;
   }
 
   const pctUsed = b.budgeted > 0 ? Math.min(1, b.spend / b.budgeted) : b.spend > 0 ? 1 : 0;
@@ -42,13 +42,13 @@ function budgetRowHtml(b: MonthlyRecapData["budgets"][number]): string {
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:16px;">
       <tr>
         <td style="font-family:'Inter', sans-serif; font-size:14px; color:#1A1917;">${name}</td>
-        <td align="right" style="font-family:'JetBrains Mono', ui-monospace, Consolas, monospace; font-size:13px; color:#524F47;">${spend} / ${budgeted}</td>
+        <td align="right" style="font-family:'JetBrains Mono', ui-monospace, Consolas, monospace; font-size:13px; color:#4D4B45;">${spend} / ${budgeted}</td>
       </tr>
     </table>
     <table role="presentation" width="240" cellpadding="0" cellspacing="0" border="0" style="margin:-10px 0 16px 0;">
       <tr style="height:6px;">
-        <td width="${filled}" height="6" style="background-color:#0F7A57; border-radius:3px 0 0 3px; font-size:0; line-height:0;">&nbsp;</td>
-        <td width="${remaining}" height="6" style="background-color:#EFEDE8; border-radius:0 3px 3px 0; font-size:0; line-height:0;">&nbsp;</td>
+        <td width="${filled}" height="6" style="background-color:#237A3B; border-radius:3px 0 0 3px; font-size:0; line-height:0;">&nbsp;</td>
+        <td width="${remaining}" height="6" style="background-color:#ECEBE6; border-radius:0 3px 3px 0; font-size:0; line-height:0;">&nbsp;</td>
       </tr>
     </table>`;
 }
@@ -60,7 +60,7 @@ function categoryRowHtml(c: MonthlyRecapData["categories"][number]): string {
         <td width="14" style="background-color:${c.color}; border-radius:2px; font-size:0; line-height:0;">&nbsp;</td>
         <td width="8" style="font-size:0; line-height:0;">&nbsp;</td>
         <td style="font-family:'Inter', sans-serif; font-size:14px; color:#1A1917;">${escapeHtml(c.label)}</td>
-        <td align="right" style="font-family:'JetBrains Mono', ui-monospace, Consolas, monospace; font-size:13px; color:#524F47;">${formatCents(c.amount)} &middot; ${formatPercent(c.pct)}</td>
+        <td align="right" style="font-family:'JetBrains Mono', ui-monospace, Consolas, monospace; font-size:13px; color:#4D4B45;">${formatCents(c.amount)} &middot; ${formatPercent(c.pct)}</td>
       </tr>
     </table>`;
 }
@@ -68,8 +68,8 @@ function categoryRowHtml(c: MonthlyRecapData["categories"][number]): string {
 function netWorthDeltaChipHtml(data: MonthlyRecapData): string {
   if (data.netWorthDeltaAmount == null || data.netWorthDeltaPct == null || data.netWorthDeltaDirection == null) return "";
   const up = data.netWorthDeltaDirection === "up";
-  const color = up ? "#0F7A57" : "#B23A2C";
-  const bg = up ? "#E3F0EA" : "#F6E7E4";
+  const color = up ? "#237A3B" : "#B3372A";
+  const bg = up ? "#E6F1E8" : "#F8E8E5";
   const arrow = up ? "&#9650;" : "&#9660;";
   return `<div style="font-family:'JetBrains Mono', ui-monospace, Consolas, monospace; font-size:14px; color:${color}; background-color:${bg}; padding:6px 10px; border-radius:6px; display:inline-block;">${arrow} ${formatCents(Math.abs(data.netWorthDeltaAmount))} &middot; ${formatPercent(Math.abs(data.netWorthDeltaPct))}</div>`;
 }
@@ -83,7 +83,7 @@ function netWorthMonthLabelsHtml(labels: string[]): string {
       const isLast = i === n - 1;
       const style = isLast
         ? `font-family:'JetBrains Mono', ui-monospace, Consolas, monospace; font-size:11px; color:#1A1917; font-weight:600;`
-        : `font-family:'JetBrains Mono', ui-monospace, Consolas, monospace; font-size:11px; color:#6A665E;`;
+        : `font-family:'JetBrains Mono', ui-monospace, Consolas, monospace; font-size:11px; color:#65635C;`;
       return `<td width="${width}%"${isLast ? ' align="right"' : ""} style="${style}">${escapeHtml(label)}</td>`;
     })
     .join("\n");
@@ -93,9 +93,9 @@ function subPriceIncreaseHtml(data: MonthlyRecapData): string {
   const p = data.priceIncrease;
   if (!p) return "";
   return `
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:12px; background-color:#F6E7E4; border-radius:8px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:12px; background-color:#F8E8E5; border-radius:8px;">
       <tr>
-        <td style="padding:12px 14px; font-family:'Inter', sans-serif; font-size:13px; color:#B23A2C; line-height:1.5;">
+        <td style="padding:12px 14px; font-family:'Inter', sans-serif; font-size:13px; color:#B3372A; line-height:1.5;">
           <strong>${escapeHtml(p.label)}</strong> renewed at ${formatCents(p.newAmount)}, up from ${formatCents(p.oldAmount)} (+${p.pctIncrease}).
         </td>
       </tr>
@@ -104,7 +104,7 @@ function subPriceIncreaseHtml(data: MonthlyRecapData): string {
 
 function budgetsFootnoteHtml(data: MonthlyRecapData): string {
   if (data.budgetsOmitted <= 0) return "";
-  return `<div style="font-family:'Inter', sans-serif; font-size:12px; color:#6A665E; padding-top:4px;">+${data.budgetsOmitted} more in the full report</div>`;
+  return `<div style="font-family:'Inter', sans-serif; font-size:12px; color:#65635C; padding-top:4px;">+${data.budgetsOmitted} more in the full report</div>`;
 }
 
 function fireSentenceHtml(data: MonthlyRecapData): string {
@@ -180,7 +180,7 @@ export function renderMonthInReviewEmail(data: MonthlyRecapData, ctx: RenderCont
     INCOME: formatCents(data.income),
     SPEND: formatCents(data.spend),
     SAVED: formatCents(data.saved, { signed: true }),
-    SAVED_COLOR: data.saved >= 0 ? "#0F7A57" : "#B23A2C",
+    SAVED_COLOR: data.saved >= 0 ? "#237A3B" : "#B3372A",
     SAVINGS_RATE_LINE: savingsRateLineText(data),
     BUDGET_ROWS: data.budgets.map(budgetRowHtml).join("\n"),
     BUDGETS_FOOTNOTE: budgetsFootnoteHtml(data),

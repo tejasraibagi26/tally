@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.12.0",
+    date: "2026-09-30",
+    changes: [{ kind: "improved", text: "Refreshed light mode: cards stand out more clearly from the background, borders and focus outlines are easier to see, and gains are a distinct green from buttons and links." }],
+  },
+  {
     version: "1.11.0",
     date: "2026-09-30",
     changes: [{ kind: "improved", text: "The refined dark mode is now the dark mode: higher-contrast text, clearer card edges and borders. The preview switch in Settings is gone." }],
