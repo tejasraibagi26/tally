@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
+import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChevronLeft, ChevronRight, Plus, PiggyBank } from "lucide-react-native";
 import { monthLastDay } from "@tally/core/budgetMath";
@@ -11,7 +12,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useBudgets, currentMonthParam, type BudgetLine } from "@/lib/queries/budgets";
 import { useThemeColors } from "@/theme/useThemeColors";
-import { hairline } from "@/theme/colors";
+import { hairline, chartSeries } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { useRF } from "@/theme/responsiveFont";
@@ -32,17 +33,21 @@ function daysInMonthOf(month: string): number {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
 }
 
-// MOBILE_DESIGN.md §5.6, revised: the Budgeted/Spent/Remaining summary lives
-// in the header instead of pinned above the tab bar (an earlier pass tried
-// pinning it there) -- still deferred: swipe-left/right month navigation,
-// and parent-category grouping/"copy last month" bulk actions (neither
-// exists on web either).
+// MOBILE_DESIGN.md §5.6, revised: every budget lives in one grouped card
+// (hairline-divided rows, not a card apiece), and the Budgeted/Spent/
+// Remaining summary is that card's own header -- "left to spend", a single
+// total bar segmented by category, and a one-line count/progress caption --
+// rather than a separate strip above the list. Still deferred: swipe-left/
+// right month navigation, and parent-category grouping/"copy last month"
+// bulk actions (neither exists on web either).
 export default function BudgetsScreen() {
   const insets = useSafeAreaInsets();
   const tabBarClearance = useTabBarBottomClearance();
   const colors = useThemeColors();
   const rf = useRF();
   const router = useRouter();
+  const { colorScheme } = useColorScheme();
+  const series = colorScheme === "dark" ? chartSeries.dark : chartSeries.light;
   const [month, setMonth] = useState(currentMonthParam());
   const { data, isLoading, isError, refetch, isRefetching } = useBudgets(month);
   const [addOpen, setAddOpen] = useState(false);
@@ -57,6 +62,8 @@ export default function BudgetsScreen() {
   const isCurrentMonth = month === currentMonthParam();
   const daysElapsed = new Date().getUTCDate();
   const daysInMonth = daysInMonthOf(month);
+  const spentPct = totalBudget > 0 ? Math.round((totalSpend / totalBudget) * 100) : 0;
+  const daysLeft = daysInMonth - daysElapsed;
 
   function openTransactionsFor(budget: BudgetLine) {
     router.push({
@@ -75,7 +82,7 @@ export default function BudgetsScreen() {
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
       >
         <View className="px-5 pb-4">
-          <View className="flex-row items-center justify-between mb-1">
+          <View className="flex-row items-center justify-between mb-3">
             <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(24) }}>
               Budgets
             </Text>
@@ -83,11 +90,6 @@ export default function BudgetsScreen() {
               <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
             </Pressable>
           </View>
-          {hasBudgets && (
-            <Text className="font-ui text-text-2 mb-3" style={{ fontSize: rf(13) }}>
-              {budgets.length} {budgets.length === 1 ? "category" : "categories"} budgeted
-            </Text>
-          )}
           <View className="flex-row items-center justify-between">
             <Pressable onPress={() => setMonth((m) => shiftMonth(m, -1))} hitSlop={12}>
               <ChevronLeft size={20} color={colors["text-2"]} />
@@ -98,36 +100,11 @@ export default function BudgetsScreen() {
             </Pressable>
           </View>
 
-          {hasBudgets && (
-            <View className="flex-row items-center justify-around bg-surface rounded-card mt-4" style={{ paddingVertical: 14, paddingHorizontal: 12 }}>
-              <View className="items-center">
-                <Text className="font-ui text-text-3" style={{ fontSize: rf(10), letterSpacing: 0.4, textTransform: "uppercase" }}>Budgeted</Text>
-                <MoneyText cents={totalBudget} mask={false} className="font-ui-semibold text-text" style={{ fontSize: rf(14) }} />
-              </View>
-              <View style={{ width: 1, height: 28, backgroundColor: hairline(colors) }} />
-              <View className="items-center">
-                <Text className="font-ui text-text-3" style={{ fontSize: rf(10), letterSpacing: 0.4, textTransform: "uppercase" }}>Spent</Text>
-                <MoneyText cents={totalSpend} mask={false} className="font-ui-semibold text-text" style={{ fontSize: rf(14) }} />
-              </View>
-              <View style={{ width: 1, height: 28, backgroundColor: hairline(colors) }} />
-              <View className="items-center">
-                <Text className="font-ui text-text-3" style={{ fontSize: rf(10), letterSpacing: 0.4, textTransform: "uppercase" }}>Remaining</Text>
-                <MoneyText
-                  cents={Math.abs(totalRemaining)}
-                  mask={false}
-                  className="font-ui-semibold"
-                  style={{ fontSize: rf(14), color: totalRemaining < 0 ? colors.negative : colors.text }}
-                />
-              </View>
-            </View>
-          )}
         </View>
 
         {isLoading ? (
-          <View className="px-5 gap-3">
-            <Skeleton style={{ height: 76, borderRadius: 18 }} />
-            <Skeleton style={{ height: 76, borderRadius: 18 }} />
-            <Skeleton style={{ height: 76, borderRadius: 18 }} />
+          <View className="px-5">
+            <Skeleton style={{ height: 360, borderRadius: 18 }} />
           </View>
         ) : isError ? (
           <View className="px-5">
@@ -139,10 +116,49 @@ export default function BudgetsScreen() {
             </View>
           </View>
         ) : hasBudgets ? (
-          <View className="px-5 gap-3">
-            {budgets.map((b) => (
-              <Pressable key={b.categoryId} onPress={() => setEditing(b)}>
-                <Card className="p-5">
+          <View className="px-5">
+            <Card className="overflow-hidden">
+              <View className="px-5 pt-5 pb-[18px] gap-3" style={{ borderBottomWidth: 1, borderBottomColor: hairline(colors) }}>
+                <View className="flex-row items-end justify-between">
+                  <View className="gap-0.5">
+                    <Text className="font-ui text-text-3" style={{ fontSize: rf(10), letterSpacing: 0.4, textTransform: "uppercase" }}>
+                      {totalRemaining < 0 ? "Over budget" : "Left to spend"}
+                    </Text>
+                    <MoneyText
+                      cents={Math.abs(totalRemaining)}
+                      mask={false}
+                      className="font-ui-semibold"
+                      style={{ fontSize: rf(28), letterSpacing: -0.5, color: totalRemaining < 0 ? colors.negative : colors.text }}
+                    />
+                  </View>
+                  <Text className="font-ui text-text-2 pb-1" style={{ fontSize: rf(13) }}>
+                    <MoneyText cents={totalSpend} mask={false} /> of <MoneyText cents={totalBudget} mask={false} />
+                  </Text>
+                </View>
+                {/* Each category's within-budget spend, in its series color, as a
+                    share of the month's total budget -- overage isn't drawn here
+                    (the row below already calls it out), so the bar never
+                    exceeds 100%. */}
+                <View className="h-2.5 rounded-full bg-sunken flex-row overflow-hidden" style={{ gap: 2 }}>
+                  {totalBudget > 0 &&
+                    budgets.map((b) => {
+                      const w = (Math.min(b.spend, b.amount + b.rolloverFromPrior) / totalBudget) * 100;
+                      if (w <= 0) return null;
+                      return <View key={b.categoryId} style={{ width: `${w}%`, backgroundColor: series[(b.categoryColorSlot - 1) % series.length] ?? series[0] }} />;
+                    })}
+                </View>
+                <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>
+                  {budgets.length} {budgets.length === 1 ? "category" : "categories"} · {spentPct}% spent
+                  {isCurrentMonth ? ` · ${daysLeft} ${daysLeft === 1 ? "day" : "days"} left` : ""}
+                </Text>
+              </View>
+              {budgets.map((b, i) => (
+                <Pressable
+                  key={b.categoryId}
+                  onPress={() => setEditing(b)}
+                  className="px-5 py-4"
+                  style={i > 0 ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined}
+                >
                   <MeterBar
                     label={b.categoryName}
                     colorSlot={b.categoryColorSlot}
@@ -154,9 +170,9 @@ export default function BudgetsScreen() {
                     daysInMonth={isCurrentMonth ? daysInMonth : undefined}
                     mask={false}
                   />
-                </Card>
-              </Pressable>
-            ))}
+                </Pressable>
+              ))}
+            </Card>
           </View>
         ) : (
           <View className="px-5">

@@ -36,8 +36,11 @@ import Constants from "expo-constants";
  * shows a "Syncing…" spinner in an institution card's subtitle while its
  * per-item "Refresh balances" is in flight -- previously the only spinner
  * lived in the actions sheet, which closes the moment the row is tapped.
+ * 1.5.0 regroups the Budgets tab into one card: the summary becomes its
+ * header (left to spend, a category-segmented total bar, progress caption)
+ * and every budget is a hairline-divided row inside it.
  */
-export const APP_VERSION = "1.4.5";
+export const APP_VERSION = "1.5.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
