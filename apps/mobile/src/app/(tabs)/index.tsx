@@ -30,6 +30,10 @@ import { useRF } from "@/theme/responsiveFont";
 // KPI stat-tile strip (spend/income/investments/utilization), a single-line
 // connections summary, "Budget this month" (top 3), "Upcoming", and
 // "Recent activity."
+// Hero net worth chart height -- taller than the old 56px strip now that it
+// runs full-bleed, matching web's more immersive Overview chart.
+const HERO_CHART_HEIGHT = 96;
+
 export default function OverviewScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -53,7 +57,7 @@ export default function OverviewScreen() {
   // it always spans exactly the hero section's real width; the window-width
   // fallback (minus the screen's 40px of horizontal px-5 padding) avoids a
   // flash of the old fixed width before the first layout pass.
-  const [chartWidth, setChartWidth] = useState(windowWidth - 40);
+  const [chartWidth, setChartWidth] = useState(windowWidth);
   // Index into trend.data.points/chartData currently under a finger dragging
   // across the net worth chart, or null when nothing's being touched -- the
   // hero figure and its subtitle below read off this instead of the live
@@ -301,12 +305,16 @@ export default function OverviewScreen() {
           {chartData.length > 1 && (
             <View
               onLayout={(e) => setChartWidth(e.nativeEvent.layout.width)}
-              style={{ height: 56 }}
+              // Full-bleed, like web's Overview chart: the negative margin
+              // cancels the screen's px-5 so the area runs edge to edge.
+              // Scrubbing is unaffected -- it reads locationX within this
+              // view, and chartWidth is measured from it.
+              style={{ height: HERO_CHART_HEIGHT, marginHorizontal: -20 }}
               {...chartPanResponder.panHandlers}
             >
               <LineChart
                 data={chartData}
-                height={56}
+                height={HERO_CHART_HEIGHT}
                 width={chartWidth}
                 adjustToWidth
                 // Even with hideYAxisText, gifted-charts reserves a hidden
@@ -323,10 +331,10 @@ export default function OverviewScreen() {
                 yAxisOffset={chartYAxisOffset}
                 maxValue={chartMaxValue}
                 areaChart
-                startFillColor={colors["brand-subtle"]}
-                endFillColor={colors["brand-subtle"]}
-                startOpacity={0.9}
-                endOpacity={0.3}
+                startFillColor={colors.brand}
+                endFillColor={colors.brand}
+                startOpacity={0.28}
+                endOpacity={0}
                 hideDataPoints
                 hideYAxisText
                 hideAxesAndRules
@@ -343,7 +351,7 @@ export default function OverviewScreen() {
               {touchX != null && (
                 <View
                   pointerEvents="none"
-                  style={{ position: "absolute", left: touchX - 0.75, top: 0, width: 1.5, height: 56, backgroundColor: colors.brand, opacity: 0.55 }}
+                  style={{ position: "absolute", left: touchX - 0.75, top: 0, width: 1.5, height: HERO_CHART_HEIGHT, backgroundColor: colors.brand, opacity: 0.55 }}
                 />
               )}
             </View>

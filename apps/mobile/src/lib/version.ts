@@ -48,9 +48,10 @@ import Constants from "expo-constants";
  * moves Investments' Sync into the header as plain text. 1.6.3 colors
  * each budget distinctly (server-assigned colorSlot) instead of sharing
  * its parent category's color. 1.7.0 adds 3/6/9/12-month terms to
- * "Spread across months" (transaction detail and Subscriptions).
+ * "Spread across months" (transaction detail and Subscriptions). 1.7.1
+ * makes Overview's net worth chart full-bleed and taller, like web's.
  */
-export const APP_VERSION = "1.7.0";
+export const APP_VERSION = "1.7.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
