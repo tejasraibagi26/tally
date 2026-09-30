@@ -4,10 +4,13 @@ import { APP_VERSION } from "@/lib/version";
 
 // Reached only from the version line at the bottom of Settings -- not in
 // the nav or any menu, on purpose (see lib/changelog.ts).
-const KIND_STYLE: Record<ChangeKind, { label: string; className: string }> = {
-  new: { label: "New", className: "bg-brand-subtle text-brand" },
-  improved: { label: "Improved", className: "bg-info-subtle text-info" },
-  fixed: { label: "Fixed", className: "bg-sunken text-text-2" },
+// Changes are grouped under one label per kind (not a tag on every line),
+// so every line of text starts at the same edge.
+const KIND_ORDER: ChangeKind[] = ["new", "improved", "fixed"];
+const KIND_STYLE: Record<ChangeKind, { label: string; dot: string; text: string }> = {
+  new: { label: "New", dot: "bg-brand", text: "text-brand" },
+  improved: { label: "Improved", dot: "bg-info", text: "text-info" },
+  fixed: { label: "Fixed", dot: "bg-text-3", text: "text-text-2" },
 };
 
 function formatDate(date: string): string {
@@ -27,22 +30,38 @@ export default function ChangelogPage() {
 
       <ol className="flex flex-col">
         {CHANGELOG.map((entry, i) => (
-          <li key={entry.version} className={`flex flex-col gap-2.5 py-5 ${i > 0 ? "border-t border-border" : ""}`}>
-            <div className="flex items-baseline gap-3">
-              <span className="font-mono text-[14px] font-medium text-text">v{entry.version}</span>
+          <li
+            key={entry.version}
+            className={`grid grid-cols-1 sm:grid-cols-[148px_minmax(0,1fr)] gap-x-8 gap-y-3 py-7 ${i > 0 ? "border-t border-border" : ""}`}
+          >
+            {/* Left rail: version, date, current marker -- stacks above the
+                changes on narrow screens. */}
+            <div className="flex sm:flex-col items-baseline sm:items-start gap-x-3 gap-y-1">
+              <span className="font-mono text-[15px] font-medium text-text">v{entry.version}</span>
               <span className="text-[13px] text-text-3">{formatDate(entry.date)}</span>
-              {entry.version === APP_VERSION && <span className="text-[12px] font-medium text-positive">Current</span>}
+              {entry.version === APP_VERSION && (
+                <span className="sm:mt-1.5 inline-flex px-2 py-0.5 rounded-full bg-positive-subtle text-positive text-[11.5px] font-medium">Current</span>
+              )}
             </div>
-            <ul className="flex flex-col gap-2">
-              {entry.changes.map((c) => (
-                <li key={c.text} className="flex items-start gap-2.5">
-                  <span className={`flex-none mt-px px-1.5 py-0.5 rounded-[4px] text-[11px] font-medium ${KIND_STYLE[c.kind].className}`}>
-                    {KIND_STYLE[c.kind].label}
-                  </span>
-                  <span className="text-[14px] leading-relaxed text-text-2">{c.text}</span>
-                </li>
+            <div className="flex flex-col gap-5">
+              {KIND_ORDER.filter((kind) => entry.changes.some((c) => c.kind === kind)).map((kind) => (
+                <section key={kind} className="flex flex-col gap-2">
+                  <h2 className={`m-0 flex items-center gap-2 text-[11.5px] font-semibold uppercase tracking-[0.06em] ${KIND_STYLE[kind].text}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${KIND_STYLE[kind].dot}`} />
+                    {KIND_STYLE[kind].label}
+                  </h2>
+                  <ul className="m-0 p-0 list-none flex flex-col gap-2">
+                    {entry.changes
+                      .filter((c) => c.kind === kind)
+                      .map((c) => (
+                        <li key={c.text} className="text-[14.5px] leading-[1.6] text-text max-w-[60ch]">
+                          {c.text}
+                        </li>
+                      ))}
+                  </ul>
+                </section>
               ))}
-            </ul>
+            </div>
           </li>
         ))}
       </ol>

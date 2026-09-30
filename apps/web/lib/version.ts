@@ -40,8 +40,9 @@
  * 1.10.0 redesigns Overview's cash flow chart (income/spend lines with the
  * gap shaded, paired bars under 4 months of data, a savings headline).
  * 1.10.1 adds a changelog page, linked quietly from the bottom of Settings.
+ * 1.10.2 reworks its layout (version rail, changes grouped by kind).
  */
-export const APP_VERSION = "1.10.1";
+export const APP_VERSION = "1.10.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
