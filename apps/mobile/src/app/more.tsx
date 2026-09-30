@@ -80,13 +80,17 @@ export default function MoreScreen() {
         </View>
       </View>
 
+      {/* The only way into the changelog -- tapping the build line. Kept as
+          quiet as before; the trailing "Changelog" is the only hint. */}
       <View className="items-center pt-4 mt-3" style={soft}>
-        <Text
-          className="text-text-3"
-          style={{ fontFamily: "JetBrainsMono", letterSpacing: 0.2, fontSize: rf(10.5) }}
-        >
-          Build v{APP_VERSION} · {BUILD_SHA}
-        </Text>
+        <Pressable onPress={() => go("/changelog")} hitSlop={12} accessibilityRole="link" accessibilityLabel={`Version ${APP_VERSION}, open changelog`}>
+          <Text
+            className="text-text-3"
+            style={{ fontFamily: "JetBrainsMono", letterSpacing: 0.2, fontSize: rf(10.5) }}
+          >
+            Build v{APP_VERSION} · {BUILD_SHA} · Changelog
+          </Text>
+        </Pressable>
       </View>
     </View>
   );

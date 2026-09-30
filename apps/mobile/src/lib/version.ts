@@ -8,7 +8,7 @@ import Constants from "expo-constants";
  * so it tracks its own counter rather than reusing web's.
  *
  * Bump this by hand on every user-visible change, right alongside the
- * change itself: a new feature or a meaningful behavior change bumps minor
+ * change itself -- and add a matching user-facing entry to lib/changelog.ts: a new feature or a meaningful behavior change bumps minor
  * (1.3.0 → 1.4.0), a bug fix, small tweak, or polish-only change bumps
  * patch (1.4.0 → 1.4.1). Starting point (1.4.0) reflects the run of mobile
  * work already shipped this session before this counter existed:
@@ -51,9 +51,10 @@ import Constants from "expo-constants";
  * "Spread across months" (transaction detail and Subscriptions). 1.7.1
  * makes Overview's net worth chart full-bleed and taller, like web's.
  * 1.8.0 adopts web's refined dark palette (near-black canvas instead of
- * OLED black, higher-contrast text and borders, raised sheets).
+ * OLED black, higher-contrast text and borders, raised sheets). 1.8.1 adds
+ * a changelog screen, opened by tapping the build line in the More sheet.
  */
-export const APP_VERSION = "1.8.0";
+export const APP_VERSION = "1.8.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
