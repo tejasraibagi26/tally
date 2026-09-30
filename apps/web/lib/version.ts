@@ -21,8 +21,11 @@
  * -- the recap-email switch on Settings was the one remaining control with
  * neither a visible label nor a title/aria-label. 1.5.6 swaps the plain
  * incrementing BUILD_NUMBER below for a real build SHA (see BUILD_SHA).
+ * 1.5.7 fixes holdings priced at their market quote being stored in the
+ * wrong currency (VFV, a CAD ETF, labeled USD and converted twice) -- the
+ * currency now comes from the security's listing exchange.
  */
-export const APP_VERSION = "1.5.6";
+export const APP_VERSION = "1.5.7";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

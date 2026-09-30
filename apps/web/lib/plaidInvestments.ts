@@ -4,6 +4,7 @@ import { plaidClient, getAccessToken, plaidErrorCode, institutionSupportsProduct
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
 import { seedMockHoldingsForItem, seedMockInvestmentTransactionsForItem } from "@/lib/mock/seedInvestments";
 import { recordSyncRun } from "@/lib/syncRuns";
+import { holdingPriceCurrency } from "@tally/core/listingCurrency";
 import type { SyncTrigger } from "@/lib/plaidSync";
 import type { Holding, InvestmentTransaction, Security } from "plaid";
 
@@ -109,22 +110,24 @@ async function reconcileHoldings(securities: Security[], holdings: Holding[]): P
     const price = closePrice ?? h.institution_price;
     const priceAsOf = closePrice != null ? (security?.close_price_as_of ?? null) : (h.institution_price_as_of ?? null);
     const value = closePrice != null ? closePrice * h.quantity : h.institution_value;
-    // No FX conversion anywhere in this app — every consumer of
-    // institutionPrice/institutionValue needs this to know what they're
-    // actually looking at, which means the currency label must match
-    // whichever number is actually being stored. Normally that's the
-    // holding's own reported currency (what the institution says this
-    // position is held in). But when institution_price is broken and we
-    // fell back to the security's close_price instead, that price is
-    // denominated in the SECURITY's currency, not necessarily the holding's
-    // — observed on Wealthsimple: a US stock (close_price in USD) held
-    // inside a CAD account gets iso_currency_code: "CAD" on the holding
-    // itself, which would silently relabel a USD figure as CAD and read as
-    // a much smaller CAD value than the position is actually worth. Only
-    // the institution's own currency is trustworthy when its own price is.
-    const currency = closePrice != null
-      ? (security?.iso_currency_code ?? security?.unofficial_currency_code ?? h.iso_currency_code ?? h.unofficial_currency_code ?? "USD")
-      : (h.iso_currency_code ?? h.unofficial_currency_code ?? security?.iso_currency_code ?? security?.unofficial_currency_code ?? "USD");
+    // The stored currency must match whichever price was actually used. A
+    // price that IS the security's market quote (the fallback above, or an
+    // institution price equal to Plaid's close price) is in the security's
+    // listing currency, so that's resolved from its exchange -- neither
+    // Plaid label is reliable there. Observed on Wealthsimple: a US stock
+    // held in a CAD account comes back with iso_currency_code "CAD" on the
+    // holding (so a USD price would read as far too small a CAD value), and
+    // VFV -- a TSX ETF priced in CAD -- came back labeled USD (so a CAD price
+    // got converted again, ~39% too large). See @tally/core/listingCurrency.
+    const priceIsMarketPrice =
+      closePrice != null || (h.institution_price != null && security?.close_price != null && Math.abs(h.institution_price - security.close_price) < 0.005);
+    const currency = holdingPriceCurrency({
+      priceIsMarketPrice,
+      mic: security?.market_identifier_code,
+      ticker: security?.ticker_symbol,
+      securityCurrency: security?.iso_currency_code ?? security?.unofficial_currency_code,
+      holdingCurrency: h.iso_currency_code ?? h.unofficial_currency_code,
+    });
 
     const values = {
       accountId,
