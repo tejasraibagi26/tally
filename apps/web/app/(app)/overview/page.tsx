@@ -10,6 +10,7 @@ import { monthTotals, categoryBreakdown, upcomingBills, cashFlowTrend } from "@/
 import { netWorthTrend } from "@/lib/networth";
 import { NET_WORTH_CURRENCY } from "@tally/core/fx";
 import { creditCardsForUser, utilizationFor } from "@/lib/liabilities";
+import { latestHoldingsForUser, portfolioValue } from "@/lib/portfolio";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { StatTile } from "@/components/ui/StatTile";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
@@ -74,7 +75,7 @@ export default async function OverviewPage() {
   const { start: monthStart } = monthRange(month);
   const monthEnd = monthLastDay(month);
 
-  const [budgets, thisMonth, lastMonth, breakdown, bills, netWorthPoints, recentTx, cards, cashFlowMonths] = await Promise.all([
+  const [budgets, thisMonth, lastMonth, breakdown, bills, netWorthPoints, recentTx, cards, cashFlowMonths, holdings] = await Promise.all([
     getBudgetsForMonth(userId, month),
     monthTotals(userId, month),
     monthTotals(userId, priorMonth),
@@ -88,6 +89,7 @@ export default async function OverviewPage() {
     }),
     creditCardsForUser(userId),
     cashFlowTrend(userId, 12),
+    latestHoldingsForUser(userId),
   ]);
 
   const totalAssets = accounts.filter((a) => a.type === "depository" || a.type === "investment").reduce((sum, a) => sum + (a.currentBalance ?? 0), 0);
@@ -108,9 +110,7 @@ export default async function OverviewPage() {
 
   const spendDelta = pctChip(thisMonth.spend, lastMonth.spend);
   const incomeDelta = pctChip(thisMonth.income, lastMonth.income);
-  const cashFlow = thisMonth.income - thisMonth.spend;
-  const cashFlowLastMonth = lastMonth.income - lastMonth.spend;
-  const cashFlowDelta = pctChip(cashFlow, cashFlowLastMonth);
+  const investmentsTotal = portfolioValue(holdings);
 
   const totalBudgeted = budgets.reduce((s, b) => s + b.amount + b.rolloverFromPrior, 0);
 
@@ -187,10 +187,10 @@ export default async function OverviewPage() {
           href={`/transactions?from=${monthStart}&to=${monthEnd}&kind=income&transfer=0&excluded=0`}
         />
         <StatTile
-          label="Cash flow"
-          value={<AnimatedNumber cents={cashFlow} signed className="money" />}
-          delta={cashFlowDelta ? { ...cashFlowDelta, goodDirection: "up", comparisonLabel: "vs last month" } : undefined}
-          href={`/transactions?from=${monthStart}&to=${monthEnd}&transfer=0&excluded=0`}
+          label="Investments"
+          value={holdings.length > 0 ? <AnimatedNumber cents={investmentsTotal} className="money" /> : "—"}
+          secondary={holdings.length > 0 ? "Portfolio value" : "No investments connected"}
+          href="/investments"
         />
         <StatTile
           label="Credit utilization"

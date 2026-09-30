@@ -138,8 +138,8 @@ body {
 
 /* Privacy toggle (components/PrivacyToggle.tsx): applied explicitly via
    .money on the span/div wrapping a formatCents(...) call -- and ONLY for
-   net worth, income (incl. cash flow and income schedules), investment
-   totals, and account balances; spend, transactions, budgets, bills,
+   net worth, income (incl. income schedules), investment totals, and
+   account balances; spend, transactions, budgets, bills,
    individual holdings, and FIRE targets stay visible (mobile's MoneyText
    `mask` prop follows the same list) — NOT .tabular,
    which is also used for dates, percentages, and other non-money numerics

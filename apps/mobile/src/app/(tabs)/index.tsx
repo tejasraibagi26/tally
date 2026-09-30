@@ -15,6 +15,7 @@ import { useOverview, useNetWorthTrend } from "@/lib/queries/overview";
 import { useTransactions } from "@/lib/queries/transactions";
 import { useCashFlowTrend } from "@/lib/queries/cashflow";
 import { useLiabilities } from "@/lib/queries/liabilities";
+import { useHoldings } from "@/lib/queries/investments";
 import { useCategoryBreakdown } from "@/lib/queries/spendBreakdown";
 import { CategorySpendBar } from "@/components/charts/CategorySpendBar";
 import { usePrivacy } from "@/lib/PrivacyContext";
@@ -26,7 +27,7 @@ import { hairline } from "@/theme/colors";
 import { useRF } from "@/theme/responsiveFont";
 
 // MOBILE_DESIGN.md §5.2 -- hero net worth (unboxed, direct on canvas), a
-// KPI stat-tile strip (spend/income/cashflow/utilization), a single-line
+// KPI stat-tile strip (spend/income/investments/utilization), a single-line
 // connections summary, "Budget this month" (top 3), "Upcoming", and
 // "Recent activity."
 export default function OverviewScreen() {
@@ -42,6 +43,7 @@ export default function OverviewScreen() {
   const recent = useTransactions();
   const cashFlow = useCashFlowTrend(2);
   const liabilities = useLiabilities();
+  const holdings = useHoldings();
   const breakdown = useCategoryBreakdown();
   const { hidden, toggle: togglePrivacy } = usePrivacy();
   const { width: windowWidth } = useWindowDimensions();
@@ -219,15 +221,13 @@ export default function OverviewScreen() {
           delta: priorMonth ? deltaLabel(currentMonth.income, priorMonth.income) : undefined,
           secondary: undefined as string | undefined,
         },
-        {
-          key: "cashflow",
-          label: "Cash flow",
-          cents: currentMonth.cashFlow,
-          delta: priorMonth ? deltaLabel(currentMonth.cashFlow, priorMonth.cashFlow) : undefined,
-          secondary: undefined as string | undefined,
-        },
       ]
     : [];
+  // Replaces the old Cash flow tile -- same portfolio total as the
+  // Investments screen's header (GET /api/investments/holdings).
+  if (holdings.data && holdings.data.holdings.length > 0) {
+    kpiTiles.push({ key: "investments", label: "Investments", cents: holdings.data.value, delta: undefined, secondary: "Portfolio value" });
+  }
 
   const refreshing = accounts.isFetching || overview.isFetching || trend.isFetching;
   function onRefresh() {
@@ -237,6 +237,7 @@ export default function OverviewScreen() {
     queryClient.invalidateQueries({ queryKey: ["transactions"] });
     queryClient.invalidateQueries({ queryKey: ["cashflow"] });
     queryClient.invalidateQueries({ queryKey: ["liabilities"] });
+    queryClient.invalidateQueries({ queryKey: ["investments"] });
     queryClient.invalidateQueries({ queryKey: ["category-breakdown"] });
   }
 
@@ -376,7 +377,7 @@ export default function OverviewScreen() {
             {kpiTiles.map((tile) => (
               <View key={tile.key} className="rounded-panel px-4 py-4 gap-1.5 bg-surface" style={{ width: "48%" }}>
                 <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(11.5) }}>{tile.label}</Text>
-                <MoneyText cents={tile.cents} signed={tile.key === "cashflow"} mask={tile.key === "income" || tile.key === "cashflow"} className="font-ui-semibold text-text" style={{ fontSize: rf(19) }} numberOfLines={1} adjustsFontSizeToFit />
+                <MoneyText cents={tile.cents} mask={tile.key === "income" || tile.key === "investments"} className="font-ui-semibold text-text" style={{ fontSize: rf(19) }} numberOfLines={1} adjustsFontSizeToFit />
                 {/* Secondary (budget %) takes priority over the vs.-last-month
                     delta when both exist (spend tile only) -- showing both
                     stacked overflowed the tile width, truncating the second

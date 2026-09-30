@@ -10,10 +10,9 @@ interface MoneyTextProps extends TextProps {
   className?: string;
   /** Opt out of the "hide amounts" mask. The toggle covers exactly four
    * things, same as web's `.money` class (apps/web/app/globals.css): net
-   * worth (incl. FIRE's "invested today"), income (the Overview tile, cash
-   * flow -- income is derivable from it next to spend -- and income
-   * schedules), investment totals (portfolio value/invested/return, account
-   * subtotals), and account balances. Everything else -- spend,
+   * worth (incl. FIRE's "invested today"), income (the Overview tile and
+   * income schedules), investment totals (portfolio value/invested/return,
+   * account subtotals, the Overview tile), and account balances. Everything else -- spend,
    * transactions, budgets, bills, individual holdings, FIRE targets and
    * projections -- opts out via this prop. Defaults to true. */
   mask?: boolean;
