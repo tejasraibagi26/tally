@@ -4,7 +4,7 @@ import { plaidClient, getAccessToken, plaidErrorCode, institutionSupportsProduct
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
 import { seedMockHoldingsForItem, seedMockInvestmentTransactionsForItem } from "@/lib/mock/seedInvestments";
 import { recordSyncRun } from "@/lib/syncRuns";
-import { holdingPriceCurrency } from "@tally/core/listingCurrency";
+import { holdingPriceCurrency, isMarketQuote, listingCurrency } from "@tally/core/listingCurrency";
 import type { SyncTrigger } from "@/lib/plaidSync";
 import type { Holding, InvestmentTransaction, Security } from "plaid";
 
@@ -112,15 +112,23 @@ async function reconcileHoldings(securities: Security[], holdings: Holding[]): P
     const value = closePrice != null ? closePrice * h.quantity : h.institution_value;
     // The stored currency must match whichever price was actually used. A
     // price that IS the security's market quote (the fallback above, or an
-    // institution price equal to Plaid's close price) is in the security's
+    // institution price within isMarketQuote's band of Plaid's close) is in the security's
     // listing currency, so that's resolved from its exchange -- neither
     // Plaid label is reliable there. Observed on Wealthsimple: a US stock
     // held in a CAD account comes back with iso_currency_code "CAD" on the
     // holding (so a USD price would read as far too small a CAD value), and
     // VFV -- a TSX ETF priced in CAD -- came back labeled USD (so a CAD price
     // got converted again, ~39% too large). See @tally/core/listingCurrency.
-    const priceIsMarketPrice =
-      closePrice != null || (h.institution_price != null && security?.close_price != null && Math.abs(h.institution_price - security.close_price) < 0.005);
+    const priceIsMarketPrice = closePrice != null || isMarketQuote(h.institution_price, security?.close_price);
+    if (priceIsMarketPrice && listingCurrency(security?.market_identifier_code, security?.ticker_symbol) == null) {
+      // Plaid sent no exchange we recognize, so the currency below falls back
+      // to Plaid's own labels -- exactly what mislabeled VFV. Logged so a
+      // repeat is visible in the function logs rather than silent.
+      console.warn(
+        `Holding currency fell back to Plaid labels: ticker=${security?.ticker_symbol ?? "?"} mic=${security?.market_identifier_code ?? "none"} ` +
+          `security=${security?.iso_currency_code ?? "?"} holding=${h.iso_currency_code ?? "?"}`,
+      );
+    }
     const currency = holdingPriceCurrency({
       priceIsMarketPrice,
       mic: security?.market_identifier_code,

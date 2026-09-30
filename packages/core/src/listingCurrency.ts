@@ -27,6 +27,19 @@ export function listingCurrency(mic: string | null | undefined, ticker: string |
 }
 
 /**
+ * Whether an institution-reported price is the security's market quote
+ * (same currency, just a slightly different timestamp) rather than a price
+ * the institution converted into another currency. Day-to-day and
+ * intraday drift between the two is a few percent at most, while a USD/CAD
+ * conversion moves the number ~27-39% -- so a relative band between those
+ * separates them without needing either quote to match to the cent.
+ */
+export function isMarketQuote(institutionPrice: number | null | undefined, closePrice: number | null | undefined): boolean {
+  if (institutionPrice == null || closePrice == null || closePrice <= 0 || institutionPrice <= 0) return false;
+  return Math.abs(institutionPrice / closePrice - 1) < 0.15;
+}
+
+/**
  * Which currency to store a holding's price/value in. When the price is the
  * security's own market price -- either because we fell back to it (the
  * institution reported $0) or because the institution's price is that same

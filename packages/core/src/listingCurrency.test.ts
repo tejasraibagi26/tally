@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { listingCurrency, holdingPriceCurrency } from "./listingCurrency";
+import { listingCurrency, holdingPriceCurrency, isMarketQuote } from "./listingCurrency";
 
 describe("listingCurrency", () => {
   it("maps Canadian exchanges to CAD", () => {
@@ -37,5 +37,20 @@ describe("holdingPriceCurrency", () => {
     expect(
       holdingPriceCurrency({ priceIsMarketPrice: false, mic: "XNAS", ticker: "MU", securityCurrency: "USD", holdingCurrency: "CAD" }),
     ).toBe("CAD");
+  });
+});
+
+describe("isMarketQuote", () => {
+  it("matches an exact or slightly drifted quote", () => {
+    expect(isMarketQuote(193.11, 193.11)).toBe(true);
+    expect(isMarketQuote(195.4, 193.11)).toBe(true);
+  });
+  it("rejects a price converted between USD and CAD", () => {
+    expect(isMarketQuote(193.11 / 1.39, 193.11)).toBe(false);
+    expect(isMarketQuote(100.67 * 1.39, 100.67)).toBe(false);
+  });
+  it("rejects missing or zero prices", () => {
+    expect(isMarketQuote(0, 193.11)).toBe(false);
+    expect(isMarketQuote(193.11, null)).toBe(false);
   });
 });
