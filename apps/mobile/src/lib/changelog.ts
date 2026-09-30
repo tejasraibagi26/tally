@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.11.0",
+    date: "2026-09-30",
+    changes: [
+      { kind: "improved", text: "The More menu is grouped into Your money and Account, with the same names and icons as the web app." },
+      { kind: "improved", text: "The FIRE calculator is now called Early retirement." },
+    ],
+  },
+  {
     version: "1.10.1",
     date: "2026-09-30",
     changes: [{ kind: "fixed", text: "In light mode, the light green buttons (Sync, Add account, Filters) are visible again." }],

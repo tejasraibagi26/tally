@@ -53,8 +53,10 @@
  * calculator to Early retirement, and compacts the footer into an icon row.
  * 1.13.1 replaces that unlabeled icon row with a labeled Hide amounts /
  * theme pill, and moves Settings and Sign out next to the profile.
+ * 1.13.2 swaps that pill for two nav-style rows (Hide amounts with a
+ * switch, Appearance showing the current theme) above the profile row.
  */
-export const APP_VERSION = "1.13.1";
+export const APP_VERSION = "1.13.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

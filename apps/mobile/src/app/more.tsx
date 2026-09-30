@@ -1,7 +1,7 @@
 import { View, Text, Pressable } from "react-native";
 import { useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Wallet, TrendingUp, LineChart, Settings, LogOut, ChevronRight } from "lucide-react-native";
+import { Repeat, TrendingUp, Flame, Settings, LogOut, ChevronRight } from "lucide-react-native";
 import { useAuth } from "@/lib/AuthContext";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
@@ -23,7 +23,7 @@ function Row({
 }) {
   const rf = useRF();
   return (
-    <Pressable onPress={onPress} className="flex-row items-center justify-between py-4 active:opacity-70">
+    <Pressable onPress={onPress} className="flex-row items-center justify-between px-4 py-3.5 active:opacity-70">
       <View className="flex-row items-center gap-3">
         {icon}
         <Text className="font-ui-medium" style={{ color: destructive ? colors.negative : colors.text, fontSize: rf(15) }}>
@@ -44,9 +44,10 @@ export default function MoreScreen() {
   const router = useRouter();
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
-  const { logout, user } = useAuth();
+  const { logout } = useAuth();
   const rf = useRF();
   const soft = { borderTopWidth: 1, borderTopColor: hairline(colors) };
+  const caption = { fontSize: rf(11), letterSpacing: 0.66, textTransform: "uppercase" as const };
 
   function go(href: Href) {
     router.back();
@@ -54,7 +55,7 @@ export default function MoreScreen() {
   }
 
   return (
-    // The sheet itself is a fixed 46% of screen height (_layout.tsx's
+    // The sheet itself is a fixed 60% of screen height (_layout.tsx's
     // sheetAllowedDetents), not sized to this content -- without flex-1 here,
     // this View is only as tall as its own rows, and the native sheet's own
     // (light, even in dark mode) background shows through as a bar below it.
@@ -62,27 +63,37 @@ export default function MoreScreen() {
       <View className="items-center mb-3">
         <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }}>More</Text>
       </View>
-      {user && <Text className="font-ui text-text-2 mb-1 px-1" style={{ fontSize: rf(13) }}>{user.email}</Text>}
+      {/* Same order, names and icons as web's side nav (Your money → What
+          you have → Plan ahead), collapsed into one card because mobile has
+          no Rules or Credit cards screens yet -- five headings over single
+          rows read as empty. Split along web's groups once those exist.
+          Account actions get their own card, like web's footer. */}
+      <View className="gap-2">
+        <Text className="font-ui-medium text-text-3 px-1" style={caption}>Your money</Text>
+        <View className="rounded-card bg-surface-2 border border-border overflow-hidden">
+          <Row icon={<Repeat size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Subscriptions" onPress={() => go("/subscriptions")} colors={colors} />
+          <View style={soft}>
+            <Row icon={<TrendingUp size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Investments" onPress={() => go("/investments")} colors={colors} />
+          </View>
+          <View style={soft}>
+            <Row icon={<Flame size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Early retirement" onPress={() => go("/fire")} colors={colors} />
+          </View>
+        </View>
+      </View>
 
-      <View>
-        <Row icon={<LineChart size={20} color={colors["text-2"]} strokeWidth={1.75} />} label="Investments" onPress={() => go("/investments")} colors={colors} />
-        <View style={soft}>
-          <Row icon={<TrendingUp size={20} color={colors["text-2"]} strokeWidth={1.75} />} label="FIRE calculator" onPress={() => go("/fire")} colors={colors} />
-        </View>
-        <View style={soft}>
-          <Row icon={<Wallet size={20} color={colors["text-2"]} strokeWidth={1.75} />} label="Subscriptions" onPress={() => go("/subscriptions")} colors={colors} />
-        </View>
-        <View style={soft}>
-          <Row icon={<Settings size={20} color={colors["text-2"]} strokeWidth={1.75} />} label="Settings" onPress={() => go("/settings")} colors={colors} />
-        </View>
-        <View style={soft}>
-          <Row icon={<LogOut size={20} color={colors.negative} strokeWidth={1.75} />} label="Log out" destructive onPress={() => logout()} colors={colors} />
+      <View className="gap-2 mt-5">
+        <Text className="font-ui-medium text-text-3 px-1" style={caption}>Account</Text>
+        <View className="rounded-card bg-surface-2 border border-border overflow-hidden">
+          <Row icon={<Settings size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Settings" onPress={() => go("/settings")} colors={colors} />
+          <View style={soft}>
+            <Row icon={<LogOut size={19} color={colors.negative} strokeWidth={1.75} />} label="Sign out" destructive onPress={() => logout()} colors={colors} />
+          </View>
         </View>
       </View>
 
       {/* The only way into the changelog -- tapping the build line. Kept as
           quiet as before; the trailing "Changelog" is the only hint. */}
-      <View className="items-center pt-4 mt-3" style={soft}>
+      <View className="items-center mt-4">
         <Pressable onPress={() => go("/changelog")} hitSlop={12} accessibilityRole="link" accessibilityLabel={`Version ${APP_VERSION}, open changelog`}>
           <Text
             className="text-text-3"

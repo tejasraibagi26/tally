@@ -5,8 +5,8 @@ import { Sun, Moon } from "lucide-react";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 import { cn } from "@/lib/cn";
 
-/** `variant="segment"` is one half of the SideNav footer's labeled pill (see SideNav); it names the current theme and flips it on click. */
-export function ThemeToggle({ variant = "switch" }: { variant?: "switch" | "segment" }) {
+/** `variant="row"` is the SideNav footer form: a full-width nav-style "Appearance" row showing the current theme; clicking flips it. */
+export function ThemeToggle({ variant = "switch" }: { variant?: "switch" | "row" }) {
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
@@ -24,18 +24,18 @@ export function ThemeToggle({ variant = "switch" }: { variant?: "switch" | "segm
 
   const isDark = theme === "dark";
 
-  if (variant === "segment") {
+  if (variant === "row") {
     return (
       <button
         onClick={toggle}
-        role="switch"
-        aria-checked={isDark}
-        aria-label="Toggle color theme"
-        title={isDark ? "Switch to light theme" : "Switch to dark theme"}
-        className="flex-1 h-8 flex items-center justify-center gap-1.5 text-[12.5px] transition-colors text-text-2 hover:bg-sunken hover:text-text"
+        aria-label={isDark ? "Appearance: dark. Switch to light" : "Appearance: light. Switch to dark"}
+        className="w-full flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-control text-[15px] text-text-2 hover:bg-sunken hover:text-text transition-colors"
       >
-        {isDark ? <Moon size={14} strokeWidth={1.9} /> : <Sun size={14} strokeWidth={1.9} />}
-        {isDark ? "Dark" : "Light"}
+        <span className="flex items-center gap-2.5">
+          {isDark ? <Moon size={17} strokeWidth={1.75} /> : <Sun size={17} strokeWidth={1.75} />}
+          Appearance
+        </span>
+        <span className="text-[12.5px] text-text-3">{isDark ? "Dark" : "Light"}</span>
       </button>
     );
   }

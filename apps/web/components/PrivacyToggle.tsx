@@ -5,8 +5,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { applyPrivacy, getStoredPrivacy } from "@/lib/privacy";
 import { cn } from "@/lib/cn";
 
-/** `variant="segment"` is one half of the SideNav footer's labeled pill (see SideNav). */
-export function PrivacyToggle({ variant = "switch" }: { variant?: "switch" | "segment" }) {
+/** `variant="row"` is the SideNav footer form: a full-width nav-style row with a small switch on the right. */
+export function PrivacyToggle({ variant = "switch" }: { variant?: "switch" | "row" }) {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
@@ -21,21 +21,27 @@ export function PrivacyToggle({ variant = "switch" }: { variant?: "switch" | "se
     applyPrivacy(next);
   }
 
-  if (variant === "segment") {
+  if (variant === "row") {
     return (
-      <button
-        onClick={toggle}
-        role="switch"
-        aria-checked={hidden}
-        aria-label="Hide sensitive amounts"
-        title={hidden ? "Show amounts" : "Hide amounts"}
-        className={cn(
-          "flex-1 h-8 flex items-center justify-center gap-1.5 text-[12.5px] transition-colors",
-          hidden ? "bg-brand-subtle text-brand font-medium" : "text-text-2 hover:bg-sunken hover:text-text",
-        )}
-      >
-        {hidden ? <EyeOff size={14} strokeWidth={1.9} /> : <Eye size={14} strokeWidth={1.9} />}
-        {hidden ? "Amounts hidden" : "Hide amounts"}
+      <button onClick={toggle} role="switch" aria-checked={hidden} aria-label="Hide sensitive amounts" className="w-full flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-control text-[15px] text-text-2 hover:bg-sunken hover:text-text transition-colors">
+        <span className="flex items-center gap-2.5">
+          {hidden ? <EyeOff size={17} strokeWidth={1.75} /> : <Eye size={17} strokeWidth={1.75} />}
+          Hide amounts
+        </span>
+        <span
+          aria-hidden
+          className={cn(
+            "relative w-[30px] h-[18px] flex-none rounded-full border transition-colors duration-200",
+            hidden ? "bg-brand border-brand" : "bg-sunken border-border-strong",
+          )}
+        >
+          <span
+            className={cn(
+              "absolute top-[2px] left-[2px] w-3 h-3 rounded-full transition-transform duration-200",
+              hidden ? "translate-x-3 bg-on-brand" : "bg-text-3",
+            )}
+          />
+        </span>
       </button>
     );
   }

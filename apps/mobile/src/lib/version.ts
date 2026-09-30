@@ -61,9 +61,11 @@ import Constants from "expo-constants";
  * Android via a custom TransparentHeader. 1.10.0 adopts web's refined
  * light palette ("light v2", web v1.12.0). 1.10.1 deepens brand-subtle
  * so the green pill buttons (Sync, Add account, Filters) are visible on
- * the light canvas again.
+ * the light canvas again. 1.11.0 regroups the More sheet to match web's
+ * side nav: a "Your money" card (Subscriptions, Investments, Early
+ * retirement) and an "Account" card (Settings, Sign out).
  */
-export const APP_VERSION = "1.10.1";
+export const APP_VERSION = "1.11.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

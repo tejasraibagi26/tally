@@ -100,7 +100,7 @@ function RootNavigator() {
               // measured height and the true screen edge (a react-native-screens
               // auto-sizing quirk) -- an explicit fraction sizes the sheet
               // deterministically and sits flush to the bottom instead.
-              sheetAllowedDetents: [0.46],
+              sheetAllowedDetents: [0.6], // two grouped cards (mobile v1.11.0) need more room than the old flat list
               sheetInitialDetentIndex: 0,
               sheetGrabberVisible: true,
               sheetCornerRadius: 24,
@@ -125,7 +125,7 @@ function RootNavigator() {
               headerRight, set from inside each screen via its own
               <Stack.Screen options={{...}}/> -- TransparentHeader renders
               them on Android. */}
-          <Stack.Screen name="fire" options={pushedScreenOptions("FIRE Calculator")} />
+          <Stack.Screen name="fire" options={pushedScreenOptions("Early retirement")} />
           <Stack.Screen name="subscriptions" options={pushedScreenOptions("Subscriptions")} />
           <Stack.Screen name="investments" options={pushedScreenOptions("Investments")} />
           <Stack.Screen name="settings" options={pushedScreenOptions("Settings")} />

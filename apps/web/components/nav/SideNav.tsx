@@ -164,12 +164,15 @@ export function SideNav({
           </span>
         )}
 
-        {/* The two display toggles as one labeled pill -- each half says what
-            it does and shows its state, instead of two bare icons. */}
-        <div className="flex rounded-control border border-border overflow-hidden divide-x divide-border">
-          <PrivacyToggle variant="segment" />
-          <ThemeToggle variant="segment" />
+        {/* Display preferences as one more nav section: labeled rows in the
+            same style as the links above. Account actions (Settings, Sign
+            out) live on the profile row below. */}
+        <div className="flex flex-col gap-[2px]">
+          <PrivacyToggle variant="row" />
+          <ThemeToggle variant="row" />
         </div>
+
+        <div className="h-px bg-border" />
 
         <div
           className={cn(
