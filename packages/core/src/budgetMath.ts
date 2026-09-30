@@ -33,3 +33,17 @@ export function computeBurnRateProjection(spendToDate: number, daysElapsed: numb
   if (daysElapsed <= 0) return 0;
   return Math.round((spendToDate / daysElapsed) * daysInMonth);
 }
+
+/**
+ * A distinct chart color (series slot 1..8) per budget. A budget's category
+ * colorSlot comes from its parent category (lib/categoryTaxonomy.ts), so
+ * sibling budgets -- Groceries and Dining out are both "Food and drink" --
+ * shared one color and were indistinguishable in meters and the stacked
+ * budget bar. Slots are dealt out in alphabetical order of category name
+ * rather than list order: the budget list is sorted by spend, which would
+ * reshuffle colors every time spending changed. Wraps past 8 budgets.
+ */
+export function budgetColorSlots(budgets: { categoryId: string; categoryName: string }[]): Map<string, number> {
+  const sorted = [...budgets].sort((a, b) => a.categoryName.localeCompare(b.categoryName) || a.categoryId.localeCompare(b.categoryId));
+  return new Map(sorted.map((b, i) => [b.categoryId, (i % 8) + 1]));
+}

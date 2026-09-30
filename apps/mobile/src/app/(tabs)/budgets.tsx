@@ -144,7 +144,7 @@ export default function BudgetsScreen() {
                     budgets.map((b) => {
                       const w = (Math.min(b.spend, b.amount + b.rolloverFromPrior) / totalBudget) * 100;
                       if (w <= 0) return null;
-                      return <View key={b.categoryId} style={{ width: `${w}%`, backgroundColor: series[(b.categoryColorSlot - 1) % series.length] ?? series[0] }} />;
+                      return <View key={b.categoryId} style={{ width: `${w}%`, backgroundColor: series[((b.colorSlot ?? b.categoryColorSlot) - 1) % series.length] ?? series[0] }} />;
                     })}
                 </View>
                 <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>
@@ -161,7 +161,7 @@ export default function BudgetsScreen() {
                 >
                   <MeterBar
                     label={b.categoryName}
-                    colorSlot={b.categoryColorSlot}
+                    colorSlot={b.colorSlot ?? b.categoryColorSlot}
                     spentCents={b.spend}
                     budgetCents={b.amount + b.rolloverFromPrior}
                     rolloverCents={b.rolloverEnabled ? b.rolloverFromPrior : 0}

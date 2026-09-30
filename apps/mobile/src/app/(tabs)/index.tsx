@@ -408,7 +408,7 @@ export default function OverviewScreen() {
             </View>
             <Card className="p-5 gap-5">
               {topBudgets.map((b) => (
-                <MeterBar key={b.categoryId} label={b.categoryName} colorSlot={b.categoryColorSlot} spentCents={b.spend} budgetCents={b.amount + b.rolloverFromPrior} mask={false} />
+                <MeterBar key={b.categoryId} label={b.categoryName} colorSlot={b.colorSlot ?? b.categoryColorSlot} spentCents={b.spend} budgetCents={b.amount + b.rolloverFromPrior} mask={false} />
               ))}
             </Card>
           </View>

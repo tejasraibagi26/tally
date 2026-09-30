@@ -11,6 +11,7 @@ export interface BudgetRowData {
   categoryId: string;
   categoryName: string;
   categoryColorSlot: number;
+  colorSlot: number;
   month: string;
   amount: number;
   rolloverEnabled: boolean;
@@ -83,7 +84,7 @@ export function BudgetRow({ budget, daysElapsed, daysInMonth }: { budget: Budget
   return (
     <div className="flex flex-col gap-2 px-4 py-3 border-b border-border last:border-b-0">
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-        <span className="w-1.5 h-1.5 rounded-full flex-none" style={{ background: `var(--series-${budget.categoryColorSlot})` }} />
+        <span className="w-1.5 h-1.5 rounded-full flex-none" style={{ background: `var(--series-${budget.colorSlot})` }} />
         <span className="text-[15px] text-text flex-1 min-w-[80px] truncate">{budget.categoryName}</span>
         {budget.rolloverEnabled && budget.rolloverFromPrior !== 0 && (
           <span className="text-xs text-text-3 tabular">+{formatCents(budget.rolloverFromPrior)} rollover</span>

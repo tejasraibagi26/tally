@@ -34,9 +34,10 @@
  * adds a temporary "Refined dark mode (preview)" toggle in Settings to
  * trial the dark v2 palette side by side before it replaces the current one.
  * 1.7.1 wires --raised/--raised-hover into menus, dropdowns, popovers,
- * modals, side sheets and chart tooltips.
+ * modals, side sheets and chart tooltips. 1.8.0 gives every budget its own
+ * chart color and makes Overview's net worth chart full-bleed.
  */
-export const APP_VERSION = "1.7.1";
+export const APP_VERSION = "1.8.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

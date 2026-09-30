@@ -127,7 +127,7 @@ export default async function OverviewPage() {
 
       {/* Row 1: hero net worth + connections health */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch" style={reveal(0)}>
-        <Card className="lg:col-span-8 p-5 lg:p-7 flex flex-col gap-4">
+        <Card className="lg:col-span-8 p-5 lg:p-7 flex flex-col gap-4 overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-12">
             <div className="flex flex-col gap-3">
               <span className="text-xs font-medium uppercase tracking-wide text-text-3">Net worth ({NET_WORTH_CURRENCY})</span>
@@ -147,7 +147,13 @@ export default async function OverviewPage() {
               View accounts →
             </Link>
           </div>
-          <NetWorthChart points={netWorthPoints} />
+          {/* Full-bleed: cancels the card's side and bottom padding so the
+              area runs to the card's edges (overflow-hidden above clips it
+              to the rounded corners), and flex-1 lets it grow into whatever
+              height the row's taller card gives it. */}
+          <div className="-mx-5 -mb-5 lg:-mx-7 lg:-mb-7 flex-1 min-h-[160px] flex">
+            <NetWorthChart points={netWorthPoints} />
+          </div>
         </Card>
 
         <Card className="lg:col-span-4 flex flex-col">

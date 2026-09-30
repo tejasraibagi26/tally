@@ -64,7 +64,7 @@ export function BudgetMeterList({
             <div className="relative h-2 rounded-full bg-sunken overflow-hidden">
               <div
                 className="h-full rounded-full"
-                style={{ width: `${pct * 100}%`, background: overBudget ? "var(--negative)" : `var(--series-${b.categoryColorSlot})` }}
+                style={{ width: `${pct * 100}%`, background: overBudget ? "var(--negative)" : `var(--series-${b.colorSlot})` }}
               />
               {projected != null && projectedPct != null && (
                 <div

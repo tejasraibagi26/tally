@@ -1,6 +1,6 @@
 import { and, eq, gte, isNull, lt, or, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { monthRange, shiftMonth, computeRemaining } from "@tally/core/budgetMath";
+import { monthRange, shiftMonth, computeRemaining, budgetColorSlots } from "@tally/core/budgetMath";
 
 export { monthRange, shiftMonth, computeRemaining };
 
@@ -126,6 +126,8 @@ export interface BudgetLine {
   categoryId: string;
   categoryName: string;
   categoryColorSlot: number;
+  /** Distinct per budget (budgetColorSlots) -- use this, not categoryColorSlot, to color budget meters/bars. */
+  colorSlot: number;
   amount: number;
   rolloverEnabled: boolean;
   rolloverFromPrior: number;
@@ -183,6 +185,7 @@ export async function getBudgetsForMonth(userId: string, month: string): Promise
       categoryId: row.categoryId,
       categoryName: row.categoryName,
       categoryColorSlot: row.categoryColorSlot,
+      colorSlot: 1, // assigned below, once every line is known
       amount: row.amount,
       rolloverEnabled: row.rolloverEnabled,
       rolloverFromPrior,
@@ -191,5 +194,7 @@ export async function getBudgetsForMonth(userId: string, month: string): Promise
       remaining: computeRemaining(row.amount, rolloverFromPrior, catSpend),
     });
   }
+  const slots = budgetColorSlots(lines);
+  for (const line of lines) line.colorSlot = slots.get(line.categoryId) ?? 1;
   return lines.sort((a, b) => b.spend - a.spend);
 }

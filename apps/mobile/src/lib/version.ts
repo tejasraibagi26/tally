@@ -45,9 +45,11 @@ import Constants from "expo-constants";
  * Overview's Cash flow tile for an Investments total. 1.6.1 paints
  * Android's pushed-screen toolbar canvas-colored with no shadow, so it
  * blends into the page instead of sitting on it as a white slab. 1.6.2
- * moves Investments' Sync into the header as plain text.
+ * moves Investments' Sync into the header as plain text. 1.6.3 colors
+ * each budget distinctly (server-assigned colorSlot) instead of sharing
+ * its parent category's color.
  */
-export const APP_VERSION = "1.6.2";
+export const APP_VERSION = "1.6.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

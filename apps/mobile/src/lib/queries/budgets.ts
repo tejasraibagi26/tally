@@ -5,6 +5,8 @@ export interface BudgetLine {
   categoryId: string;
   categoryName: string;
   categoryColorSlot: number;
+  /** Distinct per budget, server-assigned (@tally/core/budgetMath budgetColorSlots) -- color budget meters with this. */
+  colorSlot?: number;
   amount: number;
   rolloverEnabled: boolean;
   rolloverFromPrior: number;

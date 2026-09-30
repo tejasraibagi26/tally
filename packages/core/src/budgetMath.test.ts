@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { monthRange, monthLastDay, shiftMonth, computeRemaining, computeBurnRateProjection } from "./budgetMath";
+import { monthRange, monthLastDay, shiftMonth, computeRemaining, computeBurnRateProjection, budgetColorSlots } from "./budgetMath";
 
 describe("monthRange", () => {
   it("returns the first of the month through the first of the next month", () => {
@@ -68,5 +68,29 @@ describe("computeBurnRateProjection", () => {
 
   it("matches spend-to-date exactly on the last day of the month", () => {
     expect(computeBurnRateProjection(45000, 30, 30)).toBe(45000);
+  });
+});
+
+describe("budgetColorSlots", () => {
+  it("gives every budget its own slot, dealt alphabetically", () => {
+    const slots = budgetColorSlots([
+      { categoryId: "c", categoryName: "Groceries" },
+      { categoryId: "a", categoryName: "Dining out" },
+      { categoryId: "b", categoryName: "Rent" },
+    ]);
+    expect(slots.get("a")).toBe(1);
+    expect(slots.get("c")).toBe(2);
+    expect(slots.get("b")).toBe(3);
+  });
+  it("is independent of input order", () => {
+    const a = budgetColorSlots([{ categoryId: "x", categoryName: "B" }, { categoryId: "y", categoryName: "A" }]);
+    const b = budgetColorSlots([{ categoryId: "y", categoryName: "A" }, { categoryId: "x", categoryName: "B" }]);
+    expect([...a.entries()].sort()).toEqual([...b.entries()].sort());
+  });
+  it("wraps after 8 budgets", () => {
+    const names = "ABCDEFGHI".split("").map((n) => ({ categoryId: n, categoryName: n }));
+    const slots = budgetColorSlots(names);
+    expect(slots.get("H")).toBe(8);
+    expect(slots.get("I")).toBe(1);
   });
 });
