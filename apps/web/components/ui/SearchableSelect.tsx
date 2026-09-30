@@ -104,7 +104,7 @@ export function SearchableSelect({
       </button>
 
       {open && (
-        <div className="absolute z-20 mt-1 w-max min-w-full max-w-[340px] rounded-control bg-surface border border-border-strong shadow-overlay overflow-hidden">
+        <div className="absolute z-20 mt-1 w-max min-w-full max-w-[340px] rounded-control bg-raised border border-border-strong shadow-overlay overflow-hidden">
           <input
             ref={inputRef}
             type="text"
@@ -123,7 +123,7 @@ export function SearchableSelect({
                   type="button"
                   onClick={() => select(o.value)}
                   className={cn(
-                    "w-full flex items-start gap-1.5 px-2.5 py-1.5 text-sm text-left hover:bg-surface-2",
+                    "w-full flex items-start gap-1.5 px-2.5 py-1.5 text-sm text-left hover:bg-raised-hover",
                     o.indent && !query.trim() && "pl-6",
                     o.value === currentValue && "bg-brand-subtle text-brand",
                   )}

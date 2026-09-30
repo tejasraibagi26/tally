@@ -67,7 +67,7 @@ export function Modal({
         aria-modal="true"
         tabIndex={-1}
         className={cn(
-          "relative w-full bg-surface border border-border rounded-[16px] shadow-overlay outline-none max-h-[90vh] overflow-y-auto",
+          "relative w-full bg-raised border border-border rounded-[16px] shadow-overlay outline-none max-h-[90vh] overflow-y-auto",
           "animate-[fade-in-up_220ms_cubic-bezier(.32,.72,0,1)] motion-reduce:animate-none",
         )}
         style={{ maxWidth: width }}

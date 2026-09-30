@@ -17,7 +17,7 @@ export function LoadingOverlay({ message }: { message: string }) {
       role="status"
       aria-live="polite"
     >
-      <div className="flex flex-col items-center gap-5 bg-surface border border-border rounded-[16px] shadow-overlay px-8 py-7 w-[360px] max-w-full text-center">
+      <div className="flex flex-col items-center gap-5 bg-raised border border-border rounded-[16px] shadow-overlay px-8 py-7 w-[360px] max-w-full text-center">
         <div className="relative w-40 h-1.5 rounded-full bg-sunken overflow-hidden" aria-hidden="true">
           <span
             className="absolute inset-y-0 w-1/3 rounded-full"

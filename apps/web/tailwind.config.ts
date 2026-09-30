@@ -12,6 +12,8 @@ const config: Config = {
         canvas: "var(--canvas)",
         surface: "var(--surface)",
         "surface-2": "var(--surface-2)",
+        raised: "var(--raised)",
+        "raised-hover": "var(--raised-hover)",
         sunken: "var(--sunken)",
         border: "var(--border)",
         "border-strong": "var(--border-strong)",

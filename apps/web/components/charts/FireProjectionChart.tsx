@@ -24,7 +24,7 @@ export function FireProjectionChart({ points, fireNumberValue }: { points: Proje
         <XAxis dataKey="year" tickFormatter={(y: number) => `${y}y`} tick={{ fill: "var(--text-3)", fontSize: 11 }} axisLine={false} tickLine={false} />
         <YAxis hide domain={["auto", "auto"]} />
         <Tooltip
-          contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 13 }}
+          contentStyle={{ background: "var(--raised)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 13, boxShadow: "var(--shadow-overlay)" }}
           labelStyle={{ color: "var(--text-2)" }}
           labelFormatter={(y: number) => `Year ${y}`}
           formatter={(value: number) => [formatCents(value), "Projected value"]}

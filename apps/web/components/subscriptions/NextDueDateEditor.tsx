@@ -89,7 +89,7 @@ export function NextDueDateEditor({
       {open && (
         <form
           onSubmit={submit}
-          className="absolute right-0 top-full mt-1 z-20 w-64 bg-surface border border-border rounded-control shadow-overlay p-3 flex flex-col gap-2.5"
+          className="absolute right-0 top-full mt-1 z-20 w-64 bg-raised border border-border rounded-control shadow-overlay p-3 flex flex-col gap-2.5"
         >
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Next date</span>
           <input

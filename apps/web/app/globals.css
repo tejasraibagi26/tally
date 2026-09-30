@@ -26,6 +26,11 @@
   --negative-subtle: #F6E7E4;
   --warning-subtle: #F5EEDC;
   --info-subtle: #E5EEFA;
+  /* Floating layers -- menus, dropdowns, popovers, modals, side sheets,
+     chart tooltips -- and their row hover. Same as --surface in light and
+     current dark; only dark v2 lifts them a step above cards. */
+  --raised: #FCFCFB;
+  --raised-hover: #F2F0EB;
 
   --status-good: #0CA30C;
   --status-warning: #FAB219;
@@ -74,6 +79,8 @@
     --negative-subtle: #2B1A16;
     --warning-subtle: #2A2213;
     --info-subtle: #111F2E;
+  --raised: #1A1A19;
+  --raised-hover: #262623;
     --series-1: #199e70;
     --series-2: #d95926;
     --series-3: #3987e5;
@@ -111,6 +118,8 @@
   --negative-subtle: #2B1A16;
   --warning-subtle: #2A2213;
   --info-subtle: #111F2E;
+  --raised: #1A1A19;
+  --raised-hover: #262623;
   --series-1: #199e70;
   --series-2: #d95926;
   --series-3: #3987e5;
@@ -137,6 +146,7 @@
   --surface: #191918;
   --surface-2: #222220;
   --raised: #292927;
+  --raised-hover: #33332F;
   --sunken: #111110;
   --border: #2C2C29;
   --border-strong: #666560;

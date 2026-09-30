@@ -24,7 +24,7 @@ function CashFlowTooltip({ active, payload, label }: { active?: boolean; payload
   const income = payload.find((p) => p.dataKey === "income")?.value ?? 0;
   const spend = Math.abs(payload.find((p) => p.dataKey === "spendNegative")?.value ?? 0);
   return (
-    <div className="bg-surface border border-border rounded-[8px] px-3 py-2 text-[13px] shadow-raised">
+    <div className="bg-raised border border-border rounded-[8px] px-3 py-2 text-[13px] shadow-overlay">
       <div className="text-text-2 mb-1">{label}</div>
       <div className="text-positive">Income {formatCents(income)}</div>
       <div className="text-negative">Spend {formatCents(spend)}</div>

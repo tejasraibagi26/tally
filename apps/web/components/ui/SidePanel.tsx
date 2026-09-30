@@ -55,7 +55,7 @@ export function SidePanel({ open, onClose, children }: { open: boolean; onClose:
         role="dialog"
         aria-modal="true"
         tabIndex={-1}
-        className="relative w-[420px] max-w-full h-full bg-surface border-l border-border shadow-overlay overflow-y-auto outline-none animate-[slide-in-right_220ms_cubic-bezier(.32,.72,0,1)] motion-reduce:animate-none"
+        className="relative w-[420px] max-w-full h-full bg-raised border-l border-border shadow-overlay overflow-y-auto outline-none animate-[slide-in-right_220ms_cubic-bezier(.32,.72,0,1)] motion-reduce:animate-none"
       >
         {children}
       </div>

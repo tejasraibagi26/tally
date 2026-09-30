@@ -31,7 +31,7 @@ export function NetWorthChart({ points }: { points: NetWorthPoint[] }) {
         <XAxis dataKey="asOfDate" hide />
         <YAxis hide domain={["auto", "auto"]} />
         <Tooltip
-          contentStyle={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 13 }}
+          contentStyle={{ background: "var(--raised)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 13, boxShadow: "var(--shadow-overlay)" }}
           labelStyle={{ color: "var(--text-2)" }}
           formatter={(value: number) => [formatCents(value), "Net worth"]}
         />

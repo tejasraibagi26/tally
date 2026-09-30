@@ -33,8 +33,10 @@
  * keeps hidden-amount dots flush right in right-aligned columns. 1.7.0
  * adds a temporary "Refined dark mode (preview)" toggle in Settings to
  * trial the dark v2 palette side by side before it replaces the current one.
+ * 1.7.1 wires --raised/--raised-hover into menus, dropdowns, popovers,
+ * modals, side sheets and chart tooltips.
  */
-export const APP_VERSION = "1.7.0";
+export const APP_VERSION = "1.7.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

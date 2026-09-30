@@ -87,12 +87,12 @@ export function ItemActionsMenu({ itemId, institutionName }: { itemId: string; i
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full mt-1 z-20 w-52 bg-surface border border-border rounded-control shadow-overlay py-1 flex flex-col"
+          className="absolute right-0 top-full mt-1 z-20 w-52 bg-raised border border-border rounded-control shadow-overlay py-1 flex flex-col"
         >
           <button
             role="menuitem"
             onClick={refreshBalances}
-            className="flex items-center gap-2.5 px-3 py-2 text-[13.5px] text-text hover:bg-sunken text-left"
+            className="flex items-center gap-2.5 px-3 py-2 text-[13.5px] text-text hover:bg-raised-hover text-left"
           >
             <RefreshCw size={14} strokeWidth={1.75} className="text-text-3 flex-none" />
             Refresh balances
@@ -103,7 +103,7 @@ export function ItemActionsMenu({ itemId, institutionName }: { itemId: string; i
               setOpen(false);
               startManageAccess();
             }}
-            className="flex items-center gap-2.5 px-3 py-2 text-[13.5px] text-text hover:bg-sunken text-left"
+            className="flex items-center gap-2.5 px-3 py-2 text-[13.5px] text-text hover:bg-raised-hover text-left"
           >
             <KeyRound size={14} strokeWidth={1.75} className="text-text-3 flex-none" />
             Manage access
