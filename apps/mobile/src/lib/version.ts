@@ -55,9 +55,12 @@ import Constants from "expo-constants";
  * a changelog screen, opened by tapping the build line in the More sheet.
  * 1.9.0 makes Android's tab bar translucent and floating, and drops the
  * circle behind Android's back button. 1.9.1 lightens that tab bar's tint
- * (85% → 60%) so it actually reads as see-through in dark mode.
+ * (85% → 60%) so it actually reads as see-through in dark mode. 1.9.2
+ * reverts that bottom tab bar change (a misread request -- the ask was
+ * the top bar) and makes the pushed screens' top bar transparent on
+ * Android via a custom TransparentHeader.
  */
-export const APP_VERSION = "1.9.1";
+export const APP_VERSION = "1.9.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

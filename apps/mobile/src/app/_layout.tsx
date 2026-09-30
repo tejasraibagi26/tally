@@ -1,6 +1,6 @@
 import "../global.css";
 import { useEffect, useCallback } from "react";
-import { Stack } from "expo-router";
+import { Stack, type NativeStackHeaderProps } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useColorScheme } from "nativewind";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -10,7 +10,7 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { Platform, View } from "react-native";
 import { AuthProvider, useAuth } from "@/lib/AuthContext";
-import { NativeBackButton } from "@/components/ui/ScreenHeader";
+import { TransparentHeader } from "@/components/ui/ScreenHeader";
 import { PrivacyProvider } from "@/lib/PrivacyContext";
 import { queryClient } from "@/lib/queryClient";
 import { fontsToLoad } from "@/theme/fonts";
@@ -49,15 +49,13 @@ function RootNavigator() {
     return <View className="flex-1 bg-canvas" />;
   }
 
-  const pushedScreenOptions = (title: string) => ({
-    headerShown: true,
-    headerTransparent: Platform.OS === "ios",
-    headerStyle: { backgroundColor: Platform.OS === "ios" ? "transparent" : colors.canvas },
-    headerShadowVisible: Platform.OS !== "android",
-    headerTitle: title,
-    headerBackTitle: "",
-    headerLeft: Platform.OS === "android" ? NativeBackButton : undefined,
-  });
+  // Transparent on both platforms: iOS's native header, Android's own
+  // TransparentHeader (ScreenHeader.tsx) -- the native Android toolbar
+  // couldn't be made transparent reliably.
+  const pushedScreenOptions = (title: string) =>
+    Platform.OS === "android"
+      ? { headerShown: true, headerTransparent: true, headerTitle: title, header: (props: NativeStackHeaderProps) => <TransparentHeader {...props} /> }
+      : { headerShown: true, headerTransparent: true, headerStyle: { backgroundColor: "transparent" }, headerTitle: title, headerBackTitle: "" };
 
   return (
     <>
@@ -110,37 +108,23 @@ function RootNavigator() {
               headerShown: false,
             }}
           />
-          {/* Real native header, title included (left-aligned, next to the
-              back control, per screenOptions' headerTitleAlign above) --
-              these screens no longer render their own separate in-content
-              title row (ScreenTitle/ScreenHeader are now just for
-              non-scrolling loading/empty states without a title, plus
-              useScreenContentTop). The back control itself is native and
-              always fixed (never part of the ScrollView, so it can't drift
-              out of alignment the way a hand-rolled absolutely-positioned
-              chevron once did here). headerTransparent only applies on iOS:
-              react-native-screens' native-stack doesn't support a real
-              transparent floating header on Android (tested on-device --
-              headerTransparent: true there still renders a solid opaque
-              bar), so Android gets the platform's own normal toolbar
-              instead, which is the native Android pattern for a pushed
-              screen anyway (root/tab screens like Overview stay
-              header-less since those aren't pushed) -- accepted tradeoff:
-              it reserves real vertical space Overview's screens don't have.
-              Android also needs NativeBackButton as an explicit headerLeft
-              (native-stack rendered no back arrow at all there once
-              headerTitle was empty, tested); iOS keeps its own default back
-              control (e.g. iOS 26's glass pill) since headerLeft is only
-              set for Android below. Per-screen action buttons (FIRE's
-              Save, Investments' Sync) now live in headerRight, set from
-              inside each screen via its own <Stack.Screen options={{...}}/>
-              -- see fire.tsx/investments.tsx. useScreenContentTop
-              (ScreenHeader.tsx) matches the transparency split: iOS's
-              header reserves no layout space, so content needs manual
-              padding to clear it; Android's opaque one already reserves its
-              own space, so content needs none. On Android that toolbar is
-              painted canvas-colored with no shadow, so it reads as part of
-              the page rather than a separate white slab sitting on top. */}
+          {/* Pushed screens get an always-fixed header (title left-aligned
+              next to the back control; never part of the ScrollView, so the
+              back control can't drift on scroll the way a hand-rolled
+              absolutely-positioned chevron once did). It's transparent on
+              both platforms and reserves no layout space -- screens pad
+              their content by useScreenContentTop (ScreenHeader.tsx):
+              - iOS: the native header with headerTransparent, keeping iOS's
+                own back control (e.g. iOS 26's glass pill).
+              - Android: TransparentHeader, a plain JS view with no
+                background (back arrow, title, headerRight). The native
+                Android toolbar rendered a solid bar even with
+                headerTransparent (tested on-device), so it's replaced
+                rather than restyled. Mobile v1.9.2.
+              Per-screen actions (FIRE's Save, Investments' Sync) are
+              headerRight, set from inside each screen via its own
+              <Stack.Screen options={{...}}/> -- TransparentHeader renders
+              them on Android. */}
           <Stack.Screen name="fire" options={pushedScreenOptions("FIRE Calculator")} />
           <Stack.Screen name="subscriptions" options={pushedScreenOptions("Subscriptions")} />
           <Stack.Screen name="investments" options={pushedScreenOptions("Investments")} />

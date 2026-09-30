@@ -4,8 +4,6 @@ import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { House, ArrowLeftRight, PiggyBank, Landmark } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useThemeColors } from "@/theme/useThemeColors";
-import { withAlpha } from "@/theme/colors";
-import { ANDROID_TAB_BAR_BASE_HEIGHT } from "@/lib/useTabBarBottomClearance";
 
 const { Icon, Label } = NativeTabs.Trigger;
 
@@ -42,25 +40,15 @@ function AndroidTabsLayout() {
         tabBarActiveTintColor: colors.brand,
         tabBarInactiveTintColor: colors["text-3"],
         tabBarButton: (props) => <NoRippleTabButton {...props} />,
-        // Translucent and floating: position "absolute" lets each screen's
-        // content scroll underneath, visible through a canvas tint -- no
-        // native blur module (that would need a new build). 60%, not
-        // higher: on the near-black dark canvas an 85% tint was
-        // indistinguishable from solid (cards are only one step lighter
-        // than the page, so they vanished under it), which read as a plain
-        // black bar. Tab screens pad their scroll content by
-        // useTabBarBottomClearance() so the last row clears the bar.
         tabBarStyle: {
-          position: "absolute",
-          backgroundColor: withAlpha(colors.canvas, 0.6),
+          backgroundColor: colors.surface,
           borderTopWidth: 1,
-          borderTopColor: withAlpha(colors.border, 0.6),
-          elevation: 0,
+          borderTopColor: colors.border,
           // A fixed height/paddingBottom opts the tab bar out of
           // react-navigation's own safe-area handling, so the bottom inset
           // (Android's gesture-nav bar) has to be added back in by hand --
           // without it, the gesture bar sits right on top of the tab labels.
-          height: ANDROID_TAB_BAR_BASE_HEIGHT + insets.bottom,
+          height: 62 + insets.bottom,
           paddingBottom: Math.max(insets.bottom, 10),
           paddingTop: 8,
         },

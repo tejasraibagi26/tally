@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.9.2",
+    date: "2026-09-30",
+    changes: [
+      { kind: "improved", text: "On Android, the top bar on Investments, Settings and other screens is transparent, so the page shows through to the top of the screen." },
+      { kind: "fixed", text: "The Android bottom tab bar is back to solid, as before 1.9.0." },
+    ],
+  },
+  {
     version: "1.9.1",
     date: "2026-09-30",
     changes: [{ kind: "fixed", text: "On Android, the see-through tab bar actually looks see-through in dark mode instead of solid black." }],
