@@ -141,6 +141,13 @@
       "when": 1789870897921,
       "tag": "0019_wide_richard_fisk",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1790792951612,
+      "tag": "0020_mysterious_goblin_queen",
+      "breakpoints": true
     }
   ]
 }
