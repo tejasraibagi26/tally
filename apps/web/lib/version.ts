@@ -37,8 +37,10 @@
  * modals, side sheets and chart tooltips. 1.8.0 gives every budget its own
  * chart color and makes Overview's net worth chart full-bleed. 1.9.0 lets
  * "Spread across months" split a prepaid plan across 3, 6, 9 or 12 months.
+ * 1.10.0 redesigns Overview's cash flow chart (income/spend lines with the
+ * gap shaded, paired bars under 4 months of data, a savings headline).
  */
-export const APP_VERSION = "1.9.0";
+export const APP_VERSION = "1.10.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -9,6 +9,7 @@ import { monthRange, monthLastDay, shiftMonth, computeBurnRateProjection } from 
 import { monthTotals, categoryBreakdown, upcomingBills, cashFlowTrend } from "@/lib/analytics";
 import { netWorthTrend } from "@/lib/networth";
 import { NET_WORTH_CURRENCY } from "@tally/core/fx";
+import { trimLeadingEmptyMonths } from "@tally/core/cashFlowMath";
 import { creditCardsForUser, utilizationFor } from "@/lib/liabilities";
 import { latestHoldingsForUser, portfolioValue } from "@/lib/portfolio";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -111,6 +112,10 @@ export default async function OverviewPage() {
   const spendDelta = pctChip(thisMonth.spend, lastMonth.spend);
   const incomeDelta = pctChip(thisMonth.income, lastMonth.income);
   const investmentsTotal = portfolioValue(holdings);
+  // The chart drops leading months with no data (CashFlowChart), so the
+  // header names the span actually shown rather than a fixed "12 months".
+  const cashFlowShown = trimLeadingEmptyMonths(cashFlowMonths).length;
+  const cashFlowMeta = cashFlowShown > 1 ? `Last ${cashFlowShown} months` : cashFlowShown === 1 ? "This month" : undefined;
 
   const totalBudgeted = budgets.reduce((s, b) => s + b.amount + b.rolloverFromPrior, 0);
 
@@ -214,7 +219,7 @@ export default async function OverviewPage() {
 
       {/* Cash flow trend */}
       <Card style={reveal(2)}>
-        <CardHeader title="Cash flow" meta="Last 12 months" />
+        <CardHeader title="Cash flow" meta={cashFlowMeta} />
         <div className="p-4">
           <CashFlowChart months={cashFlowMonths} />
         </div>

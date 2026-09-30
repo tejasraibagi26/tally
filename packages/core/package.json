@@ -15,7 +15,8 @@
     "./fx": "./src/fx.ts",
     "./pfc": "./src/pfc.ts",
     "./accountName": "./src/accountName.ts",
-    "./listingCurrency": "./src/listingCurrency.ts"
+    "./listingCurrency": "./src/listingCurrency.ts",
+    "./cashFlowMath": "./src/cashFlowMath.ts"
   },
   "scripts": {
     "test": "vitest run",
