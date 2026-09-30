@@ -55,7 +55,7 @@ export default function MoreScreen() {
   }
 
   return (
-    // The sheet itself is a fixed 60% of screen height (_layout.tsx's
+    // The sheet is sized from MORE_SHEET_CONTENT_HEIGHT (lib/moreSheet.ts, via _layout.tsx's
     // sheetAllowedDetents), not sized to this content -- without flex-1 here,
     // this View is only as tall as its own rows, and the native sheet's own
     // (light, even in dark mode) background shows through as a bar below it.

@@ -63,9 +63,10 @@ import Constants from "expo-constants";
  * so the green pill buttons (Sync, Add account, Filters) are visible on
  * the light canvas again. 1.11.0 regroups the More sheet to match web's
  * side nav: a "Your money" card (Subscriptions, Investments, Early
- * retirement) and an "Account" card (Settings, Sign out).
+ * retirement) and an "Account" card (Settings, Sign out). 1.11.1 sizes
+ * that sheet to its content instead of a fixed 60% of the screen.
  */
-export const APP_VERSION = "1.11.0";
+export const APP_VERSION = "1.11.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

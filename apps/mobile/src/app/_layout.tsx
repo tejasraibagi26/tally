@@ -4,11 +4,11 @@ import { Stack, type NativeStackHeaderProps } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useColorScheme } from "nativewind";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { Platform, View } from "react-native";
+import { Platform, View, useWindowDimensions } from "react-native";
 import { AuthProvider, useAuth } from "@/lib/AuthContext";
 import { TransparentHeader } from "@/components/ui/ScreenHeader";
 import { PrivacyProvider } from "@/lib/PrivacyContext";
@@ -16,6 +16,8 @@ import { queryClient } from "@/lib/queryClient";
 import { fontsToLoad } from "@/theme/fonts";
 import { getStoredAppearanceMode } from "@/theme/appearance";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useResponsiveFontScale } from "@/theme/responsiveFont";
+import { MORE_SHEET_CONTENT_HEIGHT } from "@/lib/moreSheet";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -24,6 +26,12 @@ function RootNavigator() {
   const [fontsLoaded] = useFonts(fontsToLoad);
   const { setColorScheme } = useColorScheme();
   const colors = useThemeColors();
+  const insets = useSafeAreaInsets();
+  const { height: windowHeight } = useWindowDimensions();
+  const fontScale = useResponsiveFontScale();
+  // The More sheet's height as a fraction of the screen, from its actual
+  // content (see MORE_SHEET_CONTENT_HEIGHT) rather than a fixed guess.
+  const moreSheetDetent = Math.min(0.9, (MORE_SHEET_CONTENT_HEIGHT * fontScale + insets.bottom) / windowHeight);
 
   // Applies a user-picked light/dark override (Settings > Appearance) on
   // cold start -- nativewind's own colorScheme.set() doesn't persist across
@@ -100,7 +108,7 @@ function RootNavigator() {
               // measured height and the true screen edge (a react-native-screens
               // auto-sizing quirk) -- an explicit fraction sizes the sheet
               // deterministically and sits flush to the bottom instead.
-              sheetAllowedDetents: [0.6], // two grouped cards (mobile v1.11.0) need more room than the old flat list
+              sheetAllowedDetents: [moreSheetDetent],
               sheetInitialDetentIndex: 0,
               sheetGrabberVisible: true,
               sheetCornerRadius: 24,
