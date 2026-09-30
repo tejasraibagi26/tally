@@ -479,6 +479,12 @@ export const recurringStreams = pgTable("recurring_streams", {
   // confirming via "mark as annual" first. Never reset by
   // detectRecurringForUser's upsert once the user has turned it on.
   amortizeMonthly: boolean("amortize_monthly").notNull().default(false),
+  // How many months one charge covers and is spread across when
+  // amortizeMonthly is on -- 3, 6, 9 or 12 (the API enforces the set). The
+  // billing term, not just the spread: lib/recurringBillGeneration.ts posts
+  // averageAmount / amortizeMonths per month, and the next charge is
+  // expected amortizeMonths after lastDate. 12 = the original annual case.
+  amortizeMonths: integer("amortize_months").notNull().default(12),
   // Set when the user removes this stream from Subscriptions
   // (RemoveBillButton) and it isn't a manually-added bill (those are hard
   // deleted instead, since nothing ever recreates them). Soft-deleting an

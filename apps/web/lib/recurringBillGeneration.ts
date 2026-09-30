@@ -1,4 +1,4 @@
-import { and, eq, inArray, isNotNull, isNull, notInArray, or } from "drizzle-orm";
+import { and, eq, gte, inArray, isNotNull, isNull, notInArray, or } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { shiftMonth } from "@tally/core/budgetMath";
 import { normalizeMerchantKey } from "@tally/core/recurringDetection";
@@ -14,6 +14,7 @@ interface ManualBillStream {
   averageAmount: number;
   manualNextDueDate: string | null;
   amortizeMonthly?: boolean;
+  amortizeMonths?: number;
   lastDate?: string | null;
   predictedNextDate?: string | null;
 }
@@ -33,10 +34,14 @@ function currentMonthStart(): string {
  * every month from the current month through the month before that due
  * date — the stretch a lump-sum prepayment already covers.
  *
- * For an amortizeMonthly stream (frequency = "annual", confirmed via "mark
- * as annual"): posts averageAmount/12 every month, starting this month —
- * never backfilling months that already closed before the user tracked it,
- * and never front-loading months that haven't happened yet (a "(9/12)"
+ * For an amortizeMonthly stream (confirmed via "mark as annual" or the
+ * Subscriptions toggle): posts averageAmount / amortizeMonths (3, 6, 9 or
+ * 12 -- the billing term one charge covers) for each month of the term,
+ * starting with the month the charge was paid: a 3-month plan paid in
+ * January is January, February and March at ⅓ each. Months of the current
+ * term that already passed get their installment too (marking a charge a
+ * month late mustn't drop a slice of it), but it never front-loads months
+ * that haven't happened yet (a "(9/12)"
  * transaction dated a year in the future is meaningless and was showing up
  * ahead of real activity in Overview's date-sorted Recent Activity). Instead
  * each month's installment gets created once that month actually arrives —
@@ -51,11 +56,18 @@ function currentMonthStart(): string {
  */
 export async function generateDueManualBillPayments(stream: ManualBillStream): Promise<number> {
   if (!stream.accountId) return 0;
-  let dueDate = stream.manualNextDueDate ?? (stream.amortizeMonthly ? stream.predictedNextDate : null);
+  const amortizing = stream.amortizeMonthly === true;
+  const termMonths = amortizing ? amortizeTermMonths(stream.amortizeMonths) : 1;
+  // An amortizing cycle ends termMonths after the charge it spreads (its
+  // lastDate), not at the detector's predictedNextDate -- that reflects the
+  // detected cadence (typically annual), which a 3/6/9-month term doesn't
+  // match. predictedNextDate stays the fallback when there's no lastDate.
+  let dueDate =
+    stream.manualNextDueDate ??
+    (amortizing ? (stream.lastDate ? shiftMonth(stream.lastDate.slice(0, 7) + "-01", termMonths) : stream.predictedNextDate) : null);
   if (!dueDate) return 0;
 
-  const amortizing = stream.amortizeMonthly === true;
-  const amount = amortizing ? Math.round(stream.averageAmount / 12) : stream.averageAmount;
+  const amount = amortizing ? Math.round(stream.averageAmount / termMonths) : stream.averageAmount;
   const startMonth = currentMonthStart();
 
   // Self-heals a stale predictedNextDate inherited from a stream that
@@ -65,13 +77,13 @@ export async function generateDueManualBillPayments(stream: ManualBillStream): P
   // since there's no user-facing way to retrigger this once a transaction
   // already shows "Marked as annual."
   if (amortizing && dueDate <= startMonth) {
-    dueDate = shiftMonth(startMonth, 12);
+    dueDate = shiftMonth(startMonth, termMonths);
   }
 
   // Compared against the due date's own month-start (not the raw due date)
   // for the amortizing path specifically, so a due date that isn't the 1st
   // (e.g. "2027-08-15") doesn't pull in one extra trailing month — 13
-  // installments instead of 12. Left as a raw-date comparison for the
+  // installments instead of 12 (for a 12-month term). Left as a raw-date comparison for the
   // pre-existing manual-bill path to avoid changing behavior nothing here
   // asked to touch.
   const upperBound = amortizing ? dueDate.slice(0, 7) + "-01" : dueDate;
@@ -82,8 +94,13 @@ export async function generateDueManualBillPayments(stream: ManualBillStream): P
   // prepaid stretch at once, since those future months are already paid for.
   const insertUpperBound = amortizing ? shiftMonth(startMonth, 1) : upperBound;
 
+  // An amortizing term is exactly termMonths long, ending at upperBound --
+  // so it starts in the month the charge was paid (month 1 of the term),
+  // even if that's already behind us. Manual bills start from this month.
+  const cycleStart = amortizing ? shiftMonth(upperBound, -termMonths) : startMonth;
+
   const candidates: string[] = [];
-  let month = startMonth;
+  let month = cycleStart;
   while (month < upperBound && candidates.length < MAX_MONTHS) {
     candidates.push(month);
     month = shiftMonth(month, 1);
@@ -116,28 +133,23 @@ export async function generateDueManualBillPayments(stream: ManualBillStream): P
   let badIds = new Set<string>();
   if (amortizing) {
     // One-time cleanup for rows an earlier version of this function
-    // bulk-frontloaded (a whole year at once, backfilling past months and
-    // pre-creating future ones) before the "never generate beyond the
-    // current month" rule existed. Can't identify those by comparing
-    // postedDate against *this* run's startMonth — that moves forward every
-    // month, so it would just as happily flag a legitimately-created row
-    // from last month as "stale" once the calendar advances, silently
-    // deleting real history. createdAt vs. postedDate's own month is a
-    // signal that stays true forever instead: the new code only ever
-    // inserts a row within the same month it's dated for, so any row whose
-    // insert month doesn't match its own postedDate month can only be a
-    // leftover from that old bulk-insert behavior.
-    badIds = new Set(existing.filter((r) => r.postedDate.slice(0, 7) !== r.createdAt.toISOString().slice(0, 7)).map((r) => r.id));
+    // bulk-frontloaded (pre-creating a whole year of future months at once)
+    // before the "never generate beyond the current month" rule existed.
+    // Can't identify those by comparing postedDate against *this* run's
+    // startMonth — that moves forward every month. A row dated for a month
+    // AFTER the month it was inserted in is the signal that stays true
+    // forever: current code never does that. (The reverse -- inserted after
+    // its own month -- is now legitimate: an earlier month of the current
+    // term, filled in when the charge was marked late.)
+    badIds = new Set(existing.filter((r) => r.postedDate.slice(0, 7) > r.createdAt.toISOString().slice(0, 7)).map((r) => r.id));
     if (badIds.size > 0) {
       await db.delete(schema.transactions).where(inArray(schema.transactions.id, [...badIds]));
     }
     // Relabeling (every row used to get a hardcoded "(1/12)" regardless of
-    // its actual position) is scoped the same way — only this run's single
-    // current-month candidate has a total/index that's actually still
-    // valid; a genuinely past row's original cycle length isn't
-    // recomputable from here.
+    // its actual position) covers the current term's rows only — an older
+    // term's rows keep the label they were posted with.
     for (const row of existing) {
-      if (badIds.has(row.id) || row.postedDate < startMonth || row.postedDate >= insertUpperBound) continue;
+      if (badIds.has(row.id) || !candidates.includes(row.postedDate) || row.postedDate >= insertUpperBound) continue;
       const correctLabel = labelFor(row.postedDate);
       if (row.name !== correctLabel) {
         await db.update(schema.transactions).set({ name: correctLabel, merchantName: correctLabel }).where(eq(schema.transactions.id, row.id));
@@ -191,6 +203,7 @@ export async function generateDueManualBillPaymentsForAllStreams(userId?: string
       averageAmount: schema.recurringStreams.averageAmount,
       manualNextDueDate: schema.recurringStreams.manualNextDueDate,
       amortizeMonthly: schema.recurringStreams.amortizeMonthly,
+      amortizeMonths: schema.recurringStreams.amortizeMonths,
       lastDate: schema.recurringStreams.lastDate,
       predictedNextDate: schema.recurringStreams.predictedNextDate,
     })
@@ -212,7 +225,7 @@ export async function generateDueManualBillPaymentsForAllStreams(userId?: string
 
 /**
  * Keeps the real, Plaid-synced annual charge for an amortizeMonthly stream
- * from double-counting alongside the /12 synthetic installments above: any
+ * from double-counting alongside the per-month synthetic installments above: any
  * non-synthetic transaction (isManual = false) matching the stream's
  * account + merchant + amount band gets excludedFromBudget set and is
  * linked back via recurringStreamId. Safe to re-run — only touches rows that
@@ -220,6 +233,33 @@ export async function generateDueManualBillPaymentsForAllStreams(userId?: string
  */
 function amountBand(amountCents: number): number {
   return Math.round(Math.abs(amountCents) / 100);
+}
+
+/** The spread lengths "Spread across months" offers. */
+export const AMORTIZE_TERM_OPTIONS = [3, 6, 9, 12] as const;
+
+/** A stored amortizeMonths, clamped to a supported term (anything unexpected reads as the original 12). */
+export function amortizeTermMonths(months: number | null | undefined): number {
+  return AMORTIZE_TERM_OPTIONS.includes(months as (typeof AMORTIZE_TERM_OPTIONS)[number]) ? months! : 12;
+}
+
+/**
+ * For a change of term on a stream that's already amortizing: deletes the
+ * synthetic installments of its current term (from the month of its last
+ * charge on), so the next generateDueManualBillPayments run re-posts them
+ * at the new amount and "(n/N)" labels. Earlier terms keep theirs.
+ */
+export async function resetCurrentInstallments(streamId: string, lastChargeDate: string | null): Promise<void> {
+  const from = lastChargeDate ? lastChargeDate.slice(0, 7) + "-01" : currentMonthStart();
+  await db
+    .delete(schema.transactions)
+    .where(
+      and(
+        eq(schema.transactions.recurringStreamId, streamId),
+        eq(schema.transactions.isManual, true),
+        gte(schema.transactions.postedDate, from),
+      ),
+    );
 }
 
 /**
@@ -230,7 +270,7 @@ function amountBand(amountCents: number): number {
  * manual bill's synthetic payments (a real lump sum that actually
  * happened, just spread for display — worth keeping as history), an
  * amortized installment has no meaning without the amortization that
- * generated it: no money moved on that date, it was only ever 1/12 of the
+ * generated it: no money moved on that date, it was only ever a slice of the
  * real charge. Deletes those, and clears recurringStreamId +
  * excludedFromBudget on the real charge itself — what
  * TransactionDetailPanel.tsx reads to decide a transaction is still

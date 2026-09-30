@@ -70,7 +70,7 @@ export async function detectRecurringForUser(userId: string): Promise<void> {
   // For any stream the user has confirmed as amortizeMonthly (whether via
   // "mark as annual" or — in a later run — because detection re-found it):
   // keep its real Plaid charge excluded from budget spend, and (re)generate
-  // this cycle's /12 synthetic installments. No-op for every other stream.
+  // this cycle's per-month synthetic installments. No-op for every other stream.
   await excludeAmortizedRealCharges(userId);
   await generateDueManualBillPaymentsForAllStreams(userId);
 }

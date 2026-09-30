@@ -32,6 +32,7 @@ export interface SubscriptionStream {
   status: string;
   isManual: boolean;
   amortizeMonthly: boolean;
+  amortizeMonths: number;
   accountName: string | null;
   accountNickname: string | null;
   accountMask: string | null;
@@ -66,7 +67,11 @@ export function SubscriptionsTable({ streams }: { streams: SubscriptionStream[] 
         >
           <span className="flex flex-col min-w-0">
             <span className="text-[15px] text-text truncate">{s.description ?? s.merchantKey}</span>
-            {s.frequency === "annual" && s.averageAmount < 0 && <AmortizeToggle streamId={s.id} amortizeMonthly={s.amortizeMonthly} />}
+            {/* Offered for any charge that recurs less often than monthly
+                (a prepaid 3/6/9/12-month plan), or one already spread. */}
+            {(s.amortizeMonthly || s.frequency === "annual" || s.frequency === "quarterly") && s.averageAmount < 0 && (
+              <AmortizeToggle streamId={s.id} amortizeMonthly={s.amortizeMonthly} amortizeMonths={s.amortizeMonths} />
+            )}
           </span>
           <span className="flex items-center gap-1.5 min-w-0">
             {s.categoryName ? (
@@ -81,7 +86,7 @@ export function SubscriptionsTable({ streams }: { streams: SubscriptionStream[] 
           <span className="font-mono text-xs text-text-2 truncate">
             {s.accountName ? `${accountDisplayName(s.accountName, s.accountNickname)} ····${s.accountMask ?? "----"}` : "—"}
           </span>
-          <span className="text-[13.5px] text-text-2">{FREQUENCY_LABEL[s.frequency] ?? s.frequency}</span>
+          <span className="text-[13.5px] text-text-2">{s.amortizeMonthly ? `Every ${s.amortizeMonths} months` : (FREQUENCY_LABEL[s.frequency] ?? s.frequency)}</span>
           <span className={`text-right text-[15px] tabular ${s.averageAmount > 0 ? "text-positive" : "text-text"}`}>
             {formatCents(s.averageAmount, { signed: true })}
           </span>

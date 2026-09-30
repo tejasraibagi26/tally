@@ -156,26 +156,38 @@ export default function TransactionDetailScreen() {
                     <Check size={12} color={colors.positive} strokeWidth={2.5} />
                   </View>
                   <Text className="font-ui-medium flex-1" style={{ fontSize: rf(13), lineHeight: rf(18), color: colors.positive }}>
-                    Marked as annual · spread {formatCents(Math.round(Math.abs(t.amount) / 12))}/mo across the budget
+                    Paid every {t.amortizeMonths ?? 12} months · spread {formatCents(Math.round(Math.abs(t.amount) / (t.amortizeMonths ?? 12)))}/mo across the budget
                   </Text>
                 </View>
               ) : (
                 // Solid fill, no dashed border -- the dashed line read as a
                 // placeholder/unfinished state, and it contradicted the
                 // already-marked version above, which was already solid.
-                <Pressable
-                  onPress={() => markAnnual.mutate()}
-                  disabled={markAnnual.isPending}
-                  className="flex-row items-start gap-2.5 p-3 rounded-control disabled:opacity-40"
-                  style={{ backgroundColor: colors["brand-subtle"] }}
-                >
-                  <View className="flex-none rounded-full p-1" style={{ backgroundColor: withAlpha(colors.brand, 0.15) }}>
-                    <SplitSquareVertical size={12} color={colors.brand} strokeWidth={2} />
+                // Prepaid plans charge once per term and get split evenly
+                // across it, starting with the month the charge landed in.
+                <View className="gap-2.5 p-3 rounded-control" style={{ backgroundColor: colors["brand-subtle"] }}>
+                  <View className="flex-row items-center gap-2.5">
+                    <View className="flex-none rounded-full p-1" style={{ backgroundColor: withAlpha(colors.brand, 0.15) }}>
+                      <SplitSquareVertical size={12} color={colors.brand} strokeWidth={2} />
+                    </View>
+                    <Text className="font-ui-medium text-brand flex-1" style={{ fontSize: rf(13), lineHeight: rf(18) }}>
+                      {markAnnual.isPending ? "Spreading…" : "Prepaid plan? Spread this charge across"}
+                    </Text>
                   </View>
-                  <Text className="font-ui-medium text-brand flex-1" style={{ fontSize: rf(13), lineHeight: rf(18) }}>
-                    {markAnnual.isPending ? "Marking…" : "Mark as annual subscription · spread cost across 12 months"}
-                  </Text>
-                </Pressable>
+                  <View className="flex-row gap-2">
+                    {[3, 6, 9, 12].map((m) => (
+                      <Pressable
+                        key={m}
+                        onPress={() => markAnnual.mutate(m)}
+                        disabled={markAnnual.isPending}
+                        className="flex-1 h-9 rounded-full items-center justify-center disabled:opacity-40"
+                        style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors["brand-border"] }}
+                      >
+                        <Text className="font-ui-medium text-brand" style={{ fontSize: rf(13) }}>{m} mo</Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
               ))}
 
             <View className="gap-2">

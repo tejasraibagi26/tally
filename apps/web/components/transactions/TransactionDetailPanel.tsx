@@ -42,6 +42,8 @@ export interface TransactionDetailData {
   plaidItemLabel: string | null;
   isManual: boolean;
   recurringStreamId: string | null;
+  /** Split term (3/6/9/12 months) of the stream this charge is spread by; null when it isn't. */
+  amortizeMonths: number | null;
   splits: DetailSplit[];
 }
 
@@ -75,6 +77,7 @@ export function TransactionDetailPanel({
   const [deleting, setDeleting] = useState(false);
   const [markingAnnual, setMarkingAnnual] = useState(false);
   const [markedAnnual, setMarkedAnnual] = useState(false);
+  const [markedMonths, setMarkedMonths] = useState<number | null>(null);
 
   useEffect(() => {
     if (!transaction) return;
@@ -166,12 +169,17 @@ export function TransactionDetailPanel({
     }
   }
 
-  async function markAnnual() {
+  async function markAnnual(months: number) {
     setMarkingAnnual(true);
     try {
-      const res = await fetch(`/api/transactions/${transaction!.id}/mark-annual`, { method: "POST" });
+      const res = await fetch(`/api/transactions/${transaction!.id}/mark-annual`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ months }),
+      });
       if (!res.ok) throw new Error("Failed to mark as annual");
       setMarkedAnnual(true);
+      setMarkedMonths(months);
       router.refresh();
     } catch (err) {
       console.error(err);
@@ -334,23 +342,38 @@ export function TransactionDetailPanel({
                 <Check size={12} strokeWidth={2.5} />
               </span>
               <span className="text-[13.5px] font-medium leading-snug">
-                Marked as annual · spread {formatCents(Math.round(Math.abs(transaction.amount) / 12))}/mo across the budget
+                {(() => {
+                  const months = markedMonths ?? transaction.amortizeMonths ?? 12;
+                  return `Paid every ${months} months · spread ${formatCents(Math.round(Math.abs(transaction.amount) / months))}/mo across the budget`;
+                })()}
               </span>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={markAnnual}
-              disabled={markingAnnual}
-              className="flex items-start gap-2.5 p-3 rounded-control bg-brand-subtle text-brand border border-dashed border-brand-border text-left hover:bg-brand-border/40 disabled:opacity-40"
-            >
-              <span className="relative top-0.5 flex-none rounded-full bg-brand/15 p-1">
-                <SplitSquareVertical size={12} strokeWidth={2} />
+            // Prepaid plans charge once per term (3, 6, 9 or 12 months) and
+            // are spread evenly across that term, starting with the month
+            // the charge landed in -- see lib/recurringBillGeneration.ts.
+            <div className="flex flex-col gap-2 p-3 rounded-control bg-brand-subtle border border-dashed border-brand-border">
+              <span className="flex items-center gap-2 text-[13.5px] font-medium text-brand">
+                <span className="flex-none rounded-full bg-brand/15 p-1">
+                  <SplitSquareVertical size={12} strokeWidth={2} />
+                </span>
+                {markingAnnual ? "Spreading…" : "Prepaid plan? Spread this charge across"}
               </span>
-              <span className="text-[13.5px] font-medium leading-snug">
-                {markingAnnual ? "Marking…" : "Mark as annual subscription · spread cost across 12 months"}
-              </span>
-            </button>
+              <div className="flex gap-1.5">
+                {[3, 6, 9, 12].map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => markAnnual(m)}
+                    disabled={markingAnnual}
+                    title={`Charged every ${m} months · ${formatCents(Math.round(Math.abs(transaction.amount) / m))}/mo`}
+                    className="h-7 px-2.5 rounded-full bg-surface border border-brand-border text-[12.5px] font-medium text-brand hover:bg-brand-border/40 disabled:opacity-40"
+                  >
+                    {m} mo
+                  </button>
+                ))}
+              </div>
+            </div>
           )
         )}
 

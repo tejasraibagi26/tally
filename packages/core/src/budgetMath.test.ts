@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { monthRange, monthLastDay, shiftMonth, computeRemaining, computeBurnRateProjection, budgetColorSlots } from "./budgetMath";
+import { monthRange, monthLastDay, shiftMonth, computeRemaining, computeBurnRateProjection, budgetColorSlots, shiftDateByMonths } from "./budgetMath";
 
 describe("monthRange", () => {
   it("returns the first of the month through the first of the next month", () => {
@@ -92,5 +92,16 @@ describe("budgetColorSlots", () => {
     const slots = budgetColorSlots(names);
     expect(slots.get("H")).toBe(8);
     expect(slots.get("I")).toBe(1);
+  });
+});
+
+describe("shiftDateByMonths", () => {
+  it("keeps the day of month", () => {
+    expect(shiftDateByMonths("2026-03-15", 6)).toBe("2026-09-15");
+    expect(shiftDateByMonths("2026-11-10", 3)).toBe("2027-02-10");
+  });
+  it("clamps to the end of a shorter month", () => {
+    expect(shiftDateByMonths("2026-08-31", 6)).toBe("2027-02-28");
+    expect(shiftDateByMonths("2027-08-31", 6)).toBe("2028-02-29");
   });
 });

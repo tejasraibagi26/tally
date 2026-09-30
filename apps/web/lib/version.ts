@@ -35,9 +35,10 @@
  * trial the dark v2 palette side by side before it replaces the current one.
  * 1.7.1 wires --raised/--raised-hover into menus, dropdowns, popovers,
  * modals, side sheets and chart tooltips. 1.8.0 gives every budget its own
- * chart color and makes Overview's net worth chart full-bleed.
+ * chart color and makes Overview's net worth chart full-bleed. 1.9.0 lets
+ * "Spread across months" split a prepaid plan across 3, 6, 9 or 12 months.
  */
-export const APP_VERSION = "1.8.0";
+export const APP_VERSION = "1.9.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

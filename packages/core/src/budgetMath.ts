@@ -47,3 +47,12 @@ export function budgetColorSlots(budgets: { categoryId: string; categoryName: st
   const sorted = [...budgets].sort((a, b) => a.categoryName.localeCompare(b.categoryName) || a.categoryId.localeCompare(b.categoryId));
   return new Map(sorted.map((b, i) => [b.categoryId, (i % 8) + 1]));
 }
+
+/** `date` (YYYY-MM-DD) moved by whole months, keeping its day -- clamped to the target month's last day (Aug 31 + 6 → Feb 28/29). */
+export function shiftDateByMonths(date: string, deltaMonths: number): string {
+  const d = new Date(date + "T00:00:00Z");
+  const target = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + deltaMonths, 1));
+  const lastDay = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate();
+  target.setUTCDate(Math.min(d.getUTCDate(), lastDay));
+  return target.toISOString().slice(0, 10);
+}

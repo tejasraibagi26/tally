@@ -26,6 +26,7 @@ export interface TransactionRowData {
   isManual: boolean;
   source: string | null;
   recurringStreamId: string | null;
+  amortizeMonths: number | null;
   splits: DetailSplit[];
 }
 
@@ -103,6 +104,7 @@ export function TransactionsList({
       plaidItemLabel: account?.plaidItemLabel ?? null,
       isManual: row.isManual,
       recurringStreamId: row.recurringStreamId,
+      amortizeMonths: row.amortizeMonths,
       splits: row.splits,
     };
   }

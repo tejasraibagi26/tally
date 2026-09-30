@@ -9,36 +9,63 @@ import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { Trash2, Check, SplitSquareVertical } from "lucide-react-native";
 
+const TERM_OPTIONS = [3, 6, 9, 12];
+
 // Same "chip, not plain text" treatment as web's AmortizeToggle.tsx --
-// annual only (the other cadences already post real monthly-ish charges of
-// their own, nothing to smooth).
+// offered for anything charged less often than monthly (a prepaid 3/6/9/12-
+// month plan). Once on, a row of term pills picks how many months the charge
+// covers; it's split evenly across those months.
 function AmortizeChip({ stream }: { stream: RecurringStream }) {
   const rf = useRF();
   const colors = useThemeColors();
   const setAmortize = useSetAmortizeMonthly();
+  const term = stream.amortizeMonths ?? 12;
 
   return (
-    <Pressable
-      onPress={() => setAmortize.mutate({ id: stream.id, amortizeMonthly: !stream.amortizeMonthly })}
-      disabled={setAmortize.isPending}
-      className="flex-row items-center gap-1 self-start px-2 rounded-full mt-1 disabled:opacity-40"
-      style={{
-        height: 22,
-        backgroundColor: stream.amortizeMonthly ? colors["positive-subtle"] : colors["brand-subtle"],
-        borderWidth: stream.amortizeMonthly ? 0 : 1,
-        borderStyle: "dashed",
-        borderColor: colors["brand-border"],
-      }}
-    >
-      {stream.amortizeMonthly ? (
-        <Check size={10} color={colors.positive} strokeWidth={2.5} />
-      ) : (
-        <SplitSquareVertical size={10} color={colors.brand} strokeWidth={2} />
+    <View className="gap-1.5 mt-1">
+      <Pressable
+        onPress={() => setAmortize.mutate({ id: stream.id, amortizeMonthly: !stream.amortizeMonthly })}
+        disabled={setAmortize.isPending}
+        className="flex-row items-center gap-1 self-start px-2 rounded-full disabled:opacity-40"
+        style={{
+          height: 22,
+          backgroundColor: stream.amortizeMonthly ? colors["positive-subtle"] : colors["brand-subtle"],
+          borderWidth: stream.amortizeMonthly ? 0 : 1,
+          borderStyle: "dashed",
+          borderColor: colors["brand-border"],
+        }}
+      >
+        {stream.amortizeMonthly ? (
+          <Check size={10} color={colors.positive} strokeWidth={2.5} />
+        ) : (
+          <SplitSquareVertical size={10} color={colors.brand} strokeWidth={2} />
+        )}
+        <Text className="font-ui-medium" style={{ fontSize: rf(11), color: stream.amortizeMonthly ? colors.positive : colors.brand }}>
+          {setAmortize.isPending ? "…" : stream.amortizeMonthly ? `Spread across ${term} months` : "Spread across months?"}
+        </Text>
+      </Pressable>
+      {stream.amortizeMonthly && (
+        <View className="flex-row gap-1.5">
+          {TERM_OPTIONS.map((m) => {
+            const selected = m === term;
+            return (
+              <Pressable
+                key={m}
+                onPress={() => !selected && setAmortize.mutate({ id: stream.id, amortizeMonths: m })}
+                disabled={setAmortize.isPending}
+                hitSlop={4}
+                className="px-2 rounded-full items-center justify-center disabled:opacity-40"
+                style={{ height: 22, backgroundColor: selected ? colors.positive : colors["positive-subtle"] }}
+              >
+                <Text className="font-ui-medium" style={{ fontSize: rf(11), color: selected ? colors["on-brand"] : colors.positive }}>
+                  {m} mo
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
       )}
-      <Text className="font-ui-medium" style={{ fontSize: rf(11), color: stream.amortizeMonthly ? colors.positive : colors.brand }}>
-        {setAmortize.isPending ? "…" : stream.amortizeMonthly ? "Spread across months" : "Spread across months?"}
-      </Text>
-    </Pressable>
+    </View>
   );
 }
 
@@ -80,7 +107,11 @@ export default function SubscriptionsScreen() {
   // amounts) count toward Monthly/Annualized — a paycheck or other income
   // stream shouldn't inflate what looks like a spend total.
   const expenseStreams = streams.filter((s) => s.averageAmount < 0);
-  const monthlyTotal = expenseStreams.reduce((sum, s) => sum + Math.abs(s.averageAmount) * MONTHLY_MULTIPLIER[s.frequency], 0);
+  // A spread plan's real cadence is its term (the enum has no 6/9-month value).
+  const monthlyTotal = expenseStreams.reduce(
+    (sum, s) => sum + Math.abs(s.averageAmount) * (s.amortizeMonthly ? 1 / (s.amortizeMonths ?? 12) : MONTHLY_MULTIPLIER[s.frequency]),
+    0,
+  );
 
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
@@ -116,10 +147,10 @@ export default function SubscriptionsScreen() {
                   {s.description ?? s.merchantKey}
                 </Text>
                 <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>
-                  {FREQUENCY_LABEL[s.frequency]}
+                  {s.amortizeMonthly ? `Every ${s.amortizeMonths ?? 12} months` : FREQUENCY_LABEL[s.frequency]}
                   {s.status === "at_risk" ? " · At risk" : ""}
                 </Text>
-                {s.frequency === "annual" && s.averageAmount < 0 && <AmortizeChip stream={s} />}
+                {(s.amortizeMonthly || s.frequency === "annual" || s.frequency === "quarterly") && s.averageAmount < 0 && <AmortizeChip stream={s} />}
               </View>
               <MoneyText cents={s.averageAmount} className="text-text" mask={false} style={{ fontSize: rf(14.5) }} />
               <Pressable onPress={() => confirmRemove(s)} hitSlop={10} className="ml-3">

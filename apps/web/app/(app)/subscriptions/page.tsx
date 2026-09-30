@@ -32,6 +32,7 @@ export default async function SubscriptionsPage() {
       status: schema.recurringStreams.status,
       isManual: schema.recurringStreams.isManual,
       amortizeMonthly: schema.recurringStreams.amortizeMonthly,
+      amortizeMonths: schema.recurringStreams.amortizeMonths,
       accountName: schema.accounts.name,
       accountNickname: schema.accounts.nickname,
       accountMask: schema.accounts.mask,
@@ -59,7 +60,12 @@ export default async function SubscriptionsPage() {
   // for this total even if the gap-based detector marked it cancelled/at_risk —
   // the user has confirmed it's a real ongoing bill, just off the algorithm's cadence.
   const activeExpenseStreams = streams.filter((s) => (s.status !== "cancelled" || s.manualNextDueDate != null) && s.averageAmount < 0);
-  const monthlyTotal = activeExpenseStreams.reduce((sum, s) => sum + Math.abs(s.averageAmount) * (FREQUENCY_MONTHLY_MULTIPLIER[s.frequency] ?? 1), 0);
+  // A spread (prepaid) plan's real cadence is its term, not the detected
+  // frequency -- the enum has no 6/9-month value (see mark-annual route).
+  const monthlyTotal = activeExpenseStreams.reduce(
+    (sum, s) => sum + Math.abs(s.averageAmount) * (s.amortizeMonthly ? 1 / s.amortizeMonths : (FREQUENCY_MONTHLY_MULTIPLIER[s.frequency] ?? 1)),
+    0,
+  );
   const annualTotal = monthlyTotal * 12;
 
   return (

@@ -31,6 +31,8 @@ export interface TransactionRow {
   plaidTransactionId: string | null;
   isManual: boolean;
   recurringStreamId: string | null;
+  /** Split term (3/6/9/12 months) of the stream this charge is spread by; null/absent when it isn't. */
+  amortizeMonths?: number | null;
   splits: TransactionSplit[];
 }
 
@@ -84,12 +86,13 @@ export function useUpdateTransaction(id: string) {
 // Matches web's "Mark as annual subscription" (TransactionDetailPanel.tsx +
 // POST /api/transactions/[id]/mark-annual) -- creates/updates a
 // recurringStreams row with amortizeMonthly = true for this transaction's
-// merchant/account, so its cost gets spread 1/12 across the budget instead
-// of hitting one month all at once.
+// merchant/account, so its cost gets spread evenly across the months it
+// covers (3, 6, 9 or 12 -- the plan's billing term) instead of hitting one
+// month all at once.
 export function useMarkAnnual(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => apiPost<{ stream: { id: string }; generated: number }>(`/api/transactions/${id}/mark-annual`, {}),
+    mutationFn: (months: number) => apiPost<{ stream: { id: string }; generated: number }>(`/api/transactions/${id}/mark-annual`, { months }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transaction", id] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });

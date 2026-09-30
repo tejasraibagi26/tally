@@ -39,6 +39,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     ? await db.query.categories.findFirst({ where: eq(schema.categories.id, t.categoryId) })
     : null;
   const account = await db.query.accounts.findFirst({ where: eq(schema.accounts.id, t.accountId) });
+  const stream = t.recurringStreamId
+    ? await db.query.recurringStreams.findFirst({ where: eq(schema.recurringStreams.id, t.recurringStreamId), columns: { amortizeMonths: true } })
+    : undefined;
 
   return NextResponse.json({
     id: t.id,
@@ -63,6 +66,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     plaidTransactionId: t.plaidTransactionId,
     isManual: t.isManual,
     recurringStreamId: t.recurringStreamId,
+    amortizeMonths: stream?.amortizeMonths ?? null,
     splits: splitRows.filter((s) => s.categoryId).map((s) => ({ categoryId: s.categoryId as string, amount: s.amount, note: s.note })),
   });
 }

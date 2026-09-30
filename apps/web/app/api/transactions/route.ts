@@ -112,6 +112,8 @@ export async function GET(req: Request) {
     isManual: schema.transactions.isManual,
     source: schema.transactions.source,
     recurringStreamId: schema.transactions.recurringStreamId,
+    // The split term of the stream this charge is spread by (null if none).
+    amortizeMonths: schema.recurringStreams.amortizeMonths,
   };
 
   const [rows, countRows] = await Promise.all([
@@ -119,6 +121,7 @@ export async function GET(req: Request) {
       .select(transactionColumns)
       .from(schema.transactions)
       .leftJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))
+      .leftJoin(schema.recurringStreams, eq(schema.transactions.recurringStreamId, schema.recurringStreams.id))
       .where(whereClause)
       .orderBy(desc(schema.transactions.postedDate), desc(schema.transactions.createdAt))
       .limit(PAGE_SIZE)
@@ -127,6 +130,7 @@ export async function GET(req: Request) {
       .select({ count: sql<number>`count(*)::int` })
       .from(schema.transactions)
       .leftJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))
+      .leftJoin(schema.recurringStreams, eq(schema.transactions.recurringStreamId, schema.recurringStreams.id))
       .where(whereClause),
   ]);
 
@@ -171,6 +175,7 @@ export async function GET(req: Request) {
     isManual: t.isManual,
     source: t.source,
     recurringStreamId: t.recurringStreamId,
+    amortizeMonths: t.amortizeMonths ?? null,
     splits: splitsByTransaction.get(t.id) ?? [],
   }));
 

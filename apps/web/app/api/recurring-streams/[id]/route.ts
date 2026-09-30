@@ -3,7 +3,8 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
-import { excludeAmortizedRealCharges, generateDueManualBillPayments, undoAmortization } from "@/lib/recurringBillGeneration";
+import { shiftDateByMonths } from "@tally/core/budgetMath";
+import { excludeAmortizedRealCharges, generateDueManualBillPayments, resetCurrentInstallments, undoAmortization } from "@/lib/recurringBillGeneration";
 
 const patchSchema = z.object({
   manualNextDueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
@@ -12,6 +13,9 @@ const patchSchema = z.object({
   // page's "spread across months" toggle and confirming a 2-occurrence
   // annual candidate detectRecurringForUser surfaced on its own.
   amortizeMonthly: z.boolean().optional(),
+  // The billing term one charge covers and is spread across (see
+  // schema.ts's recurringStreams.amortizeMonths).
+  amortizeMonths: z.union([z.literal(3), z.literal(6), z.literal(9), z.literal(12)]).optional(),
 });
 
 // Sets or clears manualNextDueDate (schema.ts's override for a recurring
@@ -28,7 +32,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const { id } = await params;
   const [existing] = await db
-    .select({ id: schema.recurringStreams.id, userId: schema.recurringStreams.userId, amortizeMonthly: schema.recurringStreams.amortizeMonthly })
+    .select({
+      id: schema.recurringStreams.id,
+      userId: schema.recurringStreams.userId,
+      amortizeMonthly: schema.recurringStreams.amortizeMonthly,
+      amortizeMonths: schema.recurringStreams.amortizeMonths,
+      lastDate: schema.recurringStreams.lastDate,
+    })
     .from(schema.recurringStreams)
     .where(eq(schema.recurringStreams.id, id))
     .limit(1);
@@ -44,6 +54,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const update: Partial<typeof schema.recurringStreams.$inferInsert> = {};
   if (parsed.data.manualNextDueDate !== undefined) update.manualNextDueDate = parsed.data.manualNextDueDate;
   if (parsed.data.amortizeMonthly !== undefined) update.amortizeMonthly = parsed.data.amortizeMonthly;
+  if (parsed.data.amortizeMonths !== undefined) {
+    update.amortizeMonths = parsed.data.amortizeMonths;
+    // Next charge is one term after the last one (Upcoming bills reads this;
+    // detection may re-derive it from real charge gaps later, which is fine).
+    if (existing.lastDate) update.predictedNextDate = shiftDateByMonths(existing.lastDate, parsed.data.amortizeMonths);
+  }
   if (Object.keys(update).length === 0) {
     return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
   }
@@ -63,6 +79,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   // installments and a permanently-"Marked as annual" transaction behind.
   if (existing.amortizeMonthly && !stream.amortizeMonthly) {
     await undoAmortization(id);
+  }
+
+  // A new term on a stream that's still amortizing: this month's (and any
+  // later) installment was posted at the old amount -- clear it so the
+  // generation below re-posts it at averageAmount / new term.
+  if (existing.amortizeMonthly && stream.amortizeMonthly && existing.amortizeMonths !== stream.amortizeMonths) {
+    await resetCurrentInstallments(id, stream.lastDate);
   }
 
   // Only a manually-added bill or an amortizeMonthly stream gets synthetic
