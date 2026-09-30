@@ -53,8 +53,10 @@ import Constants from "expo-constants";
  * 1.8.0 adopts web's refined dark palette (near-black canvas instead of
  * OLED black, higher-contrast text and borders, raised sheets). 1.8.1 adds
  * a changelog screen, opened by tapping the build line in the More sheet.
+ * 1.9.0 makes Android's tab bar translucent and floating, and drops the
+ * circle behind Android's back button.
  */
-export const APP_VERSION = "1.8.1";
+export const APP_VERSION = "1.9.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

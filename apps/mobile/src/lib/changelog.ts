@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.9.0",
+    date: "2026-09-30",
+    changes: [
+      { kind: "improved", text: "On Android, the tab bar is see-through: content scrolls underneath it instead of stopping above it." },
+      { kind: "improved", text: "On Android, the back button is a plain arrow without the circle behind it." },
+    ],
+  },
+  {
     version: "1.8.1",
     date: "2026-09-30",
     changes: [{ kind: "new", text: "This changelog. Tap the build line at the bottom of More to get here." }],

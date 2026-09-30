@@ -4,6 +4,7 @@ import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { X, ChevronRight, Trash2, Check, SplitSquareVertical } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { prettifyPfc } from "@tally/core/pfc";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useTransaction, useUpdateTransaction, useDeleteTransaction, useMarkAnnual } from "@/lib/queries/transactions";
@@ -24,6 +25,13 @@ export default function TransactionDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  // On Android this screen renders inside the Transactions tab with the
+  // (now floating) tab bar still showing, so its bottom space is the bar's
+  // clearance -- which already includes insets.bottom, so it REPLACES the
+  // inset rather than adding to it. On iOS it's a true modal over the tab
+  // bar, where only the home-indicator inset applies.
+  const tabBarClearance = useTabBarBottomClearance();
+  const bottomInset = Platform.OS === "android" ? tabBarClearance : insets.bottom;
   const colors = useThemeColors();
   const { colorScheme } = useColorScheme();
   const series = colorScheme === "dark" ? chartSeries.dark : chartSeries.light;
@@ -121,7 +129,7 @@ export default function TransactionDetailScreen() {
         <ActivityIndicator className="mt-8" />
       ) : (
         <>
-          <ScrollView className="px-5" showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 24, paddingBottom: dirty ? 24 : insets.bottom + 40 }} keyboardShouldPersistTaps="handled">
+          <ScrollView className="px-5" showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 24, paddingBottom: dirty ? 24 : bottomInset + 40 }} keyboardShouldPersistTaps="handled">
             <View className="gap-1.5">
               <MoneyText cents={t.amount} signed mask={false} className="font-display" style={{ color: amountColor(t.amount, colors), fontSize: rf(36) }} />
               <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }}>{t.merchantName ?? t.name}</Text>
@@ -243,7 +251,7 @@ export default function TransactionDetailScreen() {
           </ScrollView>
 
           {dirty && (
-            <View className="px-5 pt-3" style={{ borderTopWidth: 1, borderTopColor: colors.border, paddingBottom: insets.bottom + 16 }}>
+            <View className="px-5 pt-3" style={{ borderTopWidth: 1, borderTopColor: colors.border, paddingBottom: bottomInset + 16 }}>
               <Pressable
                 onPress={save}
                 disabled={updateTransaction.isPending}

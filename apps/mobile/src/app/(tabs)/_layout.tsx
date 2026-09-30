@@ -4,6 +4,8 @@ import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { House, ArrowLeftRight, PiggyBank, Landmark } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { withAlpha } from "@/theme/colors";
+import { ANDROID_TAB_BAR_BASE_HEIGHT } from "@/lib/useTabBarBottomClearance";
 
 const { Icon, Label } = NativeTabs.Trigger;
 
@@ -40,15 +42,22 @@ function AndroidTabsLayout() {
         tabBarActiveTintColor: colors.brand,
         tabBarInactiveTintColor: colors["text-3"],
         tabBarButton: (props) => <NoRippleTabButton {...props} />,
+        // Translucent and floating: position "absolute" lets each screen's
+        // content scroll underneath, faintly visible through a canvas tint
+        // at 85% -- readable labels without a native blur module (which
+        // would need a new build). Tab screens pad their scroll content by
+        // useTabBarBottomClearance() so the last row clears the bar.
         tabBarStyle: {
-          backgroundColor: colors.surface,
+          position: "absolute",
+          backgroundColor: withAlpha(colors.canvas, 0.85),
           borderTopWidth: 1,
-          borderTopColor: colors.border,
+          borderTopColor: withAlpha(colors.border, 0.6),
+          elevation: 0,
           // A fixed height/paddingBottom opts the tab bar out of
           // react-navigation's own safe-area handling, so the bottom inset
           // (Android's gesture-nav bar) has to be added back in by hand --
           // without it, the gesture bar sits right on top of the tab labels.
-          height: 62 + insets.bottom,
+          height: ANDROID_TAB_BAR_BASE_HEIGHT + insets.bottom,
           paddingBottom: Math.max(insets.bottom, 10),
           paddingTop: 8,
         },
