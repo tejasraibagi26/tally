@@ -48,8 +48,11 @@
  * #D0E3D9): it was 1.04:1 on the new canvas, so tinted pills vanished.
  * 1.12.2 stops treating a holding Plaid matched to an OTC cross-listing
  * (VFV -> VFVXF, mic OOTC) as USD; the holding's own label decides.
+ * 1.13.0 regroups the side nav (Your money / What you have / What you owe
+ * / Plan ahead) with icons and dividers, adds Rules to it, renames FIRE
+ * calculator to Early retirement, and compacts the footer into an icon row.
  */
-export const APP_VERSION = "1.12.2";
+export const APP_VERSION = "1.13.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

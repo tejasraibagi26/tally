@@ -2,7 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { X } from "lucide-react";
+import {
+  X,
+  LayoutDashboard,
+  Receipt,
+  PieChart,
+  Repeat,
+  ListFilter,
+  Landmark,
+  TrendingUp,
+  CreditCard,
+  Flame,
+  Settings,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/cn";
 import { LogoMark } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -20,7 +33,14 @@ import { APP_VERSION, BUILD_SHA } from "@/lib/version";
 interface NavItem {
   href: string;
   label: string;
+  icon: LucideIcon;
   meta?: string;
+}
+
+interface NavGroup {
+  /** Omitted for the lone Overview block at the top. */
+  label?: string;
+  items: NavItem[];
 }
 
 interface NavCounts {
@@ -29,21 +49,30 @@ interface NavCounts {
   creditCards: number;
 }
 
-function moneyItems(counts: NavCounts): NavItem[] {
+// Grouped by what the money is doing, not by page type: what you have and
+// what you owe are separate blocks (credit cards used to sit under
+// "Assets"), and the retirement planner is its own "Plan ahead" block.
+function navGroups(counts: NavCounts): NavGroup[] {
   return [
-    { href: "/overview", label: "Overview" },
-    { href: "/transactions", label: "Transactions", meta: String(counts.transactions) },
-    { href: "/budgets", label: "Budgets" },
-    { href: "/subscriptions", label: "Subscriptions" },
-  ];
-}
-
-function assetItems(counts: NavCounts): NavItem[] {
-  return [
-    { href: "/accounts", label: "Accounts", meta: String(counts.accounts) },
-    { href: "/investments", label: "Investments" },
-    { href: "/fire", label: "FIRE calculator" },
-    { href: "/cards", label: "Credit cards", meta: String(counts.creditCards) },
+    { items: [{ href: "/overview", label: "Overview", icon: LayoutDashboard }] },
+    {
+      label: "Your money",
+      items: [
+        { href: "/transactions", label: "Transactions", icon: Receipt, meta: String(counts.transactions) },
+        { href: "/budgets", label: "Budgets", icon: PieChart },
+        { href: "/subscriptions", label: "Subscriptions", icon: Repeat },
+        { href: "/rules", label: "Rules", icon: ListFilter },
+      ],
+    },
+    {
+      label: "What you have",
+      items: [
+        { href: "/accounts", label: "Accounts", icon: Landmark, meta: String(counts.accounts) },
+        { href: "/investments", label: "Investments", icon: TrendingUp },
+      ],
+    },
+    { label: "What you owe", items: [{ href: "/cards", label: "Credit cards", icon: CreditCard, meta: String(counts.creditCards) }] },
+    { label: "Plan ahead", items: [{ href: "/fire", label: "Early retirement", icon: Flame }] },
   ];
 }
 
@@ -56,7 +85,10 @@ function NavRow({ item, active }: { item: NavItem; active: boolean }) {
         active ? "bg-brand-subtle text-brand font-medium" : "text-text-2 font-normal hover:bg-sunken",
       )}
     >
-      <span>{item.label}</span>
+      <span className="flex items-center gap-2.5 min-w-0">
+        <item.icon size={17} strokeWidth={1.75} className="flex-none" />
+        <span className="truncate">{item.label}</span>
+      </span>
       {item.meta && item.meta !== "0" && (
         <span className="font-mono text-[12.5px] leading-none text-text-3">{item.meta}</span>
       )}
@@ -107,32 +139,25 @@ export function SideNav({
         )}
       </div>
 
-      <div className="flex flex-col gap-[2px]">
-        <div className="text-xs font-medium uppercase tracking-[0.06em] text-text-3 px-2 pb-2">Money</div>
-        {moneyItems(counts).map((item) => (
-          <NavRow key={item.href} item={item} active={isActive(item.href)} />
-        ))}
-      </div>
-
-      <div className="flex flex-col gap-[2px]">
-        <div className="text-xs font-medium uppercase tracking-[0.06em] text-text-3 px-2 pb-2">Assets</div>
-        {assetItems(counts).map((item) => (
-          <NavRow key={item.href} item={item} active={isActive(item.href)} />
+      <div className="flex flex-col gap-4">
+        {navGroups(counts).map((group, i) => (
+          <div key={group.label ?? "top"} className="flex flex-col gap-4">
+            {i > 0 && <div className="h-px bg-border mx-2" />}
+            <div className="flex flex-col gap-[2px]">
+              {group.label && (
+                <div className="text-xs font-medium uppercase tracking-[0.06em] text-text-3 px-2 pb-2">{group.label}</div>
+              )}
+              {group.items.map((item) => (
+                <NavRow key={item.href} item={item} active={isActive(item.href)} />
+              ))}
+            </div>
+          </div>
         ))}
       </div>
 
       <div className="mt-auto flex flex-col gap-3">
         <div className="h-px bg-border" />
 
-        <div className="flex items-center justify-between px-2">
-          <span className="text-[13.5px] text-text-2">Hide amounts</span>
-          <PrivacyToggle />
-        </div>
-
-        <div className="flex items-center justify-between px-2">
-          <span className="text-[13.5px] text-text-2">Theme</span>
-          <ThemeToggle />
-        </div>
 
         {mockMode && (
           <span className="self-start inline-flex items-center gap-1.5 rounded-full bg-warning-subtle text-warning text-xs font-medium px-2.5 py-0.5">
@@ -156,6 +181,22 @@ export function SideNav({
               </span>
               <span className="text-xs leading-none text-text-3">Private</span>
             </div>
+          </Link>
+        </div>
+
+        <div className="flex items-center justify-between px-1">
+          <PrivacyToggle variant="icon" />
+          <ThemeToggle variant="icon" />
+          <Link
+            href="/settings"
+            aria-label="Settings"
+            title="Settings"
+            className={cn(
+              "w-8 h-8 flex-none rounded-control flex items-center justify-center text-text-3 hover:text-text hover:bg-sunken transition-colors",
+              isActive("/settings") && "text-brand",
+            )}
+          >
+            <Settings size={16} strokeWidth={1.75} />
           </Link>
           <SignOutButton />
         </div>

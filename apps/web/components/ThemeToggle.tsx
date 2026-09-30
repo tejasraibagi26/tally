@@ -5,7 +5,8 @@ import { Sun, Moon } from "lucide-react";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 import { cn } from "@/lib/cn";
 
-export function ThemeToggle() {
+/** `variant="icon"` is the SideNav footer's compact form: a plain icon button, same behavior. */
+export function ThemeToggle({ variant = "switch" }: { variant?: "switch" | "icon" }) {
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
@@ -22,6 +23,21 @@ export function ThemeToggle() {
   }
 
   const isDark = theme === "dark";
+
+  if (variant === "icon") {
+    return (
+      <button
+        onClick={toggle}
+        role="switch"
+        aria-checked={isDark}
+        aria-label="Toggle color theme"
+        title={isDark ? "Switch to light theme" : "Switch to dark theme"}
+        className="w-8 h-8 flex-none rounded-control flex items-center justify-center text-text-3 hover:text-text hover:bg-sunken transition-colors"
+      >
+        {isDark ? <Moon size={16} strokeWidth={1.75} /> : <Sun size={16} strokeWidth={1.75} />}
+      </button>
+    );
+  }
 
   return (
     <button

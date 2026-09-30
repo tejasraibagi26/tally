@@ -5,7 +5,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { applyPrivacy, getStoredPrivacy } from "@/lib/privacy";
 import { cn } from "@/lib/cn";
 
-export function PrivacyToggle() {
+/** `variant="icon"` is the SideNav footer's compact form: a plain icon button, same behavior. */
+export function PrivacyToggle({ variant = "switch" }: { variant?: "switch" | "icon" }) {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
@@ -18,6 +19,21 @@ export function PrivacyToggle() {
     const next = !hidden;
     setHidden(next);
     applyPrivacy(next);
+  }
+
+  if (variant === "icon") {
+    return (
+      <button
+        onClick={toggle}
+        role="switch"
+        aria-checked={hidden}
+        aria-label="Hide sensitive amounts"
+        title={hidden ? "Show amounts" : "Hide amounts"}
+        className={cn("w-8 h-8 flex-none rounded-control flex items-center justify-center text-text-3 hover:text-text hover:bg-sunken transition-colors", hidden && "text-brand")}
+      >
+        {hidden ? <EyeOff size={16} strokeWidth={1.75} /> : <Eye size={16} strokeWidth={1.75} />}
+      </button>
+    );
   }
 
   return (

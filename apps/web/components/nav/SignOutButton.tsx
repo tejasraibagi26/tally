@@ -9,9 +9,9 @@ export function SignOutButton() {
       onClick={() => signOut({ callbackUrl: "/login" })}
       aria-label="Sign out"
       title="Sign out"
-      className="w-7 h-7 flex-none rounded-control flex items-center justify-center text-text-3 hover:text-negative hover:bg-negative-subtle transition-colors"
+      className="w-8 h-8 flex-none rounded-control flex items-center justify-center text-text-3 hover:text-negative hover:bg-negative-subtle transition-colors"
     >
-      <LogOut size={15} strokeWidth={2} />
+      <LogOut size={16} strokeWidth={1.75} />
     </button>
   );
 }

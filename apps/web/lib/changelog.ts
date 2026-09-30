@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.13.0",
+    date: "2026-09-30",
+    changes: [
+      { kind: "improved", text: "Reorganized sidebar: Your money, What you have, What you owe and Plan ahead, each with icons. Credit cards now sit under What you owe." },
+      { kind: "new", text: "Rules is in the sidebar." },
+      { kind: "improved", text: "The FIRE calculator is now called Early retirement." },
+      { kind: "improved", text: "Hide amounts, theme, settings and sign out are one row of buttons at the bottom of the sidebar." },
+    ],
+  },
+  {
     version: "1.12.2",
     date: "2026-09-30",
     changes: [{ kind: "fixed", text: "Canadian ETFs like VFV no longer show up as US dollars (and overvalued) when Plaid reports them under their US over-the-counter listing." }],
