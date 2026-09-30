@@ -42,9 +42,11 @@ import Constants from "expo-constants";
  * "hide amounts" to net worth, income, investment totals and account
  * balances (matching web) -- now masks the income/cash-flow tiles and
  * income schedules, and unmasks FIRE's target and projection. 1.6.0 swaps
- * Overview's Cash flow tile for an Investments total.
+ * Overview's Cash flow tile for an Investments total. 1.6.1 paints
+ * Android's pushed-screen toolbar canvas-colored with no shadow, so it
+ * blends into the page instead of sitting on it as a white slab.
  */
-export const APP_VERSION = "1.6.0";
+export const APP_VERSION = "1.6.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
