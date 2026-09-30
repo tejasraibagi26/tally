@@ -59,9 +59,11 @@ import Constants from "expo-constants";
  * reverts that bottom tab bar change (a misread request -- the ask was
  * the top bar) and makes the pushed screens' top bar transparent on
  * Android via a custom TransparentHeader. 1.10.0 adopts web's refined
- * light palette ("light v2", web v1.12.0).
+ * light palette ("light v2", web v1.12.0). 1.10.1 deepens brand-subtle
+ * so the green pill buttons (Sync, Add account, Filters) are visible on
+ * the light canvas again.
  */
-export const APP_VERSION = "1.10.0";
+export const APP_VERSION = "1.10.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

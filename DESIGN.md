@@ -31,7 +31,7 @@ COLOR — light
   canvas #F1F0EC · surface #FFFFFF · surface-2 #F8F8F5 · sunken #ECEBE6
   border #E3E1DB · border-strong #8A877E
   text #1A1917 · text-2 #4D4B45 · text-3 #65635C
-  brand #14513F (evergreen) · brand-hover #0E3E30 · brand-subtle #E4EEE9
+  brand #14513F (evergreen) · brand-hover #0E3E30 · brand-subtle #D0E3D9
   positive #237A3B · negative #B3372A · warning #835600 · info #2466C6
 
 COLOR — dark
@@ -158,8 +158,8 @@ chart legend) in both light and dark.
 | `--text-3` | `#65635C` | Tertiary, placeholders, axis |
 | `--brand` | `#14513F` | Primary action, active nav |
 | `--brand-hover` | `#0E3E30` | Hover/pressed |
-| `--brand-subtle` | `#E4EEE9` | Selected row, brand-tinted chip |
-| `--brand-border` | `#B9D2C6` | Border on brand-subtle |
+| `--brand-subtle` | `#D0E3D9` | Selected row, brand-tinted chip |
+| `--brand-border` | `#A9C8B9` | Border on brand-subtle |
 | `--on-brand` | `#FFFFFF` | Text on brand |
 | `--positive` | `#237A3B` | Income, gains |
 | `--negative` | `#B3372A` | Spend, losses, over budget |
@@ -389,8 +389,8 @@ Respect `prefers-reduced-motion: reduce` — replace movement with an instant st
   --canvas:#F1F0EC; --surface:#FFFFFF; --surface-2:#F8F8F5; --sunken:#ECEBE6;
   --border:#E3E1DB; --border-strong:#8A877E;
   --text:#1A1917; --text-2:#4D4B45; --text-3:#65635C;
-  --brand:#14513F; --brand-hover:#0E3E30; --brand-subtle:#E4EEE9;
-  --brand-border:#B9D2C6; --on-brand:#FFFFFF;
+  --brand:#14513F; --brand-hover:#0E3E30; --brand-subtle:#D0E3D9;
+  --brand-border:#A9C8B9; --on-brand:#FFFFFF;
   --positive:#237A3B; --negative:#B3372A; --warning:#835600; --info:#2466C6;
   --status-good:#0CA30C; --status-warning:#FAB219;
   --status-serious:#EC835A; --status-critical:#D03B3B;

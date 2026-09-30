@@ -44,9 +44,10 @@
  * 1.11.0 makes the refined dark palette the only dark mode and removes the
  * preview toggle. 1.12.0 refines light mode ("light v2"): white cards on a
  * deeper canvas, AA-passing info/focus ring and input borders, and a
- * greener positive that no longer matches the brand.
+ * greener positive that no longer matches the brand. 1.12.1 deepens --brand-subtle (#E4EEE9 ->
+ * #D0E3D9): it was 1.04:1 on the new canvas, so tinted pills vanished.
  */
-export const APP_VERSION = "1.12.0";
+export const APP_VERSION = "1.12.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

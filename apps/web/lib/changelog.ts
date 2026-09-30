@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.12.1",
+    date: "2026-09-30",
+    changes: [{ kind: "fixed", text: "In light mode, the light green highlight on selected items and the active menu item is visible again." }],
+  },
+  {
     version: "1.12.0",
     date: "2026-09-30",
     changes: [{ kind: "improved", text: "Refreshed light mode: cards stand out more clearly from the background, borders and focus outlines are easier to see, and gains are a distinct green from buttons and links." }],
