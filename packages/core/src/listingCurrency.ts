@@ -13,8 +13,23 @@ import { DEFAULT_CURRENCY } from "./fx";
 const CAD_MICS = new Set(["XTSE", "XTSX", "XCNQ", "PURE", "NEOE", "NEOD", "NEON", "CHIC", "XCXD", "XATS", "OMGA", "LYNX"]);
 const USD_MICS = new Set([
   "XNYS", "XNAS", "XNGS", "XNMS", "XNCM", "ARCX", "XASE", "BATS", "BATY", "EDGA", "EDGX",
-  "IEXG", "XCHI", "XPHL", "XBOS", "MEMX", "EPRL", "OTCM",
+  "IEXG", "XCHI", "XPHL", "XBOS", "MEMX", "EPRL",
 ]);
+/**
+ * US over-the-counter venues. A Canadian security's OTC twin (VFV on the TSX
+ * vs VFVXF on OTC) shares its ISIN, and Plaid resolved Wealthsimple's VFV to
+ * that twin -- mic OOTC, labeled USD -- while its close_price was still the
+ * TSX quote in CAD (193.11), so the holding got converted as USD, ~38% too
+ * large. An OTC listing says nothing reliable about the quote currency, so
+ * it's treated as unknown and the holding's own label decides (see
+ * holdingPriceCurrency). OTCM used to be counted as USD for the same reason
+ * it's wrong here.
+ */
+const OTC_MICS = new Set(["OOTC", "OTCM", "OTCB", "OTCQ", "PINX", "PSGM", "XOTC"]);
+
+export function isOtcMic(mic: string | null | undefined): boolean {
+  return !!mic && OTC_MICS.has(mic.toUpperCase());
+}
 
 export function listingCurrency(mic: string | null | undefined, ticker: string | null | undefined): string | null {
   if (!mic) return null;
@@ -57,6 +72,10 @@ export function holdingPriceCurrency(opts: {
   holdingCurrency: string | null | undefined;
 }): string {
   if (opts.priceIsMarketPrice) {
+    // Plaid matched an OTC cross-listing: the security's own label is the
+    // twin's (USD), so fall to the holding's label, which follows the
+    // account the position is actually held in.
+    if (isOtcMic(opts.mic)) return opts.holdingCurrency ?? opts.securityCurrency ?? DEFAULT_CURRENCY;
     return listingCurrency(opts.mic, opts.ticker) ?? opts.securityCurrency ?? opts.holdingCurrency ?? DEFAULT_CURRENCY;
   }
   return opts.holdingCurrency ?? opts.securityCurrency ?? DEFAULT_CURRENCY;

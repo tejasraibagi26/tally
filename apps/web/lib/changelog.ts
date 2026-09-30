@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.12.2",
+    date: "2026-09-30",
+    changes: [{ kind: "fixed", text: "Canadian ETFs like VFV no longer show up as US dollars (and overvalued) when Plaid reports them under their US over-the-counter listing." }],
+  },
+  {
     version: "1.12.1",
     date: "2026-09-30",
     changes: [{ kind: "fixed", text: "In light mode, the light green highlight on selected items and the active menu item is visible again." }],

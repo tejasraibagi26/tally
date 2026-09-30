@@ -46,8 +46,10 @@
  * deeper canvas, AA-passing info/focus ring and input borders, and a
  * greener positive that no longer matches the brand. 1.12.1 deepens --brand-subtle (#E4EEE9 ->
  * #D0E3D9): it was 1.04:1 on the new canvas, so tinted pills vanished.
+ * 1.12.2 stops treating a holding Plaid matched to an OTC cross-listing
+ * (VFV -> VFVXF, mic OOTC) as USD; the holding's own label decides.
  */
-export const APP_VERSION = "1.12.1";
+export const APP_VERSION = "1.12.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -17,6 +17,10 @@ describe("listingCurrency", () => {
     expect(listingCurrency(null, "VFV")).toBeNull();
     expect(listingCurrency("XLON", "VOD")).toBeNull();
   });
+  it("treats OTC venues as unknown, not USD", () => {
+    expect(listingCurrency("OOTC", "VFVXF")).toBeNull();
+    expect(listingCurrency("OTCM", "VFVXF")).toBeNull();
+  });
 });
 
 describe("holdingPriceCurrency", () => {
@@ -29,6 +33,13 @@ describe("holdingPriceCurrency", () => {
     expect(
       holdingPriceCurrency({ priceIsMarketPrice: true, mic: "XNAS", ticker: "MU", securityCurrency: "USD", holdingCurrency: "CAD" }),
     ).toBe("USD");
+  });
+  it("uses the holding's label when Plaid matched a Canadian ETF's OTC twin", () => {
+    // Observed 2026-09-30: Wealthsimple VFV came back as VFVXF / OOTC / USD
+    // with the TSX CAD close, in a CAD account.
+    expect(
+      holdingPriceCurrency({ priceIsMarketPrice: true, mic: "OOTC", ticker: "VFVXF", securityCurrency: "USD", holdingCurrency: "CAD" }),
+    ).toBe("CAD");
   });
   it("falls back to the security's label when the exchange is unknown", () => {
     expect(holdingPriceCurrency({ priceIsMarketPrice: true, mic: null, ticker: "VCN", securityCurrency: "CAD", holdingCurrency: "USD" })).toBe("CAD");
