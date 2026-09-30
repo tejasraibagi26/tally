@@ -12,6 +12,7 @@ import { RecapsToggle } from "@/components/settings/RecapsToggle";
 import { DarkModePreviewToggle } from "@/components/settings/DarkModePreviewToggle";
 import { ApiKeysManager } from "@/components/settings/ApiKeysManager";
 import { accountDisplayName } from "@tally/core/accountName";
+import { APP_VERSION } from "@/lib/version";
 
 function GroupLabel({ children }: { children: string }) {
   return <div className="text-xs font-medium uppercase tracking-[0.06em] text-text-3 px-1">{children}</div>;
@@ -215,6 +216,11 @@ export default async function SettingsPage() {
           </div>
         </Card>
       </div>
+
+      {/* The only way into the changelog -- kept deliberately quiet. */}
+      <Link href="/settings/changelog" className="self-center font-mono text-[12px] text-text-3 hover:text-text-2 transition-colors">
+        v{APP_VERSION} · Changelog
+      </Link>
     </div>
   );
 }

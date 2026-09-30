@@ -4,7 +4,7 @@
  * concern, not a "what did the user's app just change" one.
  *
  * Bump this by hand on every user-visible change, right alongside the
- * change itself: a new feature or a meaningful behavior change bumps minor
+ * change itself -- and add a matching user-facing entry to lib/changelog.ts: a new feature or a meaningful behavior change bumps minor
  * (1.4.0 → 1.5.0), a bug fix, small tweak, or polish-only change bumps
  * patch (1.5.0 → 1.5.1). Initial value (1.5.2) reflected the run of work
  * already shipped before this counter existed: institution totals + a
@@ -39,8 +39,9 @@
  * "Spread across months" split a prepaid plan across 3, 6, 9 or 12 months.
  * 1.10.0 redesigns Overview's cash flow chart (income/spend lines with the
  * gap shaded, paired bars under 4 months of data, a savings headline).
+ * 1.10.1 adds a changelog page, linked quietly from the bottom of Settings.
  */
-export const APP_VERSION = "1.10.0";
+export const APP_VERSION = "1.10.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
