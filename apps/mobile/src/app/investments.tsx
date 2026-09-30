@@ -1,5 +1,6 @@
 import { View, Text, ScrollView, ActivityIndicator, Pressable } from "react-native";
-import { TrendingUp, RefreshCw } from "lucide-react-native";
+import { Stack } from "expo-router";
+import { TrendingUp } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useHoldings, useInvestmentTransactions } from "@/lib/queries/investments";
@@ -32,27 +33,34 @@ export default function InvestmentsScreen() {
   const { data: activityData } = useInvestmentTransactions();
   const sync = useSync();
 
-  // Rendered as normal in-content JS, not a native headerRight -- a custom
-  // view placed in the native header picks up iOS 26's automatic "Liquid
-  // Glass" bar-button chrome (the same treatment the native back button
-  // gets), which showed up as an unwanted ring/glow around this pill. The
-  // header stays transparent (ScreenGlow still shows through); only this
-  // button moved out of the native chrome, matching how Accounts screen's
-  // identical Sync/Add pills already render in-content with no such issue.
+  // Plain brand-colored text in the native header's right slot. On iOS it
+  // goes through unstable_headerRightItems with hidesSharedBackground, which
+  // opts it out of iOS 26's automatic "Liquid Glass" bar-button chrome -- a
+  // plain headerRight custom view picks that up as an unwanted ring/glow
+  // (why this once lived in-content instead). Android has no such chrome
+  // and ignores the items API, so it keeps using headerRight.
   const syncAction = (
-    <Pressable
-      onPress={() => sync.mutate(["holdings", "investments"])}
-      disabled={sync.isPending}
-      className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50"
-    >
-      {sync.isPending ? <ActivityIndicator size="small" color={colors.brand} /> : <RefreshCw size={14} color={colors.brand} strokeWidth={2} />}
-      <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Sync holdings</Text>
+    <Pressable onPress={() => sync.mutate(["holdings", "investments"])} disabled={sync.isPending} hitSlop={10} className="px-2 py-1">
+      {sync.isPending ? (
+        <ActivityIndicator size="small" color={colors.brand} />
+      ) : (
+        <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(15) }}>Sync</Text>
+      )}
     </Pressable>
+  );
+  const headerOptions = (
+    <Stack.Screen
+      options={{
+        headerRight: () => syncAction,
+        unstable_headerRightItems: () => [{ type: "custom", element: syncAction, hidesSharedBackground: true }],
+      }}
+    />
   );
 
   if (isLoading || !data) {
     return (
       <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
+        {headerOptions}
         <ScreenGlow />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator />
@@ -64,8 +72,8 @@ export default function InvestmentsScreen() {
   if (data.holdings.length === 0) {
     return (
       <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
+        {headerOptions}
         <ScreenGlow />
-        <View className="px-5 pt-2 items-end">{syncAction}</View>
         <View className="flex-1 items-center justify-center px-8 gap-3">
           <TrendingUp size={28} color={colors["text-3"]} strokeWidth={1.5} />
           <Text className="font-ui-semibold text-text text-center" style={{ fontSize: rf(16) }}>Nothing invested here yet</Text>
@@ -91,9 +99,9 @@ export default function InvestmentsScreen() {
 
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
+    {headerOptions}
     <ScreenGlow />
     <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
-      <View className="items-end">{syncAction}</View>
       <Card className="p-5 gap-5">
         <View className="gap-1">
           <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
