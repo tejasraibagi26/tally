@@ -32,9 +32,12 @@ import Constants from "expo-constants";
  * the chart's gesture directly -- it computes the touched index itself
  * (no gifted-charts pointer system involved at all) and resets on
  * onPanResponderRelease/Terminate, core React Native touch-lifecycle
- * callbacks rather than a third-party library's partial wiring.
+ * callbacks rather than a third-party library's partial wiring. 1.4.5
+ * shows a "Syncing…" spinner in an institution card's subtitle while its
+ * per-item "Refresh balances" is in flight -- previously the only spinner
+ * lived in the actions sheet, which closes the moment the row is tapped.
  */
-export const APP_VERSION = "1.4.4";
+export const APP_VERSION = "1.4.5";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

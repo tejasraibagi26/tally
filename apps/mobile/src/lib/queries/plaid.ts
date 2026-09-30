@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useIsMutating, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiPost, apiDelete } from "@/lib/api";
 
 // Server-side only: builds a short-lived Link token. This is the only Plaid
@@ -33,15 +33,25 @@ interface SyncResult {
 // Matches apps/web/app/api/items/[id]/refresh-balances/route.ts's contract
 // exactly — lighter-weight than useSync (balances only, one item), backing
 // the institution actions sheet's "Refresh balances" row.
+const refreshBalancesKey = (itemId: string) => ["refresh-item-balances", itemId] as const;
+
 export function useRefreshItemBalances(itemId: string) {
   const queryClient = useQueryClient();
   return useMutation({
+    mutationKey: refreshBalancesKey(itemId),
     mutationFn: () => apiPost<{ ok: true }>(`/api/items/${itemId}/refresh-balances`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
       queryClient.invalidateQueries({ queryKey: ["overview"] });
     },
   });
+}
+
+// The actions sheet closes (and unmounts) the instant "Refresh balances" is
+// tapped, taking its own isPending spinner with it -- so the institution card
+// watches the in-flight mutation by key instead to show its "Syncing…" state.
+export function useIsRefreshingItemBalances(itemId: string): boolean {
+  return useIsMutating({ mutationKey: refreshBalancesKey(itemId) }) > 0;
 }
 
 // Matches apps/web/app/api/items/[id]/route.ts's DELETE contract exactly —

@@ -8,7 +8,7 @@ import { StatusChip } from "@/components/ui/StatusChip";
 import { InstitutionActionsSheet } from "@/components/InstitutionActionsSheet";
 import { useAccounts, useUpdateAccountNickname, type Institution, type AccountRow } from "@/lib/queries/accounts";
 import { usePlaidLink } from "@/lib/usePlaidLink";
-import { useSync } from "@/lib/queries/plaid";
+import { useSync, useIsRefreshingItemBalances } from "@/lib/queries/plaid";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { hairline } from "@/theme/colors";
@@ -35,6 +35,7 @@ function InstitutionCard({
   const rf = useRF();
   const initial = (institution.institutionName ?? "?").charAt(0).toUpperCase();
   const broken = institution.badge === "critical";
+  const refreshing = useIsRefreshingItemBalances(institution.id);
 
   return (
     <Card className="overflow-hidden">
@@ -47,7 +48,14 @@ function InstitutionCard({
             <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15) }} numberOfLines={1}>
               {institution.institutionName ?? "Unknown"}
             </Text>
-            <Text className="font-ui text-text-2" style={{ fontSize: rf(12) }}>{relativeTime(institution.lastSyncedAt)}</Text>
+            {refreshing ? (
+              <View className="flex-row items-center gap-1.5">
+                <ActivityIndicator size="small" color={colors["text-2"]} style={{ transform: [{ scale: 0.7 }] }} />
+                <Text className="font-ui text-text-2" style={{ fontSize: rf(12) }}>Syncing…</Text>
+              </View>
+            ) : (
+              <Text className="font-ui text-text-2" style={{ fontSize: rf(12) }}>{relativeTime(institution.lastSyncedAt)}</Text>
+            )}
           </View>
         </View>
         <View className="flex-row items-center gap-2" style={{ flexShrink: 0 }}>
