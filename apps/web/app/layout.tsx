@@ -42,18 +42,12 @@ const THEME_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("tally-the
 // must run synchronously before first paint too.
 const PRIVACY_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("tally-hide-amounts");document.documentElement.setAttribute("data-hide-amounts",s==="true"?"true":"false");}catch(e){}})();`;
 
-// Same before-first-paint reasoning as THEME_INIT_SCRIPT, for the temporary
-// dark v2 preview (lib/theme.ts) -- otherwise a v2 user would see the old
-// dark palette flash first.
-const DARK_V2_INIT_SCRIPT = `(function(){try{document.documentElement.setAttribute("data-dark-v2",localStorage.getItem("tally-dark-v2")==="true"?"true":"false");}catch(e){}})();`;
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" data-theme="light" data-hide-amounts="false" data-dark-v2="false" suppressHydrationWarning>
+    <html lang="en" data-theme="light" data-hide-amounts="false" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: PRIVACY_INIT_SCRIPT }} />
-        <script dangerouslySetInnerHTML={{ __html: DARK_V2_INIT_SCRIPT }} />
       </head>
       <body
         className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} font-ui antialiased`}

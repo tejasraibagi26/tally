@@ -41,8 +41,10 @@
  * gap shaded, paired bars under 4 months of data, a savings headline).
  * 1.10.1 adds a changelog page, linked quietly from the bottom of Settings.
  * 1.10.2 reworks its layout (version rail, changes grouped by kind).
+ * 1.11.0 makes the refined dark palette the only dark mode and removes the
+ * preview toggle.
  */
-export const APP_VERSION = "1.10.2";
+export const APP_VERSION = "1.11.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

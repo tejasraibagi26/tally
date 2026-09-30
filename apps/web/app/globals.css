@@ -27,8 +27,8 @@
   --warning-subtle: #F5EEDC;
   --info-subtle: #E5EEFA;
   /* Floating layers -- menus, dropdowns, popovers, modals, side sheets,
-     chart tooltips -- and their row hover. Same as --surface in light and
-     current dark; only dark v2 lifts them a step above cards. */
+     chart tooltips -- and their row hover. Same as --surface in light
+     (shadows carry the lift there); dark lifts them a step above cards. */
   --raised: #FCFCFB;
   --raised-hover: #F2F0EB;
 
@@ -57,96 +57,54 @@
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) {
     color-scheme: dark;
-    --canvas: #111110;
-    --surface: #1A1A19;
-    --surface-2: #232320;
-    --sunken: #0C0C0B;
-    --border: #2B2B28;
-    --border-strong: #3D3D38;
-    --text: #F2F1ED;
-    --text-2: #A8A69D;
-    --text-3: #77756D;
-    --brand: #4FB394;
-    --brand-hover: #6AC5A9;
-    --brand-subtle: #14251F;
-    --brand-border: #234438;
-    --on-brand: #0C1A15;
-    --positive: #4FC49B;
-    --negative: #F0846B;
-    --warning: #E0A94A;
-    --info: #3987E5;
-    --positive-subtle: #12271F;
-    --negative-subtle: #2B1A16;
-    --warning-subtle: #2A2213;
-    --info-subtle: #111F2E;
-  --raised: #1A1A19;
-  --raised-hover: #262623;
-    --series-1: #199e70;
-    --series-2: #d95926;
-    --series-3: #3987e5;
-    --series-4: #c98500;
-    --series-5: #d55181;
-    --series-6: #008300;
-    --series-7: #9085e9;
-    --series-8: #e66767;
-    --shadow-raised: none;
-    --shadow-overlay: 0 12px 32px -8px rgba(0,0,0,.6);
+    --canvas: #0B0B0A;
+    --surface: #191918;
+    --surface-2: #222220;
+    --sunken: #111110;
+    --border: #2C2C29;
+    --border-strong: #666560;
+    --text: #EEEDE8;
+    --text-2: #B3B1A8;
+    --text-3: #908E85;
+    --brand: #5BBFA3;
+    --brand-hover: #7ACFB6;
+    --brand-subtle: #11261F;
+    --brand-border: #24463B;
+    --on-brand: #0B1A15;
+    --positive: #6CCB8E;
+    --negative: #F48C75;
+    --warning: #E8B45A;
+    --info: #6AA5F0;
+    --positive-subtle: #13261A;
+    --negative-subtle: #2E1914;
+    --warning-subtle: #2C2312;
+    --info-subtle: #12203A;
+    --raised: #292927;
+    --raised-hover: #33332F;
+    --series-1: #23b07e;
+    --series-2: #e0662f;
+    --series-3: #4a93ea;
+    --series-4: #d69a1a;
+    --series-5: #dd6a93;
+    --series-6: #3aa95a;
+    --series-7: #9a90ee;
+    --series-8: #ea7575;
+    --shadow-raised: inset 0 1px 0 rgba(255,255,255,.045), 0 1px 2px rgba(0,0,0,.45);
+    --shadow-overlay: inset 0 1px 0 rgba(255,255,255,.06), 0 16px 40px -8px rgba(0,0,0,.7);
   }
 }
 
+/* Dark theme ("dark v2", made default in web v1.11.0 after a side-by-side
+   preview). Measured on --surface: text-3 5.36:1 and border-strong 3.01:1
+   (both failed before); positive is greener than the teal brand so gains
+   don't read as links; elevation comes from lightness steps plus a 1px top
+   edge-light in the shadows. Keep in sync with the prefers-color-scheme
+   copy above. */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --canvas: #111110;
-  --surface: #1A1A19;
-  --surface-2: #232320;
-  --sunken: #0C0C0B;
-  --border: #2B2B28;
-  --border-strong: #3D3D38;
-  --text: #F2F1ED;
-  --text-2: #A8A69D;
-  --text-3: #77756D;
-  --brand: #4FB394;
-  --brand-hover: #6AC5A9;
-  --brand-subtle: #14251F;
-  --brand-border: #234438;
-  --on-brand: #0C1A15;
-  --positive: #4FC49B;
-  --negative: #F0846B;
-  --warning: #E0A94A;
-  --info: #3987E5;
-  --positive-subtle: #12271F;
-  --negative-subtle: #2B1A16;
-  --warning-subtle: #2A2213;
-  --info-subtle: #111F2E;
-  --raised: #1A1A19;
-  --raised-hover: #262623;
-  --series-1: #199e70;
-  --series-2: #d95926;
-  --series-3: #3987e5;
-  --series-4: #c98500;
-  --series-5: #d55181;
-  --series-6: #008300;
-  --series-7: #9085e9;
-  --series-8: #e66767;
-  --shadow-raised: none;
-  --shadow-overlay: 0 12px 32px -8px rgba(0,0,0,.6);
-}
-
-/* Dark v2 ("Refined dark mode (preview)" in Settings, lib/theme.ts) --
-   TEMPORARY side-by-side trial; overrides only the tokens that change.
-   Spec and measured contrast: the "Tally dark mode spec" review canvas.
-   - text-3 5.36:1 on surface (was 3.77, failed AA)
-   - border-strong 3.01:1 for control edges (was 1.59)
-   - positive moved greener so gains don't read as brand-teal links
-   - deeper canvas + a 1px top edge-light on raised layers for elevation
-   Once committed, these values replace the [data-theme="dark"] block above
-   and this block, the init script and the toggle go away. */
-:root[data-theme="dark"][data-dark-v2="true"] {
   --canvas: #0B0B0A;
   --surface: #191918;
   --surface-2: #222220;
-  --raised: #292927;
-  --raised-hover: #33332F;
   --sunken: #111110;
   --border: #2C2C29;
   --border-strong: #666560;
@@ -166,6 +124,8 @@
   --negative-subtle: #2E1914;
   --warning-subtle: #2C2312;
   --info-subtle: #12203A;
+  --raised: #292927;
+  --raised-hover: #33332F;
   --series-1: #23b07e;
   --series-2: #e0662f;
   --series-3: #4a93ea;
