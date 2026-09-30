@@ -8,12 +8,14 @@ interface MoneyTextProps extends TextProps {
   abbreviate?: boolean;
   /** Tailwind text-color className, e.g. "text-positive" -- caller decides sign coloring per DESIGN.md §5.4. */
   className?: string;
-  /** Opt out of the "hide amounts" mask. The toggle is meant to cover figures
-   * that reveal overall financial standing at a glance -- net worth, account
-   * balances, portfolio value/gain, FIRE numbers -- not every individual
-   * dollar figure in the app. Budgets/Subscriptions totals (plans, not
-   * balances) and per-line-item amounts (a single transaction, split, or
-   * holding) opt out via this prop. Defaults to true. */
+  /** Opt out of the "hide amounts" mask. The toggle covers exactly four
+   * things, same as web's `.money` class (apps/web/app/globals.css): net
+   * worth (incl. FIRE's "invested today"), income (the Overview tile, cash
+   * flow -- income is derivable from it next to spend -- and income
+   * schedules), investment totals (portfolio value/invested/return, account
+   * subtotals), and account balances. Everything else -- spend,
+   * transactions, budgets, bills, individual holdings, FIRE targets and
+   * projections -- opts out via this prop. Defaults to true. */
   mask?: boolean;
 }
 

@@ -376,7 +376,7 @@ export default function OverviewScreen() {
             {kpiTiles.map((tile) => (
               <View key={tile.key} className="rounded-panel px-4 py-4 gap-1.5 bg-surface" style={{ width: "48%" }}>
                 <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(11.5) }}>{tile.label}</Text>
-                <MoneyText cents={tile.cents} signed={tile.key === "cashflow"} mask={false} className="font-ui-semibold text-text" style={{ fontSize: rf(19) }} numberOfLines={1} adjustsFontSizeToFit />
+                <MoneyText cents={tile.cents} signed={tile.key === "cashflow"} mask={tile.key === "income" || tile.key === "cashflow"} className="font-ui-semibold text-text" style={{ fontSize: rf(19) }} numberOfLines={1} adjustsFontSizeToFit />
                 {/* Secondary (budget %) takes priority over the vs.-last-month
                     delta when both exist (spend tile only) -- showing both
                     stacked overflowed the tile width, truncating the second

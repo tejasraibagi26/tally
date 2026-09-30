@@ -132,13 +132,13 @@ export default async function CardsPage() {
                       <div className="grid grid-cols-2 gap-4">
                         <div className="flex flex-col gap-1">
                           <span className="text-xs text-text-3 uppercase tracking-wide">Statement balance</span>
-                          <span className="text-[15px] text-text tabular money">
+                          <span className="text-[15px] text-text tabular">
                             {liability.lastStatementBalance != null ? formatCents(liability.lastStatementBalance) : "—"}
                           </span>
                         </div>
                         <div className="flex flex-col gap-1">
                           <span className="text-xs text-text-3 uppercase tracking-wide">Minimum payment</span>
-                          <span className="text-[15px] text-text tabular money">
+                          <span className="text-[15px] text-text tabular">
                             {liability.minimumPaymentAmount != null ? formatCents(liability.minimumPaymentAmount) : "—"}
                           </span>
                         </div>

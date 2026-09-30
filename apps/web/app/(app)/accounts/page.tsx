@@ -180,7 +180,7 @@ export default async function AccountsPage() {
                             {acct.currentBalance != null ? formatCents(acct.currentBalance) : "—"}
                           </span>
                           {acct.type === "credit" && acct.creditLimit != null && (
-                            <span className="text-xs text-text-3 tabular money">of {formatCents(acct.creditLimit)}</span>
+                            <span className="text-xs text-text-3 tabular">of {formatCents(acct.creditLimit)}</span>
                           )}
                         </div>
                       </div>

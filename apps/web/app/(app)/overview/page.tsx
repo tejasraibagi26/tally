@@ -175,7 +175,7 @@ export default async function OverviewPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" style={reveal(1)}>
         <StatTile
           label="Spent this month"
-          value={<AnimatedNumber cents={thisMonth.spend} className="money" />}
+          value={<AnimatedNumber cents={thisMonth.spend} />}
           delta={spendDelta ? { ...spendDelta, goodDirection: "down", comparisonLabel: "vs last month" } : undefined}
           secondary={totalBudgeted > 0 ? `${formatPercent(thisMonth.spend / totalBudgeted)} of ${formatCents(totalBudgeted)} budget` : "Projected " + formatCents(projectedSpend)}
           href={`/transactions?from=${monthStart}&to=${monthEnd}&kind=expense&transfer=0&excluded=0`}
@@ -244,7 +244,7 @@ export default async function OverviewPage() {
                     <span className="text-[15px] text-text truncate">{bill.label}</span>
                     <span className="text-xs text-text-3">{bill.dueDate}</span>
                   </div>
-                  <span className="text-right text-[15px] text-text tabular money">{formatCents(bill.amount)}</span>
+                  <span className="text-right text-[15px] text-text tabular">{formatCents(bill.amount)}</span>
                 </div>
               ))}
             </div>
@@ -260,7 +260,7 @@ export default async function OverviewPage() {
                   {t.isPending && <span className="text-[11px] text-warning uppercase tracking-wide flex-none">Pending</span>}
                 </div>
                 <span className="font-mono text-xs text-text-3 tabular flex-none w-20 text-right whitespace-nowrap">{relativeDate(t.postedDate)}</span>
-                <span className={`text-[15px] tabular money flex-none w-24 text-right ${t.amount > 0 ? "text-positive" : "text-text"}`}>
+                <span className={`text-[15px] tabular flex-none w-24 text-right ${t.amount > 0 ? "text-positive" : "text-text"}`}>
                   {formatCents(t.amount, { signed: true })}
                 </span>
               </div>

@@ -38,9 +38,12 @@ import Constants from "expo-constants";
  * lived in the actions sheet, which closes the moment the row is tapped.
  * 1.5.0 regroups the Budgets tab into one card: the summary becomes its
  * header (left to spend, a category-segmented total bar, progress caption)
- * and every budget is a hairline-divided row inside it.
+ * and every budget is a hairline-divided row inside it. 1.5.1 narrows
+ * "hide amounts" to net worth, income, investment totals and account
+ * balances (matching web) -- now masks the income/cash-flow tiles and
+ * income schedules, and unmasks FIRE's target and projection.
  */
-export const APP_VERSION = "1.5.0";
+export const APP_VERSION = "1.5.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -168,7 +168,7 @@ export default function FireCalculatorScreen() {
             <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
               FIRE number
             </Text>
-            <MoneyText cents={target} className="font-display text-text" style={{ fontSize: rf(26) }} />
+            <MoneyText cents={target} mask={false} className="font-display text-text" style={{ fontSize: rf(26) }} />
           </View>
           <View className="h-2 rounded-full bg-sunken overflow-hidden">
             <View className="h-full rounded-full bg-brand" style={{ width: `${barPct * 100}%` }} />
@@ -241,7 +241,7 @@ export default function FireCalculatorScreen() {
                 </View>
                 <View className="items-end gap-0.5">
                   <Text className="font-ui text-text-3" style={{ fontSize: rf(10.5) }}>In {horizonYears} years</Text>
-                  <MoneyText cents={endValue} className="font-ui-semibold text-text" style={{ fontSize: rf(13.5) }} />
+                  <MoneyText cents={endValue} mask={false} className="font-ui-semibold text-text" style={{ fontSize: rf(13.5) }} />
                 </View>
               </View>
             </Card>

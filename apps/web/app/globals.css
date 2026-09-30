@@ -137,7 +137,11 @@ body {
 }
 
 /* Privacy toggle (components/PrivacyToggle.tsx): applied explicitly via
-   .money on the span/div wrapping a formatCents(...) call — NOT .tabular,
+   .money on the span/div wrapping a formatCents(...) call -- and ONLY for
+   net worth, income (incl. cash flow and income schedules), investment
+   totals, and account balances; spend, transactions, budgets, bills,
+   individual holdings, and FIRE targets stay visible (mobile's MoneyText
+   `mask` prop follows the same list) — NOT .tabular,
    which is also used for dates, percentages, and other non-money numerics
    that shouldn't be masked (font-variant-numeric: tabular-nums is a font
    styling concern, unrelated to what's actually sensitive).

@@ -178,13 +178,13 @@ export default async function InvestmentsPage() {
                   <span className="font-mono text-[13.5px] text-text">{h.ticker ?? "—"}</span>
                   <span className="text-[15px] text-text truncate">{h.securityName ?? "Unknown security"}</span>
                   <span className="text-right text-[13.5px] text-text-2 tabular">{formatQuantity(h.quantity)}</span>
-                  <span className="text-right text-[13.5px] text-text-2 tabular money">
+                  <span className="text-right text-[13.5px] text-text-2 tabular">
                     {h.institutionValue != null && parseFloat(h.quantity) > 0
                       ? formatCents(Math.round(h.institutionValue / parseFloat(h.quantity)))
                       : "—"}
                   </span>
                   <div className="flex flex-col items-end gap-0.5">
-                    <span className="text-right text-[15px] text-text tabular money">{formatCents(h.institutionValue)}</span>
+                    <span className="text-right text-[15px] text-text tabular">{formatCents(h.institutionValue)}</span>
                     <span className="text-right text-[11px] text-text-3">
                       {h.currency}
                       {h.originalCurrency !== h.currency && ` (${h.originalCurrency})`}

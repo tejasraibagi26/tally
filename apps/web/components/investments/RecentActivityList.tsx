@@ -30,7 +30,7 @@ export function RecentActivityList({ activity }: { activity: ActivityRow[] }) {
             {tx.ticker && <span className="text-text-3"> · {tx.ticker}</span>}
           </span>
           <span className="text-xs text-text-3">{tx.subtype}</span>
-          <span className={`text-right text-[15px] tabular money ${tx.amount < 0 ? "text-positive" : "text-text"}`}>
+          <span className={`text-right text-[15px] tabular ${tx.amount < 0 ? "text-positive" : "text-text"}`}>
             {formatCents(tx.amount, { signed: true })}
           </span>
         </div>

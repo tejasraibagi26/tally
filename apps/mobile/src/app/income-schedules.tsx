@@ -66,7 +66,7 @@ function ScheduleRow({ schedule, isLast }: { schedule: IncomeSchedule; isLast: b
           {schedule.categoryName ? ` · ${schedule.categoryName}` : ""}
         </Text>
       </View>
-      <MoneyText cents={schedule.amount} mask={false} className="text-positive font-ui-medium" style={{ fontSize: rf(14.5) }} />
+      <MoneyText cents={schedule.amount} className="text-positive font-ui-medium" style={{ fontSize: rf(14.5) }} />
       <Pressable onPress={() => update.mutate({ active: !schedule.active })} disabled={update.isPending} hitSlop={8}>
         <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(13) }}>{schedule.active ? "Pause" : "Resume"}</Text>
       </Pressable>
