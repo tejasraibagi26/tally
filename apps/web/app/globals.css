@@ -180,6 +180,20 @@ body {
   letter-spacing: 1px;
 }
 
+/* Right-aligned figures (text-right on the figure or its wrapper) anchor
+   the dots to the box's right edge and let them grow leftward, instead of
+   laying them out inside the box: that box is only as wide as the hidden
+   figure, so with inset: 0 a narrow value ("$0.00") let the fixed-width
+   dots overflow past the right edge while wider ones stopped short --
+   a ragged column. right: -1px cancels letter-spacing's trailing gap so
+   the last dot sits flush with unmasked right-aligned text below it. */
+[data-hide-amounts="true"] .text-right > .money::after,
+[data-hide-amounts="true"] .money.text-right::after {
+  left: auto;
+  right: -1px;
+  white-space: nowrap;
+}
+
 /* components/ui/LoadingOverlay.tsx: a single brand-colored bar sliding
    across a rounded track — standard indeterminate-progress motion,
    accelerates in, decelerates out at the far edge, then loops. */

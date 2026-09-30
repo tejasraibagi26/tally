@@ -29,9 +29,10 @@
  * 1.5.9 assumes CAD (not USD) wherever a synced amount has no currency.
  * 1.5.10 narrows "hide amounts" to net worth, income, investment totals
  * and account balances -- spend, transactions, budgets etc. stay visible.
- * 1.6.0 swaps Overview's Cash flow tile for an Investments total.
+ * 1.6.0 swaps Overview's Cash flow tile for an Investments total. 1.6.1
+ * keeps hidden-amount dots flush right in right-aligned columns.
  */
-export const APP_VERSION = "1.6.0";
+export const APP_VERSION = "1.6.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
