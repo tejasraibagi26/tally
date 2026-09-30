@@ -130,7 +130,7 @@ export function Sheet({
           pointerEvents="box-none"
         >
           <Animated.View
-            className="bg-surface rounded-t-panel overflow-hidden"
+            className="bg-raised rounded-t-panel overflow-hidden"
             style={[{ maxHeight, paddingBottom: keyboardVisible ? 0 : insets.bottom }, sheetStyle]}
           >
             <GestureDetector gesture={panGesture}>

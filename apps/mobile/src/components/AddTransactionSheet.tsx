@@ -124,14 +124,14 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
             <Pressable
               onPress={() => setKind("expense")}
               className="flex-1 items-center justify-center"
-              style={{ backgroundColor: kind === "expense" ? colors["negative-subtle"] : colors.surface }}
+              style={{ backgroundColor: kind === "expense" ? colors["negative-subtle"] : colors.raised }}
             >
               <Text className="font-ui-semibold" style={{ fontSize: rf(14), color: kind === "expense" ? colors.negative : colors["text-2"] }}>Expense</Text>
             </Pressable>
             <Pressable
               onPress={() => setKind("income")}
               className="flex-1 items-center justify-center"
-              style={{ backgroundColor: kind === "income" ? colors["positive-subtle"] : colors.surface }}
+              style={{ backgroundColor: kind === "income" ? colors["positive-subtle"] : colors.raised }}
             >
               <Text className="font-ui-semibold" style={{ fontSize: rf(14), color: kind === "income" ? colors.positive : colors["text-2"] }}>Income</Text>
             </Pressable>

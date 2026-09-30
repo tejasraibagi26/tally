@@ -39,5 +39,5 @@ export function hairline(colors: Record<string, string>): string {
 /** DESIGN.md §7.1 -- fixed order, never cycled, never reused as a status color. */
 export const chartSeries = {
   light: ["#1baf7a", "#eb6834", "#2a78d6", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"],
-  dark: ["#199e70", "#d95926", "#3987e5", "#c98500", "#d55181", "#008300", "#9085e9", "#e66767"],
+  dark: ["#23b07e", "#e0662f", "#4a93ea", "#d69a1a", "#dd6a93", "#3aa95a", "#9a90ee", "#ea7575"],
 };

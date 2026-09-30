@@ -30,34 +30,40 @@
     --color-negative-subtle: #F6E7E4;
     --color-warning-subtle: #F5EEDC;
     --color-info-subtle: #E5EEFA;
+    --color-raised: #FCFCFB;
+    --color-raised-hover: #F2F0EB;
   }
 
-  /* True OLED black (not a tinted near-black) -- canvas/sunken are literal
-     #000000, surface/surface-2 promoted to carry all the elevation contrast.
-     brand and positive are separated 36° apart in hue (jade vs. grass) so a
-     primary button and a gains figure never read as the same green. */
+  /* Same palette as web's dark theme (apps/web/app/globals.css, "dark v2",
+     mobile v1.8.0). Replaces the earlier true-OLED-black canvas: the
+     near-black #0B0B0A is indistinguishable on OLED but lets cards and
+     sheets step up in lightness the same way they do on web. Measured on
+     --surface: text-3 5.36:1, border-strong 3.01:1; brand teal and the
+     greener positive stay distinct so gains don't read as links. */
   .dark:root {
-    --color-canvas: #000000;
-    --color-surface: #151918;
-    --color-surface-2: #242928;
-    --color-sunken: #000000;
-    --color-border: #2F3736;
-    --color-border-strong: #566160;
-    --color-text: #F5F5F4;
-    --color-text-2: #B2B6AF;
-    --color-text-3: #868B84;
-    --color-brand: #53C6AF;
-    --color-brand-hover: #70D7C2;
-    --color-brand-subtle: #0F2420;
-    --color-brand-border: #244740;
-    --color-on-brand: #081614;
-    --color-positive: #55CE6D;
-    --color-negative: #F37B68;
-    --color-warning: #E4A944;
-    --color-info: #4791EB;
-    --color-positive-subtle: #112214;
-    --color-negative-subtle: #29130F;
-    --color-warning-subtle: #271F11;
-    --color-info-subtle: #101B28;
+    --color-canvas: #0B0B0A;
+    --color-surface: #191918;
+    --color-surface-2: #222220;
+    --color-sunken: #111110;
+    --color-border: #2C2C29;
+    --color-border-strong: #666560;
+    --color-text: #EEEDE8;
+    --color-text-2: #B3B1A8;
+    --color-text-3: #908E85;
+    --color-brand: #5BBFA3;
+    --color-brand-hover: #7ACFB6;
+    --color-brand-subtle: #11261F;
+    --color-brand-border: #24463B;
+    --color-on-brand: #0B1A15;
+    --color-positive: #6CCB8E;
+    --color-negative: #F48C75;
+    --color-warning: #E8B45A;
+    --color-info: #6AA5F0;
+    --color-positive-subtle: #13261A;
+    --color-negative-subtle: #2E1914;
+    --color-warning-subtle: #2C2312;
+    --color-info-subtle: #12203A;
+    --color-raised: #292927;
+    --color-raised-hover: #33332F;
   }
 }

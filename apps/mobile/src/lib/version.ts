@@ -50,8 +50,10 @@ import Constants from "expo-constants";
  * its parent category's color. 1.7.0 adds 3/6/9/12-month terms to
  * "Spread across months" (transaction detail and Subscriptions). 1.7.1
  * makes Overview's net worth chart full-bleed and taller, like web's.
+ * 1.8.0 adopts web's refined dark palette (near-black canvas instead of
+ * OLED black, higher-contrast text and borders, raised sheets).
  */
-export const APP_VERSION = "1.7.1";
+export const APP_VERSION = "1.8.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
