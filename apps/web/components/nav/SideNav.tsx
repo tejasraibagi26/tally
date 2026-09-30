@@ -158,16 +158,22 @@ export function SideNav({
       <div className="mt-auto flex flex-col gap-3">
         <div className="h-px bg-border" />
 
-
         {mockMode && (
           <span className="self-start inline-flex items-center gap-1.5 rounded-full bg-warning-subtle text-warning text-xs font-medium px-2.5 py-0.5">
             Mock data
           </span>
         )}
 
+        {/* The two display toggles as one labeled pill -- each half says what
+            it does and shows its state, instead of two bare icons. */}
+        <div className="flex rounded-control border border-border overflow-hidden divide-x divide-border">
+          <PrivacyToggle variant="segment" />
+          <ThemeToggle variant="segment" />
+        </div>
+
         <div
           className={cn(
-            "flex items-center gap-2 px-2 py-2 -mx-2 rounded-control hover:bg-sunken",
+            "flex items-center gap-1 px-2 py-2 -mx-2 rounded-control",
             isActive("/settings") && "bg-sunken",
           )}
         >
@@ -182,19 +188,11 @@ export function SideNav({
               <span className="text-xs leading-none text-text-3">Private</span>
             </div>
           </Link>
-        </div>
-
-        <div className="flex items-center justify-between px-1">
-          <PrivacyToggle variant="icon" />
-          <ThemeToggle variant="icon" />
           <Link
             href="/settings"
             aria-label="Settings"
             title="Settings"
-            className={cn(
-              "w-8 h-8 flex-none rounded-control flex items-center justify-center text-text-3 hover:text-text hover:bg-sunken transition-colors",
-              isActive("/settings") && "text-brand",
-            )}
+            className="w-8 h-8 flex-none rounded-control flex items-center justify-center text-text-3 hover:text-text hover:bg-sunken transition-colors"
           >
             <Settings size={16} strokeWidth={1.75} />
           </Link>

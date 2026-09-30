@@ -5,8 +5,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { applyPrivacy, getStoredPrivacy } from "@/lib/privacy";
 import { cn } from "@/lib/cn";
 
-/** `variant="icon"` is the SideNav footer's compact form: a plain icon button, same behavior. */
-export function PrivacyToggle({ variant = "switch" }: { variant?: "switch" | "icon" }) {
+/** `variant="segment"` is one half of the SideNav footer's labeled pill (see SideNav). */
+export function PrivacyToggle({ variant = "switch" }: { variant?: "switch" | "segment" }) {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export function PrivacyToggle({ variant = "switch" }: { variant?: "switch" | "ic
     applyPrivacy(next);
   }
 
-  if (variant === "icon") {
+  if (variant === "segment") {
     return (
       <button
         onClick={toggle}
@@ -29,9 +29,13 @@ export function PrivacyToggle({ variant = "switch" }: { variant?: "switch" | "ic
         aria-checked={hidden}
         aria-label="Hide sensitive amounts"
         title={hidden ? "Show amounts" : "Hide amounts"}
-        className={cn("w-8 h-8 flex-none rounded-control flex items-center justify-center text-text-3 hover:text-text hover:bg-sunken transition-colors", hidden && "text-brand")}
+        className={cn(
+          "flex-1 h-8 flex items-center justify-center gap-1.5 text-[12.5px] transition-colors",
+          hidden ? "bg-brand-subtle text-brand font-medium" : "text-text-2 hover:bg-sunken hover:text-text",
+        )}
       >
-        {hidden ? <EyeOff size={16} strokeWidth={1.75} /> : <Eye size={16} strokeWidth={1.75} />}
+        {hidden ? <EyeOff size={14} strokeWidth={1.9} /> : <Eye size={14} strokeWidth={1.9} />}
+        {hidden ? "Amounts hidden" : "Hide amounts"}
       </button>
     );
   }

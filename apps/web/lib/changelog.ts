@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.13.1",
+    date: "2026-09-30",
+    changes: [{ kind: "improved", text: "The sidebar footer has labeled Hide amounts and Light/Dark buttons, with Settings and Sign out next to your name." }],
+  },
+  {
     version: "1.13.0",
     date: "2026-09-30",
     changes: [

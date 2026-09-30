@@ -51,8 +51,10 @@
  * 1.13.0 regroups the side nav (Your money / What you have / What you owe
  * / Plan ahead) with icons and dividers, adds Rules to it, renames FIRE
  * calculator to Early retirement, and compacts the footer into an icon row.
+ * 1.13.1 replaces that unlabeled icon row with a labeled Hide amounts /
+ * theme pill, and moves Settings and Sign out next to the profile.
  */
-export const APP_VERSION = "1.13.0";
+export const APP_VERSION = "1.13.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

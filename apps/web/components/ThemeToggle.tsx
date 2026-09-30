@@ -5,8 +5,8 @@ import { Sun, Moon } from "lucide-react";
 import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme";
 import { cn } from "@/lib/cn";
 
-/** `variant="icon"` is the SideNav footer's compact form: a plain icon button, same behavior. */
-export function ThemeToggle({ variant = "switch" }: { variant?: "switch" | "icon" }) {
+/** `variant="segment"` is one half of the SideNav footer's labeled pill (see SideNav); it names the current theme and flips it on click. */
+export function ThemeToggle({ variant = "switch" }: { variant?: "switch" | "segment" }) {
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export function ThemeToggle({ variant = "switch" }: { variant?: "switch" | "icon
 
   const isDark = theme === "dark";
 
-  if (variant === "icon") {
+  if (variant === "segment") {
     return (
       <button
         onClick={toggle}
@@ -32,9 +32,10 @@ export function ThemeToggle({ variant = "switch" }: { variant?: "switch" | "icon
         aria-checked={isDark}
         aria-label="Toggle color theme"
         title={isDark ? "Switch to light theme" : "Switch to dark theme"}
-        className="w-8 h-8 flex-none rounded-control flex items-center justify-center text-text-3 hover:text-text hover:bg-sunken transition-colors"
+        className="flex-1 h-8 flex items-center justify-center gap-1.5 text-[12.5px] transition-colors text-text-2 hover:bg-sunken hover:text-text"
       >
-        {isDark ? <Moon size={16} strokeWidth={1.75} /> : <Sun size={16} strokeWidth={1.75} />}
+        {isDark ? <Moon size={14} strokeWidth={1.9} /> : <Sun size={14} strokeWidth={1.9} />}
+        {isDark ? "Dark" : "Light"}
       </button>
     );
   }
