@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.11.2",
+    date: "2026-09-30",
+    changes: [{ kind: "fixed", text: "On iPhone, the More menu no longer has empty space below the build line." }],
+  },
+  {
     version: "1.11.1",
     date: "2026-09-30",
     changes: [{ kind: "fixed", text: "The More menu is only as tall as its contents, with no empty space at the bottom." }],

@@ -17,7 +17,7 @@ import { fontsToLoad } from "@/theme/fonts";
 import { getStoredAppearanceMode } from "@/theme/appearance";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useResponsiveFontScale } from "@/theme/responsiveFont";
-import { MORE_SHEET_CONTENT_HEIGHT } from "@/lib/moreSheet";
+import { moreSheetDetent } from "@/lib/moreSheet";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,8 +30,8 @@ function RootNavigator() {
   const { height: windowHeight } = useWindowDimensions();
   const fontScale = useResponsiveFontScale();
   // The More sheet's height as a fraction of the screen, from its actual
-  // content (see MORE_SHEET_CONTENT_HEIGHT) rather than a fixed guess.
-  const moreSheetDetent = Math.min(0.9, (MORE_SHEET_CONTENT_HEIGHT * fontScale + insets.bottom) / windowHeight);
+  // content rather than a fixed guess (see lib/moreSheet.ts).
+  const moreDetent = moreSheetDetent({ windowHeight, fontScale, bottomInset: insets.bottom });
 
   // Applies a user-picked light/dark override (Settings > Appearance) on
   // cold start -- nativewind's own colorScheme.set() doesn't persist across
@@ -108,7 +108,7 @@ function RootNavigator() {
               // measured height and the true screen edge (a react-native-screens
               // auto-sizing quirk) -- an explicit fraction sizes the sheet
               // deterministically and sits flush to the bottom instead.
-              sheetAllowedDetents: [moreSheetDetent],
+              sheetAllowedDetents: [moreDetent],
               sheetInitialDetentIndex: 0,
               sheetGrabberVisible: true,
               sheetCornerRadius: 24,

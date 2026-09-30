@@ -64,9 +64,10 @@ import Constants from "expo-constants";
  * the light canvas again. 1.11.0 regroups the More sheet to match web's
  * side nav: a "Your money" card (Subscriptions, Investments, Early
  * retirement) and an "Account" card (Settings, Sign out). 1.11.1 sizes
- * that sheet to its content instead of a fixed 60% of the screen.
+ * that sheet to its content instead of a fixed 60% of the screen. 1.11.2
+ * recalibrates it on iOS, where the floating sheet was still ~20% too tall.
  */
-export const APP_VERSION = "1.11.1";
+export const APP_VERSION = "1.11.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
