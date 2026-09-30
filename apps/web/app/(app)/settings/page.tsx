@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { and, desc, eq, isNull, or } from "drizzle-orm";
-import { User, Lock, Download, Link2, Wand2, Wallet, Mail, KeyRound, ChevronRight, AlertTriangle, type LucideIcon } from "lucide-react";
+import { User, Lock, Download, Link2, Wand2, Wallet, Mail, KeyRound, ChevronRight, AlertTriangle, Moon, type LucideIcon } from "lucide-react";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -9,6 +9,7 @@ import { PasswordForm } from "@/components/settings/PasswordForm";
 import { DangerZone } from "@/components/settings/DangerZone";
 import { IncomeScheduleManager } from "@/components/settings/IncomeScheduleManager";
 import { RecapsToggle } from "@/components/settings/RecapsToggle";
+import { DarkModePreviewToggle } from "@/components/settings/DarkModePreviewToggle";
 import { ApiKeysManager } from "@/components/settings/ApiKeysManager";
 import { accountDisplayName } from "@tally/core/accountName";
 
@@ -128,6 +129,16 @@ export default async function SettingsPage() {
           <CardHeader title="Email" action={<Mail size={17} strokeWidth={1.75} className="text-text-3" />} />
           <div className="p-5">
             <RecapsToggle initialEnabled={user?.recapsEnabled ?? true} />
+          </div>
+        </Card>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <GroupLabel>Appearance</GroupLabel>
+        <Card>
+          <CardHeader title="Dark mode" action={<Moon size={17} strokeWidth={1.75} className="text-text-3" />} />
+          <div className="p-5">
+            <DarkModePreviewToggle />
           </div>
         </Card>
       </div>

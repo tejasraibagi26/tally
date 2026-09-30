@@ -30,9 +30,11 @@
  * 1.5.10 narrows "hide amounts" to net worth, income, investment totals
  * and account balances -- spend, transactions, budgets etc. stay visible.
  * 1.6.0 swaps Overview's Cash flow tile for an Investments total. 1.6.1
- * keeps hidden-amount dots flush right in right-aligned columns.
+ * keeps hidden-amount dots flush right in right-aligned columns. 1.7.0
+ * adds a temporary "Refined dark mode (preview)" toggle in Settings to
+ * trial the dark v2 palette side by side before it replaces the current one.
  */
-export const APP_VERSION = "1.6.1";
+export const APP_VERSION = "1.7.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

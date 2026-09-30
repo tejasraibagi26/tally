@@ -123,6 +123,51 @@
   --shadow-overlay: 0 12px 32px -8px rgba(0,0,0,.6);
 }
 
+/* Dark v2 ("Refined dark mode (preview)" in Settings, lib/theme.ts) --
+   TEMPORARY side-by-side trial; overrides only the tokens that change.
+   Spec and measured contrast: the "Tally dark mode spec" review canvas.
+   - text-3 5.36:1 on surface (was 3.77, failed AA)
+   - border-strong 3.01:1 for control edges (was 1.59)
+   - positive moved greener so gains don't read as brand-teal links
+   - deeper canvas + a 1px top edge-light on raised layers for elevation
+   Once committed, these values replace the [data-theme="dark"] block above
+   and this block, the init script and the toggle go away. */
+:root[data-theme="dark"][data-dark-v2="true"] {
+  --canvas: #0B0B0A;
+  --surface: #191918;
+  --surface-2: #222220;
+  --raised: #292927;
+  --sunken: #111110;
+  --border: #2C2C29;
+  --border-strong: #666560;
+  --text: #EEEDE8;
+  --text-2: #B3B1A8;
+  --text-3: #908E85;
+  --brand: #5BBFA3;
+  --brand-hover: #7ACFB6;
+  --brand-subtle: #11261F;
+  --brand-border: #24463B;
+  --on-brand: #0B1A15;
+  --positive: #6CCB8E;
+  --negative: #F48C75;
+  --warning: #E8B45A;
+  --info: #6AA5F0;
+  --positive-subtle: #13261A;
+  --negative-subtle: #2E1914;
+  --warning-subtle: #2C2312;
+  --info-subtle: #12203A;
+  --series-1: #23b07e;
+  --series-2: #e0662f;
+  --series-3: #4a93ea;
+  --series-4: #d69a1a;
+  --series-5: #dd6a93;
+  --series-6: #3aa95a;
+  --series-7: #9a90ee;
+  --series-8: #ea7575;
+  --shadow-raised: inset 0 1px 0 rgba(255,255,255,.045), 0 1px 2px rgba(0,0,0,.45);
+  --shadow-overlay: inset 0 1px 0 rgba(255,255,255,.06), 0 16px 40px -8px rgba(0,0,0,.7);
+}
+
 * {
   border-color: var(--border);
 }
