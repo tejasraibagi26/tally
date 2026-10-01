@@ -17,6 +17,7 @@
     "seed:categories": "tsx scripts/seed-categories.ts",
     "rotate:master-key": "tsx scripts/rotate-master-key.ts",
     "clear:mock-data": "tsx scripts/clear-mock-data.ts",
+    "alerts:delete-tests": "tsx scripts/delete-test-alerts.ts",
     "test": "vitest run"
   },
   "dependencies": {

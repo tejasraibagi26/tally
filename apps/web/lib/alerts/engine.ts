@@ -31,6 +31,7 @@ export async function recordAndDeliver(userId: string, candidates: AlertCandidat
   const prefs = prefsIn ?? (await loadAlertPreferences(userId)).prefs;
   // "First evaluation" = no real alert recorded yet. Not "preferences row
   // just created": opening Settings creates that row before any sync runs.
+  // Rows from the removed test-send feature (payload.test) don't count.
   const seeding = !(await hasRecordedAlerts(userId));
   const timeZone = await getUserTimezone(userId);
   const now = new Date();
@@ -73,9 +74,6 @@ export interface DeliveryResult {
   emailSent: boolean;
   /** Devices Expo accepted the push for; null when push wasn't attempted. */
   pushDevices: number | null;
-  /** Why a channel failed, for the Settings test send (already logged either way). */
-  emailError?: string;
-  pushError?: string;
 }
 
 /**
@@ -110,7 +108,6 @@ async function deliver(row: EventRow, prefs: AlertPreferences, now: Date): Promi
           url: row.url ?? "/overview",
           appUrl,
           userId: row.userId,
-          test: !!payload.test,
         }),
       });
       await db.update(schema.alertEvents).set({ emailSentAt: new Date() }).where(eq(schema.alertEvents.id, row.id));
@@ -118,8 +115,7 @@ async function deliver(row: EventRow, prefs: AlertPreferences, now: Date): Promi
       result.emailSent = true;
     } catch (err) {
       console.error(`Alert email failed (event ${row.id})`, err);
-      result.emailError = err instanceof Error ? err.message : String(err);
-      await noteDelivery(row.id, { emailError: result.emailError }).catch(() => {});
+      await noteDelivery(row.id, { emailError: err instanceof Error ? err.message : String(err) }).catch(() => {});
     }
   }
 
@@ -137,36 +133,11 @@ async function deliver(row: EventRow, prefs: AlertPreferences, now: Date): Promi
       await noteDelivery(row.id, { pushDevices: result.pushDevices }, ["pushError"]);
     } catch (err) {
       console.error(`Alert push failed (event ${row.id})`, err);
-      result.pushError = err instanceof Error ? err.message : String(err);
-      await noteDelivery(row.id, { pushError: result.pushError }).catch(() => {});
+      await noteDelivery(row.id, { pushError: err instanceof Error ? err.message : String(err) }).catch(() => {});
     }
   }
   result.any = result.emailSent || (result.pushDevices ?? 0) > 0;
   return result;
-}
-
-/**
- * Settings → "Send a test alert": a sample of `type` sent straight away on
- * whichever channels are on for it, skipping quiet hours and dedupe (each
- * test gets its own key). Recorded with payload.test so history can label it.
- */
-export async function sendTestAlert(userId: string, sample: AlertCandidate): Promise<DeliveryResult> {
-  const { prefs } = await loadAlertPreferences(userId);
-  const now = new Date();
-  const [row] = await db
-    .insert(schema.alertEvents)
-    .values({
-      userId,
-      type: sample.type,
-      dedupeKey: `test:${sample.type}:${now.getTime()}`,
-      title: sample.title,
-      body: sample.body,
-      url: sample.url,
-      payload: { test: true, titleNoAmounts: sample.titleNoAmounts, bodyNoAmounts: sample.bodyNoAmounts } satisfies StoredPayload,
-      deliverAfter: now,
-    })
-    .returning();
-  return deliver(row!, prefs, now);
 }
 
 const RETRY_WINDOW_MS = 36 * 60 * 60 * 1000;
@@ -192,7 +163,9 @@ export async function flushPendingAlerts(): Promise<number> {
   const prefsCache = new Map<string, AlertPreferences>();
   for (const row of rows) {
     const p = row.payload as StoredPayload | null;
-    if (p?.suppressed || p?.test) continue; // tests are one-shot, never retried
+    // payload.test: rows from the removed test-send feature; never retried.
+    // scripts/delete-test-alerts.ts clears them out.
+    if (p?.suppressed || p?.test) continue;
     let prefs = prefsCache.get(row.userId);
     if (!prefs) {
       prefs = (await loadAlertPreferences(row.userId)).prefs;

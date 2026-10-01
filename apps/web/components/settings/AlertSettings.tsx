@@ -5,7 +5,6 @@ import Link from "next/link";
 import { PieChart, Landmark, Receipt, Repeat, type LucideIcon } from "lucide-react";
 import type { AlertType } from "@tally/core/alerts";
 import type { AlertHistoryItem } from "@/lib/alerts/history";
-import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 
 type Channels = { push: boolean; email: boolean };
@@ -101,16 +100,12 @@ async function patchPrefs(body: unknown): Promise<boolean> {
   }
 }
 
-export function AlertSettings({ initial, pushDevices, history: initialHistory }: AlertSettingsProps) {
+export function AlertSettings({ initial, pushDevices, history }: AlertSettingsProps) {
   const [channels, setChannels] = useState(initial.channels);
   const [showAmounts, setShowAmounts] = useState(initial.showAmounts);
   const [threshold, setThreshold] = useState(String(initial.largeTransactionCents / 100));
   const [savedThreshold, setSavedThreshold] = useState(initial.largeTransactionCents);
   const [thresholdMsg, setThresholdMsg] = useState<string | null>(null);
-  const [testType, setTestType] = useState<AlertType>("budget_threshold");
-  const [testMsg, setTestMsg] = useState<string | null>(null);
-  const [testing, setTesting] = useState(false);
-  const [history, setHistory] = useState(initialHistory);
 
   async function setChannel(type: AlertType, key: keyof Channels, value: boolean) {
     const prev = channels;
@@ -135,40 +130,6 @@ export function AlertSettings({ initial, pushDevices, history: initialHistory }:
       setThresholdMsg("Saved");
     } else {
       setThresholdMsg("Couldn't save. Try again.");
-    }
-  }
-
-  async function sendTest() {
-    setTesting(true);
-    setTestMsg(null);
-    try {
-      const res = await fetch("/api/alerts/test", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: testType }) });
-      const data = (await res.json()) as {
-        error?: string;
-        emailSent?: boolean;
-        pushDevices?: number | null;
-        channels?: Channels;
-        emailError?: string;
-        pushError?: string;
-      };
-      if (!res.ok) {
-        setTestMsg(data.error ?? "Couldn't send the test alert.");
-        return;
-      }
-      const parts: string[] = [];
-      if ((data.pushDevices ?? 0) > 0) parts.push(`to ${data.pushDevices} phone${data.pushDevices === 1 ? "" : "s"}`);
-      if (data.emailSent) parts.push("by email");
-      const failures = [data.emailError && `Email failed: ${data.emailError}`, data.pushError && `Push failed: ${data.pushError}`].filter(Boolean);
-      if (parts.length > 0) setTestMsg([`Sent ${parts.join(" and ")}.`, ...failures].join(" "));
-      else if (failures.length > 0) setTestMsg(failures.join(" "));
-      else if (data.channels?.push && !data.channels.email) setTestMsg("Nothing sent: no phone is connected yet, and email is off for this alert.");
-      else setTestMsg("Couldn't send the test alert. Try again in a moment.");
-      const h = await fetch("/api/alerts?limit=10").then((r) => (r.ok ? r.json() : null)).catch(() => null);
-      if (h?.alerts) setHistory(h.alerts);
-    } catch {
-      setTestMsg("Couldn't send the test alert.");
-    } finally {
-      setTesting(false);
     }
   }
 
@@ -237,30 +198,6 @@ export function AlertSettings({ initial, pushDevices, history: initialHistory }:
           <Switch checked={showAmounts} onChange={toggleShowAmounts} label="Show amounts in notifications" />
         </div>
 
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <label htmlFor="test-alert-type" className="flex flex-col gap-0.5">
-            <span className="text-[15px] text-text">Send a test alert</span>
-            <span className="text-[13.5px] text-text-2">Uses the push and email settings above for that alert.</span>
-          </label>
-          <div className="flex items-center gap-2">
-            <select
-              id="test-alert-type"
-              value={testType}
-              onChange={(e) => setTestType(e.target.value as AlertType)}
-              className="h-9 rounded-control border border-border-strong bg-surface px-2.5 text-[14px] text-text"
-            >
-              {TYPES.map((t) => (
-                <option key={t.type} value={t.type}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
-            <Button variant="secondary" size="sm" disabled={testing} onClick={sendTest}>
-              {testing ? "Sending…" : "Send test"}
-            </Button>
-          </div>
-        </div>
-        {testMsg && <p className="text-[13.5px] text-text-2 -mt-1">{testMsg}</p>}
       </div>
 
       <div className="p-5 flex flex-col gap-3">
@@ -283,7 +220,6 @@ export function AlertSettings({ initial, pushDevices, history: initialHistory }:
                   <span className="flex flex-col items-end gap-1 flex-none">
                     <span className="text-xs text-text-3 tabular">{relativeTime(a.createdAt)}</span>
                     <span className="flex flex-wrap justify-end gap-1">
-                      {a.test && <Tag>Test</Tag>}
                       {a.push && <PushTag push={a.push} />}
                       {a.email && (a.email.status === "sent" ? <Tag>Email</Tag> : <Tag tone="negative" title={a.email.error}>Email failed</Tag>)}
                     </span>

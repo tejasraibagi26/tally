@@ -66,8 +66,10 @@
  * email for broken connections now, push once the mobile app registers.
  * 1.15.0 adds Settings → Alerts: push/email per type, the large-purchase
  * threshold, show-amounts, a test send and recent alert history.
+ * 1.15.1: per-type alert email wording, failed sends shown in Recent
+ * alerts, and the test send removed (scripts/delete-test-alerts.ts).
  */
-export const APP_VERSION = "1.15.0";
+export const APP_VERSION = "1.15.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

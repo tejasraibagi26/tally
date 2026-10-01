@@ -15,10 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.15.1",
+    date: "2026-09-30",
+    changes: [
+      { kind: "improved", text: "Alert emails say what happened, why it matters, and link straight to the right page." },
+      { kind: "improved", text: "Recent alerts shows when an email or push didn't go through, and why." },
+    ],
+  },
+  {
     version: "1.15.0",
     date: "2026-09-30",
     changes: [
-      { kind: "new", text: "Settings → Alerts: choose push or email for budget, large purchase, subscription and connection alerts, set your large purchase amount, and send yourself a test." },
+      { kind: "new", text: "Settings → Alerts: choose push or email for budget, large purchase, subscription and connection alerts, and set your large purchase amount." },
       { kind: "new", text: "Recent alerts are listed in Settings." },
     ],
   },

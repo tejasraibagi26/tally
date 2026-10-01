@@ -10,14 +10,12 @@ export interface AlertHistoryItem {
   url: string | null;
   createdAt: string;
   read: boolean;
-  test: boolean;
   /** null when that channel wasn't used for this alert. */
   email: { status: "sent" | "failed"; error?: string } | null;
   push: { status: "sent" | "no_device" | "failed" | "scheduled"; error?: string; devices?: number; at?: string } | null;
 }
 
 interface Payload {
-  test?: boolean;
   emailError?: string;
   pushError?: string;
   pushDevices?: number;
@@ -46,7 +44,7 @@ export async function alertHistory(userId: string, limit = 20): Promise<AlertHis
         : { status: "no_device" }
       : p.pushError
         ? { status: "failed", error: p.pushError }
-        : !p.test && r.deliverAfter.getTime() > now
+        : r.deliverAfter.getTime() > now
           ? { status: "scheduled", at: r.deliverAfter.toISOString() }
           : null;
     return {
@@ -57,7 +55,6 @@ export async function alertHistory(userId: string, limit = 20): Promise<AlertHis
       url: r.url,
       createdAt: r.createdAt.toISOString(),
       read: !!r.readAt,
-      test: !!p.test,
       email,
       push,
     };

@@ -33,9 +33,9 @@ const COPY: Record<AlertType, { label: string; why: string; cta: string; setting
   },
 };
 
-/** "Tally · Dining is at 82%". Tests say so up front. */
+/** "Tally · Dining is at 82%" */
 export function alertEmailSubject(title: string): string {
-  return title.startsWith("Test: ") ? `Tally test alert · ${title.slice(6)}` : `Tally · ${title}`;
+  return `Tally · ${title}`;
 }
 
 /**
@@ -44,15 +44,12 @@ export function alertEmailSubject(title: string): string {
  * to Settings → Alerts, and has a one-click link that turns off alert email
  * only; recaps keep their own switch.
  */
-export function alertEmailHtml(opts: { type: AlertType; title: string; body: string; url: string; appUrl: string; userId: string; test?: boolean }): string {
+export function alertEmailHtml(opts: { type: AlertType; title: string; body: string; url: string; appUrl: string; userId: string }): string {
   const copy = COPY[opts.type];
-  const title = opts.test ? opts.title.replace(/^Test: /, "") : opts.title;
+  const title = opts.title;
   const open = `${opts.appUrl}${opts.url}`;
   const manage = `${opts.appUrl}/settings#alerts`;
   const unsub = `${opts.appUrl}/api/email/unsubscribe?uid=${opts.userId}&token=${unsubscribeToken(opts.userId)}&kind=alerts`;
-  const testNote = opts.test
-    ? `<div style="font-size:13px;line-height:1.5;color:#835600;background:#F6EEDA;border-radius:8px;padding:10px 12px;margin-bottom:16px;">This is a test you sent from Settings. Nothing in your accounts triggered it, and the figures are examples.</div>`
-    : "";
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
 <body style="margin:0;background:#F1F0EC;font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;color:#1A1917;">
 <div style="display:none;max-height:0;overflow:hidden;">${esc(opts.body)}</div>
@@ -60,7 +57,6 @@ export function alertEmailHtml(opts: { type: AlertType; title: string; body: str
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;">
 <tr><td style="padding:0 4px 16px;font-family:Georgia,serif;font-size:22px;color:#1A1917;">Tally</td></tr>
 <tr><td style="background:#FFFFFF;border:1px solid #E3E1DB;border-radius:12px;padding:24px;">
-${testNote}
 <div style="font-size:12px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:#65635C;margin-bottom:8px;">${esc(copy.label)}</div>
 <div style="font-size:20px;font-weight:600;line-height:1.3;margin-bottom:6px;">${esc(title)}</div>
 <div style="font-size:15px;line-height:1.55;color:#1A1917;margin-bottom:16px;">${esc(opts.body)}</div>
