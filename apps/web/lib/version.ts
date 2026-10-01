@@ -57,9 +57,11 @@
  * switch, Appearance showing the current theme) above the profile row.
  * 1.13.3 works out "this month" and "today" in the user's timezone
  * (users.timezone) instead of the server's UTC, which rolled the month
- * over at 8 PM Eastern.
+ * over at 8 PM Eastern. 1.13.4 tidies Cash flow's headline with amounts
+ * hidden: the savings rate (a ratio) stays visible and the masked figure
+ * no longer leaves a gap before its label.
  */
-export const APP_VERSION = "1.13.3";
+export const APP_VERSION = "1.13.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

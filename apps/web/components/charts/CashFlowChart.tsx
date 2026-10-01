@@ -91,9 +91,13 @@ export function CashFlowChart({ months }: { months: CashFlowMonth[] }) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="text-[26px] font-semibold tracking-[-0.4px] text-text tabular money">
-          {summary.avgSaved < 0 ? "−" : ""}
-          {formatCents(Math.abs(summary.avgSaved))}
+        {/* money-fit: shrinks to the dots when hidden, so the label below
+            doesn't trail a gap the width of the real figure. */}
+        <span className="text-[26px] font-semibold tracking-[-0.4px] text-text tabular money money-fit">
+          <span>
+            {summary.avgSaved < 0 ? "−" : ""}
+            {formatCents(Math.abs(summary.avgSaved))}
+          </span>
         </span>
         <span className="text-[13.5px] text-text-2">
           {summary.avgSaved < 0 ? "overspent" : "saved"} per month on average
@@ -101,7 +105,7 @@ export function CashFlowChart({ months }: { months: CashFlowMonth[] }) {
         </span>
         {summary.savingsRate != null && (
           <span
-            className={`money inline-flex px-2 py-0.5 rounded-full text-[12.5px] font-medium ${summary.savingsRate >= 0 ? "bg-positive-subtle text-positive" : "bg-negative-subtle text-negative"}`}
+            className={`inline-flex px-2 py-0.5 rounded-full text-[12.5px] font-medium ${summary.savingsRate >= 0 ? "bg-positive-subtle text-positive" : "bg-negative-subtle text-negative"}`}
           >
             {formatPercent(summary.savingsRate)} savings rate
           </span>

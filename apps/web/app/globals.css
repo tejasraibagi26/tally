@@ -201,6 +201,19 @@ body {
   letter-spacing: 1px;
 }
 
+/* Opt-in for a figure that leads a line of running text (e.g. Cash flow's
+   "$X saved per month on average"): instead of keeping the hidden figure's
+   width, which leaves a gap before the words that follow, the figure (its
+   one child span) is taken out and the dots flow inline in its place. Only
+   where a small reflow on toggle is acceptable. */
+[data-hide-amounts="true"] .money.money-fit > * {
+  display: none;
+}
+
+[data-hide-amounts="true"] .money.money-fit::after {
+  position: static;
+}
+
 /* Right-aligned figures (text-right on the figure or its wrapper) anchor
    the dots to the box's right edge and let them grow leftward, instead of
    laying them out inside the box: that box is only as wide as the hidden
