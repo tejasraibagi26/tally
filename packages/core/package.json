@@ -14,6 +14,7 @@
     "./money": "./src/money.ts",
     "./fx": "./src/fx.ts",
     "./zonedDate": "./src/zonedDate.ts",
+    "./alerts": "./src/alerts.ts",
     "./pfc": "./src/pfc.ts",
     "./accountName": "./src/accountName.ts",
     "./listingCurrency": "./src/listingCurrency.ts",

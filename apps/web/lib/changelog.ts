@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.14.0",
+    date: "2026-09-30",
+    changes: [{ kind: "new", text: "Tally emails you when a bank connection needs you to sign in again. Alerts for budgets, large purchases and subscription price changes arrive as phone notifications in an upcoming mobile update." }],
+  },
+  {
     version: "1.13.5",
     date: "2026-09-30",
     changes: [{ kind: "improved", text: "Cash flow's headline puts your savings rate next to the amount, with the description underneath." }],

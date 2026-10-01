@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { verifyUnsubscribeToken } from "@/lib/emailUnsubscribe";
+import { loadAlertPreferences, ALERT_TYPES } from "@/lib/alerts/preferences";
 
 const page = (body: string) => `<!DOCTYPE html>
 <html><head><meta charset="utf-8" /><title>Tally</title>
@@ -20,6 +21,18 @@ export async function GET(req: Request) {
   if (!userId || !token || !verifyUnsubscribeToken(userId, token)) {
     return new NextResponse(page("<p>This unsubscribe link is invalid or has expired.</p>"), {
       status: 400,
+      headers: { "Content-Type": "text/html" },
+    });
+  }
+
+  // `kind=alerts` (lib/alerts/email.ts) turns off email for every alert type
+  // and leaves push and the monthly recap alone.
+  if (url.searchParams.get("kind") === "alerts") {
+    const { prefs } = await loadAlertPreferences(userId);
+    const channels = Object.fromEntries(ALERT_TYPES.map((t) => [t, { ...prefs.channels[t], email: false }]));
+    await db.update(schema.alertPreferences).set({ channels, updatedAt: new Date() }).where(eq(schema.alertPreferences.userId, userId));
+    return new NextResponse(page("<p>You won't get any more alert emails from Tally. Push alerts and your monthly recap are unchanged.</p>"), {
+      status: 200,
       headers: { "Content-Type": "text/html" },
     });
   }

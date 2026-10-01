@@ -8,6 +8,7 @@ import { toPlaidOwnedFields, mergeTransactionUpdate } from "@/lib/transactionSyn
 import { categorizeTransactions } from "@/lib/categorize";
 import { detectTransfersForUser } from "@/lib/transfers";
 import { detectRecurringForUser } from "@/lib/recurring";
+import { evaluateAfterTransactionSync } from "@/lib/alerts/evaluate";
 import { computeAndStoreNetWorthSnapshot } from "@/lib/networth";
 import type { Transaction as PlaidTransaction } from "plaid";
 
@@ -149,6 +150,16 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
       await computeAndStoreNetWorthSnapshot(item.userId, new Date().toISOString().slice(0, 10));
     } catch (err) {
       console.error(`Categorization/transfer detection failed for item ${itemId}`, err);
+    }
+
+    // Alerts (ALERTS.md §3) run last, on fully categorized and transfer-
+    // flagged rows. Like the step above, a failure here never fails the sync.
+    try {
+      if (result.added > 0 || result.modified > 0) {
+        await evaluateAfterTransactionSync(item.userId, added.map((t) => t.transaction_id));
+      }
+    } catch (err) {
+      console.error(`Alert evaluation failed for item ${itemId}`, err);
     }
 
     await recordSyncRun(itemId, trigger, startedAt, result);

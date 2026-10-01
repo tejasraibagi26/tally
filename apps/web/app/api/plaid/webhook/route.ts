@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db, schema } from "@/db";
 import { eq, sql } from "drizzle-orm";
 import { verifyPlaidWebhook } from "@/lib/plaidWebhook";
+import { evaluateConnections } from "@/lib/alerts/evaluate";
 import { syncTransactionsForItem, type SyncTrigger } from "@/lib/plaidSync";
 import { syncHoldingsForItem, syncInvestmentTransactionsForItem } from "@/lib/plaidInvestments";
 import { syncLiabilitiesForItem } from "@/lib/plaidLiabilities";
@@ -70,10 +71,15 @@ export async function POST(req: Request) {
               : null;
 
     if (status) {
-      await db
+      const [updated] = await db
         .update(schema.plaidItems)
         .set({ status, lastErrorCode: payload.error?.error_code ?? null })
-        .where(eq(schema.plaidItems.plaidItemId, payload.item_id));
+        .where(eq(schema.plaidItems.plaidItemId, payload.item_id))
+        .returning({ userId: schema.plaidItems.userId });
+      // Connection alert (ALERTS.md §2). Never fails the webhook.
+      if (updated) {
+        await evaluateConnections(updated.userId).catch((err) => console.error("Connection alert evaluation failed", err));
+      }
     }
   }
 

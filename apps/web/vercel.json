@@ -1,6 +1,7 @@
 {
   "crons": [
     { "path": "/api/cron/nightly", "schedule": "0 6 * * *" },
-    { "path": "/api/cron/monthly-recap", "schedule": "0 12 1 * *" }
+    { "path": "/api/cron/monthly-recap", "schedule": "0 12 1 * *" },
+    { "path": "/api/cron/alerts", "schedule": "0 13 * * *" }
   ]
 }

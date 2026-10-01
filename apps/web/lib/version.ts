@@ -61,8 +61,11 @@
  * hidden: the savings rate (a ratio) stays visible and the masked figure
  * no longer leaves a gap before its label. 1.13.5 restacks that headline:
  * figure + savings-rate chip, then the label and window on a second line.
+ * 1.14.0 adds the alerts engine (ALERTS.md): budget steps, connection
+ * breaks, large purchases and subscription changes, recorded once each;
+ * email for broken connections now, push once the mobile app registers.
  */
-export const APP_VERSION = "1.13.5";
+export const APP_VERSION = "1.14.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
