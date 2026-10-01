@@ -541,6 +541,64 @@ export const monthlyRecaps = pgTable("monthly_recaps", {
   uniq: uniqueIndex("monthly_recaps_user_month_idx").on(t.userId, t.month),
 }));
 
+// Alerts (ALERTS.md). The alert types; card-payment-due is deliberately
+// absent -- Plaid's liabilities data is too unreliable for it (ALERTS.md §1).
+export const alertTypeEnum = pgEnum("alert_type", [
+  "budget_threshold",
+  "connection_broken",
+  "large_transaction",
+  "subscription_change",
+]);
+
+export type AlertType = (typeof alertTypeEnum.enumValues)[number];
+
+// Expo push tokens, one per device. Deleted on sign-out and when Expo's
+// push receipts report DeviceNotRegistered.
+export const pushTokens = pgTable("push_tokens", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  token: text("token").notNull().unique(),
+  platform: text("platform").notNull(), // "ios" | "android"
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  userIdx: index("push_tokens_user_idx").on(t.userId),
+}));
+
+// Per-user alert settings, one row, created on first read with defaults
+// from the code (lib/alerts) rather than SQL defaults, so the per-type
+// channel map can grow without a migration.
+export const alertPreferences = pgTable("alert_preferences", {
+  userId: uuid("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  channels: jsonb("channels").$type<Partial<Record<AlertType, { push: boolean; email: boolean }>>>().notNull(),
+  largeTransactionCents: bigint("large_transaction_cents", { mode: "number" }).notNull().default(50_000),
+  showAmounts: boolean("show_amounts").notNull().default(true),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Send log, dedupe lock and history in one: inserting a row for
+// (userId, dedupeKey) is what claims the right to deliver it, so a re-sync
+// or retry that computes the same alert finds the row and sends nothing.
+// deliverAfter holds push back during quiet hours (ALERTS.md §5.3).
+export const alertEvents = pgTable("alert_events", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: alertTypeEnum("type").notNull(),
+  dedupeKey: text("dedupe_key").notNull(),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  url: text("url"),
+  payload: jsonb("payload"),
+  deliverAfter: timestamp("deliver_after", { withTimezone: true }).notNull().defaultNow(),
+  pushSentAt: timestamp("push_sent_at", { withTimezone: true }),
+  emailSentAt: timestamp("email_sent_at", { withTimezone: true }),
+  readAt: timestamp("read_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  uniq: uniqueIndex("alert_events_user_dedupe_idx").on(t.userId, t.dedupeKey),
+  userCreatedIdx: index("alert_events_user_created_idx").on(t.userId, t.createdAt),
+}));
+
 export const webhookEvents = pgTable("webhook_events", {
   id: uuid("id").primaryKey().defaultRandom(),
   provider: text("provider").notNull().default("plaid"),
