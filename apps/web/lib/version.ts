@@ -68,8 +68,10 @@
  * threshold, show-amounts, a test send and recent alert history.
  * 1.15.1: per-type alert email wording, failed sends shown in Recent
  * alerts, and the test send removed (scripts/delete-test-alerts.ts).
+ * 1.15.2 drops push (no iOS push without an Apple Developer account):
+ * alerts are email only, on by default for every type.
  */
-export const APP_VERSION = "1.15.1";
+export const APP_VERSION = "1.15.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

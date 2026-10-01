@@ -4,14 +4,12 @@ import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { ALERT_TYPES, loadAlertPreferences } from "@/lib/alerts/preferences";
-import { pushDeviceCount } from "@/lib/alerts/history";
 
-const channel = z.object({ push: z.boolean().optional(), email: z.boolean().optional() });
+const channel = z.object({ email: z.boolean().optional() });
 const patchSchema = z.object({
   channels: z.record(z.enum(ALERT_TYPES as [string, ...string[]]), channel).optional(),
   // $10 to $100,000
   largeTransactionCents: z.number().int().min(1_000).max(10_000_000).optional(),
-  showAmounts: z.boolean().optional(),
 });
 
 export async function GET(req: Request) {
@@ -22,7 +20,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { prefs } = await loadAlertPreferences(userId);
-  return NextResponse.json({ ...prefs, pushDevices: await pushDeviceCount(userId) });
+  return NextResponse.json(prefs);
 }
 
 export async function PATCH(req: Request) {
@@ -46,7 +44,6 @@ export async function PATCH(req: Request) {
     .set({
       channels,
       largeTransactionCents: parsed.data.largeTransactionCents ?? prefs.largeTransactionCents,
-      showAmounts: parsed.data.showAmounts ?? prefs.showAmounts,
       updatedAt: new Date(),
     })
     .where(eq(schema.alertPreferences.userId, userId));

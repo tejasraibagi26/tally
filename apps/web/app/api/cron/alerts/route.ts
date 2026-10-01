@@ -8,8 +8,8 @@ export const maxDuration = 300;
 
 // Daily (vercel.json: 13:00 UTC, ≈9 AM Eastern), ALERTS.md §3: a sweep per
 // user for connections, budget steps reached outside a sync (manual entries,
-// Shortcuts, recategorizing) and subscription changes; then sends push held
-// overnight by quiet hours and retries recent failed sends.
+// Shortcuts, recategorizing) and subscription changes; then retries alert
+// emails that failed in the last 36 hours.
 export async function GET(req: Request) {
   if (!isAuthorizedCronRequest(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -10,15 +10,12 @@ export interface AlertHistoryItem {
   url: string | null;
   createdAt: string;
   read: boolean;
-  /** null when that channel wasn't used for this alert. */
+  /** null when the email wasn't attempted (email off for this type). */
   email: { status: "sent" | "failed"; error?: string } | null;
-  push: { status: "sent" | "no_device" | "failed" | "scheduled"; error?: string; devices?: number; at?: string } | null;
 }
 
 interface Payload {
   emailError?: string;
-  pushError?: string;
-  pushDevices?: number;
 }
 
 /** Delivered alerts, newest first. Suppressed rows (seeded, silent, channels off) are bookkeeping, not history. */
@@ -29,7 +26,6 @@ export async function alertHistory(userId: string, limit = 20): Promise<AlertHis
     .where(and(eq(schema.alertEvents.userId, userId), sql`coalesce((${schema.alertEvents.payload}->>'suppressed')::boolean, false) = false`))
     .orderBy(desc(schema.alertEvents.createdAt))
     .limit(Math.min(Math.max(limit, 1), 50));
-  const now = Date.now();
   return rows.map((r) => {
     const p = (r.payload ?? {}) as Payload;
     const email: AlertHistoryItem["email"] = r.emailSentAt
@@ -37,16 +33,6 @@ export async function alertHistory(userId: string, limit = 20): Promise<AlertHis
       : p.emailError
         ? { status: "failed", error: p.emailError }
         : null;
-    const push: AlertHistoryItem["push"] = r.pushSentAt
-      ? // Rows from before pushDevices was recorded: no phone had registered yet.
-        (p.pushDevices ?? 0) > 0
-        ? { status: "sent", devices: p.pushDevices }
-        : { status: "no_device" }
-      : p.pushError
-        ? { status: "failed", error: p.pushError }
-        : r.deliverAfter.getTime() > now
-          ? { status: "scheduled", at: r.deliverAfter.toISOString() }
-          : null;
     return {
       id: r.id,
       type: r.type,
@@ -56,12 +42,6 @@ export async function alertHistory(userId: string, limit = 20): Promise<AlertHis
       createdAt: r.createdAt.toISOString(),
       read: !!r.readAt,
       email,
-      push,
     };
   });
-}
-
-export async function pushDeviceCount(userId: string): Promise<number> {
-  const [row] = await db.select({ n: sql<number>`count(*)::int` }).from(schema.pushTokens).where(eq(schema.pushTokens.userId, userId));
-  return row?.n ?? 0;
 }

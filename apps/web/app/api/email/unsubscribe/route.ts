@@ -26,12 +26,12 @@ export async function GET(req: Request) {
   }
 
   // `kind=alerts` (lib/alerts/email.ts) turns off email for every alert type
-  // and leaves push and the monthly recap alone.
+  // and leaves the monthly recap alone.
   if (url.searchParams.get("kind") === "alerts") {
     const { prefs } = await loadAlertPreferences(userId);
     const channels = Object.fromEntries(ALERT_TYPES.map((t) => [t, { ...prefs.channels[t], email: false }]));
     await db.update(schema.alertPreferences).set({ channels, updatedAt: new Date() }).where(eq(schema.alertPreferences.userId, userId));
-    return new NextResponse(page("<p>You won't get any more alert emails from Tally. Push alerts and your monthly recap are unchanged.</p>"), {
+    return new NextResponse(page("<p>You won't get any more alert emails from Tally. Your monthly recap is unchanged.</p>"), {
       status: 200,
       headers: { "Content-Type": "text/html" },
     });

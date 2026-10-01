@@ -15,9 +15,6 @@ export interface AlertCandidate {
   dedupeKey: string;
   title: string;
   body: string;
-  /** Same alert with every figure removed, for "Show amounts in notifications" off. */
-  titleNoAmounts: string;
-  bodyNoAmounts: string;
   /** In-app path the alert opens. */
   url: string;
   /**
@@ -70,8 +67,6 @@ export function budgetAlerts(budgets: BudgetInput[], month: string, daysLeft: nu
         dedupeKey: `budget:${b.categoryId}:${ym}:${Math.round(step * 100)}`,
         title,
         body: `${formatCents(b.spend)} of ${formatCents(b.limit)} spent, ${daysLeftLabel(daysLeft)}.`,
-        titleNoAmounts: title,
-        bodyNoAmounts: `${pct}% of this month's budget, ${daysLeftLabel(daysLeft)}.`,
         url: "/budgets",
         silent: step < 1 && reachedFull,
         payload: { categoryId: b.categoryId, month: ym, step, spend: b.spend, limit: b.limit },
@@ -132,8 +127,6 @@ export function largeTransactionAlerts(
       dedupeKey: `txn:${key}`,
       title: `${formatCents(magnitude)} at ${t.merchantLabel}`,
       body: unusual && !overThreshold ? `${t.accountLabel} · about ${Math.round(magnitude / med!)}× what you usually spend there.` : t.accountLabel,
-      titleNoAmounts: `Large purchase at ${t.merchantLabel}`,
-      bodyNoAmounts: t.accountLabel,
       // Web has no single-transaction route; its exact-merchant filter shows the
       // charge in context. Mobile opens /transactions/{payload.transactionId}.
       url: `/transactions?merchant=${encodeURIComponent(t.merchantLabel)}`,
@@ -179,8 +172,6 @@ export function subscriptionAlerts(streams: StreamInput[]): AlertCandidate[] {
       dedupeKey: `sub_new:${s.id}`,
       title: `New subscription: ${s.description}`,
       body: `${formatCents(latestMag)} ${PER[s.frequency]}.`,
-      titleNoAmounts: `New subscription: ${s.description}`,
-      bodyNoAmounts: `Charged ${PER[s.frequency]}.`,
       url: "/subscriptions",
       payload: { streamId: s.id, kind: "new" },
     });
@@ -194,8 +185,6 @@ export function subscriptionAlerts(streams: StreamInput[]): AlertCandidate[] {
         dedupeKey: `sub_price:${s.id}:${latestMag}`,
         title: `${s.description} went up`,
         body: `${formatCents(prevMag)} → ${formatCents(latestMag)} ${PER[s.frequency]}.`,
-        titleNoAmounts: `${s.description} went up`,
-        bodyNoAmounts: `The latest charge was higher than the one before.`,
         url: "/subscriptions",
         payload: { streamId: s.id, kind: "price", from: prevMag, to: latestMag },
       });
@@ -232,52 +221,9 @@ export function connectionAlerts(items: ItemInput[]): AlertCandidate[] {
       dedupeKey: `conn:${i.id}:${i.status}:${epoch}`,
       title,
       body,
-      titleNoAmounts: title,
-      bodyNoAmounts: body,
       url: "/accounts",
       payload: { itemId: i.id, status: i.status },
     });
   }
   return out;
-}
-
-// ---------------------------------------------------------------------------
-// Quiet hours (§5.3)
-
-export const QUIET_END_HOUR = 8; // push resumes at 08:00 local
-export const QUIET_START_HOUR = 22; // and pauses at 22:00 local
-
-function zonedParts(timeZone: string, at: Date): { y: number; m: number; d: number; h: number; min: number; s: number } {
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone,
-    hourCycle: "h23",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }).formatToParts(at);
-  const get = (t: string) => Number(parts.find((p) => p.type === t)!.value);
-  return { y: get("year"), m: get("month"), d: get("day"), h: get("hour"), min: get("minute"), s: get("second") };
-}
-
-/** The UTC instant of a wall-clock time in `timeZone` (DST-safe). */
-export function zonedWallTimeToUtc(timeZone: string, y: number, m: number, d: number, h: number): Date {
-  let guess = Date.UTC(y, m - 1, d, h);
-  for (let i = 0; i < 2; i++) {
-    const p = zonedParts(timeZone, new Date(guess));
-    const asIfUtc = Date.UTC(p.y, p.m - 1, p.d, p.h, p.min, p.s);
-    guess += Date.UTC(y, m - 1, d, h) - asIfUtc;
-  }
-  return new Date(guess);
-}
-
-/** `now` if it's inside push hours in `timeZone`, otherwise the next 08:00 there. */
-export function deliverAfter(now: Date, timeZone: string): Date {
-  const p = zonedParts(timeZone, now);
-  if (p.h >= QUIET_END_HOUR && p.h < QUIET_START_HOUR) return now;
-  // Before 08:00 → today's 08:00; from 22:00 on → tomorrow's.
-  const base = new Date(Date.UTC(p.y, p.m - 1, p.d + (p.h >= QUIET_START_HOUR ? 1 : 0)));
-  return zonedWallTimeToUtc(timeZone, base.getUTCFullYear(), base.getUTCMonth() + 1, base.getUTCDate(), QUIET_END_HOUR);
 }

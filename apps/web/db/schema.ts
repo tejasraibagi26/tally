@@ -552,8 +552,10 @@ export const alertTypeEnum = pgEnum("alert_type", [
 
 export type AlertType = (typeof alertTypeEnum.enumValues)[number];
 
-// Expo push tokens, one per device. Deleted on sign-out and when Expo's
-// push receipts report DeviceNotRegistered.
+// Expo push tokens, one per device. Unused since push was dropped (no
+// Apple Developer account, so no iOS push); kept so bringing push back
+// needs no migration. push_sent_at / deliver_after / show_amounts below are
+// likewise unused for now.
 export const pushTokens = pgTable("push_tokens", {
   id: uuid("id").primaryKey().defaultRandom(),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
@@ -570,7 +572,7 @@ export const pushTokens = pgTable("push_tokens", {
 // channel map can grow without a migration.
 export const alertPreferences = pgTable("alert_preferences", {
   userId: uuid("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
-  channels: jsonb("channels").$type<Partial<Record<AlertType, { push: boolean; email: boolean }>>>().notNull(),
+  channels: jsonb("channels").$type<Partial<Record<AlertType, { email: boolean; push?: boolean }>>>().notNull(),
   largeTransactionCents: bigint("large_transaction_cents", { mode: "number" }).notNull().default(50_000),
   showAmounts: boolean("show_amounts").notNull().default(true),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

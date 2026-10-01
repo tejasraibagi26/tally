@@ -7,11 +7,10 @@ import type { AlertType } from "@tally/core/alerts";
 import type { AlertHistoryItem } from "@/lib/alerts/history";
 import { cn } from "@/lib/cn";
 
-type Channels = { push: boolean; email: boolean };
+type Channels = { email: boolean };
 
 export interface AlertSettingsProps {
-  initial: { channels: Record<AlertType, Channels>; largeTransactionCents: number; showAmounts: boolean };
-  pushDevices: number;
+  initial: { channels: Record<AlertType, Channels>; largeTransactionCents: number };
   history: AlertHistoryItem[];
 }
 
@@ -40,43 +39,18 @@ function Switch({ checked, onChange, label, disabled }: { checked: boolean; onCh
   );
 }
 
-function Tag({ children, tone = "neutral", title }: { children: React.ReactNode; tone?: "neutral" | "muted" | "negative"; title?: string }) {
+function Tag({ children, tone = "neutral", title }: { children: React.ReactNode; tone?: "neutral" | "negative"; title?: string }) {
   return (
     <span
       title={title}
       className={cn(
         "text-[11px] px-1.5 py-0.5 rounded whitespace-nowrap",
-        tone === "negative" ? "bg-negative-subtle text-negative" : tone === "muted" ? "bg-sunken text-text-3" : "bg-sunken text-text-2",
+        tone === "negative" ? "bg-negative-subtle text-negative" : "bg-sunken text-text-2",
       )}
     >
       {children}
     </span>
   );
-}
-
-function PushTag({ push }: { push: NonNullable<AlertHistoryItem["push"]> }) {
-  switch (push.status) {
-    case "sent":
-      return <Tag>Push</Tag>;
-    case "no_device":
-      return (
-        <Tag tone="muted" title="Push was on, but no phone was connected to receive it.">
-          No phone
-        </Tag>
-      );
-    case "failed":
-      return (
-        <Tag tone="negative" title={push.error}>
-          Push failed
-        </Tag>
-      );
-    case "scheduled":
-      return (
-        <Tag tone="muted" title="Held overnight; push alerts go out from 8 AM.">
-          {`Push at ${new Date(push.at!).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`}
-        </Tag>
-      );
-  }
 }
 
 function relativeTime(iso: string): string {
@@ -100,22 +74,16 @@ async function patchPrefs(body: unknown): Promise<boolean> {
   }
 }
 
-export function AlertSettings({ initial, pushDevices, history }: AlertSettingsProps) {
+export function AlertSettings({ initial, history }: AlertSettingsProps) {
   const [channels, setChannels] = useState(initial.channels);
-  const [showAmounts, setShowAmounts] = useState(initial.showAmounts);
   const [threshold, setThreshold] = useState(String(initial.largeTransactionCents / 100));
   const [savedThreshold, setSavedThreshold] = useState(initial.largeTransactionCents);
   const [thresholdMsg, setThresholdMsg] = useState<string | null>(null);
 
-  async function setChannel(type: AlertType, key: keyof Channels, value: boolean) {
+  async function setEmail(type: AlertType, value: boolean) {
     const prev = channels;
-    setChannels({ ...channels, [type]: { ...channels[type], [key]: value } });
-    if (!(await patchPrefs({ channels: { [type]: { [key]: value } } }))) setChannels(prev);
-  }
-
-  async function toggleShowAmounts(value: boolean) {
-    setShowAmounts(value);
-    if (!(await patchPrefs({ showAmounts: value }))) setShowAmounts(!value);
+    setChannels({ ...channels, [type]: { email: value } });
+    if (!(await patchPrefs({ channels: { [type]: { email: value } } }))) setChannels(prev);
   }
 
   async function saveThreshold() {
@@ -136,29 +104,17 @@ export function AlertSettings({ initial, pushDevices, history }: AlertSettingsPr
   return (
     <div className="flex flex-col divide-y divide-border">
       <div className="p-5 flex flex-col gap-4">
-        <p className="text-[13.5px] text-text-2">
-          Tally lets you know when something needs a look. Each alert is sent once.{" "}
-          {pushDevices === 0
-            ? "No phone is connected yet, so push alerts will start once you turn on notifications in the Tally app."
-            : `Push goes to ${pushDevices} phone${pushDevices === 1 ? "" : "s"}, and waits until 8 AM if it arrives overnight.`}
-        </p>
+        <p className="text-[13.5px] text-text-2">Tally emails you when something needs a look. Each alert is sent once.</p>
 
         <div className="flex flex-col">
-          <div className="flex items-center justify-end gap-6 pb-2 pr-0.5 text-xs font-medium uppercase tracking-[0.06em] text-text-3">
-            <span className="w-11 text-center">Push</span>
-            <span className="w-11 text-center">Email</span>
-          </div>
           {TYPES.map(({ type, label, description, icon: Icon }) => (
-            <div key={type} className="flex items-center gap-4 py-3 border-t border-border">
+            <div key={type} className="flex items-center gap-4 py-3 border-t border-border first:border-t-0">
               <Icon size={17} strokeWidth={1.75} className="text-text-3 flex-none" />
               <div className="flex flex-col gap-0.5 min-w-0 flex-1">
                 <span className="text-[15px] text-text">{label}</span>
                 <span className="text-[13.5px] text-text-2">{description}</span>
               </div>
-              <div className="flex items-center gap-6 flex-none">
-                <Switch checked={channels[type].push} onChange={(v) => setChannel(type, "push", v)} label={`${label}: push`} />
-                <Switch checked={channels[type].email} onChange={(v) => setChannel(type, "email", v)} label={`${label}: email`} />
-              </div>
+              <Switch checked={channels[type].email} onChange={(v) => setEmail(type, v)} label={`Email ${label.toLowerCase()} alerts`} />
             </div>
           ))}
         </div>
@@ -190,13 +146,6 @@ export function AlertSettings({ initial, pushDevices, history }: AlertSettingsPr
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex flex-col gap-0.5">
-            <span className="text-[15px] text-text">Show amounts in notifications</span>
-            <span className="text-[13.5px] text-text-2">Turn off to keep dollar figures off your lock screen. Emails always include them.</span>
-          </div>
-          <Switch checked={showAmounts} onChange={toggleShowAmounts} label="Show amounts in notifications" />
-        </div>
 
       </div>
 
@@ -215,13 +164,11 @@ export function AlertSettings({ initial, pushDevices, history }: AlertSettingsPr
                     <span className="text-[14px] text-text">{a.title}</span>
                     <span className="text-[13px] text-text-2">{a.body}</span>
                     {a.email?.status === "failed" && <span className="text-xs text-negative">Email didn&apos;t send: {a.email.error}</span>}
-                    {a.push?.status === "failed" && <span className="text-xs text-negative">Push didn&apos;t send: {a.push.error}</span>}
                   </span>
                   <span className="flex flex-col items-end gap-1 flex-none">
                     <span className="text-xs text-text-3 tabular">{relativeTime(a.createdAt)}</span>
                     <span className="flex flex-wrap justify-end gap-1">
-                      {a.push && <PushTag push={a.push} />}
-                      {a.email && (a.email.status === "sent" ? <Tag>Email</Tag> : <Tag tone="negative" title={a.email.error}>Email failed</Tag>)}
+                      {a.email && (a.email.status === "sent" ? <Tag>Emailed</Tag> : <Tag tone="negative" title={a.email.error}>Email failed</Tag>)}
                     </span>
                   </span>
                 </>

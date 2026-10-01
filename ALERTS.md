@@ -1,6 +1,8 @@
 # ALERTS.md — Spec: Alerts (push + email)
 
-Status: **draft for review** · 2026-09-30 · extends WORK.md §8.4
+Status: **shipped, email only** · 2026-09-30 · extends WORK.md §8.4
+
+> **Update (web v1.15.2): push was dropped.** There's no paid Apple Developer account, so iOS can't get an APNs key (or universal links). Email is the only channel: every type defaults to email on, and quiet hours, "show amounts in notifications" and push tokens are gone from the app. The `push_tokens` table and the `push_sent_at`, `deliver_after` and `show_amounts` columns are still in the database, unused, so bringing push back needs no migration. Sections below that describe push (§5.1, §5.3, §5.4, step 5) are kept for that day.
 
 Tally already knows when a budget is nearly spent, a connection broke, a
 big charge landed, or a subscription changed price. Right now it only says so
@@ -179,7 +181,7 @@ alertEvents = pgTable("alert_events", {
 2. **Core:** `packages/core/src/alerts.ts`, the pure checks plus unit tests for every rule in §4 (crossing edges, pending → posted keying, the median baseline with fewer than 3 points, the price-change noise case).
 3. **Engine and email:** `lib/alerts/` (load rows → check → insert-or-skip → deliver), hooked into the sync and webhook paths, the new cron and the email template. **Ship and verify with email only.**
 4. **Web settings, history and test send.**
-5. **Mobile push (Android only for now):** no paid Apple Developer account, so iOS can't get an APNs key (or universal links); email is the iOS channel until that changes. Then `expo-notifications`, token registration, Settings → Alerts, deep links. This is a **native module, so it needs a new EAS build** (an OTA update can't add it). It also needs the APNs key.
+5. **Mobile push (Android only for now):** no paid Apple Developer account, so iOS can't get an APNs key (or universal links); email is the iOS channel until that changes. Then `expo-notifications`, token registration, Settings → Alerts, deep links. This is a **native module, so it needs a new EAS build** (an OTA update can't add it), and on iOS an APNs key, which needs a paid Apple Developer account.
 6. Changelog entries; DESIGN.md gets an "Alerts" copy section.
 
 Steps 1–4 are web-only and can ship without waiting on an app store build.

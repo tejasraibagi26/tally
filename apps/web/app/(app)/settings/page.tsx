@@ -11,7 +11,7 @@ import { IncomeScheduleManager } from "@/components/settings/IncomeScheduleManag
 import { RecapsToggle } from "@/components/settings/RecapsToggle";
 import { AlertSettings } from "@/components/settings/AlertSettings";
 import { loadAlertPreferences } from "@/lib/alerts/preferences";
-import { alertHistory, pushDeviceCount } from "@/lib/alerts/history";
+import { alertHistory } from "@/lib/alerts/history";
 import { ApiKeysManager } from "@/components/settings/ApiKeysManager";
 import { accountDisplayName } from "@tally/core/accountName";
 import { APP_VERSION } from "@/lib/version";
@@ -83,11 +83,7 @@ export default async function SettingsPage() {
     accountName: s.accountName != null ? accountDisplayName(s.accountName, accountNickname) : s.accountName,
   }));
 
-  const [{ prefs: alertPrefs }, alertDevices, recentAlerts] = await Promise.all([
-    loadAlertPreferences(userId),
-    pushDeviceCount(userId),
-    alertHistory(userId, 10),
-  ]);
+  const [{ prefs: alertPrefs }, recentAlerts] = await Promise.all([loadAlertPreferences(userId), alertHistory(userId, 10)]);
 
   const apiKeys = await db
     .select({
@@ -144,7 +140,7 @@ export default async function SettingsPage() {
         <div id="alerts" className="scroll-mt-6">
           <Card>
             <CardHeader title="Alerts" action={<Bell size={17} strokeWidth={1.75} className="text-text-3" />} />
-            <AlertSettings initial={alertPrefs} pushDevices={alertDevices} history={recentAlerts} />
+            <AlertSettings initial={alertPrefs} history={recentAlerts} />
           </Card>
         </div>
       </div>

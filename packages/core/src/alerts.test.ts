@@ -1,17 +1,16 @@
 import { describe, it, expect } from "vitest";
-import { budgetAlerts, largeTransactionAlerts, subscriptionAlerts, connectionAlerts, deliverAfter, median } from "./alerts";
+import { budgetAlerts, largeTransactionAlerts, subscriptionAlerts, connectionAlerts, median } from "./alerts";
 
 describe("budgetAlerts", () => {
   const b = (spend: number, limit = 50_000) => [{ categoryId: "c1", categoryName: "Dining", limit, spend }];
   it("nothing under 80%", () => {
     expect(budgetAlerts(b(39_999), "2026-09-01", 11)).toEqual([]);
   });
-  it("80% step with amounts and a no-amounts variant", () => {
+  it("80% step", () => {
     const [a] = budgetAlerts(b(41_200), "2026-09-01", 11);
     expect(a!.dedupeKey).toBe("budget:c1:2026-09:80");
     expect(a!.title).toBe("Dining is at 82%");
     expect(a!.body).toBe("$412.00 of $500.00 spent, 11 days left.");
-    expect(a!.bodyNoAmounts).toBe("82% of this month's budget, 11 days left.");
     expect(a!.silent).toBe(false);
   });
   it("jumping past 100% records 80% silently and sends 100%", () => {
@@ -95,23 +94,5 @@ describe("connectionAlerts", () => {
       { id: "a", institutionName: null, status: "healthy", lastSyncedAt: null },
       { id: "b", institutionName: null, status: "revoked", lastSyncedAt: null },
     ])).toEqual([]);
-  });
-});
-
-describe("deliverAfter", () => {
-  const tz = "America/Toronto";
-  it("sends now during the day", () => {
-    const noon = new Date("2026-09-30T16:00:00Z"); // 12:00 EDT
-    expect(deliverAfter(noon, tz)).toEqual(noon);
-  });
-  it("holds a late-evening alert until 08:00 the next morning", () => {
-    expect(deliverAfter(new Date("2026-10-01T03:00:00Z"), tz).toISOString()).toBe("2026-10-01T12:00:00.000Z"); // 23:00 → 08:00 EDT
-  });
-  it("holds an early-morning alert until 08:00 the same day", () => {
-    expect(deliverAfter(new Date("2026-10-01T09:00:00Z"), tz).toISOString()).toBe("2026-10-01T12:00:00.000Z"); // 05:00 → 08:00 EDT
-  });
-  it("handles the DST fall-back night", () => {
-    // 23:30 EDT on Oct 31; clocks fall back overnight, so 08:00 EST on Nov 1 is 13:00Z.
-    expect(deliverAfter(new Date("2026-11-01T03:30:00Z"), tz).toISOString()).toBe("2026-11-01T13:00:00.000Z");
   });
 });

@@ -1,17 +1,14 @@
-import { and, eq, gte, isNull, lte, or, sql } from "drizzle-orm";
+import { and, eq, gte, isNull, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
-import { deliverAfter, type AlertCandidate } from "@tally/core/alerts";
+import type { AlertCandidate } from "@tally/core/alerts";
 import { sendEmail } from "@/lib/emailService";
-import { getUserTimezone } from "@/lib/userTimezone";
 import { loadAlertPreferences, type AlertPreferences } from "@/lib/alerts/preferences";
-import { sendPushToUser } from "@/lib/alerts/push";
 import { alertEmailHtml, alertEmailSubject } from "@/lib/alerts/email";
 
 type EventRow = typeof schema.alertEvents.$inferSelect;
 interface StoredPayload {
   suppressed?: boolean;
-  titleNoAmounts?: string;
-  bodyNoAmounts?: string;
+  emailError?: string;
   [k: string]: unknown;
 }
 
@@ -21,10 +18,11 @@ interface StoredPayload {
  * re-sync, retry or second webhook computes the same key, inserts nothing,
  * and sends nothing.
  *
- * Recorded but not delivered ("suppressed"): everything in the user's first
- * evaluation (so turning alerts on doesn't replay every budget already past
- * 80%), silent candidates, and types with both channels off (so turning a
- * type on later doesn't replay old events).
+ * Delivery is email only (push was dropped: no iOS push without an Apple
+ * Developer account). Recorded but not sent ("suppressed"): everything in
+ * the user's first evaluation (so turning alerts on doesn't replay every
+ * budget already past 80%), silent candidates, and types with email off (so
+ * turning a type on later doesn't replay old events).
  */
 export async function recordAndDeliver(userId: string, candidates: AlertCandidate[], prefsIn?: AlertPreferences): Promise<number> {
   if (candidates.length === 0) return 0;
@@ -33,13 +31,12 @@ export async function recordAndDeliver(userId: string, candidates: AlertCandidat
   // just created": opening Settings creates that row before any sync runs.
   // Rows from the removed test-send feature (payload.test) don't count.
   const seeding = !(await hasRecordedAlerts(userId));
-  const timeZone = await getUserTimezone(userId);
   const now = new Date();
   let delivered = 0;
 
   for (const c of candidates) {
     const ch = prefs.channels[c.type];
-    const suppressed = seeding || !!c.silent || (!ch.push && !ch.email);
+    const suppressed = seeding || !!c.silent || !ch.email;
     const [row] = await db
       .insert(schema.alertEvents)
       .values({
@@ -49,13 +46,13 @@ export async function recordAndDeliver(userId: string, candidates: AlertCandidat
         title: c.title,
         body: c.body,
         url: c.url,
-        payload: { ...c.payload, suppressed, titleNoAmounts: c.titleNoAmounts, bodyNoAmounts: c.bodyNoAmounts } satisfies StoredPayload,
-        deliverAfter: suppressed || !ch.push ? now : deliverAfter(now, timeZone),
+        payload: { ...c.payload, suppressed } satisfies StoredPayload,
+        deliverAfter: now,
       })
       .onConflictDoNothing({ target: [schema.alertEvents.userId, schema.alertEvents.dedupeKey] })
       .returning();
     if (!row || suppressed) continue;
-    if ((await deliver(row, prefs, now)).any) delivered++;
+    if (await deliver(row, prefs)) delivered++;
   }
   return delivered;
 }
@@ -69,17 +66,9 @@ async function hasRecordedAlerts(userId: string): Promise<boolean> {
   return !!row;
 }
 
-export interface DeliveryResult {
-  any: boolean;
-  emailSent: boolean;
-  /** Devices Expo accepted the push for; null when push wasn't attempted. */
-  pushDevices: number | null;
-}
-
 /**
- * Merges delivery status into the event's payload (no column needed):
- * an error message per channel until a retry succeeds, and how many phones
- * a push reached. Read back by lib/alerts/history.ts.
+ * Merges delivery status into the event's payload (no column needed): the
+ * email error until a retry succeeds. Read back by lib/alerts/history.ts.
  */
 async function noteDelivery(id: string, set: Record<string, unknown>, clear: string[] = []): Promise<void> {
   let expr = sql`coalesce(${schema.alertEvents.payload}, '{}'::jsonb) || ${JSON.stringify(set)}::jsonb`;
@@ -87,65 +76,41 @@ async function noteDelivery(id: string, set: Record<string, unknown>, clear: str
   await db.update(schema.alertEvents).set({ payload: expr }).where(eq(schema.alertEvents.id, id));
 }
 
-/** Sends whatever channels are on and still unsent for this event. Never throws. */
-async function deliver(row: EventRow, prefs: AlertPreferences, now: Date): Promise<DeliveryResult> {
-  const ch = prefs.channels[row.type];
+/** Emails this event if email is on for its type and it hasn't gone out yet. Never throws. */
+async function deliver(row: EventRow, prefs: AlertPreferences): Promise<boolean> {
   const payload = (row.payload ?? {}) as StoredPayload;
-  const result: DeliveryResult = { any: false, emailSent: false, pushDevices: null };
-
-  if (ch.email && !row.emailSentAt) {
-    try {
-      const appUrl = process.env.APP_URL;
-      const [user] = await db.select({ email: schema.users.email }).from(schema.users).where(eq(schema.users.id, row.userId)).limit(1);
-      if (!appUrl || !user) throw new Error("APP_URL or user email missing");
-      await sendEmail({
-        to: user.email,
-        subject: alertEmailSubject(row.title),
-        html: alertEmailHtml({
-          type: row.type,
-          title: row.title,
-          body: row.body,
-          url: row.url ?? "/overview",
-          appUrl,
-          userId: row.userId,
-        }),
-      });
-      await db.update(schema.alertEvents).set({ emailSentAt: new Date() }).where(eq(schema.alertEvents.id, row.id));
-      if (payload.emailError) await noteDelivery(row.id, {}, ["emailError"]);
-      result.emailSent = true;
-    } catch (err) {
-      console.error(`Alert email failed (event ${row.id})`, err);
-      await noteDelivery(row.id, { emailError: err instanceof Error ? err.message : String(err) }).catch(() => {});
-    }
+  if (!prefs.channels[row.type].email || row.emailSentAt) return false;
+  try {
+    const appUrl = process.env.APP_URL;
+    const [user] = await db.select({ email: schema.users.email }).from(schema.users).where(eq(schema.users.id, row.userId)).limit(1);
+    if (!appUrl || !user) throw new Error("APP_URL or user email missing");
+    await sendEmail({
+      to: user.email,
+      subject: alertEmailSubject(row.title),
+      html: alertEmailHtml({
+        type: row.type,
+        title: row.title,
+        body: row.body,
+        url: row.url ?? "/overview",
+        appUrl,
+        userId: row.userId,
+      }),
+    });
+    await db.update(schema.alertEvents).set({ emailSentAt: new Date() }).where(eq(schema.alertEvents.id, row.id));
+    if (payload.emailError) await noteDelivery(row.id, {}, ["emailError"]);
+    return true;
+  } catch (err) {
+    console.error(`Alert email failed (event ${row.id})`, err);
+    await noteDelivery(row.id, { emailError: err instanceof Error ? err.message : String(err) }).catch(() => {});
+    return false;
   }
-
-  if (ch.push && !row.pushSentAt && row.deliverAfter <= now) {
-    try {
-      const amounts = prefs.showAmounts;
-      result.pushDevices = await sendPushToUser(row.userId, {
-        title: amounts ? row.title : (payload.titleNoAmounts ?? row.title),
-        body: amounts ? row.body : (payload.bodyNoAmounts ?? row.body),
-        data: { url: row.url, alertId: row.id, transactionId: payload.transactionId ?? null },
-      });
-      // Marked sent even with no devices registered yet: a phone added later
-      // shouldn't receive a backlog of old alerts.
-      await db.update(schema.alertEvents).set({ pushSentAt: new Date() }).where(eq(schema.alertEvents.id, row.id));
-      await noteDelivery(row.id, { pushDevices: result.pushDevices }, ["pushError"]);
-    } catch (err) {
-      console.error(`Alert push failed (event ${row.id})`, err);
-      await noteDelivery(row.id, { pushError: err instanceof Error ? err.message : String(err) }).catch(() => {});
-    }
-  }
-  result.any = result.emailSent || (result.pushDevices ?? 0) > 0;
-  return result;
 }
 
 const RETRY_WINDOW_MS = 36 * 60 * 60 * 1000;
 
 /**
- * Sends push held back by quiet hours and retries failed sends from the
- * last 36 hours (daily cron). Older failures are dropped: a day-old "you're
- * at 80%" isn't worth sending.
+ * Retries alert emails that failed in the last 36 hours (daily cron).
+ * Older failures are dropped: a day-old "you're at 80%" isn't worth sending.
  */
 export async function flushPendingAlerts(): Promise<number> {
   const now = new Date();
@@ -153,11 +118,7 @@ export async function flushPendingAlerts(): Promise<number> {
     .select()
     .from(schema.alertEvents)
     .where(
-      and(
-        lte(schema.alertEvents.deliverAfter, now),
-        gte(schema.alertEvents.createdAt, new Date(now.getTime() - RETRY_WINDOW_MS)),
-        or(isNull(schema.alertEvents.pushSentAt), isNull(schema.alertEvents.emailSentAt)),
-      ),
+      and(gte(schema.alertEvents.createdAt, new Date(now.getTime() - RETRY_WINDOW_MS)), isNull(schema.alertEvents.emailSentAt)),
     );
   let delivered = 0;
   const prefsCache = new Map<string, AlertPreferences>();
@@ -171,7 +132,7 @@ export async function flushPendingAlerts(): Promise<number> {
       prefs = (await loadAlertPreferences(row.userId)).prefs;
       prefsCache.set(row.userId, prefs);
     }
-    if ((await deliver(row, prefs, now)).any) delivered++;
+    if (await deliver(row, prefs)) delivered++;
   }
   return delivered;
 }

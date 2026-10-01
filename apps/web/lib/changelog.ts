@@ -15,18 +15,23 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.15.2",
+    date: "2026-09-30",
+    changes: [{ kind: "improved", text: "Alerts come by email, with one switch per alert in Settings → Alerts." }],
+  },
+  {
     version: "1.15.1",
     date: "2026-09-30",
     changes: [
       { kind: "improved", text: "Alert emails say what happened, why it matters, and link straight to the right page." },
-      { kind: "improved", text: "Recent alerts shows when an email or push didn't go through, and why." },
+      { kind: "improved", text: "Recent alerts shows when an alert email didn't go through, and why." },
     ],
   },
   {
     version: "1.15.0",
     date: "2026-09-30",
     changes: [
-      { kind: "new", text: "Settings → Alerts: choose push or email for budget, large purchase, subscription and connection alerts, and set your large purchase amount." },
+      { kind: "new", text: "Settings → Alerts: choose which budget, large purchase, subscription and connection alerts to get by email, and set your large purchase amount." },
       { kind: "new", text: "Recent alerts are listed in Settings." },
     ],
   },
