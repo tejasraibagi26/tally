@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.12.0",
+    date: "2026-09-30",
+    changes: [{ kind: "new", text: "Settings → Alerts: choose which budget, large purchase, subscription and connection alerts to get by email, set your large purchase amount, and see recent alerts." }],
+  },
+  {
     version: "1.11.2",
     date: "2026-09-30",
     changes: [{ kind: "fixed", text: "On iPhone, the More menu no longer has empty space below the build line." }],

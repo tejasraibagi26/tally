@@ -3,7 +3,7 @@ import { View, Text, ScrollView, TextInput, Pressable, Switch, ActivityIndicator
 import { useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import * as LocalAuthentication from "expo-local-authentication";
-import { ChevronRight, Link2, Wallet, Download, KeyRound, Sun, Moon, Smartphone, Pencil, Lock, Trash2, Check, X } from "lucide-react-native";
+import { ChevronRight, Link2, Wallet, Download, KeyRound, Sun, Moon, Smartphone, Pencil, Lock, Trash2, Check, X, Bell } from "lucide-react-native";
 import { exportTransactions } from "@/lib/exportData";
 import { Card } from "@/components/ui/Card";
 import { useAccountProfile, useUpdateAccountProfile, useUpdateRecaps, useChangePassword, useWipeAccount } from "@/lib/queries/account";
@@ -343,7 +343,7 @@ export default function SettingsScreen() {
         <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(13) }}>
           Notifications
         </Text>
-        <Card className="p-5">
+        <Card className="p-5 gap-4">
           <View className="flex-row items-center justify-between gap-4">
             <View className="flex-1 gap-0.5">
               <Text className="font-ui-medium text-text" style={{ fontSize: rf(14.5) }}>Monthly recap email</Text>
@@ -353,6 +353,19 @@ export default function SettingsScreen() {
             </View>
             <Switch value={recapsEnabled} onValueChange={toggleRecaps} trackColor={{ false: colors["border-strong"], true: colors.brand }} ios_backgroundColor={colors["border-strong"]} />
           </View>
+          {/* Alert emails (ALERTS.md) get their own screen, same as web Settings → Alerts. */}
+          <Pressable
+            onPress={() => router.push("/alerts")}
+            className="flex-row items-center gap-3 pt-4"
+            style={{ borderTopWidth: 1, borderTopColor: colors.border }}
+          >
+            <Bell size={18} color={colors["text-2"]} strokeWidth={1.75} />
+            <View className="flex-1 gap-0.5">
+              <Text className="font-ui-medium text-text" style={{ fontSize: rf(14.5) }}>Alerts</Text>
+              <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>Budgets, large purchases, subscriptions and connections, by email.</Text>
+            </View>
+            <ChevronRight size={16} color={colors["text-3"]} />
+          </Pressable>
         </Card>
       </View>
 

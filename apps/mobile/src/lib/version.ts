@@ -66,8 +66,10 @@ import Constants from "expo-constants";
  * retirement) and an "Account" card (Settings, Sign out). 1.11.1 sizes
  * that sheet to its content instead of a fixed 60% of the screen. 1.11.2
  * recalibrates it on iOS, where the floating sheet was still ~20% too tall.
+ * 1.12.0 adds Settings → Alerts (email on/off per alert, large purchase
+ * threshold, recent alerts), matching web.
  */
-export const APP_VERSION = "1.11.2";
+export const APP_VERSION = "1.12.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
