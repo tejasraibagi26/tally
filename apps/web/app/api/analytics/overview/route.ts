@@ -4,11 +4,7 @@ import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { getBudgetsForMonth } from "@/lib/budgets";
 import { upcomingBills } from "@/lib/analytics";
-
-function currentMonth(): string {
-  const now = new Date();
-  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)).toISOString().slice(0, 10);
-}
+import { currentMonthFor } from "@/lib/userTimezone";
 
 // §9's headline figures, bundled — the Overview page itself reads these
 // straight from the DB (no network round trip); this route exists for
@@ -22,7 +18,7 @@ export async function GET(req: Request) {
   }
 
   const monthParam = new URL(req.url).searchParams.get("month");
-  const month = monthParam && /^\d{4}-\d{2}-01$/.test(monthParam) ? monthParam : currentMonth();
+  const month = monthParam && /^\d{4}-\d{2}-01$/.test(monthParam) ? monthParam : (await currentMonthFor(userId));
 
   const [latestSnapshot] = await db
     .select()

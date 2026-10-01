@@ -4,15 +4,11 @@ import { db, schema } from "@/db";
 import { isAuthorizedCronRequest } from "@/lib/cronAuth";
 import { shiftMonth } from "@tally/core/budgetMath";
 import { sendMonthlyRecapForUser } from "@/lib/sendMonthlyRecap";
+import { DEFAULT_TIMEZONE, monthStartInZone } from "@tally/core/zonedDate";
 
 export const maxDuration = 300;
 
 const MONTH_RE = /^\d{4}-\d{2}-01$/;
-
-function currentMonth(): string {
-  const now = new Date();
-  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)).toISOString().slice(0, 10);
-}
 
 interface RecapFailure {
   userId: string;
@@ -46,7 +42,7 @@ export async function GET(req: Request) {
   if (monthParam && !MONTH_RE.test(monthParam)) {
     return NextResponse.json({ error: "month must be YYYY-MM-01" }, { status: 400 });
   }
-  const month = monthParam ?? shiftMonth(currentMonth(), -1);
+  const month = monthParam ?? shiftMonth(monthStartInZone(DEFAULT_TIMEZONE), -1);
 
   const users = await db
     .select({ id: schema.users.id, email: schema.users.email })

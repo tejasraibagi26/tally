@@ -6,11 +6,7 @@ import { SideNav } from "@/components/nav/SideNav";
 import { MobileNav } from "@/components/nav/MobileNav";
 import { MOCK_MODE } from "@/lib/config";
 import { monthRange } from "@tally/core/budgetMath";
-
-function currentMonth(): string {
-  const now = new Date();
-  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)).toISOString().slice(0, 10);
-}
+import { currentMonthFor } from "@/lib/userTimezone";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -20,7 +16,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // Matches the Transactions page's own default (unfiltered) view, which
   // defaults to the current month — this nav badge should read as "how many
   // are waiting in Transactions right now," not an all-time total.
-  const { start, end } = monthRange(currentMonth());
+  const { start, end } = monthRange((await currentMonthFor(userId)));
 
   const [[user], [txnCount], [acctCount], [cardCount]] = await Promise.all([
     db.select({ name: schema.users.name, email: schema.users.email }).from(schema.users).where(eq(schema.users.id, userId)).limit(1),

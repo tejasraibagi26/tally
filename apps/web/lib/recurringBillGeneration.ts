@@ -3,6 +3,8 @@ import { db, schema } from "@/db";
 import { shiftMonth } from "@tally/core/budgetMath";
 import { normalizeMerchantKey } from "@tally/core/recurringDetection";
 import { DEFAULT_CURRENCY } from "@tally/core/fx";
+import { DEFAULT_TIMEZONE, monthStartInZone } from "@tally/core/zonedDate";
+import { currentMonthFor } from "@/lib/userTimezone";
 
 interface ManualBillStream {
   id: string;
@@ -22,11 +24,6 @@ interface ManualBillStream {
 // A pathological override (a typo'd year, say) shouldn't silently backfill
 // years of transactions — this is well beyond any real prepayment stretch.
 const MAX_MONTHS = 36;
-
-function currentMonthStart(): string {
-  const now = new Date();
-  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)).toISOString().slice(0, 10);
-}
 
 /**
  * For a manually-added bill (Subscriptions' "+ Add a bill") with a
@@ -68,7 +65,7 @@ export async function generateDueManualBillPayments(stream: ManualBillStream): P
   if (!dueDate) return 0;
 
   const amount = amortizing ? Math.round(stream.averageAmount / termMonths) : stream.averageAmount;
-  const startMonth = currentMonthStart();
+  const startMonth = await currentMonthFor(stream.userId);
 
   // Self-heals a stale predictedNextDate inherited from a stream that
   // existed under some other (non-annual) cadence before amortizeMonthly
@@ -250,7 +247,7 @@ export function amortizeTermMonths(months: number | null | undefined): number {
  * at the new amount and "(n/N)" labels. Earlier terms keep theirs.
  */
 export async function resetCurrentInstallments(streamId: string, lastChargeDate: string | null): Promise<void> {
-  const from = lastChargeDate ? lastChargeDate.slice(0, 7) + "-01" : currentMonthStart();
+  const from = lastChargeDate ? lastChargeDate.slice(0, 7) + "-01" : monthStartInZone(DEFAULT_TIMEZONE);
   await db
     .delete(schema.transactions)
     .where(

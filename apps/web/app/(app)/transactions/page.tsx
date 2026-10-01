@@ -15,13 +15,9 @@ import { clearOrphanedRecurringStreamRefs } from "@/lib/recurringBillGeneration"
 import { monthLastDay } from "@tally/core/budgetMath";
 import { accountDisplayName } from "@tally/core/accountName";
 import Link from "next/link";
+import { currentMonthFor } from "@/lib/userTimezone";
 
 const PAGE_SIZE = 50;
-
-function currentMonth(): string {
-  const now = new Date();
-  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)).toISOString().slice(0, 10);
-}
 
 function monthLabel(month: string): string {
   return new Date(month + "T00:00:00Z").toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
@@ -72,7 +68,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   // bare /transactions shouldn't dump all-time history and silently mix in
   // prior months' spend. An explicit "" (the date inputs cleared and the
   // form resubmitted) is a deliberate "show all time" and is left alone.
-  const thisMonth = currentMonth();
+  const thisMonth = (await currentMonthFor(userId));
   const hasExplicitDateFilter = sp.from !== undefined || sp.to !== undefined;
   const fromFilter = sp.from ?? thisMonth;
   const toFilter = sp.to ?? monthLastDay(thisMonth);

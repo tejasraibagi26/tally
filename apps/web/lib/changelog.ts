@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.13.3",
+    date: "2026-09-30",
+    changes: [{ kind: "fixed", text: "Transactions, Budgets and Overview switch to the new month at midnight your time, not hours early in the evening." }],
+  },
+  {
     version: "1.13.2",
     date: "2026-09-30",
     changes: [{ kind: "improved", text: "Hide amounts and Appearance are now rows at the bottom of the sidebar, styled like the rest of it." }],

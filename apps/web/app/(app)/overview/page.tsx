@@ -23,17 +23,13 @@ import { BudgetMeterList } from "@/components/budgets/BudgetMeterList";
 import { LinkButton } from "@/components/plaid/LinkButton";
 import { MOCK_MODE } from "@/lib/config";
 import Link from "next/link";
+import { todayFor } from "@/lib/userTimezone";
 
 // A short, increasing entrance delay per major section so the page arrives
 // in a quick cascade rather than all at once. Kept small (120ms apart) so
 // it reads as "alive," not like a slow reveal you have to wait through.
 function reveal(step: number): React.CSSProperties {
   return { animation: `fade-in-up 420ms ease-out ${step * 120}ms both` };
-}
-
-function currentMonth(): string {
-  const now = new Date();
-  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)).toISOString().slice(0, 10);
 }
 
 function pctChip(current: number, prior: number): { direction: "up" | "down"; pctLabel: string } | null {
@@ -71,7 +67,9 @@ export default async function OverviewPage() {
     );
   }
 
-  const month = currentMonth();
+  // Both in the user's timezone, so the month and day don't roll over at UTC midnight.
+  const today = await todayFor(userId);
+  const month = today.slice(0, 7) + "-01";
   const priorMonth = shiftMonth(month, -1);
   const { start: monthStart } = monthRange(month);
   const monthEnd = monthLastDay(month);
@@ -104,8 +102,8 @@ export default async function OverviewPage() {
   const brokenItems = items.filter((i) => i.status !== "healthy").length;
   const utilization = utilizationFor(cards);
 
-  // `month` is always the current month (see currentMonth() above), so "today" always falls within it.
-  const daysElapsed = new Date().getUTCDate();
+  // `month` is always the current month (see todayFor() above), so "today" always falls within it.
+  const daysElapsed = Number(today.slice(8, 10));
   const daysInMonth = new Date(monthEnd + "T00:00:00Z").getUTCDate();
   const projectedSpend = computeBurnRateProjection(thisMonth.spend, daysElapsed, daysInMonth);
 

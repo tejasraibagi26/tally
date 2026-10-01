@@ -6,13 +6,9 @@ import { requireUserId } from "@/lib/session";
 import { categoryIdsInGroup } from "@/lib/categoryOptions";
 import { clearOrphanedRecurringStreamRefs } from "@/lib/recurringBillGeneration";
 import { monthLastDay } from "@tally/core/budgetMath";
+import { currentMonthFor } from "@/lib/userTimezone";
 
 const PAGE_SIZE = 50;
-
-function currentMonth(): string {
-  const now = new Date();
-  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)).toISOString().slice(0, 10);
-}
 
 interface RawLocation {
   city?: string | null;
@@ -53,7 +49,7 @@ export async function GET(req: Request) {
   const page = Math.max(1, parseInt(sp.get("page") ?? "1", 10) || 1);
   const categoryFilter = sp.get("category") ?? "";
   const merchantFilter = sp.get("merchant") ?? "";
-  const thisMonth = currentMonth();
+  const thisMonth = (await currentMonthFor(userId));
   const hasExplicitDateFilter = sp.has("from") || sp.has("to");
   const fromFilter = sp.get("from") ?? thisMonth;
   const toFilter = sp.get("to") ?? monthLastDay(thisMonth);

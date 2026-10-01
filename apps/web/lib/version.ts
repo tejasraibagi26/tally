@@ -55,8 +55,11 @@
  * theme pill, and moves Settings and Sign out next to the profile.
  * 1.13.2 swaps that pill for two nav-style rows (Hide amounts with a
  * switch, Appearance showing the current theme) above the profile row.
+ * 1.13.3 works out "this month" and "today" in the user's timezone
+ * (users.timezone) instead of the server's UTC, which rolled the month
+ * over at 8 PM Eastern.
  */
-export const APP_VERSION = "1.13.2";
+export const APP_VERSION = "1.13.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

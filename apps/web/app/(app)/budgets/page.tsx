@@ -10,11 +10,7 @@ import { Card, CardHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { BudgetRow } from "@/components/budgets/BudgetRow";
 import { AddBudgetForm } from "@/components/budgets/AddBudgetForm";
-
-function currentMonth(): string {
-  const now = new Date();
-  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)).toISOString().slice(0, 10);
-}
+import { currentMonthFor } from "@/lib/userTimezone";
 
 function monthLabel(month: string): string {
   return new Date(month + "T00:00:00Z").toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
@@ -23,7 +19,7 @@ function monthLabel(month: string): string {
 export default async function BudgetsPage({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
   const userId = await requireUserId();
   const sp = await searchParams;
-  const month = /^\d{4}-\d{2}-01$/.test(sp.month ?? "") ? (sp.month as string) : currentMonth();
+  const month = /^\d{4}-\d{2}-01$/.test(sp.month ?? "") ? (sp.month as string) : (await currentMonthFor(userId));
 
   const budgets = await getBudgetsForMonth(userId, month);
   const budgetedCategoryIds = budgets.map((b) => b.categoryId);
@@ -42,7 +38,7 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
   const totalRemaining = totalBudgeted - totalSpend;
 
   // Projection only means something for the month actually in progress (WORK.md §9).
-  const isCurrentMonth = month === currentMonth();
+  const isCurrentMonth = month === (await currentMonthFor(userId));
   const daysElapsed = isCurrentMonth ? new Date().getUTCDate() : undefined;
   const daysInMonth = isCurrentMonth ? new Date(monthLastDay(month) + "T00:00:00Z").getUTCDate() : undefined;
 

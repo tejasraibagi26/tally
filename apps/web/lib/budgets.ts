@@ -1,6 +1,7 @@
 import { and, eq, gte, isNull, lt, or, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { monthRange, shiftMonth, computeRemaining, budgetColorSlots } from "@tally/core/budgetMath";
+import { currentMonthFor } from "@/lib/userTimezone";
 
 export { monthRange, shiftMonth, computeRemaining };
 
@@ -39,11 +40,6 @@ function rolledUpSpend(spend: Map<string, number>, rollup: Map<string, string[]>
   return ids.reduce((sum, id) => sum + (spend.get(id) ?? 0), 0);
 }
 
-function currentMonth(): string {
-  const now = new Date();
-  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)).toISOString().slice(0, 10);
-}
-
 /**
  * A budget row only ever exists for the month it was explicitly created in —
  * there's no template/recurrence concept, so a fresh month is otherwise a
@@ -59,7 +55,7 @@ function currentMonth(): string {
  * and Budgets loading in parallel) both seeing "empty" at once.
  */
 async function ensureMonthSeeded(userId: string, month: string): Promise<void> {
-  if (month !== currentMonth()) return;
+  if (month !== (await currentMonthFor(userId))) return;
 
   const [already] = await db
     .select({ id: schema.budgets.id })

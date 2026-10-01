@@ -4,14 +4,10 @@ import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { sendMonthlyRecapForUser } from "@/lib/sendMonthlyRecap";
+import { currentMonthFor } from "@/lib/userTimezone";
 
 const MONTH_RE = /^\d{4}-\d{2}-01$/;
 const bodySchema = z.object({ month: z.string().regex(MONTH_RE).optional() });
-
-function currentMonth(): string {
-  const now = new Date();
-  return new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)).toISOString().slice(0, 10);
-}
 
 /**
  * "Send me a test recap" — session-authed (unlike the cron route, which is
@@ -38,7 +34,7 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
-  const month = parsed.data.month ?? currentMonth();
+  const month = parsed.data.month ?? (await currentMonthFor(userId));
 
   const [user] = await db.select({ id: schema.users.id, email: schema.users.email }).from(schema.users).where(eq(schema.users.id, userId)).limit(1);
   if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });

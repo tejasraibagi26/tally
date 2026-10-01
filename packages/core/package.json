@@ -13,6 +13,7 @@
     "./recurringDetection": "./src/recurringDetection.ts",
     "./money": "./src/money.ts",
     "./fx": "./src/fx.ts",
+    "./zonedDate": "./src/zonedDate.ts",
     "./pfc": "./src/pfc.ts",
     "./accountName": "./src/accountName.ts",
     "./listingCurrency": "./src/listingCurrency.ts",
