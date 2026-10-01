@@ -104,7 +104,14 @@ export function AlertSettings({ initial, pushDevices, history: initialHistory }:
     setTestMsg(null);
     try {
       const res = await fetch("/api/alerts/test", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ type: testType }) });
-      const data = (await res.json()) as { error?: string; emailSent?: boolean; pushDevices?: number | null; channels?: Channels };
+      const data = (await res.json()) as {
+        error?: string;
+        emailSent?: boolean;
+        pushDevices?: number | null;
+        channels?: Channels;
+        emailError?: string;
+        pushError?: string;
+      };
       if (!res.ok) {
         setTestMsg(data.error ?? "Couldn't send the test alert.");
         return;
@@ -112,7 +119,9 @@ export function AlertSettings({ initial, pushDevices, history: initialHistory }:
       const parts: string[] = [];
       if ((data.pushDevices ?? 0) > 0) parts.push(`to ${data.pushDevices} phone${data.pushDevices === 1 ? "" : "s"}`);
       if (data.emailSent) parts.push("by email");
-      if (parts.length > 0) setTestMsg(`Sent ${parts.join(" and ")}.`);
+      const failures = [data.emailError && `Email failed: ${data.emailError}`, data.pushError && `Push failed: ${data.pushError}`].filter(Boolean);
+      if (parts.length > 0) setTestMsg([`Sent ${parts.join(" and ")}.`, ...failures].join(" "));
+      else if (failures.length > 0) setTestMsg(failures.join(" "));
       else if (data.channels?.push && !data.channels.email) setTestMsg("Nothing sent: no phone is connected yet, and email is off for this alert.");
       else setTestMsg("Couldn't send the test alert. Try again in a moment.");
       const h = await fetch("/api/alerts?limit=10").then((r) => (r.ok ? r.json() : null)).catch(() => null);

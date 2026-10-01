@@ -73,6 +73,9 @@ export interface DeliveryResult {
   emailSent: boolean;
   /** Devices Expo accepted the push for; null when push wasn't attempted. */
   pushDevices: number | null;
+  /** Why a channel failed, for the Settings test send (already logged either way). */
+  emailError?: string;
+  pushError?: string;
 }
 
 /** Sends whatever channels are on and still unsent for this event. Never throws. */
@@ -95,6 +98,7 @@ async function deliver(row: EventRow, prefs: AlertPreferences, now: Date): Promi
       result.emailSent = true;
     } catch (err) {
       console.error(`Alert email failed (event ${row.id})`, err);
+      result.emailError = err instanceof Error ? err.message : String(err);
     }
   }
 
@@ -111,6 +115,7 @@ async function deliver(row: EventRow, prefs: AlertPreferences, now: Date): Promi
       await db.update(schema.alertEvents).set({ pushSentAt: new Date() }).where(eq(schema.alertEvents.id, row.id));
     } catch (err) {
       console.error(`Alert push failed (event ${row.id})`, err);
+      result.pushError = err instanceof Error ? err.message : String(err);
     }
   }
   result.any = result.emailSent || (result.pushDevices ?? 0) > 0;
