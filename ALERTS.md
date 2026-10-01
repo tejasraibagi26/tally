@@ -2,8 +2,8 @@
 
 Status: **draft for review** · 2026-09-30 · extends WORK.md §8.4
 
-Tally already knows when a budget is nearly spent, a card payment is due, a
-connection broke, or a subscription changed price. Right now it only says so
+Tally already knows when a budget is nearly spent, a connection broke, a
+big charge landed, or a subscription changed price. Right now it only says so
 when you open the app. Alerts send those facts to you, once, at a sensible
 time, through mobile push and email.
 
@@ -12,7 +12,7 @@ time, through mobile push and email.
 ## 1. Goals and non-goals
 
 **Goals**
-- Five alert types (§2), each computed from data that already syncs. No new Plaid products.
+- Four alert types (§2), each computed from data that already syncs. No new Plaid products.
 - Each alert fires exactly once per real event. A re-sync, a retry or a webhook storm never sends a duplicate.
 - Each alert type has its own on/off switch per channel, and thresholds where they make sense.
 - Every alert opens the screen that explains it.
@@ -20,6 +20,7 @@ time, through mobile push and email.
 **Non-goals (v1)**
 - Weekly digest email (the monthly recap covers this for now).
 - SMS, Telegram, Slack.
+- **Card payment due.** Dropped: Plaid's liabilities data (due date, last payment, statement balance) is too unreliable to say "due in 3 days and not yet paid" with confidence, and a wrong "you haven't paid" alert is worse than none.
 - Alerts built on new data: contribution room, safe-to-spend. Those features can later send through this pipeline.
 - Anything that needs manual import or AI parsing (product rule: automation only).
 
@@ -32,7 +33,6 @@ Amounts follow the existing money rules (DESIGN.md §5.4, §9): true minus sign,
 | Type | Fires when | Default channels | Example copy | Opens |
 |---|---|---|---|---|
 | `budget_threshold` | A budget's spend this month crosses **80%**, then **100%**, of its limit (rollover included). | Push | **Dining is at 82%** · $412 of $500 spent, 11 days left. | Budgets (web `/budgets`, mobile Budgets tab) |
-| `card_due` | A card's `nextPaymentDueDate` is **3 days** away and the statement isn't paid yet (§4.2). | Push + email | **Amex Cobalt due Fri** · $1,284.30 statement, $10.00 minimum. | `/cards` · mobile Accounts |
 | `connection_broken` | A connection turns `error` / `login_required`. | Push + email | **TD Canada Trust needs you to sign in again** · Syncing is paused until you reconnect. | `/accounts` · mobile Accounts |
 | `large_transaction` | A new spend transaction is ≥ the user's threshold (default **$500**), **or** is ≥ 3× the merchant's 6-month median and ≥ $100. | Push | **$842.10 at Best Buy** · Amex Cobalt ····1004. | Transaction detail |
 | `subscription_change` | Recurring detection finds a **new** subscription, or an existing one's latest charge is ≥ 5% and ≥ $1 more than the previous charge. | Push | **Spotify went up** · $11.99 → $13.99 a month. | `/subscriptions` |
@@ -49,7 +49,7 @@ There's no new polling. The checks hook into jobs that already run:
 |---|---|
 | `lib/plaidSync.ts`, after a transaction sync adds rows (next to `detectRecurringForUser`) | `large_transaction` for the new rows; `budget_threshold` for the categories they touched; `subscription_change` for streams the re-detection created or updated |
 | Webhook `ITEM` error handler (`app/api/plaid/webhook/route.ts`, where `status` is set) and the sync failure path | `connection_broken` |
-| **New cron** `/api/cron/alerts`, daily at 13:00 UTC (≈ 9 AM Eastern) | `card_due`; sends push held back by quiet hours (§5.3); a safety sweep of `budget_threshold` for manual and Shortcuts transactions |
+| **New cron** `/api/cron/alerts`, daily at 13:00 UTC (≈ 9 AM Eastern) | Sends push held back by quiet hours (§5.3); a safety sweep of `budget_threshold` for manual and Shortcuts transactions |
 
 The cron is added to `vercel.json`; Hobby allows daily crons. Every check lives in a pure function in `packages/core/src/alerts.ts` that takes plain rows and returns alert candidates, with unit tests like `budgetMath` and `fireMath`. The web side just loads rows, calls the function and sends what comes back.
 
@@ -63,26 +63,19 @@ Every candidate has a `dedupeKey`. Inserting into `alert_events` with a unique `
 | Type | Dedupe key |
 |---|---|
 | `budget_threshold` | `budget:{categoryId}:{YYYY-MM}:{80\|100}` |
-| `card_due` | `card:{accountId}:{nextPaymentDueDate}` |
 | `connection_broken` | `conn:{itemId}:{errorCode}:{date broken}`, which allows a new alert if it breaks again later |
 | `large_transaction` | `txn:{pending_transaction_id ?? plaid_transaction_id}`, so the posted row reuses the pending row's key |
 | `subscription_change` | `sub_new:{streamId}` · `sub_price:{streamId}:{newAmountCents}` |
 
 Thresholds are judged on the month in the user's timezone (`currentMonthFor`, v1.13.3).
 
-### 4.2 "Statement already paid" (card_due)
-Skip when any of these is true:
-- `lastPaymentDate ≥ lastStatementIssueDate` and `lastPaymentAmount ≥ minimumPaymentAmount`
-- `lastStatementBalance ≤ 0`
-- `isOverdue` is true (that's a different message, and out of scope for v1)
-
-### 4.3 Budget crossings
+### 4.2 Budget crossings
 Only an actual **crossing** alerts: spend before this sync was below the line, and spend after is at or above it. Raising a budget's limit afterwards doesn't re-arm the alert for that month. Crossing 80% and 100% in one sync sends only the 100% alert, and records 80% as sent.
 
-### 4.4 Large transaction baseline
+### 4.3 Large transaction baseline
 Merchant median: the last 6 months of that `merchantKey` for the user, excluding transfers. If there are fewer than 3 past charges, only the fixed threshold applies.
 
-### 4.5 Subscription price change
+### 4.4 Subscription price change
 Compare the two most recent charges in the stream's `transactionIds`. If `averageAmount` moved but the latest charge didn't, nothing fires, because that's noise.
 
 ---
@@ -98,16 +91,16 @@ Compare the two most recent charges in the stream's `transactionIds`. If `averag
 
 ### 5.2 Email
 - `lib/emailService.ts` (Uplift Send), using the recap's HTML shell in `lib/emailTemplate.ts`.
-- One email per alert. Only `card_due` and `connection_broken` email by default.
+- One email per alert. Only `connection_broken` emails by default.
 - Footer: **Manage alerts** goes to `/settings#alerts`. The one-click unsubscribe reuses `lib/emailUnsubscribe.ts` and turns off email for alerts only (recaps keep their own switch).
 
 ### 5.3 Quiet hours
-Push sends between **08:00 and 22:00** in the user's timezone. Outside that window the row is written with `deliverAfter` set to the next 08:00, and the daily cron (or the next evaluation) sends it. `connection_broken` and `card_due` follow quiet hours too, since nothing about them is urgent at 3 AM. Email ignores quiet hours, because it doesn't buzz.
+Push sends between **08:00 and 22:00** in the user's timezone. Outside that window the row is written with `deliverAfter` set to the next 08:00, and the daily cron (or the next evaluation) sends it. `connection_broken` follows quiet hours too, since nothing about it is urgent at 3 AM. Email ignores quiet hours, because it doesn't buzz.
 
 ### 5.4 Privacy
 - New setting: **Show amounts in notifications**, default **on**.
 - When it's off, the body drops figures. For example, "Dining is at 82% of its budget" instead of "$412 of $500".
-- Lock-screen notifications never include balances or net worth, which matches the hide-amounts rule. None of the five types needs them anyway.
+- Lock-screen notifications never include balances or net worth, which matches the hide-amounts rule. None of the four types needs them anyway.
 
 ---
 
@@ -128,7 +121,7 @@ pushTokens = pgTable("push_tokens", {
 // Per-user settings. One row, created on first read with defaults.
 alertPreferences = pgTable("alert_preferences", {
   userId: uuid().primaryKey().references(() => users.id, { onDelete: "cascade" }),
-  // { budget_threshold: { push: true, email: false }, card_due: { push: true, email: true }, ... }
+  // { budget_threshold: { push: true, email: false }, connection_broken: { push: true, email: true }, ... }
   channels: jsonb().$type<Record<AlertType, { push: boolean; email: boolean }>>().notNull(),
   largeTransactionCents: bigint({ mode: "number" }).notNull().default(50_000),
   showAmounts: boolean().notNull().default(true),
@@ -183,7 +176,7 @@ alertEvents = pgTable("alert_events", {
 ## 9. Build plan
 
 1. **Migration:** the three tables and `alertTypeEnum`, pushed alone, then `db:migrate`.
-2. **Core:** `packages/core/src/alerts.ts`, the pure checks plus unit tests for every rule in §4 (crossing edges, paid-statement skip, pending → posted keying, the median baseline with fewer than 3 points, the price-change noise case).
+2. **Core:** `packages/core/src/alerts.ts`, the pure checks plus unit tests for every rule in §4 (crossing edges, pending → posted keying, the median baseline with fewer than 3 points, the price-change noise case).
 3. **Engine and email:** `lib/alerts/` (load rows → check → insert-or-skip → deliver), hooked into the sync and webhook paths, the new cron and the email template. **Ship and verify with email only.**
 4. **Web settings, history and test send.**
 5. **Mobile push:** `expo-notifications`, token registration, Settings → Alerts, deep links. This is a **native module, so it needs a new EAS build** (an OTA update can't add it). It also needs the APNs key.
@@ -207,5 +200,5 @@ Steps 1–4 are web-only and can ship without waiting on an app store build.
 1. Default large-purchase threshold: **$500**?
 2. Pending transactions trigger `large_transaction`: **yes**?
 3. Quiet hours **08:00–22:00**, fixed in v1 (no setting)?
-4. Default email only for `card_due` and `connection_broken`?
+4. Default email only for `connection_broken`?
 5. Show amounts in notifications defaults to **on**?
