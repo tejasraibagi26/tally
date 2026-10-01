@@ -64,8 +64,10 @@
  * 1.14.0 adds the alerts engine (ALERTS.md): budget steps, connection
  * breaks, large purchases and subscription changes, recorded once each;
  * email for broken connections now, push once the mobile app registers.
+ * 1.15.0 adds Settings → Alerts: push/email per type, the large-purchase
+ * threshold, show-amounts, a test send and recent alert history.
  */
-export const APP_VERSION = "1.14.0";
+export const APP_VERSION = "1.15.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

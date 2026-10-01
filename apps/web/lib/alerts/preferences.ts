@@ -22,9 +22,7 @@ export interface AlertPreferences {
 
 /**
  * The user's alert settings, creating the row with defaults on first read.
- * `created` tells the engine this is the user's first evaluation, so it can
- * record everything already true as seen instead of sending a backlog
- * (every budget already past 80%, every existing subscription).
+ * (The engine's no-backlog seeding keys off alert_events, not `created`.)
  */
 export async function loadAlertPreferences(userId: string): Promise<{ prefs: AlertPreferences; created: boolean }> {
   const [row] = await db.select().from(schema.alertPreferences).where(eq(schema.alertPreferences.userId, userId)).limit(1);

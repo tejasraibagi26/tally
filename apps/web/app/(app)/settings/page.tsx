@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { and, desc, eq, isNull, or } from "drizzle-orm";
-import { User, Lock, Download, Link2, Wand2, Wallet, Mail, KeyRound, ChevronRight, AlertTriangle, type LucideIcon } from "lucide-react";
+import { User, Lock, Download, Link2, Wand2, Wallet, Mail, KeyRound, ChevronRight, AlertTriangle, Bell, type LucideIcon } from "lucide-react";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { Card, CardHeader } from "@/components/ui/Card";
@@ -9,6 +9,9 @@ import { PasswordForm } from "@/components/settings/PasswordForm";
 import { DangerZone } from "@/components/settings/DangerZone";
 import { IncomeScheduleManager } from "@/components/settings/IncomeScheduleManager";
 import { RecapsToggle } from "@/components/settings/RecapsToggle";
+import { AlertSettings } from "@/components/settings/AlertSettings";
+import { loadAlertPreferences } from "@/lib/alerts/preferences";
+import { alertHistory, pushDeviceCount } from "@/lib/alerts/history";
 import { ApiKeysManager } from "@/components/settings/ApiKeysManager";
 import { accountDisplayName } from "@tally/core/accountName";
 import { APP_VERSION } from "@/lib/version";
@@ -80,6 +83,12 @@ export default async function SettingsPage() {
     accountName: s.accountName != null ? accountDisplayName(s.accountName, accountNickname) : s.accountName,
   }));
 
+  const [{ prefs: alertPrefs }, alertDevices, recentAlerts] = await Promise.all([
+    loadAlertPreferences(userId),
+    pushDeviceCount(userId),
+    alertHistory(userId, 10),
+  ]);
+
   const apiKeys = await db
     .select({
       id: schema.apiKeys.id,
@@ -131,6 +140,13 @@ export default async function SettingsPage() {
             <RecapsToggle initialEnabled={user?.recapsEnabled ?? true} />
           </div>
         </Card>
+        {/* #alerts: target of the alert emails' "Manage alerts" link. */}
+        <div id="alerts" className="scroll-mt-6">
+          <Card>
+            <CardHeader title="Alerts" action={<Bell size={17} strokeWidth={1.75} className="text-text-3" />} />
+            <AlertSettings initial={alertPrefs} pushDevices={alertDevices} history={recentAlerts} />
+          </Card>
+        </div>
       </div>
 
       <div className="flex flex-col gap-3">

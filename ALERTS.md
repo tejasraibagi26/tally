@@ -149,7 +149,7 @@ alertEvents = pgTable("alert_events", {
 | Route | Purpose |
 |---|---|
 | `GET/PATCH /api/alerts/preferences` | Read and update channels, threshold, showAmounts |
-| `POST /api/push-tokens` · `DELETE /api/push-tokens/:token` | Register on permission grant; remove on sign-out |
+| `POST /api/push-tokens` · `DELETE /api/push-tokens` (token in the body) | Register on permission grant; remove on sign-out |
 | `GET /api/alerts?limit=50` | History, newest first |
 | `POST /api/alerts/:id/read` | Mark read (mobile tap, web click) |
 | `POST /api/alerts/test` | Send a sample of one type to yourself, using the existing recaps "send test" pattern |

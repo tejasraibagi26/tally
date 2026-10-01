@@ -85,8 +85,7 @@ async function connectionCandidates(userId: string): Promise<AlertCandidate[]> {
  * them, budget steps, and subscription changes.
  */
 export async function evaluateAfterTransactionSync(userId: string, plaidTransactionIds: string[]): Promise<number> {
-  const loaded = await loadAlertPreferences(userId);
-  const { prefs } = loaded;
+  const { prefs } = await loadAlertPreferences(userId);
   const candidates: AlertCandidate[] = [];
 
   if (plaidTransactionIds.length > 0) {
@@ -138,7 +137,7 @@ export async function evaluateAfterTransactionSync(userId: string, plaidTransact
   }
 
   candidates.push(...(await budgetCandidates(userId)), ...(await subscriptionCandidates(userId)));
-  return recordAndDeliver(userId, candidates, loaded);
+  return recordAndDeliver(userId, candidates, prefs);
 }
 
 /** After a webhook changes a connection's status. */
