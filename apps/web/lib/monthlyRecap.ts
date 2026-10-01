@@ -1,4 +1,5 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
+import { isActiveExpenseStream, subscriptionsMonthlyTotal } from "@tally/core/subscriptionMath";
 import { db, schema } from "@/db";
 import { monthTotals, categoryBreakdown, cashFlowTrend, trailingAnnualCashFlowEstimate, type BreakdownRow } from "@/lib/analytics";
 import { getBudgetsForMonth } from "@/lib/budgets";
@@ -13,14 +14,6 @@ import { formatPercent } from "@tally/core/money";
 // email forces color-scheme:light, so dark-theme tokens would never apply.
 const SERIES_COLORS = ["#1baf7a", "#eb6834", "#2a78d6", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"];
 const OTHER_COLOR = "#8A877E";
-
-const FREQUENCY_MONTHLY_MULTIPLIER: Record<string, number> = {
-  weekly: 52 / 12,
-  biweekly: 26 / 12,
-  monthly: 1,
-  quarterly: 1 / 3,
-  annual: 1 / 12,
-};
 
 const PRICE_INCREASE_THRESHOLD = 0.03; // 3% — below this, treat as noise/rounding, not a real price bump
 
@@ -179,13 +172,19 @@ async function computeSubscriptions(userId: string, month: string) {
       frequency: schema.recurringStreams.frequency,
       status: schema.recurringStreams.status,
       manualNextDueDate: schema.recurringStreams.manualNextDueDate,
+      isManual: schema.recurringStreams.isManual,
+      amortizeMonthly: schema.recurringStreams.amortizeMonthly,
+      amortizeMonths: schema.recurringStreams.amortizeMonths,
       transactionIds: schema.recurringStreams.transactionIds,
     })
     .from(schema.recurringStreams)
-    .where(eq(schema.recurringStreams.userId, userId));
+    // Removed (dismissed) streams are soft-deleted, so they have to be
+    // filtered here -- the recap used to count them, and ignored spread
+    // plans' terms, overstating the total vs. the Subscriptions page.
+    .where(and(eq(schema.recurringStreams.userId, userId), isNull(schema.recurringStreams.dismissedAt)));
 
-  const active = streams.filter((s) => (s.status !== "cancelled" || s.manualNextDueDate != null) && s.averageAmount < 0);
-  const monthlyTotal = active.reduce((sum, s) => sum + Math.abs(s.averageAmount) * (FREQUENCY_MONTHLY_MULTIPLIER[s.frequency] ?? 1), 0);
+  const active = streams.filter(isActiveExpenseStream);
+  const { monthlyTotal, activeCount } = subscriptionsMonthlyTotal(active);
 
   // No stored history of past monthlyTotal to diff against, so the recap
   // reports the current total and a specific per-merchant price increase
@@ -193,7 +192,7 @@ async function computeSubscriptions(userId: string, month: string) {
   // rather than fabricating a month-over-month delta for the total itself.
   const priceIncrease = await detectPriceIncrease(active, month);
 
-  return { activeCount: active.length, monthlyTotal, priceIncrease };
+  return { activeCount, monthlyTotal, priceIncrease };
 }
 
 async function detectPriceIncrease(

@@ -86,6 +86,8 @@ export interface TransactionInput {
   pendingTransactionId: string | null;
   /** Cents; expenses negative. */
   amount: number;
+  /** The transaction's own date, YYYY-MM-DD (Plaid's posted/pending date). */
+  date: string;
   isTransfer: boolean;
   merchantKey: string;
   merchantLabel: string;
@@ -95,6 +97,25 @@ export interface TransactionInput {
 export const MERCHANT_MULTIPLE = 3;
 export const MERCHANT_MULTIPLE_FLOOR_CENTS = 10_000; // $100
 export const MIN_MERCHANT_HISTORY = 3;
+/**
+ * Only charges dated within this many days of today alert. A sync's "added"
+ * rows aren't all new purchases: Plaid's historical backfill after linking
+ * (up to 24 months, arriving in later syncs than the first 30 days) and a
+ * relink both deliver old transactions as "added". A week still covers a
+ * charge that posts several days after the purchase.
+ */
+export const MAX_ALERT_AGE_DAYS = 7;
+
+/** "Mon, Sep 28" -- plus the year when it isn't today's year. Dates are YYYY-MM-DD. */
+export function alertDate(date: string, today: string): string {
+  const d = new Date(date + "T00:00:00Z");
+  const sameYear = date.slice(0, 4) === today.slice(0, 4);
+  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", ...(sameYear ? {} : { year: "numeric" }), timeZone: "UTC" });
+}
+
+function daysBetween(from: string, to: string): number {
+  return Math.round((Date.parse(to + "T00:00:00Z") - Date.parse(from + "T00:00:00Z")) / 86_400_000);
+}
 
 export function median(values: number[]): number | null {
   if (values.length === 0) return null;
@@ -111,10 +132,13 @@ export function largeTransactionAlerts(
   txns: TransactionInput[],
   history: Map<string, number[]>,
   thresholdCents: number,
+  /** Today in the user's timezone, YYYY-MM-DD. */
+  today: string,
 ): AlertCandidate[] {
   const out: AlertCandidate[] = [];
   for (const t of txns) {
     if (t.isTransfer || t.amount >= 0) continue;
+    if (daysBetween(t.date, today) > MAX_ALERT_AGE_DAYS) continue;
     const magnitude = -t.amount;
     const past = history.get(t.merchantKey) ?? [];
     const med = past.length >= MIN_MERCHANT_HISTORY ? median(past) : null;
@@ -126,11 +150,14 @@ export function largeTransactionAlerts(
       type: "large_transaction",
       dedupeKey: `txn:${key}`,
       title: `${formatCents(magnitude)} at ${t.merchantLabel}`,
-      body: unusual && !overThreshold ? `${t.accountLabel} · about ${Math.round(magnitude / med!)}× what you usually spend there.` : t.accountLabel,
+      body:
+        unusual && !overThreshold
+          ? `${alertDate(t.date, today)} · ${t.accountLabel} · about ${Math.round(magnitude / med!)}× what you usually spend there.`
+          : `${alertDate(t.date, today)} · ${t.accountLabel}`,
       // Web has no single-transaction route; its exact-merchant filter shows the
       // charge in context. Mobile opens /transactions/{payload.transactionId}.
       url: `/transactions?merchant=${encodeURIComponent(t.merchantLabel)}`,
-      payload: { transactionId: t.id, amount: t.amount, reason: overThreshold ? "threshold" : "merchant_multiple", median: med },
+      payload: { transactionId: t.id, amount: t.amount, date: t.date, reason: overThreshold ? "threshold" : "merchant_multiple", median: med },
     });
   }
   return out;
@@ -160,7 +187,7 @@ const PER: Record<Frequency, string> = {
 export const PRICE_CHANGE_MIN_RATIO = 0.05;
 export const PRICE_CHANGE_MIN_CENTS = 100;
 
-export function subscriptionAlerts(streams: StreamInput[]): AlertCandidate[] {
+export function subscriptionAlerts(streams: StreamInput[], today: string): AlertCandidate[] {
   const out: AlertCandidate[] = [];
   for (const s of streams) {
     const charges = s.charges.filter((c) => c.amount < 0);
@@ -171,7 +198,7 @@ export function subscriptionAlerts(streams: StreamInput[]): AlertCandidate[] {
       type: "subscription_change",
       dedupeKey: `sub_new:${s.id}`,
       title: `New subscription: ${s.description}`,
-      body: `${formatCents(latestMag)} ${PER[s.frequency]}.`,
+      body: `${formatCents(latestMag)} ${PER[s.frequency]}. Last charged ${alertDate(latest.date, today)}.`,
       url: "/subscriptions",
       payload: { streamId: s.id, kind: "new" },
     });
@@ -184,7 +211,7 @@ export function subscriptionAlerts(streams: StreamInput[]): AlertCandidate[] {
         type: "subscription_change",
         dedupeKey: `sub_price:${s.id}:${latestMag}`,
         title: `${s.description} went up`,
-        body: `${formatCents(prevMag)} → ${formatCents(latestMag)} ${PER[s.frequency]}.`,
+        body: `${formatCents(prevMag)} → ${formatCents(latestMag)} ${PER[s.frequency]}. Charged ${alertDate(latest.date, today)}.`,
         url: "/subscriptions",
         payload: { streamId: s.id, kind: "price", from: prevMag, to: latestMag },
       });

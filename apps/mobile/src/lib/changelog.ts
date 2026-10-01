@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.13.1",
+    date: "2026-10-01",
+    changes: [
+      { kind: "fixed", text: "Subscriptions' monthly total now matches the website and the monthly recap email." },
+      { kind: "improved", text: "Subscription totals only count subscriptions Tally found on its own. Bills you add yourself, like rent, aren't counted." },
+    ],
+  },
+  {
     version: "1.13.0",
     date: "2026-10-01",
     changes: [

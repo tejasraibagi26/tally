@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View, Text, ScrollView, ActivityIndicator, Pressable, Alert } from "react-native";
 import { Stack } from "expo-router";
 import { AddBillSheet } from "@/components/AddBillSheet";
+import { subscriptionsMonthlyTotal } from "@tally/core/subscriptionMath";
 import { HeaderTextAction } from "@/components/ui/HeaderTextAction";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
@@ -81,14 +82,6 @@ const FREQUENCY_LABEL: Record<RecurringStream["frequency"], string> = {
   annual: "Annual",
 };
 
-const MONTHLY_MULTIPLIER: Record<RecurringStream["frequency"], number> = {
-  weekly: 52 / 12,
-  biweekly: 26 / 12,
-  monthly: 1,
-  quarterly: 1 / 3,
-  annual: 1 / 12,
-};
-
 // MOBILE_DESIGN.md §5.7 -- flat list (not grouped by institution), header
 // totals for monthly/annualized spend, at-risk/cancelled get the same
 // status-badge treatment as connection health.
@@ -108,15 +101,10 @@ export default function SubscriptionsScreen() {
     ]);
   }
 
-  // Matches the web Subscriptions page: only expense streams (negative
-  // amounts) count toward Monthly/Annualized — a paycheck or other income
-  // stream shouldn't inflate what looks like a spend total.
-  const expenseStreams = streams.filter((s) => s.averageAmount < 0);
-  // A spread plan's real cadence is its term (the enum has no 6/9-month value).
-  const monthlyTotal = expenseStreams.reduce(
-    (sum, s) => sum + Math.abs(s.averageAmount) * (s.amortizeMonthly ? 1 / (s.amortizeMonths ?? 12) : MONTHLY_MULTIPLIER[s.frequency]),
-    0,
-  );
+  // Same total as web's Subscriptions page and the recap email
+  // (@tally/core/subscriptionMath): expense streams only, spread plans over
+  // their term, and a cancelled stream with a manual due date still counts.
+  const { monthlyTotal } = subscriptionsMonthlyTotal(data?.streams ?? []);
 
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
@@ -137,6 +125,11 @@ export default function SubscriptionsScreen() {
           <MoneyText cents={Math.round(monthlyTotal * 12)} className="font-display text-text" mask={false} style={{ fontSize: rf(24) }} />
         </View>
       </Card>
+      {(data?.streams ?? []).some((s) => s.isManual && s.averageAmount < 0) && (
+        <Text className="font-ui text-text-3" style={{ fontSize: rf(12), marginTop: -12 }}>
+          Bills you added yourself, like rent, aren&apos;t included in these totals.
+        </Text>
+      )}
 
       {isLoading ? (
         <ActivityIndicator />

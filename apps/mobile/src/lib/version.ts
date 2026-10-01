@@ -74,8 +74,12 @@ import Constants from "expo-constants";
  * screens share TabHeader (context line; Transactions leads with period
  * spend). Also fixes FIRE "Save": rates were sent as strings and rejected,
  * and saved expenses/contribution were never loaded back.
+ * 1.13.1 computes the Subscriptions monthly total with the same shared
+ * function as web and the recap email (@tally/core/subscriptionMath), so
+ * a cancelled-but-manually-dated bill counts the same everywhere, and
+ * manually added bills (rent) are left out of the total.
  */
-export const APP_VERSION = "1.13.0";
+export const APP_VERSION = "1.13.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

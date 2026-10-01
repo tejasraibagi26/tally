@@ -63,7 +63,7 @@ async function subscriptionCandidates(userId: string): Promise<AlertCandidate[]>
       .sort((a, b) => a.date.localeCompare(b.date))
       .map((c) => ({ amount: c.amount, date: c.date })),
   }));
-  return subscriptionAlerts(inputs);
+  return subscriptionAlerts(inputs, await todayFor(userId));
 }
 
 async function connectionCandidates(userId: string): Promise<AlertCandidate[]> {
@@ -95,6 +95,7 @@ export async function evaluateAfterTransactionSync(userId: string, plaidTransact
         plaidTransactionId: schema.transactions.plaidTransactionId,
         pendingTransactionId: schema.transactions.pendingTransactionId,
         amount: schema.transactions.amount,
+        postedDate: schema.transactions.postedDate,
         isTransfer: schema.transactions.isTransfer,
         name: schema.transactions.name,
         merchantName: schema.transactions.merchantName,
@@ -125,6 +126,7 @@ export async function evaluateAfterTransactionSync(userId: string, plaidTransact
           plaidTransactionId: t.plaidTransactionId,
           pendingTransactionId: t.pendingTransactionId,
           amount: t.amount,
+          date: t.postedDate,
           isTransfer: t.isTransfer,
           merchantKey: normalizeMerchantKey(t.merchantName ?? t.name),
           merchantLabel: t.merchantName ?? t.name,
@@ -132,6 +134,7 @@ export async function evaluateAfterTransactionSync(userId: string, plaidTransact
         })),
         history,
         prefs.largeTransactionCents,
+        await todayFor(userId),
       ),
     );
   }

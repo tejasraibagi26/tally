@@ -39,7 +39,7 @@ Amounts follow the existing money rules (DESIGN.md §5.4, §9): true minus sign,
 | `large_transaction` | A new spend transaction is ≥ the user's threshold (default **$500**), **or** is ≥ 3× the merchant's 6-month median and ≥ $100. | Push | **$842.10 at Best Buy** · Amex Cobalt ····1004. | Transaction detail |
 | `subscription_change` | Recurring detection finds a **new** subscription, or an existing one's latest charge is ≥ 5% and ≥ $1 more than the previous charge. | Push | **Spotify went up** · $11.99 → $13.99 a month. | `/subscriptions` |
 
-Transfers (`is_transfer`) and income never trigger `large_transaction`. Pending transactions do count, so you hear about a charge as it happens. Dedupe (§4.1) stops the same charge alerting again once it posts.
+Transfers (`is_transfer`) and income never trigger `large_transaction`. Neither does a charge dated more than **7 days** before today (user's timezone): Plaid delivers its historical backfill after linking, and a relink's history, as "added" rows, so "added in this sync" doesn't mean "new" (`MAX_ALERT_AGE_DAYS`, web v1.16.2). The alert body leads with the charge's date ("Mon, Sep 28 · Amex Cobalt ····1004"); subscription alerts say when the charge was. Pending transactions do count, so you hear about a charge as it happens. Dedupe (§4.1) stops the same charge alerting again once it posts.
 
 ---
 

@@ -81,8 +81,15 @@
  * API now accepts the rates as strings (older mobile builds sent them that
  * way and every save 400'd), and a failed save says so. GET
  * /api/transactions also returns a spend/unreviewed summary for mobile.
+ * 1.16.2 stops large-purchase alerts for old charges: a sync's "added" rows
+ * include Plaid's historical backfill, so a months-old purchase alerted as
+ * new. Only charges dated within 7 days alert now, and alert emails carry
+ * the charge's date. Also: the monthly recap's subscriptions total counted
+ * dismissed streams and ignored spread plans' terms; it, the Subscriptions
+ * page and mobile now share @tally/core/subscriptionMath, which also leaves
+ * manually added bills (rent) out of the subscriptions total and count.
  */
-export const APP_VERSION = "1.16.1";
+export const APP_VERSION = "1.16.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

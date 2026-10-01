@@ -18,7 +18,8 @@
     "./pfc": "./src/pfc.ts",
     "./accountName": "./src/accountName.ts",
     "./listingCurrency": "./src/listingCurrency.ts",
-    "./cashFlowMath": "./src/cashFlowMath.ts"
+    "./cashFlowMath": "./src/cashFlowMath.ts",
+    "./subscriptionMath": "./src/subscriptionMath.ts"
   },
   "scripts": {
     "test": "vitest run",

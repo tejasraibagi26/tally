@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.16.2",
+    date: "2026-10-01",
+    changes: [
+      { kind: "fixed", text: "Large purchase alerts no longer go out for old purchases that show up when your bank sends older history. Only purchases from the past week alert." },
+      { kind: "improved", text: "Large purchase and subscription alerts say the date of the charge." },
+      { kind: "fixed", text: "The monthly recap's subscriptions total no longer counts subscriptions you removed, and counts prepaid plans spread across months at their monthly share, matching the Subscriptions page." },
+      { kind: "improved", text: "Subscription totals only count subscriptions Tally found on its own. Bills you add yourself, like rent, stay in the list but aren't counted." },
+    ],
+  },
+  {
     version: "1.16.1",
     date: "2026-10-01",
     changes: [
