@@ -5,7 +5,7 @@ import { sendEmail } from "@/lib/emailService";
 import { getUserTimezone } from "@/lib/userTimezone";
 import { loadAlertPreferences, type AlertPreferences } from "@/lib/alerts/preferences";
 import { sendPushToUser } from "@/lib/alerts/push";
-import { alertEmailHtml } from "@/lib/alerts/email";
+import { alertEmailHtml, alertEmailSubject } from "@/lib/alerts/email";
 
 type EventRow = typeof schema.alertEvents.$inferSelect;
 interface StoredPayload {
@@ -102,8 +102,16 @@ async function deliver(row: EventRow, prefs: AlertPreferences, now: Date): Promi
       if (!appUrl || !user) throw new Error("APP_URL or user email missing");
       await sendEmail({
         to: user.email,
-        subject: row.title,
-        html: alertEmailHtml({ title: row.title, body: row.body, url: row.url ?? "/overview", appUrl, userId: row.userId }),
+        subject: alertEmailSubject(row.title),
+        html: alertEmailHtml({
+          type: row.type,
+          title: row.title,
+          body: row.body,
+          url: row.url ?? "/overview",
+          appUrl,
+          userId: row.userId,
+          test: !!payload.test,
+        }),
       });
       await db.update(schema.alertEvents).set({ emailSentAt: new Date() }).where(eq(schema.alertEvents.id, row.id));
       if (payload.emailError) await noteDelivery(row.id, {}, ["emailError"]);
