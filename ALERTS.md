@@ -179,7 +179,7 @@ alertEvents = pgTable("alert_events", {
 2. **Core:** `packages/core/src/alerts.ts`, the pure checks plus unit tests for every rule in §4 (crossing edges, pending → posted keying, the median baseline with fewer than 3 points, the price-change noise case).
 3. **Engine and email:** `lib/alerts/` (load rows → check → insert-or-skip → deliver), hooked into the sync and webhook paths, the new cron and the email template. **Ship and verify with email only.**
 4. **Web settings, history and test send.**
-5. **Mobile push:** `expo-notifications`, token registration, Settings → Alerts, deep links. This is a **native module, so it needs a new EAS build** (an OTA update can't add it). It also needs the APNs key.
+5. **Mobile push (Android only for now):** no paid Apple Developer account, so iOS can't get an APNs key (or universal links); email is the iOS channel until that changes. Then `expo-notifications`, token registration, Settings → Alerts, deep links. This is a **native module, so it needs a new EAS build** (an OTA update can't add it). It also needs the APNs key.
 6. Changelog entries; DESIGN.md gets an "Alerts" copy section.
 
 Steps 1–4 are web-only and can ship without waiting on an app store build.
