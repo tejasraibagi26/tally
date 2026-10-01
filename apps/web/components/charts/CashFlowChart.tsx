@@ -90,26 +90,37 @@ export function CashFlowChart({ months }: { months: CashFlowMonth[] }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        {/* money-fit: shrinks to the dots when hidden, so the label below
-            doesn't trail a gap the width of the real figure. */}
-        <span className="text-[26px] font-semibold tracking-[-0.4px] text-text tabular money money-fit">
-          <span>
-            {summary.avgSaved < 0 ? "−" : ""}
-            {formatCents(Math.abs(summary.avgSaved))}
+      {/* Two lines: the figure with its savings-rate chip, then what the
+          figure means and the window it covers. */}
+      <div className="flex flex-col gap-1">
+        <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+          {/* money-fit: shrinks to the dots when hidden, so the chip doesn't
+              trail a gap the width of the real figure. */}
+          <span className="text-[26px] font-semibold tracking-[-0.4px] text-text tabular money money-fit">
+            <span>
+              {summary.avgSaved < 0 ? "−" : ""}
+              {formatCents(Math.abs(summary.avgSaved))}
+            </span>
           </span>
-        </span>
-        <span className="text-[13.5px] text-text-2">
-          {summary.avgSaved < 0 ? "overspent" : "saved"} per month on average
-          {summary.monthsCounted > 0 && visible.length > 1 ? ` · past ${summary.monthsCounted} full month${summary.monthsCounted === 1 ? "" : "s"}` : ""}
-        </span>
-        {summary.savingsRate != null && (
-          <span
-            className={`inline-flex px-2 py-0.5 rounded-full text-[12.5px] font-medium ${summary.savingsRate >= 0 ? "bg-positive-subtle text-positive" : "bg-negative-subtle text-negative"}`}
-          >
-            {formatPercent(summary.savingsRate)} savings rate
-          </span>
-        )}
+          {summary.savingsRate != null && (
+            <span
+              className={`inline-flex px-2 py-0.5 rounded-full text-[12.5px] font-medium ${summary.savingsRate >= 0 ? "bg-positive-subtle text-positive" : "bg-negative-subtle text-negative"}`}
+            >
+              {formatPercent(summary.savingsRate)} savings rate
+            </span>
+          )}
+        </div>
+        <div className="flex flex-wrap items-center gap-x-2 text-[13.5px] text-text-2">
+          <span>{summary.avgSaved < 0 ? "Overspent" : "Saved"} per month on average</span>
+          {summary.monthsCounted > 0 && visible.length > 1 && (
+            <>
+              <span aria-hidden className="h-3 w-px bg-border-strong" />
+              <span className="text-text-3">
+                Past {summary.monthsCounted} full month{summary.monthsCounted === 1 ? "" : "s"}
+              </span>
+            </>
+          )}
+        </div>
       </div>
       {useLines ? <GapLines months={visible} /> : <PairedBars months={visible} />}
     </div>

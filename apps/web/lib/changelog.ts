@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.13.5",
+    date: "2026-09-30",
+    changes: [{ kind: "improved", text: "Cash flow's headline puts your savings rate next to the amount, with the description underneath." }],
+  },
+  {
     version: "1.13.4",
     date: "2026-09-30",
     changes: [{ kind: "fixed", text: "With amounts hidden, Cash flow still shows your savings rate, and the hidden average no longer leaves a gap before its label." }],

@@ -59,9 +59,10 @@
  * (users.timezone) instead of the server's UTC, which rolled the month
  * over at 8 PM Eastern. 1.13.4 tidies Cash flow's headline with amounts
  * hidden: the savings rate (a ratio) stays visible and the masked figure
- * no longer leaves a gap before its label.
+ * no longer leaves a gap before its label. 1.13.5 restacks that headline:
+ * figure + savings-rate chip, then the label and window on a second line.
  */
-export const APP_VERSION = "1.13.4";
+export const APP_VERSION = "1.13.5";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
