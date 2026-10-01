@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiDelete, apiGet, apiPatch } from "@/lib/api";
+import { apiDelete, apiGet, apiPatch, apiPost } from "@/lib/api";
 
 export interface RecurringStream {
   id: string;
@@ -46,5 +46,17 @@ export function useDeleteSubscription() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recurring-streams"] });
     },
+  });
+}
+
+// Matches web's AddBillForm.tsx / POST /api/recurring-streams -- a bill the
+// recurring detector never picked up (rent prepaid in lump sums, etc.),
+// created with manualNextDueDate already set. Amount is positive cents.
+export function useCreateBill() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { description: string; accountId: string; categoryId: string | null; amount: number; manualNextDueDate: string }) =>
+      apiPost<{ stream: RecurringStream }>("/api/recurring-streams", body),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["recurring-streams"] }),
   });
 }

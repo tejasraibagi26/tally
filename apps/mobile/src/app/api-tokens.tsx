@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator, Alert } from "react-native";
-import { Plus } from "lucide-react-native";
+import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from "react-native";
+import { Stack } from "expo-router";
 import { Card } from "@/components/ui/Card";
 import { useApiTokens, useCreateApiToken, useDeleteApiToken, type ApiToken } from "@/lib/queries/apiTokens";
 import { API_URL } from "@/lib/api";
@@ -9,6 +9,8 @@ import { useRF } from "@/theme/responsiveFont";
 import { hairline } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
+import { FormSheet, SheetField, SheetInput } from "@/components/ui/FormSheet";
+import { HeaderTextAction } from "@/components/ui/HeaderTextAction";
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
@@ -62,7 +64,7 @@ export default function ApiTokensScreen() {
   const { data, isLoading } = useApiTokens();
   const createToken = useCreateApiToken();
 
-  const [adding, setAdding] = useState(false);
+  const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
@@ -73,24 +75,31 @@ export default function ApiTokensScreen() {
     try {
       const res = await createToken.mutateAsync(name.trim());
       setRevealedKey(res.key);
-      setAdding(false);
+      setOpen(false);
       setName("");
     } catch {
       setError("Something went wrong");
     }
   }
 
+  function openSheet() {
+    setName("");
+    setError(null);
+    setOpen(true);
+  }
+
   const endpoint = `${API_URL}/api/shortcuts/transactions`;
 
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
+      <Stack.Screen options={{ headerRight: () => <HeaderTextAction label="Add" onPress={openSheet} />, unstable_headerRightItems: () => [{ type: "custom", element: <HeaderTextAction label="Add" onPress={openSheet} />, hidesSharedBackground: true }] }} />
       <ScreenGlow />
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
         <Card className="p-5 gap-2.5">
           <Text className="font-ui-semibold text-text-3" style={{ textTransform: "uppercase", fontSize: rf(12) }}>Endpoint</Text>
           <Text selectable className="font-mono text-text bg-surface-2 rounded-control px-3 py-2.5" style={{ fontSize: rf(12.5) }}>{endpoint}</Text>
           <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>
-            For automations like Apple Shortcuts. Create a token below, tap and hold it or the endpoint above to copy, then send a
+            For automations like Apple Shortcuts. Create a token with Add, tap and hold it or the endpoint above to copy, then send a
             POST with header Authorization: Bearer &lt;token&gt; and a JSON body of name, amount, card, and date (see web Settings
             for the full setup steps).
           </Text>
@@ -119,57 +128,29 @@ export default function ApiTokensScreen() {
               </Card>
             )}
 
-            {!adding ? (
-              <Pressable
-                onPress={() => {
-                  setName("");
-                  setError(null);
-                  setAdding(true);
-                }}
-                className="flex-row items-center justify-center gap-2 h-11 rounded-full bg-surface-2"
-              >
-                <Plus size={16} color={colors.text} strokeWidth={2} />
-                <Text className="font-ui-medium text-text" style={{ fontSize: rf(14) }}>Create token</Text>
-              </Pressable>
-            ) : (
-              <Card className="p-5 gap-3">
-                <TextInput
-                  value={name}
-                  onChangeText={setName}
-                  placeholder="e.g. Apple Shortcuts"
-                  placeholderTextColor={colors["text-3"]}
-                  autoFocus
-                  className="h-11 rounded-control bg-surface-2 px-3.5 font-ui text-text"
-                  style={{ fontSize: rf(14.5) }}
-                />
-                {error && <Text className="font-ui text-negative" style={{ fontSize: rf(13) }}>{error}</Text>}
-                <View className="flex-row gap-3 pt-1">
-                  <Pressable onPress={() => setAdding(false)} className="flex-1 h-11 rounded-full items-center justify-center bg-surface-2">
-                    <Text className="font-ui-medium text-text" style={{ fontSize: rf(14) }}>Cancel</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={submit}
-                    disabled={createToken.isPending || !name.trim()}
-                    className="flex-1 h-11 rounded-full items-center justify-center bg-brand disabled:opacity-50"
-                  >
-                    {createToken.isPending ? (
-                      <ActivityIndicator color="#FFFFFF" />
-                    ) : (
-                      <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14) }}>Create token</Text>
-                    )}
-                  </Pressable>
-                </View>
-              </Card>
-            )}
-
-            {!isLoading && (data?.keys.length ?? 0) === 0 && !adding && (
+            {(data?.keys.length ?? 0) === 0 && (
               <Text className="font-ui text-text-3" style={{ fontSize: rf(13.5) }}>
-                No tokens yet. Create one to connect an automation like Apple Shortcuts.
+                No tokens yet. Tap Add to create one for an automation like Apple Shortcuts.
               </Text>
             )}
           </>
         )}
       </ScrollView>
+      <FormSheet
+        visible={open}
+        onClose={() => setOpen(false)}
+        title="Create token"
+        description="The token is shown once after you create it. Copy it somewhere safe."
+        onSubmit={submit}
+        submitLabel="Create token"
+        submitting={createToken.isPending}
+        submitDisabled={!name.trim()}
+        error={error}
+      >
+        <SheetField label="Name" hint="So you can tell your tokens apart later.">
+          <SheetInput value={name} onChangeText={setName} placeholder="e.g. Apple Shortcuts" autoFocus />
+        </SheetField>
+      </FormSheet>
     </View>
   );
 }

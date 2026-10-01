@@ -75,8 +75,14 @@
  * in the page header instead of an inline form (components/ui/FormPanel.tsx),
  * and gives every page one shared header (components/ui/PageHeader.tsx):
  * title + context line, with Transactions using the headline-figure variant.
+ * 1.16.1 fixes Early retirement's saved assumptions: the expenses and
+ * contribution overrides were saved but never loaded back (now kept only
+ * when they differ from actual spending, with a "Use actual" reset), the
+ * API now accepts the rates as strings (older mobile builds sent them that
+ * way and every save 400'd), and a failed save says so. GET
+ * /api/transactions also returns a spend/unreviewed summary for mobile.
  */
-export const APP_VERSION = "1.16.0";
+export const APP_VERSION = "1.16.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

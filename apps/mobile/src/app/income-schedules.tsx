@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
-import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator, Alert } from "react-native";
-import { Plus } from "lucide-react-native";
+import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from "react-native";
+import { Stack } from "expo-router";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { SimplePickerSheet } from "@/components/ui/SimplePickerSheet";
@@ -18,6 +18,8 @@ import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { hairline } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
+import { FormSheet, SheetAmountInput, SheetField, SheetInput, SheetPickerRow } from "@/components/ui/FormSheet";
+import { HeaderTextAction } from "@/components/ui/HeaderTextAction";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 
 const LAST_DAY = "0";
@@ -85,7 +87,6 @@ function ScheduleRow({ schedule, isLast }: { schedule: IncomeSchedule; isLast: b
 // category reuses the existing CategoryPickerSheet, pre-filtered to
 // kind === "income" the same way web's settings page does server-side.
 export default function IncomeSchedulesScreen() {
-  const colors = useThemeColors();
   const rf = useRF();
   const contentTop = useScreenContentTop();
   const { data, isLoading } = useIncomeSchedules();
@@ -100,7 +101,7 @@ export default function IncomeSchedulesScreen() {
   }, [accountsData]);
   const incomeCategories = useMemo(() => (categoriesData?.categories ?? []).filter((c) => c.kind === "income"), [categoriesData]);
 
-  const [adding, setAdding] = useState(false);
+  const [open, setOpen] = useState(false);
   const [label, setLabel] = useState("Paycheck");
   const [accountId, setAccountId] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -132,7 +133,7 @@ export default function IncomeSchedulesScreen() {
     setError(null);
     try {
       await createSchedule.mutateAsync({ accountId, categoryId, label: label.trim() || "Paycheck", amount, dayAnchors });
-      setAdding(false);
+      setOpen(false);
       resetForm();
     } catch {
       setError("Something went wrong");
@@ -142,142 +143,103 @@ export default function IncomeSchedulesScreen() {
   const selectedAccount = accounts.find((a) => a.id === accountId);
   const selectedCategory = incomeCategories.find((c) => c.id === categoryId);
 
+  function openSheet() {
+    resetForm();
+    setOpen(true);
+  }
+
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
+      <Stack.Screen options={{ headerRight: () => <HeaderTextAction label="Add" onPress={openSheet} />, unstable_headerRightItems: () => [{ type: "custom", element: <HeaderTextAction label="Add" onPress={openSheet} />, hidesSharedBackground: true }] }} />
       <ScreenGlow />
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
         {isLoading ? (
           <ActivityIndicator className="mt-8" />
+        ) : (data?.schedules.length ?? 0) > 0 ? (
+          <Card className="px-5">
+            {data!.schedules.map((s, i, arr) => (
+              <ScheduleRow key={s.id} schedule={s} isLast={i === arr.length - 1} />
+            ))}
+          </Card>
         ) : (
-          <>
-            {(data?.schedules.length ?? 0) > 0 && (
-              <Card className="px-5">
-                {data!.schedules.map((s, i, arr) => (
-                  <ScheduleRow key={s.id} schedule={s} isLast={i === arr.length - 1} />
-                ))}
-              </Card>
-            )}
-
-            {!adding ? (
-              <Pressable
-                onPress={() => {
-                  resetForm();
-                  setAdding(true);
-                }}
-                className="flex-row items-center justify-center gap-2 h-11 rounded-full bg-surface-2"
-              >
-                <Plus size={16} color={colors.text} strokeWidth={2} />
-                <Text className="font-ui-medium text-text" style={{ fontSize: rf(14) }}>Add income schedule</Text>
-              </Pressable>
-            ) : (
-              <Card className="p-5 gap-3">
-                <TextInput
-                  value={label}
-                  onChangeText={setLabel}
-                  placeholder="Paycheck"
-                  placeholderTextColor={colors["text-3"]}
-                  className="h-11 rounded-control bg-surface-2 px-3.5 font-ui text-text"
-                  style={{ fontSize: rf(14.5) }}
-                />
-                <Pressable onPress={() => setPickingAccount(true)} className="h-11 rounded-control bg-surface-2 px-3.5 justify-center">
-                  <Text className={selectedAccount ? "font-ui text-text" : "font-ui text-text-3"} style={{ fontSize: rf(14.5) }}>
-                    {selectedAccount ? `${selectedAccount.name} ····${selectedAccount.mask ?? "----"}` : "Choose account"}
-                  </Text>
-                </Pressable>
-                <TextInput
-                  value={amountInput}
-                  onChangeText={setAmountInput}
-                  placeholder="Amount, e.g. 2500.00"
-                  placeholderTextColor={colors["text-3"]}
-                  keyboardType="decimal-pad"
-                  className="h-11 rounded-control bg-surface-2 px-3.5 font-ui text-text tabular"
-                  style={{ fontSize: rf(14.5) }}
-                />
-                <Pressable onPress={() => setPickingCategory(true)} className="h-11 rounded-control bg-surface-2 px-3.5 justify-center">
-                  <Text className={selectedCategory ? "font-ui text-text" : "font-ui text-text-3"} style={{ fontSize: rf(14.5) }}>
-                    {selectedCategory?.name ?? "Category (optional)"}
-                  </Text>
-                </Pressable>
-
-                <View className="gap-2">
-                  <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>Paid on</Text>
-                  <View className="flex-row items-center gap-2 flex-wrap">
-                    <Pressable onPress={() => setPickingAnchor(1)} className="h-9 px-3 rounded-control bg-surface-2 justify-center">
-                      <Text className="font-ui text-text" style={{ fontSize: rf(13.5) }}>{anchorLabel(Number(anchor1))}</Text>
-                    </Pressable>
-                    {anchor2 !== NONE ? (
-                      <>
-                        <Text className="font-ui text-text-3" style={{ fontSize: rf(13) }}>and</Text>
-                        <Pressable onPress={() => setPickingAnchor(2)} className="h-9 px-3 rounded-control bg-surface-2 justify-center">
-                          <Text className="font-ui text-text" style={{ fontSize: rf(13.5) }}>{anchorLabel(Number(anchor2))}</Text>
-                        </Pressable>
-                        <Pressable onPress={() => setAnchor2(NONE)} hitSlop={8}>
-                          <Text className="font-ui text-text-3" style={{ fontSize: rf(13) }}>remove</Text>
-                        </Pressable>
-                      </>
-                    ) : (
-                      <Pressable onPress={() => setAnchor2(LAST_DAY)} hitSlop={8}>
-                        <Text className="font-ui-medium text-brand" style={{ fontSize: rf(13.5) }}>+ add a second payday</Text>
-                      </Pressable>
-                    )}
-                  </View>
-                  <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>Moved to the preceding Friday if it lands on a weekend.</Text>
-                </View>
-
-                {error && <Text className="font-ui text-negative" style={{ fontSize: rf(13) }}>{error}</Text>}
-
-                <View className="flex-row gap-3 pt-1">
-                  <Pressable onPress={() => setAdding(false)} className="flex-1 h-11 rounded-full items-center justify-center bg-surface-2">
-                    <Text className="font-ui-medium text-text" style={{ fontSize: rf(14) }}>Cancel</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={submit}
-                    disabled={createSchedule.isPending}
-                    className="flex-1 h-11 rounded-full items-center justify-center bg-brand disabled:opacity-50"
-                  >
-                    {createSchedule.isPending ? (
-                      <ActivityIndicator color="#FFFFFF" />
-                    ) : (
-                      <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14) }}>Add schedule</Text>
-                    )}
-                  </Pressable>
-                </View>
-              </Card>
-            )}
-
-            {!isLoading && (data?.schedules.length ?? 0) === 0 && !adding && (
-              <Text className="font-ui text-text-3" style={{ fontSize: rf(13.5) }}>
-                No income schedules yet. Add one for a paycheck Plaid doesn&apos;t reliably catch.
-              </Text>
-            )}
-          </>
+          <Text className="font-ui text-text-3" style={{ fontSize: rf(13.5) }}>
+            No income schedules yet. Tap Add to set one up for a paycheck Plaid doesn&apos;t reliably catch.
+          </Text>
         )}
       </ScrollView>
 
-      <SimplePickerSheet
-        visible={pickingAccount}
-        onClose={() => setPickingAccount(false)}
-        title="Account"
-        items={accounts.map((a) => ({ id: a.id, label: a.name, sublabel: a.mask ? `····${a.mask}` : undefined }))}
-        selectedId={accountId}
-        onSelect={setAccountId}
-      />
-      <CategoryPickerSheet
-        visible={pickingCategory}
-        onClose={() => setPickingCategory(false)}
-        selectedId={categoryId}
-        onSelect={setCategoryId}
-        categories={incomeCategories}
-        includeUncategorized={false}
-      />
-      <SimplePickerSheet
-        visible={pickingAnchor !== null}
-        onClose={() => setPickingAnchor(null)}
-        title="Payday"
-        items={DAY_ITEMS}
-        selectedId={pickingAnchor === 1 ? anchor1 : anchor2}
-        onSelect={(id) => (pickingAnchor === 1 ? setAnchor1(id) : setAnchor2(id))}
-      />
+      <FormSheet
+        visible={open}
+        onClose={() => setOpen(false)}
+        title="Add income schedule"
+        description="Adds your paycheck automatically on payday, for income Tally can't see arrive."
+        onSubmit={submit}
+        submitLabel="Add schedule"
+        submitting={createSchedule.isPending}
+        error={error}
+        overlays={
+          <>
+            <SimplePickerSheet
+              visible={pickingAccount}
+              onClose={() => setPickingAccount(false)}
+              title="Account"
+              items={accounts.map((a) => ({ id: a.id, label: a.name, sublabel: a.mask ? `····${a.mask}` : undefined }))}
+              selectedId={accountId}
+              onSelect={setAccountId}
+            />
+            <CategoryPickerSheet
+              visible={pickingCategory}
+              onClose={() => setPickingCategory(false)}
+              selectedId={categoryId}
+              onSelect={setCategoryId}
+              categories={incomeCategories}
+              includeUncategorized={false}
+            />
+            <SimplePickerSheet
+              visible={pickingAnchor !== null}
+              onClose={() => setPickingAnchor(null)}
+              title="Payday"
+              items={DAY_ITEMS}
+              selectedId={pickingAnchor === 1 ? anchor1 : anchor2}
+              onSelect={(id) => (pickingAnchor === 1 ? setAnchor1(id) : setAnchor2(id))}
+            />
+          </>
+        }
+      >
+        <SheetField label="Name">
+          <SheetInput value={label} onChangeText={setLabel} placeholder="Paycheck" />
+        </SheetField>
+        <SheetField label="Amount per paycheck">
+          <SheetAmountInput value={amountInput} onChangeText={setAmountInput} />
+        </SheetField>
+        <SheetField label="Deposited to">
+          <SheetPickerRow
+            value={selectedAccount ? `${selectedAccount.name} ····${selectedAccount.mask ?? "----"}` : null}
+            placeholder="Choose account"
+            onPress={() => setPickingAccount(true)}
+          />
+        </SheetField>
+        <SheetField label="Category">
+          <SheetPickerRow value={selectedCategory?.name} placeholder="Category (optional)" onPress={() => setPickingCategory(true)} />
+        </SheetField>
+        <SheetField label="Paid on" hint="Moved to the preceding Friday if it lands on a weekend.">
+          <SheetPickerRow value={DAY_ITEMS.find((d) => d.id === anchor1)?.label} placeholder="Choose a day" onPress={() => setPickingAnchor(1)} />
+          {anchor2 !== NONE ? (
+            <View className="flex-row items-center gap-2">
+              <View className="flex-1">
+                <SheetPickerRow value={DAY_ITEMS.find((d) => d.id === anchor2)?.label} placeholder="Choose a day" onPress={() => setPickingAnchor(2)} />
+              </View>
+              <Pressable onPress={() => setAnchor2(NONE)} hitSlop={8}>
+                <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(13) }}>Remove</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <Pressable onPress={() => setAnchor2(LAST_DAY)} hitSlop={8} className="self-start">
+              <Text className="font-ui-medium text-brand" style={{ fontSize: rf(13.5) }}>+ Add a second payday</Text>
+            </Pressable>
+          )}
+        </SheetField>
+      </FormSheet>
     </View>
   );
 }

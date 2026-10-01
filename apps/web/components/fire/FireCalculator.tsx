@@ -35,16 +35,15 @@ export function FireCalculator({
   const router = useRouter();
   const [swr, setSwr] = useState(savedSettings ? parseFloat(savedSettings.swr) : 0.04);
   const [expectedReturn, setExpectedReturn] = useState(savedSettings ? parseFloat(savedSettings.expectedReturn) : 0.07);
-  // Always the freshly computed trailing-12-month default, never a stale
-  // saved override -- these are facts about actual spending, not tunable
-  // assumptions, so a real change in spending shows up immediately instead
-  // of being shadowed by whatever was true the last time settings were
-  // saved. SWR/expected return above ARE genuine assumptions, so those
-  // still come from savedSettings when present.
-  const [expensesInput, setExpensesInput] = useState((defaultAnnualExpenses / 100).toFixed(0));
-  const [contributionInput, setContributionInput] = useState((defaultMonthlyContribution / 100).toFixed(0));
+  // A saved override wins; without one, the trailing-12-month default. save()
+  // only stores an override when the value differs from that default, so an
+  // untouched field keeps tracking real spending as it changes instead of
+  // freezing at whatever it was the day "Save assumptions" was clicked.
+  const [expensesInput, setExpensesInput] = useState(dollars(savedSettings?.annualExpensesOverride ?? defaultAnnualExpenses));
+  const [contributionInput, setContributionInput] = useState(dollars(savedSettings?.monthlyContributionOverride ?? defaultMonthlyContribution));
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   const annualExpenses = Math.round((parseFloat(expensesInput) || 0) * 100);
   const monthlyContribution = Math.round((parseFloat(contributionInput) || 0) * 100);
@@ -61,9 +60,14 @@ export function FireCalculator({
 
   const barPct = Math.min(1, Math.max(0, progress));
 
+  // Inputs are whole dollars, so compare at that precision.
+  const expensesIsDefault = annualExpenses === Math.round(defaultAnnualExpenses / 100) * 100;
+  const contributionIsDefault = monthlyContribution === Math.round(defaultMonthlyContribution / 100) * 100;
+
   async function save() {
     setSaving(true);
     setSaved(false);
+    setSaveError(null);
     try {
       const res = await fetch("/api/fire", {
         method: "PUT",
@@ -71,8 +75,8 @@ export function FireCalculator({
         body: JSON.stringify({
           swr,
           expectedReturn,
-          annualExpensesOverride: annualExpenses,
-          monthlyContributionOverride: monthlyContribution,
+          annualExpensesOverride: expensesIsDefault ? null : annualExpenses,
+          monthlyContributionOverride: contributionIsDefault ? null : monthlyContribution,
         }),
       });
       if (!res.ok) throw new Error("Failed to save FIRE settings");
@@ -80,6 +84,7 @@ export function FireCalculator({
       router.refresh();
     } catch (err) {
       console.error(err);
+      setSaveError("Couldn't save. Try again.");
     } finally {
       setSaving(false);
     }
@@ -101,6 +106,7 @@ export function FireCalculator({
               className="w-full h-9 rounded-control bg-surface-2 border border-border-strong px-2 text-sm text-text tabular"
             />
           </div>
+          <DefaultHint isDefault={expensesIsDefault} defaultCents={defaultAnnualExpenses} onReset={() => setExpensesInput(dollars(defaultAnnualExpenses))} />
         </label>
 
         <label className="flex flex-col gap-1.5">
@@ -116,6 +122,7 @@ export function FireCalculator({
               className="w-full h-9 rounded-control bg-surface-2 border border-border-strong px-2 text-sm text-text tabular"
             />
           </div>
+          <DefaultHint isDefault={contributionIsDefault} defaultCents={defaultMonthlyContribution} onReset={() => setContributionInput(dollars(defaultMonthlyContribution))} />
         </label>
 
         <label className="flex flex-col gap-1.5">
@@ -176,7 +183,25 @@ export function FireCalculator({
           {saving ? "Saving…" : "Save assumptions"}
         </Button>
         {saved && <span className="text-xs text-text-3">Saved</span>}
+        {saveError && <span className="text-xs text-negative">{saveError}</span>}
       </div>
     </div>
+  );
+}
+
+function dollars(cents: number): string {
+  return (cents / 100).toFixed(0);
+}
+
+/** Under an expenses/contribution input: where the number comes from, and a way back to the actual figure. */
+function DefaultHint({ isDefault, defaultCents, onReset }: { isDefault: boolean; defaultCents: number; onReset: () => void }) {
+  if (isDefault) return <span className="text-xs text-text-3">From your last 12 months</span>;
+  return (
+    <span className="text-xs text-text-3">
+      Your own amount ·{" "}
+      <button type="button" onClick={onReset} className="text-brand hover:underline">
+        Use actual ({formatCents(defaultCents)})
+      </button>
+    </span>
   );
 }

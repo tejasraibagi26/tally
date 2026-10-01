@@ -21,7 +21,19 @@ import { useThemeColors } from "@/theme/useThemeColors";
 // original mobile v1 of this screen was hardcoded $60k/$2k text inputs with
 // no progress bar, banner, chart, or save, a much thinner port than the
 // rest of the app's screens.
-function Field({ label, value, onChangeText }: { label: string; value: string; onChangeText: (v: string) => void }) {
+function Field({
+  label,
+  value,
+  onChangeText,
+  isDefault,
+  defaultCents,
+}: {
+  label: string;
+  value: string;
+  onChangeText: (v: string) => void;
+  isDefault: boolean;
+  defaultCents: number;
+}) {
   const rf = useRF();
   return (
     <View className="gap-1.5" style={{ width: "48%" }}>
@@ -32,8 +44,21 @@ function Field({ label, value, onChangeText }: { label: string; value: string; o
         <Text className="font-ui text-text-3 mr-1" style={{ fontSize: rf(13) }}>$</Text>
         <TextInput value={value} onChangeText={onChangeText} keyboardType="decimal-pad" className="flex-1 font-ui text-text" style={{ fontSize: rf(14.5) }} />
       </View>
+      {isDefault ? (
+        <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>From your last 12 months</Text>
+      ) : (
+        <Pressable onPress={() => onChangeText(dollars(defaultCents))} hitSlop={6}>
+          <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>
+            Your own amount · <Text className="font-ui-medium text-brand">Use actual (${dollars(defaultCents)})</Text>
+          </Text>
+        </Pressable>
+      )}
     </View>
   );
+}
+
+function dollars(cents: number): string {
+  return ((cents / 100) || 0).toFixed(0);
 }
 
 export default function FireCalculatorScreen() {
@@ -62,18 +87,15 @@ export default function FireCalculatorScreen() {
   const [saved, setSaved] = useState(false);
 
   // Seed inputs once both the saved settings and the server defaults have
-  // loaded. Expenses/contribution always come from the freshly computed
-  // trailing-12-month default, never a stale saved override -- those two
-  // are facts about actual spending, not tunable assumptions, so a change
-  // in real spending should show up immediately instead of being shadowed
-  // by whatever was true the last time "Save assumptions" was tapped. SWR
-  // and expected return ARE genuine assumptions, so those still come from
-  // saved settings when present.
+  // loaded. A saved override wins for expenses/contribution; without one,
+  // the trailing-12-month default. save() only stores an override when the
+  // value differs from that default (same as web's FireCalculator), so an
+  // untouched field keeps tracking real spending as it changes.
   useEffect(() => {
     if (initialized || !defaults || settingsData === undefined) return;
     const settings = settingsData.settings;
-    setExpensesInput(((defaults.defaultAnnualExpenses / 100) || 0).toFixed(0));
-    setContributionInput(((defaults.defaultMonthlyContribution / 100) || 0).toFixed(0));
+    setExpensesInput(dollars(settings?.annualExpensesOverride ?? defaults.defaultAnnualExpenses));
+    setContributionInput(dollars(settings?.monthlyContributionOverride ?? defaults.defaultMonthlyContribution));
     setSwr(settings ? parseFloat(settings.swr) : 0.04);
     setExpectedReturn(settings ? parseFloat(settings.expectedReturn) : 0.07);
     setInitialized(true);
@@ -95,18 +117,24 @@ export default function FireCalculatorScreen() {
     return { target, progress, years, alreadyThere, ageResult, chartData, horizonYears, endValue };
   }, [annualExpenses, swr, investableNetWorth, monthlyContribution, expectedReturn, defaults]);
 
+  // Inputs are whole dollars, so compare at that precision.
+  const expensesIsDefault = annualExpenses === Math.round((defaults?.defaultAnnualExpenses ?? 0) / 100) * 100;
+  const contributionIsDefault = monthlyContribution === Math.round((defaults?.defaultMonthlyContribution ?? 0) / 100) * 100;
+
   async function save() {
     setSaved(false);
     try {
+      // Numbers, not strings: the API's schema is numeric (it now also
+      // coerces strings, for builds that still send them).
       await saveSettings.mutateAsync({
-        swr: swr.toString(),
-        expectedReturn: expectedReturn.toString(),
-        annualExpensesOverride: annualExpenses,
-        monthlyContributionOverride: monthlyContribution,
+        swr,
+        expectedReturn,
+        annualExpensesOverride: expensesIsDefault ? null : annualExpenses,
+        monthlyContributionOverride: contributionIsDefault ? null : monthlyContribution,
       });
       setSaved(true);
     } catch {
-      // mutation error state is enough feedback here -- no destructive path to guard
+      // saveSettings.isError drives the inline message below
     }
   }
 
@@ -249,9 +277,12 @@ export default function FireCalculatorScreen() {
         )}
 
         <View className="flex-row flex-wrap justify-between" style={{ rowGap: 16 }}>
-          <Field label="Annual expenses" value={expensesInput} onChangeText={setExpensesInput} />
-          <Field label="Monthly contribution" value={contributionInput} onChangeText={setContributionInput} />
+          <Field label="Annual expenses" value={expensesInput} onChangeText={setExpensesInput} isDefault={expensesIsDefault} defaultCents={defaults?.defaultAnnualExpenses ?? 0} />
+          <Field label="Monthly contribution" value={contributionInput} onChangeText={setContributionInput} isDefault={contributionIsDefault} defaultCents={defaults?.defaultMonthlyContribution ?? 0} />
         </View>
+        {saveSettings.isError && (
+          <Text className="font-ui text-negative" style={{ fontSize: rf(13) }}>Couldn&apos;t save your assumptions. Try again.</Text>
+        )}
 
         <View className="gap-5">
           <View className="gap-2">

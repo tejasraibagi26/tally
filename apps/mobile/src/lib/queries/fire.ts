@@ -34,7 +34,10 @@ export function useFireSettings() {
 export function useSaveFireSettings() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (settings: FireSettings) => apiPut<{ settings: FireSettings }>("/api/fire", settings),
+    // The GET returns swr/expectedReturn as numeric strings (Postgres numeric);
+    // the PUT takes numbers.
+    mutationFn: (settings: { swr: number; expectedReturn: number; annualExpensesOverride: number | null; monthlyContributionOverride: number | null }) =>
+      apiPut<{ settings: FireSettings }>("/api/fire", settings),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["fire", "settings"] }),
   });
 }

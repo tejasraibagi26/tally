@@ -5,6 +5,7 @@ import { Plus, RefreshCw, MoreHorizontal, Pencil, Check, X } from "lucide-react-
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { StatusChip } from "@/components/ui/StatusChip";
+import { TabHeader, SyncFreshness, hasSynced } from "@/components/ui/TabHeader";
 import { InstitutionActionsSheet } from "@/components/InstitutionActionsSheet";
 import { useAccounts, useUpdateAccountNickname, type Institution, type AccountRow } from "@/lib/queries/accounts";
 import { usePlaidLink } from "@/lib/usePlaidLink";
@@ -212,6 +213,8 @@ export default function AccountsScreen() {
   const colors = useThemeColors();
   const rf = useRF();
   const { data, isLoading, refetch, isRefetching } = useAccounts();
+  const accountCount = (data?.institutions.reduce((n, i) => n + i.accounts.length, 0) ?? 0) + (data?.unlinkedAccounts.length ?? 0);
+  const syncTimes = data?.institutions.map((i) => i.lastSyncedAt) ?? [];
   const { openLink, isLinking, error } = usePlaidLink();
   const sync = useSync();
   const [menuInstitutionId, setMenuInstitutionId] = useState<string | null>(null);
@@ -243,11 +246,16 @@ export default function AccountsScreen() {
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
         keyboardShouldPersistTaps="handled"
       >
-        <View className="flex-row items-center justify-between px-5 pb-4">
-        <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(24) }}>
-          Accounts
-        </Text>
-        <View className="flex-row items-center gap-2">
+        <View className="px-5 pb-4">
+          <TabHeader
+            title="Accounts"
+            meta={[
+              data && `${accountCount} account${accountCount === 1 ? "" : "s"}`,
+              data && data.institutions.length > 0 && `${data.institutions.length} institution${data.institutions.length === 1 ? "" : "s"}`,
+              data && hasSynced(syncTimes) && <SyncFreshness key="sync" syncedAt={syncTimes} />,
+            ]}
+            actions={
+              <>
           {data && data.institutions.length > 0 && (
             <Pressable
               onPress={handleSync}
@@ -266,8 +274,10 @@ export default function AccountsScreen() {
             {isLinking ? <ActivityIndicator size="small" color={colors.brand} /> : <Plus size={15} color={colors.brand} strokeWidth={2} />}
             <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Add</Text>
           </Pressable>
+              </>
+            }
+          />
         </View>
-      </View>
 
       {error && (
         <View className="mx-5 mb-4 rounded-control px-4 py-3 bg-negative-subtle">

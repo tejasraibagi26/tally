@@ -11,6 +11,7 @@ import { MeterBar } from "@/components/ui/MeterBar";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useAccounts } from "@/lib/queries/accounts";
+import { TabHeader, SyncFreshness, hasSynced } from "@/components/ui/TabHeader";
 import { useOverview, useNetWorthTrend } from "@/lib/queries/overview";
 import { useTransactions } from "@/lib/queries/transactions";
 import { useCashFlowTrend } from "@/lib/queries/cashflow";
@@ -263,19 +264,25 @@ export default function OverviewScreen() {
         // duration of a scrub instead of relying on gesture arbitration.
         scrollEnabled={!isScrubbingChart}
       >
-        <View className="flex-row items-center justify-between px-5 pb-1">
-        <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(24) }}>
-          Overview
-        </Text>
-        <View className="flex-row items-center gap-4">
+        <View className="px-5 pb-1">
+          <TabHeader
+            title="Overview"
+            meta={[
+              new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+              hasSynced(accounts.data?.institutions.map((i) => i.lastSyncedAt) ?? []) && <SyncFreshness key="sync" syncedAt={accounts.data?.institutions.map((i) => i.lastSyncedAt) ?? []} />,
+            ]}
+            actions={
+              <View className="flex-row items-center gap-4">
           <Pressable onPress={togglePrivacy} hitSlop={12} accessibilityRole="switch" accessibilityLabel="Hide sensitive amounts" accessibilityState={{ checked: hidden }}>
             {hidden ? <EyeOff size={20} color={colors["text-2"]} strokeWidth={1.75} /> : <Eye size={20} color={colors["text-2"]} strokeWidth={1.75} />}
           </Pressable>
           <Pressable onPress={() => router.push("/more")} hitSlop={12}>
             <Ellipsis size={22} color={colors["text-2"]} strokeWidth={1.75} />
           </Pressable>
+              </View>
+            }
+          />
         </View>
-      </View>
 
       <View className="gap-7 px-5 pt-3">
         {/* Hero net worth -- unboxed, per MOBILE_DESIGN.md */}

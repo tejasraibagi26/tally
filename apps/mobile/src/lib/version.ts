@@ -68,8 +68,14 @@ import Constants from "expo-constants";
  * recalibrates it on iOS, where the floating sheet was still ~20% too tall.
  * 1.12.0 adds Settings → Alerts (email on/off per alert, large purchase
  * threshold, recent alerts), matching web.
+ * 1.13.0 matches web v1.16: every add flow opens in the shared FormSheet
+ * (income schedules and API tokens move out of inline forms; Subscriptions
+ * gains "Add a bill"), pushed screens put Add in the header, and tab
+ * screens share TabHeader (context line; Transactions leads with period
+ * spend). Also fixes FIRE "Save": rates were sent as strings and rejected,
+ * and saved expenses/contribution were never loaded back.
  */
-export const APP_VERSION = "1.12.0";
+export const APP_VERSION = "1.13.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

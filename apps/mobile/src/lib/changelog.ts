@@ -16,6 +16,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.13.0",
+    date: "2026-10-01",
+    changes: [
+      { kind: "new", text: "Add a bill from Subscriptions, for recurring charges Tally hasn't picked up on its own." },
+      { kind: "improved", text: "Adding an income schedule or API token opens a sheet from Add at the top of the screen." },
+      { kind: "improved", text: "Screen headers show the period, counts and when your accounts last synced. Transactions leads with how much you've spent and how many are left to review." },
+      { kind: "fixed", text: "Early retirement: Save now keeps your assumptions, including the expenses and contribution you typed in." },
+    ],
+  },
+  {
     version: "1.12.0",
     date: "2026-09-30",
     changes: [{ kind: "new", text: "Settings → Alerts: choose which budget, large purchase, subscription and connection alerts to get by email, set your large purchase amount, and see recent alerts." }],

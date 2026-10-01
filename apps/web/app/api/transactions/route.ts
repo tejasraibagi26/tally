@@ -122,8 +122,15 @@ export async function GET(req: Request) {
       .orderBy(desc(schema.transactions.postedDate), desc(schema.transactions.createdAt))
       .limit(PAGE_SIZE)
       .offset((page - 1) * PAGE_SIZE),
+    // Same summary as the web Transactions page header: spend per lib/analytics.ts
+    // monthTotals' definition (expense categories, no transfers/excluded rows),
+    // narrowed by the active filters, plus how many are still unreviewed.
     db
-      .select({ count: sql<number>`count(*)::int` })
+      .select({
+        count: sql<number>`count(*)::int`,
+        spend: sql<number>`coalesce(sum(abs(${schema.transactions.amount})) filter (where ${schema.categories.kind} = 'expense' and not ${schema.transactions.isTransfer} and not ${schema.transactions.excludedFromBudget}), 0)::float8`,
+        unreviewed: sql<number>`(count(*) filter (where not ${schema.transactions.reviewed}))::int`,
+      })
       .from(schema.transactions)
       .leftJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))
       .leftJoin(schema.recurringStreams, eq(schema.transactions.recurringStreamId, schema.recurringStreams.id))
@@ -182,6 +189,7 @@ export async function GET(req: Request) {
     items,
     pagination: { page, pageSize: PAGE_SIZE, total, totalPages },
     dateRange: { from: fromFilter, to: toFilter, isExplicit: hasExplicitDateFilter },
+    summary: { spend: Number(countRows[0]?.spend ?? 0), unreviewed: countRows[0]?.unreviewed ?? 0 },
   });
 }
 

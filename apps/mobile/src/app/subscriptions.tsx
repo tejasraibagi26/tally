@@ -1,4 +1,8 @@
+import { useState } from "react";
 import { View, Text, ScrollView, ActivityIndicator, Pressable, Alert } from "react-native";
+import { Stack } from "expo-router";
+import { AddBillSheet } from "@/components/AddBillSheet";
+import { HeaderTextAction } from "@/components/ui/HeaderTextAction";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useSubscriptions, useDeleteSubscription, useSetAmortizeMonthly, type RecurringStream } from "@/lib/queries/subscriptions";
@@ -94,6 +98,7 @@ export default function SubscriptionsScreen() {
   const contentTop = useScreenContentTop();
   const { data, isLoading } = useSubscriptions();
   const deleteSubscription = useDeleteSubscription();
+  const [addOpen, setAddOpen] = useState(false);
   const streams = (data?.streams ?? []).filter((s) => s.status !== "cancelled");
 
   function confirmRemove(s: RecurringStream) {
@@ -115,6 +120,7 @@ export default function SubscriptionsScreen() {
 
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
+    <Stack.Screen options={{ headerRight: () => <HeaderTextAction label="Add" onPress={() => setAddOpen(true)} />, unstable_headerRightItems: () => [{ type: "custom", element: <HeaderTextAction label="Add" onPress={() => setAddOpen(true)} />, hidesSharedBackground: true }] }} />
     <ScreenGlow />
     <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
       <Card className="p-5 flex-row justify-between">
@@ -158,10 +164,11 @@ export default function SubscriptionsScreen() {
               </Pressable>
             </View>
           ))}
-          {streams.length === 0 && <Text className="font-ui text-text-3 py-4" style={{ fontSize: rf(14) }}>No subscriptions detected yet.</Text>}
+          {streams.length === 0 && <Text className="font-ui text-text-3 py-4" style={{ fontSize: rf(14) }}>No subscriptions detected yet. Paid in irregular lump sums, like rent prepaid ahead? Tap Add to track it.</Text>}
         </Card>
       )}
     </ScrollView>
+    <AddBillSheet visible={addOpen} onClose={() => setAddOpen(false)} />
     </View>
   );
 }

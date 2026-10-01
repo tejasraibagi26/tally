@@ -16,9 +16,11 @@ export async function GET(req: Request) {
   return NextResponse.json({ settings: settings ?? null });
 }
 
+// coerce: mobile up to v1.12 sent swr/expectedReturn as strings ("0.04"),
+// which a plain z.number() rejected -- so every mobile save 400'd silently.
 const putSchema = z.object({
-  swr: z.number().min(0.01).max(0.1),
-  expectedReturn: z.number().min(-0.05).max(0.15),
+  swr: z.coerce.number().min(0.01).max(0.1),
+  expectedReturn: z.coerce.number().min(-0.05).max(0.15),
   annualExpensesOverride: z.number().int().min(0).nullable(),
   monthlyContributionOverride: z.number().int().min(0).nullable(),
 });

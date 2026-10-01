@@ -17,6 +17,7 @@ import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { useRF } from "@/theme/responsiveFont";
 import { AddBudgetSheet } from "@/components/AddBudgetSheet";
+import { TabHeader } from "@/components/ui/TabHeader";
 
 function shiftMonth(month: string, delta: number): string {
   const d = new Date(month + "T00:00:00Z");
@@ -82,13 +83,19 @@ export default function BudgetsScreen() {
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
       >
         <View className="px-5 pb-4">
-          <View className="flex-row items-center justify-between mb-3">
-            <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(24) }}>
-              Budgets
-            </Text>
-            <Pressable onPress={() => setAddOpen(true)} hitSlop={12} className="items-center justify-center rounded-full bg-brand" style={{ width: 34, height: 34 }}>
-              <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
-            </Pressable>
+          <View className="mb-3">
+            <TabHeader
+              title="Budgets"
+              meta={[
+                hasBudgets && `${budgets.length} ${budgets.length === 1 ? "category" : "categories"} budgeted`,
+                hasBudgets && isCurrentMonth && (daysLeft === 0 ? "Last day of the month" : `${daysLeft} day${daysLeft === 1 ? "" : "s"} left`),
+              ]}
+              actions={
+                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} accessibilityLabel="Add budget" className="items-center justify-center rounded-full bg-brand" style={{ width: 34, height: 34 }}>
+                  <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
+                </Pressable>
+              }
+            />
           </View>
           <View className="flex-row items-center justify-between">
             <Pressable onPress={() => setMonth((m) => shiftMonth(m, -1))} hitSlop={12}>

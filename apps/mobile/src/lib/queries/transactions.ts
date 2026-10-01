@@ -40,6 +40,8 @@ export interface TransactionsResponse {
   items: TransactionRow[];
   pagination: { page: number; pageSize: number; total: number; totalPages: number };
   dateRange: { from: string; to: string; isExplicit: boolean };
+  /** Spend (positive cents) and unreviewed count for the whole filtered set; absent from servers before web v1.16. */
+  summary?: { spend: number; unreviewed: number };
 }
 
 export function useTransaction(id: string | undefined) {

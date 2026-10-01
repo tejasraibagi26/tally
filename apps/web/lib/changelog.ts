@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.16.1",
+    date: "2026-10-01",
+    changes: [
+      { kind: "fixed", text: "Early retirement: Save assumptions now keeps the expenses and contribution you typed in. Use actual switches back to your real spending." },
+    ],
+  },
+  {
     version: "1.16.0",
     date: "2026-10-01",
     changes: [

@@ -6,6 +6,8 @@ import { ListFilter, Plus, RefreshCw, Search, X } from "lucide-react-native";
 import { prettifyPfc } from "@tally/core/pfc";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useTransactions, type TransactionRow } from "@/lib/queries/transactions";
+import { useAccounts } from "@/lib/queries/accounts";
+import { TabHeader, SyncFreshness, hasSynced } from "@/components/ui/TabHeader";
 import { useSync } from "@/lib/queries/plaid";
 import { amountColor } from "@/lib/amountColor";
 import { TransactionFiltersSheet, type TransactionFilters } from "@/components/TransactionFiltersSheet";
@@ -150,6 +152,7 @@ export default function TransactionsScreen() {
     setSearchQuery("");
   }
 
+  const { data: accountsData } = useAccounts();
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage, refetch, isRefetching } = useTransactions(queryFilters);
 
   // Matches web's transactions page (SyncButton products={["transactions"]})
@@ -172,6 +175,17 @@ export default function TransactionsScreen() {
   }
 
   const items = data?.pages.flatMap((p) => p.items) ?? [];
+  // Headline: spend for the period/filters on screen, from the API's summary
+  // (absent on a server older than this build -- the figure just hides).
+  const firstPage = data?.pages[0];
+  const summary = firstPage?.summary;
+  const total = firstPage?.pagination.total ?? 0;
+  const periodLabel = firstPage
+    ? firstPage.dateRange.isExplicit
+      ? "in this range"
+      : `in ${new Date(firstPage.dateRange.from + "T00:00:00Z").toLocaleDateString("en-US", { month: "long", timeZone: "UTC" })}`
+    : "";
+  const syncTimes = accountsData?.institutions.map((i) => i.lastSyncedAt) ?? [];
 
   return (
     <View className="flex-1 bg-canvas">
@@ -196,11 +210,18 @@ export default function TransactionsScreen() {
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
         ListHeaderComponent={
           <View className="pb-4">
-            <View className="flex-row items-center justify-between">
-              <Text className="font-ui-semibold text-text" style={{ letterSpacing: -0.3, fontSize: rf(24) }}>
-                Transactions
-              </Text>
-              <View className="flex-row items-center gap-2">
+            <TabHeader
+              eyebrow="Your money"
+              title="Transactions"
+              figure={summary ? <MoneyText cents={summary.spend} mask={false} className="font-display text-text" style={{ fontSize: rf(36), lineHeight: rf(40) }} /> : undefined}
+              figureContext={
+                summary
+                  ? `spent across ${total} transaction${total === 1 ? "" : "s"} ${periodLabel}${summary.unreviewed > 0 ? ` · ${summary.unreviewed} to review` : ""}`
+                  : undefined
+              }
+              meta={[hasSynced(syncTimes) && <SyncFreshness key="sync" syncedAt={syncTimes} />]}
+              actions={
+                <>
                 <Pressable onPress={() => setAddOpen(true)} hitSlop={12} className="items-center justify-center rounded-full bg-brand" style={{ width: 34, height: 34 }}>
                   <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
                 </Pressable>
@@ -223,8 +244,9 @@ export default function TransactionsScreen() {
                     </View>
                   )}
                 </Pressable>
-              </View>
-            </View>
+                </>
+              }
+            />
 
             <View className="flex-row items-center gap-2 rounded-control bg-surface-2 px-3.5 mt-3" style={{ height: 42 }}>
               <Search size={16} color={colors["text-3"]} strokeWidth={2} />
