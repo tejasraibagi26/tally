@@ -5,9 +5,11 @@ import { requireUserId } from "@/lib/session";
 import { formatCents } from "@tally/core/money";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { AddBillForm } from "@/components/subscriptions/AddBillForm";
 import { SubscriptionsTable } from "@/components/subscriptions/SubscriptionsTable";
 import { accountDisplayName } from "@tally/core/accountName";
+import { todayFor } from "@/lib/userTimezone";
 
 const FREQUENCY_MONTHLY_MULTIPLIER: Record<string, number> = {
   weekly: 52 / 12,
@@ -68,12 +70,21 @@ export default async function SubscriptionsPage() {
   );
   const annualTotal = monthlyTotal * 12;
 
+  // In the user's timezone, matching how "today" is read everywhere else.
+  const today = await todayFor(userId);
+  const weekOut = new Date(Date.parse(today + "T00:00:00Z") + 7 * 86_400_000).toISOString().slice(0, 10);
+  const dueThisWeek = activeExpenseStreams.filter((s) => {
+    const next = s.manualNextDueDate ?? s.predictedNextDate;
+    return next != null && next >= today && next <= weekOut;
+  }).length;
+
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-text">Subscriptions &amp; recurring</h1>
-        <AddBillForm accounts={accounts} categories={expenseCategories} />
-      </div>
+      <PageHeader
+        title="Subscriptions & recurring"
+        meta={[streams.length > 0 && `${activeExpenseStreams.length} active`, dueThisWeek > 0 && `${dueThisWeek} due in the next 7 days`]}
+        actions={<AddBillForm accounts={accounts} categories={expenseCategories} />}
+      />
 
       {streams.length === 0 ? (
         <Card className="p-10">
@@ -81,7 +92,7 @@ export default async function SubscriptionsPage() {
             icon={Repeat}
             animation="spin"
             title="Nothing detected yet"
-            description="Recurring charges and income show up here automatically once a merchant, account, and amount repeat at least 3 times with a stable interval. Paid in irregular lump sums (e.g. rent prepaid ahead)? Add it manually above instead."
+            description="Recurring charges and income show up here automatically once a merchant, account, and amount repeat at least 3 times with a stable interval. Paid in irregular lump sums (e.g. rent prepaid ahead)? Use Add a bill to track it manually."
           />
         </Card>
       ) : (

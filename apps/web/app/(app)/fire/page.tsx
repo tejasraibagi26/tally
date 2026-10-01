@@ -6,6 +6,7 @@ import { requireUserId } from "@/lib/session";
 import { formatCents } from "@tally/core/money";
 import { trailingAnnualCashFlowEstimate } from "@/lib/analytics";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FireCalculator } from "@/components/fire/FireCalculator";
 
@@ -17,7 +18,7 @@ export default async function FirePage() {
   if (accounts.length === 0) {
     return (
       <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-        <h1 className="text-2xl font-semibold text-text">Early retirement</h1>
+        <PageHeader title="Early retirement" />
         <Card className="p-10">
           <EmptyState
             icon={Flame}
@@ -50,7 +51,7 @@ export default async function FirePage() {
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold text-text">Early retirement</h1>
+      <PageHeader title="Early retirement" meta={["Seeded from your balances and last 12 months of spending"]} />
 
       <Card className="flex flex-col sm:flex-row">
         <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">

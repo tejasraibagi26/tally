@@ -13,6 +13,7 @@ import { trimLeadingEmptyMonths } from "@tally/core/cashFlowMath";
 import { creditCardsForUser, utilizationFor } from "@/lib/liabilities";
 import { latestHoldingsForUser, portfolioValue } from "@/lib/portfolio";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { PageHeader, SyncFreshness } from "@/components/ui/PageHeader";
 import { StatTile } from "@/components/ui/StatTile";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -45,6 +46,10 @@ function relativeDate(dateStr: string): string {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: sameYear ? undefined : "numeric" });
 }
 
+function monthLabel(month: string): string {
+  return new Date(month + "T00:00:00Z").toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+}
+
 export default async function OverviewPage() {
   const userId = await requireUserId();
 
@@ -54,7 +59,9 @@ export default async function OverviewPage() {
   if (accounts.length === 0) {
     return (
       <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7">
-        <h1 className="text-2xl font-semibold text-text mb-6">Overview</h1>
+        <div className="mb-6">
+          <PageHeader title="Overview" />
+        </div>
         <Card className="p-12">
           <EmptyState
             icon={Landmark}
@@ -119,14 +126,17 @@ export default async function OverviewPage() {
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-2xl font-semibold text-text">Overview</h1>
-        {brokenItems > 0 && (
-          <Link href="/accounts" className="text-[13.5px] text-negative">
-            {brokenItems} connection{brokenItems === 1 ? "" : "s"} need attention →
-          </Link>
-        )}
-      </div>
+      <PageHeader
+        title="Overview"
+        meta={[monthLabel(month), items.some((i) => i.lastSyncedAt) && <SyncFreshness key="sync" syncedAt={items.map((i) => i.lastSyncedAt)} />]}
+        actions={
+          brokenItems > 0 && (
+            <Link href="/accounts" className="text-[13.5px] text-negative">
+              {brokenItems} connection{brokenItems === 1 ? "" : "s"} need attention →
+            </Link>
+          )
+        }
+      />
 
       {/* Row 1: hero net worth + connections health */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch" style={reveal(0)}>

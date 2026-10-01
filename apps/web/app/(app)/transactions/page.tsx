@@ -4,6 +4,7 @@ import { Receipt, SearchX } from "lucide-react";
 import { requireUserId } from "@/lib/session";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader, SyncFreshness } from "@/components/ui/PageHeader";
 import { SyncButton } from "@/components/plaid/SyncButton";
 import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
 import { TransactionsList, type TransactionRowData, type AccountLookup } from "@/components/transactions/TransactionsList";
@@ -13,6 +14,7 @@ import { TransactionsFilterBar } from "@/components/transactions/TransactionsFil
 import { groupCategoryOptions, categoryIdsInGroup } from "@/lib/categoryOptions";
 import { clearOrphanedRecurringStreamRefs } from "@/lib/recurringBillGeneration";
 import { monthLastDay } from "@tally/core/budgetMath";
+import { formatCents } from "@tally/core/money";
 import { accountDisplayName } from "@tally/core/accountName";
 import Link from "next/link";
 import { currentMonthFor } from "@/lib/userTimezone";
@@ -179,8 +181,15 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
       .orderBy(desc(schema.transactions.postedDate), desc(schema.transactions.createdAt))
       .limit(PAGE_SIZE)
       .offset((page - 1) * PAGE_SIZE),
+    // Spend uses lib/analytics.ts monthTotals' definition (expense categories,
+    // transfers and excluded rows left out) so the header matches Overview's
+    // "Spent this month" for the same period -- just narrowed by any filters.
     db
-      .select({ count: sql<number>`count(*)::int` })
+      .select({
+        count: sql<number>`count(*)::int`,
+        spend: sql<number>`coalesce(sum(abs(${schema.transactions.amount})) filter (where ${schema.categories.kind} = 'expense' and not ${schema.transactions.isTransfer} and not ${schema.transactions.excludedFromBudget}), 0)::float8`,
+        unreviewed: sql<number>`(count(*) filter (where not ${schema.transactions.reviewed}))::int`,
+      })
       .from(schema.transactions)
       .leftJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))
       .leftJoin(schema.recurringStreams, eq(schema.transactions.recurringStreamId, schema.recurringStreams.id))
@@ -227,6 +236,8 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   }));
 
   const total = countRows[0]?.count ?? 0;
+  const periodSpend = Number(countRows[0]?.spend ?? 0);
+  const unreviewed = countRows[0]?.unreviewed ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const start = total === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const end = Math.min(page * PAGE_SIZE, total);
@@ -250,27 +261,31 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 h-full min-h-0 flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 flex-none">
-        <div className="flex items-baseline gap-3">
-          <h1 className="text-2xl font-semibold text-text">Transactions</h1>
-          <span className="text-[13.5px] text-text-3 tabular">
-            {total} {hasExplicitDateFilter ? "in range" : `in ${monthLabel(thisMonth)}`}
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link href="/rules" className="text-sm text-brand">
-            Manage rules →
-          </Link>
-          <SyncButton products={["transactions"]} loadingMessage="Syncing your transactions. This can take a moment." />
-        </div>
-      </div>
-
-      <div className="flex-none">
-        <AddTransactionForm
-          accounts={accounts.map((a) => ({ id: a.id, name: accountDisplayName(a.name, a.nickname), mask: a.mask }))}
-          categories={categoryOptions}
-        />
-      </div>
+      <PageHeader
+        eyebrow="Your money"
+        title="Transactions"
+        figure={formatCents(periodSpend)}
+        figureContext={
+          <>
+            spent across <span className="font-medium text-text">{total}</span> transaction{total === 1 ? "" : "s"}{" "}
+            {hasExplicitDateFilter ? "in this range" : `in ${monthLabel(thisMonth).split(" ")[0]}`}
+            {unreviewed > 0 && ` · ${unreviewed} to review`}
+          </>
+        }
+        meta={[<SyncFreshness key="sync" syncedAt={items.map((i) => i.lastSyncedAt)} />]}
+        actions={
+          <>
+            <Link href="/rules" className="text-sm text-brand mr-1.5">
+              Manage rules →
+            </Link>
+            <SyncButton products={["transactions"]} loadingMessage="Syncing your transactions. This can take a moment." />
+            <AddTransactionForm
+              accounts={accounts.map((a) => ({ id: a.id, name: accountDisplayName(a.name, a.nickname), mask: a.mask }))}
+              categories={categoryOptions}
+            />
+          </>
+        }
+      />
 
       <SyncFailureBanner />
 

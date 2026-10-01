@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.16.0",
+    date: "2026-10-01",
+    changes: [
+      { kind: "improved", text: "Adding a budget, bill, transaction or rule now opens a side panel from a button at the top of the page, so there's no scrolling to find the form." },
+      { kind: "improved", text: "Income schedules and API tokens in Settings open in the same side panel." },
+      { kind: "improved", text: "Page headers show what you're looking at: the period, counts, and when your accounts last synced. Budgets gets a single month picker." },
+      { kind: "new", text: "Transactions leads with how much you've spent in the period you're viewing, and how many transactions are left to review." },
+    ],
+  },
+  {
     version: "1.15.2",
     date: "2026-09-30",
     changes: [{ kind: "improved", text: "Alerts come by email, with one switch per alert in Settings → Alerts." }],

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { FormField, FormPanel, panelInputClass } from "@/components/ui/FormPanel";
 
 export interface ApiKeyData {
   id: string;
@@ -46,12 +47,17 @@ function CopyRow({ value }: { value: string }) {
 
 export function ApiKeysManager({ apiKeys, shortcutsEndpoint }: { apiKeys: ApiKeyData[]; shortcutsEndpoint: string }) {
   const router = useRouter();
-  const [adding, setAdding] = useState(false);
+  const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
+
+  function close() {
+    setOpen(false);
+    setError(null);
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -70,7 +76,7 @@ export function ApiKeysManager({ apiKeys, shortcutsEndpoint }: { apiKeys: ApiKey
         return;
       }
       setRevealedKey(data.key);
-      setAdding(false);
+      close();
       setName("");
       router.refresh();
     } catch (err) {
@@ -156,34 +162,27 @@ export function ApiKeysManager({ apiKeys, shortcutsEndpoint }: { apiKeys: ApiKey
         </div>
       )}
 
-      {!adding ? (
-        <div>
-          <Button variant="secondary" size="sm" onClick={() => setAdding(true)}>
-            + Create token
-          </Button>
-        </div>
-      ) : (
-        <form onSubmit={submit} className="flex flex-col gap-3 p-3 rounded-control bg-surface-2 border border-border">
-          <div className="flex items-center gap-2 flex-wrap">
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Apple Shortcuts"
-              autoFocus
-              className="w-56 h-9 rounded-control bg-surface border border-border-strong px-2 text-sm text-text"
-            />
-          </div>
-          {error && <p className="text-sm text-negative">{error}</p>}
-          <div className="flex items-center gap-3">
-            <Button type="submit" size="sm" disabled={saving || !name.trim()}>
-              {saving ? "Creating…" : "Create token"}
-            </Button>
-            <button type="button" onClick={() => { setAdding(false); setError(null); }} className="text-sm text-text-2">
-              Cancel
-            </button>
-          </div>
-        </form>
-      )}
+      <div>
+        <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
+          + Create token
+        </Button>
+      </div>
+      <FormPanel
+        open={open}
+        onClose={close}
+        title="Create token"
+        description="The token is shown once after you create it. Copy it somewhere safe."
+        onSubmit={submit}
+        submitLabel="Create token"
+        submittingLabel="Creating…"
+        submitting={saving}
+        submitDisabled={!name.trim()}
+        error={error}
+      >
+        <FormField label="Name" hint="So you can tell your tokens apart later.">
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Apple Shortcuts" autoFocus className={panelInputClass} />
+        </FormField>
+      </FormPanel>
     </div>
   );
 }

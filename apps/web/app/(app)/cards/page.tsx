@@ -4,6 +4,7 @@ import { requireUserId } from "@/lib/session";
 import { formatCents, formatPercent } from "@tally/core/money";
 import { creditCardsForUser, utilizationFor } from "@/lib/liabilities";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { CreditLimitEditor } from "@/components/cards/CreditLimitEditor";
@@ -39,7 +40,7 @@ export default async function CardsPage() {
   if (cards.length === 0) {
     return (
       <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-        <h1 className="text-2xl font-semibold text-text">Credit cards</h1>
+        <PageHeader title="Credit cards" />
         <Card className="p-10">
           <EmptyState
             icon={CreditCardIcon}
@@ -58,10 +59,11 @@ export default async function CardsPage() {
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-text">Credit cards</h1>
-        <SyncButton products={["liabilities"]} label="Sync card details" loadingMessage="Syncing your credit card details. This can take a moment." />
-      </div>
+      <PageHeader
+        title="Credit cards"
+        meta={[`${cards.length} card${cards.length === 1 ? "" : "s"}`]}
+        actions={<SyncButton products={["liabilities"]} label="Sync card details" loadingMessage="Syncing your credit card details. This can take a moment." />}
+      />
 
       <SyncFailureBanner />
 

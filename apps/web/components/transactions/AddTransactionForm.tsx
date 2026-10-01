@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { AmountInput, FormField, FormPanel, panelInputClass } from "@/components/ui/FormPanel";
 import { cn } from "@/lib/cn";
 
 export interface TransactionAccountOption {
@@ -25,11 +26,11 @@ function todayDate(): string {
 
 // For a purchase Plaid never saw -- cash, a bank this app isn't linked to,
 // or something the user just wants tracked right away. Same inline-toggle
-// pattern as AddBillForm.tsx; hits POST /api/transactions, which stamps the
+// FormPanel side sheet as AddBillForm.tsx; hits POST /api/transactions, which stamps the
 // row isManual so it's editable/deletable like any other manual entry.
 export function AddTransactionForm({ accounts, categories }: { accounts: TransactionAccountOption[]; categories: TransactionCategoryOption[] }) {
   const router = useRouter();
-  const [adding, setAdding] = useState(false);
+  const [open, setOpen] = useState(false);
   const [kind, setKind] = useState<"expense" | "income">("expense");
   const [name, setName] = useState("");
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
@@ -40,6 +41,11 @@ export function AddTransactionForm({ accounts, categories }: { accounts: Transac
   const [error, setError] = useState<string | null>(null);
 
   if (accounts.length === 0) return null;
+
+  function close() {
+    setOpen(false);
+    setError(null);
+  }
 
   function reset() {
     setName("");
@@ -66,7 +72,7 @@ export function AddTransactionForm({ accounts, categories }: { accounts: Transac
         setError(data.error ?? "Something went wrong");
         return;
       }
-      setAdding(false);
+      close();
       reset();
       router.refresh();
     } catch (err) {
@@ -77,87 +83,68 @@ export function AddTransactionForm({ accounts, categories }: { accounts: Transac
     }
   }
 
-  if (!adding) {
-    return (
-      <Button variant="secondary" size="sm" onClick={() => setAdding(true)}>
+  return (
+    <>
+      <Button size="sm" onClick={() => setOpen(true)}>
         + Add transaction
       </Button>
-    );
-  }
-
-  return (
-    <form onSubmit={submit} className="flex flex-col gap-3 p-3 rounded-control bg-surface-2 border border-border w-fit">
-      <div className="flex items-center gap-2 flex-wrap">
-        <div className="flex rounded-control border border-border-strong overflow-hidden h-9">
+      <FormPanel
+        open={open}
+        onClose={close}
+        title="Add transaction"
+        description="For cash, or anything from an account Tally isn't linked to."
+        onSubmit={submit}
+        submitLabel="Add transaction"
+        submittingLabel="Adding…"
+        submitting={saving}
+        error={error}
+      >
+        <div className="grid grid-cols-2 rounded-control border border-border-strong overflow-hidden h-9">
           <button
             type="button"
             onClick={() => setKind("expense")}
-            className={cn("px-3 text-sm font-medium", kind === "expense" ? "bg-negative-subtle text-negative" : "bg-surface text-text-2")}
+            className={cn("text-sm font-medium", kind === "expense" ? "bg-negative-subtle text-negative" : "bg-surface text-text-2")}
           >
             Expense
           </button>
           <button
             type="button"
             onClick={() => setKind("income")}
-            className={cn("px-3 text-sm font-medium", kind === "income" ? "bg-positive-subtle text-positive" : "bg-surface text-text-2")}
+            className={cn("text-sm font-medium", kind === "income" ? "bg-positive-subtle text-positive" : "bg-surface text-text-2")}
           >
             Income
           </button>
         </div>
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Description"
-          className="w-44 h-9 rounded-control bg-surface border border-border-strong px-2 text-sm text-text"
-        />
-        <span className="text-text-3 text-sm">$</span>
-        <input
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="0.00"
-          value={amountInput}
-          onChange={(e) => setAmountInput(e.target.value)}
-          required
-          className="w-28 h-9 rounded-control bg-surface border border-border-strong px-2 text-sm text-text tabular"
-        />
-      </div>
-      <div className="flex items-center gap-2 flex-wrap">
-        <SearchableSelect
-          value={accountId}
-          onChange={setAccountId}
-          buttonPlaceholder="Choose account"
-          placeholder="Search accounts…"
-          className="w-56"
-          options={accounts.map((a) => ({ value: a.id, label: `${a.name} ····${a.mask ?? "----"}` }))}
-        />
-        <SearchableSelect
-          value={categoryId}
-          onChange={setCategoryId}
-          buttonPlaceholder="Category (optional)"
-          placeholder="Search categories…"
-          className="w-48"
-          options={[{ value: "", label: "Uncategorized" }, ...categories.map((c) => ({ value: c.id, label: c.name, colorSlot: c.colorSlot, indent: c.indent }))]}
-        />
-        <input
-          type="date"
-          value={postedDate}
-          onChange={(e) => setPostedDate(e.target.value)}
-          required
-          className="h-9 rounded-control bg-surface border border-border-strong px-2 text-sm text-text"
-        />
-      </div>
-
-      {error && <p className="text-sm text-negative">{error}</p>}
-
-      <div className="flex items-center gap-3">
-        <Button type="submit" size="sm" disabled={saving}>
-          {saving ? "Adding…" : "Add transaction"}
-        </Button>
-        <button type="button" onClick={() => setAdding(false)} className="text-sm text-text-2">
-          Cancel
-        </button>
-      </div>
-    </form>
+        <FormField label="Description">
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Coffee" required autoFocus className={panelInputClass} />
+        </FormField>
+        <FormField label="Amount">
+          <AmountInput value={amountInput} onChange={setAmountInput} />
+        </FormField>
+        <FormField label="Date">
+          <input type="date" value={postedDate} onChange={(e) => setPostedDate(e.target.value)} required className={panelInputClass} />
+        </FormField>
+        <FormField label="Account">
+          <SearchableSelect
+            value={accountId}
+            onChange={setAccountId}
+            buttonPlaceholder="Choose account"
+            placeholder="Search accounts…"
+            className="w-full"
+            options={accounts.map((a) => ({ value: a.id, label: `${a.name} ····${a.mask ?? "----"}` }))}
+          />
+        </FormField>
+        <FormField label="Category">
+          <SearchableSelect
+            value={categoryId}
+            onChange={setCategoryId}
+            buttonPlaceholder="Category (optional)"
+            placeholder="Search categories…"
+            className="w-full"
+            options={[{ value: "", label: "Uncategorized" }, ...categories.map((c) => ({ value: c.id, label: c.name, colorSlot: c.colorSlot, indent: c.indent }))]}
+          />
+        </FormField>
+      </FormPanel>
+    </>
   );
 }

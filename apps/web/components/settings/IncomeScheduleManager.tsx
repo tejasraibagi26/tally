@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { AmountInput, FormField, FormPanel, panelInputClass } from "@/components/ui/FormPanel";
 import { formatCents } from "@tally/core/money";
 
 export interface IncomeAccountOption {
@@ -62,7 +63,7 @@ export function IncomeScheduleManager({
   schedules: IncomeScheduleData[];
 }) {
   const router = useRouter();
-  const [adding, setAdding] = useState(false);
+  const [open, setOpen] = useState(false);
   const [label, setLabel] = useState("Paycheck");
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
   const [categoryId, setCategoryId] = useState("");
@@ -74,6 +75,11 @@ export function IncomeScheduleManager({
   const [busyId, setBusyId] = useState<string | null>(null);
 
   if (accounts.length === 0) return <p className="text-text-2 text-sm">Connect or add an account first, then come back here to set up an income schedule.</p>;
+
+  function close() {
+    setOpen(false);
+    setError(null);
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -93,7 +99,7 @@ export function IncomeScheduleManager({
         setError(data.error ?? "Something went wrong");
         return;
       }
-      setAdding(false);
+      close();
       setLabel("Paycheck");
       setAmountInput("");
       setCategoryId("");
@@ -173,82 +179,65 @@ export function IncomeScheduleManager({
         </div>
       )}
 
-      {!adding ? (
-        <div>
-          <Button variant="secondary" size="sm" onClick={() => setAdding(true)}>
-            + Add income schedule
-          </Button>
-        </div>
-      ) : (
-        <form onSubmit={submit} className="flex flex-col gap-3 p-3 rounded-control bg-surface-2 border border-border">
-          <div className="flex items-center gap-2 flex-wrap">
-            <input
-              value={label}
-              onChange={(e) => setLabel(e.target.value)}
-              placeholder="Paycheck"
-              className="w-40 h-9 rounded-control bg-surface border border-border-strong px-2 text-sm text-text"
-            />
-            <SearchableSelect
-              value={accountId}
-              onChange={setAccountId}
-              buttonPlaceholder="Choose account"
-              placeholder="Search accounts…"
-              className="w-56"
-              options={accounts.map((a) => ({ value: a.id, label: `${a.name} ····${a.mask ?? "----"}` }))}
-            />
-            <span className="text-text-3 text-sm">$</span>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              placeholder="0.00"
-              value={amountInput}
-              onChange={(e) => setAmountInput(e.target.value)}
-              required
-              className="w-28 h-9 rounded-control bg-surface border border-border-strong px-2 text-sm text-text tabular"
-            />
-            <SearchableSelect
-              value={categoryId}
-              onChange={setCategoryId}
-              buttonPlaceholder="Category (optional)"
-              placeholder="Search categories…"
-              className="w-48"
-              options={[{ value: "", label: "Uncategorized" }, ...categories.map((c) => ({ value: c.id, label: c.name }))]}
-            />
-          </div>
-
-          <div className="flex items-center gap-2 flex-wrap text-[13.5px] text-text-2">
-            <span>Paid on</span>
-            <SearchableSelect value={anchor1} onChange={setAnchor1} className="w-44" options={dayOptions()} />
-            {anchor2 !== NONE && (
-              <>
-                <span>and</span>
-                <SearchableSelect value={anchor2} onChange={setAnchor2} className="w-44" options={dayOptions()} />
-                <button type="button" onClick={() => setAnchor2(NONE)} className="text-text-3 hover:text-negative">
-                  remove
-                </button>
-              </>
-            )}
-            {anchor2 === NONE && (
-              <button type="button" onClick={() => setAnchor2(LAST_DAY)} className="text-brand">
-                + add a second payday
+      <div>
+        <Button variant="secondary" size="sm" onClick={() => setOpen(true)}>
+          + Add income schedule
+        </Button>
+      </div>
+      <FormPanel
+        open={open}
+        onClose={close}
+        title="Add income schedule"
+        description="Adds your paycheck automatically on payday, for income Tally can't see arrive."
+        onSubmit={submit}
+        submitLabel="Add schedule"
+        submittingLabel="Adding…"
+        submitting={saving}
+        error={error}
+      >
+        <FormField label="Name">
+          <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="Paycheck" autoFocus className={panelInputClass} />
+        </FormField>
+        <FormField label="Amount per paycheck">
+          <AmountInput value={amountInput} onChange={setAmountInput} />
+        </FormField>
+        <FormField label="Deposited to">
+          <SearchableSelect
+            value={accountId}
+            onChange={setAccountId}
+            buttonPlaceholder="Choose account"
+            placeholder="Search accounts…"
+            className="w-full"
+            options={accounts.map((a) => ({ value: a.id, label: `${a.name} ····${a.mask ?? "----"}` }))}
+          />
+        </FormField>
+        <FormField label="Category">
+          <SearchableSelect
+            value={categoryId}
+            onChange={setCategoryId}
+            buttonPlaceholder="Category (optional)"
+            placeholder="Search categories…"
+            className="w-full"
+            options={[{ value: "", label: "Uncategorized" }, ...categories.map((c) => ({ value: c.id, label: c.name }))]}
+          />
+        </FormField>
+        <FormField label="Paid on" hint="Moved to the preceding Friday if it lands on a weekend.">
+          <SearchableSelect value={anchor1} onChange={setAnchor1} className="w-full" options={dayOptions()} />
+          {anchor2 !== NONE ? (
+            <div className="flex items-center gap-2">
+              <span className="text-[13px] text-text-2">and</span>
+              <SearchableSelect value={anchor2} onChange={setAnchor2} className="flex-1" options={dayOptions()} />
+              <button type="button" onClick={() => setAnchor2(NONE)} className="text-[13px] text-text-3 hover:text-negative">
+                Remove
               </button>
-            )}
-            <span className="text-text-3">(moved to the preceding Friday if it lands on a weekend)</span>
-          </div>
-
-          {error && <p className="text-sm text-negative">{error}</p>}
-
-          <div className="flex items-center gap-3">
-            <Button type="submit" size="sm" disabled={saving}>
-              {saving ? "Adding…" : "Add schedule"}
-            </Button>
-            <button type="button" onClick={() => setAdding(false)} className="text-sm text-text-2">
-              Cancel
+            </div>
+          ) : (
+            <button type="button" onClick={() => setAnchor2(LAST_DAY)} className="text-[13px] text-brand w-fit">
+              + Add a second payday
             </button>
-          </div>
-        </form>
-      )}
+          )}
+        </FormField>
+      </FormPanel>
     </div>
   );
 }

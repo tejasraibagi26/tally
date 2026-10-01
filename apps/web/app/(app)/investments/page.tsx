@@ -7,6 +7,7 @@ import { formatCents, formatPercent } from "@tally/core/money";
 import { latestHoldingsForUser, portfolioValue, allocationFor, unrealizedGain, portfolioSimpleReturn, currenciesInvolved } from "@/lib/portfolio";
 import { toNetWorthCurrency, NET_WORTH_CURRENCY } from "@tally/core/fx";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SyncButton } from "@/components/plaid/SyncButton";
 import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
@@ -63,10 +64,10 @@ export default async function InvestmentsPage() {
   if (holdings.length === 0) {
     return (
       <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-2xl font-semibold text-text">Investments</h1>
-          <SyncButton products={["holdings", "investments"]} label="Sync holdings" loadingMessage="Syncing your investment holdings. This can take a moment." />
-        </div>
+        <PageHeader
+          title="Investments"
+          actions={<SyncButton products={["holdings", "investments"]} label="Sync holdings" loadingMessage="Syncing your investment holdings. This can take a moment." />}
+        />
         <SyncFailureBanner />
         <Card className="p-10">
           <EmptyState
@@ -86,10 +87,14 @@ export default async function InvestmentsPage() {
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-text">Investments</h1>
-        <SyncButton products={["holdings", "investments"]} label="Sync holdings" loadingMessage="Syncing your investment holdings. This can take a moment." />
-      </div>
+      <PageHeader
+        title="Investments"
+        meta={[
+          `${holdings.length} holding${holdings.length === 1 ? "" : "s"}`,
+          `${holdingsByAccount.size} account${holdingsByAccount.size === 1 ? "" : "s"}`,
+        ]}
+        actions={<SyncButton products={["holdings", "investments"]} label="Sync holdings" loadingMessage="Syncing your investment holdings. This can take a moment." />}
+      />
 
       <SyncFailureBanner />
 

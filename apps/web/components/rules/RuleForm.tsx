@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { AmountInput, CheckboxField, FormField, FormPanel, panelInputClass } from "@/components/ui/FormPanel";
 
 type Field = "description" | "merchant" | "amount" | "account" | "direction";
 
@@ -39,6 +40,7 @@ export interface RuleFormAccount {
 
 export function RuleForm({ categories, accounts }: { categories: RuleFormCategory[]; accounts: RuleFormAccount[] }) {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
   const [field, setField] = useState<Field>("merchant");
   const [op, setOp] = useState("equals");
   const [textValue, setTextValue] = useState("");
@@ -56,6 +58,11 @@ export function RuleForm({ categories, accounts }: { categories: RuleFormCategor
   const [previewCount, setPreviewCount] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function close() {
+    setOpen(false);
+    setError(null);
+  }
 
   function buildMatch() {
     if (field === "amount") return { field, op, value: Math.round(parseFloat(amountValue || "0") * 100) };
@@ -126,6 +133,7 @@ export function RuleForm({ categories, accounts }: { categories: RuleFormCategor
       setExclude(false);
       setMarkTransfer(false);
       setPreviewCount(null);
+      close();
       router.refresh();
     } catch (err) {
       console.error(err);
@@ -136,128 +144,111 @@ export function RuleForm({ categories, accounts }: { categories: RuleFormCategor
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-4">
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-sm text-text-2">When</span>
-        <select
-          value={field}
-          onChange={(e) => {
-            const f = e.target.value as Field;
-            setField(f);
-            setOp(OPS_BY_FIELD[f][0]!.value);
-          }}
-          className="h-9 rounded-control bg-surface-2 border border-border-strong px-2 text-sm text-text"
-        >
-          <option value="merchant">Merchant</option>
-          <option value="description">Description</option>
-          <option value="amount">Amount</option>
-          <option value="account">Account</option>
-          <option value="direction">Direction</option>
-        </select>
-        <select value={op} onChange={(e) => setOp(e.target.value)} className="h-9 rounded-control bg-surface-2 border border-border-strong px-2 text-sm text-text">
-          {OPS_BY_FIELD[field].map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-
-        {field === "amount" ? (
-          <div className="flex items-center gap-1">
-            <span className="text-text-3 text-sm">$</span>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={amountValue}
-              onChange={(e) => setAmountValue(e.target.value)}
-              required
-              className="w-24 h-9 rounded-control bg-surface-2 border border-border-strong px-2 text-sm text-text tabular"
-            />
+    <>
+      <Button size="sm" onClick={() => setOpen(true)}>
+        + New rule
+      </Button>
+      <FormPanel
+        open={open}
+        onClose={close}
+        title="New rule"
+        description="Automatically categorize, tag or exclude transactions that match."
+        onSubmit={handleSubmit}
+        submitLabel="Create rule"
+        submittingLabel="Saving…"
+        submitting={busy}
+        error={error}
+      >
+        <FormField label="When">
+          <div className="grid grid-cols-2 gap-2">
+            <select
+              value={field}
+              onChange={(e) => {
+                const f = e.target.value as Field;
+                setField(f);
+                setOp(OPS_BY_FIELD[f][0]!.value);
+                setPreviewCount(null);
+              }}
+              className={panelInputClass}
+            >
+              <option value="merchant">Merchant</option>
+              <option value="description">Description</option>
+              <option value="amount">Amount</option>
+              <option value="account">Account</option>
+              <option value="direction">Direction</option>
+            </select>
+            <select value={op} onChange={(e) => setOp(e.target.value)} className={panelInputClass}>
+              {OPS_BY_FIELD[field].map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
           </div>
-        ) : field === "account" ? (
+          {field === "amount" ? (
+            <AmountInput value={amountValue} onChange={setAmountValue} />
+          ) : field === "account" ? (
+            <SearchableSelect
+              value={accountValue}
+              onChange={setAccountValue}
+              buttonPlaceholder="Choose account"
+              placeholder="Search accounts…"
+              className="w-full"
+              options={accounts.map((a) => ({ value: a.id, label: a.name }))}
+            />
+          ) : field === "direction" ? (
+            <select value={directionValue} onChange={(e) => setDirectionValue(e.target.value as "in" | "out")} className={panelInputClass}>
+              <option value="out">Money out (spend)</option>
+              <option value="in">Money in</option>
+            </select>
+          ) : (
+            <input
+              type="text"
+              value={textValue}
+              onChange={(e) => setTextValue(e.target.value)}
+              required
+              autoFocus
+              placeholder={field === "merchant" ? "Starbucks" : "text to match"}
+              className={panelInputClass}
+            />
+          )}
+          <div className="flex items-center gap-3">
+            <button type="button" onClick={handlePreview} disabled={busy} className="text-[13px] text-brand disabled:opacity-40">
+              Preview matches
+            </button>
+            {previewCount !== null && (
+              <span className="text-[13px] text-text-2 tabular">
+                Would affect {previewCount} transaction{previewCount === 1 ? "" : "s"}
+              </span>
+            )}
+          </div>
+        </FormField>
+
+        <div className="h-px bg-border" />
+
+        <FormField label="Then">
           <SearchableSelect
-            value={accountValue}
-            onChange={setAccountValue}
-            buttonPlaceholder="Choose account"
-            placeholder="Search accounts…"
-            className="w-56"
-            options={accounts.map((a) => ({ value: a.id, label: a.name }))}
+            value={setCategoryId}
+            onChange={setSetCategoryId}
+            buttonPlaceholder="Don't change category"
+            placeholder="Search categories…"
+            className="w-full"
+            options={categories.map((c) => ({ value: c.id, label: `Set category: ${c.name}`, colorSlot: c.colorSlot, indent: c.indent }))}
           />
-        ) : field === "direction" ? (
-          <select value={directionValue} onChange={(e) => setDirectionValue(e.target.value as "in" | "out")} className="h-9 rounded-control bg-surface-2 border border-border-strong px-2 text-sm text-text">
-            <option value="out">Money out (spend)</option>
-            <option value="in">Money in</option>
-          </select>
-        ) : (
-          <input
-            type="text"
-            value={textValue}
-            onChange={(e) => setTextValue(e.target.value)}
-            required
-            placeholder={field === "merchant" ? "Starbucks" : "text to match"}
-            className="flex-1 min-w-[160px] h-9 rounded-control bg-surface-2 border border-border-strong px-2 text-sm text-text"
-          />
-        )}
-      </div>
+          <input type="text" value={addTag} onChange={(e) => setAddTag(e.target.value)} placeholder="Add tag (optional)" className={panelInputClass} />
+          <div className="flex flex-col gap-3 pt-1">
+            <CheckboxField checked={exclude} onChange={setExclude} label="Exclude from budget" />
+            <CheckboxField checked={markTransfer} onChange={setMarkTransfer} label="Mark as transfer" />
+          </div>
+        </FormField>
 
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-sm text-text-2">Then</span>
-        <SearchableSelect
-          value={setCategoryId}
-          onChange={setSetCategoryId}
-          buttonPlaceholder="Don't change category"
-          placeholder="Search categories…"
-          className="w-56"
-          options={categories.map((c) => ({ value: c.id, label: `Set category: ${c.name}`, colorSlot: c.colorSlot, indent: c.indent }))}
-        />
-        <input
-          type="text"
-          value={addTag}
-          onChange={(e) => setAddTag(e.target.value)}
-          placeholder="Add tag (optional)"
-          className="w-40 h-9 rounded-control bg-surface-2 border border-border-strong px-2 text-sm text-text"
-        />
-        <label className="flex items-center gap-1.5 text-sm text-text-2">
-          <input type="checkbox" checked={exclude} onChange={(e) => setExclude(e.target.checked)} />
-          Exclude from budget
-        </label>
-        <label className="flex items-center gap-1.5 text-sm text-text-2">
-          <input type="checkbox" checked={markTransfer} onChange={(e) => setMarkTransfer(e.target.checked)} />
-          Mark as transfer
-        </label>
-      </div>
+        <div className="h-px bg-border" />
 
-      <div className="flex items-center gap-3 flex-wrap">
-        <label className="flex items-center gap-1.5 text-sm text-text-2">
-          Priority
-          <input
-            type="number"
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-            className="w-16 h-8 rounded-control bg-surface-2 border border-border-strong px-2 text-sm text-text tabular"
-          />
-          <span className="text-xs text-text-3">(lower runs first)</span>
-        </label>
-        <label className="flex items-center gap-1.5 text-sm text-text-2">
-          <input type="checkbox" checked={applyToExisting} onChange={(e) => setApplyToExisting(e.target.checked)} />
-          Apply to existing transactions
-        </label>
-
-        <Button type="button" variant="secondary" size="sm" onClick={handlePreview} disabled={busy}>
-          Preview
-        </Button>
-        {previewCount !== null && (
-          <span className="text-sm text-text-2 tabular">
-            Would affect {previewCount} transaction{previewCount === 1 ? "" : "s"}
-          </span>
-        )}
-        <Button type="submit" size="sm" disabled={busy} className="ml-auto">
-          {busy ? "Saving…" : "Create rule"}
-        </Button>
-      </div>
-
-      {error && <span className="text-sm text-negative">{error}</span>}
-    </form>
+        <FormField label="Priority" hint="Lower numbers run first.">
+          <input type="number" value={priority} onChange={(e) => setPriority(e.target.value)} className={`${panelInputClass} w-24 tabular`} />
+        </FormField>
+        <CheckboxField checked={applyToExisting} onChange={setApplyToExisting} label="Apply to existing transactions" />
+      </FormPanel>
+    </>
   );
 }

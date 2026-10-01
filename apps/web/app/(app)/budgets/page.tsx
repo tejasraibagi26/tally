@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { and, eq, isNull, notInArray, or } from "drizzle-orm";
 import { PiggyBank } from "lucide-react";
 import { db, schema } from "@/db";
@@ -8,6 +7,7 @@ import { monthLastDay } from "@tally/core/budgetMath";
 import { formatCents } from "@tally/core/money";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { MonthStepper, PageHeader } from "@/components/ui/PageHeader";
 import { BudgetRow } from "@/components/budgets/BudgetRow";
 import { AddBudgetForm } from "@/components/budgets/AddBudgetForm";
 import { currentMonthFor } from "@/lib/userTimezone";
@@ -41,24 +41,23 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
   const isCurrentMonth = month === (await currentMonthFor(userId));
   const daysElapsed = isCurrentMonth ? new Date().getUTCDate() : undefined;
   const daysInMonth = isCurrentMonth ? new Date(monthLastDay(month) + "T00:00:00Z").getUTCDate() : undefined;
+  const daysLeft = daysInMonth != null && daysElapsed != null ? daysInMonth - daysElapsed : null;
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-baseline gap-3">
-          <h1 className="text-2xl font-semibold text-text">Budgets</h1>
-          <span className="text-[13.5px] text-text-3">{budgets.length} categories budgeted</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link href={`/budgets?month=${shiftMonth(month, -1)}`} className="text-sm text-text-2 px-2">
-            ← Prev
-          </Link>
-          <span className="font-display text-lg text-text min-w-[160px] text-center">{monthLabel(month)}</span>
-          <Link href={`/budgets?month=${shiftMonth(month, 1)}`} className="text-sm text-text-2 px-2">
-            Next →
-          </Link>
-        </div>
-      </div>
+      <PageHeader
+        title="Budgets"
+        meta={[
+          `${budgets.length} ${budgets.length === 1 ? "category" : "categories"} budgeted`,
+          daysLeft != null && (daysLeft === 0 ? "Last day of the month" : `${daysLeft} day${daysLeft === 1 ? "" : "s"} left`),
+        ]}
+        actions={
+          <>
+            <MonthStepper label={monthLabel(month)} prevHref={`/budgets?month=${shiftMonth(month, -1)}`} nextHref={`/budgets?month=${shiftMonth(month, 1)}`} />
+            <AddBudgetForm month={month} monthLabel={monthLabel(month)} categories={availableCategories} />
+          </>
+        }
+      />
 
       {budgets.length > 0 && (
         <Card className="flex flex-col sm:flex-row">
@@ -83,14 +82,11 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
         <CardHeader title="This month" />
         {budgets.length === 0 ? (
           <div className="px-4 py-10">
-            <EmptyState icon={PiggyBank} title="No budgets yet" description={`Add one below to start tracking spend against a limit for ${monthLabel(month)}.`} />
+            <EmptyState icon={PiggyBank} title="No budgets yet" description={`Use Add budget to start tracking spend against a limit for ${monthLabel(month)}.`} />
           </div>
         ) : (
           budgets.map((b) => <BudgetRow key={b.categoryId} budget={{ ...b, month }} daysElapsed={daysElapsed} daysInMonth={daysInMonth} />)
         )}
-        <div className="border-t border-border">
-          <AddBudgetForm month={month} categories={availableCategories} />
-        </div>
       </Card>
     </div>
   );

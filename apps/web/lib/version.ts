@@ -70,8 +70,13 @@
  * alerts, and the test send removed (scripts/delete-test-alerts.ts).
  * 1.15.2 drops push (no iOS push without an Apple Developer account):
  * alerts are email only, on by default for every type.
+ * 1.16.0 opens every "add" form (budget, bill, transaction, rule, income
+ * schedule, API token) in the same right-hand side panel, from a button
+ * in the page header instead of an inline form (components/ui/FormPanel.tsx),
+ * and gives every page one shared header (components/ui/PageHeader.tsx):
+ * title + context line, with Transactions using the headline-figure variant.
  */
-export const APP_VERSION = "1.15.2";
+export const APP_VERSION = "1.16.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

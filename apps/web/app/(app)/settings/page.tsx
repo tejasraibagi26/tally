@@ -4,6 +4,7 @@ import { User, Lock, Download, Link2, Wand2, Wallet, Mail, KeyRound, ChevronRigh
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { AccountForm } from "@/components/settings/AccountForm";
 import { PasswordForm } from "@/components/settings/PasswordForm";
 import { DangerZone } from "@/components/settings/DangerZone";
@@ -110,7 +111,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="max-w-[720px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-8">
-      <h1 className="text-2xl font-semibold text-text">Settings</h1>
+      <PageHeader title="Settings" />
 
       <div className="flex flex-col gap-3">
         <GroupLabel>Profile</GroupLabel>

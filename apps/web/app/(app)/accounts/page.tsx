@@ -5,6 +5,7 @@ import { requireUserId } from "@/lib/session";
 import { formatCents } from "@tally/core/money";
 import { cn } from "@/lib/cn";
 import { Card } from "@/components/ui/Card";
+import { PageHeader, SyncFreshness } from "@/components/ui/PageHeader";
 import { StatusBadge, type Status } from "@/components/ui/StatusBadge";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { LinkButton } from "@/components/plaid/LinkButton";
@@ -56,19 +57,20 @@ export default async function AccountsPage() {
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-baseline gap-3">
-          <h1 className="text-2xl font-semibold text-text">Accounts &amp; connections</h1>
-          <span className="text-[13.5px] text-text-3">
-            {accounts.length} account{accounts.length === 1 ? "" : "s"} · {items.length} institution
-            {items.length === 1 ? "" : "s"}
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          {items.length > 0 && <SyncButton products={["balances"]} label="Sync balances" loadingMessage="Refreshing account balances. This can take a moment." />}
-          <LinkButton mode="create" label="Add account" mock={MOCK_MODE} />
-        </div>
-      </div>
+      <PageHeader
+        title="Accounts & connections"
+        meta={[
+          `${accounts.length} account${accounts.length === 1 ? "" : "s"}`,
+          `${items.length} institution${items.length === 1 ? "" : "s"}`,
+          items.some((i) => i.lastSyncedAt) && <SyncFreshness key="sync" syncedAt={items.map((i) => i.lastSyncedAt)} />,
+        ]}
+        actions={
+          <>
+            {items.length > 0 && <SyncButton products={["balances"]} label="Sync balances" loadingMessage="Refreshing account balances. This can take a moment." />}
+            <LinkButton mode="create" label="Add account" mock={MOCK_MODE} />
+          </>
+        }
+      />
 
       <SyncFailureBanner />
       <SyncFailureToast />

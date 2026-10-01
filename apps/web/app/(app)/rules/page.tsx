@@ -4,6 +4,7 @@ import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { RuleForm } from "@/components/rules/RuleForm";
 import { RuleRow } from "@/components/rules/RuleRow";
 import { summarizeMatch, summarizeActions } from "@/lib/ruleSummary";
@@ -29,18 +30,19 @@ export default async function RulesPage() {
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-      <div className="flex items-baseline gap-3">
-        <h1 className="text-2xl font-semibold text-text">Rules</h1>
-        <span className="text-[13.5px] text-text-3">{rules.length} rule{rules.length === 1 ? "" : "s"}</span>
-      </div>
-
-      <Card>
-        <CardHeader title="New rule" />
-        <RuleForm
-          categories={groupedCategories}
-          accounts={accounts.map((a) => ({ id: a.id, name: `${accountDisplayName(a.name, a.nickname)} ····${a.mask ?? "----"}` }))}
-        />
-      </Card>
+      <PageHeader
+        title="Rules"
+        meta={[
+          `${rules.length} rule${rules.length === 1 ? "" : "s"}`,
+          rules.length > 0 && `${rules.filter((r) => r.enabled).length} enabled`,
+        ]}
+        actions={
+          <RuleForm
+            categories={groupedCategories}
+            accounts={accounts.map((a) => ({ id: a.id, name: `${accountDisplayName(a.name, a.nickname)} ····${a.mask ?? "----"}` }))}
+          />
+        }
+      />
 
       <Card>
         <CardHeader title="Existing rules" meta="Lower priority number runs first" />
@@ -50,7 +52,7 @@ export default async function RulesPage() {
               icon={Wand2}
               animation="wiggle"
               title="No rules yet"
-              description={'Create one above, or click "Always categorize this way" on any transaction to add one automatically.'}
+              description={'Use New rule, or click "Always categorize this way" on any transaction to add one automatically.'}
             />
           </div>
         ) : (

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { AmountInput, FormField, FormPanel, panelInputClass } from "@/components/ui/FormPanel";
 
 export interface BillAccountOption {
   id: string;
@@ -25,7 +26,7 @@ export interface BillCategoryOption {
  */
 export function AddBillForm({ accounts, categories }: { accounts: BillAccountOption[]; categories: BillCategoryOption[] }) {
   const router = useRouter();
-  const [adding, setAdding] = useState(false);
+  const [open, setOpen] = useState(false);
   const [description, setDescription] = useState("");
   const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
   const [categoryId, setCategoryId] = useState("");
@@ -35,6 +36,11 @@ export function AddBillForm({ accounts, categories }: { accounts: BillAccountOpt
   const [error, setError] = useState<string | null>(null);
 
   if (accounts.length === 0) return null;
+
+  function close() {
+    setOpen(false);
+    setError(null);
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -53,7 +59,7 @@ export function AddBillForm({ accounts, categories }: { accounts: BillAccountOpt
         setError(data.error ?? "Something went wrong");
         return;
       }
-      setAdding(false);
+      close();
       setDescription("");
       setAmountInput("");
       setDueDate("");
@@ -67,70 +73,59 @@ export function AddBillForm({ accounts, categories }: { accounts: BillAccountOpt
     }
   }
 
-  if (!adding) {
-    return (
-      <Button variant="secondary" size="sm" onClick={() => setAdding(true)}>
+  return (
+    <>
+      <Button size="sm" onClick={() => setOpen(true)}>
         + Add a bill
       </Button>
-    );
-  }
-
-  return (
-    <form onSubmit={submit} className="flex flex-col gap-3 p-3 rounded-control bg-surface-2 border border-border w-fit">
-      <div className="flex items-center gap-2 flex-wrap">
-        <input
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Rent"
-          className="w-40 h-9 rounded-control bg-surface border border-border-strong px-2 text-sm text-text"
-        />
-        <SearchableSelect
-          value={accountId}
-          onChange={setAccountId}
-          buttonPlaceholder="Choose account"
-          placeholder="Search accounts…"
-          className="w-56"
-          options={accounts.map((a) => ({ value: a.id, label: `${a.name} ····${a.mask ?? "----"}` }))}
-        />
-        <span className="text-text-3 text-sm">$</span>
-        <input
-          type="number"
-          step="0.01"
-          min="0"
-          placeholder="0.00"
-          value={amountInput}
-          onChange={(e) => setAmountInput(e.target.value)}
-          required
-          className="w-28 h-9 rounded-control bg-surface border border-border-strong px-2 text-sm text-text tabular"
-        />
-        <SearchableSelect
-          value={categoryId}
-          onChange={setCategoryId}
-          buttonPlaceholder="Category (optional)"
-          placeholder="Search categories…"
-          className="w-48"
-          options={[{ value: "", label: "Uncategorized" }, ...categories.map((c) => ({ value: c.id, label: c.name }))]}
-        />
-        <span className="text-text-3 text-sm">Next due</span>
-        <input
-          type="date"
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-          required
-          className="h-9 rounded-control bg-surface border border-border-strong px-2 text-sm text-text"
-        />
-      </div>
-
-      {error && <p className="text-sm text-negative">{error}</p>}
-
-      <div className="flex items-center gap-3">
-        <Button type="submit" size="sm" disabled={saving}>
-          {saving ? "Adding…" : "Add bill"}
-        </Button>
-        <button type="button" onClick={() => setAdding(false)} className="text-sm text-text-2">
-          Cancel
-        </button>
-      </div>
-    </form>
+      <FormPanel
+        open={open}
+        onClose={close}
+        title="Add a bill"
+        description="For a recurring charge Tally hasn't picked up on its own, like rent paid in lump sums."
+        onSubmit={submit}
+        submitLabel="Add bill"
+        submittingLabel="Adding…"
+        submitting={saving}
+        error={error}
+      >
+        <FormField label="Name">
+          <input
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Rent"
+            required
+            autoFocus
+            className={panelInputClass}
+          />
+        </FormField>
+        <FormField label="Amount">
+          <AmountInput value={amountInput} onChange={setAmountInput} />
+        </FormField>
+        <FormField label="Paid from">
+          <SearchableSelect
+            value={accountId}
+            onChange={setAccountId}
+            buttonPlaceholder="Choose account"
+            placeholder="Search accounts…"
+            className="w-full"
+            options={accounts.map((a) => ({ value: a.id, label: `${a.name} ····${a.mask ?? "----"}` }))}
+          />
+        </FormField>
+        <FormField label="Category">
+          <SearchableSelect
+            value={categoryId}
+            onChange={setCategoryId}
+            buttonPlaceholder="Category (optional)"
+            placeholder="Search categories…"
+            className="w-full"
+            options={[{ value: "", label: "Uncategorized" }, ...categories.map((c) => ({ value: c.id, label: c.name }))]}
+          />
+        </FormField>
+        <FormField label="Next due">
+          <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} required className={panelInputClass} />
+        </FormField>
+      </FormPanel>
+    </>
   );
 }
