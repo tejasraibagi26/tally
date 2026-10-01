@@ -78,6 +78,17 @@ export interface DeliveryResult {
   pushError?: string;
 }
 
+/**
+ * Merges delivery status into the event's payload (no column needed):
+ * an error message per channel until a retry succeeds, and how many phones
+ * a push reached. Read back by lib/alerts/history.ts.
+ */
+async function noteDelivery(id: string, set: Record<string, unknown>, clear: string[] = []): Promise<void> {
+  let expr = sql`coalesce(${schema.alertEvents.payload}, '{}'::jsonb) || ${JSON.stringify(set)}::jsonb`;
+  for (const key of clear) expr = sql`(${expr}) - ${key}`;
+  await db.update(schema.alertEvents).set({ payload: expr }).where(eq(schema.alertEvents.id, id));
+}
+
 /** Sends whatever channels are on and still unsent for this event. Never throws. */
 async function deliver(row: EventRow, prefs: AlertPreferences, now: Date): Promise<DeliveryResult> {
   const ch = prefs.channels[row.type];
@@ -95,10 +106,12 @@ async function deliver(row: EventRow, prefs: AlertPreferences, now: Date): Promi
         html: alertEmailHtml({ title: row.title, body: row.body, url: row.url ?? "/overview", appUrl, userId: row.userId }),
       });
       await db.update(schema.alertEvents).set({ emailSentAt: new Date() }).where(eq(schema.alertEvents.id, row.id));
+      if (payload.emailError) await noteDelivery(row.id, {}, ["emailError"]);
       result.emailSent = true;
     } catch (err) {
       console.error(`Alert email failed (event ${row.id})`, err);
       result.emailError = err instanceof Error ? err.message : String(err);
+      await noteDelivery(row.id, { emailError: result.emailError }).catch(() => {});
     }
   }
 
@@ -113,9 +126,11 @@ async function deliver(row: EventRow, prefs: AlertPreferences, now: Date): Promi
       // Marked sent even with no devices registered yet: a phone added later
       // shouldn't receive a backlog of old alerts.
       await db.update(schema.alertEvents).set({ pushSentAt: new Date() }).where(eq(schema.alertEvents.id, row.id));
+      await noteDelivery(row.id, { pushDevices: result.pushDevices }, ["pushError"]);
     } catch (err) {
       console.error(`Alert push failed (event ${row.id})`, err);
       result.pushError = err instanceof Error ? err.message : String(err);
+      await noteDelivery(row.id, { pushError: result.pushError }).catch(() => {});
     }
   }
   result.any = result.emailSent || (result.pushDevices ?? 0) > 0;

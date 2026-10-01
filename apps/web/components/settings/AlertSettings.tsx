@@ -41,6 +41,45 @@ function Switch({ checked, onChange, label, disabled }: { checked: boolean; onCh
   );
 }
 
+function Tag({ children, tone = "neutral", title }: { children: React.ReactNode; tone?: "neutral" | "muted" | "negative"; title?: string }) {
+  return (
+    <span
+      title={title}
+      className={cn(
+        "text-[11px] px-1.5 py-0.5 rounded whitespace-nowrap",
+        tone === "negative" ? "bg-negative-subtle text-negative" : tone === "muted" ? "bg-sunken text-text-3" : "bg-sunken text-text-2",
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
+function PushTag({ push }: { push: NonNullable<AlertHistoryItem["push"]> }) {
+  switch (push.status) {
+    case "sent":
+      return <Tag>Push</Tag>;
+    case "no_device":
+      return (
+        <Tag tone="muted" title="Push was on, but no phone was connected to receive it.">
+          No phone
+        </Tag>
+      );
+    case "failed":
+      return (
+        <Tag tone="negative" title={push.error}>
+          Push failed
+        </Tag>
+      );
+    case "scheduled":
+      return (
+        <Tag tone="muted" title="Held overnight; push alerts go out from 8 AM.">
+          {`Push at ${new Date(push.at!).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}`}
+        </Tag>
+      );
+  }
+}
+
 function relativeTime(iso: string): string {
   const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60_000);
   if (mins < 1) return "Just now";
@@ -238,13 +277,15 @@ export function AlertSettings({ initial, pushDevices, history: initialHistory }:
                   <span className="flex flex-col gap-0.5 min-w-0 flex-1">
                     <span className="text-[14px] text-text">{a.title}</span>
                     <span className="text-[13px] text-text-2">{a.body}</span>
+                    {a.email?.status === "failed" && <span className="text-xs text-negative">Email didn&apos;t send: {a.email.error}</span>}
+                    {a.push?.status === "failed" && <span className="text-xs text-negative">Push didn&apos;t send: {a.push.error}</span>}
                   </span>
                   <span className="flex flex-col items-end gap-1 flex-none">
                     <span className="text-xs text-text-3 tabular">{relativeTime(a.createdAt)}</span>
-                    <span className="flex gap-1">
-                      {a.test && <span className="text-[11px] px-1.5 py-0.5 rounded bg-sunken text-text-2">Test</span>}
-                      {a.push && <span className="text-[11px] px-1.5 py-0.5 rounded bg-sunken text-text-2">Push</span>}
-                      {a.email && <span className="text-[11px] px-1.5 py-0.5 rounded bg-sunken text-text-2">Email</span>}
+                    <span className="flex flex-wrap justify-end gap-1">
+                      {a.test && <Tag>Test</Tag>}
+                      {a.push && <PushTag push={a.push} />}
+                      {a.email && (a.email.status === "sent" ? <Tag>Email</Tag> : <Tag tone="negative" title={a.email.error}>Email failed</Tag>)}
                     </span>
                   </span>
                 </>
