@@ -78,8 +78,12 @@ import Constants from "expo-constants";
  * function as web and the recap email (@tally/core/subscriptionMath), so
  * a cancelled-but-manually-dated bill counts the same everywhere, and
  * manually added bills (rent) are left out of the total.
+ * 1.14.0 adds a cold-start loading screen (components/BootSplash.tsx): the
+ * tally mark drawing itself stroke by stroke, held until Overview's first
+ * data lands (max 6s) instead of opening on skeletons. The native splash
+ * images are now blank so the mark isn't shown twice (needs a new build).
  */
-export const APP_VERSION = "1.13.1";
+export const APP_VERSION = "1.14.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.14.0",
+    date: "2026-10-03",
+    changes: [{ kind: "new", text: "A new opening screen: the Tally mark draws itself while your accounts load, so the app opens with your numbers ready." }],
+  },
+  {
     version: "1.13.1",
     date: "2026-10-01",
     changes: [
