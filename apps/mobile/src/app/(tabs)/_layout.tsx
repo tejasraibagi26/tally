@@ -1,60 +1,20 @@
-import { Platform, Pressable } from "react-native";
+import { Platform } from "react-native";
 import { Tabs } from "expo-router";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { House, ArrowLeftRight, PiggyBank, Landmark } from "lucide-react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { AndroidTabBar } from "@/components/AndroidTabBar";
 import { useThemeColors } from "@/theme/useThemeColors";
 
 const { Icon, Label } = NativeTabs.Trigger;
 
-// No ripple at all instead of react-navigation's default black circle on
-// tap -- there's no prop for this on BottomTabNavigationOptions itself, so
-// this replaces the tab bar's button entirely with a plain Pressable that
-// disables the Android ripple outright.
-function NoRippleTabButton({ children, style, ...rest }: any) {
-  return (
-    <Pressable
-      {...rest}
-      style={[{ flex: 1, alignItems: "center", justifyContent: "center" }, style]}
-      android_ripple={null}
-    >
-      {children}
-    </Pressable>
-  );
-}
-
-// iOS's dev-client build already has expo-router's native tab bar compiled
-// in (UITabBarController -- the floating "Liquid Glass" pill on iOS 26+),
-// and it looked right there. Android's native Material 3 NavigationBar
-// looked wrong even after tinting the selection indicator (small icons,
-// unfamiliar proportions vs. the rest of the app) -- reverted to the
-// JS-rendered bar there, fixing the original black-ripple complaint
-// properly this time via NoRippleTabButton instead of accepting the default.
+// iOS keeps the system tab bar (UITabBarController -- the floating "Liquid
+// Glass" pill on iOS 26+). Android's native Material 3 NavigationBar looked
+// wrong (small icons, unfamiliar proportions), and react-navigation's stock
+// JS bar read as flat and generic, so Android renders its own floating bar
+// that matches the iOS pill: components/AndroidTabBar.tsx (mobile v1.15.0).
 function AndroidTabsLayout() {
-  const colors = useThemeColors();
-  const insets = useSafeAreaInsets();
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.brand,
-        tabBarInactiveTintColor: colors["text-3"],
-        tabBarButton: (props) => <NoRippleTabButton {...props} />,
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopWidth: 1,
-          borderTopColor: colors.border,
-          // A fixed height/paddingBottom opts the tab bar out of
-          // react-navigation's own safe-area handling, so the bottom inset
-          // (Android's gesture-nav bar) has to be added back in by hand --
-          // without it, the gesture bar sits right on top of the tab labels.
-          height: 62 + insets.bottom,
-          paddingBottom: Math.max(insets.bottom, 10),
-          paddingTop: 8,
-        },
-        tabBarLabelStyle: { fontSize: 10.5, fontFamily: "Inter" },
-      }}
-    >
+    <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <AndroidTabBar {...props} />}>
       <Tabs.Screen name="index" options={{ title: "Overview", tabBarIcon: ({ color, size }) => <House color={color} size={size} strokeWidth={1.9} /> }} />
       <Tabs.Screen
         name="transactions"

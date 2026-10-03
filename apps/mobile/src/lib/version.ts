@@ -82,8 +82,16 @@ import Constants from "expo-constants";
  * tally mark drawing itself stroke by stroke, held until Overview's first
  * data lands (max 6s) instead of opening on skeletons. The native splash
  * images are now blank so the mark isn't shown twice (needs a new build).
+ * 1.14.1 stops Face ID re-prompting on the app switcher, Control Center or
+ * a quick minimize: it's asked on launch, or after 5+ minutes in the
+ * background. In between, a plain cover (PrivacyCover) hides balances from
+ * the app switcher snapshot instead.
+ * 1.15.0 replaces Android's stock tab bar with a custom floating one
+ * (components/AndroidTabBar.tsx) matching the iOS pill: a brand-tinted
+ * highlight springs between tabs; hidden with the keyboard and on
+ * transaction detail. Tab screens pad for it via useTabBarBottomClearance.
  */
-export const APP_VERSION = "1.14.0";
+export const APP_VERSION = "1.15.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

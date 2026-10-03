@@ -1,5 +1,6 @@
 import { Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ANDROID_TAB_BAR_GAP, ANDROID_TAB_BAR_HEIGHT } from "@/components/AndroidTabBar";
 
 // NativeTabsView.ios embeds each tab's content as a child of the real
 // UITabBarController, so UIKit registers the floating "Liquid Glass" pill's
@@ -10,10 +11,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 // +60 buffer on top of insets.bottom left a large dead zone above the
 // pill; dropping insets.bottom entirely for a flat 24 undershot and left
 // content clipped behind it. insets.bottom alone is the actual pill
-// footprint.) Android's JS tab bar already reserves real layout height for
-// itself (see (tabs)/_layout.tsx's tabBarStyle.height), so no extra
-// clearance is needed there.
+// footprint.) Android's custom bar (components/AndroidTabBar.tsx) floats
+// and reserves no layout space, so its full footprint is added here.
 export function useTabBarBottomClearance() {
   const insets = useSafeAreaInsets();
-  return Platform.OS === "ios" ? insets.bottom : 0;
+  if (Platform.OS === "ios") return insets.bottom;
+  return insets.bottom + ANDROID_TAB_BAR_GAP + ANDROID_TAB_BAR_HEIGHT;
 }

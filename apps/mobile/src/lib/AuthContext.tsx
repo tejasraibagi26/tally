@@ -32,6 +32,10 @@ interface AuthContextValue {
   // isLocked gates a third Stack.Protected branch in _layout.tsx (the lock
   // screen) whenever it's true and status is "authenticated" — see there.
   isLocked: boolean;
+  // True while the app isn't in the foreground with the lock enabled, so
+  // _layout.tsx can cover the screen (app switcher snapshot) without
+  // demanding Face ID on return.
+  isCovered: boolean;
   biometricLockEnabled: boolean;
   setBiometricLockEnabled: (enabled: boolean) => Promise<void>;
   unlock: () => Promise<boolean>;
@@ -41,10 +45,16 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+// Back from the background after this long counts as opening the app again
+// (iOS can keep it suspended for hours), so Face ID is asked.
+const RELOCK_AFTER_MS = 5 * 60 * 1000;
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>("loading");
   const [user, setUser] = useState<User | null>(null);
   const [isLocked, setIsLocked] = useState(false);
+  const [isCovered, setIsCovered] = useState(false);
+  const backgroundedAtRef = useRef<number | null>(null);
   const [biometricLockEnabled, setBiometricLockEnabledState] = useState(false);
   // AppState's listener is registered once (empty deps below) but needs the
   // latest status/biometricLockEnabled on every change event — refs avoid
@@ -101,15 +111,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
   }, []);
 
-  // Re-lock on every backgrounding while authenticated (not just relaunch).
-  // Deliberately does NOT auto-lock as a side effect of biometricLockEnabled
-  // itself changing — flipping the Settings switch on shouldn't instantly
-  // lock the user out of the session they're actively in.
+  // Face ID is asked on app open: a cold launch (bootstrap above), or coming
+  // back after RELOCK_AFTER_MS in the background, which is effectively
+  // reopening it. Never on "inactive" alone -- on iOS that's the app
+  // switcher, Control Center, a notification banner pulled down, or the Face
+  // ID prompt itself, and locking on it re-prompted constantly (v1.14.1).
+  // While not active, the screen is only covered (isCovered) so the app
+  // switcher snapshot doesn't show balances. Deliberately does NOT auto-lock
+  // as a side effect of biometricLockEnabled itself changing -- flipping the
+  // Settings switch on shouldn't lock the user out of the session they're in.
   useEffect(() => {
     const sub = AppState.addEventListener("change", (next) => {
-      if (next !== "active" && statusRef.current === "authenticated" && lockEnabledRef.current) {
-        setIsLocked(true);
+      const guarded = statusRef.current === "authenticated" && lockEnabledRef.current;
+      if (next === "active") {
+        const awayMs = backgroundedAtRef.current != null ? Date.now() - backgroundedAtRef.current : 0;
+        backgroundedAtRef.current = null;
+        // Same handler, so React batches these: the cover only drops in the
+        // same render the lock screen (if any) comes up -- no flash of data.
+        if (guarded && awayMs >= RELOCK_AFTER_MS) setIsLocked(true);
+        setIsCovered(false);
+        return;
       }
+      if (next === "background" && backgroundedAtRef.current == null) backgroundedAtRef.current = Date.now();
+      if (guarded) setIsCovered(true);
     });
     return () => sub.remove();
   }, []);
@@ -119,6 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       status,
       user,
       isLocked,
+      isCovered,
       biometricLockEnabled,
       async setBiometricLockEnabled(enabled: boolean) {
         await storeBiometricLockEnabled(enabled);
@@ -156,7 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setIsLocked(false);
       },
     }),
-    [status, user, isLocked, biometricLockEnabled],
+    [status, user, isLocked, isCovered, biometricLockEnabled],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

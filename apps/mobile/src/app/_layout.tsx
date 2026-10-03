@@ -18,7 +18,7 @@ import { getStoredAppearanceMode } from "@/theme/appearance";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useResponsiveFontScale } from "@/theme/responsiveFont";
 import { moreSheetDetent } from "@/lib/moreSheet";
-import { BootSplash } from "@/components/BootSplash";
+import { BootSplash, PrivacyCover } from "@/components/BootSplash";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -56,7 +56,7 @@ function useInitialDataSettled(active: boolean): boolean {
 }
 
 function RootNavigator() {
-  const { status, isLocked } = useAuth();
+  const { status, isLocked, isCovered } = useAuth();
   const [fontsLoaded] = useFonts(fontsToLoad);
   const { setColorScheme } = useColorScheme();
   const colors = useThemeColors();
@@ -192,6 +192,7 @@ function RootNavigator() {
         <View className="flex-1 bg-canvas" />
       )}
       {bootSplash}
+      {isCovered && <PrivacyCover />}
     </>
   );
 }

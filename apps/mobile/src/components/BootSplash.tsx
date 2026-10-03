@@ -175,3 +175,22 @@ export function BootSplash({ ready, showWordmark, onDone }: { ready: boolean; sh
     </Animated.View>
   );
 }
+
+/**
+ * The finished mark on the splash background, no animation: covers the app
+ * while it isn't in the foreground (AuthContext's isCovered) so the iOS app
+ * switcher snapshot doesn't show balances, without asking for Face ID.
+ */
+export function PrivacyCover() {
+  const scheme = useSystemColorScheme() === "dark" ? "dark" : "light";
+  const palette = PALETTE[scheme];
+  return (
+    <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: palette.bg, alignItems: "center", justifyContent: "center" }]} pointerEvents="none">
+      <Svg width={LOGO_SIZE} height={LOGO_SIZE} viewBox="0 0 24 24" fill="none">
+        {STROKES.map((s, i) => (
+          <Line key={i} {...s} stroke={palette.ink} strokeWidth={STROKE_WIDTH} strokeLinecap="round" />
+        ))}
+      </Svg>
+    </Animated.View>
+  );
+}
