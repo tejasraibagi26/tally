@@ -39,6 +39,7 @@ function TabItem({
 }) {
   const colors = useThemeColors();
   const pop = useSharedValue(1);
+  const [pressed, setPressed] = useState(false);
 
   useEffect(() => {
     if (focused) pop.value = withSequence(withTiming(0.86, { duration: 90 }), withSpring(1, SPRING));
@@ -48,21 +49,28 @@ function TabItem({
   const iconStyle = useAnimatedStyle(() => ({ transform: [{ scale: pop.value }] }));
   const color = focused ? colors.brand : colors["text-2"];
 
+  // Plain style objects only: NativeWind's interop wrapper on Pressable drops
+  // a function `style`, which collapsed every tab to its content width
+  // (v1.15.1). The pressed fade is tracked in state instead.
   return (
-    <Pressable
-      onPress={onPress}
-      onLongPress={onLongPress}
-      android_ripple={null}
-      accessibilityRole="tab"
-      accessibilityState={{ selected: focused }}
-      accessibilityLabel={accessibilityLabel ?? label}
-      style={({ pressed }) => ({ flex: 1, alignItems: "center", justifyContent: "center", gap: 3, opacity: pressed && !focused ? 0.6 : 1 })}
-    >
-      <Animated.View style={iconStyle}>{icon(color)}</Animated.View>
-      <Text numberOfLines={1} style={{ fontFamily: focused ? "Inter_SemiBold" : "Inter_Medium", fontSize: 11, color }}>
-        {label}
-      </Text>
-    </Pressable>
+    <View style={{ flex: 1 }}>
+      <Pressable
+        onPress={onPress}
+        onLongPress={onLongPress}
+        onPressIn={() => setPressed(true)}
+        onPressOut={() => setPressed(false)}
+        android_ripple={null}
+        accessibilityRole="tab"
+        accessibilityState={{ selected: focused }}
+        accessibilityLabel={accessibilityLabel ?? label}
+        style={{ flex: 1, alignItems: "center", justifyContent: "center", opacity: pressed && !focused ? 0.6 : 1 }}
+      >
+        <Animated.View style={iconStyle}>{icon(color)}</Animated.View>
+        <Text numberOfLines={1} style={{ marginTop: 3, fontFamily: focused ? "Inter_SemiBold" : "Inter_Medium", fontSize: 11, color }}>
+          {label}
+        </Text>
+      </Pressable>
+    </View>
   );
 }
 

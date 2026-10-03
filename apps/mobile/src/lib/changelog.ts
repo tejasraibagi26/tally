@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.15.1",
+    date: "2026-10-03",
+    changes: [{ kind: "fixed", text: "Android: the tab bar's tabs are evenly spaced again, with the highlight under the tab you're on." }],
+  },
+  {
     version: "1.15.0",
     date: "2026-10-03",
     changes: [{ kind: "improved", text: "Android: a new floating tab bar, with a highlight that slides to the tab you pick." }],

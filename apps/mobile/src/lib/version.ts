@@ -90,8 +90,10 @@ import Constants from "expo-constants";
  * (components/AndroidTabBar.tsx) matching the iOS pill: a brand-tinted
  * highlight springs between tabs; hidden with the keyboard and on
  * transaction detail. Tab screens pad for it via useTabBarBottomClearance.
+ * 1.15.1 fixes that bar's tabs bunching up on the left: NativeWind's
+ * Pressable wrapper drops a function `style`, so the flex:1 never applied.
  */
-export const APP_VERSION = "1.15.0";
+export const APP_VERSION = "1.15.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
