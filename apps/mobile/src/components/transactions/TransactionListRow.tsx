@@ -103,11 +103,13 @@ export function TransactionListRow({
             <Text className="font-ui-medium flex-shrink" style={{ fontSize: rf(14.5), color: v.amountTone === "muted" ? colors["text-2"] : colors.text }} numberOfLines={1}>
               {display}
             </Text>
-            {v.mark && (
-              <Text className="font-ui text-text-3" style={{ fontSize: rf(11), fontStyle: v.mark.kind === "pending" ? "italic" : "normal" }}>
-                {v.mark.kind === "pending" ? "pending" : `· ${v.mark.text}`}
-              </Text>
-            )}
+            {v.mark?.kind === "pending" ? (
+              <View className="rounded-full px-2 py-0.5" style={{ backgroundColor: colors["warning-subtle"] }}>
+                <Text className="font-ui-medium" style={{ fontSize: rf(10.5), color: colors.warning }}>Pending</Text>
+              </View>
+            ) : v.mark ? (
+              <Text className="font-ui text-text-3" style={{ fontSize: rf(11) }}>{`· ${v.mark.text}`}</Text>
+            ) : null}
           </View>
           <View className="flex-row items-center gap-2">
             {item.isTransfer ? (
