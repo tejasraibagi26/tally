@@ -112,6 +112,14 @@ export function Sheet({
     opacity: interpolate(translateY.value, [0, SCREEN_HEIGHT * 0.6], [0.42, 0], Extrapolation.CLAMP),
   }));
 
+  // Every sheet's content already ends with its own bottom padding (a
+  // footer's 24px, a list's trailing padding), so adding iOS's full
+  // home-indicator inset (34pt) on top left a tall empty band under the
+  // last button. On iOS only the part of the inset not already covered by
+  // that padding is added -- the indicator sits in the bottom ~13pt, well
+  // inside it. Android keeps the full inset (gesture/nav bar).
+  const bottomPad = Platform.OS === "ios" ? Math.max(8, insets.bottom - 20) : insets.bottom;
+
   if (!mounted) return null;
 
   return (
@@ -131,7 +139,7 @@ export function Sheet({
         >
           <Animated.View
             className="bg-raised rounded-t-panel overflow-hidden"
-            style={[{ maxHeight, paddingBottom: keyboardVisible ? 0 : insets.bottom }, sheetStyle]}
+            style={[{ maxHeight, paddingBottom: keyboardVisible ? 0 : bottomPad }, sheetStyle]}
           >
             <GestureDetector gesture={panGesture}>
               <View style={{ alignItems: "center", paddingTop: 8, paddingBottom: 4 }} hitSlop={{ top: 12, bottom: 12, left: 48, right: 48 }}>

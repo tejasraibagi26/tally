@@ -140,8 +140,11 @@ import Constants from "expo-constants";
  * inflation and account choice, the "to retire at 55" target when out of
  * reach, and an empty state with "Start from $0". Replaces the
  * gifted-charts projection and the Save button.
+ * 1.20.1 trims the empty band at the bottom of every bottom sheet on iOS:
+ * Sheet.tsx added the full 34pt home-indicator inset on top of each
+ * sheet's own trailing padding; iOS now adds only insets.bottom − 20.
  */
-export const APP_VERSION = "1.20.0";
+export const APP_VERSION = "1.20.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
