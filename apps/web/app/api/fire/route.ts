@@ -23,6 +23,9 @@ const putSchema = z.object({
   expectedReturn: z.coerce.number().min(-0.05).max(0.15),
   annualExpensesOverride: z.number().int().min(0).nullable(),
   monthlyContributionOverride: z.number().int().min(0).nullable(),
+  // Optional so older mobile builds (which don't send them) keep working.
+  inflation: z.coerce.number().min(0).max(0.1).optional(),
+  excludedAccountIds: z.array(z.string().uuid()).max(100).optional(),
 });
 
 export async function PUT(req: Request) {
@@ -37,7 +40,11 @@ export async function PUT(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid request", issues: parsed.error.issues }, { status: 400 });
   }
-  const { swr, expectedReturn, annualExpensesOverride, monthlyContributionOverride } = parsed.data;
+  const { swr, expectedReturn, annualExpensesOverride, monthlyContributionOverride, inflation, excludedAccountIds } = parsed.data;
+  const extra = {
+    ...(inflation !== undefined ? { inflation: inflation.toString() } : {}),
+    ...(excludedAccountIds !== undefined ? { excludedAccountIds } : {}),
+  };
 
   const [settings] = await db
     .insert(schema.fireSettings)
@@ -47,11 +54,12 @@ export async function PUT(req: Request) {
       expectedReturn: expectedReturn.toString(),
       annualExpensesOverride,
       monthlyContributionOverride,
+      ...extra,
       updatedAt: new Date(),
     })
     .onConflictDoUpdate({
       target: schema.fireSettings.userId,
-      set: { swr: swr.toString(), expectedReturn: expectedReturn.toString(), annualExpensesOverride, monthlyContributionOverride, updatedAt: new Date() },
+      set: { swr: swr.toString(), expectedReturn: expectedReturn.toString(), annualExpensesOverride, monthlyContributionOverride, ...extra, updatedAt: new Date() },
     })
     .returning();
 

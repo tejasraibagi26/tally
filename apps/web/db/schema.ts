@@ -523,6 +523,11 @@ export const fireSettings = pgTable("fire_settings", {
   expectedReturn: numeric("expected_return", { precision: 5, scale: 4 }).notNull(),
   annualExpensesOverride: bigint("annual_expenses_override", { mode: "number" }),
   monthlyContributionOverride: bigint("monthly_contribution_override", { mode: "number" }),
+  // Subtracted from expectedReturn (the market return) so the projection is
+  // in today's dollars, matching annual expenses.
+  inflation: numeric("inflation", { precision: 5, scale: 4 }).notNull().default("0.0200"),
+  // Investment accounts left out of "invested today" (e.g. an FHSA saved for a house).
+  excludedAccountIds: jsonb("excluded_account_ids").$type<string[]>().notNull().default(sql`'[]'::jsonb`),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

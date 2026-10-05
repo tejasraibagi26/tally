@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.21.0",
+    date: "2026-10-05",
+    changes: [
+      { kind: "improved", text: "Early retirement redesigned: it leads with the age and year you could retire, with a clearer chart showing when you reach your target." },
+      { kind: "new", text: "See what each change is worth in years (save $250 more a month, spend less, different returns) and the milestones on the way, like Coast FIRE." },
+      { kind: "improved", text: "The plan now accounts for inflation, so the date is in today's dollars and no longer comes out a few years too early." },
+      { kind: "fixed", text: "Accounts in US dollars are converted to CAD before they count toward what you've invested. You can also leave accounts out, like an FHSA saved for a house." },
+      { kind: "improved", text: "Changes save as you go. No more Save button." },
+    ],
+  },
+  {
     version: "1.20.0",
     date: "2026-10-05",
     changes: [

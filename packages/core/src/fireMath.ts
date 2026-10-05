@@ -101,3 +101,102 @@ export function projectionSeries({ currentValue, monthlyContribution, annualRetu
   }
   return points;
 }
+
+/**
+ * Return after inflation (Fisher): (1 + market) / (1 + inflation) − 1.
+ * Spending is in today's dollars, so the projection must grow in today's
+ * dollars too -- mixing a nominal return with today's spending overstates
+ * progress by years.
+ */
+export function realReturn(marketReturn: number, inflation: number): number {
+  return (1 + marketReturn) / (1 + inflation) - 1;
+}
+
+/** Monthly saving needed to grow `currentValue` to `targetValue` in `years` at `annualReturnRate`; 0 if already enough. */
+export function requiredMonthlySaving(currentValue: number, targetValue: number, annualReturnRate: number, years: number): number {
+  const months = Math.round(years * 12);
+  if (months <= 0) return Math.max(0, targetValue - currentValue);
+  const r = annualReturnRate / 12;
+  const grown = r === 0 ? currentValue : currentValue * Math.pow(1 + r, months);
+  const gap = targetValue - grown;
+  if (gap <= 0) return 0;
+  return r === 0 ? gap / months : (gap * r) / (Math.pow(1 + r, months) - 1);
+}
+
+export interface FirePlanInput {
+  currentValue: number;
+  monthlyContribution: number;
+  /** After inflation. */
+  annualReturnRate: number;
+  annualExpenses: number;
+  swr: number;
+}
+
+export interface Milestone {
+  key: "p25" | "p50" | "p75" | "lean" | "coast" | "fire";
+  label: string;
+  /** Cents. */
+  value: number;
+  /** Years from now; 0 when reached, null when unreachable. */
+  years: number | null;
+  reached: boolean;
+  detail?: string;
+}
+
+/** Spending fraction used for "Lean FIRE". */
+const LEAN_SHARE = 0.75;
+/** Age Coast FIRE assumes you'd retire by if you stopped saving. */
+export const COAST_AGE = 65;
+
+/**
+ * Checkpoints on the way, soonest first: 25/50/75% of the target, Lean
+ * FIRE (75% of spending), Coast FIRE (enough today to reach the target by
+ * 65 with no more saving -- only with a known age), and FIRE itself.
+ */
+export function fireMilestones(p: FirePlanInput, currentAge: number | null): Milestone[] {
+  const target = fireNumber(p.annualExpenses, p.swr);
+  const when = (value: number) => {
+    const r = yearsToFire({ currentValue: p.currentValue, monthlyContribution: p.monthlyContribution, annualReturnRate: p.annualReturnRate, targetValue: value });
+    return { years: r.alreadyThere ? 0 : r.years, reached: r.alreadyThere };
+  };
+  const list: Milestone[] = [
+    { key: "p25", label: "25%", value: target * 0.25, ...when(target * 0.25) },
+    { key: "p50", label: "50%", value: target * 0.5, ...when(target * 0.5) },
+    { key: "p75", label: "75%", value: target * 0.75, ...when(target * 0.75) },
+    { key: "lean", label: "Lean FIRE", value: target * LEAN_SHARE, detail: `${Math.round(LEAN_SHARE * 100)}% of your spending`, ...when(target * LEAN_SHARE) },
+    { key: "fire", label: "FIRE", value: target, ...when(target) },
+  ];
+  if (currentAge != null && currentAge < COAST_AGE && p.annualReturnRate > -1) {
+    const coast = target / Math.pow(1 + p.annualReturnRate, COAST_AGE - currentAge);
+    list.push({ key: "coast", label: "Coast FIRE", value: coast, detail: `Stop saving, still retire at ${COAST_AGE}`, ...when(coast) });
+  }
+  // At a 75% Lean share, "75%" and Lean FIRE are the same amount; keep Lean.
+  return list
+    .filter((m) => !(m.key === "p75" && LEAN_SHARE === 0.75))
+    .sort((a, b) => (a.years ?? Infinity) - (b.years ?? Infinity));
+}
+
+export interface WhatIf {
+  label: string;
+  /** Positive = sooner, negative = later; null when either side is unreachable. */
+  yearsSooner: number | null;
+}
+
+/** How much each lever moves the date, in years. */
+export function fireWhatIfs(p: FirePlanInput): WhatIf[] {
+  const years = (q: FirePlanInput) => {
+    const r = yearsToFire({ currentValue: q.currentValue, monthlyContribution: q.monthlyContribution, annualReturnRate: q.annualReturnRate, targetValue: fireNumber(q.annualExpenses, q.swr) });
+    return r.alreadyThere ? 0 : r.years;
+  };
+  const base = years(p);
+  const delta = (q: FirePlanInput) => {
+    const y = years(q);
+    return base == null || y == null ? null : base - y;
+  };
+  return [
+    { label: "Save $250 more a month", yearsSooner: delta({ ...p, monthlyContribution: p.monthlyContribution + 25_000 }) },
+    { label: "Spend $2,000 less a year", yearsSooner: delta({ ...p, annualExpenses: Math.max(0, p.annualExpenses - 200_000) }) },
+    { label: "Returns 1% lower", yearsSooner: delta({ ...p, annualReturnRate: p.annualReturnRate - 0.01 }) },
+    { label: "Withdraw at 3.5%", yearsSooner: p.swr === 0.035 ? null : delta({ ...p, swr: 0.035 }) },
+  ];
+}

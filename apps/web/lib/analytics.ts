@@ -93,7 +93,7 @@ export async function cashFlowTrend(userId: string, months = 13): Promise<CashFl
  * updating toward the real 12-month total as more actual months accumulate
  * and fewer need substituting.
  */
-export async function trailingAnnualCashFlowEstimate(userId: string, months = 12): Promise<{ income: number; expenses: number }> {
+export async function trailingAnnualCashFlowEstimate(userId: string, months = 12): Promise<{ income: number; expenses: number; coveredMonths: number }> {
   const trend = await cashFlowTrend(userId, months);
 
   const [earliest] = await db
@@ -115,7 +115,9 @@ export async function trailingAnnualCashFlowEstimate(userId: string, months = 12
     income += isCovered ? m.income : highestIncome;
     expenses += isCovered ? m.spend : highestSpend;
   }
-  return { income, expenses };
+  // How many of the months are real data (the rest are filled in above) --
+  // the FIRE planner says when its spending figure is an estimate.
+  return { income, expenses, coveredMonths: covered.length };
 }
 
 export interface BreakdownRow {

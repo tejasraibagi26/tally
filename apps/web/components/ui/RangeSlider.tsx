@@ -7,7 +7,7 @@ import { cn } from "@/lib/cn";
  * visibly broken rather than a clean two-tone bar. Fully custom-drawing the
  * track (this component) sidesteps native rendering entirely, matching the
  * solid `bg-sunken`/`bg-brand` progress bar used elsewhere (e.g.
- * FireCalculator's FIRE-number bar).
+ * FirePlanner's levers).
  *
  * The fill itself is a `linear-gradient` on `::-webkit-slider-runnable-track`
  * (Firefox instead gets `::-moz-range-progress`, which clips to the value

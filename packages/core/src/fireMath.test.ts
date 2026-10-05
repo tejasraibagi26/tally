@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { fireNumber, fireProgressPct, yearsToFire, projectionSeries, ageAsOf, fireAgeAndYear } from "./fireMath";
+import { fireNumber, fireProgressPct, yearsToFire, projectionSeries, ageAsOf, fireAgeAndYear, realReturn, requiredMonthlySaving, fireMilestones, fireWhatIfs } from "./fireMath";
 
 describe("ageAsOf", () => {
   it("counts a full year once the birthday has passed this year", () => {
@@ -158,5 +158,37 @@ describe("projectionSeries", () => {
   it("matches the linear case at 0% return", () => {
     const points = projectionSeries({ currentValue: 1_000_000, monthlyContribution: 10_000, annualReturnRate: 0, horizonYears: 3 });
     expect(points[3]!.projectedValue).toBe(1_000_000 + 10_000 * 36);
+  });
+});
+
+describe("redesign helpers", () => {
+  const plan = { currentValue: 8_740_000, monthlyContribution: 250_000, annualReturnRate: 0.05, annualExpenses: 4_800_000, swr: 0.04 };
+
+  it("computes the return after inflation", () => {
+    expect(realReturn(0.07, 0.02)).toBeCloseTo(0.04902, 4);
+  });
+
+  it("solves the saving needed by a date", () => {
+    expect(requiredMonthlySaving(8_740_000, 120_000_000, 0, 23)).toBeCloseTo((120_000_000 - 8_740_000) / 276, 0);
+    expect(requiredMonthlySaving(200_000_000, 120_000_000, 0.05, 10)).toBe(0);
+    const pmt = requiredMonthlySaving(8_740_000, 120_000_000, 0.05, 19.3);
+    expect(pmt).toBeGreaterThan(240_000);
+    expect(pmt).toBeLessThan(260_000);
+  });
+
+  it("lists milestones soonest first, with Coast FIRE only when age is known", () => {
+    const m = fireMilestones(plan, 32);
+    expect(m.map((x) => x.key)).toEqual(["coast", "p25", "p50", "lean", "fire"]);
+    expect(m.find((x) => x.key === "fire")!.years).toBeCloseTo(19.3, 1);
+    expect(m.find((x) => x.key === "coast")!.value).toBeCloseTo(23_984_700, -4);
+    expect(fireMilestones(plan, null).some((x) => x.key === "coast")).toBe(false);
+  });
+
+  it("puts each what-if in years", () => {
+    const w = fireWhatIfs(plan);
+    expect(w[0]!.yearsSooner).toBeCloseTo(1.0, 1);
+    expect(w[1]!.yearsSooner).toBeCloseTo(0.6, 1);
+    expect(w[2]!.yearsSooner).toBeCloseTo(-1.9, 1);
+    expect(w[3]!.yearsSooner).toBeCloseTo(-1.8, 1);
   });
 });

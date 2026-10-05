@@ -123,8 +123,17 @@
  * Esc), a "To review" filter (?review=1), and "Review N": a one-at-a-time
  * queue in a side panel (GET /api/transactions/review) with suggestions
  * from the merchant's history and "Always use … for <merchant>" rules.
+ * 1.21.0 redesigns Early retirement (components/fire/FirePlanner.tsx): the
+ * answer first (age and year), a projection chart with the target line,
+ * a ±1% return band and the crossing labeled, what-ifs in years,
+ * milestones (25/50%, Lean, Coast, FIRE), and levers that autosave --
+ * now including inflation (the projection uses the return after
+ * inflation; @tally/core/fireMath realReturn) and a choice of which
+ * investment accounts count. "Invested today" comes from lib/fire.ts,
+ * converted to CAD like Investments (it summed raw balances), and the
+ * monthly recap uses the same inputs. Needs migration 0022.
  */
-export const APP_VERSION = "1.20.0";
+export const APP_VERSION = "1.21.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

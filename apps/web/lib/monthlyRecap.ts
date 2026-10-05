@@ -1,11 +1,12 @@
 import { and, eq, inArray, isNull } from "drizzle-orm";
 import { isActiveExpenseStream, subscriptionsMonthlyTotal } from "@tally/core/subscriptionMath";
 import { db, schema } from "@/db";
-import { monthTotals, categoryBreakdown, cashFlowTrend, trailingAnnualCashFlowEstimate, type BreakdownRow } from "@/lib/analytics";
+import { monthTotals, categoryBreakdown, cashFlowTrend, type BreakdownRow } from "@/lib/analytics";
 import { getBudgetsForMonth } from "@/lib/budgets";
 import { netWorthTrend } from "@/lib/networth";
 import { monthRange, shiftMonth, monthLastDay } from "@tally/core/budgetMath";
-import { fireNumber, fireProgressPct, yearsToFire, ageAsOf, fireAgeAndYear } from "@tally/core/fireMath";
+import { fireNumber, fireProgressPct, yearsToFire, ageAsOf, fireAgeAndYear, realReturn } from "@tally/core/fireMath";
+import { fireInputs } from "@/lib/fire";
 import { formatPercent } from "@tally/core/money";
 
 // Matches CategorySpendBar.tsx's convention: color by rank position, not the
@@ -234,19 +235,16 @@ async function detectPriceIncrease(
 async function computeFire(userId: string, birthDate: string | null, priorYearsToFire: number | null): Promise<FireRecap | null> {
   if (!birthDate) return null;
 
-  const [fireSettingsRow] = await db.select().from(schema.fireSettings).where(eq(schema.fireSettings.userId, userId)).limit(1);
+  // Same inputs and real-return math as the FIRE page (lib/fire.ts), so the
+  // recap's "N years" matches what the planner shows.
+  const inputs = await fireInputs(userId);
+  const fireSettingsRow = inputs.settings;
   if (!fireSettingsRow) return null;
-
-  const accounts = await db.query.accounts.findMany({ where: eq(schema.accounts.userId, userId) });
-  const investableNetWorth = accounts.filter((a) => a.type === "investment").reduce((sum, a) => sum + (a.currentBalance ?? 0), 0);
-
-  const { income: totalIncome, expenses: defaultAnnualExpenses } = await trailingAnnualCashFlowEstimate(userId, 12);
-  const defaultMonthlyContribution = Math.max(0, Math.round((totalIncome - defaultAnnualExpenses) / 12));
-
-  const annualExpenses = fireSettingsRow.annualExpensesOverride ?? defaultAnnualExpenses;
-  const monthlyContribution = fireSettingsRow.monthlyContributionOverride ?? defaultMonthlyContribution;
-  const swr = Number(fireSettingsRow.swr);
-  const annualReturnRate = Number(fireSettingsRow.expectedReturn);
+  const investableNetWorth = inputs.investedToday;
+  const annualExpenses = fireSettingsRow.annualExpensesOverride ?? inputs.defaultAnnualExpenses;
+  const monthlyContribution = fireSettingsRow.monthlyContributionOverride ?? inputs.defaultMonthlyContribution;
+  const swr = fireSettingsRow.swr;
+  const annualReturnRate = realReturn(fireSettingsRow.expectedReturn, fireSettingsRow.inflation);
 
   const fireNumberValue = fireNumber(annualExpenses, swr);
   const result = yearsToFire({ currentValue: investableNetWorth, monthlyContribution, annualReturnRate, targetValue: fireNumberValue });

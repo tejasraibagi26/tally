@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.20.0",
+    date: "2026-10-05",
+    changes: [
+      { kind: "improved", text: "Early retirement redesigned: the age and year you could retire up top, a clearer chart, what each change is worth in years, and milestones on the way." },
+      { kind: "improved", text: "Accounts for inflation and converts US-dollar accounts to CAD, and changes save as you go." },
+    ],
+  },
+  {
     version: "1.19.0",
     date: "2026-10-05",
     changes: [

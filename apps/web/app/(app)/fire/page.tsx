@@ -1,80 +1,61 @@
-import { and, eq } from "drizzle-orm";
-import Link from "next/link";
-import { Flame } from "lucide-react";
+import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
-import { formatCents } from "@tally/core/money";
-import { trailingAnnualCashFlowEstimate } from "@/lib/analytics";
-import { Card, CardHeader } from "@/components/ui/Card";
+import { fireInputs } from "@/lib/fire";
+import { todayFor } from "@/lib/userTimezone";
+import { MOCK_MODE } from "@/lib/config";
+import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { FireCalculator } from "@/components/fire/FireCalculator";
+import { LinkButton } from "@/components/plaid/LinkButton";
+import { FirePlanner } from "@/components/fire/FirePlanner";
 
-export default async function FirePage() {
+export default async function FirePage({ searchParams }: { searchParams: Promise<{ start?: string }> }) {
   const userId = await requireUserId();
+  const { start } = await searchParams;
+  const [inputs, [user], anyAccount, today] = await Promise.all([
+    fireInputs(userId),
+    db.select({ birthDate: schema.users.birthDate }).from(schema.users).where(eq(schema.users.id, userId)).limit(1),
+    db.query.accounts.findFirst({ where: eq(schema.accounts.userId, userId) }),
+    todayFor(userId),
+  ]);
 
-  const accounts = await db.query.accounts.findMany({ where: eq(schema.accounts.userId, userId) });
-
-  if (accounts.length === 0) {
+  // No investment accounts: offer to connect one, or to plan from $0
+  // (?start=zero) so someone without a brokerage still gets an answer.
+  if (inputs.accounts.length === 0 && start !== "zero") {
     return (
       <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
         <PageHeader title="Early retirement" />
-        <Card className="p-10">
-          <EmptyState
-            icon={Flame}
-            title="Connect an account to get started"
-            description="The calculator uses your investable net worth and spending history to seed sensible defaults, which you can always adjust by hand."
-            action={
-              <Link href="/accounts" className="text-brand text-[13.5px] font-medium">
-                Go to Accounts →
-              </Link>
-            }
-          />
+        <Card className="p-8 lg:p-10 flex flex-col items-start gap-4 max-w-[600px]">
+          <h2 className="m-0 font-display text-[28px] font-normal text-text">When could you stop working?</h2>
+          <p className="m-0 text-[15px] leading-relaxed text-text-2">
+            {anyAccount
+              ? "Tally can work it out from your spending. Connect a brokerage so it also knows what you've invested, or start from $0."
+              : "Connect your bank and brokerage, and Tally works it out from your spending and investments. Or start from $0."}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <LinkButton mode="create" label="Connect a brokerage" mock={MOCK_MODE} />
+            <a href="/fire?start=zero" className="h-9 px-4 rounded-control bg-brand-subtle text-brand text-[15px] font-medium inline-flex items-center">
+              Start from $0
+            </a>
+          </div>
         </Card>
       </div>
     );
   }
 
-  const investableNetWorth = accounts.filter((a) => a.type === "investment").reduce((sum, a) => sum + (a.currentBalance ?? 0), 0);
-
-  const { income: totalIncome, expenses: defaultAnnualExpenses } = await trailingAnnualCashFlowEstimate(userId, 12);
-  const defaultMonthlyContribution = Math.max(0, Math.round((totalIncome - defaultAnnualExpenses) / 12));
-
-  const [savedSettings] = await db
-    .select()
-    .from(schema.fireSettings)
-    .where(and(eq(schema.fireSettings.userId, userId)))
-    .limit(1);
-
-  const [user] = await db.select({ birthDate: schema.users.birthDate }).from(schema.users).where(eq(schema.users.id, userId)).limit(1);
-  const today = new Date().toISOString().slice(0, 10);
-
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-      <PageHeader title="Early retirement" meta={["Seeded from your balances and last 12 months of spending"]} />
-
-      <Card className="flex flex-col sm:flex-row">
-        <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-text-3">Investable net worth</span>
-          <span className="font-display text-3xl text-text tabular money">{formatCents(investableNetWorth)}</span>
-        </div>
-        <div className="flex-1 p-[18px_24px] flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-text-3">Trailing 12mo expenses</span>
-          <span className="font-display text-3xl text-text tabular">{formatCents(defaultAnnualExpenses)}</span>
-        </div>
-      </Card>
-
-      <Card>
-        <CardHeader title="Your FIRE plan" />
-        <FireCalculator
-          investableNetWorth={investableNetWorth}
-          defaultAnnualExpenses={defaultAnnualExpenses}
-          defaultMonthlyContribution={defaultMonthlyContribution}
-          savedSettings={savedSettings ?? null}
-          birthDate={user?.birthDate ?? null}
-          today={today}
-        />
-      </Card>
+      <PageHeader title="Early retirement" meta={["In today's dollars", "Saves as you go"]} />
+      <FirePlanner
+        investedTodayAll={inputs.investedToday}
+        accounts={inputs.accounts}
+        defaultAnnualExpenses={inputs.defaultAnnualExpenses}
+        defaultMonthlyContribution={inputs.defaultMonthlyContribution}
+        coveredMonths={inputs.coveredMonths}
+        saved={inputs.settings}
+        birthDate={user?.birthDate ?? null}
+        today={today}
+      />
     </div>
   );
 }

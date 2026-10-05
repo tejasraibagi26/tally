@@ -134,8 +134,14 @@ import Constants from "expo-constants";
  * "N to review" banner and "To review" filter, and a full-screen review
  * queue (transactions/review) with swipe right to confirm, left for
  * another category, and "Always use my pick for <merchant>".
+ * 1.20.0 redesigns Early retirement to match web 1.21.0: answer-first
+ * hero, FireChart (plain SVG: projection, target line, ±1% band, labeled
+ * crossing, age axis), what-ifs, milestones, autosaving levers with
+ * inflation and account choice, the "to retire at 55" target when out of
+ * reach, and an empty state with "Start from $0". Replaces the
+ * gifted-charts projection and the Save button.
  */
-export const APP_VERSION = "1.19.0";
+export const APP_VERSION = "1.20.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
