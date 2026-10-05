@@ -1,7 +1,9 @@
-import { and, asc, eq, gte, lt, lte } from "drizzle-orm";
+import { and, asc, eq, gte, isNull, lt, lte } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { monthRange, shiftMonth } from "@tally/core/budgetMath";
 import { accountDisplayName } from "@tally/core/accountName";
+import { qualifiesAsUpcoming } from "@tally/core/overviewView";
+import { todayFor } from "@/lib/userTimezone";
 
 export interface CashFlowMonth {
   month: string; // YYYY-MM-01
@@ -198,6 +200,10 @@ export interface UpcomingBill {
   amount: number; // cents
   dueDate: string;
   accountId: string | null;
+  /** The recurring stream behind a "subscription" bill; null for a card payment. */
+  streamId: string | null;
+  /** True when Tally guessed this from past charges, so the user can tell it "this won't recur". False for a card payment (the bank's own due date) and for a bill the user added themselves. */
+  canDismiss: boolean;
 }
 
 /**
@@ -208,13 +214,20 @@ export interface UpcomingBill {
  * occasional lump sums (rent prepaid several months at once) can look
  * "cancelled" to that algorithm despite the user knowing exactly when it's
  * next due.
+ *
+ * Only money going out is listed (a detected paycheck, bonus or refund isn't a
+ * bill, and none of it is guaranteed), a stream the user dismissed stays gone,
+ * and a guessed stream must clear MIN_UPCOMING_CONFIDENCE
+ * (qualifiesAsUpcoming in @tally/core/overviewView). Dates are the
+ * user's own today, not the server's UTC day.
  */
 export async function upcomingBills(userId: string, withinDays = 30): Promise<UpcomingBill[]> {
-  const today = new Date().toISOString().slice(0, 10);
-  const cutoff = new Date(Date.now() + withinDays * 86_400_000).toISOString().slice(0, 10);
+  const today = await todayFor(userId);
+  const cutoff = new Date(new Date(`${today}T00:00:00Z`).getTime() + withinDays * 86_400_000).toISOString().slice(0, 10);
 
   const streamRows = await db
     .select({
+      id: schema.recurringStreams.id,
       description: schema.recurringStreams.description,
       merchantKey: schema.recurringStreams.merchantKey,
       averageAmount: schema.recurringStreams.averageAmount,
@@ -222,13 +235,15 @@ export async function upcomingBills(userId: string, withinDays = 30): Promise<Up
       manualNextDueDate: schema.recurringStreams.manualNextDueDate,
       status: schema.recurringStreams.status,
       accountId: schema.recurringStreams.accountId,
+      isManual: schema.recurringStreams.isManual,
+      confidence: schema.recurringStreams.confidence,
     })
     .from(schema.recurringStreams)
-    .where(eq(schema.recurringStreams.userId, userId));
+    .where(and(eq(schema.recurringStreams.userId, userId), isNull(schema.recurringStreams.dismissedAt)));
 
   const streams = streamRows
     .map((s) => ({ ...s, dueDate: s.manualNextDueDate ?? s.predictedNextDate }))
-    .filter((s) => s.dueDate != null && s.dueDate >= today && s.dueDate <= cutoff && (s.manualNextDueDate != null || s.status === "active"));
+    .filter((s) => qualifiesAsUpcoming(s, today, cutoff));
 
   const cards = await db
     .select({
@@ -249,6 +264,8 @@ export async function upcomingBills(userId: string, withinDays = 30): Promise<Up
       amount: Math.abs(s.averageAmount),
       dueDate: s.dueDate!,
       accountId: s.accountId,
+      streamId: s.id,
+      canDismiss: !s.isManual,
     })),
     ...cards.map((c) => ({
       type: "card" as const,
@@ -256,6 +273,8 @@ export async function upcomingBills(userId: string, withinDays = 30): Promise<Up
       amount: c.amount ?? 0,
       dueDate: c.dueDate!,
       accountId: c.accountId,
+      streamId: null,
+      canDismiss: false,
     })),
   ];
 

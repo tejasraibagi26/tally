@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.22.0",
+    date: "2026-10-05",
+    changes: [
+      { kind: "improved", text: "Overview: Upcoming no longer lists money coming in, like a bonus or paycheck, or patterns Tally isn't sure about, and a bill you've removed stays removed." },
+      { kind: "new", text: "Overview: tap a bill Tally guessed and choose \"This won't recur\" to stop it showing up." },
+    ],
+  },
+  {
     version: "1.21.3",
     date: "2026-10-05",
     changes: [{ kind: "improved", text: "Overview: net worth is bigger, the \"transactions to review\" bar is now green, and the small marker on the This month bar is gone." }],

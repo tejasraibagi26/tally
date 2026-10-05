@@ -8,6 +8,10 @@ export interface UpcomingBill {
   amount: number;
   dueDate: string;
   accountId: string | null;
+  /** The recurring stream behind a "subscription" bill; null for a card payment. Absent from older servers. */
+  streamId?: string | null;
+  /** Tally guessed this bill from past charges, so the user can say it won't recur. Absent from older servers. */
+  canDismiss?: boolean;
 }
 
 export interface OverviewResponse {

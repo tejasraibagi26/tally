@@ -45,6 +45,8 @@ export function useDeleteSubscription() {
     mutationFn: (id: string) => apiDelete(`/api/recurring-streams/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["recurring-streams"] });
+      // Overview's Upcoming list is built from the same streams.
+      queryClient.invalidateQueries({ queryKey: ["overview"] });
     },
   });
 }

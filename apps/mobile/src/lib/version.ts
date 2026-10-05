@@ -166,8 +166,14 @@ import Constants from "expo-constants";
  * 1.21.3 removes the "how far through the month" tick from the This month
  * bar, makes the Overview net worth figure larger (68pt), and draws the
  * "transactions to review" row as a solid brand bar.
+ * 1.22.0 tightens Overview's Upcoming and lets you correct it: only money
+ * going out is listed (a detected paycheck or bonus never is), a bill you
+ * removed stays gone, guessed bills must clear a confidence bar, and dates
+ * use your timezone (all server-side, @tally/core/overviewView's
+ * qualifiesAsUpcoming). A bill Tally guessed opens a sheet with "This won't
+ * recur", which dismisses the stream behind it.
  */
-export const APP_VERSION = "1.21.3";
+export const APP_VERSION = "1.22.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
