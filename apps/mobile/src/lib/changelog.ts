@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.21.2",
+    date: "2026-10-05",
+    changes: [{ kind: "fixed", text: "Overview: \"transactions to review\" now counts only this month, and the review screen it opens skips older months." }],
+  },
+  {
     version: "1.21.1",
     date: "2026-10-05",
     changes: [

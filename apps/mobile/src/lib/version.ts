@@ -152,16 +152,19 @@ import Constants from "expo-constants";
  * budgets; Upcoming gets date tiles and due labels; Recent activity rows
  * match the Transactions list; Where it went moves last; the net worth
  * hero quiets its cents and gains a delta chip and a 1M / 3M / 6M / 1Y
- * range (@tally/core/overviewView). Reads a new this-month `unreviewed`
- * count from /api/analytics/overview, treated as zero from older servers.
+ * range (@tally/core/overviewView).
  * 1.21.1 makes Overview's Credit used show the balance and limit behind
  * its percentage and note any card left out for having no limit, and
  * fixes the figure itself (web's /api/liabilities, shared with the web
  * Overview): overpaid cards count as zero used instead of offsetting other
  * cards, and each card's balance and limit are converted to one currency
  * before they're summed.
+ * 1.21.2 limits "N transactions to review" to this month: the count is the
+ * Transactions tab's own this-month figure (it no longer needs a new
+ * /api/analytics/overview field), and the review queue it opens asks for
+ * `?scope=month`, so older months' backlog no longer shows anywhere.
  */
-export const APP_VERSION = "1.21.1";
+export const APP_VERSION = "1.21.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

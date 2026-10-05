@@ -15,8 +15,6 @@ export interface OverviewResponse {
   netWorth: { assets: number; liabilities: number; net: number; asOfDate: string } | null;
   budgets: { totalBudgeted: number; totalSpend: number; remaining: number; categories: BudgetLine[] };
   upcomingBills: UpcomingBill[];
-  /** Unreviewed non-transfer transactions posted this month; absent from servers before this field shipped. */
-  unreviewed?: number;
 }
 
 export interface NetWorthPoint {

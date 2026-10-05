@@ -86,7 +86,6 @@ export function useUpdateTransaction(id: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transaction", id] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["overview"] });
     },
   });
 }
@@ -155,11 +154,11 @@ export interface ReviewItem {
   suggestions: { categoryId: string; name: string; colorSlot: number; reason: "current" | "history" }[];
 }
 
-/** The review queue (GET /api/transactions/review): unreviewed rows with category suggestions. */
+/** The review queue (GET /api/transactions/review): this month's unreviewed rows with category suggestions. */
 export function useReviewQueue(enabled = true) {
   return useQuery({
     queryKey: ["transactions", "review"],
-    queryFn: () => apiGet<{ total: number; items: ReviewItem[] }>("/api/transactions/review"),
+    queryFn: () => apiGet<{ total: number; items: ReviewItem[] }>("/api/transactions/review?scope=month"),
     enabled,
   });
 }
@@ -175,11 +174,7 @@ export function useReviewTransaction() {
   return useMutation({
     mutationFn: ({ id, categoryId, always }: { id: string; categoryId: string | null; always?: boolean }) =>
       apiPatch(`/api/transactions/${id}`, categoryId ? { categoryId, reviewed: true, alwaysCategorizeMerchant: always || undefined } : { reviewed: true }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"], predicate: (q) => q.queryKey[1] !== "review" });
-      // Overview's "N to review" row counts the same queue.
-      queryClient.invalidateQueries({ queryKey: ["overview"] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["transactions"], predicate: (q) => q.queryKey[1] !== "review" }),
   });
 }
 
@@ -190,9 +185,6 @@ export function useBulkTransactions() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: { ids: string[]; action: BulkAction }) => apiPost<{ ok: true; affected: number }>("/api/transactions/bulk", body),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["overview"] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["transactions"] }),
   });
 }
