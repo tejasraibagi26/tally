@@ -15,7 +15,10 @@ export function usePlaidExchange(mode: "create" | "update", itemId: string | und
   const router = useRouter();
 
   return useCallback(
-    async (publicToken: string, metadata: PlaidLinkOnSuccessMetadata) => {
+    // itemIdOverride: the item a shared update-mode flow was started for
+    // (usePlaidLinkFlow's start(itemId)), when it isn't the hook's own.
+    async (publicToken: string, metadata: PlaidLinkOnSuccessMetadata, itemIdOverride?: string) => {
+      const targetItemId = itemIdOverride ?? itemId;
       let body: ExchangeResponse = {};
       if (mode === "create") {
         const res = await fetch("/api/plaid/exchange", {
@@ -25,8 +28,8 @@ export function usePlaidExchange(mode: "create" | "update", itemId: string | und
         });
         if (!res.ok) throw new Error("Failed to exchange token");
         body = await res.json().catch(() => ({}));
-      } else if (itemId) {
-        const res = await fetch(`/api/items/${itemId}/sync`, { method: "POST" });
+      } else if (targetItemId) {
+        const res = await fetch(`/api/items/${targetItemId}/sync`, { method: "POST" });
         if (res.ok) body = await res.json().catch(() => ({}));
       }
 

@@ -4,13 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { LogoMark } from "@/components/Logo";
-import { SideNav } from "@/components/nav/SideNav";
-
-interface NavCounts {
-  transactions: number;
-  accounts: number;
-  creditCards: number;
-}
+import { SideNav, type NavCounts } from "@/components/nav/SideNav";
 
 /** Below `lg` (1024px) the fixed sidebar (components/nav/SideNav.tsx) is hidden in favor of this: a
  * slim top bar plus a slide-in drawer holding the same nav content. Desktop is unaffected. */

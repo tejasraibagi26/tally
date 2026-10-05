@@ -248,7 +248,8 @@ export function connectionAlerts(items: ItemInput[]): AlertCandidate[] {
       dedupeKey: `conn:${i.id}:${i.status}:${epoch}`,
       title,
       body,
-      url: "/accounts",
+      // Opens this bank's panel on the Accounts page, not just the page.
+      url: `/accounts?bank=${i.id}`,
       payload: { itemId: i.id, status: i.status },
     });
   }

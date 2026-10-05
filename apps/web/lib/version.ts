@@ -88,8 +88,17 @@
  * dismissed streams and ignored spread plans' terms; it, the Subscriptions
  * page and mobile now share @tally/core/subscriptionMath, which also leaves
  * manually added bills (rent) out of the subscriptions total and count.
+ * 1.17.0 redesigns Accounts around connection health, sharing
+ * @tally/core/connectionState with mobile: a summary band with a health
+ * meter, a "Needs you" panel listing each problem with its reason and a
+ * state-colored fix (sign in, renew, retry, sync now, reconnect/remove),
+ * cards sorted by urgency that size together in pairs (no fixed 440px
+ * height), a bank side panel (?bank=<itemId>) with exact times and
+ * sync_runs history replacing the "⋯" menu, a sidebar count on Accounts,
+ * and a first-run card. Broken-connection alert emails deep-link to the
+ * bank's panel. Also keeps an exactly-met budget's bar out of amber.
  */
-export const APP_VERSION = "1.16.2";
+export const APP_VERSION = "1.17.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

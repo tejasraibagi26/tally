@@ -1,43 +1,44 @@
 import { db, schema } from "@/db";
-import { eq } from "drizzle-orm";
-import { Landmark } from "lucide-react";
+import { desc, eq, inArray } from "drizzle-orm";
+import { Check, Landmark } from "lucide-react";
 import { requireUserId } from "@/lib/session";
 import { formatCents } from "@tally/core/money";
-import { cn } from "@/lib/cn";
+import { connectionState, type ConnectionLevel } from "@tally/core/connectionState";
+import { accountDisplayName } from "@tally/core/accountName";
 import { Card } from "@/components/ui/Card";
 import { PageHeader, SyncFreshness } from "@/components/ui/PageHeader";
-import { StatusBadge, type Status } from "@/components/ui/StatusBadge";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { LinkButton } from "@/components/plaid/LinkButton";
-import { ItemActionsMenu } from "@/components/plaid/ItemActionsMenu";
 import { SyncButton } from "@/components/plaid/SyncButton";
 import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
 import { SyncFailureToast } from "@/components/plaid/SyncFailureToast";
+import { AccountsView } from "@/components/accounts/AccountsView";
+import type { ConnectionView } from "@/components/accounts/types";
 import { MOCK_MODE } from "@/lib/config";
 import { itemStatusToBadge } from "@/lib/freshness";
 import { toNetWorthCurrency, NET_WORTH_CURRENCY } from "@tally/core/fx";
-import { AccountNicknameEditor } from "@/components/accounts/AccountNicknameEditor";
 
-function relativeTime(date: Date | null): string {
-  if (!date) return "Never synced";
-  const diffMs = Date.now() - date.getTime();
-  const hours = Math.floor(diffMs / 3_600_000);
-  if (hours < 1) return "Updated just now";
-  if (hours < 24) return `Updated ${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `Updated ${days}d ago`;
-}
+/** Sync history rows kept per bank for its side panel. */
+const RUNS_PER_ITEM = 10;
 
-export default async function AccountsPage() {
+export default async function AccountsPage({ searchParams }: { searchParams: Promise<{ bank?: string }> }) {
   const userId = await requireUserId();
+  const { bank } = await searchParams;
 
-  const items = await db.query.plaidItems.findMany({
-    where: eq(schema.plaidItems.userId, userId),
-  });
+  const [items, accounts] = await Promise.all([
+    db.query.plaidItems.findMany({ where: eq(schema.plaidItems.userId, userId) }),
+    db.query.accounts.findMany({ where: eq(schema.accounts.userId, userId) }),
+  ]);
 
-  const accounts = await db.query.accounts.findMany({
-    where: eq(schema.accounts.userId, userId),
-  });
+  // Newest first across all of the user's items, then trimmed per item below.
+  const runs =
+    items.length === 0
+      ? []
+      : await db
+          .select()
+          .from(schema.syncRuns)
+          .where(inArray(schema.syncRuns.itemId, items.map((i) => i.id)))
+          .orderBy(desc(schema.syncRuns.startedAt))
+          .limit(items.length * RUNS_PER_ITEM * 3);
 
   const accountsByItem = new Map<string, typeof accounts>();
   for (const acct of accounts) {
@@ -45,15 +46,68 @@ export default async function AccountsPage() {
     accountsByItem.set(acct.itemId, [...(accountsByItem.get(acct.itemId) ?? []), acct]);
   }
 
-  // Per-connection/per-account balances below stay labeled in their own
-  // currency, unconverted — but the totals here mix every account together,
-  // so they're converted to NET_WORTH_CURRENCY first (lib/fx.ts) rather than
-  // summing raw USD and CAD cents as if they were the same currency.
+  // Per-connection/per-account balances stay labeled in their own currency,
+  // unconverted -- but totals mix every account together, so they're
+  // converted to NET_WORTH_CURRENCY first (lib/fx.ts) rather than summing raw
+  // USD and CAD cents as if they were the same currency.
   const convertedForTotals = await Promise.all(
     accounts.map(async (a) => (a.currentBalance != null ? await toNetWorthCurrency(a.currentBalance, a.currency) : 0)),
   );
+  const convertedById = new Map(accounts.map((a, i) => [a.id, convertedForTotals[i]!]));
+  const isDebt = (a: (typeof accounts)[number]) => a.type === "credit" || a.type === "loan";
   const totalAssets = accounts.reduce((sum, a, i) => (a.type === "depository" || a.type === "investment" ? sum + convertedForTotals[i]! : sum), 0);
-  const totalLiabilities = accounts.reduce((sum, a, i) => (a.type === "credit" || a.type === "loan" ? sum + convertedForTotals[i]! : sum), 0);
+  const totalLiabilities = accounts.reduce((sum, a, i) => (isDebt(a) ? sum + convertedForTotals[i]! : sum), 0);
+
+  const views: ConnectionView[] = items.map((item) => {
+    const itemAccounts = accountsByItem.get(item.id) ?? [];
+    return {
+      id: item.id,
+      institutionName: item.institutionName,
+      status: item.status,
+      lastSyncedAt: item.lastSyncedAt?.toISOString() ?? null,
+      badge: itemStatusToBadge(item.status, item.lastSyncedAt, item.transactionsUpdateStatus),
+      createdAt: item.createdAt.toISOString(),
+      // currentBalance is stored positive for every type -- a card's or
+      // loan's balance is what's owed -- so debts are subtracted here.
+      total: itemAccounts.reduce((sum, a) => sum + (isDebt(a) ? -1 : 1) * (convertedById.get(a.id) ?? 0), 0),
+      accounts: itemAccounts.map((a) => ({
+        id: a.id,
+        name: accountDisplayName(a.name, a.nickname),
+        realName: a.name,
+        nickname: a.nickname,
+        mask: a.mask,
+        type: a.type,
+        subtype: a.subtype,
+        currentBalance: a.currentBalance,
+        currency: a.currency,
+        creditLimit: a.creditLimit,
+      })),
+      runs: runs
+        .filter((r) => r.itemId === item.id)
+        .slice(0, RUNS_PER_ITEM)
+        .map((r) => ({
+          id: r.id,
+          kind: r.kind,
+          trigger: r.trigger,
+          startedAt: r.startedAt.toISOString(),
+          finishedAt: r.finishedAt?.toISOString() ?? null,
+          added: r.added,
+          modified: r.modified,
+          removed: r.removed,
+          error: r.error,
+        })),
+    };
+  });
+
+  // "A manual retry already failed" -> the state escalates to Sign in again.
+  const serverRefreshFailed = views.filter((v) => v.runs.find((r) => r.trigger === "manual")?.error).map((v) => v.id);
+
+  // Server-side health for the summary meter and header (no in-flight local state here).
+  const levels = views.map((v) => connectionState(v, { refreshing: false, linking: false, justReconnected: false, refreshFailed: serverRefreshFailed.includes(v.id) }));
+  const count = (pred: (l: ConnectionLevel, needs: boolean) => boolean) => levels.filter((s) => pred(s.level, s.needsAttention)).length;
+  const blocked = count((l) => l === "blocked");
+  const actSoon = count((l, needs) => needs && l !== "blocked");
+  const healthy = levels.length - blocked - actSoon;
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
@@ -61,144 +115,89 @@ export default async function AccountsPage() {
         title="Accounts & connections"
         meta={[
           `${accounts.length} account${accounts.length === 1 ? "" : "s"}`,
-          `${items.length} institution${items.length === 1 ? "" : "s"}`,
+          items.length > 0 && `${items.length} bank${items.length === 1 ? "" : "s"}`,
           items.some((i) => i.lastSyncedAt) && <SyncFreshness key="sync" syncedAt={items.map((i) => i.lastSyncedAt)} />,
+          blocked + actSoon > 0 && (
+            <span key="needs" className={blocked > 0 ? "text-negative" : "text-warning"}>
+              {blocked + actSoon} need{blocked + actSoon === 1 ? "s" : ""} you
+            </span>
+          ),
         ]}
         actions={
-          <>
-            {items.length > 0 && <SyncButton products={["balances"]} label="Sync balances" loadingMessage="Refreshing account balances. This can take a moment." />}
-            <LinkButton mode="create" label="Add account" mock={MOCK_MODE} />
-          </>
+          items.length > 0 && (
+            <>
+              <SyncButton products={["balances"]} label="Sync all" loadingMessage="Refreshing account balances. This can take a moment." />
+              <LinkButton mode="create" label="Add bank" mock={MOCK_MODE} />
+            </>
+          )
         }
       />
 
       <SyncFailureBanner />
       <SyncFailureToast />
 
-      {items.length > 0 && (
-        <Card className="flex flex-col sm:flex-row">
-          <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-text-3">Assets ({NET_WORTH_CURRENCY})</span>
-            <span className="font-display text-3xl text-positive tabular money">{formatCents(totalAssets)}</span>
-          </div>
-          <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-text-3">Liabilities ({NET_WORTH_CURRENCY})</span>
-            <span className="font-display text-3xl text-negative tabular money">{formatCents(totalLiabilities)}</span>
-          </div>
-          <div className="flex-1 p-[18px_24px] flex flex-col gap-2">
-            <span className="text-xs font-medium uppercase tracking-wide text-text-3">Net ({NET_WORTH_CURRENCY})</span>
-            <span className="font-display text-3xl text-text tabular money">
-              {formatCents(totalAssets - totalLiabilities)}
-            </span>
-          </div>
-        </Card>
-      )}
-
       {items.length === 0 ? (
-        <Card className="p-10">
-          <EmptyState
-            icon={Landmark}
-            title="No accounts yet"
-            description="Connect your bank, card, or brokerage to see everything in one place."
-            action={<LinkButton mode="create" label="Connect your first account" mock={MOCK_MODE} />}
-          />
+        <Card className="p-8 lg:p-10 flex flex-col items-start gap-4 max-w-[640px]">
+          <span className="w-11 h-11 rounded-[12px] bg-brand-subtle text-brand flex items-center justify-center">
+            <Landmark size={20} strokeWidth={1.75} />
+          </span>
+          <h2 className="m-0 font-display text-[28px] font-normal text-text">Connect your first bank</h2>
+          <p className="m-0 text-[15px] leading-relaxed text-text-2 max-w-[52ch]">
+            Tally reads your balances and transactions so budgets, bills and net worth fill themselves in.
+          </p>
+          <ul className="m-0 p-0 list-none flex flex-col gap-2 text-[14px] text-text-2">
+            {["Read-only. Tally can't move money", "Secured by Plaid. Your password stays with your bank", "Disconnect any bank at any time"].map((t) => (
+              <li key={t} className="flex items-center gap-2">
+                <Check size={15} className="text-brand flex-none" /> {t}
+              </li>
+            ))}
+          </ul>
+          <LinkButton mode="create" label="Connect a bank" mock={MOCK_MODE} />
         </Card>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-          {items.map((item, index) => {
-            const itemAccounts = accountsByItem.get(item.id) ?? [];
-            const broken = item.status === "login_required" || item.status === "revoked" || item.status === "error";
-            const notReady = !broken && item.transactionsUpdateStatus === "NOT_READY";
-            // currentBalance is stored positive for every account type — a credit
-            // card's/loan's balance is what's owed, not held — so it must be
-            // subtracted here the same way totalLiabilities is above, or a card
-            // pairing a checking account with a credit card overstates its total.
-            const total = itemAccounts.reduce((sum, a) => {
-              const signed = a.type === "credit" || a.type === "loan" ? -(a.currentBalance ?? 0) : (a.currentBalance ?? 0);
-              return sum + signed;
-            }, 0);
+        <>
+          {/* gap-px over a border-colored ground draws the dividers, so they stay
+              single lines however the four cells wrap (1, 2 or 4 columns). */}
+          <Card className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.2fr_1fr_1fr_1.4fr] gap-px bg-border overflow-hidden">
+            <Figure label={`Net worth (${NET_WORTH_CURRENCY})`} value={formatCents(totalAssets - totalLiabilities)} />
+            <Figure label="Assets" value={formatCents(totalAssets)} className="text-positive" />
+            <Figure label="Debts" value={formatCents(totalLiabilities)} className="text-negative" />
+            <div className="bg-surface p-[18px_24px] flex flex-col gap-2 sm:col-span-2 lg:col-span-1">
+              <span className="text-xs font-medium uppercase tracking-wide text-text-3">Connection health</span>
+              <div className="flex h-1.5 gap-0.5 rounded-full overflow-hidden mt-1" aria-hidden="true">
+                {healthy > 0 && <span className="bg-positive" style={{ flex: healthy }} />}
+                {actSoon > 0 && <span className="bg-warning" style={{ flex: actSoon }} />}
+                {blocked > 0 && <span className="bg-negative" style={{ flex: blocked }} />}
+              </div>
+              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-text-3">
+                <HealthKey dot="bg-positive" label={`${healthy} up to date`} />
+                {actSoon > 0 && <HealthKey dot="bg-warning" label={`${actSoon} act soon`} />}
+                {blocked > 0 && <HealthKey dot="bg-negative" label={`${blocked} paused`} />}
+              </div>
+            </div>
+          </Card>
 
-            // A lone card (only connection) or a trailing odd-one-out (3+
-            // connections, unpaired last row) sizes to its own content. Every
-            // other card shares a fixed default height with its row partner —
-            // an overlong account list scrolls internally instead of growing
-            // the card and throwing rows out of alignment.
-            const isSoleConnection = items.length === 1;
-            const isUnpairedTail = items.length > 2 && items.length % 2 === 1 && index === items.length - 1;
-            const capped = !isSoleConnection && !isUnpairedTail;
-
-            return (
-              <Card
-                key={item.id}
-                className={cn(broken && "border-negative", isSoleConnection && "lg:col-span-2", capped && "h-[440px]")}
-              >
-                <div className="flex flex-col h-full">
-                  <div className="flex items-center gap-3 p-4 border-b border-border flex-none">
-                    <span className="w-[34px] h-[34px] flex-none rounded-[9px] bg-brand-subtle text-brand flex items-center justify-center font-medium text-sm">
-                      {(item.institutionName ?? "?").slice(0, 2).toUpperCase()}
-                    </span>
-                    <div className="flex flex-col gap-1 flex-1 min-w-0">
-                      <span className="font-semibold text-base text-text">
-                        {item.institutionName ?? "Unknown institution"}
-                      </span>
-                      <span className="font-mono text-xs text-text-3">{relativeTime(item.lastSyncedAt)}</span>
-                    </div>
-                    <StatusBadge status={itemStatusToBadge(item.status, item.lastSyncedAt, item.transactionsUpdateStatus)} />
-                    <ItemActionsMenu itemId={item.id} institutionName={item.institutionName ?? "this institution"} />
-                  </div>
-
-                  {broken && (
-                    <div className="flex items-center gap-3 px-4 py-3.5 bg-negative-subtle border-b border-border flex-none">
-                      <span className="flex-1 text-[15px] leading-snug text-text">
-                        ▲ Login expired. Balances and transactions are frozen until you reconnect.
-                      </span>
-                      <LinkButton mode="update" itemId={item.id} label="Reconnect" variant="primary" />
-                    </div>
-                  )}
-
-                  {notReady && (
-                    <div className="flex items-center gap-3 px-4 py-3.5 bg-info-subtle border-b border-border flex-none">
-                      <span className="flex-1 text-[15px] leading-snug text-text">
-                        ● Still pulling transaction history from {item.institutionName ?? "this institution"}. This
-                        can take a few hours right after connecting, and it will sync in automatically once ready.
-                      </span>
-                    </div>
-                  )}
-
-                  <div className={capped ? "flex-1 min-h-0 overflow-y-auto" : undefined}>
-                    {itemAccounts.map((acct) => (
-                      <div
-                        key={acct.id}
-                        className="grid grid-cols-[1fr_auto] gap-4 items-center px-4 py-3 border-b border-border last:border-b-0"
-                      >
-                        <div className="flex flex-col gap-1 min-w-0">
-                          <AccountNicknameEditor accountId={acct.id} name={acct.name} nickname={acct.nickname} className="text-[15px] text-text" />
-                          <span className="font-mono text-xs text-text-3">
-                            {acct.subtype ?? acct.type} ····{acct.mask ?? "----"}
-                          </span>
-                        </div>
-                        <div className="flex flex-col gap-1 text-right">
-                          <span className="text-[17px] text-text tabular money">
-                            {acct.currentBalance != null ? formatCents(acct.currentBalance) : "—"}
-                          </span>
-                          {acct.type === "credit" && acct.creditLimit != null && (
-                            <span className="text-xs text-text-3 tabular">of {formatCents(acct.creditLimit)}</span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center justify-between px-4 py-3 text-[13.5px] flex-none">
-                    <span className="text-brand">View transactions →</span>
-                    <span className="text-right text-text-3 tabular money">{formatCents(total)}</span>
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
+          <AccountsView items={views} baseCurrency={NET_WORTH_CURRENCY} initialBankId={bank ?? null} serverRefreshFailed={serverRefreshFailed} />
+        </>
       )}
     </div>
+  );
+}
+
+function Figure({ label, value, className }: { label: string; value: string; className?: string }) {
+  return (
+    <div className="bg-surface p-[18px_24px] flex flex-col gap-2">
+      <span className="text-xs font-medium uppercase tracking-wide text-text-3">{label}</span>
+      <span className={`font-display text-3xl tabular money ${className ?? "text-text"}`}>{value}</span>
+    </div>
+  );
+}
+
+function HealthKey({ dot, label }: { dot: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
+      {label}
+    </span>
   );
 }

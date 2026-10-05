@@ -15,6 +15,19 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.17.0",
+    date: "2026-10-05",
+    changes: [
+      { kind: "improved", text: "Accounts redesigned: banks that need you are listed at the top with the reason and a one-click fix, and the rest are sorted below." },
+      { kind: "new", text: "Click a bank to open its details: when it last synced, its recent sync history, and its actions in one place." },
+      { kind: "improved", text: "Each problem gets its own fix: sign in again, renew access before it runs out, retry when the bank itself is down, or sync now." },
+      { kind: "new", text: "The Accounts item in the sidebar shows how many banks need you, so a broken connection is visible from any page." },
+      { kind: "improved", text: "Bank cards side by side now always line up at the same height, and long account lists no longer scroll inside the card." },
+      { kind: "improved", text: "Alert emails about a broken connection open that bank's details directly." },
+      { kind: "fixed", text: "Budgets: a budget you've spent exactly in full no longer turns amber." },
+    ],
+  },
+  {
     version: "1.16.2",
     date: "2026-10-01",
     changes: [

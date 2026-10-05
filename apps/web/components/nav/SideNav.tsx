@@ -35,6 +35,8 @@ interface NavItem {
   label: string;
   icon: LucideIcon;
   meta?: string;
+  /** Replaces `meta` with a colored count pill (coral = blocked, amber = act soon). */
+  alert?: { count: number; tone: "negative" | "warning"; title: string };
 }
 
 interface NavGroup {
@@ -43,10 +45,12 @@ interface NavGroup {
   items: NavItem[];
 }
 
-interface NavCounts {
+export interface NavCounts {
   transactions: number;
   accounts: number;
   creditCards: number;
+  /** Banks needing a tap (lib/connectionState via the app layout), so a broken one shows from any page. */
+  accountsAttention?: { count: number; blocked: boolean; names: string[] };
 }
 
 // Grouped by what the money is doing, not by page type: what you have and
@@ -67,7 +71,19 @@ function navGroups(counts: NavCounts): NavGroup[] {
     {
       label: "What you have",
       items: [
-        { href: "/accounts", label: "Accounts", icon: Landmark, meta: String(counts.accounts) },
+        {
+          href: "/accounts",
+          label: "Accounts",
+          icon: Landmark,
+          meta: String(counts.accounts),
+          alert: counts.accountsAttention?.count
+            ? {
+                count: counts.accountsAttention.count,
+                tone: counts.accountsAttention.blocked ? "negative" : "warning",
+                title: `Needs you: ${counts.accountsAttention.names.join(", ")}`,
+              }
+            : undefined,
+        },
         { href: "/investments", label: "Investments", icon: TrendingUp },
       ],
     },
@@ -89,8 +105,20 @@ function NavRow({ item, active }: { item: NavItem; active: boolean }) {
         <item.icon size={17} strokeWidth={1.75} className="flex-none" />
         <span className="truncate">{item.label}</span>
       </span>
-      {item.meta && item.meta !== "0" && (
-        <span className="font-mono text-[12.5px] leading-none text-text-3">{item.meta}</span>
+      {item.alert ? (
+        <span
+          title={item.alert.title}
+          aria-label={item.alert.title}
+          className={cn(
+            "min-w-[18px] h-[18px] px-1.5 rounded-full text-[11px] font-semibold leading-none flex items-center justify-center text-on-brand",
+            item.alert.tone === "negative" ? "bg-negative" : "bg-warning",
+          )}
+        >
+          {item.alert.count}
+        </span>
+      ) : (
+        item.meta &&
+        item.meta !== "0" && <span className="font-mono text-[12.5px] leading-none text-text-3">{item.meta}</span>
       )}
     </Link>
   );

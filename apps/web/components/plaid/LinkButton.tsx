@@ -43,7 +43,7 @@ export function LinkButton({ mode, itemId, label, variant = "primary", mock = fa
         variant={variant}
         size={mode === "update" ? "sm" : "md"}
         disabled={mock ? mockLoading : loading}
-        onClick={mock ? connectMock : start}
+        onClick={mock ? connectMock : () => start()}
       >
         {(mock ? mockLoading : loading) ? "Connecting…" : label}
       </Button>
