@@ -187,8 +187,10 @@ import Constants from "expo-constants";
  * components/ui/Toast now also used by Accounts), and Subscriptions lists
  * dismissed bills with Restore (GET /api/recurring?dismissed=1, PATCH
  * { dismissed: false }).
+ * 1.24.1 always shows Upcoming's "View all" when there are bills; it only
+ * appeared above three, which left the Upcoming screen unreachable for most.
  */
-export const APP_VERSION = "1.24.0";
+export const APP_VERSION = "1.24.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
