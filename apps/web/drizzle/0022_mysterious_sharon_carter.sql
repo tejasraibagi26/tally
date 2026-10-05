@@ -1,0 +1,2 @@
+ALTER TABLE "fire_settings" ADD COLUMN "inflation" numeric(5, 4) DEFAULT '0.0200' NOT NULL;--> statement-breakpoint
+ALTER TABLE "fire_settings" ADD COLUMN "excluded_account_ids" jsonb DEFAULT '[]'::jsonb NOT NULL;
