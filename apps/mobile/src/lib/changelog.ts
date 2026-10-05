@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.16.1",
+    date: "2026-10-05",
+    changes: [{ kind: "fixed", text: "Accounts: the last-synced time and account count in a bank's menu are readable again." }],
+  },
+  {
     version: "1.16.0",
     date: "2026-10-05",
     changes: [

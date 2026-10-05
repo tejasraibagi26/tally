@@ -100,8 +100,10 @@ import Constants from "expo-constants";
  * not syncing, importing). Broken cards collapse to a dimmed "as of"
  * total; only the reconnecting card's button spins; missing balances show
  * "—"; accounts with no bank are listed; sync-all reports via toast/banner.
+ * 1.16.1 fixes the bank sheet's "Last synced" and "Accounts" values
+ * rendering black: an explicit `color: undefined` style beat the class.
  */
-export const APP_VERSION = "1.16.0";
+export const APP_VERSION = "1.16.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

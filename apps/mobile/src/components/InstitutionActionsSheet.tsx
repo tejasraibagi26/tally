@@ -123,7 +123,9 @@ function MetaRow({ label, value, valueColor }: { label: string; value: string; v
   return (
     <View className="flex-row justify-between gap-3">
       <Text className="font-ui text-text-3" style={{ fontSize: rf(12.5) }}>{label}</Text>
-      <Text className="font-ui-medium text-text" style={{ fontSize: rf(12.5), color: valueColor, flexShrink: 1, textAlign: "right" }} numberOfLines={1}>{value}</Text>
+      <Text className="font-ui-medium text-text" // Only set color when given: an explicit `color: undefined` in style
+      // overrides the text-text class and renders black.
+      style={[{ fontSize: rf(12.5), flexShrink: 1, textAlign: "right" }, valueColor ? { color: valueColor } : null]} numberOfLines={1}>{value}</Text>
     </View>
   );
 }
