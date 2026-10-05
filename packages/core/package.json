@@ -23,7 +23,8 @@
     "./connectionState": "./src/connectionState.ts",
     "./investments": "./src/investments.ts",
     "./budgetView": "./src/budgetView.ts",
-    "./transactionView": "./src/transactionView.ts"
+    "./transactionView": "./src/transactionView.ts",
+    "./overviewView": "./src/overviewView.ts"
   },
   "scripts": {
     "test": "vitest run",

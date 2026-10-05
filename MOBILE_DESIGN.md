@@ -230,26 +230,39 @@ against mobile's stronger resting shadow rather than web's barely-there one.
   until explicit logout, matching how the web app's session cookie already
   behaves.
 
-### 5.2 Overview (Phase B, condensed from `DESIGN.md §10.1`)
+### 5.2 Overview (Phase B, condensed from `DESIGN.md §10.1`; redesigned in app 1.21.0)
 
-Single scrolling column, in this order:
-1. **Hero net-worth card** — `display-l` serif figure, delta chip (arrow +
-   % + "vs last month"), 12-month sparkline beneath (same line-chart form as
-   web, `react-native-gifted-charts`, no axis labels at this size).
-2. **Connections health** — collapsed to a single-line status row ("All 4
-   accounts synced" / "1 connection needs attention →") rather than the web's
-   separate card; tapping routes to Accounts tab. Full detail lives there, not
-   duplicated here.
-3. **KPI row** — horizontally scrollable stat-tile strip (Spent this month,
-   Income, Cash flow, Credit utilization) instead of the web's 4-column grid;
-   each tile ~140px wide, swipeable, dot pagination indicator beneath if it
-   overflows the viewport.
-4. **Budget this month** — top 3 categories by spend as meter rows (full
-   `DESIGN.md §8` meter-bar spec unchanged), "View all budgets" link to the
-   Budgets tab rather than rendering every category inline.
-5. **Upcoming** — next 3 bills/due dates as a compact list (label + date chip
-   + amount), "View all" if more exist.
-6. **Recent activity** — last 5 transactions, tap → transaction detail sheet.
+Single scrolling column, in this order. Pure rules (due labels, budget ranking,
+net-worth range and delta, credit band) live in `@tally/core/overviewView`.
+1. **Net worth hero** — unboxed on the canvas. `display-l` serif figure with
+   the cents at half size in `text-3`; a delta chip (arrow, signed amount,
+   %, with the range as its caption); the full-bleed 112pt trend chart you can
+   scrub; a 1M / 3M / 6M / 1Y range control (default 1M) that slices the
+   already-loaded 12-month daily series. Privacy on: the chip keeps its % and
+   hides its amount.
+2. **Needs you** — renders only when something needs a tap, otherwise takes no
+   space (sync freshness lives in the header meta line). A tinted card
+   (`negative-subtle` if any bank is blocked, else `warning-subtle`) with
+   icon + "N banks need you", the balances affected, and up to two bank rows
+   each with its reason and the tone-colored action pill; every tap opens the
+   Accounts tab's Fix sheet. Beneath it, an `info-subtle` "N transactions to
+   review" row into the review queue (count from `/api/analytics/overview`
+   `unreviewed`, the queue's own rule).
+3. **This month** — one card: Spent (serif 32) against the month's total
+   budget with the budget-row meter and pace tick, then Income and Saved
+   (income − spend). Income and Saved mask with the privacy toggle.
+   No budget: "Set a budget" link instead of the meter.
+4. **Investments / Credit used** — a pair of tiles under This month; one
+   fills the row, none renders nothing; stacks on narrow or large-text
+   screens. Credit reads "Healthy" under 30% of the limit, "High" at or over.
+5. **Budget this month** — the three most-used budgets (over-budget first;
+   paid fixed-amount budgets skipped) as meter rows, "View all" → Budgets tab.
+6. **Upcoming** — next 3 bills with a date tile, a due label ("Due today",
+   "tomorrow", "in 3 days") and the amount; "View all" only when more exist.
+7. **Recent activity** — last 5 transactions in the Transactions row grammar
+   (avatar, merchant, Pending chip, review dot, "Category · day", amount).
+8. **Where it went** — category spend bar, last because it's analysis rather
+   than action; "View all" → Transactions.
 
 Pull-to-refresh (native `RefreshControl`) replaces the web's toast-based sync
 status for a manual refresh gesture; a persistent top banner still appears on

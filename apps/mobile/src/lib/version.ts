@@ -144,8 +144,18 @@ import Constants from "expo-constants";
  * Sheet.tsx added the full 34pt home-indicator inset on top of each
  * sheet's own trailing padding; iOS now adds only insets.bottom − 20.
  * 1.20.2 shows a fixed budget's "Fixed" as a chip instead of loose text.
+ * 1.21.0 redesigns Overview (MOBILE_DESIGN.md §5.2): a "needs you" card
+ * (only when a bank needs a tap) and a "N to review" row replace the
+ * always-on connections strip; one "This month" card (spent vs budget with
+ * a pace tick, income, saved) and an Investments / Credit used pair
+ * replace the KPI grid; Budget this month shows the three most-used
+ * budgets; Upcoming gets date tiles and due labels; Recent activity rows
+ * match the Transactions list; Where it went moves last; the net worth
+ * hero quiets its cents and gains a delta chip and a 1M / 3M / 6M / 1Y
+ * range (@tally/core/overviewView). Reads a new `unreviewed` count from
+ * /api/analytics/overview, treated as zero from older servers.
  */
-export const APP_VERSION = "1.20.2";
+export const APP_VERSION = "1.21.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

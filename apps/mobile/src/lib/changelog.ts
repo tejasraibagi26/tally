@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.21.0",
+    date: "2026-10-05",
+    changes: [
+      { kind: "improved", text: "Overview redesigned: banks that need you and transactions to review now show only when there's something to do, and one \"This month\" card covers what you've spent against your budget, your income and what you saved." },
+      { kind: "improved", text: "Overview: net worth has a clearer change chip and a 1M / 3M / 6M / 1Y range, bills show when they're due, and recent activity matches the Transactions list." },
+    ],
+  },
+  {
     version: "1.20.2",
     date: "2026-10-05",
     changes: [{ kind: "improved", text: "Budgets: fixed budgets like rent are marked with a clear \"Fixed\" tag." }],

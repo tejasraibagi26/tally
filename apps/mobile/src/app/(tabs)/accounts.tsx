@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, ScrollView, ActivityIndicator, Pressable, RefreshControl, KeyboardAvoidingView, Platform, Animated } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Plus, RefreshCw } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
@@ -41,6 +42,10 @@ export default function AccountsScreen() {
 
   const [menuInstitutionId, setMenuInstitutionId] = useState<string | null>(null);
   const [fixOpen, setFixOpen] = useState(false);
+  // Overview's "needs you" card links here with a fresh `fix` value each tap; open
+  // the Fix sheet once per value, once there are banks to fix.
+  const { fix } = useLocalSearchParams<{ fix?: string }>();
+  const handledFix = useRef<string | undefined>(undefined);
   const [justReconnected, setJustReconnected] = useState<ReadonlySet<string>>(new Set());
   const [syncBanner, setSyncBanner] = useState<{ title: string; body?: string } | null>(null);
   const [dismissedLinkError, setDismissedLinkError] = useState<string | null>(null);
@@ -71,6 +76,12 @@ export default function AccountsScreen() {
 
   const needsYou = cards.filter((c) => c.state.needsAttention);
   const blockedNames = needsYou.filter((c) => c.state.level === "blocked").map((c) => c.institution.institutionName ?? "a bank");
+  useEffect(() => {
+    if (fix && fix !== handledFix.current && needsYou.length > 0) {
+      handledFix.current = fix;
+      setFixOpen(true);
+    }
+  }, [fix, needsYou.length]);
   const menuCard = cards.find((c) => c.institution.id === menuInstitutionId) ?? null;
 
   async function reconnect(inst: Institution) {

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { eq, desc } from "drizzle-orm";
+import { and, eq, desc, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { getBudgetsForMonth } from "@/lib/budgets";
@@ -27,7 +27,16 @@ export async function GET(req: Request) {
     .orderBy(desc(schema.netWorthSnapshots.asOfDate))
     .limit(1);
 
-  const [budgets, bills] = await Promise.all([getBudgetsForMonth(userId, month), upcomingBills(userId)]);
+  const [budgets, bills, [unreviewedRow]] = await Promise.all([
+    getBudgetsForMonth(userId, month),
+    upcomingBills(userId),
+    // The review queue's own rule (app/api/transactions/review): unreviewed,
+    // non-transfer, any date -- so Overview's count matches what the queue opens with.
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(schema.transactions)
+      .where(and(eq(schema.transactions.userId, userId), eq(schema.transactions.reviewed, false), eq(schema.transactions.isTransfer, false))),
+  ]);
 
   const totalBudgeted = budgets.reduce((s, b) => s + b.amount + b.rolloverFromPrior, 0);
   const totalSpend = budgets.reduce((s, b) => s + b.spend, 0);
@@ -37,5 +46,6 @@ export async function GET(req: Request) {
     netWorth: latestSnapshot ?? null,
     budgets: { totalBudgeted, totalSpend, remaining: totalBudgeted - totalSpend, categories: budgets },
     upcomingBills: bills,
+    unreviewed: unreviewedRow?.count ?? 0,
   });
 }
