@@ -25,7 +25,8 @@ interface MeterBarProps {
 }
 
 // DESIGN.md §8 "Meter bar" -- track in sunken gray, fill in the category's
-// series color under 80% of budget, --warning at >=80% and not yet over,
+// series color under 80% of budget and again when exactly met (100%),
+// --warning from 80% up to (not including) 100%,
 // --negative for the overage once truly over. Series slot assignment is
 // fixed order (chartSeries), never cycled or re-derived per screen.
 export function MeterBar({ label, colorSlot, spentCents, budgetCents, mask = true, rolloverCents = 0, isFixedAmount = false, daysElapsed, daysInMonth }: MeterBarProps) {
@@ -36,7 +37,9 @@ export function MeterBar({ label, colorSlot, spentCents, budgetCents, mask = tru
   const seriesColor = series[(colorSlot - 1) % series.length] ?? series[0]!;
   const pct = budgetCents > 0 ? spentCents / budgetCents : 0;
   const overBudget = pct > 1;
-  const nearBudget = !overBudget && pct >= 0.8;
+  // Exactly on budget (100%) is a met budget, not a warning: it keeps its own
+  // series color. Amber is only for 80% up to (not including) 100%.
+  const nearBudget = !overBudget && pct >= 0.8 && pct < 1;
   // When over budget the track represents total spend (100% = spentCents),
   // split into the within-budget portion and the overage (negative) -- the
   // two always sum to exactly 100%, so a plain flex-row lays them out

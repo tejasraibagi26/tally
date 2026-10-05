@@ -109,8 +109,12 @@ import Constants from "expo-constants";
  * under a missing balance, no resting pencil (tap or long-press renames),
  * a "was “old name”" hint while renaming, and an Other accounts footer.
  * 1.16.4 sets the summary's three figures in one size so they line up.
+ * 1.16.5 keeps a budget's bar in its own color when spending lands exactly
+ * on the budget (100%) instead of turning it amber; amber is 80% to <100%.
+ * The Accounts health contract (connectionState) now lives in @tally/core,
+ * shared with web; lib/connectionState.ts just re-exports it.
  */
-export const APP_VERSION = "1.16.4";
+export const APP_VERSION = "1.16.5";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -33,7 +33,9 @@ export function BudgetRow({ budget, daysElapsed, daysInMonth }: { budget: Budget
   const totalAvailable = budget.amount + budget.rolloverFromPrior;
   const pct = totalAvailable > 0 ? Math.min(1, budget.spend / totalAvailable) : budget.spend > 0 ? 1 : 0;
   const overBudget = budget.remaining < 0;
-  const barColor = overBudget ? "bg-negative" : pct >= 0.8 ? "bg-warning" : "bg-positive";
+  // Exactly on budget (pct capped at 1, nothing over) is a met budget, not a
+  // warning, so it keeps the normal color. Amber is 80% up to 100%.
+  const barColor = overBudget ? "bg-negative" : pct >= 0.8 && pct < 1 ? "bg-warning" : "bg-positive";
 
   // A fixed monthly charge (rent, insurance) posts once rather than
   // accruing daily, so the spend-so-far/days-elapsed extrapolation below
