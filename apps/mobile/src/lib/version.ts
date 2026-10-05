@@ -108,8 +108,9 @@ import Constants from "expo-constants";
  * loan balances so rows agree with the card total, "No balance from bank"
  * under a missing balance, no resting pencil (tap or long-press renames),
  * a "was “old name”" hint while renaming, and an Other accounts footer.
+ * 1.16.4 sets the summary's three figures in one size so they line up.
  */
-export const APP_VERSION = "1.16.3";
+export const APP_VERSION = "1.16.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

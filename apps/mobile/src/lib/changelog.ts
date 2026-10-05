@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.16.4",
+    date: "2026-10-05",
+    changes: [{ kind: "fixed", text: "Accounts: net worth, assets and debts at the top now line up." }],
+  },
+  {
     version: "1.16.3",
     date: "2026-10-05",
     changes: [

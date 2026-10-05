@@ -13,23 +13,23 @@ import { useRF } from "@/theme/responsiveFont";
  * phone at any balance size.
  */
 export function AccountsSummary({ net, assets, liabilities }: { net: number; assets: number; liabilities: number }) {
-  const rf = useRF();
   return (
     <Card className="flex-row px-5 py-4">
-      <Figure label="Net worth" cents={net} size={rf(18)} />
-      <Figure label="Assets" cents={assets} size={rf(15)} />
-      <Figure label="Debts" cents={-liabilities} size={rf(15)} tone="text-negative" />
+      <Figure label="Net worth" cents={net} />
+      <Figure label="Assets" cents={assets} />
+      <Figure label="Debts" cents={-liabilities} tone="text-negative" />
     </Card>
   );
 }
 
-// Debts read in the negative color, matching web's Liabilities figure.
-function Figure({ label, cents, size, tone = "text-text" }: { label: string; cents: number; size: number; tone?: string }) {
+// One size for all three so labels and figures share baselines across the
+// row. Debts read in the negative color, matching web's Liabilities figure.
+function Figure({ label, cents, tone = "text-text" }: { label: string; cents: number; tone?: string }) {
   const rf = useRF();
   return (
     <View className="flex-1 gap-1">
       <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>{label}</Text>
-      <MoneyText cents={cents} abbreviate className={`font-ui-semibold ${tone}`} style={{ fontSize: size }} numberOfLines={1} />
+      <MoneyText cents={cents} abbreviate className={`font-ui-semibold ${tone}`} style={{ fontSize: rf(16) }} numberOfLines={1} />
     </View>
   );
 }
