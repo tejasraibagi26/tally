@@ -163,8 +163,11 @@ import Constants from "expo-constants";
  * Transactions tab's own this-month figure (it no longer needs a new
  * /api/analytics/overview field), and the review queue it opens asks for
  * `?scope=month`, so older months' backlog no longer shows anywhere.
+ * 1.21.3 removes the "how far through the month" tick from the This month
+ * bar, makes the Overview net worth figure larger (68pt), and draws the
+ * "transactions to review" row as a solid brand bar.
  */
-export const APP_VERSION = "1.21.2";
+export const APP_VERSION = "1.21.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

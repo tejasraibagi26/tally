@@ -234,8 +234,8 @@ against mobile's stronger resting shadow rather than web's barely-there one.
 
 Single scrolling column, in this order. Pure rules (due labels, budget ranking,
 net-worth range and delta, credit band) live in `@tally/core/overviewView`.
-1. **Net worth hero** — unboxed on the canvas. `display-l` serif figure with
-   the cents at half size in `text-3`; a delta chip (arrow, signed amount,
+1. **Net worth hero** — unboxed on the canvas. serif figure at 68pt (this screen scales
+   `display-l` up) with the cents at 32pt in `text-3`; a delta chip (arrow, signed amount,
    %, with the range as its caption); the full-bleed 112pt trend chart you can
    scrub; a 1M / 3M / 6M / 1Y range control (default 1M) that slices the
    already-loaded 12-month daily series. Privacy on: the chip keeps its % and
@@ -245,14 +245,14 @@ net-worth range and delta, credit band) live in `@tally/core/overviewView`.
    (`negative-subtle` if any bank is blocked, else `warning-subtle`) with
    icon + "N banks need you", the balances affected, and up to two bank rows
    each with its reason and the tone-colored action pill; every tap opens the
-   Accounts tab's Fix sheet. Beneath it, an `info-subtle` "N transactions to
-   review" row into the review queue. The count is this month's, read from the
+   Accounts tab's Fix sheet. Beneath it, a solid `brand` "N transactions to
+   review" bar into the review queue. The count is this month's, read from the
    Transactions list's default summary, so it always equals the Transactions
    tab's "N to review" banner; the queue opens with `?scope=month`, so older
    months' backlog is ignored there too.
 3. **This month** — one card: Spent (serif 32) against the month's total
-   budget with the budget-row meter and a tick for how far through the month
-   it is (no projections or pace verdicts), then Income and Saved
+   budget with the budget-row meter (no tick, projection or pace verdict),
+   then Income and Saved
    (income − spend). Income and Saved mask with the privacy toggle.
    No budget: "Set a budget" link instead of the meter.
 4. **Investments / Credit used** — one card under This month with a hairline

@@ -192,12 +192,12 @@ export function NetWorthHero({
       </Text>
       {loading ? (
         <View className="gap-2">
-          <Skeleton style={{ width: 230, height: 50 }} />
+          <Skeleton style={{ width: 260, height: 60 }} />
           <Skeleton style={{ width: 150, height: 26, borderRadius: 999 }} />
         </View>
       ) : (
         <View className="gap-2.5" accessible accessibilityLabel={spoken}>
-          <SplitMoney cents={heroCents} size={56} centsSize={28} lineHeight={58} />
+          <SplitMoney cents={heroCents} size={68} centsSize={32} lineHeight={72} />
           {hoveredPoint ? (
             <View className="h-[26px] justify-center">
               <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(13) }}>{dateLabel(hoveredPoint.asOfDate)}</Text>
