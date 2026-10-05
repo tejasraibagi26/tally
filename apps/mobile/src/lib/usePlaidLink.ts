@@ -14,13 +14,20 @@ import { apiGet, apiPost } from "@/lib/api";
 // wouldn't complete the redirect back into the app.
 export function usePlaidLink() {
   const [isLinking, setIsLinking] = useState(false);
+  // Which connection the open Link session is for ("create" for a new one),
+  // so only that card's button spins -- isLinking alone made every broken
+  // card's Reconnect spin at once.
+  const [linkingItemId, setLinkingItemId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const openLink = useCallback(
-    async (mode: "create" | "update", itemId?: string) => {
+    // Resolves true once Link finished and the follow-up exchange/resync
+    // succeeded; false on cancel or error.
+    async (mode: "create" | "update", itemId?: string): Promise<boolean> => {
       setError(null);
       setIsLinking(true);
+      setLinkingItemId(mode === "update" && itemId ? itemId : "create");
       try {
         // Mirrors apps/web/app/(app)/accounts/page.tsx's `mock={MOCK_MODE}`
         // on LinkButton exactly -- when the backend has no real Plaid
@@ -43,7 +50,7 @@ export function usePlaidLink() {
         if (mode === "create" && config.mockMode) {
           await apiPost("/api/mock/connect");
           await queryClient.invalidateQueries({ queryKey: ["accounts"] });
-          return;
+          return true;
         }
 
         const { linkToken } = await createLinkToken(mode, itemId);
@@ -73,7 +80,7 @@ export function usePlaidLink() {
             .catch(reject); // session creation itself failed (bad token, native error) -- otherwise this hangs forever unresolved
         });
 
-        if (!publicToken) return; // cancelled
+        if (!publicToken) return false; // cancelled
 
         // Matches apps/web/lib/usePlaidExchange.ts exactly: "create" exchanges
         // the public token for a new item; "update" re-authenticates an
@@ -85,14 +92,17 @@ export function usePlaidLink() {
         }
 
         await queryClient.invalidateQueries({ queryKey: ["accounts"] });
+        return true;
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong connecting your account.");
+        return false;
       } finally {
         setIsLinking(false);
+        setLinkingItemId(null);
       }
     },
     [queryClient],
   );
 
-  return { openLink, isLinking, error };
+  return { openLink, isLinking, linkingItemId, error };
 }

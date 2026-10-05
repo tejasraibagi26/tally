@@ -16,6 +16,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.16.0",
+    date: "2026-10-05",
+    changes: [
+      { kind: "improved", text: "Accounts redesigned: your net worth, assets and debts up top, and banks that need you listed first with a clear reason and a one-tap fix." },
+      { kind: "new", text: "When one or more banks need attention, a strip at the top opens a list where you can fix them all in one place." },
+      { kind: "improved", text: "Each problem gets its own fix: sign in again, renew access before it runs out, or retry when the bank itself is down." },
+      { kind: "fixed", text: "Reconnecting one bank no longer makes every Reconnect button spin, and a missing balance shows as \"—\" instead of $0.00." },
+    ],
+  },
+  {
     version: "1.15.1",
     date: "2026-10-03",
     changes: [{ kind: "fixed", text: "Android: the tab bar's tabs are evenly spaced again, with the highlight under the tab you're on." }],

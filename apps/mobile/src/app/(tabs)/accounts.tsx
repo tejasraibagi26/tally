@@ -1,319 +1,277 @@
-import { useState } from "react";
-import { View, Text, TextInput, ScrollView, ActivityIndicator, Pressable, RefreshControl, Alert, KeyboardAvoidingView, Platform } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { View, Text, ScrollView, ActivityIndicator, Pressable, RefreshControl, KeyboardAvoidingView, Platform, Animated } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Plus, RefreshCw, MoreHorizontal, Pencil, Check, X } from "lucide-react-native";
+import { Plus, RefreshCw } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
-import { MoneyText } from "@/components/ui/MoneyText";
-import { StatusChip } from "@/components/ui/StatusChip";
 import { TabHeader, SyncFreshness, hasSynced } from "@/components/ui/TabHeader";
-import { InstitutionActionsSheet } from "@/components/InstitutionActionsSheet";
-import { useAccounts, useUpdateAccountNickname, type Institution, type AccountRow } from "@/lib/queries/accounts";
+import { InstitutionActionsSheet, confirmRevokeItem } from "@/components/InstitutionActionsSheet";
+import { InstitutionCard, AccountLine, toneColor } from "@/components/accounts/InstitutionCard";
+import { AccountsSummary, AttentionStrip, SyncBanner } from "@/components/accounts/AccountsSummary";
+import { AccountsSkeleton, ConnectFirstBank, AccountsLoadError } from "@/components/accounts/AccountsPlaceholders";
+import { FixSheet } from "@/components/accounts/FixSheet";
+import { ScreenGlow } from "@/components/ui/ScreenGlow";
+import { useAccounts, type Institution } from "@/lib/queries/accounts";
 import { usePlaidLink } from "@/lib/usePlaidLink";
-import { useSync, useIsRefreshingItemBalances } from "@/lib/queries/plaid";
+import { useSync, useRefreshItemBalances, useRevokeItem, useItemRefreshStates } from "@/lib/queries/plaid";
+import { connectionState, type ConnectionAction } from "@/lib/connectionState";
+import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
-import { hairline } from "@/theme/colors";
-import { ScreenGlow } from "@/components/ui/ScreenGlow";
-import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 
-// MOBILE_DESIGN.md §5.5 -- grouped by institution, broken connections get a
-// critical badge + full-width Reconnect button, both wired to native Plaid
-// Link (Phase 5). See usePlaidLink.ts for the OAuth-redirect caveat.
-function InstitutionCard({
-  institution,
-  onReconnect,
-  onOpenMenu,
-  reconnecting,
-  baseCurrency,
-}: {
-  institution: Institution;
-  onReconnect: () => void;
-  onOpenMenu: () => void;
-  reconnecting: boolean;
-  baseCurrency?: string;
-}) {
-  const colors = useThemeColors();
-  const rf = useRF();
-  const initial = (institution.institutionName ?? "?").charAt(0).toUpperCase();
-  const broken = institution.badge === "critical";
-  const refreshing = useIsRefreshingItemBalances(institution.id);
+// MOBILE_DESIGN.md §5.5 -- grouped by institution, each card as loud as its
+// connection's health (lib/connectionState.ts): summary first, an attention
+// strip when any bank needs a tap, cards sorted most urgent first.
 
-  return (
-    <Card className="overflow-hidden">
-      <View className="flex-row items-center justify-between px-5 pt-[18px] pb-4">
-        <View className="flex-row items-center gap-3 flex-1 pr-3">
-          <View className={`w-8 h-8 rounded-full items-center justify-center ${broken ? "bg-negative-subtle" : "bg-brand-subtle"}`}>
-            <Text className={`font-ui-semibold ${broken ? "text-negative" : "text-brand"}`} style={{ fontSize: rf(13) }}>{initial}</Text>
-          </View>
-          <View className="flex-1">
-            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15) }} numberOfLines={1}>
-              {institution.institutionName ?? "Unknown"}
-            </Text>
-            {refreshing ? (
-              <View className="flex-row items-center gap-1.5">
-                <ActivityIndicator size="small" color={colors["text-2"]} style={{ transform: [{ scale: 0.7 }] }} />
-                <Text className="font-ui text-text-2" style={{ fontSize: rf(12) }}>Syncing…</Text>
-              </View>
-            ) : (
-              <Text className="font-ui text-text-2" style={{ fontSize: rf(12) }}>{relativeTime(institution.lastSyncedAt)}</Text>
-            )}
-          </View>
-        </View>
-        <View className="flex-row items-center gap-2" style={{ flexShrink: 0 }}>
-          <StatusChip status={institution.badge} />
-          {/* Opens InstitutionActionsSheet (Refresh balances / Manage access /
-              Revoke connection) -- a bare KeyRound icon here read as
-              decorative rather than tappable; "⋯" is the established
-              affordance for "more actions" and matches
-              components/plaid/ItemActionsMenu.tsx's web equivalent. */}
-          <Pressable
-            onPress={onOpenMenu}
-            hitSlop={8}
-            accessibilityLabel="Connection actions"
-            className="w-7 h-7 rounded-full items-center justify-center bg-sunken"
-          >
-            <MoreHorizontal size={16} color={colors["text-2"]} strokeWidth={2} />
-          </Pressable>
-        </View>
-      </View>
-
-      {institution.accounts.map((a, i) => (
-        <AccountLine key={a.id} account={a} showTopBorder={i > 0} colors={colors} baseCurrency={baseCurrency} />
-      ))}
-
-      {institution.accounts.length > 0 && (
-        <View
-          className="flex-row items-center justify-between px-5 py-3.5"
-          style={{ borderTopWidth: 1, borderTopColor: hairline(colors) }}
-        >
-          <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(13) }}>Total</Text>
-          <View className="flex-row items-baseline gap-1.5" style={{ flexShrink: 0 }}>
-            <MoneyText cents={institution.total} className="font-ui-semibold text-text" style={{ fontSize: rf(15) }} />
-            {/* The rows above are each labeled in their own currency, so a
-                mixed-currency connection's total would otherwise look like it
-                disagrees with them -- name the currency it was converted into. */}
-            {baseCurrency && institution.accounts.some((a) => a.currency !== baseCurrency) && (
-              <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(11) }}>{baseCurrency}</Text>
-            )}
-          </View>
-        </View>
-      )}
-
-      {broken && (
-        <View className="px-5 pb-5 pt-1">
-          <Pressable onPress={onReconnect} disabled={reconnecting} className="h-12 rounded-full items-center justify-center bg-brand active:opacity-90 disabled:opacity-50">
-            {reconnecting ? <ActivityIndicator color="#FFFFFF" /> : <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14.5) }}>Reconnect</Text>}
-          </Pressable>
-        </View>
-      )}
-    </Card>
-  );
-}
-
-function AccountLine({
-  account,
-  showTopBorder,
-  colors,
-  baseCurrency,
-}: {
-  account: AccountRow;
-  showTopBorder: boolean;
-  colors: ReturnType<typeof useThemeColors>;
-  baseCurrency?: string;
-}) {
-  const [editing, setEditing] = useState(false);
-  const [input, setInput] = useState(account.nickname ?? "");
-  const updateNickname = useUpdateAccountNickname(account.id);
-  const rf = useRF();
-
-  function save() {
-    updateNickname.mutate(input.trim() || null, { onSuccess: () => setEditing(false) });
-  }
-
-  if (editing) {
-    return (
-      <View
-        className="flex-row items-center gap-2 px-5 py-3"
-        style={showTopBorder ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined}
-      >
-        <TextInput
-          autoFocus
-          value={input}
-          onChangeText={setInput}
-          placeholder={account.realName}
-          placeholderTextColor={colors["text-3"]}
-          maxLength={60}
-          // h-10 clipped the tops of ascenders/tall letters (e.g. "TD CC") --
-          // Inter's line-height needs more than 40px of box to center inside
-          // without crowding the top edge. h-12 matches every other text
-          // input in the app (Field in settings.tsx/fire.tsx); the explicit
-          // style guards against the same clipping regardless of platform
-          // vertical-centering defaults.
-          className="flex-1 h-12 rounded-control bg-surface-2 px-3 font-ui text-text"
-          style={{ paddingVertical: 0, textAlignVertical: "center", fontSize: rf(14) }}
-        />
-        <Pressable onPress={save} disabled={updateNickname.isPending} hitSlop={10}>
-          <Check size={18} color={colors.positive} strokeWidth={2.25} />
-        </Pressable>
-        <Pressable
-          onPress={() => {
-            setEditing(false);
-            setInput(account.nickname ?? "");
-          }}
-          disabled={updateNickname.isPending}
-          hitSlop={10}
-        >
-          <X size={18} color={colors["text-3"]} strokeWidth={2.25} />
-        </Pressable>
-      </View>
-    );
-  }
-
-  return (
-    <View
-      className="flex-row items-center justify-between px-5 py-3.5"
-      style={showTopBorder ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined}
-    >
-      <Pressable onPress={() => setEditing(true)} className="flex-row items-center gap-1.5 flex-1 pr-3">
-        <View className="gap-0.5 flex-1">
-          <View className="flex-row items-center gap-1.5">
-            <Text className="font-ui-medium text-text" style={{ fontSize: rf(14.5), flexShrink: 1 }} numberOfLines={1}>
-              {account.name}
-            </Text>
-            <Pencil size={12} color={colors["text-3"]} strokeWidth={2} />
-          </View>
-          {account.mask && (
-            <Text className="text-text-2" style={{ fontFamily: "JetBrainsMono", fontSize: rf(12) }}>
-              ····{account.mask}
-            </Text>
-          )}
-        </View>
-      </Pressable>
-      <View style={{ flexShrink: 0, alignItems: "flex-end" }}>
-        <MoneyText cents={account.currentBalance ?? 0} className="text-text" style={{ fontSize: rf(15) }} />
-        {baseCurrency && account.currency !== baseCurrency && (
-          <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(11) }}>{account.currency}</Text>
-        )}
-      </View>
-    </View>
-  );
-}
-
-function relativeTime(iso: string | null): string {
-  if (!iso) return "Never synced";
-  const hours = Math.floor((Date.now() - new Date(iso).getTime()) / 3_600_000);
-  if (hours < 1) return "Updated just now";
-  if (hours < 24) return `Updated ${hours}h ago`;
-  return `Updated ${Math.floor(hours / 24)}d ago`;
-}
+/** How long the "You're reconnected" confirmation stays before the card goes quiet. */
+const RECONNECTED_MS = 6000;
+const TOAST_MS = 4000;
 
 export default function AccountsScreen() {
   const insets = useSafeAreaInsets();
   const tabBarClearance = useTabBarBottomClearance();
   const colors = useThemeColors();
   const rf = useRF();
-  const { data, isLoading, refetch, isRefetching } = useAccounts();
-  const accountCount = (data?.institutions.reduce((n, i) => n + i.accounts.length, 0) ?? 0) + (data?.unlinkedAccounts.length ?? 0);
-  const syncTimes = data?.institutions.map((i) => i.lastSyncedAt) ?? [];
-  const { openLink, isLinking, error } = usePlaidLink();
+  const { data, isLoading, isError, refetch, isRefetching, dataUpdatedAt } = useAccounts();
+  const { openLink, isLinking, linkingItemId, error: linkError } = usePlaidLink();
   const sync = useSync();
-  const [menuInstitutionId, setMenuInstitutionId] = useState<string | null>(null);
-  const menuInstitution = data?.institutions.find((i) => i.id === menuInstitutionId) ?? null;
+  const refreshBalances = useRefreshItemBalances();
+  const revoke = useRevokeItem();
+  const refreshStates = useItemRefreshStates();
 
-  async function handleSync() {
+  const [menuInstitutionId, setMenuInstitutionId] = useState<string | null>(null);
+  const [fixOpen, setFixOpen] = useState(false);
+  const [justReconnected, setJustReconnected] = useState<ReadonlySet<string>>(new Set());
+  const [syncBanner, setSyncBanner] = useState<{ title: string; body?: string } | null>(null);
+  const [dismissedLinkError, setDismissedLinkError] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const hideToast = useCallback(() => setToast(null), []);
+
+  const institutions = useMemo(() => data?.institutions ?? [], [data]);
+  const accountCount = institutions.reduce((n, i) => n + i.accounts.length, 0) + (data?.unlinkedAccounts.length ?? 0);
+  const syncTimes = institutions.map((i) => i.lastSyncedAt);
+
+  const cards = useMemo(() => {
+    const withState = institutions.map((inst) => {
+      const r = refreshStates.get(inst.id);
+      return {
+        institution: inst,
+        state: connectionState(inst, {
+          refreshing: (r?.refreshing ?? false) || sync.isPending,
+          linking: linkingItemId === inst.id,
+          justReconnected: justReconnected.has(inst.id),
+          refreshFailed: r?.failed ?? false,
+        }),
+      };
+    });
+    return withState.sort(
+      (a, b) => a.state.rank - b.state.rank || (a.institution.institutionName ?? "").localeCompare(b.institution.institutionName ?? ""),
+    );
+  }, [institutions, refreshStates, sync.isPending, linkingItemId, justReconnected]);
+
+  const needsYou = cards.filter((c) => c.state.needsAttention);
+  const blockedNames = needsYou.filter((c) => c.state.level === "blocked").map((c) => c.institution.institutionName ?? "a bank");
+  const menuCard = cards.find((c) => c.institution.id === menuInstitutionId) ?? null;
+
+  async function reconnect(inst: Institution) {
+    const ok = await openLink("update", inst.id);
+    if (!ok) return;
+    setJustReconnected((prev) => new Set(prev).add(inst.id));
+    setTimeout(() => {
+      setJustReconnected((prev) => {
+        const next = new Set(prev);
+        next.delete(inst.id);
+        return next;
+      });
+    }, RECONNECTED_MS);
+  }
+
+  function runAction(inst: Institution, action: ConnectionAction) {
+    if (action.kind === "signIn") reconnect(inst);
+    else if (action.kind === "refresh") refreshBalances.mutate(inst.id);
+    else confirmRevokeItem(inst.institutionName ?? "this institution", () => revoke.mutate(inst.id));
+  }
+
+  async function handleSyncAll() {
+    setSyncBanner(null);
     try {
       const res = await sync.mutateAsync(["balances"]);
       const failed = res.results.filter((r) => r.failures.length > 0);
-      if (failed.length > 0) {
-        Alert.alert(
-          "Some accounts didn't sync",
-          failed.map((f) => `${f.institutionName ?? "An account"}: ${f.failures.map((x) => x.label).join(", ")}`).join("\n"),
-        );
+      const total = res.results.length;
+      if (failed.length === 0) {
+        setToast(total === 1 ? "Your bank is synced" : `All ${total} banks synced`);
+      } else {
+        // A failure stays on screen (MOBILE_DESIGN.md toast rule); the
+        // failed banks' own cards say what to do about it.
+        setSyncBanner({
+          title: failed.length === 1 ? `${failed[0]!.institutionName ?? "A bank"} didn't sync` : `${failed.length} banks didn't sync`,
+          body: `${total - failed.length} of ${total} synced. The cards below say what to do next.`,
+        });
       }
     } catch {
-      Alert.alert("Sync failed", "Please try again in a moment.");
+      setSyncBanner({ title: "Sync failed", body: "Check your connection and try again." });
     }
   }
+
+  const hasInstitutions = institutions.length > 0;
+  const showLinkError = linkError && linkError !== dismissedLinkError;
 
   return (
     <View className="flex-1 bg-canvas">
       <ScreenGlow />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
-      <ScrollView
-        className="flex-1"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 + tabBarClearance }}
-        refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View className="px-5 pb-4">
-          <TabHeader
-            title="Accounts"
-            meta={[
-              data && `${accountCount} account${accountCount === 1 ? "" : "s"}`,
-              data && data.institutions.length > 0 && `${data.institutions.length} institution${data.institutions.length === 1 ? "" : "s"}`,
-              data && hasSynced(syncTimes) && <SyncFreshness key="sync" syncedAt={syncTimes} />,
-            ]}
-            actions={
-              <>
-          {data && data.institutions.length > 0 && (
-            <Pressable
-              onPress={handleSync}
-              disabled={sync.isPending}
-              className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50 bg-brand-subtle"
-            >
-              {sync.isPending ? <ActivityIndicator size="small" color={colors.brand} /> : <RefreshCw size={14} color={colors.brand} strokeWidth={2} />}
-              <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Sync</Text>
-            </Pressable>
-          )}
-          <Pressable
-            onPress={() => openLink("create")}
-            disabled={isLinking}
-            className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50 bg-brand-subtle"
-          >
-            {isLinking ? <ActivityIndicator size="small" color={colors.brand} /> : <Plus size={15} color={colors.brand} strokeWidth={2} />}
-            <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Add</Text>
-          </Pressable>
-              </>
-            }
-          />
-        </View>
-
-      {error && (
-        <View className="mx-5 mb-4 rounded-control px-4 py-3 bg-negative-subtle">
-          <Text className="font-ui text-negative" style={{ fontSize: rf(13.5) }}>{error}</Text>
-        </View>
-      )}
-
-      {isLoading ? (
-        <ActivityIndicator className="mt-8" />
-      ) : (
-        <View className="gap-5 px-5">
-          {data?.institutions.map((inst) => (
-            <InstitutionCard
-              key={inst.id}
-              institution={inst}
-              onReconnect={() => openLink("update", inst.id)}
-              onOpenMenu={() => setMenuInstitutionId(inst.id)}
-              reconnecting={isLinking}
-              baseCurrency={data?.totals.currency}
+        <ScrollView
+          className="flex-1"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 + tabBarClearance }}
+          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.brand} />}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className="px-5 pb-4">
+            <TabHeader
+              title="Accounts"
+              meta={
+                data && !hasInstitutions && data.unlinkedAccounts.length === 0
+                  ? ["Nothing connected"]
+                  : [
+                      data && `${accountCount} account${accountCount === 1 ? "" : "s"}`,
+                      hasInstitutions && `${institutions.length} bank${institutions.length === 1 ? "" : "s"}`,
+                      data && hasSynced(syncTimes) && <SyncFreshness key="sync" syncedAt={syncTimes} />,
+                    ]
+              }
+              actions={
+                hasInstitutions && (
+                  <>
+                    <Pressable
+                      onPress={handleSyncAll}
+                      disabled={sync.isPending}
+                      accessibilityLabel="Sync all banks"
+                      className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50 bg-brand-subtle"
+                    >
+                      {sync.isPending ? <ActivityIndicator size="small" color={colors.brand} /> : <RefreshCw size={14} color={colors.brand} strokeWidth={2} />}
+                      <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Sync</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => openLink("create")}
+                      disabled={isLinking}
+                      className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50 bg-brand-subtle"
+                    >
+                      {linkingItemId === "create" ? <ActivityIndicator size="small" color={colors.brand} /> : <Plus size={15} color={colors.brand} strokeWidth={2} />}
+                      <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Add</Text>
+                    </Pressable>
+                  </>
+                )
+              }
             />
-          ))}
-          {data && data.institutions.length === 0 && <Text className="font-ui text-text-3" style={{ fontSize: rf(14) }}>No accounts connected yet.</Text>}
-        </View>
-      )}
-      </ScrollView>
+          </View>
+
+          <View className="gap-4 px-5">
+            {showLinkError && (
+              <SyncBanner tone="negative" title="Couldn't connect to your bank" body={linkError} onDismiss={() => setDismissedLinkError(linkError)} />
+            )}
+            {syncBanner && <SyncBanner tone="warning" title={syncBanner.title} body={syncBanner.body} onDismiss={() => setSyncBanner(null)} />}
+            {isError && data && (
+              <SyncBanner
+                tone="warning"
+                title="Couldn't refresh"
+                body={`Showing saved data from ${new Date(dataUpdatedAt).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}. Pull down to try again.`}
+              />
+            )}
+
+            {isLoading ? (
+              <AccountsSkeleton />
+            ) : !data ? (
+              isError && <AccountsLoadError onRetry={() => refetch()} retrying={isRefetching} />
+            ) : !hasInstitutions && data.unlinkedAccounts.length === 0 ? (
+              <ConnectFirstBank onConnect={() => openLink("create")} connecting={isLinking} />
+            ) : (
+              <>
+                <AccountsSummary net={data.totals.net} assets={data.totals.assets} liabilities={data.totals.liabilities} />
+                {needsYou.length > 0 && <AttentionStrip count={needsYou.length} blockedNames={blockedNames} onPress={() => setFixOpen(true)} />}
+                <View className="gap-5">
+                  {cards.map(({ institution, state }) => (
+                    <InstitutionCard
+                      key={institution.id}
+                      institution={institution}
+                      state={state}
+                      onAction={(action) => runAction(institution, action)}
+                      onOpenMenu={() => setMenuInstitutionId(institution.id)}
+                      baseCurrency={data.totals.currency}
+                    />
+                  ))}
+                </View>
+                {data.unlinkedAccounts.length > 0 && (
+                  <View className="gap-2 mt-1">
+                    <Text className="font-ui-semibold text-text-3 px-1" style={{ fontSize: rf(11.5), letterSpacing: 0.6, textTransform: "uppercase" }}>
+                      Other accounts
+                    </Text>
+                    {/* Accounts with no bank connection behind them -- already
+                        counted in the totals above, so they're listed here
+                        rather than left as an unexplained difference. */}
+                    <Card className="overflow-hidden">
+                      {data.unlinkedAccounts.map((a, i) => (
+                        <AccountLine key={a.id} account={a} showTopBorder={i > 0} baseCurrency={data.totals.currency} caption="Not linked to a bank" />
+                      ))}
+                    </Card>
+                  </View>
+                )}
+              </>
+            )}
+          </View>
+        </ScrollView>
       </KeyboardAvoidingView>
 
-      {menuInstitution && (
+      <Toast message={toast} onHidden={hideToast} bottom={tabBarClearance + 16} />
+
+      <FixSheet
+        visible={fixOpen}
+        onClose={() => setFixOpen(false)}
+        items={needsYou}
+        // Let the sheet's close animation finish first: Plaid Link presents
+        // its own native modal, which iOS won't stack on a closing one.
+        onAction={(inst, action) => setTimeout(() => runAction(inst, action), 350)}
+      />
+
+      {menuCard && (
         <InstitutionActionsSheet
           visible={menuInstitutionId !== null}
           onClose={() => setMenuInstitutionId(null)}
-          itemId={menuInstitution.id}
-          institutionName={menuInstitution.institutionName ?? "this institution"}
-          onManageAccess={() => openLink("update", menuInstitution.id)}
+          itemId={menuCard.institution.id}
+          institutionName={menuCard.institution.institutionName ?? "this institution"}
+          onManageAccess={() => reconnect(menuCard.institution)}
+          status={{
+            label: menuCard.state.notice?.title ?? (menuCard.state.level === "quiet" ? "Up to date" : menuCard.state.statusLine),
+            color: menuCard.state.level === "quiet" ? colors.text! : toneColor(colors, menuCard.state.tone),
+          }}
+          lastSyncedAt={menuCard.institution.lastSyncedAt}
+          accountCount={menuCard.institution.accounts.length}
         />
       )}
     </View>
+  );
+}
+
+/** Bottom-center, above the tab bar, 4s (MOBILE_DESIGN.md's toast row). */
+function Toast({ message, onHidden, bottom }: { message: string | null; onHidden: () => void; bottom: number }) {
+  const rf = useRF();
+  const colors = useThemeColors();
+  const [opacity] = useState(() => new Animated.Value(0));
+
+  useEffect(() => {
+    if (!message) return;
+    Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: true }).start();
+    const t = setTimeout(() => {
+      Animated.timing(opacity, { toValue: 0, duration: 220, useNativeDriver: true }).start(() => onHidden());
+    }, TOAST_MS);
+    return () => clearTimeout(t);
+  }, [message, opacity, onHidden]);
+
+  if (!message) return null;
+  return (
+    <Animated.View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, bottom, alignItems: "center", opacity }}>
+      <View className="flex-row items-center gap-2 rounded-full bg-raised px-4 py-2.5" style={{ borderWidth: 1, borderColor: colors.border }}>
+        <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.positive }} />
+        <Text className="font-ui-medium text-text" style={{ fontSize: rf(13) }}>{message}</Text>
+      </View>
+    </Animated.View>
   );
 }

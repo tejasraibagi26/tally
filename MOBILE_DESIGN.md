@@ -291,16 +291,34 @@ at top, swipe-down or backdrop-tap to dismiss.
 
 ### 5.5 Accounts (Phase B)
 
-- Grouped by institution, same as `DESIGN.md §10.3` — each institution as a
-  card: logo, name, health badge (Fresh/Stale/Needs attention, same
-  `DESIGN.md §5.3` status colors + icon + label), "Updated Xh ago", then each
-  account as a row beneath (name, mask in mono, balance right-aligned).
-- Broken connection: card gets a `critical` badge and a full-width
-  "Reconnect" primary button beneath its account rows (not a small inline
-  link) — reconnecting on a phone is a deliberate, unmissable action.
-- Pull-to-refresh triggers a manual sync check (`app/api/items/[id]/sync` per
-  account, or the aggregate `app/api/sync` — implementation detail for Phase
-  2/B, not a UI concern here).
+Redesigned in mobile v1.16.0. Every connection's health resolves through one
+function, `src/lib/connectionState.ts`, to a level, a status line, at most one
+notice and at most one action. Cards only render what it returns.
+
+- **Top of screen**: TabHeader, then a Net worth / Assets / Debts summary
+  (from `/api/accounts` totals). When any connection needs a tap, a strip
+  ("2 banks need you": coral if any is blocked, amber otherwise) opens the
+  Fix sheet, which lists each problem bank with its own action.
+- **Levels**: *quiet* (healthy: dot + "Synced 12m ago" only), *info* (6–48h
+  behind, importing history, just reconnected: no action), *act* (not synced
+  >48h or never, access ending, bank error: amber ring, notice and button),
+  *blocked* (sign-in expired, access revoked: coral ring and notice, balances
+  dimmed, card collapsed to an "as of" total). Cards sort blocked → act →
+  info → quiet, then by name.
+- **Buttons take their state's color** (coral, amber), never brand green,
+  so the button reads as the same severity as the notice it sits in. Only
+  "Remove" (revoked) is neutral, since it's an alternative, not the fix.
+- **Different problems, different fixes**: an expired sign-in or revoked
+  access opens Plaid Link in update mode; a bank error retries first and
+  offers "Sign in again" after 24h down or a failed retry; a stale or
+  never-synced connection offers "Sync now" first.
+- Healthy cards with more than 3 accounts show 3 plus "+N more". Missing
+  balances render "—", not $0.00. Accounts with no bank connection are
+  listed under "Other accounts".
+- Sync-all completion is a toast; a partial or total failure is a persistent,
+  dismissible banner (the §8 toast rule). Pull-to-refresh refetches.
+- Loading is shape-matched skeletons; no data + error is a "Couldn't load"
+  card with Try again; cached data + error keeps the data with a banner.
 
 ### 5.6 Budgets (Phase C)
 

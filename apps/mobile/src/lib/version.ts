@@ -92,8 +92,16 @@ import Constants from "expo-constants";
  * transaction detail. Tab screens pad for it via useTabBarBottomClearance.
  * 1.15.1 fixes that bar's tabs bunching up on the left: NativeWind's
  * Pressable wrapper drops a function `style`, so the flex:1 never applied.
+ * 1.16.0 redesigns the Accounts tab around connection health
+ * (lib/connectionState.ts): a net worth / assets / debts summary, a
+ * "N banks need you" strip with a Fix sheet, cards sorted most urgent
+ * first, and one notice per card whose copy and state-colored action
+ * depend on why it's unhealthy (expired sign-in, access ending, bank down,
+ * not syncing, importing). Broken cards collapse to a dimmed "as of"
+ * total; only the reconnecting card's button spins; missing balances show
+ * "—"; accounts with no bank are listed; sync-all reports via toast/banner.
  */
-export const APP_VERSION = "1.15.1";
+export const APP_VERSION = "1.16.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

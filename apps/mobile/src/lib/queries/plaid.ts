@@ -1,4 +1,4 @@
-import { useIsMutating, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useMutationState, useQueryClient } from "@tanstack/react-query";
 import { apiPost, apiDelete } from "@/lib/api";
 
 // Server-side only: builds a short-lived Link token. This is the only Plaid
@@ -33,34 +33,49 @@ interface SyncResult {
 // Matches apps/web/app/api/items/[id]/refresh-balances/route.ts's contract
 // exactly — lighter-weight than useSync (balances only, one item), backing
 // the institution actions sheet's "Refresh balances" row.
-const refreshBalancesKey = (itemId: string) => ["refresh-item-balances", itemId] as const;
+// The item id is the mutation's variable (not part of its key) so one hook
+// instance can refresh any connection -- the card, the actions sheet and the
+// Fix sheet all start refreshes, and useItemRefreshStates reads them all back.
+const refreshBalancesKey = ["refresh-item-balances"] as const;
 
-export function useRefreshItemBalances(itemId: string) {
+export function useRefreshItemBalances() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationKey: refreshBalancesKey(itemId),
-    mutationFn: () => apiPost<{ ok: true }>(`/api/items/${itemId}/refresh-balances`),
-    onSuccess: () => {
+    mutationKey: refreshBalancesKey,
+    mutationFn: (itemId: string) => apiPost<{ ok: true }>(`/api/items/${itemId}/refresh-balances`),
+    onSettled: () => {
+      // A failed refresh can still have flipped the item's status server-side.
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
       queryClient.invalidateQueries({ queryKey: ["overview"] });
     },
   });
 }
 
-// The actions sheet closes (and unmounts) the instant "Refresh balances" is
-// tapped, taking its own isPending spinner with it -- so the institution card
-// watches the in-flight mutation by key instead to show its "Syncing…" state.
-export function useIsRefreshingItemBalances(itemId: string): boolean {
-  return useIsMutating({ mutationKey: refreshBalancesKey(itemId) }) > 0;
+/**
+ * Every connection's latest per-item refresh, keyed by item id -- the
+ * Accounts screen needs this for all cards at once (to sort them and fill the
+ * Fix sheet), and a refresh can be started from the card, the actions sheet
+ * or the Fix sheet, each with its own useMutation instance. Reading the
+ * mutation cache by key prefix sees all of them.
+ */
+export function useItemRefreshStates(): Map<string, { refreshing: boolean; failed: boolean }> {
+  const latest = useMutationState({
+    filters: { mutationKey: refreshBalancesKey },
+    select: (m) => ({ itemId: String(m.state.variables ?? ""), status: m.state.status }),
+  });
+  const byItem = new Map<string, { refreshing: boolean; failed: boolean }>();
+  // Mutation cache order is creation order, so later entries win.
+  for (const m of latest) byItem.set(m.itemId, { refreshing: m.status === "pending", failed: m.status === "error" });
+  return byItem;
 }
 
 // Matches apps/web/app/api/items/[id]/route.ts's DELETE contract exactly —
 // removes the item from Plaid (best-effort) and deletes everything locally
 // tied to it. Backs the institution actions sheet's "Revoke connection" row.
-export function useRevokeItem(itemId: string) {
+export function useRevokeItem() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: () => apiDelete<{ ok: true }>(`/api/items/${itemId}`),
+    mutationFn: (itemId: string) => apiDelete<{ ok: true }>(`/api/items/${itemId}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
       queryClient.invalidateQueries({ queryKey: ["overview"] });
