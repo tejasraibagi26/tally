@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.21.2",
+    date: "2026-10-05",
+    changes: [{ kind: "fixed", text: "Subscriptions: editing a bill's next date now opens in a dialog in the middle of the screen, so you no longer have to scroll the table to reach Save." }],
+  },
+  {
     version: "1.21.1",
     date: "2026-10-05",
     changes: [{ kind: "improved", text: "Budgets: fixed budgets like rent are marked with a clear \"Fixed\" tag." }],

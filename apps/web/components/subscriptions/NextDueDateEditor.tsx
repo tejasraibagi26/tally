@@ -1,25 +1,26 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { Modal } from "@/components/ui/Modal";
 
 /**
- * The Actions column's edit-next-date control — a self-contained icon
- * button + popover (same anchor/click-outside/Escape pattern as
- * components/plaid/ItemActionsMenu.tsx), rather than an inline form in the
- * "Next date" cell itself: that used to overflow into the Status/Actions
- * columns next to it since the edit form (date input + Save + Cancel) is
- * wider than the column, and a CSS grid doesn't clip or reflow siblings for
- * an overflowing cell.
+ * The Actions column's edit-next-date control: an icon button that opens the
+ * date form in a centered Modal. The form used to be a popover anchored under
+ * the button, which the table's scroll container clipped, so reaching Save
+ * meant scrolling. The Modal is fixed to the viewport and so never clipped.
  */
 export function NextDueDateEditor({
   streamId,
+  description,
   predictedNextDate,
   manualNextDueDate,
 }: {
   streamId: string;
+  /** The bill's name, shown in the dialog heading. */
+  description: string;
   predictedNextDate: string | null;
   manualNextDueDate: string | null;
 }) {
@@ -27,26 +28,19 @@ export function NextDueDateEditor({
   const [open, setOpen] = useState(false);
   const [dateInput, setDateInput] = useState(manualNextDueDate ?? predictedNextDate ?? "");
   const [saving, setSaving] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const [error, setError] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  // Stable identity: Modal refocuses its dialog whenever onClose changes, which would pull focus out of the date field on every keystroke.
+  const close = useCallback(() => setOpen(false), []);
 
+  // Modal moves focus to its dialog on open; put it back on the date field once that has happened.
   useEffect(() => {
-    if (!open) return;
-    function handleClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setOpen(false);
-    }
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("mousedown", handleClick);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", handleClick);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
+    if (open) inputRef.current?.focus();
   }, [open]);
 
   async function save(nextManualDate: string | null) {
     setSaving(true);
+    setError(false);
     try {
       const res = await fetch(`/api/recurring-streams/${streamId}`, {
         method: "PATCH",
@@ -58,6 +52,7 @@ export function NextDueDateEditor({
       router.refresh();
     } catch (err) {
       console.error(err);
+      setError(true);
     } finally {
       setSaving(false);
     }
@@ -70,55 +65,59 @@ export function NextDueDateEditor({
   }
 
   return (
-    <div className="relative" ref={menuRef}>
+    <>
       <button
         type="button"
         onClick={() => {
           setDateInput(manualNextDueDate ?? predictedNextDate ?? "");
-          setOpen((v) => !v);
+          setError(false);
+          setOpen(true);
         }}
         title="Edit next date"
         aria-label="Edit next date"
-        aria-haspopup="true"
-        aria-expanded={open}
+        aria-haspopup="dialog"
         className="w-7 h-7 flex-none rounded-control flex items-center justify-center text-text-3 hover:text-text hover:bg-sunken"
       >
         <Pencil size={14} strokeWidth={1.75} />
       </button>
 
-      {open && (
-        <form
-          onSubmit={submit}
-          className="absolute right-0 top-full mt-1 z-20 w-64 bg-raised border border-border rounded-control shadow-overlay p-3 flex flex-col gap-2.5"
-        >
-          <span className="text-xs font-medium uppercase tracking-wide text-text-3">Next date</span>
-          <input
-            type="date"
-            autoFocus
-            value={dateInput}
-            onChange={(e) => setDateInput(e.target.value)}
-            className="h-9 w-full rounded-control bg-surface-2 border border-border-strong px-2 text-sm text-text"
-          />
-          <div className="flex items-center gap-2">
-            <Button type="submit" size="sm" disabled={saving} className="flex-1">
-              {saving ? "Saving…" : "Save"}
-            </Button>
-            <Button type="button" variant="ghost" size="sm" disabled={saving} onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
+      <Modal open={open} onClose={close} width={480}>
+        <form onSubmit={submit} className="p-6 flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-xl font-semibold text-text m-0">Edit next date</h2>
+            <p className="m-0 text-[15px] text-text-2 truncate">{description}</p>
           </div>
+          <label className="flex flex-col gap-1.5">
+            <span className="text-xs font-medium uppercase tracking-wide text-text-3">Next date</span>
+            <input
+              ref={inputRef}
+              type="date"
+              value={dateInput}
+              onChange={(e) => setDateInput(e.target.value)}
+              className="h-10 w-full rounded-control bg-surface-2 border border-border-strong px-3 text-sm text-text"
+            />
+          </label>
+          {error && <p className="m-0 text-[13px] text-negative">Couldn&apos;t save the date. Try again.</p>}
           {manualNextDueDate && (
             <button
               type="button"
-              className="text-xs text-text-3 hover:text-negative disabled:opacity-40 text-left"
+              className="text-[13px] text-text-3 hover:text-negative disabled:opacity-40 text-left self-start"
               disabled={saving}
               onClick={() => void save(null)}
             >
               Clear override (go back to auto-detected)
             </button>
           )}
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <Button type="button" variant="ghost" disabled={saving} onClick={close}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={saving || !dateInput}>
+              {saving ? "Saving…" : "Save"}
+            </Button>
+          </div>
         </form>
-      )}
-    </div>
+      </Modal>
+    </>
   );
 }

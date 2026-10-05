@@ -104,7 +104,7 @@ export function SubscriptionsTable({ streams }: { streams: SubscriptionStream[] 
             )}
           </span>
           <span className="flex items-center gap-1">
-            <NextDueDateEditor streamId={s.id} predictedNextDate={s.predictedNextDate} manualNextDueDate={s.manualNextDueDate} />
+            <NextDueDateEditor streamId={s.id} description={s.description ?? s.merchantKey} predictedNextDate={s.predictedNextDate} manualNextDueDate={s.manualNextDueDate} />
             <RemoveBillButton streamId={s.id} description={s.description ?? s.merchantKey} />
           </span>
         </div>
