@@ -123,3 +123,38 @@ export const CREDIT_UTILIZATION_LIMIT = 0.3;
 export function creditHealth(utilization: number): { label: "Healthy" | "High"; tone: "brand" | "warning" } {
   return utilization < CREDIT_UTILIZATION_LIMIT ? { label: "Healthy", tone: "brand" } : { label: "High", tone: "warning" };
 }
+
+/**
+ * How sure the detector has to be before a guessed bill is listed. A stream
+ * scores 0.7 x (1 - biggest gap wobble / 4 days) + 0.3 x (charges / 6), so 0.5
+ * keeps three or more charges that land within about two days of each other
+ * and drops loose three-charge patterns and lone annual pairs (capped at 0.4).
+ */
+export const MIN_UPCOMING_CONFIDENCE = 0.5;
+
+export interface UpcomingStreamInput {
+  /** The date it's expected: the user's override, else the detector's prediction. */
+  dueDate: string | null;
+  /** Added by the user rather than detected. */
+  isManual: boolean;
+  /** A due date the user set on the stream. */
+  manualNextDueDate: string | null;
+  status: string;
+  /** Cents; negative is money out, positive is money in. */
+  averageAmount: number;
+  confidence: number | string | null;
+}
+
+/**
+ * Whether a recurring stream belongs in Upcoming. A bill the user added, or
+ * whose due date they set, is theirs to vouch for and only has to be in the
+ * window. A detected one must also be active, be spending (a paycheck, bonus
+ * or refund is never a bill) and clear MIN_UPCOMING_CONFIDENCE. `today` and
+ * `cutoff` are YYYY-MM-DD, both inclusive.
+ */
+export function qualifiesAsUpcoming(s: UpcomingStreamInput, today: string, cutoff: string): boolean {
+  if (s.dueDate == null || s.dueDate < today || s.dueDate > cutoff) return false;
+  if (s.isManual || s.manualNextDueDate != null) return true;
+  if (s.status !== "active") return false;
+  return s.averageAmount < 0 && Number(s.confidence ?? 0) >= MIN_UPCOMING_CONFIDENCE;
+}

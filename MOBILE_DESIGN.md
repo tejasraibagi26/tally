@@ -265,6 +265,11 @@ net-worth range and delta, credit band) live in `@tally/core/overviewView`.
    paid fixed-amount budgets skipped) as meter rows, "View all" → Budgets tab.
 6. **Upcoming** — next 3 bills with a date tile, a due label ("Due today",
    "tomorrow", "in 3 days") and the amount; "View all" only when more exist.
+   Only spending is listed (never a detected paycheck, bonus or refund), a
+   dismissed bill stays gone, and a guessed bill must clear a confidence bar
+   (`qualifiesAsUpcoming`); card payments and bills you added or dated
+   yourself always count. A bill Tally guessed shows a "⋯" and opens a sheet
+   with "This won't recur", which dismisses the stream behind it.
 7. **Recent activity** — last 5 transactions in the Transactions row grammar
    (avatar, merchant, Pending chip, review dot, "Category · day", amount).
 8. **Where it went** — category spend bar, last because it's analysis rather
