@@ -249,12 +249,13 @@ net-worth range and delta, credit band) live in `@tally/core/overviewView`.
    review" row into the review queue (this month's count from
    `/api/analytics/overview` `unreviewed`, matching the Transactions banner).
 3. **This month** — one card: Spent (serif 32) against the month's total
-   budget with the budget-row meter and pace tick, then Income and Saved
+   budget with the budget-row meter and a tick for how far through the month
+   it is (no projections or pace verdicts), then Income and Saved
    (income − spend). Income and Saved mask with the privacy toggle.
    No budget: "Set a budget" link instead of the meter.
-4. **Investments / Credit used** — a pair of tiles under This month; one
-   fills the row, none renders nothing; stacks on narrow or large-text
-   screens. Credit reads "Healthy" under 30% of the limit, "High" at or over.
+4. **Investments / Credit used** — one card under This month with a hairline
+   between the two figures; one alone fills the card, none renders nothing;
+   stacks on narrow or large-text screens. Credit reads "Healthy" under 30% of the limit, "High" at or over.
 5. **Budget this month** — the three most-used budgets (over-budget first;
    paid fixed-amount budgets skipped) as meter rows, "View all" → Budgets tab.
 6. **Upcoming** — next 3 bills with a date tile, a due label ("Due today",

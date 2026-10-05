@@ -17,9 +17,9 @@ function deltaLabel(current: number, prior: number | undefined): string | undefi
 }
 
 /**
- * This month in one card: what's been spent against the month's budget (with
- * the same pace tick and bar rules as a budget row), then income and what's
- * left of it. Income and Saved mask with the privacy toggle (Saved would
+ * This month in one card: what's been spent against the month's budget (the
+ * same bar rules as a budget row, plus a tick for how far through the month
+ * it is -- no projections or pace verdicts), then income and what's left of it. Income and Saved mask with the privacy toggle (Saved would
  * reveal income); Spent and the budget don't.
  */
 export function MonthCard({
@@ -47,7 +47,6 @@ export function MonthCard({
   const usedPct = totalBudgeted > 0 ? Math.round((spend / totalBudgeted) * 100) : 0;
   const saved = income - spend;
   const fill = budget?.barTone === "warning" ? colors.warning : colors.brand;
-  const onPace = budget != null && budget.pacePct != null && !budget.aheadOfPace && budget.labelTone === "default";
 
   return (
     <View className="gap-3">
@@ -79,7 +78,6 @@ export function MonthCard({
               <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>{usedPct}% used</Text>
               <Text className="font-ui" style={{ fontSize: rf(12), color: toneColorFor(colors, budget.labelTone === "default" ? "muted" : budget.labelTone) }}>
                 {budget.label}
-                {budget.note ? <Text style={{ color: toneColorFor(colors, budget.noteTone) }}>{` · ${budget.note}`}</Text> : onPace ? " · on pace" : ""}
               </Text>
             </View>
           </View>
