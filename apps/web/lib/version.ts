@@ -107,8 +107,16 @@
  * filters, a holding side panel (?holding=), and stale-connection notices
  * from connectionState. /api/investments/transactions now returns
  * converted amounts and account names.
+ * 1.19.0 redesigns Budgets (@tally/core/budgetView, shared with mobile):
+ * "left to spend" with a per-day allowance, rows grouped by parent
+ * category in each budget's own color with a pace tick and "On pace for"
+ * projection (amber 80-<100%, red overage -- replacing green/amber/red),
+ * a "Not budgeted" row, "Worth a look" nudges, one-tap setup for an empty
+ * month (copy last month / 3-month averages, POST /api/budgets/setup), a
+ * past-month report, and a budget side panel with 6-month history
+ * (GET /api/budgets/history), plain toggles and Remove with undo.
  */
-export const APP_VERSION = "1.18.0";
+export const APP_VERSION = "1.19.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

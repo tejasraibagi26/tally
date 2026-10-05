@@ -44,7 +44,7 @@ export function BudgetMeterList({
         const totalAvailable = b.amount + b.rolloverFromPrior;
         const pct = totalAvailable > 0 ? Math.min(1, b.spend / totalAvailable) : b.spend > 0 ? 1 : 0;
         const overBudget = b.remaining < 0;
-        // See BudgetRow.tsx: a fixed monthly charge (rent, insurance) posts
+        // See @tally/core/budgetView: a fixed monthly charge (rent, insurance) posts
         // once rather than accruing daily, so this linear extrapolation
         // doesn't apply to it.
         const projected = b.isFixedAmount ? null : computeBurnRateProjection(b.spend, daysElapsed, daysInMonth);

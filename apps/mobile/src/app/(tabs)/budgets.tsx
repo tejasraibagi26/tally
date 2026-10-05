@@ -1,18 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ChevronLeft, ChevronRight, Plus, PiggyBank } from "lucide-react-native";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react-native";
 import { monthLastDay } from "@tally/core/budgetMath";
 import { Card } from "@/components/ui/Card";
-import { MeterBar } from "@/components/ui/MeterBar";
-import { MoneyText } from "@/components/ui/MoneyText";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { useBudgets, currentMonthParam, type BudgetLine } from "@/lib/queries/budgets";
+import { groupBudgets, monthSummary, type MonthContext } from "@tally/core/budgetView";
+import { useBudgets, useBudgetSetup, currentMonthParam, type BudgetLine } from "@/lib/queries/budgets";
+import { BudgetRowItem, fmtBudget } from "@/components/budgets/BudgetRowItem";
+import { BudgetDetailSheet } from "@/components/budgets/BudgetDetailSheet";
 import { useThemeColors } from "@/theme/useThemeColors";
-import { hairline, chartSeries } from "@/theme/colors";
+import { chartSeries } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { useRF } from "@/theme/responsiveFont";
@@ -34,13 +34,11 @@ function daysInMonthOf(month: string): number {
   return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
 }
 
-// MOBILE_DESIGN.md §5.6, revised: every budget lives in one grouped card
-// (hairline-divided rows, not a card apiece), and the Budgeted/Spent/
-// Remaining summary is that card's own header -- "left to spend", a single
-// total bar segmented by category, and a one-line count/progress caption --
-// rather than a separate strip above the list. Still deferred: swipe-left/
-// right month navigation, and parent-category grouping/"copy last month"
-// bulk actions (neither exists on web either).
+// MOBILE_DESIGN.md §5.6 (budgets redesign, mobile v1.18.0): "left to
+// spend" with a per-day allowance up top, rows grouped by parent category
+// with a pace tick on each bar, a "Not budgeted" row so the month adds up,
+// one-tap setup for an empty month, and a detail sheet per budget. Row
+// colors and labels come from @tally/core/budgetView, shared with web.
 export default function BudgetsScreen() {
   const insets = useSafeAreaInsets();
   const tabBarClearance = useTabBarBottomClearance();
@@ -51,20 +49,28 @@ export default function BudgetsScreen() {
   const series = colorScheme === "dark" ? chartSeries.dark : chartSeries.light;
   const [month, setMonth] = useState(currentMonthParam());
   const { data, isLoading, isError, refetch, isRefetching } = useBudgets(month);
+  const setup = useBudgetSetup();
   const [addOpen, setAddOpen] = useState(false);
-  const [editing, setEditing] = useState<BudgetLine | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ text: string; undo?: () => void } | null>(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 6000);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   const budgets = data?.budgets ?? [];
-  const hasBudgets = budgets.length > 0;
-  const totalSpend = budgets.reduce((s, b) => s + b.spend, 0);
-  const totalBudget = budgets.reduce((s, b) => s + b.amount + b.rolloverFromPrior, 0);
-  const totalRemaining = totalBudget - totalSpend;
-
-  const isCurrentMonth = month === currentMonthParam();
-  const daysElapsed = new Date().getUTCDate();
-  const daysInMonth = daysInMonthOf(month);
-  const spentPct = totalBudget > 0 ? Math.round((totalSpend / totalBudget) * 100) : 0;
-  const daysLeft = daysInMonth - daysElapsed;
+  const unbudgeted = data?.unbudgeted ?? [];
+  const current = currentMonthParam();
+  const now = new Date();
+  const ctx: MonthContext = month === current ? { phase: "current", daysElapsed: now.getDate(), daysInMonth: daysInMonthOf(month) } : { phase: month < current ? "past" : "future" };
+  const summary = monthSummary(budgets, ctx);
+  const groups = groupBudgets(budgets);
+  const unbudgetedTotal = unbudgeted.reduce((s, u) => s + u.spend, 0);
+  const colorFor = (b: BudgetLine) => series[((b.colorSlot ?? b.categoryColorSlot) - 1) % series.length] ?? series[0]!;
+  const open = budgets.find((b) => b.categoryId === openId) ?? null;
+  const label = { fontSize: rf(11), letterSpacing: 0.6, textTransform: "uppercase" as const };
 
   function openTransactionsFor(budget: BudgetLine) {
     router.push({
@@ -87,8 +93,9 @@ export default function BudgetsScreen() {
             <TabHeader
               title="Budgets"
               meta={[
-                hasBudgets && `${budgets.length} ${budgets.length === 1 ? "category" : "categories"} budgeted`,
-                hasBudgets && isCurrentMonth && (daysLeft === 0 ? "Last day of the month" : `${daysLeft} day${daysLeft === 1 ? "" : "s"} left`),
+                budgets.length > 0 && `${budgets.length} ${budgets.length === 1 ? "category" : "categories"} budgeted`,
+                summary.daysLeft != null && (summary.daysLeft <= 1 ? "Last day of the month" : `${summary.daysLeft - 1} days left`),
+                ctx.phase === "past" && "Finished",
               ]}
               actions={
                 <Pressable onPress={() => setAddOpen(true)} hitSlop={12} accessibilityLabel="Add budget" className="items-center justify-center rounded-full bg-brand" style={{ width: 34, height: 34 }}>
@@ -98,117 +105,156 @@ export default function BudgetsScreen() {
             />
           </View>
           <View className="flex-row items-center justify-between">
-            <Pressable onPress={() => setMonth((m) => shiftMonth(m, -1))} hitSlop={12}>
+            <Pressable onPress={() => setMonth((m) => shiftMonth(m, -1))} hitSlop={12} accessibilityLabel="Previous month">
               <ChevronLeft size={20} color={colors["text-2"]} />
             </Pressable>
             <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15) }}>{monthLabel(month)}</Text>
-            <Pressable onPress={() => setMonth((m) => shiftMonth(m, 1))} hitSlop={12}>
+            <Pressable onPress={() => setMonth((m) => shiftMonth(m, 1))} hitSlop={12} accessibilityLabel="Next month">
               <ChevronRight size={20} color={colors["text-2"]} />
             </Pressable>
           </View>
-
         </View>
 
         {isLoading ? (
-          <View className="px-5">
-            <Skeleton style={{ height: 360, borderRadius: 18 }} />
+          <View className="px-5 gap-4">
+            <Skeleton style={{ height: 130, borderRadius: 18 }} />
+            <Skeleton style={{ height: 320, borderRadius: 18 }} />
           </View>
         ) : isError ? (
           <View className="px-5">
             <View className="rounded-card bg-surface p-8 items-center gap-3">
-              <Text className="font-ui text-text-2 text-center" style={{ fontSize: rf(14) }}>Couldn't load budgets.</Text>
+              <Text className="font-ui text-text-2 text-center" style={{ fontSize: rf(14) }}>{"Couldn't load budgets."}</Text>
               <Pressable onPress={() => refetch()} className="rounded-full bg-brand-subtle px-4 py-2">
                 <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Retry</Text>
               </Pressable>
             </View>
           </View>
-        ) : hasBudgets ? (
-          <View className="px-5">
+        ) : budgets.length > 0 ? (
+          <View className="px-5 gap-4">
+            <Card className="px-5 pt-5 pb-[18px] gap-2.5">
+              {ctx.phase === "past" ? (
+                <>
+                  <Text className="font-ui-medium text-text-3" style={label}>{monthLabel(month).split(" ")[0]} · finished</Text>
+                  <Text className="font-display" style={{ fontSize: rf(34), color: summary.left < 0 ? colors.negative : colors.positive }}>
+                    {fmtBudget(Math.abs(summary.left))} {summary.left < 0 ? "over" : "under"}
+                  </Text>
+                  <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>
+                    {fmtBudget(summary.spent)} of {fmtBudget(summary.budgeted)}
+                    {summary.overCount > 0 ? ` · ${summary.overCount} budget${summary.overCount === 1 ? "" : "s"} went over` : ""}
+                  </Text>
+                </>
+              ) : (
+                <>
+                  <Text className="font-ui-medium text-text-3" style={label}>{summary.left < 0 ? "Over budget" : "Left to spend"}</Text>
+                  <Text className="font-display" style={{ fontSize: rf(38), color: summary.left < 0 ? colors.negative : colors.text }}>{fmtBudget(Math.abs(summary.left))}</Text>
+                  <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>
+                    {summary.perDay != null ? `About ${fmtBudget(summary.perDay)} a day for ${summary.daysLeft} days · ` : ""}
+                    {fmtBudget(summary.spent)} of {fmtBudget(summary.budgeted)} spent
+                  </Text>
+                </>
+              )}
+              {/* Each budget's within-budget spend in its own color, as a
+                  share of the whole month's budget; the rest stays track. */}
+              <View className="h-2.5 rounded-full bg-sunken flex-row overflow-hidden mt-1" style={{ gap: 2 }}>
+                {summary.budgeted > 0 &&
+                  budgets.map((b) => {
+                    const w = (Math.min(b.spend, b.amount + b.rolloverFromPrior) / summary.budgeted) * 100;
+                    return w > 0 ? <View key={b.categoryId} style={{ width: `${w}%`, backgroundColor: colorFor(b) }} /> : null;
+                  })}
+              </View>
+            </Card>
+
             <Card className="overflow-hidden">
-              <View className="px-5 pt-5 pb-[18px] gap-3" style={{ borderBottomWidth: 1, borderBottomColor: hairline(colors) }}>
-                <View className="flex-row items-end justify-between">
-                  <View className="gap-0.5">
-                    <Text className="font-ui text-text-3" style={{ fontSize: rf(10), letterSpacing: 0.4, textTransform: "uppercase" }}>
-                      {totalRemaining < 0 ? "Over budget" : "Left to spend"}
+              {groups.map((g, gi) => (
+                <View key={g.name} style={gi > 0 ? { borderTopWidth: 1, borderTopColor: colors.border } : undefined}>
+                  <View className="flex-row justify-between px-5 pt-3.5 pb-1">
+                    <Text className="font-ui-semibold text-text-3" style={label}>{g.name}</Text>
+                    <Text className="font-ui text-text-3" style={{ fontSize: rf(12), fontVariant: ["tabular-nums"] }}>
+                      {fmtBudget(g.spent)} of {fmtBudget(g.budgeted)}
                     </Text>
-                    <MoneyText
-                      cents={Math.abs(totalRemaining)}
-                      mask={false}
-                      className="font-ui-semibold"
-                      style={{ fontSize: rf(28), letterSpacing: -0.5, color: totalRemaining < 0 ? colors.negative : colors.text }}
-                    />
                   </View>
-                  <Text className="font-ui text-text-2 pb-1" style={{ fontSize: rf(13) }}>
-                    <MoneyText cents={totalSpend} mask={false} /> of <MoneyText cents={totalBudget} mask={false} />
+                  {g.lines.map((b, i) => (
+                    <BudgetRowItem key={b.categoryId} line={b} ctx={ctx} color={colorFor(b)} showTopBorder={i > 0} onPress={() => setOpenId(b.categoryId)} />
+                  ))}
+                </View>
+              ))}
+              {unbudgeted.length > 0 && (
+                <View className="px-5 py-3.5 gap-1 bg-sunken" style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
+                  <View className="flex-row justify-between">
+                    <Text className="font-ui text-text-2" style={{ fontSize: rf(14) }}>Not budgeted</Text>
+                    <Text className="font-ui-semibold text-text" style={{ fontSize: rf(14), fontVariant: ["tabular-nums"] }}>{fmtBudget(unbudgetedTotal)}</Text>
+                  </View>
+                  <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }} numberOfLines={1}>
+                    {unbudgeted.slice(0, 3).map((u) => `${u.categoryName} ${fmtBudget(u.spend)}`).join(" · ")}
+                    {unbudgeted.length > 3 ? ` · +${unbudgeted.length - 3} more` : ""}
                   </Text>
                 </View>
-                {/* Each category's within-budget spend, in its series color, as a
-                    share of the month's total budget -- overage isn't drawn here
-                    (the row below already calls it out), so the bar never
-                    exceeds 100%. */}
-                <View className="h-2.5 rounded-full bg-sunken flex-row overflow-hidden" style={{ gap: 2 }}>
-                  {totalBudget > 0 &&
-                    budgets.map((b) => {
-                      const w = (Math.min(b.spend, b.amount + b.rolloverFromPrior) / totalBudget) * 100;
-                      if (w <= 0) return null;
-                      return <View key={b.categoryId} style={{ width: `${w}%`, backgroundColor: series[((b.colorSlot ?? b.categoryColorSlot) - 1) % series.length] ?? series[0] }} />;
-                    })}
-                </View>
-                <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>
-                  {budgets.length} {budgets.length === 1 ? "category" : "categories"} · {spentPct}% spent
-                  {isCurrentMonth ? ` · ${daysLeft} ${daysLeft === 1 ? "day" : "days"} left` : ""}
-                </Text>
-              </View>
-              {budgets.map((b, i) => (
-                <Pressable
-                  key={b.categoryId}
-                  onPress={() => setEditing(b)}
-                  className="px-5 py-4"
-                  style={i > 0 ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined}
-                >
-                  <MeterBar
-                    label={b.categoryName}
-                    colorSlot={b.colorSlot ?? b.categoryColorSlot}
-                    spentCents={b.spend}
-                    budgetCents={b.amount + b.rolloverFromPrior}
-                    rolloverCents={b.rolloverEnabled ? b.rolloverFromPrior : 0}
-                    isFixedAmount={b.isFixedAmount}
-                    daysElapsed={isCurrentMonth ? daysElapsed : undefined}
-                    daysInMonth={isCurrentMonth ? daysInMonth : undefined}
-                    mask={false}
-                  />
-                </Pressable>
-              ))}
+              )}
             </Card>
           </View>
         ) : (
           <View className="px-5">
-            <View className="rounded-card bg-surface p-8 mt-2">
-              <EmptyState
-                icon={PiggyBank}
-                title="No budgets yet"
-                description={`Set one for ${monthLabel(month)} to start tracking spend against it.`}
-              />
-            </View>
+            <Card className="px-5 pt-6 pb-5 gap-3">
+              <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Set up {monthLabel(month).split(" ")[0]}</Text>
+              <Text className="font-ui text-text-2" style={{ fontSize: rf(13.5), lineHeight: rf(19) }}>
+                {data?.setup?.copy || data?.setup?.average ? "Start from what you did before. You can adjust any amount after." : "Add a budget for a category to start tracking spending against a limit."}
+                {unbudgetedTotal > 0 && ctx.phase !== "future" ? ` You've spent ${fmtBudget(unbudgetedTotal)} so far.` : ""}
+              </Text>
+              {data?.setup?.copy && (
+                <Pressable onPress={() => setup.mutate({ month, source: "copy" })} disabled={setup.isPending} className="h-12 rounded-full items-center justify-center bg-brand mt-1">
+                  <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14) }}>
+                    Copy {monthLabel(data.setup.copy.fromMonth).split(" ")[0]} · {data.setup.copy.count} budgets, {fmtBudget(data.setup.copy.total)}
+                  </Text>
+                </Pressable>
+              )}
+              {data?.setup?.average && (
+                <Pressable onPress={() => setup.mutate({ month, source: "average" })} disabled={setup.isPending} className="h-11 rounded-full items-center justify-center bg-brand-subtle">
+                  <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(14) }}>Use 3-month averages · {fmtBudget(data.setup.average.total)}</Text>
+                </Pressable>
+              )}
+              <Pressable onPress={() => setAddOpen(true)} className="items-center py-2">
+                <Text className="font-ui-medium text-brand" style={{ fontSize: rf(13.5) }}>{data?.setup?.copy || data?.setup?.average ? "Start from scratch" : "Add a budget"}</Text>
+              </Pressable>
+            </Card>
           </View>
         )}
       </ScrollView>
 
-      <AddBudgetSheet
-        visible={addOpen}
-        onClose={() => setAddOpen(false)}
-        month={month}
-        budgetedCategoryIds={budgets.map((b) => b.categoryId)}
-      />
-      {editing && (
-        <AddBudgetSheet
-          key={editing.categoryId}
-          visible={editing != null}
-          onClose={() => setEditing(null)}
+      {toast && (
+        <View pointerEvents="box-none" style={{ position: "absolute", left: 0, right: 0, bottom: tabBarClearance + 16, alignItems: "center" }}>
+          <View className="flex-row items-center gap-4 rounded-full bg-raised px-4 py-2.5" style={{ borderWidth: 1, borderColor: colors.border }}>
+            <Text className="font-ui-medium text-text" style={{ fontSize: rf(13) }}>{toast.text}</Text>
+            {toast.undo && (
+              <Pressable
+                onPress={() => {
+                  toast.undo!();
+                  setToast(null);
+                }}
+                hitSlop={8}
+              >
+                <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Undo</Text>
+              </Pressable>
+            )}
+          </View>
+        </View>
+      )}
+
+      <AddBudgetSheet visible={addOpen} onClose={() => setAddOpen(false)} month={month} budgetedCategoryIds={budgets.map((b) => b.categoryId)} />
+      {open && (
+        <BudgetDetailSheet
+          key={open.categoryId}
+          line={open}
           month={month}
-          budgetedCategoryIds={budgets.map((b) => b.categoryId)}
-          existing={editing}
-          onViewTransactions={() => openTransactionsFor(editing)}
+          color={colorFor(open)}
+          onClose={() => setOpenId(null)}
+          onViewTransactions={() => {
+            setOpenId(null);
+            openTransactionsFor(open);
+          }}
+          onRemoved={(undo) => {
+            setOpenId(null);
+            setToast({ text: `${open.categoryName} removed`, undo });
+          }}
         />
       )}
     </View>

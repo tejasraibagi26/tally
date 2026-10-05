@@ -121,6 +121,8 @@ export async function spendByCategory(userId: string, month: string): Promise<Ma
 export interface BudgetLine {
   categoryId: string;
   categoryName: string;
+  /** Parent category's name, for grouping rows; null for a top-level category. */
+  parentName: string | null;
   categoryColorSlot: number;
   /** Distinct per budget (budgetColorSlots) -- use this, not categoryColorSlot, to color budget meters/bars. */
   colorSlot: number;
@@ -166,12 +168,13 @@ export async function getBudgetsForMonth(userId: string, month: string): Promise
       isFixedAmount: schema.budgets.isFixedAmount,
       categoryName: schema.categories.name,
       categoryColorSlot: schema.categories.colorSlot,
+      parentId: schema.categories.parentId,
     })
     .from(schema.budgets)
     .innerJoin(schema.categories, eq(schema.budgets.categoryId, schema.categories.id))
     .where(and(eq(schema.budgets.userId, userId), eq(schema.budgets.month, month)));
 
-  const [spend, rollup] = await Promise.all([spendByCategory(userId, month), categoryRollupMap(userId)]);
+  const [spend, rollup, parentNames] = await Promise.all([spendByCategory(userId, month), categoryRollupMap(userId), categoryNames(userId)]);
 
   const lines: BudgetLine[] = [];
   for (const row of rows) {
@@ -180,6 +183,7 @@ export async function getBudgetsForMonth(userId: string, month: string): Promise
     lines.push({
       categoryId: row.categoryId,
       categoryName: row.categoryName,
+      parentName: row.parentId ? (parentNames.get(row.parentId) ?? null) : null,
       categoryColorSlot: row.categoryColorSlot,
       colorSlot: 1, // assigned below, once every line is known
       amount: row.amount,
@@ -193,4 +197,122 @@ export async function getBudgetsForMonth(userId: string, month: string): Promise
   const slots = budgetColorSlots(lines);
   for (const line of lines) line.colorSlot = slots.get(line.categoryId) ?? 1;
   return lines.sort((a, b) => b.spend - a.spend);
+}
+
+async function categoryNames(userId: string): Promise<Map<string, string>> {
+  const cats = await db
+    .select({ id: schema.categories.id, name: schema.categories.name })
+    .from(schema.categories)
+    .where(or(isNull(schema.categories.userId), eq(schema.categories.userId, userId)));
+  return new Map(cats.map((c) => [c.id, c.name]));
+}
+
+export interface UnbudgetedSpend {
+  categoryId: string;
+  categoryName: string;
+  spend: number;
+}
+
+/**
+ * Expense spending this month in categories no budget covers (a budget on a
+ * parent covers its children) -- the Budgets page's "Not budgeted" row, so
+ * the month's spending always adds up.
+ */
+export async function unbudgetedSpend(userId: string, month: string, lines: BudgetLine[]): Promise<UnbudgetedSpend[]> {
+  const [spend, rollup, cats] = await Promise.all([
+    spendByCategory(userId, month),
+    categoryRollupMap(userId),
+    db
+      .select({ id: schema.categories.id, name: schema.categories.name, kind: schema.categories.kind })
+      .from(schema.categories)
+      .where(or(isNull(schema.categories.userId), eq(schema.categories.userId, userId))),
+  ]);
+  const covered = new Set(lines.flatMap((l) => rollup.get(l.categoryId) ?? [l.categoryId]));
+  return cats
+    .filter((c) => c.kind === "expense" && !covered.has(c.id) && (spend.get(c.id) ?? 0) > 0)
+    .map((c) => ({ categoryId: c.id, categoryName: c.name, spend: spend.get(c.id)! }))
+    .sort((a, b) => b.spend - a.spend);
+}
+
+/** Rounds a monthly average up to a tidy budget amount ($10 steps). */
+function tidy(cents: number): number {
+  return Math.ceil(cents / 1000) * 1000;
+}
+
+export interface SetupOption {
+  count: number;
+  total: number;
+  rows: { categoryId: string; amount: number; rolloverEnabled: boolean; isFixedAmount: boolean }[];
+}
+
+/**
+ * The two one-tap ways to fill an empty month: copy the previous month's
+ * budgets (amounts only -- rollover carry-in is recomputed), or set each
+ * category to its last-3-months average spend. The average covers last
+ * month's budgeted categories, or, with none, the 8 biggest expense
+ * categories over those months.
+ */
+export async function budgetSetupOptions(userId: string, month: string): Promise<{ copy: (SetupOption & { fromMonth: string }) | null; average: SetupOption | null }> {
+  const fromMonth = shiftMonth(month, -1);
+  const prior = await db
+    .select({ categoryId: schema.budgets.categoryId, amount: schema.budgets.amount, rolloverEnabled: schema.budgets.rolloverEnabled, isFixedAmount: schema.budgets.isFixedAmount })
+    .from(schema.budgets)
+    .where(and(eq(schema.budgets.userId, userId), eq(schema.budgets.month, fromMonth)));
+
+  const [rollup, cats, ...spends] = await Promise.all([
+    categoryRollupMap(userId),
+    db.select({ id: schema.categories.id, kind: schema.categories.kind, parentId: schema.categories.parentId }).from(schema.categories).where(or(isNull(schema.categories.userId), eq(schema.categories.userId, userId))),
+    ...[1, 2, 3].map((n) => spendByCategory(userId, shiftMonth(month, -n))),
+  ]);
+  const avg = (categoryId: string) => spends.reduce((s, m) => s + rolledUpSpend(m, rollup, categoryId), 0) / 3;
+
+  let targets: { categoryId: string; rolloverEnabled: boolean; isFixedAmount: boolean }[] = prior.map((p) => ({ categoryId: p.categoryId, rolloverEnabled: p.rolloverEnabled, isFixedAmount: p.isFixedAmount }));
+  if (targets.length === 0) {
+    targets = cats
+      .filter((c) => c.kind === "expense" && !c.parentId)
+      .map((c) => ({ categoryId: c.id, total: avg(c.id) }))
+      .filter((c) => c.total > 0)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 8)
+      .map((c) => ({ categoryId: c.categoryId, rolloverEnabled: false, isFixedAmount: false }));
+  }
+  const averageRows = targets.map((t) => ({ ...t, amount: tidy(avg(t.categoryId)) })).filter((r) => r.amount > 0);
+
+  return {
+    copy: prior.length ? { fromMonth, count: prior.length, total: prior.reduce((s, p) => s + p.amount, 0), rows: prior } : null,
+    average: averageRows.length ? { count: averageRows.length, total: averageRows.reduce((s, r) => s + r.amount, 0), rows: averageRows } : null,
+  };
+}
+
+/** Writes setup rows into a month, never overwriting a budget already there. */
+export async function applyBudgetRows(userId: string, month: string, rows: SetupOption["rows"]): Promise<number> {
+  if (rows.length === 0) return 0;
+  const inserted = await db
+    .insert(schema.budgets)
+    .values(rows.map((r) => ({ userId, month, categoryId: r.categoryId, amount: r.amount, rolloverEnabled: r.rolloverEnabled, isFixedAmount: r.isFixedAmount })))
+    .onConflictDoNothing()
+    .returning({ id: schema.budgets.id });
+  return inserted.length;
+}
+
+export interface BudgetHistoryMonth {
+  month: string;
+  /** Null when the category had no budget that month. */
+  amount: number | null;
+  spend: number;
+}
+
+/** The last `months` months (oldest first, ending with `month`) of one category's budget and spend. */
+export async function budgetHistory(userId: string, categoryId: string, month: string, months = 6): Promise<BudgetHistoryMonth[]> {
+  const list = Array.from({ length: months }, (_, i) => shiftMonth(month, i - months + 1));
+  const [rollup, budgetRows, ...spends] = await Promise.all([
+    categoryRollupMap(userId),
+    db
+      .select({ month: schema.budgets.month, amount: schema.budgets.amount })
+      .from(schema.budgets)
+      .where(and(eq(schema.budgets.userId, userId), eq(schema.budgets.categoryId, categoryId), gte(schema.budgets.month, list[0]!), lt(schema.budgets.month, shiftMonth(month, 1)))),
+    ...list.map((m) => spendByCategory(userId, m)),
+  ]);
+  const amountByMonth = new Map(budgetRows.map((b) => [b.month, b.amount]));
+  return list.map((m, i) => ({ month: m, amount: amountByMonth.get(m) ?? null, spend: rolledUpSpend(spends[i]!, rollup, categoryId) }));
 }

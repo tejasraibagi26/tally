@@ -21,7 +21,8 @@
     "./cashFlowMath": "./src/cashFlowMath.ts",
     "./subscriptionMath": "./src/subscriptionMath.ts",
     "./connectionState": "./src/connectionState.ts",
-    "./investments": "./src/investments.ts"
+    "./investments": "./src/investments.ts",
+    "./budgetView": "./src/budgetView.ts"
   },
   "scripts": {
     "test": "vitest run",

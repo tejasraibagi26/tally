@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiGet, apiPut, apiFetch } from "@/lib/api";
+import { apiGet, apiPut, apiPost, apiFetch } from "@/lib/api";
 
 export interface BudgetLine {
   categoryId: string;
   categoryName: string;
+  /** Parent category name for grouping rows; null for a top-level category. */
+  parentName: string | null;
   categoryColorSlot: number;
   /** Distinct per budget, server-assigned (@tally/core/budgetMath budgetColorSlots) -- color budget meters with this. */
   colorSlot?: number;
@@ -15,9 +17,24 @@ export interface BudgetLine {
   remaining: number;
 }
 
+export interface UnbudgetedSpend {
+  categoryId: string;
+  categoryName: string;
+  spend: number;
+}
+
+export interface BudgetSetupSummary {
+  copy: { fromMonth: string; count: number; total: number } | null;
+  average: { count: number; total: number } | null;
+}
+
 export interface BudgetsResponse {
   month: string;
   budgets: BudgetLine[];
+  /** Spend in categories no budget covers ("Not budgeted"). */
+  unbudgeted: UnbudgetedSpend[];
+  /** Only for a month with no budgets: the one-tap setup options. */
+  setup: BudgetSetupSummary | null;
 }
 
 export function currentMonthParam(): string {
@@ -58,7 +75,7 @@ export interface DeleteBudget {
   categoryId: string;
 }
 
-// Mirrors web's BudgetRow.tsx "Remove" action -- DELETE /api/budgets by
+// Mirrors web's BudgetPanel.tsx "Remove budget" action -- DELETE /api/budgets by
 // month+categoryId. apiDelete has no body param (nothing else needed one
 // yet), so this goes through apiFetch directly, same as apiPut/apiPost do
 // internally.
@@ -69,5 +86,29 @@ export function useDeleteBudget() {
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["budgets", variables.month] });
     },
+  });
+}
+
+/** Fills an empty month: copy last month's budgets, or 3-month averages. */
+export function useBudgetSetup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { month: string; source: "copy" | "average" }) => apiPost<{ ok: true; created: number }>("/api/budgets/setup", body),
+    onSuccess: (_d, v) => queryClient.invalidateQueries({ queryKey: ["budgets", v.month] }),
+  });
+}
+
+export interface BudgetHistoryMonth {
+  month: string;
+  amount: number | null;
+  spend: number;
+}
+
+/** Six months of one category's budget and spend, for the budget detail sheet. */
+export function useBudgetHistory(categoryId: string | null, month: string) {
+  return useQuery({
+    queryKey: ["budgets", "history", categoryId, month],
+    queryFn: () => apiGet<{ months: BudgetHistoryMonth[] }>(`/api/budgets/history?categoryId=${categoryId}&month=${month}`),
+    enabled: !!categoryId,
   });
 }

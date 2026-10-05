@@ -16,6 +16,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.18.0",
+    date: "2026-10-05",
+    changes: [
+      { kind: "improved", text: "Budgets redesigned: what's left to spend and about how much a day, with budgets grouped like your categories." },
+      { kind: "new", text: "Each bar marks an even pace and warns when you're on track to go over. Spending without a budget shows as \"Not budgeted\"." },
+      { kind: "new", text: "Set up a new month in one tap, and tap a budget for 6 months of history. Removing one can be undone." },
+    ],
+  },
+  {
     version: "1.17.0",
     date: "2026-10-05",
     changes: [

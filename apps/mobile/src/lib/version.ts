@@ -121,8 +121,14 @@ import Constants from "expo-constants";
  * with account filter and sort, a holding sheet, plain-language activity
  * with this year's income/contributions, stale-connection notices, skeleton
  * loading, and an empty state that opens Plaid Link.
+ * 1.18.0 redesigns Budgets to match web 1.19.0 (@tally/core/budgetView):
+ * left to spend with a per-day allowance, rows grouped by parent category
+ * with a pace tick and projection note (components/budgets/BudgetRowItem),
+ * a "Not budgeted" row, one-tap setup for an empty month, a past-month
+ * report, and BudgetDetailSheet (6-month history, toggles, Remove + undo)
+ * replacing edit-in-AddBudgetSheet. Also fixes "days left" using UTC.
  */
-export const APP_VERSION = "1.17.0";
+export const APP_VERSION = "1.18.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

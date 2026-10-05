@@ -3,7 +3,7 @@ import { z } from "zod";
 import { and, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
-import { getBudgetsForMonth } from "@/lib/budgets";
+import { getBudgetsForMonth, unbudgetedSpend, budgetSetupOptions } from "@/lib/budgets";
 
 const monthSchema = z.string().regex(/^\d{4}-\d{2}-01$/, "month must be YYYY-MM-01");
 
@@ -22,7 +22,21 @@ export async function GET(req: Request) {
   }
 
   const budgets = await getBudgetsForMonth(userId, parsed.data);
-  return NextResponse.json({ month: parsed.data, budgets });
+  // "Not budgeted" spend, and -- for an empty month only -- the two one-tap
+  // setup options (rows stripped; the client only shows counts and totals).
+  const [unbudgeted, setup] = await Promise.all([
+    unbudgetedSpend(userId, parsed.data, budgets),
+    budgets.length === 0 ? budgetSetupOptions(userId, parsed.data) : Promise.resolve(null),
+  ]);
+  return NextResponse.json({
+    month: parsed.data,
+    budgets,
+    unbudgeted,
+    setup: setup && {
+      copy: setup.copy && { fromMonth: setup.copy.fromMonth, count: setup.copy.count, total: setup.copy.total },
+      average: setup.average && { count: setup.average.count, total: setup.average.total },
+    },
+  });
 }
 
 const putSchema = z.object({
