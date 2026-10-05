@@ -152,8 +152,8 @@ import Constants from "expo-constants";
  * budgets; Upcoming gets date tiles and due labels; Recent activity rows
  * match the Transactions list; Where it went moves last; the net worth
  * hero quiets its cents and gains a delta chip and a 1M / 3M / 6M / 1Y
- * range (@tally/core/overviewView). Reads a new `unreviewed` count from
- * /api/analytics/overview, treated as zero from older servers.
+ * range (@tally/core/overviewView). Reads a new this-month `unreviewed`
+ * count from /api/analytics/overview, treated as zero from older servers.
  */
 export const APP_VERSION = "1.21.0";
 

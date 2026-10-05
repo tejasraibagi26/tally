@@ -246,8 +246,8 @@ net-worth range and delta, credit band) live in `@tally/core/overviewView`.
    icon + "N banks need you", the balances affected, and up to two bank rows
    each with its reason and the tone-colored action pill; every tap opens the
    Accounts tab's Fix sheet. Beneath it, an `info-subtle` "N transactions to
-   review" row into the review queue (count from `/api/analytics/overview`
-   `unreviewed`, the queue's own rule).
+   review" row into the review queue (this month's count from
+   `/api/analytics/overview` `unreviewed`, matching the Transactions banner).
 3. **This month** — one card: Spent (serif 32) against the month's total
    budget with the budget-row meter and pace tick, then Income and Saved
    (income − spend). Income and Saved mask with the privacy toggle.
