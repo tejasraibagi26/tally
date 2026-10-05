@@ -22,7 +22,8 @@
     "./subscriptionMath": "./src/subscriptionMath.ts",
     "./connectionState": "./src/connectionState.ts",
     "./investments": "./src/investments.ts",
-    "./budgetView": "./src/budgetView.ts"
+    "./budgetView": "./src/budgetView.ts",
+    "./transactionView": "./src/transactionView.ts"
   },
   "scripts": {
     "test": "vitest run",

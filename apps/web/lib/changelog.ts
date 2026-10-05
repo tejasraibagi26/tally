@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.20.0",
+    date: "2026-10-05",
+    changes: [
+      { kind: "new", text: "Transactions: \"Review\" walks you through new transactions one at a time. Press Enter to confirm the category, or pick another. You can tell Tally to always use your pick for that merchant." },
+      { kind: "improved", text: "Transactions are grouped by day with each day's total, and each one shows a single clear status (pending, refund, transfer, split…)." },
+      { kind: "new", text: "Click a category on any row to change it right there, and see whether a rule, you, or Tally set it." },
+      { kind: "new", text: "Select several transactions to categorize, review or exclude them together. Keyboard: j/k to move, x to select, c for category, e to mark reviewed, / to search." },
+    ],
+  },
+  {
     version: "1.19.0",
     date: "2026-10-05",
     changes: [

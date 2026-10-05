@@ -115,8 +115,16 @@
  * month (copy last month / 3-month averages, POST /api/budgets/setup), a
  * past-month report, and a budget side panel with 6-month history
  * (GET /api/budgets/history), plain toggles and Remove with undo.
+ * 1.20.0 redesigns Transactions (@tally/core/transactionView, shared with
+ * mobile): rows grouped under sticky day headers with each day's net, one
+ * status mark per row, the category chip as an inline picker, who set the
+ * category ("by rule / by you / by Tally"), multi-select with a bulk bar
+ * (set category, mark reviewed, exclude), keyboard (j/k/x/c/e/Enter, /,
+ * Esc), a "To review" filter (?review=1), and "Review N": a one-at-a-time
+ * queue in a side panel (GET /api/transactions/review) with suggestions
+ * from the merchant's history and "Always use … for <merchant>" rules.
  */
-export const APP_VERSION = "1.19.0";
+export const APP_VERSION = "1.20.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

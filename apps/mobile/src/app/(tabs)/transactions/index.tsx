@@ -3,18 +3,19 @@ import { View, Text, TextInput, FlatList, Pressable, ActivityIndicator, RefreshC
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ListFilter, Plus, RefreshCw, Search, X } from "lucide-react-native";
-import { prettifyPfc } from "@tally/core/pfc";
+import { groupByDay } from "@tally/core/transactionView";
+import { formatCents } from "@tally/core/money";
 import { MoneyText } from "@/components/ui/MoneyText";
-import { useTransactions, type TransactionRow } from "@/lib/queries/transactions";
+import { useTransactions, useBulkTransactions, type TransactionRow } from "@/lib/queries/transactions";
+import { TransactionListRow } from "@/components/transactions/TransactionListRow";
+import { CategoryPickerSheet } from "@/components/CategoryPickerSheet";
 import { useAccounts } from "@/lib/queries/accounts";
 import { TabHeader, SyncFreshness, hasSynced } from "@/components/ui/TabHeader";
 import { useSync } from "@/lib/queries/plaid";
-import { amountColor } from "@/lib/amountColor";
 import { TransactionFiltersSheet, type TransactionFilters } from "@/components/TransactionFiltersSheet";
 import { AddTransactionSheet } from "@/components/AddTransactionSheet";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
-import { hairline } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -27,56 +28,15 @@ function currentMonthLabel(): string {
 // Matches web's TransactionsList.tsx: only an amortized installment's label
 // ends in "(n/total)" (see recurringBillGeneration.ts's labelFor) -- a
 // manual-bill backfill posts at its plain description/merchant name instead.
-const AMORTIZED_INSTALLMENT_RE = /\(\d+\/\d+\)$/;
-function isAmortizedInstallment(name: string): boolean {
-  return AMORTIZED_INSTALLMENT_RE.test(name);
+function todayISO(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-// MOBILE_DESIGN.md §5.3 -- card list (not a table), infinite scroll, filter
-// pill instead of a sticky multi-field bar. Swipe-to-categorize is still
-// deferred past this first cut; the filter sheet itself is wired below.
-//
-// Rows carry their own bg-surface and round only their first/last corners
-// (rather than wrapping the whole FlatList in one rounded/overflow-hidden
-// View) so the list reads as a single Card the same way Budget's meter list
-// does, while the title above stays outside it on plain canvas -- matching
-// Budget's "title outside, content boxed below" layout instead of a card
-// that swallows the header too.
-function TransactionRowItem({ item, isFirst, isLast, colors }: { item: TransactionRow; isFirst: boolean; isLast: boolean; colors: ReturnType<typeof useThemeColors> }) {
-  const router = useRouter();
-  const rf = useRF();
-  return (
-    <Pressable
-      onPress={() => router.push(`/(tabs)/transactions/${item.id}`)}
-      className="flex-row items-center justify-between bg-surface py-4 px-5"
-      style={[
-        !isLast ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined,
-        isFirst ? { borderTopLeftRadius: 18, borderTopRightRadius: 18 } : undefined,
-        isLast ? { borderBottomLeftRadius: 18, borderBottomRightRadius: 18 } : undefined,
-      ]}
-    >
-      <View className="gap-0.5 flex-1 pr-3">
-        <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15) }} numberOfLines={1}>
-          {item.merchantName ?? item.name}
-        </Text>
-        <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }} numberOfLines={1}>
-          {item.categoryName ?? prettifyPfc(item.pfcDetailed)}
-          {item.isPending ? " · Pending" : ""}
-          {item.isManual && isAmortizedInstallment(item.merchantName ?? item.name) ? " · Spread" : ""}
-          {item.excludedFromBudget ? " · Excluded" : ""}
-        </Text>
-      </View>
-      <MoneyText
-        cents={item.amount}
-        signed
-        mask={false}
-        className="font-ui-medium"
-        style={{ color: amountColor(item.amount, colors), fontStyle: item.isPending ? "italic" : "normal", fontSize: rf(15) }}
-      />
-    </Pressable>
-  );
-}
-
+// Day-grouped list (one card per day, with that day's net), review entry
+// point and "To review" filter, swipe actions and an inline category
+// picker per row. Row wording comes from @tally/core/transactionView,
+// shared with web.
 export default function TransactionsScreen() {
   const insets = useSafeAreaInsets();
   const tabBarClearance = useTabBarBottomClearance();
@@ -84,6 +44,10 @@ export default function TransactionsScreen() {
   const rf = useRF();
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [reviewOnly, setReviewOnly] = useState(false);
+  const [pickerFor, setPickerFor] = useState<TransactionRow | null>(null);
+  const router = useRouter();
+  const bulk = useBulkTransactions();
   const sync = useSync();
   // Budgets' "View transactions" deep-links here with a category + the
   // viewed month's range (router.push params), same as web's
@@ -137,7 +101,7 @@ export default function TransactionsScreen() {
   // automatically (see queryFilters above) and shouldn't inflate the badge
   // as if they were separately chosen. Search isn't counted here -- it has
   // its own visible input, same as web doesn't fold search into its Filters count.
-  const activeCount = Object.keys(queryFilters).length - (filters.category ? 2 : 0) - (searchQuery ? 1 : 0);
+  const activeCount = Object.keys(queryFilters).length - (filters.category ? 2 : 0) - (searchQuery ? 1 : 0) - (reviewOnly ? 1 : 0);
   const hasAnyFilter = activeCount > 0 || Boolean(searchQuery);
 
   // The sheet's own "Clear all" only ever touched `filters` -- it had
@@ -147,6 +111,7 @@ export default function TransactionsScreen() {
   // a deep-linked category+month filter without opening the sheet at all.
   function clearAllFilters() {
     setFilters({});
+    setReviewOnly(false);
     if (searchDebounce.current) clearTimeout(searchDebounce.current);
     setSearchInput("");
     setSearchQuery("");
@@ -175,6 +140,10 @@ export default function TransactionsScreen() {
   }
 
   const items = data?.pages.flatMap((p) => p.items) ?? [];
+  const groups = useMemo(
+    () => groupByDay(items.map((t) => ({ ...t, isTransfer: t.isTransfer ?? false })), todayISO()),
+    [items],
+  );
   // Headline: spend for the period/filters on screen, from the API's summary
   // (absent on a server older than this build -- the figure just hides).
   const firstPage = data?.pages[0];
@@ -198,10 +167,24 @@ export default function TransactionsScreen() {
           side inset Budget gets from its `px-5` wrapper, applied uniformly to the title and the
           row list below it so both line up exactly like Overview/Accounts/Budgets. */}
       <FlatList
-        data={items}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item, index }) => (
-          <TransactionRowItem item={item} isFirst={index === 0} isLast={index === items.length - 1} colors={colors} />
+        data={groups}
+        keyExtractor={(g) => g.date}
+        renderItem={({ item: g }) => (
+          <View className="rounded-card overflow-hidden bg-surface mb-3">
+            <View className="flex-row justify-between px-4 py-2 bg-sunken">
+              <Text className="font-ui-semibold text-text-3" style={{ fontSize: rf(11), letterSpacing: 0.6, textTransform: "uppercase" }}>{g.label}</Text>
+              <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(12), fontVariant: ["tabular-nums"] }}>{formatCents(g.net, { signed: true })}</Text>
+            </View>
+            {g.rows.map((t, i) => (
+              <TransactionListRow
+                key={t.id}
+                item={t}
+                showTopBorder={i > 0}
+                onPickCategory={() => setPickerFor(t)}
+                onMarkReviewed={() => bulk.mutate({ ids: [t.id], action: { type: "markReviewed" } })}
+              />
+            ))}
+          </View>
         )}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: insets.top + 12, paddingHorizontal: 20, paddingBottom: 24 + tabBarClearance }}
@@ -214,11 +197,7 @@ export default function TransactionsScreen() {
               eyebrow="Your money"
               title="Transactions"
               figure={summary ? <MoneyText cents={summary.spend} mask={false} className="font-display text-text" style={{ fontSize: rf(36), lineHeight: rf(40) }} /> : undefined}
-              figureContext={
-                summary
-                  ? `spent across ${total} transaction${total === 1 ? "" : "s"} ${periodLabel}${summary.unreviewed > 0 ? ` · ${summary.unreviewed} to review` : ""}`
-                  : undefined
-              }
+              figureContext={summary ? `spent across ${total} transaction${total === 1 ? "" : "s"} ${periodLabel}` : undefined}
               meta={[hasSynced(syncTimes) && <SyncFreshness key="sync" syncedAt={syncTimes} />]}
               actions={
                 <>
@@ -238,7 +217,22 @@ export default function TransactionsScreen() {
                 <Pressable onPress={() => setFiltersOpen(true)} className="flex-row items-center gap-2 rounded-full px-4 py-2.5 bg-brand-subtle">
                   <ListFilter size={14} color={colors.brand} strokeWidth={1.9} />
                   <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13.5) }}>Filters</Text>
-                  {activeCount > 0 && (
+                  {(reviewOnly || (summary?.unreviewed ?? 0) > 0) && (
+              <View className="flex-row mt-2.5">
+                <Pressable
+                  onPress={() => setReviewOnly((v) => !v)}
+                  className="rounded-full px-3 py-1.5"
+                  style={reviewOnly ? { backgroundColor: colors["brand-subtle"] } : { borderWidth: 1, borderColor: colors.border }}
+                  accessibilityRole="switch"
+                  accessibilityState={{ checked: reviewOnly }}
+                >
+                  <Text className="font-ui-medium" style={{ fontSize: rf(12.5), color: reviewOnly ? colors.brand : colors.warning }}>
+                    {reviewOnly ? "Only to review ✕" : `To review · ${summary?.unreviewed ?? 0}`}
+                  </Text>
+                </Pressable>
+              </View>
+            )}
+            {activeCount > 0 && (
                     <View className="rounded-full items-center justify-center bg-brand" style={{ minWidth: 18, height: 18, paddingHorizontal: 4 }}>
                       <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(11) }}>{activeCount}</Text>
                     </View>
@@ -247,6 +241,18 @@ export default function TransactionsScreen() {
                 </>
               }
             />
+
+            {summary && summary.unreviewed > 0 && !reviewOnly && (
+              <View className="flex-row items-center gap-3 rounded-[14px] bg-brand-subtle pl-4 pr-3 py-3 mt-3" style={{ borderWidth: 1, borderColor: colors["brand-border"] }}>
+                <View className="flex-1 gap-0.5">
+                  <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13.5) }}>{summary.unreviewed} to review</Text>
+                  <Text className="font-ui text-text-2" style={{ fontSize: rf(12) }}>Confirm categories one by one. Swipe to go fast.</Text>
+                </View>
+                <Pressable onPress={() => router.push("/(tabs)/transactions/review")} className="h-9 px-4 rounded-full items-center justify-center bg-brand">
+                  <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(13) }}>Review</Text>
+                </Pressable>
+              </View>
+            )}
 
             <View className="flex-row items-center gap-2 rounded-control bg-surface-2 px-3.5 mt-3" style={{ height: 42 }}>
               <Search size={16} color={colors["text-3"]} strokeWidth={2} />
@@ -279,6 +285,21 @@ export default function TransactionsScreen() {
                 other visible trace on this screen -- without this, the only way to
                 discover you're filtered at all, let alone clear it, was opening the
                 Filters sheet and finding "Clear all" at the bottom of it. */}
+            {(reviewOnly || (summary?.unreviewed ?? 0) > 0) && (
+              <View className="flex-row mt-2.5">
+                <Pressable
+                  onPress={() => setReviewOnly((v) => !v)}
+                  className="rounded-full px-3 py-1.5"
+                  style={reviewOnly ? { backgroundColor: colors["brand-subtle"] } : { borderWidth: 1, borderColor: colors.border }}
+                  accessibilityRole="switch"
+                  accessibilityState={{ checked: reviewOnly }}
+                >
+                  <Text className="font-ui-medium" style={{ fontSize: rf(12.5), color: reviewOnly ? colors.brand : colors.warning }}>
+                    {reviewOnly ? "Only to review ✕" : `To review · ${summary?.unreviewed ?? 0}`}
+                  </Text>
+                </Pressable>
+              </View>
+            )}
             {activeCount > 0 && (
               <View className="flex-row items-center justify-between mt-2.5 px-1">
                 <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>
@@ -317,6 +338,16 @@ export default function TransactionsScreen() {
         onClearAll={clearAllFilters}
       />
       <AddTransactionSheet visible={addOpen} onClose={() => setAddOpen(false)} />
+      <CategoryPickerSheet
+        visible={pickerFor != null}
+        onClose={() => setPickerFor(null)}
+        selectedId={pickerFor?.categoryId ?? null}
+        includeUncategorized={false}
+        onSelect={(categoryId) => {
+          if (pickerFor && categoryId) bulk.mutate({ ids: [pickerFor.id], action: { type: "setCategory", categoryId } });
+          setPickerFor(null);
+        }}
+      />
     </View>
   );
 }

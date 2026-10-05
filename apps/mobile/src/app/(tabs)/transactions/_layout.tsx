@@ -9,6 +9,7 @@ export default function TransactionsStackLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="index" />
       <Stack.Screen name="[id]" options={{ presentation: "modal" }} />
+      <Stack.Screen name="review" options={{ presentation: "fullScreenModal" }} />
     </Stack>
   );
 }

@@ -17,7 +17,9 @@ import { monthLastDay } from "@tally/core/budgetMath";
 import { formatCents } from "@tally/core/money";
 import { accountDisplayName } from "@tally/core/accountName";
 import Link from "next/link";
-import { currentMonthFor } from "@/lib/userTimezone";
+import { currentMonthFor, todayFor } from "@/lib/userTimezone";
+import { DEFAULT_CURRENCY } from "@tally/core/fx";
+import { ReviewQueue } from "@/components/transactions/ReviewQueue";
 
 const PAGE_SIZE = 50;
 
@@ -48,6 +50,8 @@ interface SearchParams {
   kind?: string;
   transfer?: string;
   excluded?: string;
+  /** "1" = only transactions that still need review. */
+  review?: string;
 }
 
 export default async function TransactionsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
@@ -79,6 +83,8 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   const kindFilter = sp.kind === "income" || sp.kind === "expense" ? sp.kind : "";
   const transferFilter = sp.transfer === "0" ? false : sp.transfer === "1" ? true : null;
   const excludedFilter = sp.excluded === "0" ? false : sp.excluded === "1" ? true : null;
+  const reviewOnly = sp.review === "1";
+  const today = await todayFor(userId);
 
   const accounts = await db.query.accounts.findMany({ where: eq(schema.accounts.userId, userId) });
   const accountById = new Map(accounts.map((a) => [a.id, a]));
@@ -114,6 +120,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   if (kindFilter) passthroughParams.kind = kindFilter;
   if (transferFilter != null) passthroughParams.transfer = transferFilter ? "1" : "0";
   if (excludedFilter != null) passthroughParams.excluded = excludedFilter ? "1" : "0";
+  if (reviewOnly) passthroughParams.review = "1";
 
   const conditions = [eq(schema.transactions.userId, userId)];
   if (accountIds.length === 1) conditions.push(eq(schema.transactions.accountId, accountIds[0]!));
@@ -127,6 +134,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   if (toFilter) conditions.push(lte(schema.transactions.postedDate, toFilter));
   if (transferFilter != null) conditions.push(eq(schema.transactions.isTransfer, transferFilter));
   if (excludedFilter != null) conditions.push(eq(schema.transactions.excludedFromBudget, excludedFilter));
+  if (reviewOnly) conditions.push(eq(schema.transactions.reviewed, false));
   if (kindFilter) conditions.push(eq(schema.categories.kind, kindFilter));
   if (merchantFilter) {
     // Mirrors lib/analytics.ts's merchantBreakdown grouping key (merchantName ?? name).
@@ -141,7 +149,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     if (searchCondition) conditions.push(searchCondition);
   }
   const whereClause = and(...conditions);
-  const hasFilters = Boolean(q || accountFilter || pendingOnly || categoryFilter || merchantFilter || hasExplicitDateFilter);
+  const hasFilters = Boolean(q || accountFilter || pendingOnly || categoryFilter || merchantFilter || hasExplicitDateFilter || reviewOnly);
 
   // Explicit columns (not select-all) + a leftJoin so `kindFilter` can reference categories.kind — this
   // lets a drill-down link reproduce a metric's exact filter set (transfers/excluded/category kind) precisely.
@@ -155,6 +163,8 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     accountId: schema.transactions.accountId,
     categoryId: schema.transactions.categoryId,
     categorySource: schema.transactions.categorySource,
+    categoryKind: schema.categories.kind,
+    isTransfer: schema.transactions.isTransfer,
     pfcDetailed: schema.transactions.pfcDetailed,
     amount: schema.transactions.amount,
     currency: schema.transactions.currency,
@@ -219,6 +229,8 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     accountId: t.accountId,
     categoryId: t.categoryId,
     categorySource: t.categorySource,
+    categoryKind: t.categoryKind,
+    isTransfer: t.isTransfer,
     pfcDetailed: t.pfcDetailed,
     amount: t.amount,
     currency: t.currency,
@@ -254,10 +266,17 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     if (kindFilter) params.set("kind", kindFilter);
     if (transferFilter != null) params.set("transfer", transferFilter ? "1" : "0");
     if (excludedFilter != null) params.set("excluded", excludedFilter ? "1" : "0");
+    if (reviewOnly) params.set("review", "1");
     if (p > 1) params.set("page", String(p));
     const qs = params.toString();
     return qs ? `/transactions?${qs}` : "/transactions";
   }
+
+  // The "To review" chip: same filters, page 1, review toggled.
+  const reviewParams = new URLSearchParams(pageHref(1).split("?")[1] ?? "");
+  if (reviewOnly) reviewParams.delete("review");
+  else reviewParams.set("review", "1");
+  const reviewToggleHref = reviewParams.toString() ? `/transactions?${reviewParams}` : "/transactions";
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 h-full min-h-0 flex flex-col gap-4">
@@ -269,7 +288,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
           <>
             spent across <span className="font-medium text-text">{total}</span> transaction{total === 1 ? "" : "s"}{" "}
             {hasExplicitDateFilter ? "in this range" : `in ${monthLabel(thisMonth).split(" ")[0]}`}
-            {unreviewed > 0 && ` · ${unreviewed} to review`}
+
           </>
         }
         meta={[<SyncFreshness key="sync" syncedAt={items.map((i) => i.lastSyncedAt)} />]}
@@ -278,6 +297,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
             <Link href="/rules" className="text-sm text-brand mr-1.5">
               Manage rules →
             </Link>
+            <ReviewQueue categories={categoryOptions} pendingCount={unreviewed} />
             <SyncButton products={["transactions"]} loadingMessage="Syncing your transactions. This can take a moment." />
             <AddTransactionForm
               accounts={accounts.map((a) => ({ id: a.id, name: accountDisplayName(a.name, a.nickname), mask: a.mask }))}
@@ -303,6 +323,16 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
           categoryOptions={categorySelectOptions}
           passthrough={passthroughParams}
         />
+        {(unreviewed > 0 || reviewOnly) && (
+          <div className="pt-2 flex items-center gap-2 text-[13px]">
+            <Link
+              href={reviewToggleHref}
+              className={reviewOnly ? "px-3 py-1 rounded-full bg-brand-subtle text-brand" : "px-3 py-1 rounded-full border border-border text-warning hover:bg-warning-subtle"}
+            >
+              {reviewOnly ? "Showing only to review ✕" : `To review · ${unreviewed}`}
+            </Link>
+          </div>
+        )}
         {merchantFilter && (
           <div className="pt-2 text-[13px] text-text-2">
             Filtered to merchant <span className="text-text font-medium">{merchantFilter}</span>
@@ -334,16 +364,18 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
         </Card>
       ) : (
         <Card className="flex-1 min-h-0 flex flex-col overflow-hidden">
-          <div className="hidden lg:grid grid-cols-[92px_minmax(180px,1fr)_150px_170px_120px] gap-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 flex-none">
-            <span>Date</span>
+          <div className="hidden lg:grid grid-cols-[20px_28px_minmax(180px,1fr)_minmax(150px,200px)_130px_70px_110px] gap-x-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 flex-none">
+            <span />
+            <span />
             <span>Merchant</span>
-            <span>Account</span>
             <span>Category</span>
+            <span>Account</span>
+            <span />
             <span className="text-right">Amount</span>
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto">
-            <TransactionsList rows={rowData} accountsById={accountsById} categories={categoryOptions} />
+            <TransactionsList rows={rowData} accountsById={accountsById} categories={categoryOptions} today={today} defaultCurrency={DEFAULT_CURRENCY} />
           </div>
 
           {total > 0 && (

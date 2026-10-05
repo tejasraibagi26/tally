@@ -146,6 +146,7 @@ export function TransactionsFilterBar({
         type="text"
         value={q}
         onChange={(e) => handleQChange(e.target.value)}
+        id="transactions-search"
         placeholder="Search merchant or description"
         className="flex-1 min-w-[220px] h-9 rounded-control bg-surface-2 border border-border-strong px-3 text-[15px] text-text placeholder:text-text-3 focus:outline-none focus:ring-2 focus:ring-info"
       />

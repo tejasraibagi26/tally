@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.19.0",
+    date: "2026-10-05",
+    changes: [
+      { kind: "new", text: "Transactions: tap Review to go through new transactions one at a time. Swipe right to confirm the category, left to pick another." },
+      { kind: "improved", text: "Transactions are grouped by day with each day's total. Tap a category to change it, or swipe a row for quick actions." },
+    ],
+  },
+  {
     version: "1.18.0",
     date: "2026-10-05",
     changes: [

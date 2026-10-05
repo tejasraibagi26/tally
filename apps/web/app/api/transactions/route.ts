@@ -72,6 +72,8 @@ export async function GET(req: Request) {
   if (toFilter) conditions.push(lte(schema.transactions.postedDate, toFilter));
   if (transferFilter != null) conditions.push(eq(schema.transactions.isTransfer, transferFilter));
   if (excludedFilter != null) conditions.push(eq(schema.transactions.excludedFromBudget, excludedFilter));
+  // ?review=1: only rows still waiting for review (the mobile "To review" pill).
+  if (url.searchParams.get("review") === "1") conditions.push(eq(schema.transactions.reviewed, false));
   if (kindFilter) conditions.push(eq(schema.categories.kind, kindFilter));
   if (merchantFilter) {
     const merchantCondition = or(
@@ -96,6 +98,8 @@ export async function GET(req: Request) {
     accountId: schema.transactions.accountId,
     categoryId: schema.transactions.categoryId,
     categorySource: schema.transactions.categorySource,
+    categoryKind: schema.categories.kind,
+    isTransfer: schema.transactions.isTransfer,
     pfcDetailed: schema.transactions.pfcDetailed,
     amount: schema.transactions.amount,
     currency: schema.transactions.currency,
@@ -166,6 +170,8 @@ export async function GET(req: Request) {
     categoryName: t.categoryId ? (categoryById.get(t.categoryId)?.name ?? null) : null,
     categoryColorSlot: t.categoryId ? (categoryById.get(t.categoryId)?.colorSlot ?? null) : null,
     categorySource: t.categorySource,
+    categoryKind: t.categoryKind,
+    isTransfer: t.isTransfer,
     pfcDetailed: t.pfcDetailed,
     amount: t.amount,
     currency: t.currency,

@@ -20,6 +20,11 @@ export interface TransactionRow {
   categoryName: string | null;
   categoryColorSlot: number | null;
   categorySource: string | null;
+  /** Category kind (expense/income/transfer) -- for refund detection. Absent from older servers. */
+  categoryKind?: string | null;
+  isTransfer?: boolean;
+  /** "shortcut" for Apple Pay shortcut imports. */
+  source?: string | null;
   pfcDetailed: string | null;
   amount: number;
   currency: string;
@@ -134,5 +139,52 @@ export function useCreateTransaction() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },
+  });
+}
+
+export interface ReviewItem {
+  id: string;
+  postedDate: string;
+  merchantName: string | null;
+  name: string;
+  amount: number;
+  accountName: string;
+  categoryId: string | null;
+  isPending: boolean;
+  suggestions: { categoryId: string; name: string; colorSlot: number; reason: "current" | "history" }[];
+}
+
+/** The review queue (GET /api/transactions/review): unreviewed rows with category suggestions. */
+export function useReviewQueue(enabled = true) {
+  return useQuery({
+    queryKey: ["transactions", "review"],
+    queryFn: () => apiGet<{ total: number; items: ReviewItem[] }>("/api/transactions/review"),
+    enabled,
+  });
+}
+
+/**
+ * Reviews one transaction: optionally sets its category (and, with
+ * `always`, creates a rule for its merchant), and marks it reviewed.
+ * Doesn't invalidate the queue itself -- the review screen walks a loaded
+ * list and refreshes when it's done.
+ */
+export function useReviewTransaction() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, categoryId, always }: { id: string; categoryId: string | null; always?: boolean }) =>
+      apiPatch(`/api/transactions/${id}`, categoryId ? { categoryId, reviewed: true, alwaysCategorizeMerchant: always || undefined } : { reviewed: true }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["transactions"], predicate: (q) => q.queryKey[1] !== "review" }),
+  });
+}
+
+export type BulkAction = { type: "setCategory"; categoryId: string } | { type: "markReviewed" } | { type: "exclude"; value: boolean };
+
+/** POST /api/transactions/bulk -- swipe actions on a list row use it with one id. */
+export function useBulkTransactions() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { ids: string[]; action: BulkAction }) => apiPost<{ ok: true; affected: number }>("/api/transactions/bulk", body),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["transactions"] }),
   });
 }

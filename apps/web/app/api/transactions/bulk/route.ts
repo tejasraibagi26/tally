@@ -10,6 +10,7 @@ const bodySchema = z.object({
     z.object({ type: z.literal("setCategory"), categoryId: z.string().uuid() }),
     z.object({ type: z.literal("addTag"), tag: z.string().min(1).max(40) }),
     z.object({ type: z.literal("exclude"), value: z.boolean() }),
+    z.object({ type: z.literal("markReviewed") }),
   ]),
 });
 
@@ -41,8 +42,11 @@ export async function POST(req: Request) {
   if (action.type === "setCategory") {
     await db
       .update(schema.transactions)
-      .set({ categoryId: action.categoryId, categorySource: "manual" })
+      // Choosing a category is a review, so it also clears the review flag.
+      .set({ categoryId: action.categoryId, categorySource: "manual", reviewed: true })
       .where(inArray(schema.transactions.id, ownedIds));
+  } else if (action.type === "markReviewed") {
+    await db.update(schema.transactions).set({ reviewed: true }).where(inArray(schema.transactions.id, ownedIds));
   } else if (action.type === "exclude") {
     await db.update(schema.transactions).set({ excludedFromBudget: action.value }).where(inArray(schema.transactions.id, ownedIds));
   } else if (action.type === "addTag") {

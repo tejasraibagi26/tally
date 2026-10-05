@@ -127,8 +127,15 @@ import Constants from "expo-constants";
  * a "Not budgeted" row, one-tap setup for an empty month, a past-month
  * report, and BudgetDetailSheet (6-month history, toggles, Remove + undo)
  * replacing edit-in-AddBudgetSheet. Also fixes "days left" using UTC.
+ * 1.19.0 redesigns Transactions to match web 1.20.0
+ * (@tally/core/transactionView): one card per day with that day's net,
+ * rows with a review dot, one status mark, a tappable category chip and
+ * swipe-left Category / Reviewed actions (TransactionListRow), a
+ * "N to review" banner and "To review" filter, and a full-screen review
+ * queue (transactions/review) with swipe right to confirm, left for
+ * another category, and "Always use my pick for <merchant>".
  */
-export const APP_VERSION = "1.18.0";
+export const APP_VERSION = "1.19.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
