@@ -86,6 +86,7 @@ export function useUpdateTransaction(id: string) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transaction", id] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["overview"] });
     },
   });
 }
@@ -174,7 +175,11 @@ export function useReviewTransaction() {
   return useMutation({
     mutationFn: ({ id, categoryId, always }: { id: string; categoryId: string | null; always?: boolean }) =>
       apiPatch(`/api/transactions/${id}`, categoryId ? { categoryId, reviewed: true, alwaysCategorizeMerchant: always || undefined } : { reviewed: true }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["transactions"], predicate: (q) => q.queryKey[1] !== "review" }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions"], predicate: (q) => q.queryKey[1] !== "review" });
+      // Overview's "N to review" row counts the same queue.
+      queryClient.invalidateQueries({ queryKey: ["overview"] });
+    },
   });
 }
 
@@ -185,6 +190,9 @@ export function useBulkTransactions() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: { ids: string[]; action: BulkAction }) => apiPost<{ ok: true; affected: number }>("/api/transactions/bulk", body),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["transactions"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["overview"] });
+    },
   });
 }
