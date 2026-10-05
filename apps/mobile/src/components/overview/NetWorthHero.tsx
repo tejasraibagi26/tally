@@ -8,12 +8,17 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { usePrivacy } from "@/lib/PrivacyContext";
 import { todayISO } from "@/lib/today";
 import type { NetWorthPoint } from "@/lib/queries/overview";
+import { withAlpha } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 
 // Net worth chart height -- taller than the old 56px strip now that it runs
 // full-bleed, matching web's more immersive Overview chart.
 const HERO_CHART_HEIGHT = 112;
+// The line stops this far short of the screen edge so the "today" dot (7pt
+// radius with its halo) isn't cut in half by it.
+const END_INSET = 8;
+const DOT_SIZE = 14;
 const DEFAULT_RANGE: NetWorthRange = "1M";
 /** One accessibility step moves the chart a week. */
 const A11Y_STEP_DAYS = 7;
@@ -82,7 +87,8 @@ export function NetWorthHero({
     const sliced = sliceNetWorthRange(points, range, today);
     return sliced.length >= 2 ? sliced : points;
   }, [points, range, today]);
-  const chartData = useMemo(() => visible.map((p) => ({ value: p.net / 100 })), [visible]);
+  const values = useMemo(() => visible.map((p) => p.net / 100), [visible]);
+  const plotWidth = Math.max(0, chartWidth - END_INSET);
   const delta = useMemo(() => (loading ? undefined : netWorthDelta(points, netCents, range, today)), [loading, points, netCents, range, today]);
 
   function chooseRange(next: NetWorthRange) {
@@ -126,16 +132,16 @@ export function NetWorthHero({
         onPanResponderGrant: (evt) => {
           onScrubChange(true);
           chartPageXRef.current = evt.nativeEvent.pageX - evt.nativeEvent.locationX;
-          updateChartHoverFromLocalX(evt.nativeEvent.locationX, chartWidth, chartData.length);
+          updateChartHoverFromLocalX(evt.nativeEvent.locationX, plotWidth, values.length);
         },
         onPanResponderMove: (_evt, gestureState) => {
-          updateChartHoverFromLocalX(gestureState.moveX - chartPageXRef.current, chartWidth, chartData.length);
+          updateChartHoverFromLocalX(gestureState.moveX - chartPageXRef.current, plotWidth, values.length);
         },
         onPanResponderRelease: endChartScrub,
         onPanResponderTerminate: endChartScrub,
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [chartWidth, chartData.length],
+    [plotWidth, values.length],
   );
 
   // Screen readers can't drag, so the chart is an adjustable control:
@@ -157,6 +163,30 @@ export function NetWorthHero({
   }
 
   const hoveredPoint = hoverIndex != null ? (visible[hoverIndex] ?? null) : null;
+
+  // One dot: today's point at rest, the touched point while scrubbing. The
+  // chart draws it itself (a per-point customDataPoint, every other point
+  // hidden), so it sits on the line by the chart's own scale rather than an
+  // overlay re-deriving gifted-charts' internal y-mapping.
+  const dotIndex = hoverIndex ?? values.length - 1;
+  const chartData = useMemo(
+    () =>
+      values.map((value, i) =>
+        i === dotIndex
+          ? {
+              value,
+              dataPointWidth: DOT_SIZE,
+              dataPointHeight: DOT_SIZE,
+              customDataPoint: () => (
+                <View style={{ width: DOT_SIZE, height: DOT_SIZE, borderRadius: DOT_SIZE / 2, backgroundColor: withAlpha(colors.brand!, 0.25), alignItems: "center", justifyContent: "center" }}>
+                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.brand }} />
+                </View>
+              ),
+            }
+          : { value, hideDataPoint: true },
+      ),
+    [values, dotIndex, colors.brand],
+  );
   const heroCents = hoveredPoint ? hoveredPoint.net : netCents;
 
   // gifted-charts' LineChart defaults its y-axis to start at 0 unless told
@@ -170,14 +200,13 @@ export function NetWorthHero({
   // yAxisOffset from every value *before* plotting, so maxValue is expressed
   // on that offset-adjusted scale, not the raw net-worth scale.
   const { chartYAxisOffset, chartMaxValue } = useMemo(() => {
-    if (chartData.length < 2) return { chartYAxisOffset: 0, chartMaxValue: undefined };
-    const values = chartData.map((d) => d.value);
+    if (values.length < 2) return { chartYAxisOffset: 0, chartMaxValue: undefined };
     const min = Math.min(...values);
     const max = Math.max(...values);
     const pad = (max - min) * 0.1 || Math.abs(min) * 0.02 || 1;
     const yAxisOffset = min - pad;
     return { chartYAxisOffset: yAxisOffset, chartMaxValue: max - yAxisOffset + pad * 0.25 };
-  }, [chartData]);
+  }, [values]);
 
   const up = delta?.direction === "up";
   const deltaText = delta ? `${up ? "▲" : "▼"} ${hidden ? "" : `${up ? "+" : "−"}${formatCents(delta.cents)} · `}${delta.pct}%` : null;
@@ -234,7 +263,7 @@ export function NetWorthHero({
             <LineChart
               data={chartData}
               height={HERO_CHART_HEIGHT}
-              width={chartWidth}
+              width={plotWidth}
               adjustToWidth
               // Even with hideYAxisText, gifted-charts reserves a hidden 10px
               // y-axis label column by default and adds it on top of `width`;
@@ -251,7 +280,6 @@ export function NetWorthHero({
               endFillColor={colors.brand}
               startOpacity={0.28}
               endOpacity={0}
-              hideDataPoints
               hideYAxisText
               hideAxesAndRules
               disableScroll

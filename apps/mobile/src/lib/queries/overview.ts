@@ -5,7 +5,13 @@ import type { BudgetLine } from "@/lib/queries/budgets";
 export interface UpcomingBill {
   type: "subscription" | "card";
   label: string;
-  amount: number;
+  /** Cents. Null for a card payment whose bank reported no minimum (unknown, never zero). */
+  amount: number | null;
+  /** A card's last statement balance in cents, when sent. Absent from older servers. */
+  statementBalance?: number | null;
+  /** Past its due date, or a card the bank flags as past due. Absent from older servers. */
+  overdue?: boolean;
+  overdueDays?: number;
   dueDate: string;
   accountId: string | null;
   /** The recurring stream behind a "subscription" bill; null for a card payment. Absent from older servers. */

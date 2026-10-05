@@ -136,8 +136,15 @@
  * 1.21.2 opens Subscriptions' edit-next-date form in a centered dialog
  * (components/subscriptions/NextDueDateEditor.tsx) instead of a popover the
  * table's scroll container clipped.
+ * 1.22.0 is the server side of mobile Overview v2: upcoming bills stay
+ * listed 3 days past due and come first marked overdue (a card only when
+ * Plaid flags isOverdue); a card with no reported minimum has a null amount
+ * ("Min. unknown") plus its statement balance; PATCH /api/recurring-streams
+ * accepts { dismissed: false } to restore a dismissed stream and GET
+ * /api/recurring?dismissed=1 lists them. The web Overview's Upcoming card
+ * shows the overdue label and "Min. unknown".
  */
-export const APP_VERSION = "1.21.2";
+export const APP_VERSION = "1.22.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

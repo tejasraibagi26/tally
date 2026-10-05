@@ -176,6 +176,7 @@ function RootNavigator() {
                   them on Android. */}
               <Stack.Screen name="fire" options={pushedScreenOptions("Early retirement")} />
               <Stack.Screen name="subscriptions" options={pushedScreenOptions("Subscriptions")} />
+              <Stack.Screen name="upcoming" options={pushedScreenOptions("Upcoming")} />
               <Stack.Screen name="investments" options={pushedScreenOptions("Investments")} />
               <Stack.Screen name="investment-holdings" options={pushedScreenOptions("Holdings")} />
               <Stack.Screen name="settings" options={pushedScreenOptions("Settings")} />

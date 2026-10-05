@@ -23,8 +23,10 @@ import { StatPair } from "@/components/overview/StatPair";
 import { UpcomingList } from "@/components/overview/UpcomingList";
 import { RecentList } from "@/components/overview/RecentList";
 import { usePrivacy } from "@/lib/PrivacyContext";
+import { useDismissUndo } from "@/lib/useDismissUndo";
+import { Toast } from "@/components/ui/Toast";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
-import { rankBudgets } from "@tally/core/overviewView";
+import { highCardCount, rankBudgets } from "@tally/core/overviewView";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 
@@ -52,6 +54,7 @@ export default function OverviewScreen() {
   // (its scrollEnabled prop below) so a vertical wobble mid-drag can't hand
   // the touch to the scroll view instead of the chart.
   const [isScrubbingChart, setIsScrubbingChart] = useState(false);
+  const undo = useDismissUndo();
 
   const netCents = accounts.data?.totals.net ?? 0;
 
@@ -138,7 +141,7 @@ export default function OverviewScreen() {
               daysInMonth={daysInMonth}
             />
           )}
-          <StatPair investmentsCents={investmentsCents} credit={liabilities.data?.utilization ?? null} />
+          <StatPair investmentsCents={investmentsCents} credit={liabilities.data?.utilization ?? null} highCards={highCardCount(liabilities.data?.cards ?? [])} />
         </View>
 
         {/* Budget this month */}
@@ -159,7 +162,7 @@ export default function OverviewScreen() {
         )}
 
         {/* Upcoming */}
-        <UpcomingList bills={overview.data?.upcomingBills ?? []} />
+        <UpcomingList bills={overview.data?.upcomingBills ?? []} onDismissed={undo.onDismissed} />
 
         {/* Recent activity */}
         <RecentList items={recentItems} />
@@ -180,6 +183,7 @@ export default function OverviewScreen() {
         )}
       </View>
       </ScrollView>
+      <Toast message={undo.message} onHidden={undo.clear} action={undo.action} bottom={tabBarClearance + 16} />
     </View>
   );
 }

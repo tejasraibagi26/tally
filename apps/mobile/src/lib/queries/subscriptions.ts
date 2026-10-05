@@ -14,6 +14,8 @@ export interface RecurringStream {
   amortizeMonthly: boolean;
   /** Billing term a spread plan covers (3/6/9/12); absent from an older API response. */
   amortizeMonths?: number;
+  /** When the person dismissed it ("This won't recur" or Remove); null for an active stream. */
+  dismissedAt?: string | null;
 }
 
 export function useSubscriptions() {
@@ -33,6 +35,32 @@ export function useSetAmortizeMonthly() {
     mutationFn: ({ id, ...body }: { id: string; amortizeMonthly?: boolean; amortizeMonths?: number }) =>
       apiPatch<{ stream: RecurringStream }>(`/api/recurring-streams/${id}`, body),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["recurring-streams"] }),
+  });
+}
+
+/**
+ * Streams the person dismissed, newest first, for Subscriptions' "Dismissed"
+ * group. Filtered on dismissedAt as well, so a server that predates
+ * ?dismissed=1 (and returns active streams) shows nothing rather than
+ * listing active bills as dismissed.
+ */
+export function useDismissedSubscriptions() {
+  return useQuery({
+    queryKey: ["recurring-streams", "dismissed"],
+    queryFn: () => apiGet<{ streams: RecurringStream[] }>("/api/recurring?dismissed=1"),
+    select: (d) => d.streams.filter((s) => s.dismissedAt != null),
+  });
+}
+
+/** Brings a dismissed stream back (PATCH { dismissed: false }); Undo and the Dismissed group's Restore. */
+export function useRestoreSubscription() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => apiPatch<{ stream: RecurringStream }>(`/api/recurring-streams/${id}`, { dismissed: false }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recurring-streams"] });
+      queryClient.invalidateQueries({ queryKey: ["overview"] });
+    },
   });
 }
 

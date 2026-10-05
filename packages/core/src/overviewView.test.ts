@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MIN_UPCOMING_CONFIDENCE, creditHealth, dateTile, dueLabel, monthsAgo, netWorthDelta, qualifiesAsUpcoming, rankBudgets, shortDayLabel, sliceNetWorthRange } from "./overviewView";
+import { MIN_UPCOMING_CONFIDENCE, UPCOMING_GRACE_DAYS, creditHealth, daysBefore, overdueDays, groupUpcoming, highCardCount, dateTile, dueLabel, monthsAgo, netWorthDelta, qualifiesAsUpcoming, rankBudgets, shortDayLabel, sliceNetWorthRange } from "./overviewView";
 
 describe("dueLabel", () => {
   it("words the distance, and flags today and overdue as urgent", () => {
@@ -7,7 +7,8 @@ describe("dueLabel", () => {
     expect(dueLabel("2026-10-15", "2026-10-14")).toEqual({ text: "tomorrow", urgent: false, soon: true });
     expect(dueLabel("2026-10-21", "2026-10-14")).toEqual({ text: "in 7 days", urgent: false, soon: true });
     expect(dueLabel("2026-10-22", "2026-10-14")).toEqual({ text: "in 8 days", urgent: false, soon: false });
-    expect(dueLabel("2026-10-13", "2026-10-14").text).toBe("Overdue");
+    expect(dueLabel("2026-10-13", "2026-10-14").text).toBe("Overdue · 1 day");
+    expect(dueLabel("2026-10-12", "2026-10-14")).toEqual({ text: "Overdue · 2 days", urgent: true, soon: true });
   });
   it("counts across a month boundary", () => {
     expect(dueLabel("2026-11-01", "2026-10-30").text).toBe("in 2 days");
@@ -126,5 +127,54 @@ describe("qualifiesAsUpcoming", () => {
     expect(check(stream({ dueDate: "2026-11-13" }))).toBe(true);
     expect(check(stream({ dueDate: "2026-11-14" }))).toBe(false);
     expect(check(stream({ dueDate: null }))).toBe(false);
+  });
+});
+
+describe("highCardCount", () => {
+  it("counts cards at or over 30% of their own limit, skipping unknown limits", () => {
+    expect(
+      highCardCount([
+        { currentBalance: 95_000, creditLimit: 100_000 },
+        { currentBalance: 30_000, creditLimit: 100_000 },
+        { currentBalance: 29_900, creditLimit: 100_000 },
+        { currentBalance: 50_000, creditLimit: null },
+        { currentBalance: 10_000, creditLimit: 0 },
+        { currentBalance: -5_000, creditLimit: 100_000 },
+      ]),
+    ).toBe(2);
+  });
+});
+
+describe("groupUpcoming", () => {
+  it("puts overdue first, then the next 7 days, then later, each in date order", () => {
+    const g = groupUpcoming(
+      [
+        { dueDate: "2026-10-30" },
+        { dueDate: "2026-10-12" },
+        { dueDate: "2026-10-21" },
+        { dueDate: "2026-10-15" },
+        { dueDate: "2026-10-22" },
+        { dueDate: "2026-10-25", overdue: true },
+      ],
+      "2026-10-14",
+    );
+    expect(g.overdue.map((b) => b.dueDate)).toEqual(["2026-10-12", "2026-10-25"]);
+    expect(g.thisWeek.map((b) => b.dueDate)).toEqual(["2026-10-15", "2026-10-21"]);
+    expect(g.later.map((b) => b.dueDate)).toEqual(["2026-10-22", "2026-10-30"]);
+  });
+});
+
+describe("overdue window", () => {
+  it("starts the window three days back so a just-missed bill stays listed", () => {
+    const from = daysBefore("2026-10-14", UPCOMING_GRACE_DAYS);
+    expect(from).toBe("2026-10-11");
+    const s = { dueDate: "2026-10-11", isManual: false, manualNextDueDate: null, status: "active", averageAmount: -1_500, confidence: "0.8" };
+    expect(qualifiesAsUpcoming(s, from, "2026-11-13")).toBe(true);
+    expect(qualifiesAsUpcoming({ ...s, dueDate: "2026-10-10" }, from, "2026-11-13")).toBe(false);
+  });
+  it("counts whole days past due, zero when not yet due", () => {
+    expect(overdueDays("2026-10-12", "2026-10-14")).toBe(2);
+    expect(overdueDays("2026-10-14", "2026-10-14")).toBe(0);
+    expect(overdueDays("2026-10-20", "2026-10-14")).toBe(0);
   });
 });

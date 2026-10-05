@@ -61,16 +61,18 @@ export function NeedsYouCard({ items }: { items: NeedsYouItem[] }) {
       </Pressable>
       {shown.map(({ institution, state }) => {
         const name = institution.institutionName ?? "Unknown institution";
+        const reason = state.notice?.title ?? state.statusLine;
         return (
           <View key={institution.id} className="flex-row items-center gap-3 mt-3 pt-3" style={{ borderTopWidth: 1, borderTopColor: hairline(colors) }}>
             <View className="w-[30px] h-[30px] rounded-[9px] items-center justify-center" style={{ backgroundColor: withAlpha(colors.text!, 0.08) }}>
               <Text className="font-ui-semibold" style={{ fontSize: rf(12), color: toneColor(colors, state.tone) }}>{name.charAt(0).toUpperCase()}</Text>
             </View>
-            <Pressable onPress={openFix} className="flex-1 gap-0.5" accessibilityRole="button">
-              <Text className="font-ui-medium text-text" style={{ fontSize: rf(14) }}>{name}</Text>
-              <Text className="font-ui text-text-2" style={{ fontSize: rf(12) }}>{state.notice?.title ?? state.statusLine}</Text>
+            {/* One line each, so a long bank name can't push the row to four lines; the label keeps the full text for screen readers. */}
+            <Pressable onPress={openFix} className="flex-1 gap-0.5 min-w-0" accessibilityRole="button" accessibilityLabel={`${name}, ${reason}`}>
+              <Text className="font-ui-medium text-text" style={{ fontSize: rf(14) }} numberOfLines={1}>{name}</Text>
+              <Text className="font-ui text-text-2" style={{ fontSize: rf(12) }} numberOfLines={1}>{reason}</Text>
             </Pressable>
-            {state.action && <StateButton action={state.action} tone={state.tone} onPress={openFix} />}
+            {state.action && <StateButton action={state.action} tone={state.tone} onPress={openFix} compact />}
           </View>
         );
       })}

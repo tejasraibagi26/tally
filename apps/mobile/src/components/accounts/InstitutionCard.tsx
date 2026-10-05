@@ -33,12 +33,15 @@ export function StateButton({
   pending,
   onPress,
   grow,
+  compact,
 }: {
   action: ConnectionAction;
   tone: ConnectionTone;
   pending?: boolean;
   onPress: () => void;
   grow?: boolean;
+  /** 32 high instead of 36, for tight rows like Overview's Needs you card. */
+  compact?: boolean;
 }) {
   const colors = useThemeColors();
   const rf = useRF();
@@ -51,7 +54,7 @@ export function StateButton({
       disabled={pending}
       accessibilityRole="button"
       accessibilityLabel={action.label}
-      className="h-9 rounded-full items-center justify-center px-4 active:opacity-80"
+      className={`${compact ? "h-8 px-3.5" : "h-9 px-4"} rounded-full items-center justify-center active:opacity-80`}
       style={{ backgroundColor: bg, minWidth: 64, flexGrow: grow ? 1 : 0, flexShrink: 0, opacity: pending ? 0.75 : 1 }}
     >
       {pending ? <ActivityIndicator size="small" color={fg} /> : <Text className="font-ui-semibold" style={{ color: fg, fontSize: rf(13) }}>{action.label}</Text>}

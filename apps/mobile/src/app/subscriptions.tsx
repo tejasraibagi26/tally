@@ -6,13 +6,13 @@ import { subscriptionsMonthlyTotal } from "@tally/core/subscriptionMath";
 import { HeaderTextAction } from "@/components/ui/HeaderTextAction";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
-import { useSubscriptions, useDeleteSubscription, useSetAmortizeMonthly, type RecurringStream } from "@/lib/queries/subscriptions";
+import { useSubscriptions, useDeleteSubscription, useSetAmortizeMonthly, useDismissedSubscriptions, useRestoreSubscription, type RecurringStream } from "@/lib/queries/subscriptions";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { hairline } from "@/theme/colors";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
-import { Trash2, Check, SplitSquareVertical } from "lucide-react-native";
+import { Trash2, Check, SplitSquareVertical, ChevronDown, ChevronRight } from "lucide-react-native";
 
 const TERM_OPTIONS = [3, 6, 9, 12];
 
@@ -95,7 +95,11 @@ export default function SubscriptionsScreen() {
   const streams = (data?.streams ?? []).filter((s) => s.status !== "cancelled");
 
   function confirmRemove(s: RecurringStream) {
-    Alert.alert(`Remove "${s.description ?? s.merchantKey}"?`, "Transactions it already posted stay in your history.", [
+    // A bill you added is deleted outright; a detected one is only dismissed and can be restored below.
+    const detail = s.isManual
+      ? "This deletes the bill. Transactions it already posted stay in your history."
+      : "You can bring it back from Dismissed at the end of this list. Transactions it already posted stay in your history.";
+    Alert.alert(`Remove "${s.description ?? s.merchantKey}"?`, detail, [
       { text: "Cancel", style: "cancel" },
       { text: "Remove", style: "destructive", onPress: () => deleteSubscription.mutate(s.id) },
     ]);
@@ -160,8 +164,65 @@ export default function SubscriptionsScreen() {
           {streams.length === 0 && <Text className="font-ui text-text-3 py-4" style={{ fontSize: rf(14) }}>No subscriptions detected yet. Paid in irregular lump sums, like rent prepaid ahead? Tap Add to track it.</Text>}
         </Card>
       )}
+      <DismissedGroup />
     </ScrollView>
     <AddBillSheet visible={addOpen} onClose={() => setAddOpen(false)} />
+    </View>
+  );
+}
+
+/**
+ * Bills the person dismissed ("This won't recur" on Overview, or Remove on a
+ * detected bill), collapsed by default at the end of the list, each with
+ * Restore. A bill they added themselves is deleted on removal, so it never
+ * appears here.
+ */
+function DismissedGroup() {
+  const colors = useThemeColors();
+  const rf = useRF();
+  const { data: dismissed = [] } = useDismissedSubscriptions();
+  const restore = useRestoreSubscription();
+  const [open, setOpen] = useState(false);
+  if (dismissed.length === 0) return null;
+  const Chevron = open ? ChevronDown : ChevronRight;
+  return (
+    <View className="gap-2.5">
+      <Pressable
+        onPress={() => setOpen((v) => !v)}
+        className="flex-row items-center gap-1.5"
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        accessibilityLabel={`Dismissed, ${dismissed.length}`}
+      >
+        <Text className="font-ui-semibold text-text-3" style={{ fontSize: rf(11), letterSpacing: 0.66, textTransform: "uppercase" }}>
+          Dismissed ({dismissed.length})
+        </Text>
+        <Chevron size={14} color={colors["text-3"]} strokeWidth={2} />
+      </Pressable>
+      {open && (
+        <Card className="px-5">
+          {dismissed.map((s, i) => (
+            <View key={s.id} className="flex-row items-center gap-3 py-3.5" style={i > 0 ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined}>
+              <View className="flex-1 gap-0.5">
+                <Text className="font-ui-medium text-text" style={{ fontSize: rf(14.5) }} numberOfLines={1}>{s.description ?? s.merchantKey}</Text>
+                <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }} numberOfLines={1}>
+                  Usually <MoneyText cents={s.averageAmount} signed mask={false} className="font-ui text-text-3" style={{ fontSize: rf(12) }} />
+                </Text>
+              </View>
+              <Pressable
+                onPress={() => restore.mutate(s.id)}
+                disabled={restore.isPending && restore.variables === s.id}
+                hitSlop={10}
+                accessibilityRole="button"
+                accessibilityLabel={`Restore ${s.description ?? s.merchantKey}`}
+              >
+                <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13.5) }}>Restore</Text>
+              </Pressable>
+            </View>
+          ))}
+        </Card>
+      )}
     </View>
   );
 }

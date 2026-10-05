@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.22.0",
+    date: "2026-10-05",
+    changes: [
+      { kind: "improved", text: "Overview: a bill that's past due stays at the top of Upcoming for a few days, marked Overdue, instead of disappearing." },
+      { kind: "fixed", text: "A card payment whose bank doesn't report a minimum now says \"Min. unknown\" instead of $0.00." },
+    ],
+  },
+  {
     version: "1.21.2",
     date: "2026-10-05",
     changes: [{ kind: "fixed", text: "Subscriptions: editing a bill's next date now opens in a dialog in the middle of the screen, so you no longer have to scroll the table to reach Save." }],

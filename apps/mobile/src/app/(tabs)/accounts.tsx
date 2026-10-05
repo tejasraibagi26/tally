@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, ScrollView, ActivityIndicator, Pressable, RefreshControl, KeyboardAvoidingView, Platform, Animated } from "react-native";
+import { View, Text, ScrollView, ActivityIndicator, Pressable, RefreshControl, KeyboardAvoidingView, Platform } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Plus, RefreshCw } from "lucide-react-native";
@@ -11,6 +11,7 @@ import { AccountsSummary, AttentionStrip, SyncBanner } from "@/components/accoun
 import { AccountsSkeleton, ConnectFirstBank, AccountsLoadError } from "@/components/accounts/AccountsPlaceholders";
 import { FixSheet } from "@/components/accounts/FixSheet";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
+import { Toast } from "@/components/ui/Toast";
 import { useAccounts, type Institution } from "@/lib/queries/accounts";
 import { usePlaidLink } from "@/lib/usePlaidLink";
 import { useSync, useRefreshItemBalances, useRevokeItem, useItemRefreshStates } from "@/lib/queries/plaid";
@@ -26,7 +27,6 @@ import { useRF } from "@/theme/responsiveFont";
 
 /** How long the "You're reconnected" confirmation stays before the card goes quiet. */
 const RECONNECTED_MS = 6000;
-const TOAST_MS = 4000;
 
 export default function AccountsScreen() {
   const insets = useSafeAreaInsets();
@@ -262,31 +262,5 @@ export default function AccountsScreen() {
         />
       )}
     </View>
-  );
-}
-
-/** Bottom-center, above the tab bar, 4s (MOBILE_DESIGN.md's toast row). */
-function Toast({ message, onHidden, bottom }: { message: string | null; onHidden: () => void; bottom: number }) {
-  const rf = useRF();
-  const colors = useThemeColors();
-  const [opacity] = useState(() => new Animated.Value(0));
-
-  useEffect(() => {
-    if (!message) return;
-    Animated.timing(opacity, { toValue: 1, duration: 180, useNativeDriver: true }).start();
-    const t = setTimeout(() => {
-      Animated.timing(opacity, { toValue: 0, duration: 220, useNativeDriver: true }).start(() => onHidden());
-    }, TOAST_MS);
-    return () => clearTimeout(t);
-  }, [message, opacity, onHidden]);
-
-  if (!message) return null;
-  return (
-    <Animated.View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, bottom, alignItems: "center", opacity }}>
-      <View className="flex-row items-center gap-2 rounded-full bg-raised px-4 py-2.5" style={{ borderWidth: 1, borderColor: colors.border }}>
-        <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.positive }} />
-        <Text className="font-ui-medium text-text" style={{ fontSize: rf(13) }}>{message}</Text>
-      </View>
-    </Animated.View>
   );
 }

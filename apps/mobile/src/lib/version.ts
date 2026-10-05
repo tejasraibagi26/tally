@@ -172,8 +172,23 @@ import Constants from "expo-constants";
  * use your timezone (all server-side, @tally/core/overviewView's
  * qualifiesAsUpcoming). A bill Tally guessed opens a sheet with "This won't
  * recur", which dismisses the stream behind it.
+ * 1.23.0 is Overview v2's app-only pass: "View all" opens a new Upcoming
+ * screen (app/upcoming.tsx: Overdue / This week / Later, card payments
+ * included); Credit used notes when a single card is at or over 30%
+ * (highCardCount); "Saved so far" stays plain text when negative mid-month;
+ * the chart marks today (and the scrubbed day) with a dot the chart draws
+ * itself; the attention cards fade in and out; Needs you rows are one line
+ * each with a compact pill.
+ * 1.24.0 is Overview v2's server pass (needs web 1.22.0): a bill stays in
+ * Upcoming for 3 days past due, first in the list and marked "Overdue · 2
+ * days" (cards only when the bank flags them); a card with no reported
+ * minimum shows "Min. unknown" plus its statement balance instead of $0.00;
+ * "This won't recur" offers Undo for 5 seconds (useDismissUndo, the shared
+ * components/ui/Toast now also used by Accounts), and Subscriptions lists
+ * dismissed bills with Restore (GET /api/recurring?dismissed=1, PATCH
+ * { dismissed: false }).
  */
-export const APP_VERSION = "1.22.0";
+export const APP_VERSION = "1.24.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

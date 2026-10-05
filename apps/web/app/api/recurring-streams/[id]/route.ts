@@ -16,6 +16,9 @@ const patchSchema = z.object({
   // The billing term one charge covers and is spread across (see
   // schema.ts's recurringStreams.amortizeMonths).
   amortizeMonths: z.union([z.literal(3), z.literal(6), z.literal(9), z.literal(12)]).optional(),
+  // false restores a stream the user dismissed ("This won't recur" or Remove);
+  // detection refreshes its dates on the next run. Dismissing stays DELETE.
+  dismissed: z.literal(false).optional(),
 });
 
 // Sets or clears manualNextDueDate (schema.ts's override for a recurring
@@ -54,6 +57,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const update: Partial<typeof schema.recurringStreams.$inferInsert> = {};
   if (parsed.data.manualNextDueDate !== undefined) update.manualNextDueDate = parsed.data.manualNextDueDate;
   if (parsed.data.amortizeMonthly !== undefined) update.amortizeMonthly = parsed.data.amortizeMonthly;
+  if (parsed.data.dismissed === false) update.dismissedAt = null;
   if (parsed.data.amortizeMonths !== undefined) {
     update.amortizeMonths = parsed.data.amortizeMonths;
     // Next charge is one term after the last one (Upcoming bills reads this;
