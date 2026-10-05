@@ -15,24 +15,29 @@ const MAX_ROWS = 2;
 // Accounts tab, which is where every action here goes.
 const IDLE = { refreshing: false, linking: false, justReconnected: false, refreshFailed: false };
 
+export type NeedsYouItem = { institution: Institution; state: ConnectionState };
+
+/** Banks that need a tap, most urgent first. */
+export function useNeedsYouItems(institutions: Institution[]): NeedsYouItem[] {
+  return useMemo(
+    () =>
+      institutions
+        .map((institution) => ({ institution, state: connectionState(institution, IDLE) }))
+        .filter((c) => c.state.needsAttention)
+        .sort((a, b) => a.state.rank - b.state.rank || (a.institution.institutionName ?? "").localeCompare(b.institution.institutionName ?? "")),
+    [institutions],
+  );
+}
+
 /**
  * Banks that need a tap, only when there are any: icon, title and a written
  * reason always accompany the tone color. Every row and button opens the
  * Accounts tab's Fix sheet, where Plaid Link and the retry actions already live.
  */
-export function NeedsYouCard({ institutions }: { institutions: Institution[] }) {
+export function NeedsYouCard({ items }: { items: NeedsYouItem[] }) {
   const router = useRouter();
   const colors = useThemeColors();
   const rf = useRF();
-
-  const items = useMemo(
-    () =>
-      institutions
-        .map((institution) => ({ institution, state: connectionState(institution, IDLE) }))
-        .filter((c): c is { institution: Institution; state: ConnectionState } => c.state.needsAttention)
-        .sort((a, b) => a.state.rank - b.state.rank || (a.institution.institutionName ?? "").localeCompare(b.institution.institutionName ?? "")),
-    [institutions],
-  );
   if (items.length === 0) return null;
 
   const blocked = items.some((c) => c.state.level === "blocked");

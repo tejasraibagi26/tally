@@ -19,12 +19,14 @@ import { useLiabilities } from "@/lib/queries/liabilities";
 import { useHoldings } from "@/lib/queries/investments";
 import { useCategoryBreakdown } from "@/lib/queries/spendBreakdown";
 import { CategorySpendBar } from "@/components/charts/CategorySpendBar";
-import { NeedsYouCard } from "@/components/overview/NeedsYouCard";
+import { AttentionStack } from "@/components/overview/AttentionStack";
+import { MonthCard } from "@/components/overview/MonthCard";
+import { StatPair } from "@/components/overview/StatPair";
 import { UpcomingList } from "@/components/overview/UpcomingList";
 import { RecentList } from "@/components/overview/RecentList";
 import { usePrivacy } from "@/lib/PrivacyContext";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
-import { formatCents, formatPercent } from "@tally/core/money";
+import { rankBudgets } from "@tally/core/overviewView";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 
@@ -196,42 +198,17 @@ export default function OverviewScreen() {
   }, [trend.data, accounts.data, netCents]);
 
   const recentItems = recent.data?.pages[0]?.items.slice(0, 5) ?? [];
-  const topBudgets = (overview.data?.budgets.categories ?? []).slice(0, 3);
+  const topBudgets = rankBudgets(overview.data?.budgets.categories ?? [], 3);
 
   const months = cashFlow.data?.months ?? [];
   const currentMonth = months[months.length - 1];
   const priorMonth = months.length > 1 ? months[months.length - 2] : undefined;
-  const utilizationPct = liabilities.data?.utilization.utilization != null ? Math.round(liabilities.data.utilization.utilization * 100) : null;
+  const utilization = liabilities.data?.utilization.utilization ?? null;
 
-  // Matches web's StatTile "secondary" line for the same tile -- % of the
-  // month's total budget spent so far, alongside the vs.-last-month delta.
   const totalBudgeted = overview.data?.budgets.totalBudgeted ?? 0;
-  const spendSecondary =
-    totalBudgeted > 0 ? `${formatPercent(currentMonth ? currentMonth.spend / totalBudgeted : 0)} of ${formatCents(totalBudgeted)} budget` : undefined;
-
-  const kpiTiles = currentMonth
-    ? [
-        {
-          key: "spend",
-          label: "Spent this month",
-          cents: currentMonth.spend,
-          delta: priorMonth ? deltaLabel(currentMonth.spend, priorMonth.spend) : undefined,
-          secondary: spendSecondary,
-        },
-        {
-          key: "income",
-          label: "Income",
-          cents: currentMonth.income,
-          delta: priorMonth ? deltaLabel(currentMonth.income, priorMonth.income) : undefined,
-          secondary: undefined as string | undefined,
-        },
-      ]
-    : [];
-  // Replaces the old Cash flow tile -- same portfolio total as the
-  // Investments screen's header (GET /api/investments/holdings).
-  if (holdings.data && holdings.data.holdings.length > 0) {
-    kpiTiles.push({ key: "investments", label: "Investments", cents: holdings.data.value, delta: undefined, secondary: "Portfolio value" });
-  }
+  const investmentsCents = holdings.data && holdings.data.holdings.length > 0 ? holdings.data.value : null;
+  const now = new Date();
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
 
   const refreshing = accounts.isFetching || overview.isFetching || trend.isFetching;
   function onRefresh() {
@@ -364,39 +341,24 @@ export default function OverviewScreen() {
           )}
         </View>
 
-        {/* Banks that need a tap -- renders nothing when all is well; sync
-            freshness already sits in the header meta line. */}
-        <NeedsYouCard institutions={accounts.data?.institutions ?? []} />
+        {/* Banks that need a tap and the review backlog -- renders nothing when
+            all is well; sync freshness already sits in the header meta line. */}
+        <AttentionStack institutions={accounts.data?.institutions ?? []} unreviewed={overview.data?.unreviewed ?? 0} />
 
-        {/* KPI row -- a wrapping 2-column grid rather than a fixed-width
-            horizontal scroll: at 140px-wide tiles, a horizontal ScrollView
-            clips the last tile's text right at the screen edge on
-            narrower/denser phones (nothing left to scroll to reveal the
-            rest), which read as broken rather than "swipe for more." */}
-        {(kpiTiles.length > 0 || utilizationPct !== null) && (
-          <View className="flex-row flex-wrap" style={{ gap: 12 }}>
-            {kpiTiles.map((tile) => (
-              <View key={tile.key} className="rounded-panel px-4 py-4 gap-1.5 bg-surface" style={{ width: "48%" }}>
-                <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(11.5) }}>{tile.label}</Text>
-                <MoneyText cents={tile.cents} mask={tile.key === "income" || tile.key === "investments"} className="font-ui-semibold text-text" style={{ fontSize: rf(19) }} numberOfLines={1} adjustsFontSizeToFit />
-                {/* Secondary (budget %) takes priority over the vs.-last-month
-                    delta when both exist (spend tile only) -- showing both
-                    stacked overflowed the tile width, truncating the second
-                    line ("149% of $2,863.00 budg..."). */}
-                {(tile.secondary ?? tile.delta) && (
-                  <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }} numberOfLines={1}>{tile.secondary ?? tile.delta}</Text>
-                )}
-              </View>
-            ))}
-            {utilizationPct !== null && (
-              <View className="rounded-panel px-4 py-4 gap-1.5 bg-surface" style={{ width: "48%" }}>
-                <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(11.5) }}>Credit utilization</Text>
-                <Text className="font-ui-semibold text-text" style={{ fontSize: rf(19) }}>{utilizationPct}%</Text>
-                <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>of total limit</Text>
-              </View>
-            )}
-          </View>
-        )}
+        {/* This month: spend against budget, income, saved -- with Investments and Credit used tucked just beneath */}
+        <View className="gap-3">
+          {currentMonth && (
+            <MonthCard
+              spend={currentMonth.spend}
+              income={currentMonth.income}
+              priorIncome={priorMonth?.income}
+              totalBudgeted={totalBudgeted}
+              daysElapsed={now.getDate()}
+              daysInMonth={daysInMonth}
+            />
+          )}
+          <StatPair investmentsCents={investmentsCents} utilization={utilization} />
+        </View>
 
         {/* Budget this month */}
         {topBudgets.length > 0 && (
@@ -439,10 +401,4 @@ export default function OverviewScreen() {
       </ScrollView>
     </View>
   );
-}
-
-function deltaLabel(current: number, prior: number): string | undefined {
-  if (prior === 0) return undefined;
-  const pct = Math.round((Math.abs(current - prior) / Math.abs(prior)) * 100);
-  return `${current >= prior ? "+" : "-"}${pct}% vs last month`;
 }
