@@ -102,8 +102,9 @@ import Constants from "expo-constants";
  * "—"; accounts with no bank are listed; sync-all reports via toast/banner.
  * 1.16.1 fixes the bank sheet's "Last synced" and "Accounts" values
  * rendering black: an explicit `color: undefined` style beat the class.
+ * 1.16.2 colors the Accounts summary's Debts figure negative (red), like web.
  */
-export const APP_VERSION = "1.16.1";
+export const APP_VERSION = "1.16.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

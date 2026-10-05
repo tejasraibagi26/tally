@@ -18,17 +18,18 @@ export function AccountsSummary({ net, assets, liabilities }: { net: number; ass
     <Card className="flex-row px-5 py-4">
       <Figure label="Net worth" cents={net} size={rf(18)} />
       <Figure label="Assets" cents={assets} size={rf(15)} />
-      <Figure label="Debts" cents={-liabilities} size={rf(15)} muted />
+      <Figure label="Debts" cents={-liabilities} size={rf(15)} tone="text-negative" />
     </Card>
   );
 }
 
-function Figure({ label, cents, size, muted }: { label: string; cents: number; size: number; muted?: boolean }) {
+// Debts read in the negative color, matching web's Liabilities figure.
+function Figure({ label, cents, size, tone = "text-text" }: { label: string; cents: number; size: number; tone?: string }) {
   const rf = useRF();
   return (
     <View className="flex-1 gap-1">
       <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>{label}</Text>
-      <MoneyText cents={cents} abbreviate className={`font-ui-semibold ${muted ? "text-text-2" : "text-text"}`} style={{ fontSize: size }} numberOfLines={1} />
+      <MoneyText cents={cents} abbreviate className={`font-ui-semibold ${tone}`} style={{ fontSize: size }} numberOfLines={1} />
     </View>
   );
 }

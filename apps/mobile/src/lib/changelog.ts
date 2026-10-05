@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.16.2",
+    date: "2026-10-05",
+    changes: [{ kind: "improved", text: "Accounts: your total debts now show in red at the top, so they stand apart from your assets." }],
+  },
+  {
     version: "1.16.1",
     date: "2026-10-05",
     changes: [{ kind: "fixed", text: "Accounts: the last-synced time and account count in a bank's menu are readable again." }],
