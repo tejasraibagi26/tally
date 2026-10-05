@@ -133,8 +133,11 @@
  * converted to CAD like Investments (it summed raw balances), and the
  * monthly recap uses the same inputs. Needs migration 0022.
  * 1.21.1 shows a fixed budget's "Fixed" as a chip instead of loose text.
+ * 1.21.2 opens Subscriptions' edit-next-date form in a centered dialog
+ * (components/subscriptions/NextDueDateEditor.tsx) instead of a popover the
+ * table's scroll container clipped.
  */
-export const APP_VERSION = "1.21.1";
+export const APP_VERSION = "1.21.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
