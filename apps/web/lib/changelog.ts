@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.21.1",
+    date: "2026-10-05",
+    changes: [{ kind: "improved", text: "Budgets: fixed budgets like rent are marked with a clear \"Fixed\" tag." }],
+  },
+  {
     version: "1.21.0",
     date: "2026-10-05",
     changes: [

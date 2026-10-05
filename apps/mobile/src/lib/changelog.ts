@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.20.2",
+    date: "2026-10-05",
+    changes: [{ kind: "improved", text: "Budgets: fixed budgets like rent are marked with a clear \"Fixed\" tag." }],
+  },
+  {
     version: "1.20.1",
     date: "2026-10-05",
     changes: [{ kind: "fixed", text: "iPhone: sheets that slide up from the bottom no longer have a tall empty gap under their last button." }],

@@ -30,7 +30,11 @@ export function BudgetRowItem({ line, ctx, color, showTopBorder, onPress }: { li
         <View className="flex-row items-center gap-2 flex-1">
           <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: color }} />
           <Text className="font-ui-medium text-text flex-shrink" style={{ fontSize: rf(14.5) }} numberOfLines={1}>{line.categoryName}</Text>
-          {line.isFixedAmount && <Text className="font-ui text-text-3" style={{ fontSize: rf(11) }}>fixed</Text>}
+          {line.isFixedAmount && (
+            <View className="rounded-full bg-surface-2 px-2 py-0.5">
+              <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(10.5) }}>Fixed</Text>
+            </View>
+          )}
         </View>
         <Text className="font-ui-semibold" style={{ fontSize: rf(13), color: s.labelTone === "default" ? colors.text : toneColorFor(colors, s.labelTone), fontVariant: ["tabular-nums"] }}>{s.label}</Text>
       </View>

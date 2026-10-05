@@ -143,8 +143,9 @@ import Constants from "expo-constants";
  * 1.20.1 trims the empty band at the bottom of every bottom sheet on iOS:
  * Sheet.tsx added the full 34pt home-indicator inset on top of each
  * sheet's own trailing padding; iOS now adds only insets.bottom − 20.
+ * 1.20.2 shows a fixed budget's "Fixed" as a chip instead of loose text.
  */
-export const APP_VERSION = "1.20.1";
+export const APP_VERSION = "1.20.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

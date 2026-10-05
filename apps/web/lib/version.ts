@@ -132,8 +132,9 @@
  * investment accounts count. "Invested today" comes from lib/fire.ts,
  * converted to CAD like Investments (it summed raw balances), and the
  * monthly recap uses the same inputs. Needs migration 0022.
+ * 1.21.1 shows a fixed budget's "Fixed" as a chip instead of loose text.
  */
-export const APP_VERSION = "1.21.0";
+export const APP_VERSION = "1.21.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
