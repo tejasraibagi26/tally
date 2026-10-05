@@ -61,7 +61,6 @@ export default function OverviewScreen() {
   const months = cashFlow.data?.months ?? [];
   const currentMonth = months[months.length - 1];
   const priorMonth = months.length > 1 ? months[months.length - 2] : undefined;
-  const utilization = liabilities.data?.utilization.utilization ?? null;
 
   const totalBudgeted = overview.data?.budgets.totalBudgeted ?? 0;
   const investmentsCents = holdings.data && holdings.data.holdings.length > 0 ? holdings.data.value : null;
@@ -138,7 +137,7 @@ export default function OverviewScreen() {
               daysInMonth={daysInMonth}
             />
           )}
-          <StatPair investmentsCents={investmentsCents} utilization={utilization} />
+          <StatPair investmentsCents={investmentsCents} credit={liabilities.data?.utilization ?? null} />
         </View>
 
         {/* Budget this month */}

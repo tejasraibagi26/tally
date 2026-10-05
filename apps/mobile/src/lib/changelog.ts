@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.21.1",
+    date: "2026-10-05",
+    changes: [
+      { kind: "improved", text: "Overview: Credit used now shows your balance and limit, and says when a card without a limit isn't counted." },
+      { kind: "fixed", text: "Credit used no longer drops when a card is overpaid, and cards in different currencies are now added up correctly." },
+    ],
+  },
+  {
     version: "1.21.0",
     date: "2026-10-05",
     changes: [

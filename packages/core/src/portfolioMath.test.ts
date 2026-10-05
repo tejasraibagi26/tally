@@ -75,6 +75,16 @@ describe("computeUtilization", () => {
     expect(result.excludedCount).toBe(1);
   });
 
+  it("counts an overpaid card as zero used instead of offsetting another card's balance", () => {
+    const result = computeUtilization([
+      { currentBalance: 50000, creditLimit: 100000 },
+      { currentBalance: -20000, creditLimit: 100000 },
+    ]);
+    expect(result.totalBalance).toBe(50000);
+    expect(result.totalLimit).toBe(200000);
+    expect(result.utilization).toBe(0.25);
+  });
+
   it("returns null utilization when no card has a known limit", () => {
     const result = computeUtilization([{ currentBalance: 1000, creditLimit: null }]);
     expect(result.utilization).toBeNull();

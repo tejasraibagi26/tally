@@ -255,7 +255,10 @@ net-worth range and delta, credit band) live in `@tally/core/overviewView`.
    No budget: "Set a budget" link instead of the meter.
 4. **Investments / Credit used** — one card under This month with a hairline
    between the two figures; one alone fills the card, none renders nothing;
-   stacks on narrow or large-text screens. Credit reads "Healthy" under 30% of the limit, "High" at or over.
+   stacks on narrow or large-text screens. Credit reads "Healthy" under 30% of the limit, "High" at or over,
+   shows "balance of limit" (hidden with the privacy toggle) and notes any card
+   left out for having no limit. Overpaid cards count as zero used and
+   cards in different currencies are converted before summing.
 5. **Budget this month** — the three most-used budgets (over-budget first;
    paid fixed-amount budgets skipped) as meter rows, "View all" → Budgets tab.
 6. **Upcoming** — next 3 bills with a date tile, a due label ("Due today",

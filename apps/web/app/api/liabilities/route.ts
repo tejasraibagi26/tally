@@ -11,5 +11,5 @@ export async function GET(req: Request) {
   }
 
   const cards = await creditCardsForUser(userId);
-  return NextResponse.json({ cards, utilization: utilizationFor(cards) });
+  return NextResponse.json({ cards, utilization: await utilizationFor(cards) });
 }

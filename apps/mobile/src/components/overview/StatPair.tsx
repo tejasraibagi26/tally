@@ -1,8 +1,10 @@
 import { View, Text, Pressable, PixelRatio, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { creditHealth } from "@tally/core/overviewView";
-import { formatPercent } from "@tally/core/money";
+import { formatCents, formatPercent } from "@tally/core/money";
 import { MoneyText } from "@/components/ui/MoneyText";
+import { usePrivacy } from "@/lib/PrivacyContext";
+import type { UtilizationResult } from "@/lib/queries/liabilities";
 import { hairline } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
@@ -10,13 +12,18 @@ import { useRF } from "@/theme/responsiveFont";
 /**
  * Investments and Credit used in one card, a hairline between the two. One
  * figure alone fills the card; none renders nothing. Stacks to a column on
- * narrow screens or large text. Each side opens its own screen.
+ * narrow screens or large text. Each side opens its own screen. Credit shows
+ * the balance and limit behind the percentage (hidden with the privacy toggle,
+ * since a card balance is an account balance) and says when a card without a
+ * reported limit is left out of the ratio.
  */
-export function StatPair({ investmentsCents, utilization }: { investmentsCents: number | null; utilization: number | null }) {
+export function StatPair({ investmentsCents, credit }: { investmentsCents: number | null; credit: UtilizationResult | null }) {
   const router = useRouter();
   const colors = useThemeColors();
   const rf = useRF();
   const { width } = useWindowDimensions();
+  const { hidden } = usePrivacy();
+  const utilization = credit?.utilization ?? null;
   if (investmentsCents == null && utilization == null) return null;
   const stacked = width < 340 || PixelRatio.getFontScale() > 1.15;
   const both = investmentsCents != null && utilization != null;
@@ -27,6 +34,8 @@ export function StatPair({ investmentsCents, utilization }: { investmentsCents: 
       <View style={{ width: `${Math.min(1, Math.max(0, utilization)) * 100}%`, height: "100%", backgroundColor: fill }} />
     </View>
   );
+  const amounts = credit && !hidden ? `${formatCents(credit.totalBalance)} of ${formatCents(credit.totalLimit)} limit` : null;
+  const excluded = credit && credit.excludedCount > 0 ? `${credit.excludedCount} card${credit.excludedCount === 1 ? "" : "s"} without a limit not counted` : null;
   const divider = stacked ? { height: 1, marginHorizontal: 16 } : { width: 1, marginVertical: 16 };
 
   return (
@@ -49,18 +58,26 @@ export function StatPair({ investmentsCents, utilization }: { investmentsCents: 
           {both ? (
             <>
               <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(11.5) }}>Credit used</Text>
-              <Text className="font-ui-semibold text-text" style={{ fontSize: rf(19) }}>{Math.round(utilization * 100)}%</Text>
+              <View className="flex-row items-baseline gap-1.5">
+                <Text className="font-ui-semibold text-text" style={{ fontSize: rf(19) }}>{Math.round(utilization * 100)}%</Text>
+                <Text className="font-ui-medium" style={{ fontSize: rf(11.5), color: fill }}>{health.label}</Text>
+              </View>
               {meter}
-              <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>{health.label} · of limit</Text>
+              {amounts && <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>{amounts}</Text>}
+              {excluded && <Text className="font-ui text-text-3" style={{ fontSize: rf(11) }}>{excluded}</Text>}
             </>
           ) : (
             <>
-              <View className="gap-1.5">
+              <View className="gap-1.5 flex-shrink">
                 <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(11.5) }}>Credit used</Text>
-                <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>{health.label} · of limit</Text>
+                {amounts && <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>{amounts}</Text>}
+                {excluded && <Text className="font-ui text-text-3" style={{ fontSize: rf(11) }}>{excluded}</Text>}
               </View>
-              <View className="flex-1 max-w-[120px]">{meter}</View>
-              <Text className="font-ui-semibold text-text" style={{ fontSize: rf(19) }}>{Math.round(utilization * 100)}%</Text>
+              <View className="flex-1 max-w-[100px]">{meter}</View>
+              <View className="items-end">
+                <Text className="font-ui-semibold text-text" style={{ fontSize: rf(19) }}>{Math.round(utilization * 100)}%</Text>
+                <Text className="font-ui-medium" style={{ fontSize: rf(11.5), color: fill }}>{health.label}</Text>
+              </View>
             </>
           )}
         </Pressable>

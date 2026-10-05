@@ -1,5 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { toNetWorthCurrency } from "@tally/core/fx";
 import { computeUtilization, type CreditAccountLike, type UtilizationResult } from "@tally/core/portfolioMath";
 
 export interface CreditCardRow {
@@ -8,6 +9,8 @@ export interface CreditCardRow {
   nickname: string | null;
   mask: string | null;
   currentBalance: number;
+  /** The account's own currency: balance and limit are in it. */
+  currency: string;
   creditLimit: number | null;
   creditLimitIsManual: boolean;
   liability: {
@@ -31,6 +34,7 @@ export async function creditCardsForUser(userId: string): Promise<CreditCardRow[
       nickname: schema.accounts.nickname,
       mask: schema.accounts.mask,
       currentBalance: schema.accounts.currentBalance,
+      currency: schema.accounts.currency,
       creditLimit: schema.accounts.creditLimit,
       creditLimitIsManual: schema.accounts.creditLimitIsManual,
       liability: schema.liabilitiesCredit,
@@ -45,13 +49,25 @@ export async function creditCardsForUser(userId: string): Promise<CreditCardRow[
     nickname: r.nickname,
     mask: r.mask,
     currentBalance: r.currentBalance ?? 0,
+    currency: r.currency,
     creditLimit: r.creditLimit,
     creditLimitIsManual: r.creditLimitIsManual,
     liability: r.liability,
   }));
 }
 
-export function utilizationFor(cards: CreditCardRow[]): UtilizationResult {
-  const accountLikes: CreditAccountLike[] = cards.map((c) => ({ currentBalance: c.currentBalance, creditLimit: c.creditLimit }));
+/**
+ * Overall utilization across every card with a known limit. Each card's
+ * balance and limit are converted to the net-worth currency first: a USD card
+ * next to a CAD card would otherwise be summed as if they were the same unit.
+ * The totals in the result are in that currency.
+ */
+export async function utilizationFor(cards: CreditCardRow[]): Promise<UtilizationResult> {
+  const accountLikes: CreditAccountLike[] = await Promise.all(
+    cards.map(async (c) => ({
+      currentBalance: await toNetWorthCurrency(c.currentBalance, c.currency),
+      creditLimit: c.creditLimit == null ? null : await toNetWorthCurrency(c.creditLimit, c.currency),
+    })),
+  );
   return computeUtilization(accountLikes);
 }

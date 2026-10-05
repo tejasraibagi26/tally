@@ -32,7 +32,7 @@ function relativeDueDate(dateStr: string | null): string | null {
 export default async function CardsPage() {
   const userId = await requireUserId();
   const cards = await creditCardsForUser(userId);
-  const utilization = utilizationFor(cards);
+  const utilization = await utilizationFor(cards);
   // utilization.totalBalance is scoped to the ratio (only cards with a known
   // limit) — the summary tile needs every card's balance, limit or not.
   const totalBalance = cards.reduce((sum, c) => sum + c.currentBalance, 0);

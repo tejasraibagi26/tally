@@ -154,8 +154,14 @@ import Constants from "expo-constants";
  * hero quiets its cents and gains a delta chip and a 1M / 3M / 6M / 1Y
  * range (@tally/core/overviewView). Reads a new this-month `unreviewed`
  * count from /api/analytics/overview, treated as zero from older servers.
+ * 1.21.1 makes Overview's Credit used show the balance and limit behind
+ * its percentage and note any card left out for having no limit, and
+ * fixes the figure itself (web's /api/liabilities, shared with the web
+ * Overview): overpaid cards count as zero used instead of offsetting other
+ * cards, and each card's balance and limit are converted to one currency
+ * before they're summed.
  */
-export const APP_VERSION = "1.21.0";
+export const APP_VERSION = "1.21.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
