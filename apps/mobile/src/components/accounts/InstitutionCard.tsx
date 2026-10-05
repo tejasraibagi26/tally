@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View, Text, TextInput, ActivityIndicator, Pressable } from "react-native";
-import { MoreHorizontal, Pencil, X, ChevronDown, ChevronUp } from "lucide-react-native";
+import { MoreHorizontal, X, ChevronDown, ChevronUp } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { useUpdateAccountNickname, type Institution, type AccountRow } from "@/lib/queries/accounts";
@@ -217,8 +217,19 @@ function Notice({
   );
 }
 
+// Registered-account and plan names Plaid sends in lowercase ("tfsa").
+const ACRONYMS = new Set(["tfsa", "rrsp", "fhsa", "resp", "rrif", "lira", "lif", "hsa", "ira", "401k", "403b", "529", "cd", "gic"]);
+
+/** "Credit card", "Savings", "TFSA" -- from Plaid's subtype, falling back to its type. */
 function accountKind(a: AccountRow): string {
-  return (a.subtype ?? a.type).replace(/_/g, " ");
+  const raw = (a.subtype ?? a.type).replace(/_/g, " ").trim();
+  if (ACRONYMS.has(raw.toLowerCase())) return raw.toUpperCase();
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
+}
+
+/** Balances are stored positive for every type -- for a card or loan that's what's owed. */
+function isDebt(a: AccountRow): boolean {
+  return a.type === "credit" || a.type === "loan";
 }
 
 export function AccountLine({
@@ -246,9 +257,12 @@ export function AccountLine({
     updateNickname.mutate(input.trim() || null, { onSuccess: () => setEditing(false) });
   }
 
+  const showWas = input.trim() !== "" && input.trim() !== account.name;
+
   if (editing) {
     return (
       <View className="flex-row items-center gap-2 px-4 py-2.5" style={border}>
+        <View className="flex-1 justify-center">
         <TextInput
           autoFocus
           value={input}
@@ -260,9 +274,18 @@ export function AccountLine({
           maxLength={60}
           // h-12 matches every other text input in the app; the explicit
           // style guards against Inter's ascenders clipping in a shorter box.
-          className="flex-1 h-12 rounded-control bg-surface-2 px-3 font-ui text-text"
-          style={{ paddingVertical: 0, textAlignVertical: "center", fontSize: rf(14), borderWidth: 1, borderColor: colors.brand }}
+          className="h-12 rounded-control bg-surface-2 px-3 font-ui text-text"
+          style={{ paddingVertical: 0, paddingRight: showWas ? 96 : 12, textAlignVertical: "center", fontSize: rf(14), borderWidth: 1, borderColor: colors.brand }}
         />
+        {/* The name it had before this edit, so a rename is never a guess
+            about what you're replacing. Clearing the field restores the
+            bank's own name (shown as the placeholder). */}
+        {showWas && (
+          <Text pointerEvents="none" className="font-ui text-text-3 absolute right-3" style={{ fontSize: rf(11), maxWidth: 88 }} numberOfLines={1}>
+            was “{account.name}”
+          </Text>
+        )}
+        </View>
         <Pressable onPress={save} disabled={updateNickname.isPending} className="h-9 rounded-full items-center justify-center px-4 bg-brand active:opacity-80">
           {updateNickname.isPending ? <ActivityIndicator size="small" color={colors["on-brand"]} /> : <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(13) }}>Save</Text>}
         </Pressable>
@@ -284,24 +307,34 @@ export function AccountLine({
   const foreign = !!baseCurrency && account.currency !== baseCurrency;
   return (
     <View className="flex-row items-center justify-between px-5 py-3" style={border}>
-      <Pressable onPress={() => setEditing(true)} accessibilityLabel={`Rename ${account.name}`} className="flex-1 pr-3 gap-0.5">
-        <View className="flex-row items-center gap-1.5">
-          <Text className={`font-ui-medium ${dim ? "text-text-2" : "text-text"}`} style={{ fontSize: rf(14.5), flexShrink: 1 }} numberOfLines={1}>{account.name}</Text>
-          <Pencil size={11} color={colors["text-3"]} strokeWidth={2} />
-        </View>
+      {/* No resting pencil: it crowded long names. Tap or long-press the
+          name to rename; accessibilityHint says so for screen readers. */}
+      <Pressable
+        onPress={() => setEditing(true)}
+        onLongPress={() => setEditing(true)}
+        accessibilityLabel={account.name}
+        accessibilityHint="Renames this account"
+        className="flex-1 pr-3 gap-0.5"
+      >
+        <Text className={`font-ui-medium ${dim ? "text-text-2" : "text-text"}`} style={{ fontSize: rf(14.5) }} numberOfLines={1}>{account.name}</Text>
         <Text className="text-text-3" style={{ fontFamily: "JetBrainsMono", fontSize: rf(11.5) }} numberOfLines={1}>
-          {caption ?? `${accountKind(account)}${account.mask ? ` ····${account.mask}` : ""}`}
+          {caption ?? `${accountKind(account)}${account.mask ? ` · ····${account.mask}` : ""}`}
         </Text>
       </Pressable>
       <View style={{ flexShrink: 0, alignItems: "flex-end" }}>
         {account.currentBalance == null ? (
           // A missing balance is unknown, not zero -- "$0.00" read as a real
           // (and alarming) figure.
-          <Text className="font-ui text-text-3" style={{ fontSize: rf(15) }}>—</Text>
+          <>
+            <Text className="font-ui text-text-3" style={{ fontSize: rf(15) }}>—</Text>
+            <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(11) }}>No balance from bank</Text>
+          </>
         ) : (
-          <MoneyText cents={account.currentBalance} className={dim ? "text-text-3" : "text-text"} style={{ fontSize: rf(15) }} />
+          // Debts get a minus sign (not red) so a card's balance can't be
+          // misread as money held; the rows then agree with the total below.
+          <MoneyText cents={isDebt(account) ? -account.currentBalance : account.currentBalance} className={dim ? "text-text-3" : "text-text"} style={{ fontSize: rf(15) }} />
         )}
-        {foreign && <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(11) }}>{account.currency}</Text>}
+        {foreign && account.currentBalance != null && <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(11) }}>{account.currency}</Text>}
       </View>
     </View>
   );

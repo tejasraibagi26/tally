@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.16.3",
+    date: "2026-10-05",
+    changes: [
+      { kind: "improved", text: "Accounts: each account shows its type (Savings, Credit card, TFSA), and card and loan balances show a minus sign so they add up with the bank's total." },
+      { kind: "improved", text: "Renaming an account shows the name you're replacing. Tap or long-press an account's name to rename it." },
+    ],
+  },
+  {
     version: "1.16.2",
     date: "2026-10-05",
     changes: [{ kind: "improved", text: "Accounts: your total debts now show in red at the top, so they stand apart from your assets." }],

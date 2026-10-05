@@ -103,8 +103,13 @@ import Constants from "expo-constants";
  * 1.16.1 fixes the bank sheet's "Last synced" and "Accounts" values
  * rendering black: an explicit `color: undefined` style beat the class.
  * 1.16.2 colors the Accounts summary's Debts figure negative (red), like web.
+ * 1.16.3 brings account rows to the redesign spec: "Credit card · ····9921"
+ * captions (TFSA/RRSP-style acronyms uppercased), a minus sign on card and
+ * loan balances so rows agree with the card total, "No balance from bank"
+ * under a missing balance, no resting pencil (tap or long-press renames),
+ * a "was “old name”" hint while renaming, and an Other accounts footer.
  */
-export const APP_VERSION = "1.16.2";
+export const APP_VERSION = "1.16.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

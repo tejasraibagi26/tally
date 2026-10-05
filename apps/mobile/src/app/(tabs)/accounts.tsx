@@ -15,6 +15,7 @@ import { usePlaidLink } from "@/lib/usePlaidLink";
 import { useSync, useRefreshItemBalances, useRevokeItem, useItemRefreshStates } from "@/lib/queries/plaid";
 import { connectionState, type ConnectionAction } from "@/lib/connectionState";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
+import { hairline } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 
@@ -211,6 +212,9 @@ export default function AccountsScreen() {
                       {data.unlinkedAccounts.map((a, i) => (
                         <AccountLine key={a.id} account={a} showTopBorder={i > 0} baseCurrency={data.totals.currency} caption="Not linked to a bank" />
                       ))}
+                      <View className="px-5 py-3" style={{ borderTopWidth: 1, borderTopColor: hairline(colors) }}>
+                        <Text className="font-ui text-text-3" style={{ fontSize: rf(12.5) }}>Still counted in your net worth</Text>
+                      </View>
                     </Card>
                   </View>
                 )}
