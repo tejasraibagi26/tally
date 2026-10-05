@@ -107,7 +107,7 @@ export default async function OverviewPage() {
   const netWorthDelta = netWorthMonthAgo != null ? pctChip(netWorth, netWorthMonthAgo) : null;
 
   const brokenItems = items.filter((i) => i.status !== "healthy").length;
-  const utilization = utilizationFor(cards);
+  const utilization = await utilizationFor(cards);
 
   // `month` is always the current month (see todayFor() above), so "today" always falls within it.
   const daysElapsed = Number(today.slice(8, 10));

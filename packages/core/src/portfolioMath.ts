@@ -60,7 +60,12 @@ export interface UtilizationResult {
   excludedCount: number; // cards with a null limit, excluded from both sides of the ratio (§6.5)
 }
 
-/** Σ balances / Σ limits across cards with a known limit; a null-limit card is excluded from both sides, never treated as zero or unlimited. */
+/**
+ * Σ balances / Σ limits across cards with a known limit; a null-limit card is
+ * excluded from both sides, never treated as zero or unlimited. An overpaid
+ * card (negative balance, the bank owes you) counts as zero used, not as
+ * credit that offsets what you owe on another card.
+ */
 export function computeUtilization(accounts: CreditAccountLike[]): UtilizationResult {
   let totalBalance = 0;
   let totalLimit = 0;
@@ -71,7 +76,7 @@ export function computeUtilization(accounts: CreditAccountLike[]): UtilizationRe
       excludedCount++;
       continue;
     }
-    totalBalance += a.currentBalance;
+    totalBalance += Math.max(0, a.currentBalance);
     totalLimit += a.creditLimit;
   }
 
