@@ -1,213 +1,139 @@
-import { desc, eq, inArray } from "drizzle-orm";
-import Link from "next/link";
+import { and, desc, eq, inArray } from "drizzle-orm";
 import { TrendingUp } from "lucide-react";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
-import { formatCents, formatPercent } from "@tally/core/money";
-import { latestHoldingsForUser, portfolioValue, allocationFor, unrealizedGain, portfolioSimpleReturn, currenciesInvolved } from "@/lib/portfolio";
+import { latestHoldingsForUser, portfolioHistory, currenciesInvolved } from "@/lib/portfolio";
 import { toNetWorthCurrency, NET_WORTH_CURRENCY } from "@tally/core/fx";
-import { Card, CardHeader } from "@/components/ui/Card";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { accountDisplayName } from "@tally/core/accountName";
+import { Card } from "@/components/ui/Card";
+import { PageHeader, SyncFreshness } from "@/components/ui/PageHeader";
 import { SyncButton } from "@/components/plaid/SyncButton";
 import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
-import { RecentActivityList } from "@/components/investments/RecentActivityList";
+import { LinkButton } from "@/components/plaid/LinkButton";
+import { InvestmentsView } from "@/components/investments/InvestmentsView";
+import type { ActivityView, InvestmentConnection } from "@/components/investments/types";
+import { itemStatusToBadge } from "@/lib/freshness";
+import { todayFor } from "@/lib/userTimezone";
+import { MOCK_MODE } from "@/lib/config";
 
-function formatQuantity(q: string): string {
-  const n = parseFloat(q);
-  return Number.isInteger(n) ? n.toString() : n.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
-}
+/** Recent investment transactions loaded for the activity list and holding panel. */
+const ACTIVITY_LIMIT = 200;
 
-export default async function InvestmentsPage() {
+export default async function InvestmentsPage({ searchParams }: { searchParams: Promise<{ holding?: string }> }) {
   const userId = await requireUserId();
-
-  const holdings = await latestHoldingsForUser(userId);
-  const value = portfolioValue(holdings);
-  const allocation = allocationFor(holdings);
-  const gain = unrealizedGain(holdings);
-  const simpleReturn = await portfolioSimpleReturn(userId);
-  // Every holding above is already converted to NET_WORTH_CURRENCY
-  // (lib/portfolio.ts), so this is purely informational now — which native
-  // currencies these positions actually trade in, not a "can't total this"
-  // warning.
-  const originalCurrencies = currenciesInvolved(holdings);
-
-  const holdingsByAccount = new Map<string, typeof holdings>();
-  for (const h of holdings) {
-    holdingsByAccount.set(h.accountId, [...(holdingsByAccount.get(h.accountId) ?? []), h]);
-  }
-
-  const investmentAccountIds = [...holdingsByAccount.keys()];
-  const rawActivity = investmentAccountIds.length
-    ? await db
-        .select({
-          id: schema.investmentTransactions.id,
-          date: schema.investmentTransactions.date,
-          name: schema.investmentTransactions.name,
-          amount: schema.investmentTransactions.amount,
-          currency: schema.investmentTransactions.currency,
-          type: schema.investmentTransactions.type,
-          subtype: schema.investmentTransactions.subtype,
-          ticker: schema.securities.ticker,
-        })
-        .from(schema.investmentTransactions)
-        .leftJoin(schema.securities, eq(schema.investmentTransactions.securityId, schema.securities.id))
-        .where(inArray(schema.investmentTransactions.accountId, investmentAccountIds))
-        .orderBy(desc(schema.investmentTransactions.date))
-        // A few pages' worth for RecentActivityList's client-side pagination
-        // (8/page) — this is a "recent" preview, not the full history, so a
-        // fixed cap rather than a real offset-paginated query.
-        .limit(40)
-    : [];
-  const activity = await Promise.all(rawActivity.map(async (tx) => ({ ...tx, amount: await toNetWorthCurrency(tx.amount, tx.currency) })));
+  const { holding } = await searchParams;
+  const [holdings, history, today] = await Promise.all([latestHoldingsForUser(userId), portfolioHistory(userId), todayFor(userId)]);
 
   if (holdings.length === 0) {
     return (
       <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-        <PageHeader
-          title="Investments"
-          actions={<SyncButton products={["holdings", "investments"]} label="Sync holdings" loadingMessage="Syncing your investment holdings. This can take a moment." />}
-        />
-        <SyncFailureBanner />
-        <Card className="p-10">
-          <EmptyState
-            icon={TrendingUp}
-            title="Nothing invested here yet"
-            description="Connect a brokerage account, or sync an existing one. Holdings usually appear within a minute."
-            action={
-              <Link href="/accounts" className="text-brand text-[13.5px] font-medium">
-                Go to Accounts →
-              </Link>
-            }
-          />
+        <PageHeader title="Investments" />
+        <Card className="p-8 lg:p-10 flex flex-col items-start gap-4 max-w-[640px]">
+          <span className="w-11 h-11 rounded-[12px] bg-brand-subtle text-brand flex items-center justify-center">
+            <TrendingUp size={20} strokeWidth={1.75} />
+          </span>
+          <h2 className="m-0 font-display text-[28px] font-normal text-text">Track your investments</h2>
+          <p className="m-0 text-[15px] leading-relaxed text-text-2 max-w-[52ch]">
+            Connect a brokerage like Wealthsimple or Questrade to see your TFSA, RRSP and FHSA in one place, with growth over time.
+          </p>
+          <LinkButton mode="create" label="Connect a brokerage" mock={MOCK_MODE} />
         </Card>
       </div>
     );
   }
+
+  const accountIds = [...new Set(holdings.map((h) => h.accountId))];
+  const itemIds = [...new Set(holdings.map((h) => h.itemId).filter((id): id is string => !!id))];
+
+  const [accountRows, rawActivity, items, runs] = await Promise.all([
+    db.select({ id: schema.accounts.id, name: schema.accounts.name, nickname: schema.accounts.nickname }).from(schema.accounts).where(inArray(schema.accounts.id, accountIds)),
+    db
+      .select({
+        id: schema.investmentTransactions.id,
+        accountId: schema.investmentTransactions.accountId,
+        securityId: schema.investmentTransactions.securityId,
+        date: schema.investmentTransactions.date,
+        name: schema.investmentTransactions.name,
+        quantity: schema.investmentTransactions.quantity,
+        amount: schema.investmentTransactions.amount,
+        price: schema.investmentTransactions.price,
+        currency: schema.investmentTransactions.currency,
+        type: schema.investmentTransactions.type,
+        subtype: schema.investmentTransactions.subtype,
+        ticker: schema.securities.ticker,
+        securityName: schema.securities.name,
+      })
+      .from(schema.investmentTransactions)
+      .leftJoin(schema.securities, eq(schema.investmentTransactions.securityId, schema.securities.id))
+      .where(inArray(schema.investmentTransactions.accountId, accountIds))
+      .orderBy(desc(schema.investmentTransactions.date))
+      .limit(ACTIVITY_LIMIT),
+    itemIds.length ? db.query.plaidItems.findMany({ where: and(eq(schema.plaidItems.userId, userId), inArray(schema.plaidItems.id, itemIds)) }) : [],
+    itemIds.length
+      ? db
+          .select({ itemId: schema.syncRuns.itemId, trigger: schema.syncRuns.trigger, error: schema.syncRuns.error })
+          .from(schema.syncRuns)
+          .where(inArray(schema.syncRuns.itemId, itemIds))
+          .orderBy(desc(schema.syncRuns.startedAt))
+          .limit(itemIds.length * 20)
+      : [],
+  ]);
+
+  const accountName = new Map(accountRows.map((a) => [a.id, accountDisplayName(a.name, a.nickname)]));
+  const activity: ActivityView[] = await Promise.all(
+    rawActivity.map(async (t) => ({
+      id: t.id,
+      date: t.date,
+      accountId: t.accountId,
+      accountName: accountName.get(t.accountId) ?? "",
+      securityId: t.securityId,
+      type: t.type,
+      subtype: t.subtype,
+      name: t.name,
+      ticker: t.ticker,
+      securityName: t.securityName,
+      quantity: t.quantity,
+      amount: await toNetWorthCurrency(t.amount, t.currency),
+      price: t.price != null ? await toNetWorthCurrency(t.price, t.currency) : null,
+    })),
+  );
+
+  const connections: InvestmentConnection[] = items.map((i) => ({
+    id: i.id,
+    institutionName: i.institutionName,
+    status: i.status,
+    lastSyncedAt: i.lastSyncedAt?.toISOString() ?? null,
+    badge: itemStatusToBadge(i.status, i.lastSyncedAt, i.transactionsUpdateStatus),
+  }));
+  // Same "a manual retry already failed" escalation the Accounts page uses.
+  const serverRefreshFailed = itemIds.filter((id) => runs.find((r) => r.itemId === id && r.trigger === "manual")?.error);
+  const originalCurrencies = currenciesInvolved(holdings);
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
       <PageHeader
         title="Investments"
         meta={[
-          `${holdings.length} holding${holdings.length === 1 ? "" : "s"}`,
-          `${holdingsByAccount.size} account${holdingsByAccount.size === 1 ? "" : "s"}`,
+          `${new Set(holdings.map((h) => h.securityId)).size} holdings`,
+          `${accountIds.length} account${accountIds.length === 1 ? "" : "s"}`,
+          items.some((i) => i.lastSyncedAt) && <SyncFreshness key="sync" syncedAt={items.map((i) => i.lastSyncedAt)} />,
+          originalCurrencies.some((c) => c !== NET_WORTH_CURRENCY) && `${originalCurrencies.filter((c) => c !== NET_WORTH_CURRENCY).join(", ")} converted to ${NET_WORTH_CURRENCY} at today's rate`,
         ]}
         actions={<SyncButton products={["holdings", "investments"]} label="Sync holdings" loadingMessage="Syncing your investment holdings. This can take a moment." />}
       />
 
       <SyncFailureBanner />
 
-      <Card className="flex flex-col sm:flex-row">
-        <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-text-3">Portfolio value ({NET_WORTH_CURRENCY})</span>
-          <span className="font-display text-3xl text-text tabular money">{formatCents(value)}</span>
-        </div>
-        <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-text-3">Amount invested</span>
-          {simpleReturn.hasHistory ? (
-            <span className="font-display text-3xl text-text tabular money">{formatCents(simpleReturn.investedValue)}</span>
-          ) : (
-            <span className="text-text-3 text-[15px]">Building history…</span>
-          )}
-          <span className="text-xs text-text-3">Starting balance plus contributions since</span>
-        </div>
-        <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-text-3">Unrealized gain</span>
-          {gain.hasCostBasis ? (
-            <span className={`font-display text-3xl tabular money ${gain.gain < 0 ? "text-negative" : "text-positive"}`}>
-              {formatCents(gain.gain, { signed: true })}
-            </span>
-          ) : (
-            <span className="text-text-3 text-[15px]">No cost basis reported</span>
-          )}
-          <span className="text-xs text-text-3">vs. institution-reported cost basis</span>
-        </div>
-        <div className="flex-1 p-[18px_24px] flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-text-3">Simple return</span>
-          {simpleReturn.hasHistory ? (
-            <span className={`font-display text-3xl tabular money ${simpleReturn.value < 0 ? "text-negative" : "text-positive"}`}>
-              {formatCents(simpleReturn.value, { signed: true })}
-            </span>
-          ) : (
-            <span className="text-text-3 text-[15px]">Building history…</span>
-          )}
-          <span className="text-xs text-text-3">Value change minus contributions (not IRR/TWR)</span>
-        </div>
-      </Card>
-
-      {originalCurrencies.length > 1 && (
-        <p className="text-xs text-text-3 -mt-2">
-          Holdings span {originalCurrencies.join(", ")}, converted to {NET_WORTH_CURRENCY} above at today's rate.
-        </p>
-      )}
-
-      <Card>
-        <CardHeader title="Allocation" />
-        <div className="p-4 flex flex-col gap-3">
-          <div className="h-3 rounded-full overflow-hidden flex bg-sunken">
-            {allocation.map((slice, i) => (
-              <div key={slice.label} style={{ width: `${slice.pct * 100}%`, background: `var(--series-${(i % 8) + 1})` }} />
-            ))}
-          </div>
-          <div className="flex flex-wrap gap-x-6 gap-y-2">
-            {allocation.map((slice, i) => (
-              <div key={slice.label} className="flex items-center gap-2 text-[13.5px]">
-                <span className="w-2 h-2 rounded-full flex-none" style={{ background: `var(--series-${(i % 8) + 1})` }} />
-                <span className="text-text">{slice.label}</span>
-                <span className="text-text-3 tabular">{formatPercent(slice.pct)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Card>
-
-      {[...holdingsByAccount.entries()].map(([accountId, accountHoldings]) => {
-        return (
-          <Card key={accountId} className="overflow-hidden">
-            <CardHeader
-              title={accountHoldings[0]?.accountName ?? "Account"}
-              meta={`${formatCents(accountHoldings.reduce((s, h) => s + h.institutionValue, 0))} ${NET_WORTH_CURRENCY}`}
-              metaIsMoney
-            />
-            <div className="overflow-x-auto">
-              <div className="grid grid-cols-[100px_minmax(180px,1fr)_120px_120px_150px] gap-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 min-w-[680px]">
-                <span>Ticker</span>
-                <span>Name</span>
-                <span className="text-right">Quantity</span>
-                <span className="text-right">Price</span>
-                <span className="text-right">Value</span>
-              </div>
-              {accountHoldings.map((h) => (
-                <div key={h.securityId} className="grid grid-cols-[100px_minmax(180px,1fr)_120px_120px_150px] gap-3 items-center px-4 py-2.5 border-b border-border last:border-b-0 min-w-[680px]">
-                  <span className="font-mono text-[13.5px] text-text">{h.ticker ?? "—"}</span>
-                  <span className="text-[15px] text-text truncate">{h.securityName ?? "Unknown security"}</span>
-                  <span className="text-right text-[13.5px] text-text-2 tabular">{formatQuantity(h.quantity)}</span>
-                  <span className="text-right text-[13.5px] text-text-2 tabular">
-                    {h.institutionValue != null && parseFloat(h.quantity) > 0
-                      ? formatCents(Math.round(h.institutionValue / parseFloat(h.quantity)))
-                      : "—"}
-                  </span>
-                  <div className="flex flex-col items-end gap-0.5">
-                    <span className="text-right text-[15px] text-text tabular">{formatCents(h.institutionValue)}</span>
-                    <span className="text-right text-[11px] text-text-3">
-                      {h.currency}
-                      {h.originalCurrency !== h.currency && ` (${h.originalCurrency})`}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-        );
-      })}
-
-      {activity.length > 0 && (
-        <Card>
-          <CardHeader title="Recent activity" />
-          <RecentActivityList activity={activity} />
-        </Card>
-      )}
+      <InvestmentsView
+        holdings={holdings}
+        history={history}
+        activity={activity}
+        connections={connections}
+        serverRefreshFailed={serverRefreshFailed}
+        today={today}
+        baseCurrency={NET_WORTH_CURRENCY}
+        initialHoldingId={holding ?? null}
+      />
     </div>
   );
 }

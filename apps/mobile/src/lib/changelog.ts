@@ -16,6 +16,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.17.0",
+    date: "2026-10-05",
+    changes: [
+      { kind: "new", text: "Investments: a chart of your portfolio over time, with the money you put in underneath. Drag across it to see any day." },
+      { kind: "improved", text: "Invested and Growth replace the old return numbers, and each holding shows its gain." },
+      { kind: "new", text: "See all your holdings in one list, filter by account and sort, then tap one for what you paid and its activity." },
+      { kind: "improved", text: "Activity reads plainly (\"Bought 12 XEQT\", \"Dividend from VFV\"), with your income and contributions this year." },
+    ],
+  },
+  {
     version: "1.16.5",
     date: "2026-10-05",
     changes: [{ kind: "fixed", text: "Budgets: a budget you've spent exactly in full keeps its own color instead of turning amber." }],

@@ -177,6 +177,7 @@ function RootNavigator() {
               <Stack.Screen name="fire" options={pushedScreenOptions("Early retirement")} />
               <Stack.Screen name="subscriptions" options={pushedScreenOptions("Subscriptions")} />
               <Stack.Screen name="investments" options={pushedScreenOptions("Investments")} />
+              <Stack.Screen name="investment-holdings" options={pushedScreenOptions("Holdings")} />
               <Stack.Screen name="settings" options={pushedScreenOptions("Settings")} />
               <Stack.Screen name="income-schedules" options={pushedScreenOptions("Income schedules")} />
               <Stack.Screen name="api-tokens" options={pushedScreenOptions("API tokens")} />

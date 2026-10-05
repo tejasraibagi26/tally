@@ -113,8 +113,16 @@ import Constants from "expo-constants";
  * on the budget (100%) instead of turning it amber; amber is 80% to <100%.
  * The Accounts health contract (connectionState) now lives in @tally/core,
  * shared with web; lib/connectionState.ts just re-exports it.
+ * 1.17.0 redesigns Investments to match web 1.18.0 (@tally/core/investments):
+ * a value-over-time chart (components/charts/PortfolioChart.tsx, plain SVG
+ * with a scrub gesture) with money-in under it and a range switch,
+ * Invested/Growth, allocation by type/account, top holdings rolled up
+ * across accounts with gain, an All holdings screen (investment-holdings)
+ * with account filter and sort, a holding sheet, plain-language activity
+ * with this year's income/contributions, stale-connection notices, skeleton
+ * loading, and an empty state that opens Plaid Link.
  */
-export const APP_VERSION = "1.16.5";
+export const APP_VERSION = "1.17.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

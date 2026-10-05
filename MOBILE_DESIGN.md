@@ -320,6 +320,20 @@ notice and at most one action. Cards only render what it returns.
 - Loading is shape-matched skeletons; no data + error is a "Couldn't load"
   card with Try again; cached data + error keeps the data with a banner.
 
+### 5.5b Investments
+
+Pushed screen from the More sheet, same order and shared logic as web
+(`@tally/core/investments`): stale-connection notices, then the chart hero
+(value, "+growth · +added · range", a plain-SVG chart in
+components/charts/PortfolioChart.tsx with money-in dashed under it; dragging
+scrubs the hero figure, and the ScrollView locks while a finger is on it),
+the range switch, Invested/Growth with a split bar, Allocation (Type /
+Account), the top 5 holdings rolled up across accounts with gain, and recent
+activity in plain verbs with this year's income and contributions. "All N"
+opens `investment-holdings` (account filter + sort); tapping any holding
+opens HoldingSheet. Individual holdings stay unmasked in privacy mode
+(MoneyText's documented scope); portfolio totals mask.
+
 ### 5.6 Budgets (Phase C)
 
 Full parity target with the web Budgets page (`apps/web/app/(app)/budgets/page.tsx`)

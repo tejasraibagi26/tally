@@ -20,7 +20,8 @@
     "./listingCurrency": "./src/listingCurrency.ts",
     "./cashFlowMath": "./src/cashFlowMath.ts",
     "./subscriptionMath": "./src/subscriptionMath.ts",
-    "./connectionState": "./src/connectionState.ts"
+    "./connectionState": "./src/connectionState.ts",
+    "./investments": "./src/investments.ts"
   },
   "scripts": {
     "test": "vitest run",

@@ -3,6 +3,7 @@ import { db, schema } from "@/db";
 import { computeAllocation, computeSimpleReturn, type AllocationSlice, type HoldingLike } from "@tally/core/portfolioMath";
 import { toNetWorthCurrency, NET_WORTH_CURRENCY } from "@tally/core/fx";
 import { accountDisplayName } from "@tally/core/accountName";
+import { buildPortfolioHistory, type HistoryContribution, type HistoryPoint, type HistorySnapshot } from "@tally/core/investments";
 
 export interface HoldingRow {
   accountId: string;
@@ -17,6 +18,10 @@ export interface HoldingRow {
   costBasis: number | null; // cents, converted to NET_WORTH_CURRENCY
   currency: string; // always NET_WORTH_CURRENCY — what institutionValue/costBasis are actually denominated in now
   originalCurrency: string; // what the institution actually reported this holding in, before conversion
+  institutionPrice: number | null; // cents per share, converted to NET_WORTH_CURRENCY
+  priceAsOf: string | null; // YYYY-MM-DD the institution priced it
+  itemId: string | null; // the bank connection behind this account, for stale-data marking
+  asOfDate: string; // the snapshot this row comes from
 }
 
 /** Every holding is converted to a single currency (lib/fx.ts) before this is ever called, so in practice this is purely informational now — "these are the original currencies represented" rather than "we couldn't total this." */
@@ -24,12 +29,12 @@ export function currenciesInvolved(holdings: HoldingRow[]): string[] {
   return [...new Set(holdings.map((h) => h.originalCurrency))].sort();
 }
 
-async function investmentAccountIds(userId: string): Promise<{ id: string; name: string }[]> {
+async function investmentAccountIds(userId: string): Promise<{ id: string; name: string; itemId: string | null }[]> {
   const rows = await db
-    .select({ id: schema.accounts.id, name: schema.accounts.name, nickname: schema.accounts.nickname })
+    .select({ id: schema.accounts.id, name: schema.accounts.name, nickname: schema.accounts.nickname, itemId: schema.accounts.itemId })
     .from(schema.accounts)
     .where(and(eq(schema.accounts.userId, userId), eq(schema.accounts.type, "investment")));
-  return rows.map((r) => ({ id: r.id, name: accountDisplayName(r.name, r.nickname) }));
+  return rows.map((r) => ({ id: r.id, name: accountDisplayName(r.name, r.nickname), itemId: r.itemId }));
 }
 
 /** §9 "Portfolio value"/"Allocation": the latest holdings snapshot per investment account (dates can differ slightly account to account). */
@@ -38,6 +43,7 @@ export async function latestHoldingsForUser(userId: string): Promise<HoldingRow[
   if (accounts.length === 0) return [];
   const accountIds = accounts.map((a) => a.id);
   const accountNameById = new Map(accounts.map((a) => [a.id, a.name]));
+  const itemIdByAccount = new Map(accounts.map((a) => [a.id, a.itemId]));
 
   const latestDates = await db
     .select({ accountId: schema.holdings.accountId, maxDate: sql<string>`max(${schema.holdings.asOfDate})` })
@@ -55,6 +61,8 @@ export async function latestHoldingsForUser(userId: string): Promise<HoldingRow[
         institutionValue: schema.holdings.institutionValue,
         costBasis: schema.holdings.costBasis,
         currency: schema.holdings.currency,
+        institutionPrice: schema.holdings.institutionPrice,
+        institutionPriceAsOf: schema.holdings.institutionPriceAsOf,
         ticker: schema.securities.ticker,
         securityName: schema.securities.name,
         assetType: schema.securities.type,
@@ -78,6 +86,10 @@ export async function latestHoldingsForUser(userId: string): Promise<HoldingRow[
         costBasis: h.costBasis != null ? await toNetWorthCurrency(h.costBasis, h.currency) : null,
         currency: NET_WORTH_CURRENCY,
         originalCurrency: h.currency,
+        institutionPrice: h.institutionPrice != null ? await toNetWorthCurrency(h.institutionPrice, h.currency) : null,
+        priceAsOf: h.institutionPriceAsOf,
+        itemId: itemIdByAccount.get(accountId) ?? null,
+        asOfDate: maxDate,
       });
     }
   }
@@ -203,4 +215,55 @@ export async function portfolioSimpleReturn(userId: string): Promise<{ value: nu
   const investedValue = startValue + netContributions;
 
   return { value: computeSimpleReturn(endValue, startValue, netContributions), investedValue, hasHistory };
+}
+
+/**
+ * Daily portfolio value and money-in for the Investments chart, from every
+ * holdings snapshot (summed per account per day) plus the same contribution
+ * transactions portfolioSimpleReturn counts. Converted at today's FX rate,
+ * same simplification as above. The shaping (carry-forward, late-joining
+ * accounts) lives in @tally/core/investments so mobile charts identical data.
+ */
+export async function portfolioHistory(userId: string): Promise<HistoryPoint[]> {
+  const accounts = await investmentAccountIds(userId);
+  if (accounts.length === 0) return [];
+  const accountIds = accounts.map((a) => a.id);
+
+  const [snapRows, contribRows] = await Promise.all([
+    db
+      .select({
+        accountId: schema.holdings.accountId,
+        date: schema.holdings.asOfDate,
+        currency: schema.holdings.currency,
+        value: sql<string>`sum(${schema.holdings.institutionValue})`,
+      })
+      .from(schema.holdings)
+      .where(inArray(schema.holdings.accountId, accountIds))
+      .groupBy(schema.holdings.accountId, schema.holdings.asOfDate, schema.holdings.currency),
+    db
+      .select({ date: schema.investmentTransactions.date, amount: schema.investmentTransactions.amount, currency: schema.investmentTransactions.currency })
+      .from(schema.investmentTransactions)
+      .where(
+        and(
+          inArray(schema.investmentTransactions.accountId, accountIds),
+          or(
+            eq(schema.investmentTransactions.type, "transfer"),
+            and(eq(schema.investmentTransactions.type, "cash"), inArray(schema.investmentTransactions.subtype, ["contribution", "deposit", "withdrawal"])),
+          ),
+        ),
+      ),
+  ]);
+
+  // A multi-currency account has one row per currency per day; merge them.
+  const snapTotals = new Map<string, HistorySnapshot>();
+  for (const r of snapRows) {
+    const key = `${r.accountId}|${r.date}`;
+    const converted = await toNetWorthCurrency(Number(r.value), r.currency);
+    const prev = snapTotals.get(key);
+    snapTotals.set(key, { accountId: r.accountId, date: r.date, value: (prev?.value ?? 0) + converted });
+  }
+  const contributions: HistoryContribution[] = [];
+  for (const r of contribRows) contributions.push({ date: r.date, amount: await toNetWorthCurrency(r.amount, r.currency) });
+
+  return buildPortfolioHistory([...snapTotals.values()], contributions);
 }

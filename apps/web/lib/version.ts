@@ -97,8 +97,18 @@
  * sync_runs history replacing the "⋯" menu, a sidebar count on Accounts,
  * and a first-run card. Broken-connection alert emails deep-link to the
  * bank's panel. Also keeps an exactly-met budget's bar out of amber.
+ * 1.18.0 redesigns Investments (@tally/core/investments, shared with
+ * mobile): a value-over-time chart with money-in drawn under it and a
+ * 1M/3M/YTD/1Y/All switch (lib/portfolio.ts portfolioHistory, from daily
+ * holdings snapshots; also GET /api/investments/history), "Invested" and
+ * "Growth" replacing the four stat tiles, allocation by type/account/
+ * holding, one holdings table rolled up across accounts with gain per
+ * position, sort and an account filter, activity in plain verbs with type
+ * filters, a holding side panel (?holding=), and stale-connection notices
+ * from connectionState. /api/investments/transactions now returns
+ * converted amounts and account names.
  */
-export const APP_VERSION = "1.17.0";
+export const APP_VERSION = "1.18.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

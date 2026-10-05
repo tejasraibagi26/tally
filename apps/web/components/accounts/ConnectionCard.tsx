@@ -71,7 +71,7 @@ export function ConnectionAvatar({ name, state, size = 34 }: { name: string | nu
 }
 
 /** The notice a state carries, with its action(s) inline on the right. */
-export function StateNotice({ item, state, className }: { item: ConnectionView; state: ConnectionState; className?: string }) {
+export function StateNotice({ item, state, className }: { item: Pick<ConnectionView, "id" | "institutionName">; state: ConnectionState; className?: string }) {
   const { run } = useConnectionActions();
   if (!state.notice) return null;
   return (
