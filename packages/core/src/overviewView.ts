@@ -13,7 +13,7 @@ function dayDiff(from: string, to: string): number {
 }
 
 export interface DueLabel {
-  /** "Due today", "tomorrow", "in 3 days", "Overdue". */
+  /** "Due today", "tomorrow", "in 3 days", "Overdue · 2 days". */
   text: string;
   /** Due today or already past: shown in the warning color, with the words carrying the meaning. */
   urgent: boolean;
@@ -23,7 +23,7 @@ export interface DueLabel {
 
 export function dueLabel(dueDate: string, today: string): DueLabel {
   const n = dayDiff(today, dueDate);
-  if (n < 0) return { text: "Overdue", urgent: true, soon: true };
+  if (n < 0) return { text: `Overdue · ${-n} day${n === -1 ? "" : "s"}`, urgent: true, soon: true };
   if (n === 0) return { text: "Due today", urgent: true, soon: true };
   if (n === 1) return { text: "tomorrow", urgent: false, soon: true };
   return { text: `in ${n} days`, urgent: false, soon: n <= 7 };
@@ -132,6 +132,25 @@ export function creditHealth(utilization: number): { label: "Healthy" | "High"; 
  */
 export const MIN_UPCOMING_CONFIDENCE = 0.5;
 
+/**
+ * How long a bill stays listed after its due date. Detection reruns after
+ * every transaction sync and moves a stream's date forward once the charge
+ * posts, so a bill still listed past its date hasn't been charged yet. Three
+ * days keeps a missed bill visible without holding on to one that was paid
+ * some other way and never synced.
+ */
+export const UPCOMING_GRACE_DAYS = 3;
+
+/** YYYY-MM-DD `days` before `date`. */
+export function daysBefore(date: string, days: number): string {
+  return new Date(new Date(`${date}T00:00:00Z`).getTime() - days * DAY_MS).toISOString().slice(0, 10);
+}
+
+/** Whole days a due date is behind today; 0 when it's today or later. */
+export function overdueDays(dueDate: string, today: string): number {
+  return Math.max(0, dayDiff(dueDate, today));
+}
+
 export interface UpcomingStreamInput {
   /** The date it's expected: the user's override, else the detector's prediction. */
   dueDate: string | null;
@@ -149,11 +168,12 @@ export interface UpcomingStreamInput {
  * Whether a recurring stream belongs in Upcoming. A bill the user added, or
  * whose due date they set, is theirs to vouch for and only has to be in the
  * window. A detected one must also be active, be spending (a paycheck, bonus
- * or refund is never a bill) and clear MIN_UPCOMING_CONFIDENCE. `today` and
- * `cutoff` are YYYY-MM-DD, both inclusive.
+ * or refund is never a bill) and clear MIN_UPCOMING_CONFIDENCE. `from` and
+ * `cutoff` are YYYY-MM-DD, both inclusive; `from` is normally today minus
+ * UPCOMING_GRACE_DAYS so a bill that's just slipped past due stays listed.
  */
-export function qualifiesAsUpcoming(s: UpcomingStreamInput, today: string, cutoff: string): boolean {
-  if (s.dueDate == null || s.dueDate < today || s.dueDate > cutoff) return false;
+export function qualifiesAsUpcoming(s: UpcomingStreamInput, from: string, cutoff: string): boolean {
+  if (s.dueDate == null || s.dueDate < from || s.dueDate > cutoff) return false;
   if (s.isManual || s.manualNextDueDate != null) return true;
   if (s.status !== "active") return false;
   return s.averageAmount < 0 && Number(s.confidence ?? 0) >= MIN_UPCOMING_CONFIDENCE;

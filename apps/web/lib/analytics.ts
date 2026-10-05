@@ -1,8 +1,8 @@
-import { and, asc, eq, gte, isNull, lt, lte } from "drizzle-orm";
+import { and, asc, eq, gte, isNull, lt, lte, or } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { monthRange, shiftMonth } from "@tally/core/budgetMath";
 import { accountDisplayName } from "@tally/core/accountName";
-import { qualifiesAsUpcoming } from "@tally/core/overviewView";
+import { UPCOMING_GRACE_DAYS, daysBefore, overdueDays, qualifiesAsUpcoming } from "@tally/core/overviewView";
 import { todayFor } from "@/lib/userTimezone";
 
 export interface CashFlowMonth {
@@ -197,7 +197,14 @@ export async function merchantBreakdown(userId: string, month: string): Promise<
 export interface UpcomingBill {
   type: "subscription" | "card";
   label: string;
-  amount: number; // cents
+  /** Cents. Null for a card payment whose bank reported no minimum: unknown, never zero. */
+  amount: number | null;
+  /** A card's last statement balance in cents, when the bank sent one; null otherwise. */
+  statementBalance: number | null;
+  /** Past its due date, or a card the bank flags as past due. */
+  overdue: boolean;
+  /** Whole days past the due date; 0 when not past it (a bank-flagged card can be overdue with 0). */
+  overdueDays: number;
   dueDate: string;
   accountId: string | null;
   /** The recurring stream behind a "subscription" bill; null for a card payment. */
@@ -215,6 +222,10 @@ export interface UpcomingBill {
  * "cancelled" to that algorithm despite the user knowing exactly when it's
  * next due.
  *
+ * A bill stays listed for UPCOMING_GRACE_DAYS after its due date, marked
+ * overdue; a card the bank flags as past due is listed whatever its date. A
+ * card with no reported minimum has a null amount rather than a misleading 0.
+ *
  * Only money going out is listed (a detected paycheck, bonus or refund isn't a
  * bill, and none of it is guaranteed), a stream the user dismissed stays gone,
  * and a guessed stream must clear MIN_UPCOMING_CONFIDENCE
@@ -223,6 +234,7 @@ export interface UpcomingBill {
  */
 export async function upcomingBills(userId: string, withinDays = 30): Promise<UpcomingBill[]> {
   const today = await todayFor(userId);
+  const from = daysBefore(today, UPCOMING_GRACE_DAYS);
   const cutoff = new Date(new Date(`${today}T00:00:00Z`).getTime() + withinDays * 86_400_000).toISOString().slice(0, 10);
 
   const streamRows = await db
@@ -243,7 +255,7 @@ export async function upcomingBills(userId: string, withinDays = 30): Promise<Up
 
   const streams = streamRows
     .map((s) => ({ ...s, dueDate: s.manualNextDueDate ?? s.predictedNextDate }))
-    .filter((s) => qualifiesAsUpcoming(s, today, cutoff));
+    .filter((s) => qualifiesAsUpcoming(s, from, cutoff));
 
   const cards = await db
     .select({
@@ -251,26 +263,46 @@ export async function upcomingBills(userId: string, withinDays = 30): Promise<Up
       nickname: schema.accounts.nickname,
       accountId: schema.accounts.id,
       amount: schema.liabilitiesCredit.minimumPaymentAmount,
+      statementBalance: schema.liabilitiesCredit.lastStatementBalance,
+      isOverdue: schema.liabilitiesCredit.isOverdue,
       dueDate: schema.liabilitiesCredit.nextPaymentDueDate,
     })
     .from(schema.liabilitiesCredit)
     .innerJoin(schema.accounts, eq(schema.liabilitiesCredit.accountId, schema.accounts.id))
-    .where(and(eq(schema.accounts.userId, userId), gte(schema.liabilitiesCredit.nextPaymentDueDate, today), lte(schema.liabilitiesCredit.nextPaymentDueDate, cutoff)));
+    .where(
+      and(
+        eq(schema.accounts.userId, userId),
+        or(
+          // Cards keep the plain today..cutoff window: only the bank's own flag marks one overdue.
+          and(gte(schema.liabilitiesCredit.nextPaymentDueDate, today), lte(schema.liabilitiesCredit.nextPaymentDueDate, cutoff)),
+          eq(schema.liabilitiesCredit.isOverdue, true),
+        ),
+      ),
+    );
 
   const bills: UpcomingBill[] = [
     ...streams.map((s) => ({
       type: "subscription" as const,
       label: s.description ?? s.merchantKey,
       amount: Math.abs(s.averageAmount),
+      statementBalance: null,
+      overdue: s.dueDate! < today,
+      overdueDays: overdueDays(s.dueDate!, today),
       dueDate: s.dueDate!,
       accountId: s.accountId,
       streamId: s.id,
       canDismiss: !s.isManual,
     })),
-    ...cards.map((c) => ({
+    ...cards.filter((c) => c.dueDate != null).map((c) => ({
       type: "card" as const,
       label: `${accountDisplayName(c.name, c.nickname)} payment`,
-      amount: c.amount ?? 0,
+      amount: c.amount ?? null,
+      statementBalance: c.statementBalance ?? null,
+      // A past date alone isn't proof for a card (it can be paid early and keep
+      // its date until the next statement), so a card is overdue only when the
+      // bank says so.
+      overdue: c.isOverdue === true,
+      overdueDays: c.isOverdue ? overdueDays(c.dueDate!, today) : 0,
       dueDate: c.dueDate!,
       accountId: c.accountId,
       streamId: null,
@@ -278,5 +310,6 @@ export async function upcomingBills(userId: string, withinDays = 30): Promise<Up
     })),
   ];
 
-  return bills.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  // Overdue first, then by date.
+  return bills.sort((a, b) => Number(b.overdue) - Number(a.overdue) || a.dueDate.localeCompare(b.dueDate));
 }

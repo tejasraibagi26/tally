@@ -13,7 +13,16 @@ import { useRF } from "@/theme/responsiveFont";
  * dismissing the stream behind it: it leaves Upcoming and Subscriptions and
  * the detector never brings it back (DELETE /api/recurring-streams/[id]).
  */
-export function UpcomingBillSheet({ bill, onClose }: { bill: UpcomingBill | null; onClose: () => void }) {
+export function UpcomingBillSheet({
+  bill,
+  onClose,
+  onDismissed,
+}: {
+  bill: UpcomingBill | null;
+  onClose: () => void;
+  /** Called once the bill is dismissed, so the screen can offer Undo. */
+  onDismissed?: (bill: UpcomingBill) => void;
+}) {
   const colors = useThemeColors();
   const rf = useRF();
   const remove = useDeleteSubscription();
@@ -31,7 +40,14 @@ export function UpcomingBillSheet({ bill, onClose }: { bill: UpcomingBill | null
   function dismiss() {
     if (!b?.streamId) return;
     setError(false);
-    remove.mutate(b.streamId, { onSuccess: close, onError: () => setError(true) });
+    const dismissed = b;
+    remove.mutate(dismissed.streamId!, {
+      onSuccess: () => {
+        close();
+        onDismissed?.(dismissed);
+      },
+      onError: () => setError(true),
+    });
   }
 
   return (
@@ -40,7 +56,7 @@ export function UpcomingBillSheet({ bill, onClose }: { bill: UpcomingBill | null
         <View className="px-5 pt-1 pb-4 gap-4">
           <View className="gap-1">
             <Text className="font-ui-semibold text-text" style={{ fontSize: rf(17) }} numberOfLines={2}>{b.label}</Text>
-            <MoneyText cents={b.amount} mask={false} className="text-text-2" style={{ fontSize: rf(14) }} />
+            {b.amount != null && <MoneyText cents={b.amount} mask={false} className="text-text-2" style={{ fontSize: rf(14) }} />}
           </View>
           <Text className="font-ui text-text-2" style={{ fontSize: rf(14), lineHeight: rf(20) }}>
             Tally expects this because of how often it has been paid before. If it won't come again, like a one-off or a bonus, tell Tally and it will stop listing it. It also leaves your Subscriptions list.

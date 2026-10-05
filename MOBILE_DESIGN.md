@@ -274,7 +274,11 @@ net-worth range and delta, credit band) live in `@tally/core/overviewView`.
    yourself always count. A bill Tally guessed shows a "⋯" and opens a sheet
    with "This won't recur", which dismisses the stream behind it. "View all"
    opens the Upcoming screen: every bill in the window, card payments
-   included, grouped Overdue / This week / Later.
+   included, grouped Overdue / This week / Later. A bill stays listed 3 days
+   past due, first and marked "Overdue · 2 days" (a card only when the bank
+   flags it); a card with no reported minimum reads "Min. unknown" with its
+   statement balance. "This won't recur" offers Undo for 5 seconds, and
+   Subscriptions keeps a collapsed Dismissed group with Restore.
 7. **Recent activity** — last 5 transactions in the Transactions row grammar
    (avatar, merchant, Pending chip, review dot, "Category · day", amount).
 8. **Where it went** — category spend bar, last because it's analysis rather

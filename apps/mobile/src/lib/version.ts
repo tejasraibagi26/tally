@@ -179,8 +179,16 @@ import Constants from "expo-constants";
  * the chart marks today (and the scrubbed day) with a dot the chart draws
  * itself; the attention cards fade in and out; Needs you rows are one line
  * each with a compact pill.
+ * 1.24.0 is Overview v2's server pass (needs web 1.22.0): a bill stays in
+ * Upcoming for 3 days past due, first in the list and marked "Overdue · 2
+ * days" (cards only when the bank flags them); a card with no reported
+ * minimum shows "Min. unknown" plus its statement balance instead of $0.00;
+ * "This won't recur" offers Undo for 5 seconds (useDismissUndo, the shared
+ * components/ui/Toast now also used by Accounts), and Subscriptions lists
+ * dismissed bills with Restore (GET /api/recurring?dismissed=1, PATCH
+ * { dismissed: false }).
  */
-export const APP_VERSION = "1.23.0";
+export const APP_VERSION = "1.24.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -250,7 +250,14 @@ export default async function OverviewPage() {
       {/* Row 4: upcoming + recent activity */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch" style={reveal(4)}>
         <Card className="lg:col-span-5 h-full flex flex-col">
-          <CardHeader title="Upcoming" meta={bills.length > 0 ? `${bills.length} in the next 30 days` : undefined} />
+          <CardHeader
+            title="Upcoming"
+            meta={
+              bills.length > 0
+                ? [bills.some((b) => b.overdue) && `${bills.filter((b) => b.overdue).length} overdue`, `${bills.filter((b) => !b.overdue).length} in the next 30 days`].filter(Boolean).join(" · ")
+                : undefined
+            }
+          />
           {bills.length === 0 ? (
             <div className="flex-1 flex items-center justify-center px-4 py-8">
               <EmptyState icon={CalendarCheck} title="Nothing due in the next 30 days." compact />
@@ -261,9 +268,16 @@ export default async function OverviewPage() {
                 <div key={i} className="flex items-center justify-between px-4 py-3 border-b border-border last:border-b-0">
                   <div className="flex flex-col gap-0.5 min-w-0">
                     <span className="text-[15px] text-text truncate">{bill.label}</span>
-                    <span className="text-xs text-text-3">{bill.dueDate}</span>
+                    <span className={bill.overdue ? "text-xs font-medium text-warning" : "text-xs text-text-3"}>
+                      {bill.overdue ? `Overdue${bill.overdueDays > 0 ? ` · ${bill.overdueDays} day${bill.overdueDays === 1 ? "" : "s"}` : ""} · ${bill.dueDate}` : bill.dueDate}
+                      {bill.statementBalance != null && <span className="money"> · statement {formatCents(bill.statementBalance)}</span>}
+                    </span>
                   </div>
-                  <span className="text-right text-[15px] text-text tabular">{formatCents(bill.amount)}</span>
+                  {bill.amount == null ? (
+                    <span className="text-right text-[13px] text-text-3">Min. unknown</span>
+                  ) : (
+                    <span className="text-right text-[15px] text-text tabular">{formatCents(bill.amount)}</span>
+                  )}
                 </div>
               ))}
             </div>

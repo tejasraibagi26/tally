@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
-import { UpcomingRows } from "@/components/overview/UpcomingRows";
+import { UpcomingRows, sortBills } from "@/components/overview/UpcomingRows";
 import { UpcomingBillSheet } from "@/components/overview/UpcomingBillSheet";
 import type { UpcomingBill } from "@/lib/queries/overview";
 import { useRF } from "@/theme/responsiveFont";
@@ -13,12 +13,12 @@ const SHOWN = 3;
  * (card payments included) when more exist. A bill Tally guessed from past
  * charges opens a sheet where the person can say it won't recur.
  */
-export function UpcomingList({ bills }: { bills: UpcomingBill[] }) {
+export function UpcomingList({ bills, onDismissed }: { bills: UpcomingBill[]; onDismissed?: (bill: UpcomingBill) => void }) {
   const router = useRouter();
   const rf = useRF();
   const [selected, setSelected] = useState<UpcomingBill | null>(null);
   if (bills.length === 0) return null;
-  const sorted = [...bills].sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  const sorted = sortBills(bills);
 
   return (
     <View className="gap-4">
@@ -31,7 +31,7 @@ export function UpcomingList({ bills }: { bills: UpcomingBill[] }) {
         )}
       </View>
       <UpcomingRows bills={sorted.slice(0, SHOWN)} onSelect={setSelected} />
-      <UpcomingBillSheet bill={selected} onClose={() => setSelected(null)} />
+      <UpcomingBillSheet bill={selected} onClose={() => setSelected(null)} onDismissed={onDismissed} />
     </View>
   );
 }

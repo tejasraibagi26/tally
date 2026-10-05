@@ -8,6 +8,9 @@ import { UpcomingRows } from "@/components/overview/UpcomingRows";
 import { UpcomingBillSheet } from "@/components/overview/UpcomingBillSheet";
 import { useOverview, type UpcomingBill } from "@/lib/queries/overview";
 import { todayISO } from "@/lib/today";
+import { useDismissUndo } from "@/lib/useDismissUndo";
+import { Toast } from "@/components/ui/Toast";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRF } from "@/theme/responsiveFont";
 
 /**
@@ -22,6 +25,8 @@ export default function UpcomingScreen() {
   const contentTop = useScreenContentTop();
   const overview = useOverview();
   const [selected, setSelected] = useState<UpcomingBill | null>(null);
+  const undo = useDismissUndo();
+  const insets = useSafeAreaInsets();
   const groups = groupUpcoming(overview.data?.upcomingBills ?? [], todayISO());
   const sections: { title: string; bills: UpcomingBill[] }[] = [
     { title: "Overdue", bills: groups.overdue },
@@ -55,7 +60,8 @@ export default function UpcomingScreen() {
           .
         </Text>
       </ScrollView>
-      <UpcomingBillSheet bill={selected} onClose={() => setSelected(null)} />
+      <UpcomingBillSheet bill={selected} onClose={() => setSelected(null)} onDismissed={undo.onDismissed} />
+      <Toast message={undo.message} onHidden={undo.clear} action={undo.action} bottom={insets.bottom + 24} />
     </View>
   );
 }
