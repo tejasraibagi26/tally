@@ -15,9 +15,17 @@ export interface UtilizationResult {
 // `cards` exists (apps/web/lib/liabilities.ts's CreditCardRow, a nested
 // shape including per-card liability fields) but nothing on mobile needs
 // individual card detail yet -- left untyped here rather than guessed.
+/** The per-card fields the app reads; the server sends more (apps/web/lib/liabilities.ts's CreditCardRow). */
+export interface CreditCardSummary {
+  accountId: string;
+  /** Cents in the card's own currency; positive is owed. */
+  currentBalance: number;
+  creditLimit: number | null;
+}
+
 export function useLiabilities() {
   return useQuery({
     queryKey: ["liabilities"],
-    queryFn: () => apiGet<{ cards: unknown[]; utilization: UtilizationResult }>("/api/liabilities"),
+    queryFn: () => apiGet<{ cards: CreditCardSummary[]; utilization: UtilizationResult }>("/api/liabilities"),
   });
 }

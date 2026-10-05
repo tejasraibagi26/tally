@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MIN_UPCOMING_CONFIDENCE, creditHealth, dateTile, dueLabel, monthsAgo, netWorthDelta, qualifiesAsUpcoming, rankBudgets, shortDayLabel, sliceNetWorthRange } from "./overviewView";
+import { MIN_UPCOMING_CONFIDENCE, creditHealth, groupUpcoming, highCardCount, dateTile, dueLabel, monthsAgo, netWorthDelta, qualifiesAsUpcoming, rankBudgets, shortDayLabel, sliceNetWorthRange } from "./overviewView";
 
 describe("dueLabel", () => {
   it("words the distance, and flags today and overdue as urgent", () => {
@@ -126,5 +126,39 @@ describe("qualifiesAsUpcoming", () => {
     expect(check(stream({ dueDate: "2026-11-13" }))).toBe(true);
     expect(check(stream({ dueDate: "2026-11-14" }))).toBe(false);
     expect(check(stream({ dueDate: null }))).toBe(false);
+  });
+});
+
+describe("highCardCount", () => {
+  it("counts cards at or over 30% of their own limit, skipping unknown limits", () => {
+    expect(
+      highCardCount([
+        { currentBalance: 95_000, creditLimit: 100_000 },
+        { currentBalance: 30_000, creditLimit: 100_000 },
+        { currentBalance: 29_900, creditLimit: 100_000 },
+        { currentBalance: 50_000, creditLimit: null },
+        { currentBalance: 10_000, creditLimit: 0 },
+        { currentBalance: -5_000, creditLimit: 100_000 },
+      ]),
+    ).toBe(2);
+  });
+});
+
+describe("groupUpcoming", () => {
+  it("puts overdue first, then the next 7 days, then later, each in date order", () => {
+    const g = groupUpcoming(
+      [
+        { dueDate: "2026-10-30" },
+        { dueDate: "2026-10-12" },
+        { dueDate: "2026-10-21" },
+        { dueDate: "2026-10-15" },
+        { dueDate: "2026-10-22" },
+        { dueDate: "2026-10-25", overdue: true },
+      ],
+      "2026-10-14",
+    );
+    expect(g.overdue.map((b) => b.dueDate)).toEqual(["2026-10-12", "2026-10-25"]);
+    expect(g.thisWeek.map((b) => b.dueDate)).toEqual(["2026-10-15", "2026-10-21"]);
+    expect(g.later.map((b) => b.dueDate)).toEqual(["2026-10-22", "2026-10-30"]);
   });
 });

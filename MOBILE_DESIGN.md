@@ -237,7 +237,8 @@ net-worth range and delta, credit band) live in `@tally/core/overviewView`.
 1. **Net worth hero** — unboxed on the canvas. serif figure at 68pt (this screen scales
    `display-l` up) with the cents at 32pt in `text-3`; a delta chip (arrow, signed amount,
    %, with the range as its caption); the full-bleed 112pt trend chart you can
-   scrub; a 1M / 3M / 6M / 1Y range control (default 1M) that slices the
+   scrub, with a dot on today (or the scrubbed day) drawn by the chart; a
+   1M / 3M / 6M / 1Y range control (default 1M) that slices the
    already-loaded 12-month daily series. Privacy on: the chip keeps its % and
    hides its amount.
 2. **Needs you** — renders only when something needs a tap, otherwise takes no
@@ -253,13 +254,15 @@ net-worth range and delta, credit band) live in `@tally/core/overviewView`.
 3. **This month** — one card: Spent (serif 32) against the month's total
    budget with the budget-row meter (no tick, projection or pace verdict),
    then Income and Saved
-   (income − spend). Income and Saved mask with the privacy toggle.
+   (income − spend), labelled "Saved so far" and kept in plain text when
+   negative mid-month. Income and Saved mask with the privacy toggle.
    No budget: "Set a budget" link instead of the meter.
 4. **Investments / Credit used** — one card under This month with a hairline
    between the two figures; one alone fills the card, none renders nothing;
    stacks on narrow or large-text screens. Credit reads "Healthy" under 30% of the limit, "High" at or over,
    shows "balance of limit" (hidden with the privacy toggle) and notes any card
-   left out for having no limit. Overpaid cards count as zero used and
+   left out for having no limit, and "1 card is high" when the total is
+   healthy but a single card is at or over 30%. Overpaid cards count as zero used and
    cards in different currencies are converted before summing.
 5. **Budget this month** — the three most-used budgets (over-budget first;
    paid fixed-amount budgets skipped) as meter rows, "View all" → Budgets tab.
@@ -269,7 +272,9 @@ net-worth range and delta, credit band) live in `@tally/core/overviewView`.
    dismissed bill stays gone, and a guessed bill must clear a confidence bar
    (`qualifiesAsUpcoming`); card payments and bills you added or dated
    yourself always count. A bill Tally guessed shows a "⋯" and opens a sheet
-   with "This won't recur", which dismisses the stream behind it.
+   with "This won't recur", which dismisses the stream behind it. "View all"
+   opens the Upcoming screen: every bill in the window, card payments
+   included, grouped Overdue / This week / Later.
 7. **Recent activity** — last 5 transactions in the Transactions row grammar
    (avatar, merchant, Pending chip, review dot, "Category · day", amount).
 8. **Where it went** — category spend bar, last because it's analysis rather

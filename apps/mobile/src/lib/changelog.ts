@@ -16,6 +16,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.23.0",
+    date: "2026-10-05",
+    changes: [
+      { kind: "new", text: "Overview: \"View all\" under Upcoming opens a full list of the next 30 days, card payments included." },
+      { kind: "improved", text: "Overview: Credit used tells you when one card is high even if your total is fine, and \"Saved so far\" no longer turns red before payday." },
+      { kind: "improved", text: "Overview: the net worth chart marks today with a dot, and banks that need you fit on one line." },
+    ],
+  },
+  {
     version: "1.22.0",
     date: "2026-10-05",
     changes: [

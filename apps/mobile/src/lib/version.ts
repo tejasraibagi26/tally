@@ -172,8 +172,15 @@ import Constants from "expo-constants";
  * use your timezone (all server-side, @tally/core/overviewView's
  * qualifiesAsUpcoming). A bill Tally guessed opens a sheet with "This won't
  * recur", which dismisses the stream behind it.
+ * 1.23.0 is Overview v2's app-only pass: "View all" opens a new Upcoming
+ * screen (app/upcoming.tsx: Overdue / This week / Later, card payments
+ * included); Credit used notes when a single card is at or over 30%
+ * (highCardCount); "Saved so far" stays plain text when negative mid-month;
+ * the chart marks today (and the scrubbed day) with a dot the chart draws
+ * itself; the attention cards fade in and out; Needs you rows are one line
+ * each with a compact pill.
  */
-export const APP_VERSION = "1.22.0";
+export const APP_VERSION = "1.23.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

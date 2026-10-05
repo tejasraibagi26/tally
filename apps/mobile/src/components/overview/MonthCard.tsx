@@ -19,7 +19,7 @@ function deltaLabel(current: number, prior: number | undefined): string | undefi
 /**
  * This month in one card: what's been spent against the month's budget (the
  * same bar rules as a budget row -- no tick, projection or pace verdict), then
- * income and what's left of it. Income and Saved mask with the privacy toggle (Saved would
+ * income and what's left of it so far. Income and Saved mask with the privacy toggle (Saved would
  * reveal income); Spent and the budget don't.
  */
 export function MonthCard({
@@ -89,16 +89,18 @@ export function MonthCard({
             {deltaLabel(income, priorIncome) && <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }} numberOfLines={1}>{deltaLabel(income, priorIncome)}</Text>}
           </View>
           <View className="flex-1 gap-1.5">
-            <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(11.5) }}>Saved</Text>
+            <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(11.5) }}>Saved so far</Text>
             <MoneyText
               cents={saved}
               signed
               className="font-ui-semibold"
-              style={{ fontSize: rf(19), color: saved >= 0 ? colors.positive : colors.negative }}
+              // Mid-month, spending before payday is normal, so a negative figure stays plain text rather than red.
+              style={{ fontSize: rf(19), color: saved >= 0 ? colors.positive : colors.text }}
               numberOfLines={1}
               adjustsFontSizeToFit
             />
-            {income > 0 && !hidden && <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }} numberOfLines={1}>{Math.round((saved / income) * 100)}% of income</Text>}
+            {!hidden && income <= 0 && <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }} numberOfLines={1}>No income yet this month</Text>}
+            {!hidden && income > 0 && saved >= 0 && <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }} numberOfLines={1}>{Math.round((saved / income) * 100)}% of income</Text>}
           </View>
         </View>
       </Card>

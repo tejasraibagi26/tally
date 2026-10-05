@@ -158,3 +158,37 @@ export function qualifiesAsUpcoming(s: UpcomingStreamInput, today: string, cutof
   if (s.status !== "active") return false;
   return s.averageAmount < 0 && Number(s.confidence ?? 0) >= MIN_UPCOMING_CONFIDENCE;
 }
+
+export interface CardBalanceLike {
+  /** Cents, in the card's own currency; positive is owed. */
+  currentBalance: number;
+  creditLimit: number | null;
+}
+
+/**
+ * How many cards are individually at or over the utilization limit. Each
+ * card is its own ratio, so no currency conversion is needed; a card with
+ * no limit (or a zero one) can't be judged and is skipped.
+ */
+export function highCardCount(cards: CardBalanceLike[]): number {
+  return cards.filter((c) => c.creditLimit != null && c.creditLimit > 0 && c.currentBalance / c.creditLimit >= CREDIT_UTILIZATION_LIMIT).length;
+}
+
+export interface GroupableBill {
+  dueDate: string;
+  /** The bank says this card payment is past due, whatever its date. */
+  overdue?: boolean;
+}
+
+/**
+ * Upcoming bills split for the full list: overdue first (past their date,
+ * or flagged by the bank), then the next 7 days, then the rest. Each group
+ * keeps date order.
+ */
+export function groupUpcoming<T extends GroupableBill>(bills: T[], today: string): { overdue: T[]; thisWeek: T[]; later: T[] } {
+  const sorted = [...bills].sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+  const weekEnd = new Date(new Date(`${today}T00:00:00Z`).getTime() + 7 * DAY_MS).toISOString().slice(0, 10);
+  const overdue = sorted.filter((b) => b.overdue || b.dueDate < today);
+  const rest = sorted.filter((b) => !(b.overdue || b.dueDate < today));
+  return { overdue, thisWeek: rest.filter((b) => b.dueDate <= weekEnd), later: rest.filter((b) => b.dueDate > weekEnd) };
+}

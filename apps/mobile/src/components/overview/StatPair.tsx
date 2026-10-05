@@ -17,7 +17,7 @@ import { useRF } from "@/theme/responsiveFont";
  * since a card balance is an account balance) and says when a card without a
  * reported limit is left out of the ratio.
  */
-export function StatPair({ investmentsCents, credit }: { investmentsCents: number | null; credit: UtilizationResult | null }) {
+export function StatPair({ investmentsCents, credit, highCards = 0 }: { investmentsCents: number | null; credit: UtilizationResult | null; highCards?: number }) {
   const router = useRouter();
   const colors = useThemeColors();
   const rf = useRF();
@@ -35,6 +35,8 @@ export function StatPair({ investmentsCents, credit }: { investmentsCents: numbe
     </View>
   );
   const amounts = credit && !hidden ? `${formatCents(credit.totalBalance)} of ${formatCents(credit.totalLimit)} limit` : null;
+  // A healthy total can hide one maxed card; say so. When the total is already High the note adds nothing.
+  const highNote = health?.label === "Healthy" && highCards > 0 ? `${highCards} card${highCards === 1 ? " is" : "s are"} high` : null;
   const excluded = credit && credit.excludedCount > 0 ? `${credit.excludedCount} card${credit.excludedCount === 1 ? "" : "s"} without a limit not counted` : null;
   const divider = stacked ? { height: 1, marginHorizontal: 16 } : { width: 1, marginVertical: 16 };
 
@@ -53,7 +55,7 @@ export function StatPair({ investmentsCents, credit }: { investmentsCents: numbe
           onPress={() => router.push("/(tabs)/accounts")}
           className={`flex-1 p-4 active:opacity-80 ${both ? "gap-1.5" : "flex-row items-center justify-between gap-4"}`}
           accessibilityRole="button"
-          accessibilityLabel={`Credit used ${formatPercent(utilization)}, ${health.label}`}
+          accessibilityLabel={`Credit used ${formatPercent(utilization)}, ${health.label}${highNote ? `, ${highNote}` : ""}`}
         >
           {both ? (
             <>
@@ -64,6 +66,7 @@ export function StatPair({ investmentsCents, credit }: { investmentsCents: numbe
               </View>
               {meter}
               {amounts && <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>{amounts}</Text>}
+              {highNote && <Text className="font-ui-medium" style={{ fontSize: rf(11), color: colors.warning }}>{highNote}</Text>}
               {excluded && <Text className="font-ui text-text-3" style={{ fontSize: rf(11) }}>{excluded}</Text>}
             </>
           ) : (
@@ -71,6 +74,7 @@ export function StatPair({ investmentsCents, credit }: { investmentsCents: numbe
               <View className="gap-1.5 flex-shrink">
                 <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(11.5) }}>Credit used</Text>
                 {amounts && <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>{amounts}</Text>}
+                {highNote && <Text className="font-ui-medium" style={{ fontSize: rf(11), color: colors.warning }}>{highNote}</Text>}
                 {excluded && <Text className="font-ui text-text-3" style={{ fontSize: rf(11) }}>{excluded}</Text>}
               </View>
               <View className="flex-1 max-w-[100px]">{meter}</View>

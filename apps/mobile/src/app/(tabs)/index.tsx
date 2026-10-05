@@ -24,7 +24,7 @@ import { UpcomingList } from "@/components/overview/UpcomingList";
 import { RecentList } from "@/components/overview/RecentList";
 import { usePrivacy } from "@/lib/PrivacyContext";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
-import { rankBudgets } from "@tally/core/overviewView";
+import { highCardCount, rankBudgets } from "@tally/core/overviewView";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 
@@ -138,7 +138,7 @@ export default function OverviewScreen() {
               daysInMonth={daysInMonth}
             />
           )}
-          <StatPair investmentsCents={investmentsCents} credit={liabilities.data?.utilization ?? null} />
+          <StatPair investmentsCents={investmentsCents} credit={liabilities.data?.utilization ?? null} highCards={highCardCount(liabilities.data?.cards ?? [])} />
         </View>
 
         {/* Budget this month */}
