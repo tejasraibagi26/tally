@@ -31,8 +31,8 @@ export function BudgetRowItem({ line, ctx, color, showTopBorder, onPress }: { li
           <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: color }} />
           <Text className="font-ui-medium text-text flex-shrink" style={{ fontSize: rf(14.5) }} numberOfLines={1}>{line.categoryName}</Text>
           {line.isFixedAmount && (
-            <View className="rounded-full bg-surface-2 px-2 py-0.5">
-              <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(10.5) }}>Fixed</Text>
+            <View className="rounded-full bg-brand-subtle px-2 py-0.5">
+              <Text className="font-ui-medium text-brand" style={{ fontSize: rf(10.5) }}>Fixed</Text>
             </View>
           )}
         </View>

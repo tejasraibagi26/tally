@@ -56,7 +56,7 @@ export function NeedsYouPanel({ rows, onOpenPanel }: { rows: { item: ConnectionV
                 </>
               )}
             </p>
-            <div className="flex items-center gap-1.5 row-start-1 col-start-3 lg:col-start-auto">
+            <div className="flex items-center gap-1.5 row-start-1 col-start-3 lg:row-start-auto lg:col-start-auto">
               {state.action && <StateButton action={state.action} tone={state.tone} pending={state.actionPending} onClick={() => run(item, state.action!)} />}
               {state.secondaryAction && <StateButton action={state.secondaryAction} tone={state.tone} onClick={() => run(item, state.secondaryAction!)} />}
             </div>
