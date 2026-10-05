@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.24.1",
+    date: "2026-10-05",
+    changes: [{ kind: "fixed", text: "Overview: \"View all\" under Upcoming now always shows, so the full Upcoming list is reachable even with only a few bills." }],
+  },
+  {
     version: "1.24.0",
     date: "2026-10-05",
     changes: [

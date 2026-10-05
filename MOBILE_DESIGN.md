@@ -273,7 +273,7 @@ net-worth range and delta, credit band) live in `@tally/core/overviewView`.
    (`qualifiesAsUpcoming`); card payments and bills you added or dated
    yourself always count. A bill Tally guessed shows a "⋯" and opens a sheet
    with "This won't recur", which dismisses the stream behind it. "View all"
-   opens the Upcoming screen: every bill in the window, card payments
+   (always shown when there are bills) opens the Upcoming screen: every bill in the window, card payments
    included, grouped Overdue / This week / Later. A bill stays listed 3 days
    past due, first and marked "Overdue · 2 days" (a card only when the bank
    flags it); a card with no reported minimum reads "Min. unknown" with its
