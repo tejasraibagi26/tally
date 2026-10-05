@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { View, Text, ScrollView, Pressable, ActivityIndicator, RefreshControl, useWindowDimensions, PanResponder } from "react-native";
 import { useRouter } from "expo-router";
-import { CircleCheck, ChevronRight, Ellipsis, Eye, EyeOff } from "lucide-react-native";
+import { Ellipsis, Eye, EyeOff } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LineChart } from "react-native-gifted-charts";
 import { useQueryClient } from "@tanstack/react-query";
@@ -19,12 +19,13 @@ import { useLiabilities } from "@/lib/queries/liabilities";
 import { useHoldings } from "@/lib/queries/investments";
 import { useCategoryBreakdown } from "@/lib/queries/spendBreakdown";
 import { CategorySpendBar } from "@/components/charts/CategorySpendBar";
+import { NeedsYouCard } from "@/components/overview/NeedsYouCard";
+import { UpcomingList } from "@/components/overview/UpcomingList";
+import { RecentList } from "@/components/overview/RecentList";
 import { usePrivacy } from "@/lib/PrivacyContext";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { formatCents, formatPercent } from "@tally/core/money";
-import { amountColor } from "@/lib/amountColor";
 import { useThemeColors } from "@/theme/useThemeColors";
-import { hairline } from "@/theme/colors";
 import { useRF } from "@/theme/responsiveFont";
 
 // MOBILE_DESIGN.md §5.2 -- hero net worth (unboxed, direct on canvas), a
@@ -83,8 +84,6 @@ export default function OverviewScreen() {
   }
 
   const netCents = accounts.data?.totals.net ?? 0;
-  const allSynced = accounts.data ? accounts.data.institutions.every((i) => i.badge === "good") : true;
-  const brokenCount = accounts.data ? accounts.data.institutions.filter((i) => i.badge === "critical").length : 0;
 
   // /api/analytics/networth returns one point per day (nightly net-worth
   // snapshots), not one per month -- matches web's NetWorthChart.tsx, which
@@ -365,22 +364,9 @@ export default function OverviewScreen() {
           )}
         </View>
 
-        {/* Connections status */}
-        <Pressable onPress={() => router.push("/(tabs)/accounts")}>
-          <View className="rounded-panel flex-row items-center justify-between px-[18px] py-4 bg-brand-subtle">
-            <View className="flex-row items-center gap-2.5">
-              <CircleCheck size={17} color={colors.brand} strokeWidth={2} />
-              <Text className="font-ui-medium text-brand" style={{ fontSize: rf(14.5) }}>
-                {brokenCount > 0
-                  ? `${brokenCount} connection${brokenCount === 1 ? "" : "s"} needs attention`
-                  : allSynced
-                    ? "All accounts synced"
-                    : "Sync in progress"}
-              </Text>
-            </View>
-            <ChevronRight size={16} color={colors.brand} strokeWidth={1.75} />
-          </View>
-        </Pressable>
+        {/* Banks that need a tap -- renders nothing when all is well; sync
+            freshness already sits in the header meta line. */}
+        <NeedsYouCard institutions={accounts.data?.institutions ?? []} />
 
         {/* KPI row -- a wrapping 2-column grid rather than a fixed-width
             horizontal scroll: at 140px-wide tiles, a horizontal ScrollView
@@ -429,65 +415,27 @@ export default function OverviewScreen() {
           </View>
         )}
 
-        {/* Where it went */}
+        {/* Upcoming */}
+        <UpcomingList bills={overview.data?.upcomingBills ?? []} />
+
+        {/* Recent activity */}
+        <RecentList items={recentItems} />
+
+        {/* Where it went -- analysis rather than action, so it closes the screen */}
         {(breakdown.data?.rows.length ?? 0) > 0 && (
           <View className="gap-4">
-            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Where it went</Text>
+            <View className="flex-row items-center justify-between">
+              <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Where it went</Text>
+              <Pressable onPress={() => router.push("/(tabs)/transactions")} hitSlop={8}>
+                <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13.5) }}>View all</Text>
+              </Pressable>
+            </View>
             <Card className="p-5">
               <CategorySpendBar rows={breakdown.data!.rows} />
             </Card>
           </View>
         )}
-
-        {/* Upcoming */}
-        {overview.data && overview.data.upcomingBills.length > 0 && (
-          <View className="gap-4">
-            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Upcoming</Text>
-            <Card className="px-5">
-              {overview.data.upcomingBills.slice(0, 3).map((bill, i, arr) => (
-                <View
-                  key={`${bill.label}-${bill.dueDate}`}
-                  className="flex-row items-center justify-between py-4"
-                  style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
-                >
-                  <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>{bill.label}</Text>
-                  <MoneyText cents={bill.amount} mask={false} className="text-text" style={{ fontSize: rf(14.5) }} />
-                </View>
-              ))}
-            </Card>
-          </View>
-        )}
-
-        {/* Recent activity */}
-        <View className="gap-4">
-          <View className="flex-row items-center justify-between">
-            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>Recent activity</Text>
-            <Pressable onPress={() => router.push("/(tabs)/transactions")}>
-              <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13.5) }}>View all</Text>
-            </Pressable>
-          </View>
-          <Card className="px-5">
-            {recentItems.length === 0 ? (
-              <Text className="font-ui text-text-3 py-4" style={{ fontSize: rf(14) }}>Nothing here yet.</Text>
-            ) : (
-              recentItems.map((t, i, arr) => (
-                <View
-                  key={t.id}
-                  className="flex-row items-center justify-between py-4"
-                  style={i < arr.length - 1 ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
-                >
-                  <View className="gap-0.5 flex-1 pr-3">
-                    <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15) }} numberOfLines={1}>
-                      {t.merchantName ?? t.name}
-                    </Text>
-                  </View>
-                  <MoneyText cents={t.amount} signed mask={false} className="font-ui-medium" style={{ color: amountColor(t.amount, colors), fontSize: rf(15) }} />
-                </View>
-              ))
-            )}
-          </Card>
-        </View>
-        </View>
+      </View>
       </ScrollView>
     </View>
   );
