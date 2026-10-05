@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { and, desc, eq, inArray, isNotNull, isNull, or } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNotNull, isNull, lte, or } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { accountDisplayName } from "@tally/core/accountName";
 import { suggestCategories } from "@tally/core/transactionView";
+import { monthLastDay } from "@tally/core/budgetMath";
+import { currentMonthFor } from "@/lib/userTimezone";
 
 /** Rows the review queue loads at once; it refetches when they run out. */
 const QUEUE_LIMIT = 100;
@@ -11,7 +13,9 @@ const QUEUE_LIMIT = 100;
 /**
  * The review queue: unreviewed, non-transfer transactions (newest first),
  * each with up to three category suggestions -- its current category, then
- * what you picked before for the same merchant.
+ * what you picked before for the same merchant. `?scope=month` limits it to
+ * transactions posted this month (the mobile app's queue), matching the
+ * Transactions tab's "N to review" count.
  */
 export async function GET(req: Request) {
   let userId: string;
@@ -20,6 +24,9 @@ export async function GET(req: Request) {
   } catch {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const monthOnly = new URL(req.url).searchParams.get("scope") === "month";
+  const thisMonth = monthOnly ? await currentMonthFor(userId) : null;
 
   const [rows, categories, accounts] = await Promise.all([
     db
@@ -35,7 +42,15 @@ export async function GET(req: Request) {
         isPending: schema.transactions.isPending,
       })
       .from(schema.transactions)
-      .where(and(eq(schema.transactions.userId, userId), eq(schema.transactions.reviewed, false), eq(schema.transactions.isTransfer, false)))
+      .where(
+        and(
+          eq(schema.transactions.userId, userId),
+          eq(schema.transactions.reviewed, false),
+          eq(schema.transactions.isTransfer, false),
+          thisMonth ? gte(schema.transactions.postedDate, thisMonth) : undefined,
+          thisMonth ? lte(schema.transactions.postedDate, monthLastDay(thisMonth)) : undefined,
+        ),
+      )
       .orderBy(desc(schema.transactions.postedDate), desc(schema.transactions.createdAt))
       .limit(QUEUE_LIMIT),
     db.query.categories.findMany({ where: or(isNull(schema.categories.userId), eq(schema.categories.userId, userId)) }),

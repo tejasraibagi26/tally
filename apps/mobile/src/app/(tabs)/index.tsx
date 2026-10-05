@@ -121,9 +121,10 @@ export default function OverviewScreen() {
         {/* Hero net worth -- unboxed, per MOBILE_DESIGN.md */}
         <NetWorthHero netCents={netCents} points={trend.data?.points ?? []} loading={accounts.isLoading} onScrubChange={setIsScrubbingChart} />
 
-        {/* Banks that need a tap and the review backlog -- renders nothing when
-            all is well; sync freshness already sits in the header meta line. */}
-        <AttentionStack institutions={accounts.data?.institutions ?? []} unreviewed={overview.data?.unreviewed ?? 0} />
+        {/* Banks that need a tap and this month's review backlog (the same count as
+            the Transactions tab's "N to review" banner) -- renders nothing when all
+            is well; sync freshness already sits in the header meta line. */}
+        <AttentionStack institutions={accounts.data?.institutions ?? []} unreviewed={recent.data?.pages[0]?.summary?.unreviewed ?? 0} />
 
         {/* This month: spend against budget, income, saved -- with Investments and Credit used tucked just beneath */}
         <View className="gap-3">

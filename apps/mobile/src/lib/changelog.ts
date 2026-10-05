@@ -16,6 +16,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.21.3",
+    date: "2026-10-05",
+    changes: [{ kind: "improved", text: "Overview: net worth is bigger, the \"transactions to review\" bar is now green, and the small marker on the This month bar is gone." }],
+  },
+  {
+    version: "1.21.2",
+    date: "2026-10-05",
+    changes: [{ kind: "fixed", text: "Overview: \"transactions to review\" now counts only this month, and the review screen it opens skips older months." }],
+  },
+  {
     version: "1.21.1",
     date: "2026-10-05",
     changes: [

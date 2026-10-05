@@ -18,8 +18,8 @@ function deltaLabel(current: number, prior: number | undefined): string | undefi
 
 /**
  * This month in one card: what's been spent against the month's budget (the
- * same bar rules as a budget row, plus a tick for how far through the month
- * it is -- no projections or pace verdicts), then income and what's left of it. Income and Saved mask with the privacy toggle (Saved would
+ * same bar rules as a budget row -- no tick, projection or pace verdict), then
+ * income and what's left of it. Income and Saved mask with the privacy toggle (Saved would
  * reveal income); Spent and the budget don't.
  */
 export function MonthCard({
@@ -65,14 +65,9 @@ export function MonthCard({
 
         {budget ? (
           <View className="mt-3.5">
-            <View>
-              <View className="h-2 rounded-full bg-sunken flex-row overflow-hidden">
-                <View style={{ width: `${budget.fillPct * 100}%`, backgroundColor: fill }} />
-                {budget.overPct > 0 && <View style={{ width: `${budget.overPct * 100}%`, backgroundColor: colors.negative }} />}
-              </View>
-              {budget.pacePct != null && (
-                <View style={{ position: "absolute", left: `${budget.pacePct * 100}%`, top: -3, width: 2, height: 14, borderRadius: 1, backgroundColor: colors.text, opacity: 0.5 }} />
-              )}
+            <View className="h-2 rounded-full bg-sunken flex-row overflow-hidden">
+              <View style={{ width: `${budget.fillPct * 100}%`, backgroundColor: fill }} />
+              {budget.overPct > 0 && <View style={{ width: `${budget.overPct * 100}%`, backgroundColor: colors.negative }} />}
             </View>
             <View className="flex-row justify-between mt-2.5">
               <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>{usedPct}% used</Text>
