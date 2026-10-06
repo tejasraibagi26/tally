@@ -19,6 +19,7 @@ import {
 } from "@/lib/queries/transactions";
 import { useCategories, type Category } from "@/lib/queries/categories";
 import { CategoryPickerSheet } from "@/components/CategoryPickerSheet";
+import { MerchantAvatar } from "@/components/transactions/MerchantAvatar";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Toast } from "@/components/ui/Toast";
 import { useThemeColors } from "@/theme/useThemeColors";
@@ -395,9 +396,7 @@ function Header({ t, tone, reviewed, onReviewed }: { t: TransactionRow; tone: "p
   return (
     <View className="gap-3">
       <View className="flex-row items-center gap-3">
-        <View className="w-10 h-10 rounded-[11px] bg-surface-2 items-center justify-center">
-          <Text className="font-ui-semibold text-text-2" style={{ fontSize: rf(15) }}>{display.charAt(0).toUpperCase()}</Text>
-        </View>
+        <MerchantAvatar name={display} logoUrl={t.isTransfer || t.isManual ? null : t.logoUrl} size={40} radius={11} fontSize={15} />
         <View className="flex-1 min-w-0">
           <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }} numberOfLines={1}>{display}</Text>
           <Text className="font-ui text-text-3" style={{ fontSize: rf(12.5) }} numberOfLines={1}>

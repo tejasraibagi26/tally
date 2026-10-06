@@ -1,4 +1,5 @@
 import { db, schema } from "@/db";
+import { resolveMerchantLogos } from "@/lib/merchantLogos";
 import { and, desc, eq, gte, ilike, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { Receipt, SearchX } from "lucide-react";
 import { requireUserId } from "@/lib/session";
@@ -179,6 +180,8 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     recurringStreamId: schema.transactions.recurringStreamId,
     // The split term of the stream this charge is spread by (null if none).
     amortizeMonths: schema.recurringStreams.amortizeMonths,
+    logoUrl: schema.transactions.logoUrl,
+    counterparties: schema.transactions.counterparties,
   };
 
   const [rows, countRows, anyTxRow] = await Promise.all([
@@ -220,6 +223,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     splitsByTransaction.set(s.transactionId, [...(splitsByTransaction.get(s.transactionId) ?? []), { categoryId: s.categoryId, amount: s.amount, note: s.note }]);
   }
 
+  const logos = await resolveMerchantLogos(userId, rows);
   const rowData: TransactionRowData[] = rows.map((t) => ({
     id: t.id,
     postedDate: t.postedDate,
@@ -245,6 +249,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     recurringStreamId: t.recurringStreamId,
     amortizeMonths: t.amortizeMonths ?? null,
     splits: splitsByTransaction.get(t.id) ?? [],
+    logoUrl: logos.get(t.id) ?? null,
   }));
 
   const total = countRows[0]?.count ?? 0;

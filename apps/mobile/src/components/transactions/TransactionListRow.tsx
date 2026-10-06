@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { MerchantAvatar } from "@/components/transactions/MerchantAvatar";
 import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import ReanimatedSwipeable, { type SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
@@ -93,9 +94,7 @@ export function TransactionListRow({
         className="flex-row items-center gap-3 bg-surface px-4 py-3"
         style={showTopBorder ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined}
       >
-        <View className="w-[30px] h-[30px] rounded-[9px] bg-surface-2 items-center justify-center">
-          <Text className="font-ui-semibold text-text-2" style={{ fontSize: rf(12) }}>{display.charAt(0).toUpperCase()}</Text>
-        </View>
+        <MerchantAvatar name={display} logoUrl={item.isTransfer || item.isManual ? null : item.logoUrl} size={30} radius={9} fontSize={12} />
         <View className="flex-1 gap-1">
           <View className="flex-row items-center gap-1.5">
             {v.needsReview && <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: colors.brand }} accessibilityLabel="Needs review" />}

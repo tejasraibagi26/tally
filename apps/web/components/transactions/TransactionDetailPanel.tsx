@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { SidePanel } from "@/components/ui/SidePanel";
 import { CategoryPicker } from "@/components/transactions/CategoryPicker";
+import { MerchantAvatar } from "@/components/transactions/MerchantAvatar";
 import { formatCents } from "@tally/core/money";
 import { describeTransactionDetail, splitBalance, splitEvenly, spreadMonthly } from "@tally/core/transactionView";
 import { cn } from "@/lib/cn";
@@ -48,6 +49,7 @@ export interface TransactionDetailData {
   /** Split term (3/6/9/12 months) of the stream this charge is spread by; null when it isn't. */
   amortizeMonths: number | null;
   splits: DetailSplit[];
+  logoUrl?: string | null;
 }
 
 interface Suggestion {
@@ -359,7 +361,7 @@ export function TransactionDetailPanel({
             {/* Header */}
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
-                <span className="w-10 h-10 flex-none rounded-[11px] bg-surface-2 text-text-2 flex items-center justify-center font-semibold text-[15px]">{display.charAt(0).toUpperCase()}</span>
+                <MerchantAvatar name={display} logoUrl={transaction.logoUrl} className="w-10 h-10 rounded-[11px] bg-surface-2 font-semibold text-[15px]" />
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="text-[16px] font-semibold text-text truncate">{display}</span>
                   <span className="text-[12.5px] text-text-3 truncate">

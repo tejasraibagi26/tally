@@ -8,6 +8,7 @@ import { prettifyPfc } from "@tally/core/pfc";
 import { describeTransactionRow, groupByDay } from "@tally/core/transactionView";
 import { cn } from "@/lib/cn";
 import { CategoryPicker } from "@/components/transactions/CategoryPicker";
+import { MerchantAvatar } from "@/components/transactions/MerchantAvatar";
 import { TransactionDetailPanel, type TransactionDetailData, type DetailCategoryOption, type DetailSplit } from "@/components/transactions/TransactionDetailPanel";
 
 export interface TransactionRowData {
@@ -36,6 +37,8 @@ export interface TransactionRowData {
   recurringStreamId: string | null;
   amortizeMonths: number | null;
   splits: DetailSplit[];
+  /** Merchant logo from lib/merchantLogos.ts; null shows the first letter. */
+  logoUrl: string | null;
 }
 
 export interface AccountLookup {
@@ -133,6 +136,7 @@ export function TransactionsList({
       recurringStreamId: row.recurringStreamId,
       amortizeMonths: row.amortizeMonths,
       splits: row.splits,
+      logoUrl: row.isTransfer || row.isManual ? null : row.logoUrl,
     };
   }
 
@@ -248,7 +252,7 @@ export function TransactionsList({
                   }}
                   className={cn("hidden lg:block w-4 h-4 rounded-[4px] border", isChecked ? "bg-brand border-brand" : "border-border-strong opacity-60 group-hover:opacity-100")}
                 />
-                <span className="w-7 h-7 rounded-[8px] bg-sunken text-text-2 flex items-center justify-center text-xs font-medium flex-none">{display.charAt(0).toUpperCase()}</span>
+                <MerchantAvatar name={display} logoUrl={t.isTransfer || t.isManual ? null : t.logoUrl} className="w-7 h-7 rounded-[8px] text-xs" />
                 <span className="flex flex-col gap-0.5 min-w-0">
                   <span className="flex items-center gap-1.5 min-w-0">
                     {v.needsReview && <span className="w-2 h-2 rounded-full bg-brand flex-none" title="Needs review" />}

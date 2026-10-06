@@ -7,6 +7,7 @@ import { applyRulesToExistingTransactions } from "@/lib/categorize";
 import { clearOrphanedRecurringStreamRefs } from "@/lib/recurringBillGeneration";
 import { accountDisplayName } from "@tally/core/accountName";
 import { suggestCategories } from "@tally/core/transactionView";
+import { resolveMerchantLogos } from "@/lib/merchantLogos";
 
 const splitSchema = z.object({ categoryId: z.string().uuid(), amount: z.number().int(), note: z.string().max(200).nullable().optional() });
 
@@ -102,6 +103,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     amortizeMonths: stream?.amortizeMonths ?? null,
     splits: splitRows.filter((s) => s.categoryId).map((s) => ({ categoryId: s.categoryId as string, amount: s.amount, note: s.note })),
     suggestions,
+    logoUrl: (await resolveMerchantLogos(userId, [t])).get(t.id) ?? null,
   });
 }
 

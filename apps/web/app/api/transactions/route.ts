@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolveMerchantLogos } from "@/lib/merchantLogos";
 import { z } from "zod";
 import { and, desc, eq, gte, ilike, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
@@ -114,6 +115,8 @@ export async function GET(req: Request) {
     recurringStreamId: schema.transactions.recurringStreamId,
     // The split term of the stream this charge is spread by (null if none).
     amortizeMonths: schema.recurringStreams.amortizeMonths,
+    logoUrl: schema.transactions.logoUrl,
+    counterparties: schema.transactions.counterparties,
   };
 
   const [rows, countRows] = await Promise.all([
@@ -158,6 +161,7 @@ export async function GET(req: Request) {
   // Plaid PFC code -- one source of truth for "what does this category
   // display as," same categories list the filter grouping already fetched.
   const categoryById = new Map(categories.map((c) => [c.id, c]));
+  const logos = await resolveMerchantLogos(userId, rows);
 
   const items = rows.map((t) => ({
     id: t.id,
@@ -186,6 +190,7 @@ export async function GET(req: Request) {
     recurringStreamId: t.recurringStreamId,
     amortizeMonths: t.amortizeMonths ?? null,
     splits: splitsByTransaction.get(t.id) ?? [],
+    logoUrl: logos.get(t.id) ?? null,
   }));
 
   const total = countRows[0]?.count ?? 0;

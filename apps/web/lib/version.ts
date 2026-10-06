@@ -152,8 +152,14 @@
  * change term or stop. Delete asks first. ?tx= deep-links the panel and
  * j/k move between transactions. Rules: @tally/core/transactionView's
  * describeTransactionDetail.
+ * 1.24.0 shows merchant logos on transaction rows and the edit panel
+ * (components/transactions/MerchantAvatar.tsx), falling back to the first
+ * letter. lib/merchantLogos.ts resolves them from what sync already stores:
+ * Plaid's logo_url, then a counterparty's logo, then another transaction
+ * from the same merchant. GET /api/transactions and /api/transactions/[id]
+ * return it as logoUrl.
  */
-export const APP_VERSION = "1.23.0";
+export const APP_VERSION = "1.24.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

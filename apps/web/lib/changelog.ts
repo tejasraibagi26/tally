@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.24.0",
+    date: "2026-10-05",
+    changes: [{ kind: "new", text: "Transactions show the merchant's logo where your bank provides one, instead of just the first letter." }],
+  },
+  {
     version: "1.23.0",
     date: "2026-10-05",
     changes: [

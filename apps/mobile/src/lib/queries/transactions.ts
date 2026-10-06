@@ -39,6 +39,8 @@ export interface TransactionRow {
   /** Split term (3/6/9/12 months) of the stream this charge is spread by; null/absent when it isn't. */
   amortizeMonths?: number | null;
   splits: TransactionSplit[];
+  /** Merchant logo (Plaid's, resolved by the server); null/absent shows the first letter. */
+  logoUrl?: string | null;
   /** Detail endpoint only: up to 3 categories to offer (current, then this merchant's past picks). */
   suggestions?: { categoryId: string; name: string; colorSlot: number; reason: "history" | "current" }[];
 }

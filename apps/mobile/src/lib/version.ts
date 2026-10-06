@@ -202,8 +202,12 @@ import Constants from "expo-constants";
  * sync, with its count badge on the corner.
  * 1.25.2 draws the Transactions list as one continuous table with a header
  * band per day, instead of a separate card for each day.
+ * 1.26.0 shows merchant logos (the API's new logoUrl) on transaction rows,
+ * Overview's Recent activity and the edit screen, through
+ * components/transactions/MerchantAvatar.tsx (React Native's Image, so no
+ * new native module); the first letter stays as the fallback.
  */
-export const APP_VERSION = "1.25.2";
+export const APP_VERSION = "1.26.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
