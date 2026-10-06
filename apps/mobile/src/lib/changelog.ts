@@ -16,6 +16,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.25.0",
+    date: "2026-10-05",
+    changes: [
+      { kind: "improved", text: "Editing a transaction is redesigned: the category comes first, with who set it and up to three suggestions one tap away." },
+      { kind: "improved", text: "Changes save as you make them, with Undo. No more Save button." },
+      { kind: "new", text: "Add tags, split a transaction across categories, and tell Tally to always use a category for a merchant, right from your phone." },
+      { kind: "new", text: "Spreading a prepaid plan shows the monthly amount before you confirm, and you can change the term or stop it later." },
+      { kind: "fixed", text: "Delete only shows on transactions you added, since synced ones can't be deleted." },
+    ],
+  },
+  {
     version: "1.24.1",
     date: "2026-10-05",
     changes: [{ kind: "fixed", text: "Overview: \"View all\" under Upcoming now always shows, so the full Upcoming list is reachable even with only a few bills." }],

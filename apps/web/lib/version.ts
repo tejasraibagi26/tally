@@ -143,8 +143,17 @@
  * accepts { dismissed: false } to restore a dismissed stream and GET
  * /api/recurring?dismissed=1 lists them. The web Overview's Upcoming card
  * shows the overdue label and "Min. unknown".
+ * 1.23.0 redesigns the transaction edit panel (TransactionDetailPanel.tsx):
+ * category first with who set it, up to 3 suggestions (now returned by GET
+ * /api/transactions/[id]) and the merchant rule; "How it counts" (excluded,
+ * Split and Spread as their own views); note and tags; folded Details.
+ * Every change saves on its own with an Undo toast -- only Split, which has
+ * to add up first, has a Save. Spread is confirmed with a preview and can
+ * change term or stop. Delete asks first. ?tx= deep-links the panel and
+ * j/k move between transactions. Rules: @tally/core/transactionView's
+ * describeTransactionDetail.
  */
-export const APP_VERSION = "1.22.0";
+export const APP_VERSION = "1.23.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

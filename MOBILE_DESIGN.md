@@ -314,13 +314,26 @@ banner, not a toast, unchanged).
   `useInfiniteQuery`, loading skeleton rows (shape-matched blocks per
   `DESIGN.md §8` "Skeletons") appended at the list end while fetching more.
 
-### 5.4 Transaction detail (Phase B)
+### 5.4 Transaction detail (redesigned in app 1.25.0)
 
-Bottom sheet, ~85% screen height, scrollable: amount (large, tabular, signed +
-colored per `DESIGN.md §5.4`), merchant + logo, date, account, category
-(tappable pill → category picker sheet-on-sheet), notes field, split editor
-entry point, "always categorize this merchant this way" toggle. Sheet handle
-at top, swipe-down or backdrop-tap to dismiss.
+A modal screen with the same blocks and order as web's side panel; which
+blocks apply comes from `@tally/core/transactionView`'s
+`describeTransactionDetail`. Header: merchant, date and account, the amount
+in serif 40 (text color, green for money in, gray while pending; cents in
+text-3) and a "Needs review" / "✓ Reviewed" toggle. Then **Category**: the
+current one with who set it ("Tally's guess", "Set by a rule", "Set by
+you"), up to 3 suggestion chips (GET /api/transactions/[id] `suggestions`)
+and "Always use X for Merchant" with the rules preview count. Picking a
+category also marks it reviewed. **How it counts**: Counts in spend /
+Excluded, then Split and Spread rows that open their own views. Split has
+the only Save, disabled until the lines add up; Spread previews the monthly
+amount and confirms, and can change term or stop. **Note and tags** (note
+saves 600 ms after typing stops), then folded **Details** (original
+description, account, status, a selectable ID). Delete shows only for rows
+you added, with a confirm inside the screen. Every other change saves on its
+own with an Undo toast. Transfers hide category, split and spread; a
+spread's monthly installment rows are read-only. iOS sheets keep only the
+safe-area offset at the bottom, with no extra padding on top of it.
 
 ### 5.5 Accounts (Phase B)
 

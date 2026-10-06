@@ -189,8 +189,15 @@ import Constants from "expo-constants";
  * { dismissed: false }).
  * 1.24.1 always shows Upcoming's "View all" when there are bills; it only
  * appeared above three, which left the Upcoming screen unreachable for most.
+ * 1.25.0 redesigns the transaction edit screen (transactions/[id].tsx) to
+ * match web 1.23.0: category first with suggestions and the merchant rule,
+ * "How it counts" (excluded, Split and Spread as their own views), note and
+ * tags, folded Details. Each change saves on its own with an Undo toast;
+ * the Save bar is gone, so the bottom keeps only the safe-area offset.
+ * Tags, split editing and the merchant rule are new on mobile, and Delete
+ * shows only on transactions you added (the server refuses the rest).
  */
-export const APP_VERSION = "1.24.1";
+export const APP_VERSION = "1.25.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

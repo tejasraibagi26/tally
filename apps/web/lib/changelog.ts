@@ -15,6 +15,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.23.0",
+    date: "2026-10-05",
+    changes: [
+      { kind: "improved", text: "Editing a transaction is redesigned: the category comes first, with who set it and up to three suggestions one click away." },
+      { kind: "improved", text: "Changes save as you make them, with Undo. No more Save and Cancel." },
+      { kind: "new", text: "Spreading a prepaid plan now shows the monthly amount before you confirm, and you can change the term or stop it later." },
+      { kind: "improved", text: "Splits must add up before they save, with \"Split evenly\" and \"Put the rest in\" to get there fast." },
+      { kind: "new", text: "Press j and k to move between transactions without closing the panel, and share a link straight to one." },
+      { kind: "fixed", text: "Deleting a transaction you added now asks first." },
+    ],
+  },
+  {
     version: "1.22.0",
     date: "2026-10-05",
     changes: [

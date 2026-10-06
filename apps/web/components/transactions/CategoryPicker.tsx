@@ -65,6 +65,8 @@ export function CategoryPicker({
             const o = options[active];
             if (o) onPick(o.id);
           } else if (e.key === "Escape") {
+            // Closes only the picker, not a side panel it sits in.
+            e.stopPropagation();
             onClose();
           }
         }}

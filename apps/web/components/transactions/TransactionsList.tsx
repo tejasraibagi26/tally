@@ -75,6 +75,32 @@ export function TransactionsList({
   const groups = useMemo(() => groupByDay(rows, today), [rows, today]);
   const order = useMemo(() => groups.flatMap((g) => g.rows.map((r) => r.id)), [groups]);
 
+  // The open transaction lives in the URL (?tx=) so it can be linked;
+  // replaceState keeps it out of history.
+  useEffect(() => {
+    const tx = new URLSearchParams(window.location.search).get("tx");
+    if (tx) setSelectedId(tx);
+  }, []);
+  const openTransaction = useCallback((id: string | null) => {
+    setSelectedId(id);
+    const params = new URLSearchParams(window.location.search);
+    if (id) params.set("tx", id);
+    else params.delete("tx");
+    const qs = params.toString();
+    window.history.replaceState(window.history.state, "", qs ? `${window.location.pathname}?${qs}` : window.location.pathname);
+  }, []);
+  const navigate = useCallback(
+    (dir: 1 | -1) => {
+      const i = order.indexOf(selectedId ?? "");
+      const next = order[i + dir];
+      if (next) {
+        openTransaction(next);
+        setCursor(i + dir);
+      }
+    },
+    [order, selectedId, openTransaction],
+  );
+
   // A new page of rows clears selection and the keyboard cursor.
   useEffect(() => {
     setChecked(new Set());
@@ -92,6 +118,7 @@ export function TransactionsList({
       currency: row.currency,
       postedDate: row.postedDate,
       isPending: row.isPending,
+      isTransfer: row.isTransfer,
       categoryId: row.categoryId,
       categorySource: row.categorySource,
       notes: row.notes,
@@ -162,7 +189,7 @@ export function TransactionsList({
       } else if (e.key === "e" && (checked.size > 0 || id)) {
         void bulk(checked.size > 0 ? [...checked] : [id!], { type: "markReviewed" });
       } else if (e.key === "Enter" && id) {
-        setSelectedId(id);
+        openTransaction(id);
       } else if (e.key === "Escape") {
         setChecked(new Set());
         setPickerFor(null);
@@ -170,7 +197,7 @@ export function TransactionsList({
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [order, cursor, checked, selectedId, bulk]);
+  }, [order, cursor, checked, selectedId, bulk, openTransaction]);
 
   useEffect(() => {
     const id = order[cursor];
@@ -205,7 +232,7 @@ export function TransactionsList({
                 id={`txn-${t.id}`}
                 role="row"
                 aria-selected={isChecked}
-                onClick={() => setSelectedId(t.id)}
+                onClick={() => openTransaction(t.id)}
                 className={cn(
                   "relative group grid grid-cols-[auto_minmax(0,1fr)_auto] lg:grid-cols-[20px_28px_minmax(180px,1fr)_minmax(150px,200px)_130px_70px_110px] gap-x-3 gap-y-1 items-center px-4 py-2.5 border-b border-border cursor-pointer",
                   isChecked ? "bg-brand-subtle" : "hover:bg-surface-2",
@@ -284,7 +311,7 @@ export function TransactionsList({
         </div>
       )}
 
-      <TransactionDetailPanel transaction={selected ? toDetail(selected) : null} categories={categories} onClose={() => setSelectedId(null)} />
+      <TransactionDetailPanel transaction={selected ? toDetail(selected) : null} categories={categories} onClose={() => openTransaction(null)} onNavigate={navigate} />
     </>
   );
 }

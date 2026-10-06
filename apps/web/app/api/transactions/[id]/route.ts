@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, ne } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { applyRulesToExistingTransactions } from "@/lib/categorize";
 import { clearOrphanedRecurringStreamRefs } from "@/lib/recurringBillGeneration";
 import { accountDisplayName } from "@tally/core/accountName";
+import { suggestCategories } from "@tally/core/transactionView";
 
 const splitSchema = z.object({ categoryId: z.string().uuid(), amount: z.number().int(), note: z.string().max(200).nullable().optional() });
 
@@ -43,6 +44,35 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     ? await db.query.recurringStreams.findFirst({ where: eq(schema.recurringStreams.id, t.recurringStreamId), columns: { amortizeMonths: true } })
     : undefined;
 
+  // The edit screen's suggestion chips: the current category, then what you
+  // picked before for this merchant (same rule as the review queue).
+  const history = t.merchantName
+    ? await db
+        .select({ categoryId: schema.transactions.categoryId })
+        .from(schema.transactions)
+        .where(
+          and(
+            eq(schema.transactions.userId, userId),
+            eq(schema.transactions.merchantName, t.merchantName),
+            eq(schema.transactions.reviewed, true),
+            isNotNull(schema.transactions.categoryId),
+            ne(schema.transactions.id, t.id),
+          ),
+        )
+        .orderBy(desc(schema.transactions.postedDate))
+        .limit(200)
+    : [];
+  const suggested = suggestCategories(t.categoryId, history.map((h) => h.categoryId!));
+  const suggestedCategories = suggested.length
+    ? await db.query.categories.findMany({ where: inArray(schema.categories.id, suggested.map((s) => s.categoryId)) })
+    : [];
+  const suggestions = suggested
+    .map((s) => {
+      const c = suggestedCategories.find((x) => x.id === s.categoryId);
+      return c ? { ...s, name: c.name, colorSlot: c.colorSlot } : null;
+    })
+    .filter((s) => s !== null);
+
   return NextResponse.json({
     id: t.id,
     postedDate: t.postedDate,
@@ -56,6 +86,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     categoryName: category?.name ?? null,
     categoryColorSlot: category?.colorSlot ?? null,
     categorySource: t.categorySource,
+    categoryKind: category?.kind ?? null,
+    isTransfer: t.isTransfer,
+    source: t.source,
     pfcDetailed: t.pfcDetailed,
     amount: t.amount,
     currency: t.currency,
@@ -68,6 +101,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     recurringStreamId: t.recurringStreamId,
     amortizeMonths: stream?.amortizeMonths ?? null,
     splits: splitRows.filter((s) => s.categoryId).map((s) => ({ categoryId: s.categoryId as string, amount: s.amount, note: s.note })),
+    suggestions,
   });
 }
 

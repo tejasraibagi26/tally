@@ -141,3 +141,89 @@ export function suggestCategories(currentCategoryId: string | null, history: str
   }
   return out;
 }
+
+export interface TransactionDetailInput {
+  /** Cents; positive = money in, negative = money out. */
+  amount: number;
+  isPending: boolean;
+  isTransfer: boolean;
+  isManual: boolean;
+  categoryId: string | null;
+  categorySource: string | null;
+  recurringStreamId: string | null;
+  /** Term of the stream this charge belongs to; null when it has none. */
+  amortizeMonths: number | null;
+}
+
+export interface TransactionDetailView {
+  amountTone: "positive" | "default" | "muted";
+  /** "Set by you" / "Set by a rule" / "Tally's guess"; null when uncategorized or a transfer. */
+  sourceText: string | null;
+  /** Transfers have no category, split or spread. */
+  canCategorize: boolean;
+  canSplit: boolean;
+  /** Spreading a prepaid plan applies to money out only. */
+  canSpread: boolean;
+  /** Months this charge is spread across; null when it isn't. */
+  spreadMonths: number | null;
+  /** One month's share of a spread charge (manual installment rows); they're edited from the real charge. */
+  isInstallment: boolean;
+  /** The server only deletes rows you added, and never a spread's installments. */
+  canDelete: boolean;
+  notice: { kind: "pending" | "transfer"; title: string; body: string } | null;
+}
+
+/**
+ * What the transaction edit screen (web side panel, mobile sheet) offers
+ * for one transaction -- which blocks apply and how the header reads.
+ */
+export function describeTransactionDetail(t: TransactionDetailInput): TransactionDetailView {
+  const isInstallment = t.isManual && !!t.recurringStreamId;
+  const notice = t.isTransfer
+    ? { kind: "transfer" as const, title: "Transfer · not counted in spend", body: "No category, split or spread. Notes and tags still work." }
+    : t.isPending
+      ? { kind: "pending" as const, title: "Pending", body: "The amount can change when it posts. Your category and note carry over." }
+      : null;
+  return {
+    amountTone: t.isPending || t.isTransfer ? "muted" : t.amount > 0 ? "positive" : "default",
+    sourceText: t.isTransfer || !t.categoryId ? null : t.categorySource === "manual" ? "Set by you" : t.categorySource === "rule" ? "Set by a rule" : "Tally's guess",
+    canCategorize: !t.isTransfer,
+    canSplit: !t.isTransfer && !isInstallment,
+    canSpread: !t.isTransfer && !isInstallment && t.amount < 0,
+    spreadMonths: t.recurringStreamId && !t.isManual ? (t.amortizeMonths ?? 12) : null,
+    isInstallment,
+    canDelete: t.isManual && !t.recurringStreamId,
+    notice,
+  };
+}
+
+export interface SplitBalance {
+  /** Cents assigned to split lines (each line's amount is positive). */
+  allocated: number;
+  /** Cents of the transaction left to assign; negative when lines exceed it. */
+  remaining: number;
+  /** Every line has a positive amount and together they match the total exactly. */
+  balanced: boolean;
+}
+
+/** How split lines (positive cents) add up against a transaction's amount. */
+export function splitBalance(amount: number, lines: number[]): SplitBalance {
+  const total = Math.abs(amount);
+  const allocated = lines.reduce((s, n) => s + n, 0);
+  const remaining = total - allocated;
+  return { allocated, remaining, balanced: lines.length >= 2 && remaining === 0 && lines.every((n) => n > 0) };
+}
+
+/** Splits `amount` into `parts` positive cent amounts that add up exactly (the first lines take the leftover cents). */
+export function splitEvenly(amount: number, parts: number): number[] {
+  const total = Math.abs(amount);
+  if (parts <= 0) return [];
+  const base = Math.floor(total / parts);
+  const extra = total - base * parts;
+  return Array.from({ length: parts }, (_, i) => base + (i < extra ? 1 : 0));
+}
+
+/** One month's share of a charge spread over `months` (cents, positive). */
+export function spreadMonthly(amount: number, months: number): number {
+  return Math.round(Math.abs(amount) / months);
+}

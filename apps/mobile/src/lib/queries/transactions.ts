@@ -39,6 +39,8 @@ export interface TransactionRow {
   /** Split term (3/6/9/12 months) of the stream this charge is spread by; null/absent when it isn't. */
   amortizeMonths?: number | null;
   splits: TransactionSplit[];
+  /** Detail endpoint only: up to 3 categories to offer (current, then this merchant's past picks). */
+  suggestions?: { categoryId: string; name: string; colorSlot: number; reason: "history" | "current" }[];
 }
 
 export interface TransactionsResponse {
@@ -72,13 +74,17 @@ export function useTransactions(filters: Record<string, string> = {}) {
 export interface TransactionPatch {
   categoryId?: string | null;
   notes?: string | null;
+  tags?: string[];
   excluded?: boolean;
   reviewed?: boolean;
+  /** Positive cents per line; [] removes a split. */
+  splits?: { categoryId: string; amount: number; note?: string | null }[];
+  /** With categoryId: creates a rule so this merchant always gets that category. */
+  alwaysCategorizeMerchant?: boolean;
 }
 
-// Matches apps/web/components/transactions/TransactionDetailPanel.tsx's save()
-// contract exactly (PATCH /api/transactions/[id]) -- splits/tags/
-// alwaysCategorizeMerchant aren't editable from mobile yet.
+// PATCH /api/transactions/[id], one field at a time -- the edit sheet saves
+// each change as it's made (same contract as web's TransactionDetailPanel).
 export function useUpdateTransaction(id: string) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -105,6 +111,30 @@ export function useMarkAnnual(id: string) {
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
       queryClient.invalidateQueries({ queryKey: ["recurring-streams"] });
     },
+  });
+}
+
+/** Changes the term of, or stops, the spread a charge belongs to (PATCH /api/recurring-streams/[id]). */
+export function useUpdateSpread(transactionId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ streamId, body }: { streamId: string; body: { amortizeMonths?: 3 | 6 | 9 | 12; amortizeMonthly?: false } }) =>
+      apiPatch<unknown>(`/api/recurring-streams/${streamId}`, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["transaction", transactionId] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["recurring-streams"] });
+    },
+  });
+}
+
+/** How many past transactions a merchant rule would change (POST /api/rules?preview=1). */
+export function useMerchantRulePreview(merchantName: string | null | undefined) {
+  return useQuery({
+    queryKey: ["rule-preview", merchantName],
+    enabled: Boolean(merchantName),
+    queryFn: () =>
+      apiPost<{ previewCount: number }>("/api/rules?preview=1", { match: { field: "merchant", op: "equals", value: merchantName } }),
   });
 }
 
