@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.26.1",
+    date: "2026-10-05",
+    changes: [{ kind: "fixed", text: "Merchant logos with dark lettering, like Uber's, are now visible in dark mode." }],
+  },
+  {
     version: "1.26.0",
     date: "2026-10-05",
     changes: [{ kind: "new", text: "Transactions show the merchant's logo where your bank provides one, instead of just the first letter." }],

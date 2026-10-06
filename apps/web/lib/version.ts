@@ -158,8 +158,10 @@
  * Plaid's logo_url, then a counterparty's logo, then another transaction
  * from the same merchant. GET /api/transactions and /api/transactions/[id]
  * return it as logoUrl.
+ * 1.24.1 puts logos on a white tile in both themes; dark marks on a
+ * transparent background (Uber's wordmark) disappeared on the dark tile.
  */
-export const APP_VERSION = "1.24.0";
+export const APP_VERSION = "1.24.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

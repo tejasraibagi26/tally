@@ -206,8 +206,10 @@ import Constants from "expo-constants";
  * Overview's Recent activity and the edit screen, through
  * components/transactions/MerchantAvatar.tsx (React Native's Image, so no
  * new native module); the first letter stays as the fallback.
+ * 1.26.1 puts logos on a white tile in both themes; dark marks on a
+ * transparent background (Uber's wordmark) disappeared on the dark tile.
  */
-export const APP_VERSION = "1.26.0";
+export const APP_VERSION = "1.26.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

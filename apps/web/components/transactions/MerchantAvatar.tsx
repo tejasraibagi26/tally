@@ -6,7 +6,9 @@ import { cn } from "@/lib/cn";
 /**
  * A merchant's logo (Plaid's, resolved server-side by lib/merchantLogos.ts)
  * in the rounded tile rows already use, falling back to the name's first
- * letter when there's no logo or it fails to load. A plain lazy <img>, not
+ * letter when there's no logo or it fails to load. A logo always sits on
+ * white, in both themes: many are dark marks on a transparent background
+ * (Uber's black wordmark) and vanish on the dark tile. A plain lazy <img>, not
  * next/image: these are small CDN PNGs and the optimizer would only spend
  * quota on them.
  */
@@ -14,7 +16,13 @@ export function MerchantAvatar({ name, logoUrl, className }: { name: string; log
   const [failed, setFailed] = useState(false);
   const showLogo = logoUrl && !failed;
   return (
-    <span className={cn("flex-none flex items-center justify-center overflow-hidden bg-sunken text-text-2 font-medium", className)}>
+    <span
+      className={cn(
+        "flex-none flex items-center justify-center overflow-hidden bg-sunken text-text-2 font-medium",
+        className,
+        showLogo && "bg-white border border-border",
+      )}
+    >
       {showLogo ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={logoUrl} alt="" loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={() => setFailed(true)} className="w-full h-full object-cover" />
