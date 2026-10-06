@@ -48,7 +48,14 @@ export function UpcomingRows({ bills, onSelect }: { bills: UpcomingBill[]; onSel
         const tile = dateTile(bill.dueDate);
         const due = dueFor(bill, today);
         // A card's statement balance is context, not the amount due, and masks like any card balance.
-        const statement = bill.statementBalance != null && !hidden ? ` · statement ${formatCents(Math.round(bill.statementBalance / 100) * 100).replace(/\.00$/, "")}` : "";
+        const round = (c: number) => formatCents(Math.round(c / 100) * 100).replace(/\.00$/, "");
+        // A partly paid card says how much is in; the amount column is already what's left.
+        const statement =
+          bill.statementBalance == null || hidden
+            ? ""
+            : bill.paidSoFar
+              ? ` · ${round(bill.paidSoFar)} of ${round(bill.statementBalance)} paid`
+              : ` · statement ${round(bill.statementBalance)}`;
         const guessed = isGuessedBill(bill);
         const Row = guessed ? Pressable : View;
         return (

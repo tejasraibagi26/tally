@@ -16,6 +16,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.27.0",
+    date: "2026-10-05",
+    changes: [
+      { kind: "new", text: "Credit cards on your phone: what you owe, your next payment, and each card's statement, from More or by tapping Credit used on Overview." },
+      { kind: "new", text: "Cards show your bank's logo and color with the Visa, Mastercard or Amex mark." },
+      { kind: "fixed", text: "A card payment you've already made no longer shows in Upcoming as $0.00, and a partly paid card shows how much is in." },
+    ],
+  },
+  {
     version: "1.26.1",
     date: "2026-10-05",
     changes: [{ kind: "fixed", text: "Merchant logos with dark lettering, like Uber's, are now visible in dark mode." }],

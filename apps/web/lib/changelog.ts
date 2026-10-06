@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.25.0",
+    date: "2026-10-05",
+    changes: [
+      { kind: "fixed", text: "A card payment you've already made no longer shows in Upcoming as $0.00. Tally now spots the payment in your transactions, and a partly paid card shows what's left." },
+      { kind: "improved", text: "Credit cards redesigned: what you owe, your next payment and credit used up top, then one simple table of your cards." },
+      { kind: "new", text: "Each card shows whether its statement is paid in full, partly paid, due soon or overdue." },
+      { kind: "new", text: "Cards show your bank's logo and color with the Visa, Mastercard or Amex mark." },
+      { kind: "new", text: "Open a card to see its statement cycle, what's left to avoid interest, charges since the statement, and interest rates." },
+    ],
+  },
+  {
     version: "1.24.1",
     date: "2026-10-05",
     changes: [{ kind: "fixed", text: "Merchant logos with dark lettering, like Uber's, are now visible in dark mode." }],

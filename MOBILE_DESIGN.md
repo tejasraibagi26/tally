@@ -380,6 +380,20 @@ opens `investment-holdings` (account filter + sort); tapping any holding
 opens HoldingSheet. Individual holdings stay unmasked in privacy mode
 (MoneyText's documented scope); portfolio totals mask.
 
+### 5.5c Credit cards (new in app 1.27.0)
+
+Pushed screens `cards.tsx` and `card/[id].tsx`, reached from More and from
+Overview's Credit used. Same rules as web (`@tally/core/cardView` via GET
+/api/liabilities, which now returns each card's `view` and an
+`institutions` brand map). The list: "You owe across N cards" (serif 40,
+masked by privacy) with utilization and Healthy/High, the next payment as
+one sentence, then one flat table of cards (brand tile, name, mask and
+status, balance and utilization, a thin bar with a tick at 30%). The detail:
+large brand tile, balance, the statement cycle and its four numbers,
+charges since the statement (All N opens Transactions filtered to the card),
+interest rates, and the limit (a sheet to add or change one you set). No
+boxed cards inside these screens; sections are separated by hairlines.
+
 ### 5.6 Budgets (Phase C)
 
 Full parity target with the web Budgets page (`apps/web/app/(app)/budgets/page.tsx`)

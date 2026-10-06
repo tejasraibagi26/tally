@@ -1,7 +1,7 @@
 import { View, Text, Pressable, Platform } from "react-native";
 import { useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Repeat, TrendingUp, Flame, Settings, LogOut, ChevronRight } from "lucide-react-native";
+import { Repeat, TrendingUp, Flame, Settings, LogOut, ChevronRight, CreditCard } from "lucide-react-native";
 import { useAuth } from "@/lib/AuthContext";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
@@ -65,7 +65,7 @@ export default function MoreScreen() {
       </View>
       {/* Same order, names and icons as web's side nav (Your money → What
           you have → Plan ahead), collapsed into one card because mobile has
-          no Rules or Credit cards screens yet -- five headings over single
+          no Rules screen yet -- five headings over single
           rows read as empty. Split along web's groups once those exist.
           Account actions get their own card, like web's footer. */}
       <View className="gap-2">
@@ -74,6 +74,9 @@ export default function MoreScreen() {
           <Row icon={<Repeat size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Subscriptions" onPress={() => go("/subscriptions")} colors={colors} />
           <View style={soft}>
             <Row icon={<TrendingUp size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Investments" onPress={() => go("/investments")} colors={colors} />
+          </View>
+          <View style={soft}>
+            <Row icon={<CreditCard size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Credit cards" onPress={() => go("/cards" as Href)} colors={colors} />
           </View>
           <View style={soft}>
             <Row icon={<Flame size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Early retirement" onPress={() => go("/fire")} colors={colors} />

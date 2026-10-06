@@ -208,8 +208,15 @@ import Constants from "expo-constants";
  * new native module); the first letter stays as the fallback.
  * 1.26.1 puts logos on a white tile in both themes; dark marks on a
  * transparent background (Uber's wordmark) disappeared on the dark tile.
+ * 1.27.0 adds Credit cards (app/cards.tsx, app/card/[id].tsx), reached from
+ * More and Overview's Credit used: you owe, the next payment, one flat table
+ * of cards with brand tiles (components/cards/CardTile.tsx), and a card
+ * screen with its statement cycle, charges, APRs and a limit sheet. Rules
+ * come from @tally/core/cardView via GET /api/liabilities. Upcoming card
+ * rows say how much of a statement is paid. Transactions accepts an
+ * ?account= link.
  */
-export const APP_VERSION = "1.26.1";
+export const APP_VERSION = "1.27.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

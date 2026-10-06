@@ -1,5 +1,5 @@
 import { View, Text, Pressable, PixelRatio, useWindowDimensions } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, type Href } from "expo-router";
 import { creditHealth } from "@tally/core/overviewView";
 import { formatCents, formatPercent } from "@tally/core/money";
 import { MoneyText } from "@/components/ui/MoneyText";
@@ -52,7 +52,7 @@ export function StatPair({ investmentsCents, credit, highCards = 0 }: { investme
       {both && <View style={[{ backgroundColor: hairline(colors) }, divider]} />}
       {utilization != null && health && (
         <Pressable
-          onPress={() => router.push("/(tabs)/accounts")}
+          onPress={() => router.push("/cards" as Href)}
           className={`flex-1 p-4 active:opacity-80 ${both ? "gap-1.5" : "flex-row items-center justify-between gap-4"}`}
           accessibilityRole="button"
           accessibilityLabel={`Credit used ${formatPercent(utilization)}, ${health.label}${highNote ? `, ${highNote}` : ""}`}

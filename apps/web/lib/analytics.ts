@@ -1,5 +1,6 @@
-import { and, asc, eq, gte, isNull, lt, lte, or } from "drizzle-orm";
+import { and, asc, eq, gte, isNull, lt } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { creditCardsForUser, viewForCard } from "@/lib/liabilities";
 import { monthRange, shiftMonth } from "@tally/core/budgetMath";
 import { accountDisplayName } from "@tally/core/accountName";
 import { UPCOMING_GRACE_DAYS, daysBefore, overdueDays, qualifiesAsUpcoming } from "@tally/core/overviewView";
@@ -201,6 +202,8 @@ export interface UpcomingBill {
   amount: number | null;
   /** A card's last statement balance in cents, when the bank sent one; null otherwise. */
   statementBalance: number | null;
+  /** A card: payments toward that statement so far (transactions or the bank's record); absent/null when none. */
+  paidSoFar?: number | null;
   /** Past its due date, or a card the bank flags as past due. */
   overdue: boolean;
   /** Whole days past the due date; 0 when not past it (a bank-flagged card can be overdue with 0). */
@@ -257,28 +260,13 @@ export async function upcomingBills(userId: string, withinDays = 30): Promise<Up
     .map((s) => ({ ...s, dueDate: s.manualNextDueDate ?? s.predictedNextDate }))
     .filter((s) => qualifiesAsUpcoming(s, from, cutoff));
 
-  const cards = await db
-    .select({
-      name: schema.accounts.name,
-      nickname: schema.accounts.nickname,
-      accountId: schema.accounts.id,
-      amount: schema.liabilitiesCredit.minimumPaymentAmount,
-      statementBalance: schema.liabilitiesCredit.lastStatementBalance,
-      isOverdue: schema.liabilitiesCredit.isOverdue,
-      dueDate: schema.liabilitiesCredit.nextPaymentDueDate,
-    })
-    .from(schema.liabilitiesCredit)
-    .innerJoin(schema.accounts, eq(schema.liabilitiesCredit.accountId, schema.accounts.id))
-    .where(
-      and(
-        eq(schema.accounts.userId, userId),
-        or(
-          // Cards keep the plain today..cutoff window: only the bank's own flag marks one overdue.
-          and(gte(schema.liabilitiesCredit.nextPaymentDueDate, today), lte(schema.liabilitiesCredit.nextPaymentDueDate, cutoff)),
-          eq(schema.liabilitiesCredit.isOverdue, true),
-        ),
-      ),
-    );
+  // Card payments go through @tally/core/cardView: payments found in the
+  // card's transactions (or the bank's own record) since the statement closed
+  // count, so a paid statement drops off instead of lingering at the bank's
+  // $0.00 minimum, and a partly paid one shows what's left.
+  const cards = (await creditCardsForUser(userId))
+    .map((c) => ({ c, view: viewForCard(c, today), dueDate: c.liability?.nextPaymentDueDate ?? null }))
+    .filter(({ view, dueDate }) => view.state !== "paid" && (view.state === "overdue" || (dueDate != null && dueDate >= today && dueDate <= cutoff)));
 
   const bills: UpcomingBill[] = [
     ...streams.map((s) => ({
@@ -293,17 +281,16 @@ export async function upcomingBills(userId: string, withinDays = 30): Promise<Up
       streamId: s.id,
       canDismiss: !s.isManual,
     })),
-    ...cards.filter((c) => c.dueDate != null).map((c) => ({
+    ...cards.map(({ c, view, dueDate }) => ({
       type: "card" as const,
       label: `${accountDisplayName(c.name, c.nickname)} payment`,
-      amount: c.amount ?? null,
-      statementBalance: c.statementBalance ?? null,
-      // A past date alone isn't proof for a card (it can be paid early and keep
-      // its date until the next statement), so a card is overdue only when the
-      // bank says so.
-      overdue: c.isOverdue === true,
-      overdueDays: c.isOverdue ? overdueDays(c.dueDate!, today) : 0,
-      dueDate: c.dueDate!,
+      amount: view.amountDue,
+      statementBalance: c.liability?.lastStatementBalance ?? null,
+      paidSoFar: view.paid > 0 ? view.paid : null,
+      // Overdue when the bank says so, or the date passed with the minimum unpaid.
+      overdue: view.state === "overdue",
+      overdueDays: view.overdueDays,
+      dueDate: dueDate ?? today,
       accountId: c.accountId,
       streamId: null,
       canDismiss: false,

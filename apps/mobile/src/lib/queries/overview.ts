@@ -9,6 +9,8 @@ export interface UpcomingBill {
   amount: number | null;
   /** A card's last statement balance in cents, when sent. Absent from older servers. */
   statementBalance?: number | null;
+  /** A card: paid toward that statement so far (transactions or the bank's record). Absent from older servers. */
+  paidSoFar?: number | null;
   /** Past its due date, or a card the bank flags as past due. Absent from older servers. */
   overdue?: boolean;
   overdueDays?: number;

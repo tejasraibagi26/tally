@@ -160,8 +160,16 @@
  * return it as logoUrl.
  * 1.24.1 puts logos on a white tile in both themes; dark marks on a
  * transparent background (Uber's wordmark) disappeared on the dark tile.
+ * 1.25.0 redesigns Credit cards around @tally/core/cardView: payments found
+ * in a card's transactions since its statement (isCardPayment) or the
+ * bank's own record mark it paid, so Upcoming no longer lists a paid card
+ * at $0.00 and shows what's left on a partly paid one. The page is flat:
+ * You owe / Next payment / Credit used, one table of cards with brand tiles
+ * (institutions' color + logo, cardNetwork), and a ?card= side panel with
+ * the statement cycle, charges, APRs, name and limit. GET /api/liabilities
+ * adds each card's view and an institutions brand map.
  */
-export const APP_VERSION = "1.24.1";
+export const APP_VERSION = "1.25.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

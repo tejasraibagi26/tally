@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireUserId } from "@/lib/session";
-import { creditCardsForUser, utilizationFor } from "@/lib/liabilities";
+import { creditCardsForUser, institutionBrands, utilizationFor, viewForCard } from "@/lib/liabilities";
+import { todayFor } from "@/lib/userTimezone";
 
 export async function GET(req: Request) {
   let userId: string;
@@ -10,6 +11,12 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const cards = await creditCardsForUser(userId);
-  return NextResponse.json({ cards, utilization: await utilizationFor(cards) });
+  const [cards, today] = await Promise.all([creditCardsForUser(userId), todayFor(userId)]);
+  // Each card carries its statement-cycle view (@tally/core/cardView) so both
+  // apps read paid / due / overdue the same way; brands go once per bank.
+  return NextResponse.json({
+    cards: cards.map((c) => ({ ...c, view: viewForCard(c, today) })),
+    institutions: await institutionBrands(cards),
+    utilization: await utilizationFor(cards),
+  });
 }

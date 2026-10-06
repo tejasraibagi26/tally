@@ -58,11 +58,13 @@ export default function TransactionsScreen() {
   // (any category, any month) only ever updates deepLink's values on an
   // already-mounted component; a useState initializer runs once per mount
   // and would silently ignore every deep link after the first.
-  const deepLink = useLocalSearchParams<{ category?: string; from?: string; to?: string }>();
+  const deepLink = useLocalSearchParams<{ category?: string; account?: string; from?: string; to?: string }>();
   const [filters, setFilters] = useState<TransactionFilters>({});
   useEffect(() => {
     if (deepLink.category) setFilters({ category: deepLink.category, from: deepLink.from, to: deepLink.to });
-  }, [deepLink.category, deepLink.from, deepLink.to]);
+    // A card's "All N" (card/[id].tsx): that card's charges since its statement.
+    else if (deepLink.account) setFilters({ account: [deepLink.account], from: deepLink.from, to: deepLink.to });
+  }, [deepLink.category, deepLink.account, deepLink.from, deepLink.to]);
 
   // Matches web's transactions page search box: the input updates instantly
   // (searchInput) so typing never feels laggy, but the actual query

@@ -25,7 +25,8 @@
     "./budgetView": "./src/budgetView.ts",
     "./transactionView": "./src/transactionView.ts",
     "./overviewView": "./src/overviewView.ts",
-    "./merchantLogo": "./src/merchantLogo.ts"
+    "./merchantLogo": "./src/merchantLogo.ts",
+    "./cardView": "./src/cardView.ts"
   },
   "scripts": {
     "test": "vitest run",

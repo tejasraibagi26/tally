@@ -1,54 +1,42 @@
 import Link from "next/link";
-import { CreditCard as CreditCardIcon, Clock } from "lucide-react";
+import { CreditCard as CreditCardIcon } from "lucide-react";
 import { requireUserId } from "@/lib/session";
-import { formatCents, formatPercent } from "@tally/core/money";
-import { creditCardsForUser, utilizationFor } from "@/lib/liabilities";
-import { Card, CardHeader } from "@/components/ui/Card";
-import { PageHeader } from "@/components/ui/PageHeader";
-import { StatusBadge } from "@/components/ui/StatusBadge";
+import { accountDisplayName } from "@tally/core/accountName";
+import { cardSortRank, nextPayment } from "@tally/core/cardView";
+import { creditCardsForUser, institutionBrands, utilizationFor, viewForCard } from "@/lib/liabilities";
+import { todayFor } from "@/lib/userTimezone";
+import { Card } from "@/components/ui/Card";
+import { PageHeader, SyncFreshness } from "@/components/ui/PageHeader";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { CreditLimitEditor } from "@/components/cards/CreditLimitEditor";
-import { AccountNicknameEditor } from "@/components/accounts/AccountNicknameEditor";
 import { SyncButton } from "@/components/plaid/SyncButton";
 import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
-import { cn } from "@/lib/cn";
+import { CardsView, type CardItem } from "@/components/cards/CardsView";
 
-const APR_TYPE_LABEL: Record<string, string> = {
-  purchase_apr: "Purchase APR",
-  cash_apr: "Cash advance APR",
-  balance_transfer_apr: "Balance transfer APR",
-  special: "Special APR",
-};
+const NEEDS_FIX = new Set(["login_required", "error", "revoked", "pending_expiration"]);
 
-function relativeDueDate(dateStr: string | null): string | null {
-  if (!dateStr) return null;
-  const due = new Date(dateStr + "T00:00:00");
-  const days = Math.round((due.getTime() - Date.now()) / 86_400_000);
-  if (days < 0) return `${Math.abs(days)}d overdue`;
-  if (days === 0) return "Due today";
-  return `Due in ${days}d`;
-}
-
+/**
+ * Credit cards (DESIGN.md §10.6): what you owe, the next payment, credit
+ * used, then one flat table of cards sorted by what needs you, with a side
+ * panel per card. Paid / due / overdue comes from @tally/core/cardView,
+ * counting payments found in the card's own transactions since the
+ * statement closed.
+ */
 export default async function CardsPage() {
   const userId = await requireUserId();
-  const cards = await creditCardsForUser(userId);
-  const utilization = await utilizationFor(cards);
-  // utilization.totalBalance is scoped to the ratio (only cards with a known
-  // limit) — the summary tile needs every card's balance, limit or not.
-  const totalBalance = cards.reduce((sum, c) => sum + c.currentBalance, 0);
+  const [rows, today] = await Promise.all([creditCardsForUser(userId), todayFor(userId)]);
 
-  if (cards.length === 0) {
+  if (rows.length === 0) {
     return (
       <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
         <PageHeader title="Credit cards" />
         <Card className="p-10">
           <EmptyState
             icon={CreditCardIcon}
-            title="No credit cards connected"
-            description="Connect one and its APR, statement balance, and due dates show up right here."
+            title="No credit cards yet"
+            description="Connect a card and its balance, statement and due date show up here."
             action={
               <Link href="/accounts" className="text-brand text-[13.5px] font-medium">
-                Go to Accounts →
+                Connect a card →
               </Link>
             }
           />
@@ -57,127 +45,51 @@ export default async function CardsPage() {
     );
   }
 
+  const [brands, utilization] = await Promise.all([institutionBrands(rows), utilizationFor(rows)]);
+  const cards: CardItem[] = rows
+    .map((c) => {
+      const brand = c.institutionId ? brands[c.institutionId] : undefined;
+      const l = c.liability;
+      return {
+        accountId: c.accountId,
+        name: c.name,
+        nickname: c.nickname,
+        displayName: accountDisplayName(c.name, c.nickname),
+        mask: c.mask,
+        bankName: brand?.name ?? c.institutionName ?? "Card",
+        color: brand?.color ?? null,
+        logo: brand?.logo ?? null,
+        network: c.network,
+        balance: c.currentBalance,
+        limit: c.creditLimit,
+        limitIsManual: c.creditLimitIsManual,
+        view: viewForCard(c, today),
+        statementDate: l?.lastStatementIssueDate ?? null,
+        statementBalance: l?.lastStatementBalance ?? null,
+        minimum: l?.minimumPaymentAmount ?? null,
+        dueDate: l?.nextPaymentDueDate ?? null,
+        aprs: (l?.aprs as { apr_percentage: number; apr_type: string }[] | null) ?? [],
+        hasLiability: !!l,
+        itemId: c.itemId,
+        needsFix: !!c.connectionStatus && NEEDS_FIX.has(c.connectionStatus),
+        asOf: c.lastSyncedAt ? new Date(c.lastSyncedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : null,
+      };
+    })
+    .sort((a, b) => cardSortRank(a.view) - cardSortRank(b.view) || (a.dueDate ?? "9999").localeCompare(b.dueDate ?? "9999") || a.displayName.localeCompare(b.displayName));
+
+  const totalOwed = cards.reduce((sum, c) => sum + Math.max(0, c.balance), 0);
+  const next = nextPayment(cards);
+
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
       <PageHeader
         title="Credit cards"
-        meta={[`${cards.length} card${cards.length === 1 ? "" : "s"}`]}
+        meta={[`${cards.length} card${cards.length === 1 ? "" : "s"}`, rows.some((r) => r.lastSyncedAt) && <SyncFreshness key="sync" syncedAt={rows.map((r) => r.lastSyncedAt)} />]}
         actions={<SyncButton products={["liabilities"]} label="Sync card details" loadingMessage="Syncing your credit card details. This can take a moment." />}
       />
-
       <SyncFailureBanner />
-
-      <Card className="flex flex-col sm:flex-row">
-        <div className="flex-1 p-[18px_24px] border-b sm:border-b-0 sm:border-r border-border flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-text-3">Total balance</span>
-          <span className="font-display text-3xl text-negative tabular money">{formatCents(totalBalance)}</span>
-        </div>
-        <div className="flex-1 p-[18px_24px] flex flex-col gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-text-3">Overall utilization</span>
-          <span className="font-display text-3xl text-text tabular">
-            {utilization.utilization != null ? formatPercent(utilization.utilization) : "Unknown"}
-          </span>
-          {utilization.excludedCount > 0 && (
-            <span className="text-xs text-text-3">
-              {utilization.excludedCount} card{utilization.excludedCount === 1 ? "" : "s"} excluded (limit not reported)
-            </span>
-          )}
-        </div>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-        {cards.map((card, index) => {
-          const cardUtilization = card.creditLimit ? card.currentBalance / card.creditLimit : null;
-          const liability = card.liability;
-          const dueLabel = relativeDueDate(liability?.nextPaymentDueDate ?? null);
-          const aprs = (liability?.aprs as { apr_percentage: number; apr_type: string }[] | null) ?? [];
-
-          // Same convention as the Accounts page: a lone card, or the
-          // unpaired last card in an odd-sized (3+) grid, sizes to its own
-          // content; every other card shares a fixed default height with its
-          // row partner, and overlong statement/APR details scroll inside it
-          // instead of growing the card and breaking row alignment.
-          const isSoleCard = cards.length === 1;
-          const isUnpairedTail = cards.length > 2 && cards.length % 2 === 1 && index === cards.length - 1;
-          const capped = !isSoleCard && !isUnpairedTail;
-
-          return (
-            <Card key={card.accountId} className={cn(isSoleCard && "lg:col-span-2", capped && "h-[440px]")}>
-              <div className="flex flex-col h-full">
-                <div className="flex items-center gap-3 p-4 border-b border-border flex-none">
-                  <div className="flex flex-col gap-1 flex-1 min-w-0">
-                    <AccountNicknameEditor accountId={card.accountId} name={card.name} nickname={card.nickname} className="font-semibold text-base text-text" />
-                    <span className="font-mono text-xs text-text-3">····{card.mask ?? "----"}</span>
-                  </div>
-                  {liability?.isOverdue && <StatusBadge status="critical" label="Overdue" />}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 p-4 border-b border-border flex-none">
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs text-text-3 uppercase tracking-wide">Balance</span>
-                    <span className="text-[19px] text-text tabular money">{formatCents(card.currentBalance)}</span>
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    <span className="text-xs text-text-3 uppercase tracking-wide">Utilization</span>
-                    <span className="text-[19px] text-text tabular">
-                      {cardUtilization != null ? formatPercent(cardUtilization) : "No limit reported"}
-                    </span>
-                    {(card.creditLimit == null || card.creditLimitIsManual) && (
-                      <CreditLimitEditor accountId={card.accountId} creditLimitIsManual={card.creditLimitIsManual} />
-                    )}
-                  </div>
-                </div>
-
-                <div className={capped ? "flex-1 min-h-0 overflow-y-auto" : undefined}>
-                  {liability ? (
-                    <div className="flex flex-col gap-3 p-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-xs text-text-3 uppercase tracking-wide">Statement balance</span>
-                          <span className="text-[15px] text-text tabular">
-                            {liability.lastStatementBalance != null ? formatCents(liability.lastStatementBalance) : "—"}
-                          </span>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <span className="text-xs text-text-3 uppercase tracking-wide">Minimum payment</span>
-                          <span className="text-[15px] text-text tabular">
-                            {liability.minimumPaymentAmount != null ? formatCents(liability.minimumPaymentAmount) : "—"}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-text-3 uppercase tracking-wide">Next payment due</span>
-                        <span className={`text-[15px] tabular ${liability.isOverdue ? "text-negative" : "text-text"}`}>
-                          {liability.nextPaymentDueDate ?? "—"} {dueLabel && `· ${dueLabel}`}
-                        </span>
-                      </div>
-                      {aprs.length > 0 && (
-                        <div className="flex flex-col gap-1 pt-2 border-t border-border">
-                          {aprs.map((a) => (
-                            <div key={a.apr_type} className="flex items-center justify-between text-[13.5px]">
-                              <span className="text-text-2">{APR_TYPE_LABEL[a.apr_type] ?? a.apr_type}</span>
-                              <span className="text-text tabular">{a.apr_percentage.toFixed(2)}%</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="h-full flex items-center justify-center p-4">
-                      <EmptyState
-                        icon={Clock}
-                        title="No liability details yet"
-                        description="Plaid hasn't reported statement or APR data for this card yet. Check back after the next sync."
-                        compact
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Card>
-          );
-        })}
-      </div>
+      <CardsView cards={cards} totalOwed={totalOwed} next={next} utilization={utilization} />
+      <p className="m-0 text-[12px] text-text-3">Statement and payment details come from your bank once a day. Payments you make show up as soon as their transaction syncs.</p>
     </div>
   );
 }
