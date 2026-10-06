@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.25.2",
+    date: "2026-10-05",
+    changes: [{ kind: "improved", text: "Transactions: the list is one continuous table, grouped by day, instead of a separate card for each day." }],
+  },
+  {
     version: "1.25.1",
     date: "2026-10-05",
     changes: [{ kind: "fixed", text: "Transactions: the title no longer gets cut off, and \"To review\" no longer shows up inside the Filters button." }],

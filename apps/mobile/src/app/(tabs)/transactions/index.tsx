@@ -15,6 +15,7 @@ import { useSync } from "@/lib/queries/plaid";
 import { TransactionFiltersSheet, type TransactionFilters } from "@/components/TransactionFiltersSheet";
 import { AddTransactionSheet } from "@/components/AddTransactionSheet";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { hairline } from "@/theme/colors";
 import { useRF } from "@/theme/responsiveFont";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
@@ -33,7 +34,7 @@ function todayISO(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 
-// Day-grouped list (one card per day, with that day's net), review entry
+// Day-grouped list (one continuous table, a header band per day with that day's net), review entry
 // point and "To review" filter, swipe actions and an inline category
 // picker per row. Row wording comes from @tally/core/transactionView,
 // shared with web.
@@ -169,9 +170,17 @@ export default function TransactionsScreen() {
       <FlatList
         data={groups}
         keyExtractor={(g) => g.date}
-        renderItem={({ item: g }) => (
-          <View className="rounded-card overflow-hidden bg-surface mb-3">
-            <View className="flex-row justify-between px-4 py-2 bg-sunken">
+        // One continuous table: each day is a slice of the same card, so only the
+        // first slice rounds its top and the last its bottom, and the day header
+        // is a band inside the table rather than the top of a separate card.
+        renderItem={({ item: g, index }) => (
+          <View
+            className={`overflow-hidden bg-surface ${index === 0 ? "rounded-t-card" : ""} ${index === groups.length - 1 ? "rounded-b-card" : ""}`}
+          >
+            <View
+              className="flex-row justify-between px-4 py-2 bg-sunken"
+              style={index > 0 ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined}
+            >
               <Text className="font-ui-semibold text-text-3" style={{ fontSize: rf(11), letterSpacing: 0.6, textTransform: "uppercase" }}>{g.label}</Text>
               <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(12), fontVariant: ["tabular-nums"] }}>{formatCents(g.net, { signed: true })}</Text>
             </View>

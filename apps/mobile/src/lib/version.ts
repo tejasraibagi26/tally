@@ -200,8 +200,10 @@ import Constants from "expo-constants";
  * chip had landed inside the Filters button, widening the action row until
  * the title read "Tran…". Filters is now a round icon button like + and
  * sync, with its count badge on the corner.
+ * 1.25.2 draws the Transactions list as one continuous table with a header
+ * band per day, instead of a separate card for each day.
  */
-export const APP_VERSION = "1.25.1";
+export const APP_VERSION = "1.25.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
