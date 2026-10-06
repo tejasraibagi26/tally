@@ -59,8 +59,6 @@ export function CardTile({
 }) {
   const dark = isDarkBrandColor(color);
   const lg = size === "lg";
-  // Amex issues its own cards: with its logo already on the tile, the mark only repeats it.
-  const showNetwork = network && !(network === "amex" && logo && /amex|american express/i.test(bankName));
   return (
     <span
       className={cn(
@@ -90,7 +88,7 @@ export function CardTile({
       </span>
       {/* Top-right, across from the logo, so it never meets the network mark at the bottom. */}
       {lg && mask && <span className={cn("absolute right-2 top-2 font-mono text-[9.5px] leading-none", dark ? "text-white/85" : "text-text-2")}>••{mask}</span>}
-      {showNetwork && network && <NetworkMark network={network} light={!dark} className={cn("absolute", lg ? "right-2 bottom-2 h-[14px] w-auto" : "right-1 bottom-[3px] h-[8px] w-auto")} />}
+      {network && <NetworkMark network={network} light={!dark} className={cn("absolute", lg ? "right-2 bottom-2 h-[14px] w-auto" : "right-1 bottom-[3px] h-[8px] w-auto")} />}
     </span>
   );
 }

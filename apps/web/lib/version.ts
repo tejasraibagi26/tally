@@ -169,8 +169,8 @@
  * the statement cycle, charges, APRs, name and limit. GET /api/liabilities
  * adds each card's view and an institutions brand map.
  * 1.25.1 moves the large card tile's last four digits to the top-right
- * (they ran into the network mark) and drops the AMEX badge when Amex's
- * own logo is already on the tile.
+ * (they ran into the network mark). The AMEX badge stays on Amex cards
+ * even next to Amex's own logo.
  */
 export const APP_VERSION = "1.25.1";
 
