@@ -218,8 +218,11 @@ import Constants from "expo-constants";
  * 1.27.1 grows the More sheet by one row (MORE_SHEET_CONTENT_HEIGHT 415 ->
  * 464) for Credit cards; Sign out sat on the home indicator and the build
  * line was cut off.
+ * 1.27.2 moves the large card tile's last four digits to the top-right so
+ * they no longer run into the network mark, and drops the AMEX badge when
+ * Amex's own logo is already on the tile.
  */
-export const APP_VERSION = "1.27.1";
+export const APP_VERSION = "1.27.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

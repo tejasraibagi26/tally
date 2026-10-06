@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.25.1",
+    date: "2026-10-05",
+    changes: [{ kind: "fixed", text: "Credit cards: a card's last four digits no longer overlap the Visa, Mastercard or Amex mark." }],
+  },
+  {
     version: "1.25.0",
     date: "2026-10-05",
     changes: [

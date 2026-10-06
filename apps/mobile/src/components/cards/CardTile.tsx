@@ -55,6 +55,8 @@ export function CardTile({
 }) {
   const colors = useThemeColors();
   const dark = isDarkBrandColor(color);
+  // Amex issues its own cards: with its logo already on the tile, the mark only repeats it.
+  const showNetwork = network && !(network === "amex" && logo && /amex|american express/i.test(bankName));
   const s = size === "lg" ? 2 : 1;
   const w = 44 * s;
   const h = 30 * s;
@@ -95,9 +97,10 @@ export function CardTile({
         )}
       </View>
       {size === "lg" && mask && (
-        <Text style={{ position: "absolute", left: 8, bottom: 6, fontFamily: "JetBrainsMono", fontSize: 10, color: dark ? "rgba(255,255,255,0.8)" : colors["text-2"] }}>••{mask}</Text>
+        // Top-right, across from the logo, so it never meets the network mark at the bottom.
+        <Text style={{ position: "absolute", right: 8, top: 7, fontFamily: "JetBrainsMono", fontSize: 10, color: dark ? "rgba(255,255,255,0.85)" : colors["text-2"] }}>••{mask}</Text>
       )}
-      {network && (
+      {showNetwork && network && (
         <View style={{ position: "absolute", right: 4 * s, bottom: 3 * s }}>
           <NetworkMark network={network} light={!dark} scale={s} />
         </View>
