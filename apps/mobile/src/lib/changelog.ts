@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.27.1",
+    date: "2026-10-05",
+    changes: [{ kind: "fixed", text: "The More sheet is tall enough again: Sign out no longer sits on the bottom edge, and the version line shows." }],
+  },
+  {
     version: "1.27.0",
     date: "2026-10-05",
     changes: [

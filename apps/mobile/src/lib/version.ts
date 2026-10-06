@@ -215,8 +215,11 @@ import Constants from "expo-constants";
  * come from @tally/core/cardView via GET /api/liabilities. Upcoming card
  * rows say how much of a statement is paid. Transactions accepts an
  * ?account= link.
+ * 1.27.1 grows the More sheet by one row (MORE_SHEET_CONTENT_HEIGHT 415 ->
+ * 464) for Credit cards; Sign out sat on the home indicator and the build
+ * line was cut off.
  */
-export const APP_VERSION = "1.27.0";
+export const APP_VERSION = "1.27.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
