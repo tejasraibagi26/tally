@@ -214,27 +214,22 @@ export default function TransactionsScreen() {
                 >
                   {sync.isPending ? <ActivityIndicator size="small" color={colors.brand} /> : <RefreshCw size={15} color={colors.brand} strokeWidth={2} />}
                 </Pressable>
-                <Pressable onPress={() => setFiltersOpen(true)} className="flex-row items-center gap-2 rounded-full px-4 py-2.5 bg-brand-subtle">
-                  <ListFilter size={14} color={colors.brand} strokeWidth={1.9} />
-                  <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13.5) }}>Filters</Text>
-                  {(reviewOnly || (summary?.unreviewed ?? 0) > 0) && (
-              <View className="flex-row mt-2.5">
+                {/* Round like + and sync, so the three actions leave the title room
+                    ("Tran…" when this was a text pill). The count badge sits on its corner. */}
                 <Pressable
-                  onPress={() => setReviewOnly((v) => !v)}
-                  className="rounded-full px-3 py-1.5"
-                  style={reviewOnly ? { backgroundColor: colors["brand-subtle"] } : { borderWidth: 1, borderColor: colors.border }}
-                  accessibilityRole="switch"
-                  accessibilityState={{ checked: reviewOnly }}
+                  onPress={() => setFiltersOpen(true)}
+                  hitSlop={12}
+                  accessibilityLabel={activeCount > 0 ? `Filters, ${activeCount} applied` : "Filters"}
+                  className="items-center justify-center rounded-full bg-brand-subtle"
+                  style={{ width: 34, height: 34 }}
                 >
-                  <Text className="font-ui-medium" style={{ fontSize: rf(12.5), color: reviewOnly ? colors.brand : colors.warning }}>
-                    {reviewOnly ? "Only to review ✕" : `To review · ${summary?.unreviewed ?? 0}`}
-                  </Text>
-                </Pressable>
-              </View>
-            )}
-            {activeCount > 0 && (
-                    <View className="rounded-full items-center justify-center bg-brand" style={{ minWidth: 18, height: 18, paddingHorizontal: 4 }}>
-                      <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(11) }}>{activeCount}</Text>
+                  <ListFilter size={16} color={colors.brand} strokeWidth={2} />
+                  {activeCount > 0 && (
+                    <View
+                      className="absolute rounded-full items-center justify-center bg-brand"
+                      style={{ top: -4, right: -4, minWidth: 18, height: 18, paddingHorizontal: 4, borderWidth: 2, borderColor: colors.canvas }}
+                    >
+                      <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(10.5) }}>{activeCount}</Text>
                     </View>
                   )}
                 </Pressable>

@@ -196,8 +196,12 @@ import Constants from "expo-constants";
  * the Save bar is gone, so the bottom keeps only the safe-area offset.
  * Tags, split editing and the merchant rule are new on mobile, and Delete
  * shows only on transactions you added (the server refuses the rest).
+ * 1.25.1 fixes the Transactions header: a stray copy of the "To review"
+ * chip had landed inside the Filters button, widening the action row until
+ * the title read "Tran…". Filters is now a round icon button like + and
+ * sync, with its count badge on the corner.
  */
-export const APP_VERSION = "1.25.0";
+export const APP_VERSION = "1.25.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
