@@ -1,6 +1,6 @@
 import "../global.css";
-import { useEffect, useState } from "react";
-import { Stack, type NativeStackHeaderProps } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
+import { Stack, ThemeProvider, DarkTheme, DefaultTheme, type NativeStackHeaderProps } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useColorScheme } from "nativewind";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -58,8 +58,31 @@ function useInitialDataSettled(active: boolean): boolean {
 function RootNavigator() {
   const { status, isLocked, isCovered } = useAuth();
   const [fontsLoaded] = useFonts(fontsToLoad);
-  const { setColorScheme } = useColorScheme();
+  const { colorScheme, setColorScheme } = useColorScheme();
   const colors = useThemeColors();
+  // React Navigation's theme drives the native chrome: its \`dark\` flag sets the
+  // iOS header's userInterfaceStyle (the Liquid Glass back button and bar) and
+  // its colors paint the stack and tab containers. Without a ThemeProvider it
+  // fell back to the light DefaultTheme, so in Dark Mode the header glass
+  // rendered light and the tab container was light grey under the tab bar.
+  // Built from the app's own tokens and following the active scheme.
+  const isDark = colorScheme === "dark";
+  const navTheme = useMemo(() => {
+    const base = isDark ? DarkTheme : DefaultTheme;
+    return {
+      ...base,
+      dark: isDark,
+      colors: {
+        ...base.colors,
+        primary: colors.brand!,
+        background: colors.canvas!,
+        card: colors.surface!,
+        text: colors.text!,
+        border: colors.border!,
+        notification: colors.negative!,
+      },
+    };
+  }, [isDark, colors]);
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
   const fontScale = useResponsiveFontScale();
@@ -109,6 +132,7 @@ function RootNavigator() {
       {shellReady ? (
         <>
           <StatusBar style="auto" />
+          <ThemeProvider value={navTheme}>
           <Stack
             screenOptions={{
               headerShown: false,
@@ -191,6 +215,7 @@ function RootNavigator() {
               <Stack.Screen name="login" />
             </Stack.Protected>
           </Stack>
+          </ThemeProvider>
         </>
       ) : (
         <View className="flex-1 bg-canvas" />
