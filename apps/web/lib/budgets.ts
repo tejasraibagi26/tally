@@ -1,4 +1,4 @@
-import { and, eq, gte, isNull, lt, or, sql } from "drizzle-orm";
+import { and, eq, gte, isNull, lt, not, or, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { monthRange, shiftMonth, computeRemaining, budgetColorSlots } from "@tally/core/budgetMath";
 import { currentMonthFor } from "@/lib/userTimezone";
@@ -91,29 +91,47 @@ async function ensureMonthSeeded(userId: string, month: string): Promise<void> {
     .onConflictDoNothing();
 }
 
-/** Σ |amount| for non-transfer, non-excluded transactions, per category, for one month. */
+/** True for a transaction that has split lines -- its spend belongs to the lines' categories, not its own. */
+export const hasSplits = sql`exists (select 1 from ${schema.transactionSplits} where ${schema.transactionSplits.transactionId} = ${schema.transactions.id})`;
+
+/**
+ * Σ |amount| for non-transfer, non-excluded transactions, per category, for
+ * one month. A split transaction counts through its lines instead (positive
+ * cents that add up to |amount|, see splitBalance), so a $120 Costco run
+ * split $80 Groceries / $40 Household lands in both budgets.
+ */
 export async function spendByCategory(userId: string, month: string): Promise<Map<string, number>> {
   const { start, end } = monthRange(month);
-  const rows = await db
-    .select({
-      categoryId: schema.transactions.categoryId,
-      total: sql<number>`coalesce(sum(abs(${schema.transactions.amount})), 0)::int`,
-    })
-    .from(schema.transactions)
-    .where(
-      and(
-        eq(schema.transactions.userId, userId),
-        eq(schema.transactions.isTransfer, false),
-        eq(schema.transactions.excludedFromBudget, false),
-        gte(schema.transactions.postedDate, start),
-        lt(schema.transactions.postedDate, end),
-      ),
-    )
-    .groupBy(schema.transactions.categoryId);
+  const inMonth = and(
+    eq(schema.transactions.userId, userId),
+    eq(schema.transactions.isTransfer, false),
+    eq(schema.transactions.excludedFromBudget, false),
+    gte(schema.transactions.postedDate, start),
+    lt(schema.transactions.postedDate, end),
+  );
+  const [whole, split] = await Promise.all([
+    db
+      .select({
+        categoryId: schema.transactions.categoryId,
+        total: sql<number>`coalesce(sum(abs(${schema.transactions.amount})), 0)::int`,
+      })
+      .from(schema.transactions)
+      .where(and(inMonth, not(hasSplits)))
+      .groupBy(schema.transactions.categoryId),
+    db
+      .select({
+        categoryId: schema.transactionSplits.categoryId,
+        total: sql<number>`coalesce(sum(${schema.transactionSplits.amount}), 0)::int`,
+      })
+      .from(schema.transactionSplits)
+      .innerJoin(schema.transactions, eq(schema.transactionSplits.transactionId, schema.transactions.id))
+      .where(inMonth)
+      .groupBy(schema.transactionSplits.categoryId),
+  ]);
 
   const map = new Map<string, number>();
-  for (const row of rows) {
-    if (row.categoryId) map.set(row.categoryId, row.total);
+  for (const row of [...whole, ...split]) {
+    if (row.categoryId) map.set(row.categoryId, (map.get(row.categoryId) ?? 0) + row.total);
   }
   return map;
 }

@@ -1,7 +1,8 @@
-import { and, asc, eq, gte, isNull, lt } from "drizzle-orm";
+import { and, asc, eq, gte, isNull, lt, not } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { creditCardsForUser, viewForCard } from "@/lib/liabilities";
 import { monthRange, shiftMonth } from "@tally/core/budgetMath";
+import { hasSplits } from "@/lib/budgets";
 import { accountDisplayName } from "@tally/core/accountName";
 import { UPCOMING_GRACE_DAYS, daysBefore, overdueDays, qualifiesAsUpcoming } from "@tally/core/overviewView";
 import { todayFor } from "@/lib/userTimezone";
@@ -130,28 +131,44 @@ export interface BreakdownRow {
   total: number; // cents, positive
 }
 
-/** §9 "Spending by category and merchant" — ranked, expense-kind, non-transfer, non-excluded, for one month. */
+/**
+ * §9 "Spending by category and merchant" — ranked, expense-kind, non-transfer, non-excluded, for one month.
+ * A split transaction counts through its lines' categories, same as spendByCategory.
+ */
 export async function categoryBreakdown(userId: string, month: string): Promise<BreakdownRow[]> {
   const { start, end } = monthRange(month);
-  const rows = await db
-    .select({
-      categoryId: schema.transactions.categoryId,
-      categoryName: schema.categories.name,
-      colorSlot: schema.categories.colorSlot,
-      amount: schema.transactions.amount,
-    })
-    .from(schema.transactions)
-    .innerJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))
-    .where(
-      and(
-        eq(schema.transactions.userId, userId),
-        eq(schema.transactions.isTransfer, false),
-        eq(schema.transactions.excludedFromBudget, false),
-        eq(schema.categories.kind, "expense"),
-        gte(schema.transactions.postedDate, start),
-        lt(schema.transactions.postedDate, end),
-      ),
-    );
+  const inMonth = and(
+    eq(schema.transactions.userId, userId),
+    eq(schema.transactions.isTransfer, false),
+    eq(schema.transactions.excludedFromBudget, false),
+    eq(schema.categories.kind, "expense"),
+    gte(schema.transactions.postedDate, start),
+    lt(schema.transactions.postedDate, end),
+  );
+  const [whole, split] = await Promise.all([
+    db
+      .select({
+        categoryId: schema.transactions.categoryId,
+        categoryName: schema.categories.name,
+        colorSlot: schema.categories.colorSlot,
+        amount: schema.transactions.amount,
+      })
+      .from(schema.transactions)
+      .innerJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))
+      .where(and(inMonth, not(hasSplits))),
+    db
+      .select({
+        categoryId: schema.transactionSplits.categoryId,
+        categoryName: schema.categories.name,
+        colorSlot: schema.categories.colorSlot,
+        amount: schema.transactionSplits.amount,
+      })
+      .from(schema.transactionSplits)
+      .innerJoin(schema.transactions, eq(schema.transactionSplits.transactionId, schema.transactions.id))
+      .innerJoin(schema.categories, eq(schema.transactionSplits.categoryId, schema.categories.id))
+      .where(inMonth),
+  ]);
+  const rows = [...whole, ...split];
 
   const totals = new Map<string, BreakdownRow>();
   for (const r of rows) {
