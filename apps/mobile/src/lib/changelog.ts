@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.27.3",
+    date: "2026-10-07",
+    changes: [{ kind: "fixed", text: "iPhone: in Dark Mode, the back button and top bar now look dark like other apps, instead of light." }],
+  },
+  {
     version: "1.27.2",
     date: "2026-10-05",
     changes: [{ kind: "fixed", text: "Credit cards: a card's last four digits no longer overlap the Visa, Mastercard or Amex mark." }],

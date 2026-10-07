@@ -221,8 +221,14 @@ import Constants from "expo-constants";
  * 1.27.2 moves the large card tile's last four digits to the top-right so
  * they no longer run into the network mark. (The AMEX badge stays on Amex
  * cards even next to Amex's own logo.)
+ * 1.27.3 gives the navigators a React Navigation theme (app/_layout.tsx
+ * ThemeProvider, built from the app's tokens, following the color scheme).
+ * Without one the default light theme applied: its dark=false forced every
+ * iOS header's userInterfaceStyle to light, so the Liquid Glass back button
+ * and bar rendered light in Dark Mode, and the stack/tab containers were
+ * painted the light theme's grey.
  */
-export const APP_VERSION = "1.27.2";
+export const APP_VERSION = "1.27.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
