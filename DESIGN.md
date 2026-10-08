@@ -287,7 +287,8 @@ The delta chip uses `--positive`/`--negative` *and* an arrow glyph *and* a compa
 - *Secondary*: `--surface` bg, `--border-strong` border, `--text`.
 - *Ghost*: transparent, hover `--sunken`.
 - *Destructive*: `--negative` text on transparent; solid only inside a confirm dialog.
-- Disabled: 40% opacity, no hover. Loading: inline 14px spinner, label persists.
+- Disabled: 40% opacity, no hover. Loading: inline 14px spinner, label persists, and the button keeps one size idle and busy (`Button` reserves the spinner's room whenever `loading` is passed; mobile uses `BusyIcon`'s fixed slot).
+- Size by place: page-header actions (and anything beside them, like the month stepper) are md 36; buttons inside cards, rows, banners and dialogs' bodies are sm 30.
 
 **Inputs** — height 36, radius 8, `--surface` bg, 1px `--border-strong`, 15px text, 12px label above in `--label`. Error: `--negative` border + message with an icon. Amount inputs are right-aligned, mono-adjacent tabular, with the currency symbol as a prefix affix in `--text-3`.
 
