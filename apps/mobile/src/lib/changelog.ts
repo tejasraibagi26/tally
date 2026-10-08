@@ -16,6 +16,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.28.0",
+    date: "2026-10-07",
+    changes: [
+      { kind: "improved", text: "Connecting or reconnecting a bank now shows which bank, what Tally is pulling in, and how it went, including anything that didn't come through." },
+      { kind: "improved", text: "If a bank is slow to respond, Tally tells you it's taking longer than usual instead of looking stuck." },
+      { kind: "improved", text: "Connection errors are in plain language now, with a button to try again." },
+      { kind: "improved", text: "Revoking a connection lists the exact accounts that will be deleted, and a failed revoke now says so." },
+      { kind: "improved", text: "A sync problem on Transactions stays on screen as a banner instead of a pop-up." },
+    ],
+  },
+  {
     version: "1.27.3",
     date: "2026-10-07",
     changes: [{ kind: "fixed", text: "iPhone: in Dark Mode, the back button and top bar now look dark like other apps, instead of light." }],

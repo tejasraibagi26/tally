@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, TextInput, FlatList, Pressable, ActivityIndicator, RefreshControl, Alert } from "react-native";
+import { View, Text, TextInput, FlatList, Pressable, ActivityIndicator, RefreshControl } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ListFilter, Plus, RefreshCw, Search, X } from "lucide-react-native";
@@ -18,6 +18,7 @@ import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
 import { useRF } from "@/theme/responsiveFont";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
+import { SyncBanner } from "@/components/accounts/AccountsSummary";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { EmptyPeriodIllustration } from "@/components/transactions/EmptyPeriodIllustration";
@@ -127,18 +128,22 @@ export default function TransactionsScreen() {
   // -- syncs every item's transactions, not just balances, since this is the
   // one screen where a stale row (a pending charge that's since posted, a
   // merchant name Plaid only fills in after settlement) is the whole point.
+  // A failure stays on screen until dismissed (MOBILE_DESIGN.md §5.5), the
+  // same SyncBanner Accounts uses -- an alert was gone after one tap.
+  const [syncBanner, setSyncBanner] = useState<{ title: string; body: string } | null>(null);
   async function handleSync() {
+    setSyncBanner(null);
     try {
       const res = await sync.mutateAsync(["transactions"]);
       const failed = res.results.filter((r) => r.failures.length > 0);
       if (failed.length > 0) {
-        Alert.alert(
-          "Some accounts didn't sync",
-          failed.map((f) => `${f.institutionName ?? "An account"}: ${f.failures.map((x) => x.label).join(", ")}`).join("\n"),
-        );
+        setSyncBanner({
+          title: "Some accounts didn't sync",
+          body: `${failed.map((f) => `${f.institutionName ?? "A bank"}: ${f.failures.map((x) => x.label).join(", ")}`).join(". ")}. Tally will try again on the next sync.`,
+        });
       }
     } catch {
-      Alert.alert("Sync failed", "Please try again in a moment.");
+      setSyncBanner({ title: "Sync didn't run", body: "Check your connection and tap sync to try again." });
     }
   }
 
@@ -247,6 +252,12 @@ export default function TransactionsScreen() {
                 </>
               }
             />
+
+            {syncBanner && (
+              <View className="mt-3">
+                <SyncBanner tone="warning" title={syncBanner.title} body={syncBanner.body} onDismiss={() => setSyncBanner(null)} />
+              </View>
+            )}
 
             {summary && summary.unreviewed > 0 && !reviewOnly && (
               <View className="flex-row items-center gap-3 rounded-[14px] bg-brand-subtle pl-4 pr-3 py-3 mt-3" style={{ borderWidth: 1, borderColor: colors["brand-border"] }}>

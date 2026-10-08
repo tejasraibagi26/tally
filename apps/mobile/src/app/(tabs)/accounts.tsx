@@ -5,7 +5,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Plus, RefreshCw } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { TabHeader, SyncFreshness, hasSynced } from "@/components/ui/TabHeader";
-import { InstitutionActionsSheet, confirmRevokeItem } from "@/components/InstitutionActionsSheet";
+import { InstitutionActionsSheet } from "@/components/InstitutionActionsSheet";
+import { useRevokeDialog } from "@/components/accounts/RevokeDialog";
 import { InstitutionCard, AccountLine, toneColor } from "@/components/accounts/InstitutionCard";
 import { AccountsSummary, AttentionStrip, SyncBanner } from "@/components/accounts/AccountsSummary";
 import { AccountsSkeleton, ConnectFirstBank, AccountsLoadError } from "@/components/accounts/AccountsPlaceholders";
@@ -14,7 +15,7 @@ import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { Toast } from "@/components/ui/Toast";
 import { useAccounts, type Institution } from "@/lib/queries/accounts";
 import { usePlaidLink } from "@/lib/usePlaidLink";
-import { useSync, useRefreshItemBalances, useRevokeItem, useItemRefreshStates } from "@/lib/queries/plaid";
+import { useSync, useRefreshItemBalances, useItemRefreshStates } from "@/lib/queries/plaid";
 import { connectionState, type ConnectionAction } from "@/lib/connectionState";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { hairline } from "@/theme/colors";
@@ -34,10 +35,9 @@ export default function AccountsScreen() {
   const colors = useThemeColors();
   const rf = useRF();
   const { data, isLoading, isError, refetch, isRefetching, dataUpdatedAt } = useAccounts();
-  const { openLink, isLinking, linkingItemId, error: linkError } = usePlaidLink();
+  const { openLink, isLinking, linkingItemId, progressSheet } = usePlaidLink();
   const sync = useSync();
   const refreshBalances = useRefreshItemBalances();
-  const revoke = useRevokeItem();
   const refreshStates = useItemRefreshStates();
 
   const [menuInstitutionId, setMenuInstitutionId] = useState<string | null>(null);
@@ -48,9 +48,9 @@ export default function AccountsScreen() {
   const handledFix = useRef<string | undefined>(undefined);
   const [justReconnected, setJustReconnected] = useState<ReadonlySet<string>>(new Set());
   const [syncBanner, setSyncBanner] = useState<{ title: string; body?: string } | null>(null);
-  const [dismissedLinkError, setDismissedLinkError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const hideToast = useCallback(() => setToast(null), []);
+  const { confirmRevoke, revokeDialog } = useRevokeDialog((name) => setToast(`${name} revoked`));
 
   const institutions = useMemo(() => data?.institutions ?? [], [data]);
   const accountCount = institutions.reduce((n, i) => n + i.accounts.length, 0) + (data?.unlinkedAccounts.length ?? 0);
@@ -100,7 +100,7 @@ export default function AccountsScreen() {
   function runAction(inst: Institution, action: ConnectionAction) {
     if (action.kind === "signIn") reconnect(inst);
     else if (action.kind === "refresh") refreshBalances.mutate(inst.id);
-    else confirmRevokeItem(inst.institutionName ?? "this institution", () => revoke.mutate(inst.id));
+    else confirmRevoke(inst);
   }
 
   async function handleSyncAll() {
@@ -125,7 +125,6 @@ export default function AccountsScreen() {
   }
 
   const hasInstitutions = institutions.length > 0;
-  const showLinkError = linkError && linkError !== dismissedLinkError;
 
   return (
     <View className="flex-1 bg-canvas">
@@ -177,9 +176,6 @@ export default function AccountsScreen() {
           </View>
 
           <View className="gap-4 px-5">
-            {showLinkError && (
-              <SyncBanner tone="negative" title="Couldn't connect to your bank" body={linkError} onDismiss={() => setDismissedLinkError(linkError)} />
-            )}
             {syncBanner && <SyncBanner tone="warning" title={syncBanner.title} body={syncBanner.body} onDismiss={() => setSyncBanner(null)} />}
             {isError && data && (
               <SyncBanner
@@ -259,8 +255,12 @@ export default function AccountsScreen() {
           }}
           lastSyncedAt={menuCard.institution.lastSyncedAt}
           accountCount={menuCard.institution.accounts.length}
+          onRevoke={() => confirmRevoke(menuCard.institution)}
         />
       )}
+
+      {progressSheet}
+      {revokeDialog}
     </View>
   );
 }

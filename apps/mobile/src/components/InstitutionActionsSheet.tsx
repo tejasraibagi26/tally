@@ -1,8 +1,7 @@
-import { useState } from "react";
-import { View, Text, Pressable, ActivityIndicator, Alert } from "react-native";
+import { View, Text, Pressable, ActivityIndicator } from "react-native";
 import { RefreshCw, KeyRound, Unplug } from "lucide-react-native";
 import { Sheet } from "@/components/ui/Sheet";
-import { useRefreshItemBalances, useRevokeItem } from "@/lib/queries/plaid";
+import { useRefreshItemBalances } from "@/lib/queries/plaid";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 
@@ -16,18 +15,6 @@ import { useRF } from "@/theme/responsiveFont";
  * block (state, exact last-sync time, account count) so the reason a card
  * looks the way it does is one tap away.
  */
-/** Shared by this sheet's "Revoke connection" row and a revoked card's "Remove" button. */
-export function confirmRevokeItem(institutionName: string, onConfirm: () => void) {
-  Alert.alert(
-    `Revoke ${institutionName}?`,
-    "This disconnects it from Plaid and permanently deletes every account under it, along with all of their transaction history, balances, and holdings. This can't be undone.",
-    [
-      { text: "Cancel", style: "cancel" },
-      { text: "Revoke connection", style: "destructive", onPress: onConfirm },
-    ],
-  );
-}
-
 export function InstitutionActionsSheet({
   visible,
   onClose,
@@ -37,6 +24,7 @@ export function InstitutionActionsSheet({
   status,
   lastSyncedAt,
   accountCount,
+  onRevoke,
 }: {
   visible: boolean;
   onClose: () => void;
@@ -47,12 +35,12 @@ export function InstitutionActionsSheet({
   status?: { label: string; color: string };
   lastSyncedAt?: string | null;
   accountCount?: number;
+  /** Opens the revoke dialog (components/accounts/RevokeDialog.tsx) once this sheet has closed. */
+  onRevoke: () => void;
 }) {
   const colors = useThemeColors();
   const rf = useRF();
   const refreshBalances = useRefreshItemBalances();
-  const revoke = useRevokeItem();
-  const [revoking, setRevoking] = useState(false);
 
   function handleRefresh() {
     onClose();
@@ -66,10 +54,9 @@ export function InstitutionActionsSheet({
 
   function confirmRevoke() {
     onClose();
-    confirmRevokeItem(institutionName, () => {
-      setRevoking(true);
-      revoke.mutate(itemId, { onSettled: () => setRevoking(false) });
-    });
+    // Let this sheet finish closing first: iOS won't present the dialog's
+    // Modal on top of one that's animating out.
+    setTimeout(onRevoke, 350);
   }
 
   return (
@@ -100,8 +87,8 @@ export function InstitutionActionsSheet({
           <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>Sign in again or change which accounts Tally sees</Text>
         </View>
       </Pressable>
-      <Pressable onPress={confirmRevoke} disabled={revoking} className="flex-row items-center gap-3 px-5 py-3.5">
-        {revoking ? <ActivityIndicator size="small" color={colors.negative} /> : <Unplug size={17} color={colors.negative} strokeWidth={1.9} />}
+      <Pressable onPress={confirmRevoke} className="flex-row items-center gap-3 px-5 py-3.5">
+        <Unplug size={17} color={colors.negative} strokeWidth={1.9} />
         <View className="gap-0.5">
           <Text className="font-ui text-negative" style={{ fontSize: rf(15) }}>Revoke connection</Text>
           <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>Disconnect and delete its accounts and history</Text>

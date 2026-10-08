@@ -36,11 +36,14 @@ export function Sheet({
   onClose,
   children,
   maxHeight = "90%",
+  dismissible = true,
 }: {
   visible: boolean;
   onClose: () => void;
   children: ReactNode;
   maxHeight?: ViewStyle["maxHeight"];
+  /** False while work is running that mustn't be abandoned: no grabber, no swipe, backdrop taps and Android back ignored. */
+  dismissible?: boolean;
 }) {
   const colors = useThemeColors();
   const insets = useSafeAreaInsets();
@@ -87,6 +90,7 @@ export function Sheet({
   }, [visible, reduceMotion]);
 
   const panGesture = Gesture.Pan()
+    .enabled(dismissible)
     .onStart(() => {
       dragStart.value = translateY.value;
     })
@@ -123,10 +127,10 @@ export function Sheet({
   if (!mounted) return null;
 
   return (
-    <Modal visible={mounted} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
+    <Modal visible={mounted} transparent animationType="none" onRequestClose={dismissible ? onClose : () => {}} statusBarTranslucent>
       <View style={{ flex: 1 }}>
         <Animated.View style={[{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "#000000" }, backdropStyle]}>
-          <Pressable style={{ flex: 1 }} onPress={onClose} />
+          <Pressable style={{ flex: 1 }} onPress={dismissible ? onClose : undefined} />
         </Animated.View>
         {/* Keyboard avoidance lives here, around the sheet's own bottom-anchoring container --
             not inside a consumer's children, which sit inside an already-positioned
@@ -143,7 +147,8 @@ export function Sheet({
           >
             <GestureDetector gesture={panGesture}>
               <View style={{ alignItems: "center", paddingTop: 8, paddingBottom: 4 }} hitSlop={{ top: 12, bottom: 12, left: 48, right: 48 }}>
-                <View style={{ width: 36, height: 5, borderRadius: 999, backgroundColor: withAlpha(colors["text-3"], 0.35) }} />
+                {/* Kept in layout while locked so the content doesn't jump when the grabber returns. */}
+                <View style={{ width: 36, height: 5, borderRadius: 999, backgroundColor: withAlpha(colors["text-3"]!, dismissible ? 0.35 : 0) }} />
               </View>
             </GestureDetector>
             {children}

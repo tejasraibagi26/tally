@@ -30,6 +30,8 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
+    /** A machine code the server sent alongside the error (e.g. Plaid's error_code from /api/plaid/exchange). */
+    public code: string | null = null,
   ) {
     super(message);
   }
@@ -109,7 +111,7 @@ export async function apiFetch<T>(path: string, options: RequestInit = {}): Prom
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({ error: res.statusText }));
-    throw new ApiError(res.status, body.error ?? res.statusText);
+    throw new ApiError(res.status, body.error ?? res.statusText, body.code ?? null);
   }
 
   if (res.status === 204) return undefined as T;
@@ -139,7 +141,7 @@ export async function apiGetText(path: string): Promise<string> {
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({ error: res.statusText }));
-    throw new ApiError(res.status, body.error ?? res.statusText);
+    throw new ApiError(res.status, body.error ?? res.statusText, body.code ?? null);
   }
 
   return res.text();

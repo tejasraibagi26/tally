@@ -502,7 +502,8 @@ persisting settings requires an API call).
 | Card / panel (hairline border, near-flat) | Soft shadow card, no visible border, 18px radius (see §3.4) |
 | Table | Card list (row = merchant/category left, amount right, 2-line stack) |
 | Side panel (420px, slide from right) | Bottom sheet (85% height, slide up) |
-| Modal | Centered modal, unchanged (Plaid Link, confirm dialogs) |
+| Modal | Picked by job: **progress sheet** (`ProgressSheet`, a `Sheet` with `dismissible={false}` while running) for connect/reconnect; **`TallyDialog`** (centered, 180ms fade + scale in, 120ms fade out) for irreversible actions that need to list what's affected, show progress or fail in place (revoke a connection, wipe all data); native `Alert.alert` only for simple yes/no confirms (delete a schedule, remove a budget or bill, revoke an API token). Errors never go in an alert: inline with an icon, or a SyncBanner |
+| Progress indicator | `TallyLoader` (components/ui/TallyLoader.tsx): the brand mark writing itself, 2.4s loop, in a 40pt header tile only (warning tone, 3.2s after 20s). Buttons keep `ActivityIndicator`, beside the label, never replacing it |
 | Row hover quick-categorize | Swipe-left action |
 | Bulk-select via checkbox column | Long-press to enter select mode |
 | Sticky filter bar | "Filters" pill → filter bottom sheet |
@@ -519,6 +520,7 @@ persisting settings requires an API call).
 
 | Element | Duration | Notes |
 |---|---|---|
+| Dialog (`TallyDialog`) | 180ms in / 120ms out | Fade + scale .98→1 in, fade out; reduce-motion makes it instant |
 | Bottom sheet open/close | 250ms | Native `react-native-reanimated`/sheet-library spring, not a fixed-duration ease — sheets should feel physically dragged |
 | Tab switch | instant | No cross-fade; native tab navigators default to instant, don't fight it |
 | Swipe action reveal | tracks finger 1:1 | Snap open/closed with a spring on release |

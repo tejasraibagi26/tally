@@ -1,6 +1,6 @@
 import { type ReactNode } from "react";
 import { View, Text, Pressable, ScrollView, TextInput, ActivityIndicator, type TextInputProps } from "react-native";
-import { ChevronRight } from "lucide-react-native";
+import { AlertTriangle, ChevronRight } from "lucide-react-native";
 import { Sheet } from "@/components/ui/Sheet";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
@@ -52,7 +52,12 @@ export function FormSheet({
       <ScrollView style={{ flexShrink: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View className="px-5 gap-4" style={{ paddingBottom: 8 }}>
           {children}
-          {error && <Text className="font-ui text-negative" style={{ fontSize: rf(13) }}>{error}</Text>}
+          {error && (
+            <View className="flex-row items-start gap-1.5" accessibilityLiveRegion="assertive" accessibilityRole="alert">
+              <AlertTriangle size={14} color={colors.negative} strokeWidth={1.9} style={{ marginTop: 2 }} />
+              <Text className="font-ui text-negative flex-1" style={{ fontSize: rf(13) }}>{error}</Text>
+            </View>
+          )}
         </View>
       </ScrollView>
 
@@ -60,14 +65,13 @@ export function FormSheet({
         <Pressable
           onPress={onSubmit}
           disabled={submitting || submitDisabled}
-          className="rounded-full bg-brand items-center justify-center active:opacity-90 disabled:opacity-50"
+          accessibilityState={{ busy: submitting, disabled: submitting || !!submitDisabled }}
+          className={`rounded-full bg-brand flex-row items-center justify-center gap-2 active:opacity-90 ${submitDisabled && !submitting ? "opacity-50" : ""}`}
           style={{ height: 52 }}
         >
-          {submitting ? (
-            <ActivityIndicator color={colors["on-brand"]} />
-          ) : (
-            <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>{submitLabel}</Text>
-          )}
+          {/* Spinner beside the label, which stays (DESIGN.md §8). */}
+          {submitting && <ActivityIndicator size="small" color={colors["on-brand"]} />}
+          <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>{submitLabel}</Text>
         </Pressable>
       </View>
 

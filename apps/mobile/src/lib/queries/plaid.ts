@@ -13,7 +13,7 @@ export function createLinkToken(mode: "create" | "update", itemId?: string): Pro
 // (institution.institution_id), and the server already looks up the
 // institution authoritatively via Plaid's own /item/get call regardless --
 // metadata there is only ever a fallback for when that lookup is unavailable.
-export function exchangePublicToken(publicToken: string): Promise<{ ok: true; itemId: string; institutionName: string | null }> {
+export function exchangePublicToken(publicToken: string): Promise<{ ok: true; itemId: string; institutionName: string | null; failures: { product: string; label: string }[] }> {
   return apiPost("/api/plaid/exchange", { publicToken });
 }
 

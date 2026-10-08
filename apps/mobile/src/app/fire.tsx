@@ -78,10 +78,11 @@ export default function FireScreen() {
 function EmptyFire({ contentTop, hasAccounts, onStartFromZero }: { contentTop: number; hasAccounts: boolean; onStartFromZero: () => void }) {
   const colors = useThemeColors();
   const rf = useRF();
-  const { openLink, isLinking } = usePlaidLink();
+  const { openLink, isLinking, progressSheet } = usePlaidLink();
   return (
     <View className="flex-1 bg-canvas px-5" style={{ paddingTop: contentTop }}>
       <ScreenGlow />
+      {progressSheet}
       <Card className="px-5 pt-6 pb-5 gap-3">
         <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>When could you stop working?</Text>
         <Text className="font-ui text-text-2" style={{ fontSize: rf(13.5), lineHeight: rf(19) }}>
@@ -89,8 +90,9 @@ function EmptyFire({ contentTop, hasAccounts, onStartFromZero }: { contentTop: n
             ? "Tally can work it out from your spending. Connect a brokerage so it also knows what you've invested, or start from $0."
             : "Connect your bank and brokerage, and Tally works it out from your spending and investments. Or start from $0."}
         </Text>
-        <Pressable onPress={() => openLink("create")} disabled={isLinking} className="h-12 rounded-full items-center justify-center bg-brand mt-1">
-          {isLinking ? <ActivityIndicator color={colors["on-brand"]} /> : <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14.5) }}>Connect a brokerage</Text>}
+        <Pressable onPress={() => openLink("create")} disabled={isLinking} className="h-12 rounded-full flex-row items-center justify-center gap-2 bg-brand mt-1">
+          {isLinking && <ActivityIndicator size="small" color={colors["on-brand"]} />}
+          <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14.5) }}>Connect a brokerage</Text>
         </Pressable>
         <Pressable onPress={onStartFromZero} className="h-11 rounded-full items-center justify-center bg-brand-subtle">
           <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(14) }}>Start from $0</Text>

@@ -14,9 +14,9 @@ import { PortfolioChart } from "@/components/charts/PortfolioChart";
 import { PositionRow, ActivityItem, Segmented } from "@/components/investments/parts";
 import { HoldingSheet } from "@/components/investments/HoldingSheet";
 import { StateButton, toneColor, toneSubtle } from "@/components/accounts/InstitutionCard";
-import { confirmRevokeItem } from "@/components/InstitutionActionsSheet";
+import { useRevokeDialog } from "@/components/accounts/RevokeDialog";
 import { useInvestments, type StaleConnection } from "@/lib/useInvestments";
-import { useSync, useRefreshItemBalances, useRevokeItem } from "@/lib/queries/plaid";
+import { useSync, useRefreshItemBalances } from "@/lib/queries/plaid";
 import { usePlaidLink } from "@/lib/usePlaidLink";
 import { ago } from "@tally/core/connectionState";
 import { chartSeries, withAlpha } from "@/theme/colors";
@@ -52,9 +52,9 @@ export default function InvestmentsScreen() {
   const { colorScheme } = useColorScheme();
   const series = colorScheme === "dark" ? chartSeries.dark : chartSeries.light;
   const sync = useSync();
-  const { openLink, linkingItemId, isLinking } = usePlaidLink();
+  const { openLink, linkingItemId, isLinking, progressSheet } = usePlaidLink();
   const refresh = useRefreshItemBalances();
-  const revoke = useRevokeItem();
+  const { confirmRevoke, revokeDialog } = useRevokeDialog();
   const data = useInvestments(linkingItemId);
   const today = todayISO();
 
@@ -69,28 +69,34 @@ export default function InvestmentsScreen() {
       {sync.isPending ? <ActivityIndicator size="small" color={colors.brand} /> : <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(15) }}>Sync</Text>}
     </Pressable>
   );
+  // Rendered by every branch below: the header options plus the overlays a
+  // connection action can open (the Link progress sheet, the revoke dialog).
   // Plain brand text in the header's right slot; on iOS through
   // unstable_headerRightItems with hidesSharedBackground so iOS 26 doesn't
   // wrap it in Liquid Glass bar-button chrome.
-  const headerOptions = (
-    <Stack.Screen
-      options={{
-        headerRight: () => syncAction,
-        unstable_headerRightItems: () => [{ type: "custom", element: syncAction, hidesSharedBackground: true }],
-      }}
-    />
+  const screenChrome = (
+    <>
+      <Stack.Screen
+        options={{
+          headerRight: () => syncAction,
+          unstable_headerRightItems: () => [{ type: "custom", element: syncAction, hidesSharedBackground: true }],
+        }}
+      />
+      {progressSheet}
+      {revokeDialog}
+    </>
   );
 
   function runAction(c: StaleConnection, action: ConnectionAction) {
     if (action.kind === "signIn") void openLink("update", c.institution.id);
     else if (action.kind === "refresh") refresh.mutate(c.institution.id);
-    else confirmRevokeItem(c.institution.institutionName ?? "this institution", () => revoke.mutate(c.institution.id));
+    else confirmRevoke(c.institution);
   }
 
   if (data.isLoading) {
     return (
       <View className="flex-1 bg-canvas px-5 gap-5" style={{ paddingTop: contentTop }}>
-        {headerOptions}
+        {screenChrome}
         <ScreenGlow />
         <Card className="p-5 gap-3">
           <Skeleton style={{ height: 10, width: 100 }} />
@@ -108,7 +114,7 @@ export default function InvestmentsScreen() {
   if (data.isError) {
     return (
       <View className="flex-1 bg-canvas px-5" style={{ paddingTop: contentTop }}>
-        {headerOptions}
+        {screenChrome}
         <ScreenGlow />
         <Card className="px-5 py-6 gap-3 items-start">
           <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }}>{"Couldn't load your investments"}</Text>
@@ -124,7 +130,7 @@ export default function InvestmentsScreen() {
   if (data.holdings.length === 0) {
     return (
       <View className="flex-1 bg-canvas px-5" style={{ paddingTop: contentTop }}>
-        {headerOptions}
+        {screenChrome}
         <ScreenGlow />
         <Card className="px-5 pt-6 pb-5 gap-4">
           <View className="w-12 h-12 rounded-full items-center justify-center bg-brand-subtle">
@@ -136,8 +142,9 @@ export default function InvestmentsScreen() {
               Connect a brokerage like Wealthsimple or Questrade to see your TFSA, RRSP and FHSA in one place, with growth over time.
             </Text>
           </View>
-          <Pressable onPress={() => openLink("create")} disabled={isLinking} className="h-12 rounded-full items-center justify-center bg-brand active:opacity-90 disabled:opacity-60">
-            {isLinking ? <ActivityIndicator color={colors["on-brand"]} /> : <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14.5) }}>Connect a brokerage</Text>}
+          <Pressable onPress={() => openLink("create")} disabled={isLinking} className="h-12 rounded-full flex-row items-center justify-center gap-2 bg-brand active:opacity-90">
+            {isLinking && <ActivityIndicator size="small" color={colors["on-brand"]} />}
+            <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14.5) }}>Connect a brokerage</Text>
           </Pressable>
         </Card>
       </View>
@@ -167,7 +174,7 @@ export default function InvestmentsScreen() {
 
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
-      {headerOptions}
+      {screenChrome}
       <ScreenGlow />
       <ScrollView
         className="flex-1"

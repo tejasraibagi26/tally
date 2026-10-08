@@ -1,8 +1,30 @@
-import { useState, useCallback } from "react";
+import { createElement, useState, useCallback, useEffect, useRef } from "react";
 import { createPlaidLinkSession } from "react-native-plaid-link-sdk";
 import { useQueryClient } from "@tanstack/react-query";
+import { SYNC_SUCCESS_HOLD_MS } from "@tally/core/syncDialog";
 import { createLinkToken, exchangePublicToken } from "@/lib/queries/plaid";
-import { apiGet, apiPost } from "@/lib/api";
+import { ApiError, NetworkError, apiGet, apiPost } from "@/lib/api";
+import { ProgressSheet, type ProgressState } from "@/components/accounts/ProgressSheet";
+
+/** Let a closing sheet finish before Plaid Link presents: iOS won't stack a native modal on one that's animating out. */
+const SHEET_CLOSE_MS = 350;
+
+type Failures = { product: string; label: string }[];
+
+function errorCode(err: unknown): string | null {
+  if (err instanceof NetworkError) return "NETWORK";
+  if (err instanceof ApiError) return err.code;
+  return null;
+}
+
+class LinkExitError extends Error {
+  constructor(
+    public code: string,
+    public institutionName: string | null,
+  ) {
+    super(code);
+  }
+}
 
 // Wraps the native Plaid Link SDK (Phase 5 of the implementation plan) --
 // the one piece that forces a custom dev client instead of plain Expo Go.
@@ -12,20 +34,48 @@ import { apiGet, apiPost } from "@/lib/api";
 // PLAID_REDIRECT_URI -- not configured yet, so this works today against
 // Plaid's non-OAuth sandbox test institutions but a real OAuth bank
 // wouldn't complete the redirect back into the app.
+//
+// Also owns the ProgressSheet for the stretch after Link closes (syncing →
+// success | partial | failed): callers render the returned `progressSheet`.
 export function usePlaidLink() {
   const [isLinking, setIsLinking] = useState(false);
   // Which connection the open Link session is for ("create" for a new one),
   // so only that card's button spins -- isLinking alone made every broken
   // card's Reconnect spin at once.
   const [linkingItemId, setLinkingItemId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<ProgressState | null>(null);
+  const lastRequest = useRef<{ mode: "create" | "update"; itemId?: string }>({ mode: "create" });
   const queryClient = useQueryClient();
+
+  const finishRequest = useCallback(
+    async (request: () => Promise<{ institutionName: string | null; failures: Failures }>) => {
+      try {
+        const result = await request();
+        await queryClient.invalidateQueries({ queryKey: ["accounts"] });
+        setProgress(
+          (p) =>
+            p && {
+              ...p,
+              institutionName: result.institutionName ?? p.institutionName,
+              failures: result.failures,
+              phase: result.failures.length > 0 ? "partial" : "success",
+            },
+        );
+        return true;
+      } catch (err) {
+        console.error("Finishing the Plaid connection failed", err);
+        setProgress((p) => p && { ...p, phase: "failed", errorCode: errorCode(err) });
+        return false;
+      }
+    },
+    [queryClient],
+  );
 
   const openLink = useCallback(
     // Resolves true once Link finished and the follow-up exchange/resync
     // succeeded; false on cancel or error.
     async (mode: "create" | "update", itemId?: string): Promise<boolean> => {
-      setError(null);
+      lastRequest.current = { mode, itemId };
       setIsLinking(true);
       setLinkingItemId(mode === "update" && itemId ? itemId : "create");
       try {
@@ -48,17 +98,24 @@ export function usePlaidLink() {
         });
 
         if (mode === "create" && config.mockMode) {
-          await apiPost("/api/mock/connect");
-          await queryClient.invalidateQueries({ queryKey: ["accounts"] });
-          return true;
+          setProgress({ mode, phase: "syncing", institutionName: null, accountTypes: [], failures: null, errorCode: null, errorStage: "save", startedAt: Date.now() });
+          return await finishRequest(async () => {
+            await apiPost("/api/mock/connect");
+            return { institutionName: null, failures: [] };
+          });
         }
 
         const { linkToken } = await createLinkToken(mode, itemId);
 
-        const publicToken = await new Promise<string | null>((resolve, reject) => {
+        const success = await new Promise<{ publicToken: string; institutionName: string | null; accountTypes: string[] } | null>((resolve, reject) => {
           createPlaidLinkSession({
             token: linkToken,
-            onSuccess: (success) => resolve(success.publicToken),
+            onSuccess: (s) =>
+              resolve({
+                publicToken: s.publicToken,
+                institutionName: s.metadata.institution?.name ?? null,
+                accountTypes: s.metadata.accounts.map((a) => String(a.type ?? "").toLowerCase()).filter(Boolean),
+              }),
             onExit: (exit) => {
               // Confirmed live: on a plain "closed without linking" tap, the
               // iOS SDK still calls onExit with a non-null but *empty*
@@ -69,7 +126,7 @@ export function usePlaidLink() {
               // reads as a cancel like it's supposed to.
               if (exit.error?.errorCode) {
                 console.error("Plaid Link exited with error", exit.error, exit.metadata);
-                reject(new Error(`${exit.error.errorCode}: ${exit.error.errorMessage || exit.error.displayMessage || "no message"}`));
+                reject(new LinkExitError(String(exit.error.errorCode), exit.metadata?.institution?.name ?? null));
               } else {
                 resolve(null); // user cancelled -- not an error
               }
@@ -80,29 +137,71 @@ export function usePlaidLink() {
             .catch(reject); // session creation itself failed (bad token, native error) -- otherwise this hangs forever unresolved
         });
 
-        if (!publicToken) return false; // cancelled
+        if (!success) return false; // cancelled
 
-        // Matches apps/web/lib/usePlaidExchange.ts exactly: "create" exchanges
-        // the public token for a new item; "update" re-authenticates an
-        // existing item in place, so the follow-up is a resync instead.
-        if (mode === "create") {
-          await exchangePublicToken(publicToken);
-        } else if (itemId) {
-          await apiPost(`/api/items/${itemId}/sync`);
-        }
-
-        await queryClient.invalidateQueries({ queryKey: ["accounts"] });
-        return true;
+        setProgress({
+          mode,
+          phase: "syncing",
+          institutionName: success.institutionName,
+          accountTypes: success.accountTypes,
+          failures: null,
+          errorCode: null,
+          errorStage: "save",
+          startedAt: Date.now(),
+        });
+        // Matches apps/web/lib/usePlaidExchange.ts: "create" exchanges the
+        // public token for a new item; "update" re-authenticates an existing
+        // item in place, so the follow-up is a resync instead.
+        return await finishRequest(async () =>
+          mode === "create"
+            ? exchangePublicToken(success.publicToken)
+            : apiPost<{ institutionName: string | null; failures: Failures }>(`/api/items/${itemId}/sync`),
+        );
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Something went wrong connecting your account.");
+        // Failed before or inside Plaid Link (token, SDK, or Link's own error).
+        setProgress({
+          mode,
+          phase: "failed",
+          institutionName: err instanceof LinkExitError ? err.institutionName : null,
+          accountTypes: [],
+          failures: null,
+          errorCode: err instanceof LinkExitError ? err.code : errorCode(err),
+          errorStage: "link",
+          startedAt: Date.now(),
+        });
         return false;
       } finally {
         setIsLinking(false);
         setLinkingItemId(null);
       }
     },
-    [queryClient],
+    [queryClient, finishRequest],
   );
 
-  return { openLink, isLinking, linkingItemId, error };
+  const closeProgress = useCallback(() => setProgress(null), []);
+
+  // A clean success holds briefly so it can be read, then closes itself.
+  useEffect(() => {
+    if (progress?.phase !== "success") return;
+    const t = setTimeout(() => setProgress(null), SYNC_SUCCESS_HOLD_MS[progress.mode]);
+    return () => clearTimeout(t);
+  }, [progress]);
+
+  /** The failed sheet's primary action: a resync if sign-in got through, otherwise a fresh Link session. */
+  const retry = useCallback(() => {
+    const p = progress;
+    const { mode, itemId } = lastRequest.current;
+    if (p?.mode === "update" && p.errorStage === "save" && itemId) {
+      setProgress({ ...p, phase: "syncing", errorCode: null, startedAt: Date.now() });
+      setLinkingItemId(itemId);
+      void finishRequest(() => apiPost<{ institutionName: string | null; failures: Failures }>(`/api/items/${itemId}/sync`)).finally(() => setLinkingItemId(null));
+      return;
+    }
+    setProgress(null);
+    setTimeout(() => void openLink(mode, itemId), SHEET_CLOSE_MS);
+  }, [progress, finishRequest, openLink]);
+
+  const progressSheet = createElement(ProgressSheet, { state: progress, onClose: closeProgress, onRetry: retry });
+
+  return { openLink, isLinking, linkingItemId, progressSheet };
 }
