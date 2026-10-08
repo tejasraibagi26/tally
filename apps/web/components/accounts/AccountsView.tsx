@@ -2,16 +2,18 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { connectionState, type ConnectionState } from "@tally/core/connectionState";
+import { formatCents } from "@tally/core/money";
 import { cn } from "@/lib/cn";
 import { ConnectionActionsProvider, useConnectionActions } from "@/components/accounts/ConnectionActions";
 import { ConnectionCard } from "@/components/accounts/ConnectionCard";
-import { NeedsYouPanel } from "@/components/accounts/NeedsYouPanel";
+import { toneText } from "@/components/accounts/connectionUi";
 import { BankPanel } from "@/components/accounts/BankPanel";
 import type { ConnectionView } from "@/components/accounts/types";
 
 /**
- * The interactive part of the Accounts page: the Needs you panel, the card
- * grid sorted by urgency, and the bank side panel. Every card's level, copy
+ * The interactive part of the Accounts page: the card grid sorted by
+ * urgency (banks that need you first, under their own heading) and the bank
+ * side panel. Each problem is said once, on its own card, next to its fix. Every card's level, copy
  * and action come from @tally/core/connectionState -- the same contract the
  * mobile app renders.
  */
@@ -45,6 +47,8 @@ function AccountsGrid({
   }, [items, localFor]);
 
   const needsYou = rows.filter((r) => r.state.needsAttention);
+  // Money whose numbers can't be trusted right now -- the size of the problem.
+  const affected = needsYou.reduce((sum, r) => sum + r.item.accounts.reduce((s, a) => s + Math.abs(a.currentBalance ?? 0), 0), 0);
   // Rank 0–1 is anything blocked, needing action, or just fixed (held in
   // place until its confirmation fades); everything else is up to date.
   const urgent = rows.filter((r) => r.state.rank <= 1);
@@ -65,9 +69,16 @@ function AccountsGrid({
 
   return (
     <>
-      {needsYou.length > 0 && <NeedsYouPanel rows={needsYou} onOpenPanel={openPanel} />}
-
-      {urgent.length > 0 && <Group label={rest.length > 0 ? "Needs you" : undefined} rows={urgent} baseCurrency={baseCurrency} onOpenPanel={openPanel} />}
+      {urgent.length > 0 && (
+        <Group
+          label={needsYou.length > 0 ? "Needs you" : rest.length > 0 ? "Just fixed" : undefined}
+          tone={needsYou.length === 0 ? undefined : needsYou.some((r) => r.state.level === "blocked") ? "negative" : "warning"}
+          meta={affected > 0 ? `${formatCents(affected)} in balances affected` : undefined}
+          rows={urgent}
+          baseCurrency={baseCurrency}
+          onOpenPanel={openPanel}
+        />
+      )}
       {rest.length > 0 && <Group label={urgent.length > 0 ? "Up to date" : undefined} rows={rest} baseCurrency={baseCurrency} onOpenPanel={openPanel} />}
 
       <BankPanel item={panelRow?.item ?? null} state={panelRow?.state ?? null} open={panelRow !== null} onClose={closePanel} />
@@ -77,11 +88,17 @@ function AccountsGrid({
 
 function Group({
   label,
+  tone,
+  meta,
   rows,
   baseCurrency,
   onOpenPanel,
 }: {
   label?: string;
+  /** Colors the heading for the group of banks that need you. */
+  tone?: "negative" | "warning";
+  /** Extra context beside the bank count. */
+  meta?: string;
   rows: { item: ConnectionView; state: ConnectionState }[];
   baseCurrency: string;
   onOpenPanel: (id: string) => void;
@@ -90,9 +107,10 @@ function Group({
     <section className="flex flex-col gap-3">
       {label && (
         <div className="flex items-center justify-between px-1 text-[11px] font-semibold uppercase tracking-wide text-text-3">
-          <h2 className="m-0 text-[11px] font-semibold">{label}</h2>
-          <span>
+          <h2 className={cn("m-0 text-[11px] font-semibold", tone && toneText[tone])}>{label}</h2>
+          <span className="tabular-nums">
             {rows.length} bank{rows.length === 1 ? "" : "s"}
+            {meta && <span className="normal-case tracking-normal font-normal"> · {meta}</span>}
           </span>
         </div>
       )}

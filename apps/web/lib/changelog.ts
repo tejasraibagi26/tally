@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.28.2",
+    date: "2026-10-07",
+    changes: [{ kind: "improved", text: "Accounts: a bank that needs you is shown once, on its own card at the top, instead of also in a separate panel above it." }],
+  },
+  {
     version: "1.28.1",
     date: "2026-10-07",
     changes: [{ kind: "fixed", text: "Buttons at the top of each page are now all the same size, and a button no longer grows or shrinks while it's working." }],
