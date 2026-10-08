@@ -1,50 +1,32 @@
-import Link from "next/link";
 import { and, desc, eq, isNull, or } from "drizzle-orm";
-import { User, Lock, Download, Link2, Wand2, Wallet, Mail, KeyRound, ChevronRight, AlertTriangle, Bell, type LucideIcon } from "lucide-react";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
-import { Card, CardHeader } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { AccountForm } from "@/components/settings/AccountForm";
-import { PasswordForm } from "@/components/settings/PasswordForm";
+import { ProfileSection } from "@/components/settings/ProfileSection";
 import { DangerZone } from "@/components/settings/DangerZone";
 import { IncomeScheduleManager } from "@/components/settings/IncomeScheduleManager";
-import { RecapsToggle } from "@/components/settings/RecapsToggle";
 import { AlertSettings } from "@/components/settings/AlertSettings";
+import { SettingsBlock, SettingsGroup, SettingsRow } from "@/components/settings/SettingsLayout";
+import { SettingsNav, type SettingsNavItem } from "@/components/settings/SettingsNav";
 import { loadAlertPreferences } from "@/lib/alerts/preferences";
 import { alertHistory } from "@/lib/alerts/history";
 import { ApiKeysManager } from "@/components/settings/ApiKeysManager";
 import { accountDisplayName } from "@tally/core/accountName";
 import { APP_VERSION } from "@/lib/version";
+import Link from "next/link";
 
-function GroupLabel({ children }: { children: string }) {
-  return <div className="text-xs font-medium uppercase tracking-[0.06em] text-text-3 px-1">{children}</div>;
-}
+const SECTIONS: SettingsNavItem[] = [
+  { id: "profile", label: "Profile" },
+  { id: "security", label: "Security" },
+  { id: "alerts", label: "Notifications" },
+  { id: "income", label: "Income" },
+  { id: "data", label: "Data" },
+  { id: "developer", label: "Developer" },
+  { id: "delete", label: "Delete data", tone: "negative" },
+];
 
-function LinkRow({
-  icon: Icon,
-  title,
-  description,
-  href,
-}: {
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  href: string;
-}) {
-  return (
-    <Link href={href} className="flex items-center gap-3 px-5 py-4 hover:bg-sunken transition-colors">
-      <div className="w-8 h-8 rounded-full bg-brand-subtle flex items-center justify-center flex-none">
-        <Icon size={15} strokeWidth={1.75} className="text-brand" />
-      </div>
-      <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-        <span className="text-[15px] font-medium text-text">{title}</span>
-        <span className="text-[13.5px] text-text-2 truncate">{description}</span>
-      </div>
-      <ChevronRight size={16} strokeWidth={1.75} className="text-text-3 flex-none" />
-    </Link>
-  );
-}
+const exportButton =
+  "h-[30px] px-3 inline-flex items-center rounded-control bg-surface border border-border-strong text-sm font-medium text-text hover:bg-sunken focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-info";
 
 export default async function SettingsPage() {
   const userId = await requireUserId();
@@ -109,120 +91,56 @@ export default async function SettingsPage() {
   const appHost = process.env.APP_URL ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
   const shortcutsEndpoint = `${appHost.replace(/\/$/, "")}/api/shortcuts/transactions`;
 
+  // Rows that show their value, edits in dialogs, a sticky section menu
+  // beside them from 1024px (which hides below that; sections just stack).
   return (
-    <div className="max-w-[720px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-8">
+    <div className="max-w-[1040px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
       <PageHeader title="Settings" />
 
-      <div className="flex flex-col gap-3">
-        <GroupLabel>Profile</GroupLabel>
-        <Card>
-          <CardHeader title="Account" action={<User size={17} strokeWidth={1.75} className="text-text-3" />} />
-          <div className="p-5">
-            <AccountForm initialName={user?.name ?? ""} initialEmail={user?.email ?? ""} initialBirthDate={user?.birthDate ?? null} />
-          </div>
-        </Card>
-        <Card>
-          <CardHeader title="Password" action={<Lock size={17} strokeWidth={1.75} className="text-text-3" />} />
-          <div className="p-5">
-            <PasswordForm />
-          </div>
-        </Card>
-      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-[180px_minmax(0,1fr)] gap-8 items-start">
+        <div className="hidden lg:block self-stretch">
+          <SettingsNav items={SECTIONS} version={APP_VERSION} />
+        </div>
 
-      <div className="flex flex-col gap-3">
-        <GroupLabel>Notifications</GroupLabel>
-        <Card>
-          <CardHeader title="Email" action={<Mail size={17} strokeWidth={1.75} className="text-text-3" />} />
-          <div className="p-5">
-            <RecapsToggle initialEnabled={user?.recapsEnabled ?? true} />
-          </div>
-        </Card>
-        {/* #alerts: target of the alert emails' "Manage alerts" link. */}
-        <div id="alerts" className="scroll-mt-6">
-          <Card>
-            <CardHeader title="Alerts" action={<Bell size={17} strokeWidth={1.75} className="text-text-3" />} />
-            <AlertSettings initial={alertPrefs} history={recentAlerts} />
-          </Card>
+        <div className="flex flex-col gap-8 min-w-0 max-w-[720px]">
+          <ProfileSection name={user?.name ?? ""} email={user?.email ?? ""} birthDate={user?.birthDate ?? null} />
+
+          <AlertSettings initial={alertPrefs} history={recentAlerts} recapsEnabled={user?.recapsEnabled ?? true} />
+
+          <SettingsGroup
+            id="income"
+            title="Income"
+            description="For a paycheck your bank doesn't sync reliably: set the amount and pay days once, and Tally adds it on every payday."
+          >
+            <SettingsBlock>
+              <IncomeScheduleManager accounts={accounts} categories={incomeCategories} schedules={incomeSchedulesForDisplay} />
+            </SettingsBlock>
+          </SettingsGroup>
+
+          <SettingsGroup id="data" title="Data">
+            <SettingsRow title="Export transactions" description="Every transaction you have, for backups or moving your data elsewhere">
+              <a href="/api/export?format=csv" className={exportButton}>
+                CSV
+              </a>
+              <a href="/api/export?format=json" className={exportButton}>
+                JSON
+              </a>
+            </SettingsRow>
+          </SettingsGroup>
+
+          <SettingsGroup id="developer" title="Developer" description="For automations like Apple Shortcuts: create a token, then have your automation send it a transaction.">
+            <SettingsBlock>
+              <ApiKeysManager apiKeys={apiKeysForDisplay} shortcutsEndpoint={shortcutsEndpoint} />
+            </SettingsBlock>
+          </SettingsGroup>
+
+          <DangerZone itemCount={items.length} />
+
+          <Link href="/settings/changelog" className="lg:hidden self-center font-mono text-[12px] text-text-3 hover:text-text-2 transition-colors">
+            v{APP_VERSION} · Changelog
+          </Link>
         </div>
       </div>
-
-      <div className="flex flex-col gap-3">
-        <GroupLabel>Income</GroupLabel>
-        <Card>
-          <CardHeader title="Manual income" action={<Wallet size={17} strokeWidth={1.75} className="text-text-3" />} />
-          <div className="p-5 flex flex-col gap-3">
-            <p className="text-text-2 text-sm">
-              For a paycheck your bank doesn&apos;t sync reliably: set the amount and pay days once, and it&apos;s added
-              to your transactions automatically every payday, including next month&apos;s once this month&apos;s are done.
-            </p>
-            <IncomeScheduleManager
-              accounts={accounts}
-              categories={incomeCategories}
-              schedules={incomeSchedulesForDisplay}
-            />
-          </div>
-        </Card>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <GroupLabel>Data</GroupLabel>
-        <Card>
-          <CardHeader title="Export" action={<Download size={17} strokeWidth={1.75} className="text-text-3" />} />
-          <div className="p-5 flex flex-col gap-3">
-            <p className="text-text-2 text-sm">Download every transaction you have. Useful for backups or moving your data elsewhere.</p>
-            <div className="flex gap-3">
-              <a href="/api/export?format=csv" className="h-9 px-3 inline-flex items-center rounded-control bg-surface border border-border-strong text-sm font-medium text-text hover:bg-sunken">
-                Download CSV
-              </a>
-              <a href="/api/export?format=json" className="h-9 px-3 inline-flex items-center rounded-control bg-surface border border-border-strong text-sm font-medium text-text hover:bg-sunken">
-                Download JSON
-              </a>
-            </div>
-          </div>
-        </Card>
-        <Card className="divide-y divide-border">
-          <LinkRow
-            icon={Link2}
-            title="Accounts & connections"
-            description="Manage linked institutions, reconnect or disconnect an account"
-            href="/accounts"
-          />
-          <LinkRow
-            icon={Wand2}
-            title="Categorization rules"
-            description="Auto-categorize transactions as they come in"
-            href="/rules"
-          />
-        </Card>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <GroupLabel>Developer</GroupLabel>
-        <Card>
-          <CardHeader title="API tokens" action={<KeyRound size={17} strokeWidth={1.75} className="text-text-3" />} />
-          <div className="p-5 flex flex-col gap-3">
-            <p className="text-text-2 text-sm">
-              For automations like Apple Shortcuts: create a token below, then have your automation send it a transaction.
-            </p>
-            <ApiKeysManager apiKeys={apiKeysForDisplay} shortcutsEndpoint={shortcutsEndpoint} />
-          </div>
-        </Card>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <GroupLabel>Danger zone</GroupLabel>
-        <Card className="border-negative">
-          <CardHeader title="Wipe all data" action={<AlertTriangle size={17} strokeWidth={1.75} className="text-negative" />} />
-          <div className="p-5">
-            <DangerZone itemCount={items.length} />
-          </div>
-        </Card>
-      </div>
-
-      {/* The only way into the changelog -- kept deliberately quiet. */}
-      <Link href="/settings/changelog" className="self-center font-mono text-[12px] text-text-3 hover:text-text-2 transition-colors">
-        v{APP_VERSION} · Changelog
-      </Link>
     </div>
   );
 }

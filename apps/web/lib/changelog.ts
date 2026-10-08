@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.27.0",
+    date: "2026-10-07",
+    changes: [
+      { kind: "improved", text: "Settings redesigned: each setting shows its current value at a glance, with a menu on the side to jump between sections." },
+      { kind: "improved", text: "Editing your profile, changing your password and wiping your data now happen in their own dialogs instead of forms that were always open." },
+      { kind: "improved", text: "Email alerts are simple switches, with the large-purchase amount right on its row and recent alerts shortened to the latest two." },
+    ],
+  },
+  {
     version: "1.26.2",
     date: "2026-10-07",
     changes: [{ kind: "improved", text: "Transactions: removed the \"by you\" / \"by rule\" column from the list. Where a category came from is still in each transaction's details." }],
