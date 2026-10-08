@@ -3,9 +3,11 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import type { ConnectionAction, LocalConnectionState } from "@tally/core/connectionState";
+import { Unplug } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
-import { LoadingOverlay } from "@/components/ui/LoadingOverlay";
+import { SyncDialog } from "@/components/plaid/SyncDialog";
 import { usePlaidLinkFlow } from "@/lib/usePlaidLinkFlow";
+import { showToast } from "@/lib/toast";
 
 /** How long "You're reconnected" stays before the card goes quiet. */
 const RECONNECTED_MS = 6000;
@@ -13,7 +15,12 @@ const RECONNECTED_MS = 6000;
 interface Target {
   id: string;
   institutionName: string | null;
+  /** Listed by name in the revoke confirm, when the caller has them. */
+  accounts?: { id: string; name: string; mask: string | null }[];
 }
+
+/** Rows the revoke confirm lists before collapsing the rest into "and N more". */
+const REVOKE_LIST_MAX = 6;
 
 interface ConnectionActionsValue {
   /** This device's in-flight state for a connection, layered over the server's. */
@@ -56,6 +63,7 @@ export function ConnectionActionsProvider({
   const [refreshOutcome, setRefreshOutcome] = useState<ReadonlyMap<string, boolean>>(new Map());
   const [removeTarget, setRemoveTarget] = useState<Target | null>(null);
   const [removing, setRemoving] = useState(false);
+  const [removeError, setRemoveError] = useState<string | null>(null);
 
   const onLinkDone = useCallback((ok: boolean, itemId: string | undefined) => {
     if (!ok || !itemId) return;
@@ -98,13 +106,18 @@ export function ConnectionActionsProvider({
   const startLink = link.start;
   const signIn = useCallback((itemId: string) => void startLink(itemId), [startLink]);
 
+  const openRemove = useCallback((target: Target) => {
+    setRemoveError(null);
+    setRemoveTarget(target);
+  }, []);
+
   const run = useCallback(
     (target: Target, action: ConnectionAction) => {
       if (action.kind === "signIn") signIn(target.id);
       else if (action.kind === "refresh") void refresh(target.id);
-      else setRemoveTarget(target);
+      else openRemove(target);
     },
-    [signIn, refresh],
+    [signIn, refresh, openRemove],
   );
 
   const serverFailed = useMemo(() => new Set(serverRefreshFailed), [serverRefreshFailed]);
@@ -121,22 +134,26 @@ export function ConnectionActionsProvider({
   async function remove() {
     if (!removeTarget) return;
     setRemoving(true);
+    setRemoveError(null);
     try {
       const res = await fetch(`/api/items/${removeTarget.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to remove item");
       onRemoved?.(removeTarget.id);
+      showToast(`${removeTarget.institutionName ?? "Connection"} revoked`);
+      setRemoveTarget(null);
       router.refresh();
     } catch (err) {
       console.error(err);
-      window.alert("Couldn't revoke this connection. Please try again in a moment.");
+      // Stays open with the failure in place of the description.
+      setRemoveError(`Couldn't revoke ${removeTarget.institutionName ?? "this connection"}. Nothing was deleted. Check your connection and try again.`);
     } finally {
       setRemoving(false);
-      setRemoveTarget(null);
     }
   }
 
-  const value = useMemo(() => ({ localFor, run, refresh, signIn, confirmRemove: setRemoveTarget }), [localFor, run, refresh, signIn]);
+  const value = useMemo(() => ({ localFor, run, refresh, signIn, confirmRemove: openRemove }), [localFor, run, refresh, signIn, openRemove]);
   const name = removeTarget?.institutionName ?? "this institution";
+  const accounts = removeTarget?.accounts ?? [];
 
   return (
     <Ctx.Provider value={value}>
@@ -146,23 +163,33 @@ export function ConnectionActionsProvider({
         onClose={() => setRemoveTarget(null)}
         onConfirm={remove}
         title={`Revoke ${name}?`}
+        subtitle="This can't be undone"
+        icon={<Unplug size={20} strokeWidth={1.75} />}
         confirmLabel="Revoke connection"
         confirming={removing}
+        error={removeError}
         description={
           <>
-            <p className="m-0">This disconnects {name} from Plaid and permanently deletes everything locally tied to it:</p>
-            <ul className="m-0 pl-5 list-disc flex flex-col gap-1">
-              <li>Every account under this connection</li>
-              <li>All of their transaction history, balances, and holdings</li>
-              <li>Any budgets or rules that reference those transactions won&apos;t be retroactively affected, but new transactions from here stop entirely</li>
-            </ul>
-            <p className="m-0 font-medium text-text">This cannot be undone. You&apos;d need to reconnect from scratch to get this data back.</p>
+            <p className="m-0">
+              Tally disconnects from {name} through Plaid and deletes {accounts.length > 0 ? "these accounts" : "every account under it"} with all their transactions, balances, and holdings.
+            </p>
+            {accounts.length > 0 && (
+              <div className="flex flex-col gap-2 rounded-[10px] border border-border bg-surface-2 p-3">
+                <span className="text-xs font-medium uppercase tracking-wide text-text-2">Accounts to delete</span>
+                {accounts.slice(0, REVOKE_LIST_MAX).map((a) => (
+                  <div key={a.id} className="flex justify-between gap-3 text-[13.5px] text-text">
+                    <span className="truncate">{a.name}</span>
+                    {a.mask && <span className="font-mono text-[12.5px] text-text-3 flex-none">····{a.mask}</span>}
+                  </div>
+                ))}
+                {accounts.length > REVOKE_LIST_MAX && <span className="text-[13px] text-text-3">and {accounts.length - REVOKE_LIST_MAX} more</span>}
+              </div>
+            )}
+            <p className="m-0 text-[13px] text-text-3">Budgets keep their past totals. To get this data back you&apos;d connect {name} again from scratch.</p>
           </>
         }
       />
-      {/* The resync after a successful sign-in pulls every product and can
-          take a while; the card's own spinner can't explain that alone. */}
-      {link.syncing && <LoadingOverlay message="Reconnecting and syncing this bank…" />}
+      <SyncDialog state={link.dialog} onClose={link.closeDialog} onRetry={link.retry} />
     </Ctx.Provider>
   );
 }

@@ -83,7 +83,7 @@ export function StateNotice({ item, state, className }: { item: Pick<ConnectionV
         <span className={cn("text-[13.5px] font-semibold", toneText[state.tone])}>{state.notice.title}</span>
         <span className="text-[13px] leading-snug text-text-2">{state.notice.body}</span>
         {state.tone === "info" && !state.action && (
-          // Same indeterminate motion as LoadingOverlay (globals.css).
+          // Indeterminate slide, keyframes in globals.css.
           <span className="relative mt-2 h-[3px] rounded-full overflow-hidden" style={{ backgroundColor: toneBorder("info", 30) }}>
             <span
               className="absolute top-0 h-full w-[35%] rounded-full bg-info motion-reduce:hidden"

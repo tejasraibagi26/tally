@@ -58,6 +58,8 @@
 
   --shadow-raised: 0 1px 2px rgba(26,25,23,.06);
   --shadow-overlay: 0 12px 32px -8px rgba(26,25,23,.16), 0 2px 6px rgba(26,25,23,.05);
+  /* Behind modals. Was --canvas at 60%, which barely dims a near-black dark canvas. */
+  --scrim: rgba(26,25,23,.34);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -97,6 +99,7 @@
     --series-8: #ea7575;
     --shadow-raised: inset 0 1px 0 rgba(255,255,255,.045), 0 1px 2px rgba(0,0,0,.45);
     --shadow-overlay: inset 0 1px 0 rgba(255,255,255,.06), 0 16px 40px -8px rgba(0,0,0,.7);
+    --scrim: rgba(0,0,0,.62);
   }
 }
 
@@ -142,6 +145,7 @@
   --series-8: #ea7575;
   --shadow-raised: inset 0 1px 0 rgba(255,255,255,.045), 0 1px 2px rgba(0,0,0,.45);
   --shadow-overlay: inset 0 1px 0 rgba(255,255,255,.06), 0 16px 40px -8px rgba(0,0,0,.7);
+  --scrim: rgba(0,0,0,.62);
 }
 
 * {
@@ -228,16 +232,55 @@ body {
   white-space: nowrap;
 }
 
-/* components/ui/LoadingOverlay.tsx: a single brand-colored bar sliding
-   across a rounded track — standard indeterminate-progress motion,
-   accelerates in, decelerates out at the far edge, then loops. */
+/* ConnectionCard's info notice: a bar sliding across a rounded track. No
+   hold at the far edge -- the old 60–100% hold left the track blank for
+   half a second each loop, which read as stalled. */
 @keyframes indeterminate-slide {
-  0% {
+  from {
     left: -35%;
   }
-  60%, 100% {
+  to {
     left: 100%;
   }
+}
+
+/* components/Logo.tsx TallyLoader: the brand mark writing itself. 2.4s loop
+   -- four strokes ink in 10% apart, the slash crosses at 44–56%, hold,
+   fade out at 78–90%. Each line has pathLength="1". */
+@keyframes tally-1 { 0% { stroke-dashoffset: 1; opacity: 0; } 1% { opacity: 1; } 9% { stroke-dashoffset: 0; } 78% { stroke-dashoffset: 0; opacity: 1; } 90%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+@keyframes tally-2 { 0%, 10% { stroke-dashoffset: 1; opacity: 0; } 11% { opacity: 1; } 19% { stroke-dashoffset: 0; } 78% { stroke-dashoffset: 0; opacity: 1; } 90%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+@keyframes tally-3 { 0%, 20% { stroke-dashoffset: 1; opacity: 0; } 21% { opacity: 1; } 29% { stroke-dashoffset: 0; } 78% { stroke-dashoffset: 0; opacity: 1; } 90%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+@keyframes tally-4 { 0%, 30% { stroke-dashoffset: 1; opacity: 0; } 31% { opacity: 1; } 39% { stroke-dashoffset: 0; } 78% { stroke-dashoffset: 0; opacity: 1; } 90%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+@keyframes tally-5 { 0%, 44% { stroke-dashoffset: 1; opacity: 0; } 45% { opacity: 1; } 56% { stroke-dashoffset: 0; } 78% { stroke-dashoffset: 0; opacity: 1; } 90%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+.tally-loader line {
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  animation-duration: var(--tally-loop, 2.4s);
+  animation-iteration-count: infinite;
+  animation-timing-function: cubic-bezier(.55, 0, .25, 1);
+}
+.tally-loader line:nth-child(1) { animation-name: tally-1; }
+.tally-loader line:nth-child(2) { animation-name: tally-2; }
+.tally-loader line:nth-child(3) { animation-name: tally-3; }
+.tally-loader line:nth-child(4) { animation-name: tally-4; }
+.tally-loader line:nth-child(5) { animation-name: tally-5; }
+@media (prefers-reduced-motion: reduce) {
+  .tally-loader line { animation: none; stroke-dashoffset: 0; opacity: 1; }
+}
+
+/* DESIGN.md §11 modal: 180ms fade + 2% scale in, 120ms fade out. */
+@keyframes dialog-in {
+  from { opacity: 0; transform: scale(.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes dialog-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* DESIGN.md §11: panel/sheet motion, 220ms cubic-bezier(.32,.72,0,1) — used by components/ui/SidePanel.tsx */

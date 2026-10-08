@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useConfirmAction } from "@/components/ui/useConfirmAction";
 
 export interface RuleRowData {
   id: string;
@@ -14,6 +15,7 @@ export interface RuleRowData {
 export function RuleRow({ rule }: { rule: RuleRowData }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
+  const { confirm: confirmAction, dialog: confirmDialog } = useConfirmAction();
 
   async function toggleEnabled() {
     setBusy(true);
@@ -31,17 +33,18 @@ export function RuleRow({ rule }: { rule: RuleRowData }) {
     }
   }
 
-  async function remove() {
-    if (!window.confirm("Delete this rule? Transactions it already categorized keep their category.")) return;
-    setBusy(true);
-    try {
-      const res = await fetch(`/api/rules/${rule.id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete rule");
-      router.refresh();
-    } catch (err) {
-      console.error(err);
-      setBusy(false);
-    }
+  function remove() {
+    confirmAction({
+      title: "Delete this rule?",
+      description: <p className="m-0">Transactions it already categorized keep their category.</p>,
+      confirmLabel: "Delete rule",
+      failure: "Couldn't delete this rule. Check your connection and try again.",
+      run: async () => {
+        const res = await fetch(`/api/rules/${rule.id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Failed to delete rule");
+        router.refresh();
+      },
+    });
   }
 
   return (
@@ -58,6 +61,7 @@ export function RuleRow({ rule }: { rule: RuleRowData }) {
       <button onClick={remove} disabled={busy} className="text-xs text-text-3 hover:text-negative disabled:opacity-40">
         Delete
       </button>
+      {confirmDialog}
     </div>
   );
 }

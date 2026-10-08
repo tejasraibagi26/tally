@@ -1,10 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil } from "lucide-react";
+import { AlertTriangle, CalendarDays, Pencil, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
+import { DialogBody, DialogFooter, DialogHeader, DialogTile } from "@/components/ui/Dialog";
+import { showToast } from "@/lib/toast";
+
+/** "2026-10-14" → "Oct 14". */
+function shortDate(iso: string): string {
+  return new Date(iso + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+}
 
 /**
  * The Actions column's edit-next-date control: an icon button that opens the
@@ -15,31 +22,37 @@ import { Modal } from "@/components/ui/Modal";
 export function NextDueDateEditor({
   streamId,
   description,
+  detail,
   predictedNextDate,
   manualNextDueDate,
 }: {
   streamId: string;
   /** The bill's name, shown in the dialog heading. */
   description: string;
+  /** Cadence and amount under the name, e.g. "monthly · $20.99". */
+  detail?: string;
   predictedNextDate: string | null;
   manualNextDueDate: string | null;
 }) {
   const router = useRouter();
+  const titleId = useId();
+  const fieldId = useId();
   const [open, setOpen] = useState(false);
-  const [dateInput, setDateInput] = useState(manualNextDueDate ?? predictedNextDate ?? "");
-  const [saving, setSaving] = useState(false);
+  const current = manualNextDueDate ?? predictedNextDate ?? "";
+  const [dateInput, setDateInput] = useState(current);
+  // Which save is running: the form's, or the reset to the predicted date.
+  const [saving, setSaving] = useState<"save" | "reset" | null>(null);
   const [error, setError] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  // Stable identity: Modal refocuses its dialog whenever onClose changes, which would pull focus out of the date field on every keystroke.
   const close = useCallback(() => setOpen(false), []);
 
-  // Modal moves focus to its dialog on open; put it back on the date field once that has happened.
+  // Modal moves focus to its dialog on open; put it on the date field instead.
   useEffect(() => {
     if (open) inputRef.current?.focus();
   }, [open]);
 
   async function save(nextManualDate: string | null) {
-    setSaving(true);
+    setSaving(nextManualDate === null ? "reset" : "save");
     setError(false);
     try {
       const res = await fetch(`/api/recurring-streams/${streamId}`, {
@@ -49,18 +62,20 @@ export function NextDueDateEditor({
       });
       if (!res.ok) throw new Error("Failed to update next due date");
       setOpen(false);
+      const shown = nextManualDate ?? predictedNextDate;
+      showToast(shown ? `Next date set to ${shortDate(shown)}` : "Next date cleared");
       router.refresh();
     } catch (err) {
       console.error(err);
       setError(true);
     } finally {
-      setSaving(false);
+      setSaving(null);
     }
   }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!dateInput) return;
+    if (!dateInput || dateInput === current) return;
     void save(dateInput);
   }
 
@@ -69,7 +84,7 @@ export function NextDueDateEditor({
       <button
         type="button"
         onClick={() => {
-          setDateInput(manualNextDueDate ?? predictedNextDate ?? "");
+          setDateInput(current);
           setError(false);
           setOpen(true);
         }}
@@ -81,41 +96,69 @@ export function NextDueDateEditor({
         <Pencil size={14} strokeWidth={1.75} />
       </button>
 
-      <Modal open={open} onClose={close} width={480}>
-        <form onSubmit={submit} className="p-6 flex flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-xl font-semibold text-text m-0">Edit next date</h2>
-            <p className="m-0 text-[15px] text-text-2 truncate">{description}</p>
-          </div>
-          <label className="flex flex-col gap-1.5">
-            <span className="text-xs font-medium uppercase tracking-wide text-text-3">Next date</span>
-            <input
-              ref={inputRef}
-              type="date"
-              value={dateInput}
-              onChange={(e) => setDateInput(e.target.value)}
-              className="h-10 w-full rounded-control bg-surface-2 border border-border-strong px-3 text-sm text-text"
+      <Modal open={open} onClose={close} width={480} labelledBy={titleId} busy={saving !== null}>
+        <form onSubmit={submit}>
+          <DialogBody>
+            <DialogHeader
+              tile={
+                <DialogTile tone="neutral">
+                  <CalendarDays size={20} strokeWidth={1.75} />
+                </DialogTile>
+              }
+              titleId={titleId}
+              title="Edit next date"
+              subtitle={detail ? `${description} · ${detail}` : description}
+              onClose={close}
             />
-          </label>
-          {error && <p className="m-0 text-[13px] text-negative">Couldn&apos;t save the date. Try again.</p>}
-          {manualNextDueDate && (
-            <button
-              type="button"
-              className="text-[13px] text-text-3 hover:text-negative disabled:opacity-40 text-left self-start"
-              disabled={saving}
-              onClick={() => void save(null)}
-            >
-              Clear override (go back to auto-detected)
-            </button>
-          )}
-          <div className="flex items-center justify-end gap-3 pt-2">
-            <Button type="button" variant="ghost" disabled={saving} onClick={close}>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor={fieldId} className="flex items-center gap-2 text-xs font-medium text-text-2">
+                Next charge
+                {manualNextDueDate && (
+                  <span className="rounded-[6px] border border-brand-border bg-brand-subtle px-1.5 py-0.5 text-[11px] font-medium text-brand">Set by you</span>
+                )}
+              </label>
+              <input
+                ref={inputRef}
+                id={fieldId}
+                type="date"
+                value={dateInput}
+                disabled={saving !== null}
+                aria-invalid={error || undefined}
+                aria-describedby={`${fieldId}-help`}
+                onChange={(e) => setDateInput(e.target.value)}
+                className={`h-9 w-full rounded-control bg-surface border px-3 text-[15px] text-text tabular-nums disabled:opacity-60 ${error ? "border-negative" : "border-border-strong"}`}
+              />
+              {error ? (
+                <p id={`${fieldId}-help`} role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-negative">
+                  <AlertTriangle size={14} strokeWidth={1.75} className="flex-none" />
+                  Couldn&apos;t save the date. Check your connection and try again.
+                </p>
+              ) : (
+                predictedNextDate && (
+                  <p id={`${fieldId}-help`} className="m-0 text-[13px] text-text-3">
+                    {manualNextDueDate ? `Tally predicted ${shortDate(predictedNextDate)}.` : `Tally predicts ${shortDate(predictedNextDate)} from past charges.`}
+                  </p>
+                )
+              )}
+            </div>
+          </DialogBody>
+          <DialogFooter
+            left={
+              manualNextDueDate && (
+                <Button type="button" variant="ghost" size="sm" className="text-text-2" loading={saving === "reset"} disabled={saving === "save"} onClick={() => void save(null)}>
+                  {saving !== "reset" && <RotateCcw size={14} strokeWidth={1.75} />}
+                  {predictedNextDate ? `Use ${shortDate(predictedNextDate)} instead` : "Clear my date"}
+                </Button>
+              )
+            }
+          >
+            <Button type="button" variant="ghost" disabled={saving !== null} onClick={close}>
               Cancel
             </Button>
-            <Button type="submit" disabled={saving || !dateInput}>
-              {saving ? "Saving…" : "Save"}
+            <Button type="submit" loading={saving === "save"} disabled={!dateInput || dateInput === current || saving === "reset"}>
+              Save date
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </Modal>
     </>

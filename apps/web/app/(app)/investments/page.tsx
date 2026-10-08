@@ -119,7 +119,7 @@ export default async function InvestmentsPage({ searchParams }: { searchParams: 
           items.some((i) => i.lastSyncedAt) && <SyncFreshness key="sync" syncedAt={items.map((i) => i.lastSyncedAt)} />,
           originalCurrencies.some((c) => c !== NET_WORTH_CURRENCY) && `${originalCurrencies.filter((c) => c !== NET_WORTH_CURRENCY).join(", ")} converted to ${NET_WORTH_CURRENCY} at today's rate`,
         ]}
-        actions={<SyncButton products={["holdings", "investments"]} label="Sync holdings" loadingMessage="Syncing your investment holdings. This can take a moment." />}
+        actions={<SyncButton products={["holdings", "investments"]} label="Sync holdings" />}
       />
 
       <SyncFailureBanner />

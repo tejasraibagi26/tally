@@ -104,7 +104,13 @@ export function SubscriptionsTable({ streams }: { streams: SubscriptionStream[] 
             )}
           </span>
           <span className="flex items-center gap-1">
-            <NextDueDateEditor streamId={s.id} description={s.description ?? s.merchantKey} predictedNextDate={s.predictedNextDate} manualNextDueDate={s.manualNextDueDate} />
+            <NextDueDateEditor
+              streamId={s.id}
+              description={s.description ?? s.merchantKey}
+              detail={`${(s.amortizeMonthly ? `Every ${s.amortizeMonths} months` : (FREQUENCY_LABEL[s.frequency] ?? s.frequency)).toLowerCase()} · ${formatCents(Math.abs(s.averageAmount))}`}
+              predictedNextDate={s.predictedNextDate}
+              manualNextDueDate={s.manualNextDueDate}
+            />
             <RemoveBillButton streamId={s.id} description={s.description ?? s.merchantKey} />
           </span>
         </div>

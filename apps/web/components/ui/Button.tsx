@@ -1,12 +1,14 @@
 import { type ButtonHTMLAttributes, forwardRef } from "react";
 import { cn } from "@/lib/cn";
 
-type Variant = "primary" | "secondary" | "ghost" | "destructive";
+type Variant = "primary" | "secondary" | "ghost" | "destructive" | "destructive-solid";
 type Size = "sm" | "md" | "lg";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
+  /** DESIGN.md §8: an inline 14px spinner beside the label, which stays. Also disables the button. */
+  loading?: boolean;
 }
 
 const variantClasses: Record<Variant, string> = {
@@ -14,6 +16,8 @@ const variantClasses: Record<Variant, string> = {
   secondary: "bg-surface border border-border-strong text-text hover:bg-sunken",
   ghost: "bg-transparent text-text hover:bg-sunken",
   destructive: "bg-transparent text-negative hover:bg-negative-subtle",
+  // Solid destructive is only for the confirm button inside a confirm dialog (DESIGN.md §8).
+  "destructive-solid": "bg-negative text-surface hover:opacity-90",
 };
 
 const sizeClasses: Record<Size, string> = {
@@ -23,22 +27,37 @@ const sizeClasses: Record<Size, string> = {
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = "primary", size = "md", className, disabled, ...props },
+  { variant = "primary", size = "md", className, disabled, loading = false, children, ...props },
   ref,
 ) {
   return (
     <button
       ref={ref}
-      disabled={disabled}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
       className={cn(
         "inline-flex items-center justify-center gap-2 rounded-control font-medium transition-colors",
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-info",
-        disabled && "opacity-40 cursor-not-allowed",
+        disabled && !loading && "opacity-40 cursor-not-allowed",
+        loading && "cursor-progress",
         variantClasses[variant],
         sizeClasses[size],
         className,
       )}
       {...props}
-    />
+    >
+      {loading && <Spinner />}
+      {children}
+    </button>
   );
 });
+
+/** 14px ring in the current text color. */
+export function Spinner() {
+  return (
+    <span
+      aria-hidden="true"
+      className="w-3.5 h-3.5 flex-none rounded-full border-2 border-current border-t-transparent animate-spin motion-reduce:animate-none opacity-80"
+    />
+  );
+}

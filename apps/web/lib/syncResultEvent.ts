@@ -5,4 +5,6 @@ export const SYNC_RESULT_EVENT = "tally:sync-result";
 
 export interface SyncResultEventDetail {
   failedItems: FailureBannerItem[];
+  /** The sync request itself failed, so nothing ran. */
+  runFailed?: boolean;
 }

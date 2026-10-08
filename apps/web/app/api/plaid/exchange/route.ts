@@ -3,7 +3,7 @@ import { z } from "zod";
 import { CountryCode } from "plaid";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
-import { plaidClient, encryptAccessToken, PLAID_COUNTRY_CODES } from "@/lib/plaid";
+import { plaidClient, encryptAccessToken, plaidErrorCode, PLAID_COUNTRY_CODES } from "@/lib/plaid";
 import { upsertAccountsForItem } from "@/lib/plaidAccounts";
 import { syncTransactionsForItem } from "@/lib/plaidSync";
 import { syncHoldingsForItem, syncInvestmentTransactionsForItem } from "@/lib/plaidInvestments";
@@ -124,6 +124,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, itemId: item.id, institutionName, failures });
   } catch (err) {
     console.error("plaid/exchange failed", err);
-    return NextResponse.json({ error: "Failed to link account" }, { status: 502 });
+    // `code` lets the client pick plain-language copy (@tally/core/syncDialog
+    // connectErrorCopy); it's never shown as-is.
+    return NextResponse.json({ error: "Failed to link account", code: plaidErrorCode(err) ?? null }, { status: 502 });
   }
 }

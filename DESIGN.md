@@ -303,7 +303,9 @@ The delta chip uses `--positive`/`--negative` *and* an arrow glyph *and* a compa
 
 **Side panel** — 420px, slides from the right, overlay shadow, ESC + click-outside to close, focus trapped.
 
-**Modal** — 480/640px, radius 16, centered, `--canvas` scrim at 60%. Plaid Link renders in its own iframe modal — don't restyle it; just center it and dim behind.
+**Modal** — 480/640px, radius 16, centered, over `--scrim` (light `rgba(26,25,23,.34)`, dark `rgba(0,0,0,.62)`) with a 2px backdrop blur. Built from `components/ui/Dialog.tsx`: header (40px tone tile, 18/600 title, 13.5 subtitle, close button only while dismissible), body (24px padding, 16 gap), footer (hairline above, actions right, primary last). Running work makes it non-dismissible (no close, Esc and scrim ignored). Failures show inline in the dialog, never `window.alert`; simple confirms use `useConfirmAction`. Plaid Link renders in its own iframe modal — don't restyle it; just center it and dim behind.
+
+**Progress (tally loader)** — the brand mark writing itself (`TallyLoader`, components/Logo.tsx), 2.4s loop, in a dialog's 40px header tile only; warning-toned at 3.2s after 20s. Below ~24px it reads as two bars, so buttons keep the 14px spinner. Used by `SyncDialog` (connect/reconnect: syncing → slow → success | partial | failed).
 
 **Empty states** — one line of what's missing, one primary action, no illustration. e.g. "No transactions in this range." → *Change dates*.
 
@@ -353,7 +355,7 @@ The delta chip uses `--positive`/`--negative` *and* an arrow glyph *and* a compa
 |---|---|---|
 | Hover / color | 120ms | `ease-out` |
 | Panel / sheet | 220ms | `cubic-bezier(.32,.72,0,1)` |
-| Modal | 180ms fade + 2% scale | `ease-out` |
+| Modal | 180ms fade + 2% scale in, 120ms fade out | `ease-out` / `ease-in` |
 | Chart draw-in | 400ms, once per mount, no stagger on re-filter | `ease-out` |
 | Number change | 300ms count-up, only in stat tiles | `ease-out` |
 

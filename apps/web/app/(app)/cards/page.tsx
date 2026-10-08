@@ -85,7 +85,7 @@ export default async function CardsPage() {
       <PageHeader
         title="Credit cards"
         meta={[`${cards.length} card${cards.length === 1 ? "" : "s"}`, rows.some((r) => r.lastSyncedAt) && <SyncFreshness key="sync" syncedAt={rows.map((r) => r.lastSyncedAt)} />]}
-        actions={<SyncButton products={["liabilities"]} label="Sync card details" loadingMessage="Syncing your credit card details. This can take a moment." />}
+        actions={<SyncButton products={["liabilities"]} label="Sync card details" />}
       />
       <SyncFailureBanner />
       <CardsView cards={cards} totalOwed={totalOwed} next={next} utilization={utilization} />

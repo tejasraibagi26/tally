@@ -15,12 +15,13 @@ export interface FailureBannerItem {
 }
 
 /** One dismissible line per affected institution: "Couldn't fetch transactions and credit card details for TD Canada Trust." */
-export function FailureBanner({ items, onDismiss }: { items: FailureBannerItem[]; onDismiss: () => void }) {
-  if (items.length === 0) return null;
+export function FailureBanner({ items, message = null, onDismiss }: { items: FailureBannerItem[]; message?: string | null; onDismiss: () => void }) {
+  if (items.length === 0 && !message) return null;
 
   return (
     <div className="flex items-start gap-3 px-4 py-3 rounded-control bg-warning-subtle text-[13.5px] text-text">
       <div className="flex-1 flex flex-col gap-1">
+        {message && <span>{message}</span>}
         {items.map((item, i) => (
           <span key={i}>
             Could not fetch {joinLabels(item.labels)}

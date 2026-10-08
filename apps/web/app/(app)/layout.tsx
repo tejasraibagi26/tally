@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db, schema } from "@/db";
 import { SideNav } from "@/components/nav/SideNav";
 import { MobileNav } from "@/components/nav/MobileNav";
+import { Toaster } from "@/components/ui/Toaster";
 import { MOCK_MODE } from "@/lib/config";
 import { monthRange } from "@tally/core/budgetMath";
 import { currentMonthFor } from "@/lib/userTimezone";
@@ -70,6 +71,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <div className="flex-1 flex flex-col min-w-0 min-h-0">
         <main className="flex-1 min-w-0 overflow-y-auto">{children}</main>
       </div>
+      <Toaster />
     </div>
   );
 }

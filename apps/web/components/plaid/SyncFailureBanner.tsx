@@ -14,15 +14,26 @@ import { SYNC_RESULT_EVENT, type SyncResultEventDetail } from "@/lib/syncResultE
  */
 export function SyncFailureBanner() {
   const [items, setItems] = useState<FailureBannerItem[]>([]);
+  const [runFailed, setRunFailed] = useState(false);
 
   useEffect(() => {
     function onResult(e: Event) {
       const detail = (e as CustomEvent<SyncResultEventDetail>).detail;
       setItems(detail.failedItems);
+      setRunFailed(detail.runFailed ?? false);
     }
     window.addEventListener(SYNC_RESULT_EVENT, onResult);
     return () => window.removeEventListener(SYNC_RESULT_EVENT, onResult);
   }, []);
 
-  return <FailureBanner items={items} onDismiss={() => setItems([])} />;
+  return (
+    <FailureBanner
+      items={items}
+      message={runFailed ? "Sync didn't run. Check your connection and try again." : null}
+      onDismiss={() => {
+        setItems([]);
+        setRunFailed(false);
+      }}
+    />
+  );
 }

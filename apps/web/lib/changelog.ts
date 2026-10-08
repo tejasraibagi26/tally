@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.26.0",
+    date: "2026-10-07",
+    changes: [
+      { kind: "improved", text: "Connecting or reconnecting a bank now shows which bank, what Tally is pulling in, and how it went, including anything that didn't come through." },
+      { kind: "improved", text: "If a bank is slow to respond, Tally tells you it's taking longer than usual instead of looking stuck." },
+      { kind: "improved", text: "Sync buttons no longer cover the page while they run. You'll get a short confirmation when it's done." },
+      { kind: "improved", text: "Revoking a connection lists the exact accounts that will be deleted, and a failed revoke now says so instead of closing." },
+      { kind: "improved", text: "Confirmations and errors now appear in Tally's own dialogs instead of the browser's pop-ups." },
+    ],
+  },
+  {
     version: "1.25.2",
     date: "2026-10-07",
     changes: [{ kind: "fixed", text: "A transaction split across categories now counts toward each category's budget and spending total, instead of all landing in the original category." }],

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { showToast } from "@/lib/toast";
 import { RefreshCw } from "lucide-react";
 import { formatCents } from "@tally/core/money";
 import { prettifyPfc } from "@tally/core/pfc";
@@ -151,7 +152,7 @@ export function TransactionsList({
         router.refresh();
       } catch (err) {
         console.error(err);
-        window.alert("Couldn't update those transactions. Try again.");
+        showToast("Couldn't update those transactions. Try again.", "negative");
       } finally {
         setBusy(false);
         setPickerFor(null);

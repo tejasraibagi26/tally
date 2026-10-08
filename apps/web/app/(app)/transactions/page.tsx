@@ -303,7 +303,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
               Manage rules →
             </Link>
             <ReviewQueue categories={categoryOptions} pendingCount={unreviewed} />
-            <SyncButton products={["transactions"]} loadingMessage="Syncing your transactions. This can take a moment." />
+            <SyncButton products={["transactions"]} />
             <AddTransactionForm
               accounts={accounts.map((a) => ({ id: a.id, name: accountDisplayName(a.name, a.nickname), mask: a.mask }))}
               categories={categoryOptions}

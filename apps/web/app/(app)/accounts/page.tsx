@@ -126,7 +126,7 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
         actions={
           items.length > 0 && (
             <>
-              <SyncButton products={["balances"]} label="Sync all" loadingMessage="Refreshing account balances. This can take a moment." />
+              <SyncButton products={["balances"]} label="Sync all" />
               <LinkButton mode="create" label="Add bank" mock={MOCK_MODE} />
             </>
           )

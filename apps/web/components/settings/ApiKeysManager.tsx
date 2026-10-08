@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { FormField, FormPanel, panelInputClass } from "@/components/ui/FormPanel";
+import { useConfirmAction } from "@/components/ui/useConfirmAction";
 
 export interface ApiKeyData {
   id: string;
@@ -51,7 +52,7 @@ export function ApiKeysManager({ apiKeys, shortcutsEndpoint }: { apiKeys: ApiKey
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const { confirm: confirmAction, dialog: confirmDialog } = useConfirmAction();
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
 
   function close() {
@@ -87,18 +88,18 @@ export function ApiKeysManager({ apiKeys, shortcutsEndpoint }: { apiKeys: ApiKey
     }
   }
 
-  async function remove(key: ApiKeyData) {
-    if (!window.confirm(`Revoke "${key.name}"? Anything still using it (a Shortcut, a script) will stop working immediately.`)) return;
-    setBusyId(key.id);
-    try {
-      const res = await fetch(`/api/api-keys/${key.id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to revoke key");
-      router.refresh();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setBusyId(null);
-    }
+  function remove(key: ApiKeyData) {
+    confirmAction({
+      title: `Revoke "${key.name}"?`,
+      description: <p className="m-0">Anything still using it, like a Shortcut or a script, will stop working immediately.</p>,
+      confirmLabel: "Revoke key",
+      failure: "Couldn't revoke this key. Check your connection and try again.",
+      run: async () => {
+        const res = await fetch(`/api/api-keys/${key.id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Failed to revoke key");
+        router.refresh();
+      },
+    });
   }
 
   return (
@@ -152,7 +153,6 @@ export function ApiKeysManager({ apiKeys, shortcutsEndpoint }: { apiKeys: ApiKey
               </div>
               <button
                 onClick={() => remove(k)}
-                disabled={busyId === k.id}
                 className="text-[13px] text-negative hover:underline flex-none disabled:opacity-40"
               >
                 Revoke
@@ -183,6 +183,7 @@ export function ApiKeysManager({ apiKeys, shortcutsEndpoint }: { apiKeys: ApiKey
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Apple Shortcuts" autoFocus className={panelInputClass} />
         </FormField>
       </FormPanel>
+      {confirmDialog}
     </div>
   );
 }

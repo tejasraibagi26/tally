@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { AmountInput, FormField, FormPanel, panelInputClass } from "@/components/ui/FormPanel";
+import { useConfirmAction } from "@/components/ui/useConfirmAction";
 import { formatCents } from "@tally/core/money";
 
 export interface IncomeAccountOption {
@@ -73,6 +74,7 @@ export function IncomeScheduleManager({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const { confirm: confirmAction, dialog: confirmDialog } = useConfirmAction();
 
   if (accounts.length === 0) return <p className="text-text-2 text-sm">Connect or add an account first, then come back here to set up an income schedule.</p>;
 
@@ -131,18 +133,18 @@ export function IncomeScheduleManager({
     }
   }
 
-  async function remove(schedule: IncomeScheduleData) {
-    if (!window.confirm(`Delete the "${schedule.label}" income schedule? Paychecks it already added stay in your transactions.`)) return;
-    setBusyId(schedule.id);
-    try {
-      const res = await fetch(`/api/income-schedules/${schedule.id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete schedule");
-      router.refresh();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setBusyId(null);
-    }
+  function remove(schedule: IncomeScheduleData) {
+    confirmAction({
+      title: `Delete "${schedule.label}"?`,
+      description: <p className="m-0">Paychecks it already added stay in your transactions.</p>,
+      confirmLabel: "Delete schedule",
+      failure: "Couldn't delete this schedule. Check your connection and try again.",
+      run: async () => {
+        const res = await fetch(`/api/income-schedules/${schedule.id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Failed to delete schedule");
+        router.refresh();
+      },
+    });
   }
 
   return (
@@ -238,6 +240,7 @@ export function IncomeScheduleManager({
           )}
         </FormField>
       </FormPanel>
+      {confirmDialog}
     </div>
   );
 }

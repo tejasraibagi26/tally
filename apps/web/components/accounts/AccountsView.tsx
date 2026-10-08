@@ -1,16 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { connectionState, type ConnectionState } from "@tally/core/connectionState";
 import { cn } from "@/lib/cn";
 import { ConnectionActionsProvider, useConnectionActions } from "@/components/accounts/ConnectionActions";
 import { ConnectionCard } from "@/components/accounts/ConnectionCard";
 import { NeedsYouPanel } from "@/components/accounts/NeedsYouPanel";
 import { BankPanel } from "@/components/accounts/BankPanel";
-import { SYNC_RESULT_EVENT, type SyncResultEventDetail } from "@/lib/syncResultEvent";
 import type { ConnectionView } from "@/components/accounts/types";
-
-const TOAST_MS = 4000;
 
 /**
  * The interactive part of the Accounts page: the Needs you panel, the card
@@ -39,7 +36,6 @@ function AccountsGrid({
   setBankId: (id: string | null) => void;
 }) {
   const { localFor } = useConnectionActions();
-  const [toast, setToast] = useState<string | null>(null);
 
   const rows = useMemo(() => {
     const withState = items.map((item) => ({ item, state: connectionState(item, localFor(item.id)) }));
@@ -67,22 +63,6 @@ function AccountsGrid({
   const closePanel = useCallback(() => openPanel(null), [openPanel]);
   const panelRow = rows.find((r) => r.item.id === bankId) ?? null;
 
-  // Sync-all success is a toast; failures keep using the persistent
-  // SyncFailureBanner (DESIGN.md §8 toast rule).
-  useEffect(() => {
-    function onResult(e: Event) {
-      const { failedItems } = (e as CustomEvent<SyncResultEventDetail>).detail;
-      if (failedItems.length === 0) setToast(items.length === 1 ? "Your bank is synced" : `All ${items.length} banks synced`);
-    }
-    window.addEventListener(SYNC_RESULT_EVENT, onResult);
-    return () => window.removeEventListener(SYNC_RESULT_EVENT, onResult);
-  }, [items.length]);
-  useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(null), TOAST_MS);
-    return () => clearTimeout(t);
-  }, [toast]);
-
   return (
     <>
       {needsYou.length > 0 && <NeedsYouPanel rows={needsYou} onOpenPanel={openPanel} />}
@@ -91,13 +71,6 @@ function AccountsGrid({
       {rest.length > 0 && <Group label={urgent.length > 0 ? "Up to date" : undefined} rows={rest} baseCurrency={baseCurrency} onOpenPanel={openPanel} />}
 
       <BankPanel item={panelRow?.item ?? null} state={panelRow?.state ?? null} open={panelRow !== null} onClose={closePanel} />
-
-      {toast && (
-        <div role="status" className="fixed right-6 bottom-6 z-40 flex items-center gap-2.5 rounded-control bg-raised border border-border shadow-overlay px-4 py-2.5 text-[13.5px] text-text">
-          <span className="w-1.5 h-1.5 rounded-full bg-positive" />
-          {toast}
-        </div>
-      )}
     </>
   );
 }
