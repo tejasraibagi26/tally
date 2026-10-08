@@ -228,7 +228,7 @@ import Constants from "expo-constants";
  * and bar rendered light in Dark Mode, and the stack/tab containers were
  * painted the light theme's grey.
  */
-export const APP_VERSION = "1.30.0";
+export const APP_VERSION = "1.30.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

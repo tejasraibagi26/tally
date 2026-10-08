@@ -29,7 +29,7 @@ export function SyncButton({ products, label = "Sync now" }: SyncButtonProps) {
   }
 
   return (
-    <Button variant="secondary" size="sm" loading={loading} onClick={handleSync}>
+    <Button variant="secondary" loading={loading} onClick={handleSync}>
       {label}
     </Button>
   );

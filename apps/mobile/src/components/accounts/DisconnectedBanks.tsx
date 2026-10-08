@@ -1,4 +1,6 @@
-import { View, Text, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, Pressable } from "react-native";
+import { RotateCcw } from "lucide-react-native";
+import { BusyIcon } from "@/components/ui/BusyIcon";
 import { Card } from "@/components/ui/Card";
 import type { DisconnectedInstitution } from "@/lib/queries/accounts";
 import { hairline } from "@/theme/colors";
@@ -50,7 +52,9 @@ export function DisconnectedBanks({ banks, onReconnect, connecting }: { banks: D
               accessibilityLabel={`Reconnect ${bank.institutionName ?? "this bank"}`}
               className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 bg-brand-subtle"
             >
-              {connecting && <ActivityIndicator size="small" color={colors.brand} />}
+              <BusyIcon busy={connecting} color={colors.brand!} size={14}>
+                <RotateCcw size={13} color={colors.brand} strokeWidth={2.2} />
+              </BusyIcon>
               <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Reconnect</Text>
             </Pressable>
           </View>

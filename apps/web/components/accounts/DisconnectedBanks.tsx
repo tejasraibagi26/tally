@@ -44,7 +44,7 @@ export function DisconnectedBanks({ banks, mock }: { banks: DisconnectedBank[]; 
                 <span className="text-[15px] font-medium text-text truncate">{bank.institutionName ?? "Bank"}</span>
                 <span className="text-[13px] text-text-3">Disconnected {shortDate(bank.disconnectedAt)} · history kept</span>
               </div>
-              <LinkButton mode="create" label="Reconnect" variant="secondary" mock={mock} />
+              <LinkButton mode="create" label="Reconnect" variant="secondary" size="sm" mock={mock} />
             </div>
             {bank.accounts.length > 0 && (
               <ul className="m-0 p-0 list-none flex flex-col gap-1.5 border-t border-border pt-3">

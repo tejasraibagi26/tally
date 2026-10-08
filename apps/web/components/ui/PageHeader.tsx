@@ -89,9 +89,9 @@ export function SyncFreshness({ syncedAt }: { syncedAt: (Date | null)[] }) {
 
 /** ‹ October 2026 › — one bordered control for stepping through months by link. */
 export function MonthStepper({ label, prevHref, nextHref }: { label: string; prevHref: string; nextHref: string }) {
-  const arrow = "w-[30px] h-full flex items-center justify-center text-text-2 hover:text-text hover:bg-sunken";
+  const arrow = "w-9 h-full flex items-center justify-center text-text-2 hover:text-text hover:bg-sunken";
   return (
-    <div className="inline-flex items-center h-[30px] rounded-control border border-border-strong bg-surface overflow-hidden">
+    <div className="inline-flex items-center h-9 rounded-control border border-border-strong bg-surface overflow-hidden">
       <Link href={prevHref} aria-label="Previous month" title="Previous month" className={arrow}>
         ‹
       </Link>

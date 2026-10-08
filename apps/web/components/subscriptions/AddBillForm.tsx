@@ -75,7 +75,7 @@ export function AddBillForm({ accounts, categories }: { accounts: BillAccountOpt
 
   return (
     <>
-      <Button size="sm" onClick={() => setOpen(true)}>
+      <Button onClick={() => setOpen(true)}>
         + Add a bill
       </Button>
       <FormPanel

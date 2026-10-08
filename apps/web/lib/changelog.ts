@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.28.1",
+    date: "2026-10-07",
+    changes: [{ kind: "fixed", text: "Buttons at the top of each page are now all the same size, and a button no longer grows or shrinks while it's working." }],
+  },
+  {
     version: "1.28.0",
     date: "2026-10-07",
     changes: [

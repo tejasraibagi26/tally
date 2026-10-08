@@ -145,7 +145,7 @@ export function RuleForm({ categories, accounts }: { categories: RuleFormCategor
 
   return (
     <>
-      <Button size="sm" onClick={() => setOpen(true)}>
+      <Button onClick={() => setOpen(true)}>
         + New rule
       </Button>
       <FormPanel

@@ -77,7 +77,7 @@ export function AddBudgetForm({ month, monthLabel, categories }: { month: string
 
   return (
     <>
-      <Button size="sm" onClick={() => setOpen(true)}>
+      <Button onClick={() => setOpen(true)}>
         + Add budget
       </Button>
       <FormPanel

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, ScrollView, ActivityIndicator, Pressable, RefreshControl, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, ScrollView, Pressable, RefreshControl, KeyboardAvoidingView, Platform } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Plus, RefreshCw } from "lucide-react-native";
@@ -14,6 +14,7 @@ import { FixSheet } from "@/components/accounts/FixSheet";
 import { DisconnectedBanks } from "@/components/accounts/DisconnectedBanks";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { Toast } from "@/components/ui/Toast";
+import { BusyIcon } from "@/components/ui/BusyIcon";
 import { useAccounts, type Institution } from "@/lib/queries/accounts";
 import { usePlaidLink } from "@/lib/usePlaidLink";
 import { useSync, useRefreshItemBalances, useItemRefreshStates } from "@/lib/queries/plaid";
@@ -159,7 +160,9 @@ export default function AccountsScreen() {
                       accessibilityLabel="Sync all banks"
                       className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50 bg-brand-subtle"
                     >
-                      {sync.isPending ? <ActivityIndicator size="small" color={colors.brand} /> : <RefreshCw size={14} color={colors.brand} strokeWidth={2} />}
+                      <BusyIcon busy={sync.isPending} color={colors.brand!}>
+                        <RefreshCw size={14} color={colors.brand} strokeWidth={2} />
+                      </BusyIcon>
                       <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Sync</Text>
                     </Pressable>
                     <Pressable
@@ -167,7 +170,9 @@ export default function AccountsScreen() {
                       disabled={isLinking}
                       className="flex-row items-center gap-1.5 rounded-full px-3.5 py-2 disabled:opacity-50 bg-brand-subtle"
                     >
-                      {linkingItemId === "create" ? <ActivityIndicator size="small" color={colors.brand} /> : <Plus size={15} color={colors.brand} strokeWidth={2} />}
+                      <BusyIcon busy={linkingItemId === "create"} color={colors.brand!}>
+                        <Plus size={15} color={colors.brand} strokeWidth={2} />
+                      </BusyIcon>
                       <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Add</Text>
                     </Pressable>
                   </>

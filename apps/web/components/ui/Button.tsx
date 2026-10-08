@@ -7,7 +7,11 @@ type Size = "sm" | "md" | "lg";
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
-  /** DESIGN.md §8: an inline 14px spinner beside the label, which stays. Also disables the button. */
+  /**
+   * DESIGN.md §8: an inline 14px spinner beside the label, which stays. Also
+   * disables the button. Passing this at all (true or false) reserves the
+   * spinner's room, so the button is the same size idle and busy.
+   */
   loading?: boolean;
 }
 
@@ -27,13 +31,13 @@ const sizeClasses: Record<Size, string> = {
 };
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = "primary", size = "md", className, disabled, loading = false, children, ...props },
+  { variant = "primary", size = "md", className, disabled, loading, children, ...props },
   ref,
 ) {
   return (
     <button
       ref={ref}
-      disabled={disabled || loading}
+      disabled={disabled || !!loading}
       aria-busy={loading || undefined}
       className={cn(
         "inline-flex items-center justify-center gap-2 rounded-control font-medium transition-colors",
@@ -46,8 +50,22 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       )}
       {...props}
     >
-      {loading && <Spinner />}
-      {children}
+      {loading === undefined ? (
+        children
+      ) : (
+        // Both layouts share one grid cell: the invisible copy (spinner +
+        // label) sets the width, so starting or finishing never resizes it.
+        <span className="grid">
+          <span aria-hidden="true" className="invisible col-start-1 row-start-1 flex items-center justify-center gap-2">
+            <Spinner />
+            {children}
+          </span>
+          <span className="col-start-1 row-start-1 flex items-center justify-center gap-2">
+            {loading && <Spinner />}
+            {children}
+          </span>
+        </span>
+      )}
     </button>
   );
 });

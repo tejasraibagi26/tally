@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { View, Text, ScrollView, ActivityIndicator, Pressable, RefreshControl } from "react-native";
 import { Stack, useRouter } from "expo-router";
-import { ChevronRight, TrendingUp } from "lucide-react-native";
+import { ChevronRight, RefreshCw, TrendingUp } from "lucide-react-native";
+import { BusyIcon } from "@/components/ui/BusyIcon";
 import { formatCents, formatPercent } from "@tally/core/money";
 import { allocationBy, summarizeRange, unrealizedGainTotal, describeInvestmentTxn, type AllocationView, type HistoryRange } from "@tally/core/investments";
 import type { ConnectionAction } from "@tally/core/connectionState";
@@ -65,8 +66,18 @@ export default function InvestmentsScreen() {
   const [openId, setOpenId] = useState<string | null>(null);
 
   const syncAction = (
-    <Pressable onPress={() => sync.mutate(["holdings", "investments"])} disabled={sync.isPending} hitSlop={10} className="px-2 py-1">
-      {sync.isPending ? <ActivityIndicator size="small" color={colors.brand} /> : <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(15) }}>Sync</Text>}
+    <Pressable
+      onPress={() => sync.mutate(["holdings", "investments"])}
+      disabled={sync.isPending}
+      hitSlop={10}
+      accessibilityState={{ busy: sync.isPending }}
+      className="flex-row items-center gap-1.5 px-2 py-1"
+    >
+      {/* The label stays and the spinner takes a fixed slot, so the header button never resizes. */}
+      <BusyIcon busy={sync.isPending} color={colors.brand!} size={14}>
+        <RefreshCw size={13} color={colors.brand} strokeWidth={2.2} />
+      </BusyIcon>
+      <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(15) }}>Sync</Text>
     </Pressable>
   );
   // Rendered by every branch below: the header options plus the overlays a

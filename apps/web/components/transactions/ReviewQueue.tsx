@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import { formatCents } from "@tally/core/money";
 import { cn } from "@/lib/cn";
 import { SidePanel } from "@/components/ui/SidePanel";
@@ -117,9 +118,7 @@ export function ReviewQueue({ categories, pendingCount }: { categories: DetailCa
 
   return (
     <>
-      <button type="button" onClick={start} className="h-[30px] px-3 rounded-control bg-brand text-on-brand text-sm font-medium">
-        Review {pendingCount}
-      </button>
+      <Button onClick={start}>Review {pendingCount}</Button>
       <SidePanel open={open} onClose={close}>
         <div className="flex flex-col gap-5 p-6 min-h-full">
           <div className="flex items-center justify-between">

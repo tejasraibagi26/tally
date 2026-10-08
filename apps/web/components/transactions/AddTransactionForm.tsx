@@ -85,7 +85,7 @@ export function AddTransactionForm({ accounts, categories }: { accounts: Transac
 
   return (
     <>
-      <Button size="sm" onClick={() => setOpen(true)}>
+      <Button onClick={() => setOpen(true)}>
         + Add transaction
       </Button>
       <FormPanel
