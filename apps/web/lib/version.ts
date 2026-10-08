@@ -172,7 +172,7 @@
  * (they ran into the network mark). The AMEX badge stays on Amex cards
  * even next to Amex's own logo.
  */
-export const APP_VERSION = "1.26.1";
+export const APP_VERSION = "1.26.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

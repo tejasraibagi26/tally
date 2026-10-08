@@ -369,13 +369,12 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
         </Card>
       ) : (
         <Card className="flex-1 min-h-0 flex flex-col overflow-hidden">
-          <div className="hidden lg:grid grid-cols-[20px_28px_minmax(180px,1fr)_minmax(150px,200px)_130px_70px_110px] gap-x-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 flex-none">
+          <div className="hidden lg:grid grid-cols-[20px_28px_minmax(180px,1fr)_minmax(150px,200px)_130px_110px] gap-x-3 items-center px-4 py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 flex-none">
             <span />
             <span />
             <span>Merchant</span>
             <span>Category</span>
             <span>Account</span>
-            <span />
             <span className="text-right">Amount</span>
           </div>
 

@@ -239,7 +239,7 @@ export function TransactionsList({
                 aria-selected={isChecked}
                 onClick={() => openTransaction(t.id)}
                 className={cn(
-                  "relative group grid grid-cols-[auto_minmax(0,1fr)_auto] lg:grid-cols-[20px_28px_minmax(180px,1fr)_minmax(150px,200px)_130px_70px_110px] gap-x-3 gap-y-1 items-center px-4 py-2.5 border-b border-border cursor-pointer",
+                  "relative group grid grid-cols-[auto_minmax(0,1fr)_auto] lg:grid-cols-[20px_28px_minmax(180px,1fr)_minmax(150px,200px)_130px_110px] gap-x-3 gap-y-1 items-center px-4 py-2.5 border-b border-border cursor-pointer",
                   isChecked ? "bg-brand-subtle" : "hover:bg-surface-2",
                   isCursor && "outline outline-2 -outline-offset-2 outline-info",
                 )}
@@ -272,7 +272,6 @@ export function TransactionsList({
                   <CategoryChip t={t} category={category} splitCats={splitCats} uncategorized={v.uncategorized} transfer={t.isTransfer} onOpen={() => setPickerFor(t.id)} />
                 </span>
                 <span className="hidden lg:block text-[12.5px] text-text-3 truncate">{account?.name ?? "—"}</span>
-                <span className="hidden lg:block text-[11px] text-text-3">{v.sourceLabel}</span>
                 <span className={cn("text-right tabular text-[14.5px] font-medium", v.amountTone === "positive" ? "text-positive" : v.amountTone === "muted" ? "text-text-3" : "text-text", v.struck && "line-through")}>
                   {formatCents(t.amount, { signed: true })}
                 </span>

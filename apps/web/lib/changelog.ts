@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.26.2",
+    date: "2026-10-07",
+    changes: [{ kind: "improved", text: "Transactions: removed the \"by you\" / \"by rule\" column from the list. Where a category came from is still in each transaction's details." }],
+  },
+  {
     version: "1.26.1",
     date: "2026-10-07",
     changes: [{ kind: "improved", text: "Accounts: the connection summary shows how many banks you have, one tally mark per bank colored by its health, and says plainly whether any need you." }],
