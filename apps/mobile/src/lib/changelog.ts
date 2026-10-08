@@ -16,6 +16,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.29.0",
+    date: "2026-10-07",
+    changes: [
+      { kind: "improved", text: "Settings redesigned as a simple list: your profile on top, then preferences, notifications, data and account." },
+      { kind: "improved", text: "Editing your profile and changing your password open in their own sheet, with any problem shown right there instead of a pop-up." },
+      { kind: "improved", text: "Wiping your data asks for your password in one step, and tells you in place if it's wrong." },
+      { kind: "improved", text: "Exporting asks CSV or JSON in a sheet that says what each is for." },
+    ],
+  },
+  {
     version: "1.28.0",
     date: "2026-10-07",
     changes: [

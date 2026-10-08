@@ -17,11 +17,14 @@ export function Toast({
   onHidden,
   bottom,
   action,
+  tone = "positive",
 }: {
   message: string | null;
   onHidden: () => void;
   bottom: number;
   action?: { label: string; onPress: () => void };
+  /** "negative" for a quick action that failed (e.g. an export); the dot turns red. */
+  tone?: "positive" | "negative";
 }) {
   const rf = useRF();
   const colors = useThemeColors();
@@ -45,7 +48,7 @@ export function Toast({
   return (
     <Animated.View pointerEvents={action ? "box-none" : "none"} style={{ position: "absolute", left: 0, right: 0, bottom, alignItems: "center", opacity }}>
       <View className="flex-row items-center gap-2 rounded-full bg-raised px-4 py-2.5" style={{ borderWidth: 1, borderColor: colors.border }} accessibilityLiveRegion="polite">
-        <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: colors.positive }} />
+        <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: tone === "negative" ? colors.negative : colors.positive }} />
         <Text className="font-ui-medium text-text" style={{ fontSize: rf(13) }}>{message}</Text>
         {action && (
           <Pressable

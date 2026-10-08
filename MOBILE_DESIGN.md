@@ -481,6 +481,23 @@ next predicted date as a relative chip ("in 4 days"). Header shows monthly +
 annualized totals as two small stat figures side by side. At-risk/cancelled
 states get the same status-badge treatment as connection health.
 
+### 5.7b Settings (redesigned in app 1.29.0)
+
+Pushed screen (native "Settings" header). A grouped list, never cards that
+expand into forms: a profile card (initial, name, email, **Edit**), then
+captioned groups of 48pt rows — **Preferences** (Appearance as an inline
+segmented control, Require Face ID switch), **Notifications** (Monthly recap
+switch, Alerts › with how many are on), **Data** (Income schedules › and API
+tokens › with counts, Export → picker sheet), **Account** (Change password,
+Wipe all data in `--negative`). A row either changes something in place or
+opens something (chevron). Profile and password edit in `FormSheet`s with
+inline errors and a live "At least 8 characters" hint; wipe is a
+`TallyDialog` with the password field inside. Success is a toast; a failed
+quick action (export, a switch that didn't save) is a toast with a red dot.
+The only alert left is "Set up Face ID first", since its fix is outside the
+app. Accounts isn't linked (it's a tab); Sign out stays in More. The version
+and Changelog link close the list.
+
 ### 5.8 FIRE calculator (Phase D)
 
 Single scrolling form: inputs (current net worth, monthly savings, expected
