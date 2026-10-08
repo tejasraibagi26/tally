@@ -12,6 +12,7 @@ import { SyncButton } from "@/components/plaid/SyncButton";
 import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
 import { SyncFailureToast } from "@/components/plaid/SyncFailureToast";
 import { AccountsView } from "@/components/accounts/AccountsView";
+import { ConnectionHealth, type HealthLevel } from "@/components/accounts/ConnectionHealth";
 import type { ConnectionView } from "@/components/accounts/types";
 import { MOCK_MODE } from "@/lib/config";
 import { itemStatusToBadge } from "@/lib/freshness";
@@ -107,7 +108,14 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
   const count = (pred: (l: ConnectionLevel, needs: boolean) => boolean) => levels.filter((s) => pred(s.level, s.needsAttention)).length;
   const blocked = count((l) => l === "blocked");
   const actSoon = count((l, needs) => needs && l !== "blocked");
-  const healthy = levels.length - blocked - actSoon;
+  // One tally stroke per bank in the summary, most urgent first (the cards' own order).
+  const healthBanks = views
+    .map((v, i) => ({
+      name: v.institutionName ?? "A bank",
+      level: (levels[i]!.level === "blocked" ? "blocked" : levels[i]!.needsAttention ? "act" : "healthy") as HealthLevel,
+      rank: levels[i]!.rank,
+    }))
+    .sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name));
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
@@ -162,19 +170,7 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
             <Figure label={`Net worth (${NET_WORTH_CURRENCY})`} value={formatCents(totalAssets - totalLiabilities)} />
             <Figure label="Assets" value={formatCents(totalAssets)} className="text-positive" />
             <Figure label="Debts" value={formatCents(totalLiabilities)} className="text-negative" />
-            <div className="bg-surface p-[18px_24px] flex flex-col gap-2 sm:col-span-2 lg:col-span-1">
-              <span className="text-xs font-medium uppercase tracking-wide text-text-3">Connection health</span>
-              <div className="flex h-1.5 gap-0.5 rounded-full overflow-hidden mt-1" aria-hidden="true">
-                {healthy > 0 && <span className="bg-positive" style={{ flex: healthy }} />}
-                {actSoon > 0 && <span className="bg-warning" style={{ flex: actSoon }} />}
-                {blocked > 0 && <span className="bg-negative" style={{ flex: blocked }} />}
-              </div>
-              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-text-3">
-                <HealthKey dot="bg-positive" label={`${healthy} up to date`} />
-                {actSoon > 0 && <HealthKey dot="bg-warning" label={`${actSoon} act soon`} />}
-                {blocked > 0 && <HealthKey dot="bg-negative" label={`${blocked} paused`} />}
-              </div>
-            </div>
+            <ConnectionHealth banks={healthBanks} />
           </Card>
 
           <AccountsView items={views} baseCurrency={NET_WORTH_CURRENCY} initialBankId={bank ?? null} serverRefreshFailed={serverRefreshFailed} />
@@ -190,14 +186,5 @@ function Figure({ label, value, className }: { label: string; value: string; cla
       <span className="text-xs font-medium uppercase tracking-wide text-text-3">{label}</span>
       <span className={`font-display text-3xl tabular money ${className ?? "text-text"}`}>{value}</span>
     </div>
-  );
-}
-
-function HealthKey({ dot, label }: { dot: string; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
-      {label}
-    </span>
   );
 }
