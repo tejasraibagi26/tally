@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.28.3",
+    date: "2026-10-07",
+    changes: [{ kind: "fixed", text: "The early-retirement planner loads again." }],
+  },
+  {
     version: "1.28.2",
     date: "2026-10-07",
     changes: [{ kind: "improved", text: "Accounts: a bank that needs you is shown once, on its own card at the top, instead of also in a separate panel above it." }],
