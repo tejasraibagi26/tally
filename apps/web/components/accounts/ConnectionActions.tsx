@@ -15,11 +15,11 @@ const RECONNECTED_MS = 6000;
 interface Target {
   id: string;
   institutionName: string | null;
-  /** Listed by name in the revoke confirm, when the caller has them. */
+  /** Listed by name in the disconnect confirm, when the caller has them. */
   accounts?: { id: string; name: string; mask: string | null }[];
 }
 
-/** Rows the revoke confirm lists before collapsing the rest into "and N more". */
+/** Rows the disconnect confirm lists before collapsing the rest into "and N more". */
 const REVOKE_LIST_MAX = 6;
 
 interface ConnectionActionsValue {
@@ -139,13 +139,13 @@ export function ConnectionActionsProvider({
       const res = await fetch(`/api/items/${removeTarget.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to remove item");
       onRemoved?.(removeTarget.id);
-      showToast(`${removeTarget.institutionName ?? "Connection"} revoked`);
+      showToast(`${removeTarget.institutionName ?? "Bank"} disconnected. History kept`);
       setRemoveTarget(null);
       router.refresh();
     } catch (err) {
       console.error(err);
       // Stays open with the failure in place of the description.
-      setRemoveError(`Couldn't revoke ${removeTarget.institutionName ?? "this connection"}. Nothing was deleted. Check your connection and try again.`);
+      setRemoveError(`Couldn't disconnect ${removeTarget.institutionName ?? "this bank"}. Check your connection and try again.`);
     } finally {
       setRemoving(false);
     }
@@ -162,20 +162,20 @@ export function ConnectionActionsProvider({
         open={removeTarget !== null}
         onClose={() => setRemoveTarget(null)}
         onConfirm={remove}
-        title={`Revoke ${name}?`}
-        subtitle="This can't be undone"
+        title={`Disconnect ${name}?`}
+        subtitle="Your history stays"
         icon={<Unplug size={20} strokeWidth={1.75} />}
-        confirmLabel="Revoke connection"
+        confirmLabel="Disconnect"
         confirming={removing}
         error={removeError}
         description={
           <>
             <p className="m-0">
-              Tally disconnects from {name} through Plaid and deletes {accounts.length > 0 ? "these accounts" : "every account under it"} with all their transactions, balances, and holdings.
+              Tally removes its access to {name} through Plaid and stops syncing. Past transactions stay and keep counting in spending and budgets.
             </p>
             {accounts.length > 0 && (
               <div className="flex flex-col gap-2 rounded-[10px] border border-border bg-surface-2 p-3">
-                <span className="text-xs font-medium uppercase tracking-wide text-text-2">Accounts to delete</span>
+                <span className="text-xs font-medium uppercase tracking-wide text-text-2">Stops updating</span>
                 {accounts.slice(0, REVOKE_LIST_MAX).map((a) => (
                   <div key={a.id} className="flex justify-between gap-3 text-[13.5px] text-text">
                     <span className="truncate">{a.name}</span>
@@ -185,7 +185,9 @@ export function ConnectionActionsProvider({
                 {accounts.length > REVOKE_LIST_MAX && <span className="text-[13px] text-text-3">and {accounts.length - REVOKE_LIST_MAX} more</span>}
               </div>
             )}
-            <p className="m-0 text-[13px] text-text-3">Budgets keep their past totals. To get this data back you&apos;d connect {name} again from scratch.</p>
+            <p className="m-0 text-[13px] text-text-3">
+              Balances leave your net worth. Connect {name} again any time and Tally picks up where it left off. To delete the data instead, use Wipe all data in Settings.
+            </p>
           </>
         }
       />

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { isLiveAccountRow } from "@/lib/liveAccounts";
 import { requireUserId } from "@/lib/session";
 import { itemStatusToBadge } from "@/lib/freshness";
 import { toNetWorthCurrency, NET_WORTH_CURRENCY } from "@tally/core/fx";
@@ -20,10 +21,28 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const [items, accounts] = await Promise.all([
+  const [allItems, allAccounts] = await Promise.all([
     db.query.plaidItems.findMany({ where: eq(schema.plaidItems.userId, userId) }),
     db.query.accounts.findMany({ where: eq(schema.accounts.userId, userId) }),
   ]);
+  // Disconnected banks (lib/reattach.ts) go in their own list, outside the
+  // totals: their history is kept, their balances are frozen. Older app
+  // builds just never see them, which matches what they'd expect.
+  const items = allItems.filter((i) => !i.disconnectedAt);
+  const disconnectedIds = new Set(allItems.filter((i) => i.disconnectedAt).map((i) => i.id));
+  const accounts = allAccounts.filter((a) => isLiveAccountRow(a, disconnectedIds));
+  const disconnected = allItems
+    .filter((i) => i.disconnectedAt)
+    .sort((a, b) => b.disconnectedAt!.getTime() - a.disconnectedAt!.getTime())
+    .map((item) => ({
+      id: item.id,
+      institutionId: item.institutionId,
+      institutionName: item.institutionName,
+      disconnectedAt: item.disconnectedAt,
+      accounts: allAccounts
+        .filter((a) => a.itemId === item.id)
+        .map((a) => ({ id: a.id, name: accountDisplayName(a.name, a.nickname), mask: a.mask, type: a.type })),
+    }));
 
   const accountsByItem = new Map<string, typeof accounts>();
   const unlinkedAccounts: typeof accounts = [];
@@ -79,6 +98,7 @@ export async function GET(req: Request) {
 
   return NextResponse.json({
     institutions,
+    disconnected,
     unlinkedAccounts: unlinkedAccounts.map((a) => ({
       id: a.id,
       name: accountDisplayName(a.name, a.nickname),

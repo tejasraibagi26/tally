@@ -2,6 +2,7 @@ import { sql, eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
 import { upsertAccountsForItem } from "@/lib/plaidAccounts";
+import { dedupeReattached } from "@/lib/reattach";
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
 import { seedMockTransactionsForItem } from "@/lib/mock/seedTransactions";
 import { toPlaidOwnedFields, mergeTransactionUpdate } from "@/lib/transactionSync/mapPlaidTransaction";
@@ -43,6 +44,8 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
       .where(eq(schema.plaidItems.id, itemId))
       .limit(1);
     if (!item) throw new Error(`Plaid item ${itemId} not found`);
+    // Disconnected: access was removed at Plaid, and the history it left is kept as-is.
+    if (item.disconnectedAt) return null;
 
     if (isMockPlaidItemId(item.plaidItemId)) {
       const result = await seedMockTransactionsForItem(itemId);
@@ -126,6 +129,17 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
     }
 
     const result = await reconcileTransactions(item.userId, itemId, accessToken, added, modified, removed, cursor, transactionsUpdateStatus);
+
+    // A reconnected bank re-sends its history under new ids; fold the overlap
+    // into the kept rows' edits before anything categorizes the new ones.
+    if (item.reattachedAt && result.added > 0) {
+      try {
+        const merged = await dedupeReattached(itemId, item.reattachedAt);
+        if (merged > 0) console.log(`Merged ${merged} re-synced transactions into kept history for item ${itemId}`);
+      } catch (err) {
+        console.error(`Merging re-synced history failed for item ${itemId}`, err);
+      }
+    }
 
     // Best-effort enrichment: categorization/transfer-pairing failures must
     // never fail the sync itself (the cursor already advanced and the core

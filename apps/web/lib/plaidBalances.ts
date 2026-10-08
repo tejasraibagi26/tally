@@ -12,11 +12,11 @@ import type { SyncTrigger } from "@/lib/plaidSync";
 export async function refreshAccountBalances(itemId: string, trigger: SyncTrigger): Promise<void> {
   const startedAt = new Date();
   const [item] = await db
-    .select({ plaidItemId: schema.plaidItems.plaidItemId })
+    .select({ plaidItemId: schema.plaidItems.plaidItemId, disconnectedAt: schema.plaidItems.disconnectedAt })
     .from(schema.plaidItems)
     .where(eq(schema.plaidItems.id, itemId))
     .limit(1);
-  if (!item || isMockPlaidItemId(item.plaidItemId)) return;
+  if (!item || item.disconnectedAt || isMockPlaidItemId(item.plaidItemId)) return;
 
   try {
     const accessToken = await getAccessToken(itemId);

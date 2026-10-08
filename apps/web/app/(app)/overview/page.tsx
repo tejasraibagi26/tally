@@ -1,4 +1,5 @@
 import { db, schema } from "@/db";
+import { isLiveAccountRow } from "@/lib/liveAccounts";
 import { eq } from "drizzle-orm";
 import { Landmark, CalendarCheck } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -53,10 +54,16 @@ function monthLabel(month: string): string {
 export default async function OverviewPage() {
   const userId = await requireUserId();
 
-  const accounts = await db.query.accounts.findMany({ where: eq(schema.accounts.userId, userId) });
-  const items = await db.query.plaidItems.findMany({ where: eq(schema.plaidItems.userId, userId) });
+  const allAccounts = await db.query.accounts.findMany({ where: eq(schema.accounts.userId, userId) });
+  const allItems = await db.query.plaidItems.findMany({ where: eq(schema.plaidItems.userId, userId) });
+  // Disconnected banks keep their history (so spending and budgets below still
+  // include them) but their balances are frozen: leave them out of net worth,
+  // the account count and connection health (lib/liveAccounts.ts).
+  const disconnectedIds = new Set(allItems.filter((i) => i.disconnectedAt).map((i) => i.id));
+  const accounts = allAccounts.filter((a) => isLiveAccountRow(a, disconnectedIds));
+  const items = allItems.filter((i) => !i.disconnectedAt);
 
-  if (accounts.length === 0) {
+  if (allAccounts.length === 0) {
     return (
       <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7">
         <div className="mb-6">

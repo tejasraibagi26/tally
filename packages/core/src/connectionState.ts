@@ -47,7 +47,7 @@ export interface ConnectionState {
   busy: boolean;
   notice?: { title: string; body: string };
   action?: ConnectionAction;
-  /** Shown beside `action` (revoked only: "Remove" as an equal choice). */
+  /** Shown beside `action` (revoked only: "Disconnect" as an equal choice). */
   secondaryAction?: ConnectionAction;
   /** This card's own action is in flight. */
   actionPending: boolean;
@@ -166,9 +166,9 @@ function resolveServerState(
         level: "blocked",
         tone: "negative",
         statusLine: inst.lastSyncedAt ? `Disconnected · ${ago(inst.lastSyncedAt, now)}` : "Disconnected",
-        notice: { title: "Access was turned off", body: `Tally's access was removed from ${bank}'s side. Reconnect, or remove the bank to stop seeing this.` },
+        notice: { title: "Access was turned off", body: `Tally's access was removed from ${bank}'s side. Reconnect, or disconnect it to stop seeing this. Its history stays.` },
         action: { kind: "signIn", label: "Reconnect" },
-        secondaryAction: { kind: "remove", label: "Remove" },
+        secondaryAction: { kind: "remove", label: "Disconnect" },
         dimBalances: true,
         collapsed: true,
         rank: 0,

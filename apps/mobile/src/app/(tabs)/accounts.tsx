@@ -11,6 +11,7 @@ import { InstitutionCard, AccountLine, toneColor } from "@/components/accounts/I
 import { AccountsSummary, AttentionStrip, SyncBanner } from "@/components/accounts/AccountsSummary";
 import { AccountsSkeleton, ConnectFirstBank, AccountsLoadError } from "@/components/accounts/AccountsPlaceholders";
 import { FixSheet } from "@/components/accounts/FixSheet";
+import { DisconnectedBanks } from "@/components/accounts/DisconnectedBanks";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { Toast } from "@/components/ui/Toast";
 import { useAccounts, type Institution } from "@/lib/queries/accounts";
@@ -50,7 +51,7 @@ export default function AccountsScreen() {
   const [syncBanner, setSyncBanner] = useState<{ title: string; body?: string } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const hideToast = useCallback(() => setToast(null), []);
-  const { confirmRevoke, revokeDialog } = useRevokeDialog((name) => setToast(`${name} revoked`));
+  const { confirmRevoke, revokeDialog } = useRevokeDialog((name) => setToast(`${name} disconnected. History kept`));
 
   const institutions = useMemo(() => data?.institutions ?? [], [data]);
   const accountCount = institutions.reduce((n, i) => n + i.accounts.length, 0) + (data?.unlinkedAccounts.length ?? 0);
@@ -226,6 +227,10 @@ export default function AccountsScreen() {
                   </View>
                 )}
               </>
+            )}
+
+            {data && (data.disconnected?.length ?? 0) > 0 && (
+              <DisconnectedBanks banks={data.disconnected!} onReconnect={() => openLink("create")} connecting={linkingItemId === "create"} />
             )}
           </View>
         </ScrollView>

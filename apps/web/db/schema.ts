@@ -145,6 +145,16 @@ export const plaidItems = pgTable("plaid_items", {
   // with zero rows).
   transactionsUpdateStatus: text("transactions_update_status"),
   lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }),
+  // Set when the user disconnects the bank: access is removed at Plaid and
+  // syncing stops, but the item, its accounts and their transaction history
+  // stay (balances stop counting toward net worth -- see lib/liveAccounts.ts).
+  // Null for a live connection. Distinct from status "revoked", which is the
+  // bank cutting access and asks the user to sign in again.
+  disconnectedAt: timestamp("disconnected_at", { withTimezone: true }),
+  // When a disconnected item was reconnected to a fresh Plaid item for the
+  // same institution. Transactions synced after this are matched against the
+  // kept history so the overlap isn't doubled (lib/reattach.ts).
+  reattachedAt: timestamp("reattached_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({
   userIdx: index("plaid_items_user_idx").on(t.userId),

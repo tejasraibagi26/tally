@@ -96,13 +96,13 @@ export function BankPanel({
         </section>
 
         <div className="mt-auto pt-4 border-t border-border flex items-center justify-between gap-4">
-          <span className="text-xs text-text-3">Deletes this bank&apos;s accounts and history.</span>
+          <span className="text-xs text-text-3">Stops syncing. Its history stays.</span>
           <button
             type="button"
             onClick={() => confirmRemove(item)}
             className="h-8 px-3 rounded-control text-[13px] font-medium text-negative hover:bg-negative-subtle inline-flex items-center gap-1.5 flex-none"
           >
-            <Unplug size={14} /> Revoke connection
+            <Unplug size={14} /> Disconnect
           </button>
         </div>
       </div>

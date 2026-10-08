@@ -1,5 +1,6 @@
 import { and, eq, gte, inArray, or, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { liveAccount } from "@/lib/liveAccounts";
 import { computeAllocation, computeSimpleReturn, type AllocationSlice, type HoldingLike } from "@tally/core/portfolioMath";
 import { toNetWorthCurrency, NET_WORTH_CURRENCY } from "@tally/core/fx";
 import { accountDisplayName } from "@tally/core/accountName";
@@ -33,7 +34,8 @@ async function investmentAccountIds(userId: string): Promise<{ id: string; name:
   const rows = await db
     .select({ id: schema.accounts.id, name: schema.accounts.name, nickname: schema.accounts.nickname, itemId: schema.accounts.itemId })
     .from(schema.accounts)
-    .where(and(eq(schema.accounts.userId, userId), eq(schema.accounts.type, "investment")));
+    // Disconnected banks' holdings are a frozen snapshot; leave them out of the live portfolio.
+    .where(and(eq(schema.accounts.userId, userId), eq(schema.accounts.type, "investment"), liveAccount));
   return rows.map((r) => ({ id: r.id, name: accountDisplayName(r.name, r.nickname), itemId: r.itemId }));
 }
 

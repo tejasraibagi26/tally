@@ -40,12 +40,17 @@ export async function POST(req: Request) {
       if (!itemId) return NextResponse.json({ error: "itemId required for update mode" }, { status: 400 });
 
       const [item] = await db
-        .select({ id: schema.plaidItems.id, userId: schema.plaidItems.userId })
+        .select({ id: schema.plaidItems.id, userId: schema.plaidItems.userId, disconnectedAt: schema.plaidItems.disconnectedAt })
         .from(schema.plaidItems)
         .where(eq(schema.plaidItems.id, itemId))
         .limit(1);
       if (!item || item.userId !== userId) {
         return NextResponse.json({ error: "Not found" }, { status: 404 });
+      }
+      // Its access token was removed at Plaid; reconnecting goes through a
+      // fresh "create" session, which picks the kept history back up.
+      if (item.disconnectedAt) {
+        return NextResponse.json({ error: "This bank is disconnected. Connect it again instead." }, { status: 409 });
       }
 
       const accessToken = await getAccessToken(itemId);

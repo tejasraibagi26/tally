@@ -33,8 +33,19 @@ export interface Institution {
   accounts: AccountRow[];
 }
 
+/** A bank the user disconnected: history kept, balances frozen and out of totals. */
+export interface DisconnectedInstitution {
+  id: string;
+  institutionId: string | null;
+  institutionName: string | null;
+  disconnectedAt: string;
+  accounts: { id: string; name: string; mask: string | null; type: string }[];
+}
+
 export interface AccountsResponse {
   institutions: Institution[];
+  /** Missing from servers older than web v1.28.0. */
+  disconnected?: DisconnectedInstitution[];
   unlinkedAccounts: AccountRow[];
   totals: { assets: number; liabilities: number; net: number; currency: string };
 }

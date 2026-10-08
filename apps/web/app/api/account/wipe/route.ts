@@ -35,12 +35,13 @@ export async function POST(req: Request) {
   }
 
   const items = await db
-    .select({ id: schema.plaidItems.id, plaidItemId: schema.plaidItems.plaidItemId })
+    .select({ id: schema.plaidItems.id, plaidItemId: schema.plaidItems.plaidItemId, disconnectedAt: schema.plaidItems.disconnectedAt })
     .from(schema.plaidItems)
     .where(eq(schema.plaidItems.userId, userId));
 
   for (const item of items) {
-    if (isMockPlaidItemId(item.plaidItemId)) continue;
+    // A disconnected bank's access was already removed at Plaid.
+    if (isMockPlaidItemId(item.plaidItemId) || item.disconnectedAt) continue;
     try {
       const accessToken = await getAccessToken(item.id);
       await plaidClient.itemRemove({ access_token: accessToken });

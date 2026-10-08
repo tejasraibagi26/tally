@@ -1,5 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { liveAccount } from "@/lib/liveAccounts";
 import { trailingAnnualCashFlowEstimate } from "@/lib/analytics";
 import { latestHoldingsForUser } from "@/lib/portfolio";
 import { accountDisplayName } from "@tally/core/accountName";
@@ -43,7 +44,7 @@ export interface FireInputs {
  */
 export async function fireInputs(userId: string): Promise<FireInputs> {
   const [accounts, holdings, cashFlow, [row]] = await Promise.all([
-    db.query.accounts.findMany({ where: and(eq(schema.accounts.userId, userId), eq(schema.accounts.type, "investment")) }),
+    db.query.accounts.findMany({ where: and(eq(schema.accounts.userId, userId), eq(schema.accounts.type, "investment"), liveAccount) }),
     latestHoldingsForUser(userId),
     trailingAnnualCashFlowEstimate(userId, 12),
     db.select().from(schema.fireSettings).where(eq(schema.fireSettings.userId, userId)).limit(1),

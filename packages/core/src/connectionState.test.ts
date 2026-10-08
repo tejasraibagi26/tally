@@ -37,10 +37,10 @@ describe("connectionState", () => {
     expect(s.action).toEqual({ kind: "signIn", label: "Sign in" });
   });
 
-  it("offers Remove beside Reconnect for revoked access", () => {
+  it("offers Disconnect beside Reconnect for revoked access", () => {
     const s = connectionState(conn("revoked", "critical", hoursAgo(30)), idle, NOW);
     expect(s.action?.label).toBe("Reconnect");
-    expect(s.secondaryAction).toEqual({ kind: "remove", label: "Remove" });
+    expect(s.secondaryAction).toEqual({ kind: "remove", label: "Disconnect" });
   });
 
   it("retries a bank error first and escalates to sign-in after a day down", () => {

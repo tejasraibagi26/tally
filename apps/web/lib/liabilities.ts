@@ -1,5 +1,6 @@
 import { and, eq, gt, gte, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { liveAccount } from "@/lib/liveAccounts";
 import { toNetWorthCurrency } from "@tally/core/fx";
 import { computeUtilization, type CreditAccountLike, type UtilizationResult } from "@tally/core/portfolioMath";
 import { cardNetwork, describeCard, isCardPayment, type CardInput, type CardNetwork, type CardView } from "@tally/core/cardView";
@@ -61,7 +62,7 @@ export async function creditCardsForUser(userId: string): Promise<CreditCardRow[
     .from(schema.accounts)
     .leftJoin(schema.liabilitiesCredit, eq(schema.liabilitiesCredit.accountId, schema.accounts.id))
     .leftJoin(schema.plaidItems, eq(schema.accounts.itemId, schema.plaidItems.id))
-    .where(and(eq(schema.accounts.userId, userId), eq(schema.accounts.type, "credit")));
+    .where(and(eq(schema.accounts.userId, userId), eq(schema.accounts.type, "credit"), liveAccount));
 
   const paid = await paymentsSinceStatement(
     userId,

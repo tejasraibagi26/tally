@@ -16,10 +16,12 @@ interface RevokeTarget {
 }
 
 /**
- * Revoking a connection: a TallyDialog that lists the exact accounts being
- * deleted, keeps the label on its button while it works, and shows a failure
- * in place instead of closing. `confirmRevoke(target)` opens it; render
- * `revokeDialog`. `onRevoked` fires after a successful delete (for a toast).
+ * Disconnecting a bank: a TallyDialog that says what stops (syncing, these
+ * accounts' balances) and what stays (their history), keeps the label on its
+ * button while it works, and shows a failure in place instead of closing.
+ * Nothing is deleted -- reconnecting the same bank picks the history back up
+ * (apps/web/lib/reattach.ts). `confirmRevoke(target)` opens it; render
+ * `revokeDialog`. `onRevoked` fires after it succeeds (for a toast).
  */
 export function useRevokeDialog(onRevoked?: (institutionName: string) => void) {
   const colors = useThemeColors();
@@ -55,26 +57,26 @@ export function useRevokeDialog(onRevoked?: (institutionName: string) => void) {
       dismissible={!busy}
       tone="negative"
       icon={<Unplug size={20} color={colors.negative} strokeWidth={1.75} />}
-      title={`Revoke ${name}?`}
-      subtitle="This can't be undone"
+      title={`Disconnect ${name}?`}
+      subtitle="Your history stays"
       actions={[
-        { label: failed ? "Try again" : "Revoke connection", onPress: run, variant: "danger", loading: busy },
+        { label: failed ? "Try again" : "Disconnect", onPress: run, variant: "danger", loading: busy },
         { label: "Cancel", onPress: () => setTarget(null), variant: "secondary", disabled: busy },
       ]}
     >
       <Text className="font-ui text-text-2" style={{ fontSize: rf(14), lineHeight: rf(20) }}>
-        Tally disconnects from {name} through Plaid and deletes {target && target.accounts.length > 0 ? "these accounts" : "every account under it"} with all their history.
+        Tally removes its access to {name} and stops syncing. Past transactions stay and keep counting in spending and budgets. Balances leave your net worth until you reconnect.
       </Text>
       {failed ? (
         <DialogError icon={<AlertTriangle size={16} color={colors.negative} strokeWidth={1.75} style={{ marginTop: 1 }} />}>
-          {`Couldn't revoke ${name}. Nothing was deleted. Check your connection and try again.`}
+          {`Couldn't disconnect ${name}. Check your connection and try again.`}
         </DialogError>
       ) : (
         target &&
         target.accounts.length > 0 && (
           <View className="rounded-[10px] bg-surface-2 px-3 py-2.5" style={{ borderWidth: 1, borderColor: colors.border, gap: 6 }}>
             <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(11.5), letterSpacing: 0.6, textTransform: "uppercase" }}>
-              Accounts to delete
+              Stops updating
             </Text>
             {target.accounts.slice(0, LIST_MAX).map((a) => (
               <View key={a.id} className="flex-row justify-between gap-3">

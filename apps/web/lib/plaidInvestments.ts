@@ -61,7 +61,8 @@ async function accountIdsByPlaidId(plaidAccountIds: string[]): Promise<Map<strin
 export async function syncHoldingsForItem(itemId: string, trigger: SyncTrigger): Promise<void> {
   const startedAt = new Date();
   const [item] = await db.select().from(schema.plaidItems).where(eq(schema.plaidItems.id, itemId)).limit(1);
-  if (!item) return;
+  // Disconnected banks keep their last snapshot; there's no access to refresh it.
+  if (!item || item.disconnectedAt) return;
 
   try {
     if (isMockPlaidItemId(item.plaidItemId)) {
@@ -177,7 +178,8 @@ const HISTORY_LOOKBACK_DAYS = 730; // ~24 months, matching the transactions hist
 export async function syncInvestmentTransactionsForItem(itemId: string, trigger: SyncTrigger): Promise<void> {
   const startedAt = new Date();
   const [item] = await db.select().from(schema.plaidItems).where(eq(schema.plaidItems.id, itemId)).limit(1);
-  if (!item) return;
+  // Disconnected banks keep their last snapshot; there's no access to refresh it.
+  if (!item || item.disconnectedAt) return;
 
   try {
     if (isMockPlaidItemId(item.plaidItemId)) {

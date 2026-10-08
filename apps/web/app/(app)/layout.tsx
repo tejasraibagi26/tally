@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { eq, and, gte, lt, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db, schema } from "@/db";
+import { liveAccount, liveItem } from "@/lib/liveAccounts";
 import { SideNav } from "@/components/nav/SideNav";
 import { MobileNav } from "@/components/nav/MobileNav";
 import { Toaster } from "@/components/ui/Toaster";
@@ -27,11 +28,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       .select({ count: sql<number>`count(*)::int` })
       .from(schema.transactions)
       .where(and(eq(schema.transactions.userId, userId), gte(schema.transactions.postedDate, start), lt(schema.transactions.postedDate, end))),
-    db.select({ count: sql<number>`count(*)::int` }).from(schema.accounts).where(eq(schema.accounts.userId, userId)),
+    // Counts and health cover connected banks only; a disconnected bank's
+    // accounts are history now (lib/liveAccounts.ts).
+    db.select({ count: sql<number>`count(*)::int` }).from(schema.accounts).where(and(eq(schema.accounts.userId, userId), liveAccount)),
     db
       .select({ count: sql<number>`count(*)::int` })
       .from(schema.accounts)
-      .where(and(eq(schema.accounts.userId, userId), eq(schema.accounts.type, "credit"))),
+      .where(and(eq(schema.accounts.userId, userId), eq(schema.accounts.type, "credit"), liveAccount)),
     db
       .select({
         institutionName: schema.plaidItems.institutionName,
@@ -40,7 +43,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         transactionsUpdateStatus: schema.plaidItems.transactionsUpdateStatus,
       })
       .from(schema.plaidItems)
-      .where(eq(schema.plaidItems.userId, userId)),
+      .where(and(eq(schema.plaidItems.userId, userId), liveItem)),
   ]);
 
   // Same contract as the Accounts page, so the sidebar badge and the page's

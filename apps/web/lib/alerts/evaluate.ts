@@ -10,6 +10,7 @@ import {
 } from "@tally/core/alerts";
 import { normalizeMerchantKey } from "@tally/core/recurringDetection";
 import { getBudgetsForMonth } from "@/lib/budgets";
+import { liveItem } from "@/lib/liveAccounts";
 import { todayFor } from "@/lib/userTimezone";
 import { loadAlertPreferences } from "@/lib/alerts/preferences";
 import { recordAndDeliver } from "@/lib/alerts/engine";
@@ -75,7 +76,8 @@ async function connectionCandidates(userId: string): Promise<AlertCandidate[]> {
       lastSyncedAt: schema.plaidItems.lastSyncedAt,
     })
     .from(schema.plaidItems)
-    .where(eq(schema.plaidItems.userId, userId));
+    // A bank you disconnected isn't "broken"; never alert about it.
+    .where(and(eq(schema.plaidItems.userId, userId), liveItem));
   return connectionAlerts(items);
 }
 

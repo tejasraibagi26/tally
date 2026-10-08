@@ -35,7 +35,7 @@ export function InstitutionActionsSheet({
   status?: { label: string; color: string };
   lastSyncedAt?: string | null;
   accountCount?: number;
-  /** Opens the revoke dialog (components/accounts/RevokeDialog.tsx) once this sheet has closed. */
+  /** Opens the disconnect dialog (components/accounts/RevokeDialog.tsx) once this sheet has closed. */
   onRevoke: () => void;
 }) {
   const colors = useThemeColors();
@@ -90,8 +90,8 @@ export function InstitutionActionsSheet({
       <Pressable onPress={confirmRevoke} className="flex-row items-center gap-3 px-5 py-3.5">
         <Unplug size={17} color={colors.negative} strokeWidth={1.9} />
         <View className="gap-0.5">
-          <Text className="font-ui text-negative" style={{ fontSize: rf(15) }}>Revoke connection</Text>
-          <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>Disconnect and delete its accounts and history</Text>
+          <Text className="font-ui text-negative" style={{ fontSize: rf(15) }}>Disconnect</Text>
+          <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>Stop syncing. Its history stays</Text>
         </View>
       </Pressable>
     </Sheet>

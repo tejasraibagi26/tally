@@ -87,11 +87,12 @@ export async function POST(req: Request) {
   const match = SYNC_BY_TYPE.find((m) => m.type === payload.webhook_type && m.codes.has(payload.webhook_code));
   if (match && payload.item_id) {
     const [item] = await db
-      .select({ id: schema.plaidItems.id })
+      .select({ id: schema.plaidItems.id, disconnectedAt: schema.plaidItems.disconnectedAt })
       .from(schema.plaidItems)
       .where(eq(schema.plaidItems.plaidItemId, payload.item_id))
       .limit(1);
-    if (item) {
+    // A disconnected bank's access is gone; a straggling webhook has nothing to fetch.
+    if (item && !item.disconnectedAt) {
       try {
         await match.sync(item.id, "webhook");
         if (event) {

@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.28.0",
+    date: "2026-10-07",
+    changes: [
+      { kind: "improved", text: "Disconnecting a bank now keeps its history: past transactions still count in spending and budgets. Only its balances leave your net worth." },
+      { kind: "new", text: "Disconnected banks are listed on Accounts with a Reconnect button. Reconnecting picks up where you left off, keeping your categories, splits and notes without doubling anything." },
+    ],
+  },
+  {
     version: "1.27.1",
     date: "2026-10-07",
     changes: [{ kind: "improved", text: "When a sync doesn't bring everything in, the notice says plainly what's missing and from which bank, and has a Try again button." }],

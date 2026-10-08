@@ -19,13 +19,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   const { id } = await params;
   const [item] = await db
-    .select({ id: schema.plaidItems.id, userId: schema.plaidItems.userId, institutionName: schema.plaidItems.institutionName })
+    .select({ id: schema.plaidItems.id, userId: schema.plaidItems.userId, institutionName: schema.plaidItems.institutionName, disconnectedAt: schema.plaidItems.disconnectedAt })
     .from(schema.plaidItems)
     .where(eq(schema.plaidItems.id, id))
     .limit(1);
 
   if (!item || item.userId !== userId) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  if (item.disconnectedAt) {
+    return NextResponse.json({ error: "This bank is disconnected. Connect it again to sync." }, { status: 409 });
   }
 
   try {

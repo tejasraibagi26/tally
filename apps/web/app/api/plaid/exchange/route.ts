@@ -10,6 +10,7 @@ import { syncHoldingsForItem, syncInvestmentTransactionsForItem } from "@/lib/pl
 import { syncLiabilitiesForItem } from "@/lib/plaidLiabilities";
 import { runSyncStep, type SyncFailure } from "@/lib/syncSteps";
 import { recordAudit } from "@/lib/audit";
+import { findDisconnectedItem, matchKeptAccounts, reattachItem } from "@/lib/reattach";
 
 const bodySchema = z.object({
   publicToken: z.string().min(1),
@@ -76,33 +77,50 @@ export async function POST(req: Request) {
       }
     }
 
-    const { accessTokenCiphertext, accessTokenIv, accessTokenTag } = encryptAccessToken(accessToken);
+    const token = encryptAccessToken(accessToken);
+    const consentedProducts = itemRes.data.item.consented_products ?? [];
+    const availableProducts = itemRes.data.item.available_products ?? [];
 
-    const [item] = await db
-      .insert(schema.plaidItems)
-      .values({
+    // Reconnecting a bank the user disconnected earlier: reuse that item so
+    // its kept accounts and history carry on (lib/reattach.ts). Only when at
+    // least one account lines up -- a different login at the same bank
+    // (say, a partner's) shouldn't be folded into the old one.
+    const previous = institutionId ? await findDisconnectedItem(userId, institutionId) : null;
+    let matches = new Map<string, string>();
+    if (previous) {
+      const accountsRes = await plaidClient.accountsGet({ access_token: accessToken });
+      matches = await matchKeptAccounts(previous.id, accountsRes.data.accounts);
+    }
+
+    let item: { id: string };
+    if (previous && matches.size > 0) {
+      await reattachItem({ itemId: previous.id, userId, plaidItemId, institutionName, token, consentedProducts, availableProducts, accountMatches: matches });
+      item = previous;
+    } else {
+      const [inserted] = await db
+        .insert(schema.plaidItems)
+        .values({
+          userId,
+          plaidItemId,
+          institutionId,
+          institutionName,
+          ...token,
+          status: "healthy",
+          consentedProducts,
+          availableProducts,
+        })
+        .returning({ id: schema.plaidItems.id });
+      if (!inserted) throw new Error("Failed to insert plaid_items row");
+      item = inserted;
+
+      await recordAudit({
         userId,
-        plaidItemId,
-        institutionId,
-        institutionName,
-        accessTokenCiphertext,
-        accessTokenIv,
-        accessTokenTag,
-        status: "healthy",
-        consentedProducts: itemRes.data.item.consented_products ?? [],
-        availableProducts: itemRes.data.item.available_products ?? [],
-      })
-      .returning({ id: schema.plaidItems.id });
-
-    if (!item) throw new Error("Failed to insert plaid_items row");
-
-    await recordAudit({
-      userId,
-      action: "plaid_item.connected",
-      entity: "plaid_items",
-      entityId: item.id,
-      after: { institutionName, institutionId },
-    });
+        action: "plaid_item.connected",
+        entity: "plaid_items",
+        entityId: item.id,
+        after: { institutionName, institutionId },
+      });
+    }
 
     await upsertAccountsForItem(item.id, userId, accessToken);
 
@@ -121,7 +139,7 @@ export async function POST(req: Request) {
     await runSyncStep("investments", () => syncInvestmentTransactionsForItem(item.id, "initial"), failures);
     await runSyncStep("liabilities", () => syncLiabilitiesForItem(item.id, "initial"), failures);
 
-    return NextResponse.json({ ok: true, itemId: item.id, institutionName, failures });
+    return NextResponse.json({ ok: true, itemId: item.id, institutionName, failures, reconnected: previous !== null && matches.size > 0 });
   } catch (err) {
     console.error("plaid/exchange failed", err);
     // `code` lets the client pick plain-language copy (@tally/core/syncDialog

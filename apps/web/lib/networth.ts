@@ -1,10 +1,12 @@
 import { and, desc, eq, gte } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { liveAccount } from "@/lib/liveAccounts";
 import { toNetWorthCurrency } from "@tally/core/fx";
 
 /** §9 "Net worth": Σ depository + investment balances − Σ credit + loan balances, as of now. One row per user per day (§5). */
 export async function computeAndStoreNetWorthSnapshot(userId: string, asOfDate: string): Promise<void> {
-  const rawAccounts = await db.select().from(schema.accounts).where(eq(schema.accounts.userId, userId));
+  // A disconnected bank's balances are frozen, so they stop counting (lib/liveAccounts.ts).
+  const rawAccounts = await db.select().from(schema.accounts).where(and(eq(schema.accounts.userId, userId), liveAccount));
 
   // Every other balance/holding display in this app stays labeled in its own
   // currency, never converted — but a single net worth figure can't honor

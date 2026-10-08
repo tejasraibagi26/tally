@@ -1,4 +1,4 @@
-import { notInArray } from "drizzle-orm";
+import { and, isNull, notInArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 
 // Items in these states need re-auth before another sync attempt is useful
@@ -9,7 +9,8 @@ export async function activeItems(): Promise<{ id: string; userId: string }[]> {
   return db
     .select({ id: schema.plaidItems.id, userId: schema.plaidItems.userId })
     .from(schema.plaidItems)
-    .where(notInArray(schema.plaidItems.status, [...SYNC_BLOCKED_STATUSES]));
+    // Disconnected banks never sync again (lib/reattach.ts).
+    .where(and(notInArray(schema.plaidItems.status, [...SYNC_BLOCKED_STATUSES]), isNull(schema.plaidItems.disconnectedAt)));
 }
 
 export async function activeItemIds(): Promise<string[]> {

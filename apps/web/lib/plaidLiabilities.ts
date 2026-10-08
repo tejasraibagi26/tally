@@ -14,7 +14,8 @@ const NOT_SUPPORTED_CODES = new Set(["NO_LIABILITY_ACCOUNTS", "PRODUCTS_NOT_SUPP
 export async function syncLiabilitiesForItem(itemId: string, trigger: SyncTrigger): Promise<void> {
   const startedAt = new Date();
   const [item] = await db.select().from(schema.plaidItems).where(eq(schema.plaidItems.id, itemId)).limit(1);
-  if (!item) return;
+  // Disconnected banks keep their last snapshot; there's no access to refresh it.
+  if (!item || item.disconnectedAt) return;
 
   try {
     if (isMockPlaidItemId(item.plaidItemId)) {

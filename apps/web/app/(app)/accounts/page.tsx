@@ -1,4 +1,6 @@
 import { db, schema } from "@/db";
+import { isLiveAccountRow } from "@/lib/liveAccounts";
+import { DisconnectedBanks, type DisconnectedBank } from "@/components/accounts/DisconnectedBanks";
 import { desc, eq, inArray } from "drizzle-orm";
 import { Check, Landmark } from "lucide-react";
 import { requireUserId } from "@/lib/session";
@@ -25,10 +27,24 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
   const userId = await requireUserId();
   const { bank } = await searchParams;
 
-  const [items, accounts] = await Promise.all([
+  const [allItems, allAccounts] = await Promise.all([
     db.query.plaidItems.findMany({ where: eq(schema.plaidItems.userId, userId) }),
     db.query.accounts.findMany({ where: eq(schema.accounts.userId, userId) }),
   ]);
+  // Banks the user disconnected keep their history but sit apart from the
+  // live ones, out of the totals and health (lib/liveAccounts.ts).
+  const items = allItems.filter((i) => !i.disconnectedAt);
+  const disconnectedItems = allItems.filter((i) => i.disconnectedAt).sort((a, b) => b.disconnectedAt!.getTime() - a.disconnectedAt!.getTime());
+  const disconnectedIds = new Set(disconnectedItems.map((i) => i.id));
+  const accounts = allAccounts.filter((a) => isLiveAccountRow(a, disconnectedIds));
+  const disconnected: DisconnectedBank[] = disconnectedItems.map((item) => ({
+    id: item.id,
+    institutionName: item.institutionName,
+    disconnectedAt: item.disconnectedAt!.toISOString(),
+    accounts: allAccounts
+      .filter((a) => a.itemId === item.id)
+      .map((a) => ({ id: a.id, name: accountDisplayName(a.name, a.nickname), mask: a.mask })),
+  }));
 
   // Newest first across all of the user's items, then trimmed per item below.
   const runs =
@@ -176,6 +192,8 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
           <AccountsView items={views} baseCurrency={NET_WORTH_CURRENCY} initialBankId={bank ?? null} serverRefreshFailed={serverRefreshFailed} />
         </>
       )}
+
+      {disconnected.length > 0 && <DisconnectedBanks banks={disconnected} mock={MOCK_MODE} />}
     </div>
   );
 }

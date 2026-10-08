@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db, schema } from "@/db";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
+import { liveItem } from "@/lib/liveAccounts";
 import { requireUserId } from "@/lib/session";
 import { syncTransactionsForItem } from "@/lib/plaidSync";
 import { refreshAccountBalances } from "@/lib/plaidBalances";
@@ -42,7 +43,7 @@ export async function POST(req: Request) {
   const items = await db
     .select({ id: schema.plaidItems.id, institutionName: schema.plaidItems.institutionName })
     .from(schema.plaidItems)
-    .where(eq(schema.plaidItems.userId, userId));
+    .where(and(eq(schema.plaidItems.userId, userId), liveItem));
 
   const results = [];
   for (const item of items) {

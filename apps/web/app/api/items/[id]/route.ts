@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
 import { db, schema } from "@/db";
-import { eq, inArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { requireUserId } from "@/lib/session";
-import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
-import { isMockPlaidItemId } from "@/lib/mock/isMock";
+import { disconnectItem } from "@/lib/reattach";
 import { recordAudit } from "@/lib/audit";
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -21,6 +20,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
       userId: schema.plaidItems.userId,
       plaidItemId: schema.plaidItems.plaidItemId,
       institutionName: schema.plaidItems.institutionName,
+      disconnectedAt: schema.plaidItems.disconnectedAt,
     })
     .from(schema.plaidItems)
     .where(eq(schema.plaidItems.id, id))
@@ -30,39 +30,20 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  if (!isMockPlaidItemId(item.plaidItemId)) {
-    try {
-      const accessToken = await getAccessToken(id);
-      await plaidClient.itemRemove({ access_token: accessToken });
-    } catch (err) {
-      // Item may already be revoked/dead on Plaid's side — still proceed to
-      // remove our local copy so the user isn't stuck with a zombie connection.
-      const code = plaidErrorCode(err);
-      console.error(`item/remove failed (${code ?? "unknown error"}), proceeding with local delete`);
-    }
-  }
+  if (item.disconnectedAt) return NextResponse.json({ ok: true, alreadyDisconnected: true });
 
-  // recurring_streams.account_id has no ON DELETE cascade (a stream can
-  // reference a since-deleted account by design), so it blocks the
-  // plaid_items delete (which cascades to accounts) unless removed first.
-  const accounts = await db.select({ id: schema.accounts.id }).from(schema.accounts).where(eq(schema.accounts.itemId, id));
-  if (accounts.length > 0) {
-    await db.delete(schema.recurringStreams).where(
-      inArray(
-        schema.recurringStreams.accountId,
-        accounts.map((a) => a.id),
-      ),
-    );
-  }
-
-  await db.delete(schema.plaidItems).where(eq(schema.plaidItems.id, id));
+  // Disconnect, don't delete: access is removed at Plaid and syncing stops,
+  // but the accounts and their transaction history stay, and reconnecting
+  // the same bank later picks them back up (lib/reattach.ts). Wiping data
+  // (app/api/account/wipe) is the way to delete it.
+  const { accountCount } = await disconnectItem(id, userId);
 
   await recordAudit({
     userId,
-    action: "plaid_item.revoked",
+    action: "plaid_item.disconnected",
     entity: "plaid_items",
     entityId: id,
-    before: { institutionName: item.institutionName, accountCount: accounts.length },
+    before: { institutionName: item.institutionName, accountCount },
   });
 
   return NextResponse.json({ ok: true });
