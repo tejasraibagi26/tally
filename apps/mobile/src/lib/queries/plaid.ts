@@ -95,6 +95,8 @@ export function useSync() {
       // Prefix match -- covers both ["investments","holdings"] and
       // ["investments","transactions"] (see lib/queries/investments.ts).
       queryClient.invalidateQueries({ queryKey: ["investments"] });
+      // Credit cards read liabilities (balances, statements, due dates).
+      queryClient.invalidateQueries({ queryKey: ["liabilities"] });
     },
   });
 }

@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.30.2",
+    date: "2026-10-07",
+    changes: [{ kind: "new", text: "Credit cards has a Sync button, which pulls the latest balances, statements and due dates from your banks." }],
+  },
+  {
     version: "1.30.1",
     date: "2026-10-07",
     changes: [{ kind: "fixed", text: "Sync, Add and Reconnect buttons stay the same size while they're working." }],

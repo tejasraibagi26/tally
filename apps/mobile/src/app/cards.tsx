@@ -1,10 +1,16 @@
+import { useCallback, useState } from "react";
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
-import { useRouter, type Href } from "expo-router";
-import { ChevronRight } from "lucide-react-native";
+import { Stack, useRouter, type Href } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ChevronRight, RefreshCw } from "lucide-react-native";
 import { useQueryClient } from "@tanstack/react-query";
 import { formatCents, formatPercent } from "@tally/core/money";
 import { creditHealth } from "@tally/core/overviewView";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
+import { BusyIcon } from "@/components/ui/BusyIcon";
+import { Toast } from "@/components/ui/Toast";
+import { SyncBanner } from "@/components/accounts/AccountsSummary";
+import { useSync } from "@/lib/queries/plaid";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { CardTile } from "@/components/cards/CardTile";
@@ -29,7 +35,53 @@ export default function CardsScreen() {
   const contentTop = useScreenContentTop();
   const queryClient = useQueryClient();
   const { hidden } = usePrivacy();
+  const insets = useSafeAreaInsets();
   const { data, isLoading, isError, refetch, isRefetching } = useLiabilities();
+  const sync = useSync();
+  const [syncBanner, setSyncBanner] = useState<{ title: string; body: string } | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const hideToast = useCallback(() => setToast(null), []);
+
+  // Same as web's "Sync card details" (SyncButton products={["liabilities"]}):
+  // pull fresh statements, balances and due dates from every bank. Success
+  // is a toast; a failure stays on screen as a banner (MOBILE_DESIGN.md §5.5).
+  async function handleSync() {
+    setSyncBanner(null);
+    try {
+      const res = await sync.mutateAsync(["liabilities"]);
+      const failed = res.results.filter((r) => r.failures.length > 0);
+      if (failed.length === 0) {
+        setToast("Card details synced");
+      } else {
+        setSyncBanner({
+          title: failed.length === 1 ? `Couldn't get card details from ${failed[0]!.institutionName ?? "a bank"}` : `${failed.length} banks didn't send card details`,
+          body: "This is usually a short outage on the bank's side. Tally tries again on its next sync, so what's shown may be a little out of date.",
+        });
+      }
+    } catch {
+      setSyncBanner({ title: "Sync didn't run", body: "Check your connection and try again." });
+    }
+  }
+
+  // Header Sync, the same as Investments: label stays, spinner takes a fixed
+  // slot. On iOS through unstable_headerRightItems with hidesSharedBackground
+  // so iOS 26 doesn't wrap it in Liquid Glass bar-button chrome.
+  const syncAction = (
+    <Pressable
+      onPress={handleSync}
+      disabled={sync.isPending}
+      hitSlop={10}
+      accessibilityRole="button"
+      accessibilityLabel="Sync card details"
+      accessibilityState={{ busy: sync.isPending }}
+      className="flex-row items-center gap-1.5 px-2 py-1"
+    >
+      <BusyIcon busy={sync.isPending} color={colors.brand!} size={14}>
+        <RefreshCw size={13} color={colors.brand} strokeWidth={2.2} />
+      </BusyIcon>
+      <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(15) }}>Sync</Text>
+    </Pressable>
+  );
   const rows = cardRows(data?.cards ?? [], data?.institutions);
   const next = nextPayment(rows);
   const owed = rows.reduce((s, r) => s + Math.max(0, r.card.currentBalance), 0);
@@ -38,6 +90,12 @@ export default function CardsScreen() {
 
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
+      <Stack.Screen
+        options={{
+          headerRight: () => syncAction,
+          unstable_headerRightItems: () => [{ type: "custom", element: syncAction, hidesSharedBackground: true }],
+        }}
+      />
       <ScreenGlow />
       <ScrollView
         className="flex-1"
@@ -54,6 +112,7 @@ export default function CardsScreen() {
           />
         }
       >
+        {syncBanner && <SyncBanner tone="warning" title={syncBanner.title} body={syncBanner.body} onDismiss={() => setSyncBanner(null)} />}
         {isError ? (
           <View className="rounded-card bg-surface p-5 items-center gap-2">
             <Text className="font-ui text-text" style={{ fontSize: rf(14) }}>Couldn't load your cards</Text>
@@ -109,6 +168,7 @@ export default function CardsScreen() {
           </>
         )}
       </ScrollView>
+      <Toast message={toast} onHidden={hideToast} bottom={insets.bottom + 16} />
     </View>
   );
 }
