@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, Switch, ActivityIndicator } from "react-native";
+import { View, Text, TextInput, Pressable, Switch } from "react-native";
 import { Sheet } from "@/components/ui/Sheet";
 import { fmtBudget } from "@/components/budgets/BudgetRowItem";
 import { useBudgetHistory, useDeleteBudget, useSaveBudget, type BudgetLine } from "@/lib/queries/budgets";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
+import { PillButton, SheetError } from "@/components/ui/FormSheet";
+import { BusyIcon } from "@/components/ui/BusyIcon";
+import { Trash2 } from "lucide-react-native";
 
 /**
  * One budget: this month, six months of history (with the average, to pick
@@ -125,17 +128,20 @@ export function BudgetDetailSheet({
           <ToggleRow label="Fixed amount" hint="For rent or insurance: paid / not paid, no pace." value={fixed} onChange={setFixed} border />
         </View>
 
-        {error && <Text className="font-ui text-negative" style={{ fontSize: rf(13) }}>{error}</Text>}
+        {error && <SheetError>{error}</SheetError>}
         <View className="flex-row gap-2">
-          <Pressable onPress={onSave} disabled={!dirty || save.isPending} className="flex-1 h-11 rounded-full items-center justify-center bg-brand" style={{ opacity: !dirty ? 0.4 : 1 }}>
-            {save.isPending ? <ActivityIndicator color={colors["on-brand"]} /> : <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14) }}>Save</Text>}
-          </Pressable>
-          <Pressable onPress={onViewTransactions} className="flex-1 h-11 rounded-full items-center justify-center bg-brand-subtle">
-            <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(14) }}>See transactions</Text>
-          </Pressable>
+          <View className="flex-1">
+            <PillButton label="Save" onPress={onSave} loading={save.isPending} disabled={!dirty} height={46} />
+          </View>
+          <View className="flex-1">
+            <PillButton label="See transactions" onPress={onViewTransactions} variant="subtle" height={46} />
+          </View>
         </View>
-        <Pressable onPress={onRemove} disabled={del.isPending} className="items-center py-2">
-          <Text className="font-ui-medium text-negative" style={{ fontSize: rf(13.5) }}>{del.isPending ? "Removing…" : "Remove budget"}</Text>
+        <Pressable onPress={onRemove} disabled={del.isPending} accessibilityRole="button" className="flex-row items-center justify-center gap-2 py-2">
+          <BusyIcon busy={del.isPending} color={colors.negative!} size={14}>
+            <Trash2 size={13} color={colors.negative} strokeWidth={2} />
+          </BusyIcon>
+          <Text className="font-ui-medium text-negative" style={{ fontSize: rf(13.5) }}>Remove budget</Text>
         </Pressable>
       </View>
     </Sheet>

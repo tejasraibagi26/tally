@@ -1,9 +1,10 @@
-import { View, Text, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, Pressable } from "react-native";
 import { RefreshCw, KeyRound, Unplug } from "lucide-react-native";
 import { Sheet } from "@/components/ui/Sheet";
 import { useRefreshItemBalances } from "@/lib/queries/plaid";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
+import { BusyIcon } from "@/components/ui/BusyIcon";
 
 /**
  * Mobile port of components/plaid/ItemActionsMenu.tsx's "⋯" dropdown — a
@@ -74,7 +75,9 @@ export function InstitutionActionsSheet({
         </View>
       )}
       <Pressable onPress={handleRefresh} disabled={refreshBalances.isPending} className="flex-row items-center gap-3 px-5 py-3.5">
-        {refreshBalances.isPending ? <ActivityIndicator size="small" color={colors["text-2"]} /> : <RefreshCw size={17} color={colors["text-2"]} strokeWidth={1.9} />}
+        <BusyIcon busy={refreshBalances.isPending} color={colors["text-2"]!} size={17}>
+          <RefreshCw size={17} color={colors["text-2"]} strokeWidth={1.9} />
+        </BusyIcon>
         <View className="gap-0.5">
           <Text className="font-ui text-text" style={{ fontSize: rf(15) }}>Refresh balances</Text>
           <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>Fetch the latest balances now</Text>

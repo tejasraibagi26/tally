@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
+import { BusyLabel } from "@/components/ui/BusyIcon";
 
 /** Shape-matched to the summary + two cards, so nothing jumps when data lands. */
 export function AccountsSkeleton() {
@@ -78,7 +79,9 @@ export function AccountsLoadError({ onRetry, retrying }: { onRetry: () => void; 
       <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }}>{"Couldn't load your accounts"}</Text>
       <Text className="font-ui text-text-2" style={{ fontSize: rf(13.5), lineHeight: rf(19) }}>Check your connection and try again.</Text>
       <Pressable onPress={onRetry} disabled={retrying} className="h-10 rounded-full items-center justify-center px-5 bg-brand-subtle active:opacity-80 mt-1">
-        {retrying ? <ActivityIndicator size="small" color={colors.brand} /> : <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13.5) }}>Try again</Text>}
+        <BusyLabel busy={retrying} color={colors.brand!}>
+          <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13.5) }}>Try again</Text>
+        </BusyLabel>
       </Pressable>
     </Card>
   );

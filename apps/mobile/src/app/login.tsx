@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/AuthContext";
 import { ApiError, NetworkError } from "@/lib/api";
 import { useRF } from "@/theme/responsiveFont";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { SheetError } from "@/components/ui/FormSheet";
 
 // MOBILE_DESIGN.md §5.1 -- centered form, filled (borderless) inputs, full
 // pill primary button, no sign-up flow (single-user personal app).
@@ -79,14 +80,16 @@ export default function LoginScreen() {
             style={{ fontSize: rf(15.5) }}
           />
 
-          {error && <Text className="font-ui text-negative px-1" style={{ fontSize: rf(13.5) }}>{error}</Text>}
+          {error && <SheetError>{error}</SheetError>}
 
           <Pressable
             onPress={handleLogin}
             disabled={loading || !email || !password}
-            className="h-14 rounded-full bg-brand items-center justify-center mt-2 active:opacity-90 disabled:opacity-40"
+            accessibilityState={{ busy: loading }}
+            className="h-14 rounded-full bg-brand flex-row items-center justify-center gap-2 mt-2 active:opacity-90 disabled:opacity-40"
           >
-            {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15.5) }}>Log in</Text>}
+            {loading && <ActivityIndicator size="small" color={colors["on-brand"]} />}
+            <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15.5) }}>Log in</Text>
           </Pressable>
         </View>
       </ScrollView>

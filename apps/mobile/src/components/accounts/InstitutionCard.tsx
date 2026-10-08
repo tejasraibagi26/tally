@@ -8,6 +8,7 @@ import { ago, type ConnectionAction, type ConnectionState, type ConnectionTone }
 import { hairline, withAlpha } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
+import { BusyIcon, BusyLabel } from "@/components/ui/BusyIcon";
 
 type Colors = ReturnType<typeof useThemeColors>;
 
@@ -57,7 +58,9 @@ export function StateButton({
       className={`${compact ? "h-8 px-3.5" : "h-9 px-4"} rounded-full items-center justify-center active:opacity-80`}
       style={{ backgroundColor: bg, minWidth: 64, flexGrow: grow ? 1 : 0, flexShrink: 0, opacity: pending ? 0.75 : 1 }}
     >
-      {pending ? <ActivityIndicator size="small" color={fg} /> : <Text className="font-ui-semibold" style={{ color: fg, fontSize: rf(13) }}>{action.label}</Text>}
+      <BusyLabel busy={!!pending} color={fg!}>
+        <Text className="font-ui-semibold" style={{ color: fg, fontSize: rf(13) }}>{action.label}</Text>
+      </BusyLabel>
     </Pressable>
   );
 }
@@ -290,7 +293,9 @@ export function AccountLine({
         )}
         </View>
         <Pressable onPress={save} disabled={updateNickname.isPending} className="h-9 rounded-full items-center justify-center px-4 bg-brand active:opacity-80">
-          {updateNickname.isPending ? <ActivityIndicator size="small" color={colors["on-brand"]} /> : <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(13) }}>Save</Text>}
+          <BusyLabel busy={updateNickname.isPending} color={colors["on-brand"]!}>
+            <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(13) }}>Save</Text>
+          </BusyLabel>
         </Pressable>
         <Pressable
           onPress={() => {

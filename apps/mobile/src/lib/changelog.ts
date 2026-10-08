@@ -16,6 +16,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.31.0",
+    date: "2026-10-07",
+    changes: [
+      { kind: "improved", text: "Adding a budget or transaction, editing a budget and dismissing a bill keep their button label while they work, and explain any problem with an icon." },
+      { kind: "improved", text: "Buttons on bank cards, Add in the top corner, Sync, Try again and Log in no longer swap their label for a spinner or change size." },
+      { kind: "fixed", text: "The spinner on add buttons is no longer white on the light theme." },
+    ],
+  },
+  {
     version: "1.30.2",
     date: "2026-10-07",
     changes: [{ kind: "new", text: "Credit cards has a Sync button, which pulls the latest balances, statements and due dates from your banks." }],

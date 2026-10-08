@@ -14,3 +14,21 @@ export function BusyIcon({ busy, color, size = 16, children }: { busy: boolean; 
     </View>
   );
 }
+
+/**
+ * A label that can show a spinner without the button changing size: equal
+ * fixed slots on both sides, the left one becoming the spinner while busy,
+ * so the label stays centred and visible in both states (mobile's version
+ * of web Button's reserved spinner room).
+ */
+export function BusyLabel({ busy, color, gap = 6, size = 14, children }: { busy: boolean; color: string; gap?: number; size?: number; children: ReactNode }) {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", gap }}>
+      <BusyIcon busy={busy} color={color} size={size}>
+        {null}
+      </BusyIcon>
+      {children}
+      <View style={{ width: size, height: size }} />
+    </View>
+  );
+}

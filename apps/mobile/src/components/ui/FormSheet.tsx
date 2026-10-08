@@ -52,27 +52,12 @@ export function FormSheet({
       <ScrollView style={{ flexShrink: 1 }} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <View className="px-5 gap-4" style={{ paddingBottom: 8 }}>
           {children}
-          {error && (
-            <View className="flex-row items-start gap-1.5" accessibilityLiveRegion="assertive" accessibilityRole="alert">
-              <AlertTriangle size={14} color={colors.negative} strokeWidth={1.9} style={{ marginTop: 2 }} />
-              <Text className="font-ui text-negative flex-1" style={{ fontSize: rf(13) }}>{error}</Text>
-            </View>
-          )}
+          {error && <SheetError>{error}</SheetError>}
         </View>
       </ScrollView>
 
       <View className="px-5 pt-3" style={{ paddingBottom: 24 }}>
-        <Pressable
-          onPress={onSubmit}
-          disabled={submitting || submitDisabled}
-          accessibilityState={{ busy: submitting, disabled: submitting || !!submitDisabled }}
-          className={`rounded-full bg-brand flex-row items-center justify-center gap-2 active:opacity-90 ${submitDisabled && !submitting ? "opacity-50" : ""}`}
-          style={{ height: 52 }}
-        >
-          {/* Spinner beside the label, which stays (DESIGN.md §8). */}
-          {submitting && <ActivityIndicator size="small" color={colors["on-brand"]} />}
-          <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>{submitLabel}</Text>
-        </Pressable>
+        <PillButton label={submitLabel} onPress={onSubmit} loading={submitting} disabled={submitDisabled} />
       </View>
 
       {overlays}
@@ -136,6 +121,64 @@ export function SheetPickerRow({ value, placeholder, onPress }: { value: string 
         {value ?? placeholder}
       </Text>
       <ChevronRight size={16} color={colors["text-3"]} />
+    </Pressable>
+  );
+}
+
+/**
+ * A failure inside a sheet, next to what it's about: alert icon + text,
+ * announced (DESIGN.md §8, §12 -- never color alone).
+ */
+export function SheetError({ children }: { children: string }) {
+  const colors = useThemeColors();
+  const rf = useRF();
+  return (
+    <View className="flex-row items-start gap-1.5" accessibilityLiveRegion="assertive" accessibilityRole="alert">
+      <AlertTriangle size={14} color={colors.negative} strokeWidth={1.9} style={{ marginTop: 2 }} />
+      <Text className="font-ui text-negative flex-1" style={{ fontSize: rf(13) }}>{children}</Text>
+    </View>
+  );
+}
+
+/**
+ * The full-width pill every sheet ends with. Busy: a spinner beside the
+ * label, which stays, at a fixed height -- never a bare spinner in place of
+ * the label (DESIGN.md §8). `subtle` is the secondary brand-tinted pill,
+ * `plain` a text-only one for a quiet way out ("Keep it").
+ */
+export function PillButton({
+  label,
+  onPress,
+  loading = false,
+  disabled = false,
+  variant = "primary",
+  height = 52,
+}: {
+  label: string;
+  onPress: () => void;
+  loading?: boolean;
+  disabled?: boolean;
+  variant?: "primary" | "subtle" | "plain";
+  height?: number;
+}) {
+  const colors = useThemeColors();
+  const rf = useRF();
+  const fg = variant === "primary" ? colors["on-brand"]! : variant === "subtle" ? colors.brand! : colors["text-2"]!;
+  const bg = variant === "primary" ? "bg-brand" : variant === "subtle" ? "bg-brand-subtle" : "";
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled || loading}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ busy: loading, disabled: disabled || loading }}
+      className={`rounded-full flex-row items-center justify-center gap-2 active:opacity-90 ${bg}`}
+      style={{ height, opacity: disabled && !loading ? 0.45 : 1 }}
+    >
+      {loading && <ActivityIndicator size="small" color={fg} />}
+      <Text className={variant === "plain" ? "font-ui-medium" : "font-ui-semibold"} style={{ fontSize: rf(variant === "plain" ? 14 : 15), color: fg }}>
+        {label}
+      </Text>
     </Pressable>
   );
 }

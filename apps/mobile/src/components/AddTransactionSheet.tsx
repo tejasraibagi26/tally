@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, Pressable, TextInput, ScrollView, Platform, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, TextInput, ScrollView, Platform } from "react-native";
 import { useColorScheme } from "nativewind";
 import { X, ChevronRight, Calendar } from "lucide-react-native";
 import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
@@ -11,6 +11,7 @@ import { Sheet } from "@/components/ui/Sheet";
 import { SimplePickerSheet } from "@/components/ui/SimplePickerSheet";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
+import { PillButton, SheetError } from "@/components/ui/FormSheet";
 
 // Local calendar-day components, not toISOString() -- that converts to UTC
 // and would silently roll the date back a day for anyone west of UTC
@@ -207,20 +208,11 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
             </Pressable>
           )}
 
-          {error && <Text className="font-ui text-negative" style={{ fontSize: rf(13) }}>{error}</Text>}
+          {error && <SheetError>{error}</SheetError>}
         </ScrollView>
 
         <View className="px-5 pt-3" style={{ paddingBottom: 24 }}>
-          <Pressable
-            onPress={submit}
-            disabled={createTransaction.isPending}
-            className="rounded-full bg-brand items-center justify-center active:opacity-90 disabled:opacity-50"
-            style={{ height: 52 }}
-          >
-            {createTransaction.isPending ? <ActivityIndicator color="#FFFFFF" /> : (
-              <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>Add transaction</Text>
-            )}
-          </Pressable>
+          <PillButton label="Add transaction" onPress={submit} loading={createTransaction.isPending} />
         </View>
       </>
 

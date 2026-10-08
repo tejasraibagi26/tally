@@ -22,6 +22,7 @@ import { SyncBanner } from "@/components/accounts/AccountsSummary";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { EmptyPeriodIllustration } from "@/components/transactions/EmptyPeriodIllustration";
+import { BusyIcon } from "@/components/ui/BusyIcon";
 
 function currentMonthLabel(): string {
   return new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
@@ -228,7 +229,9 @@ export default function TransactionsScreen() {
                   className="items-center justify-center rounded-full bg-brand-subtle disabled:opacity-50"
                   style={{ width: 34, height: 34 }}
                 >
-                  {sync.isPending ? <ActivityIndicator size="small" color={colors.brand} /> : <RefreshCw size={15} color={colors.brand} strokeWidth={2} />}
+                  <BusyIcon busy={sync.isPending} color={colors.brand!} size={16}>
+                    <RefreshCw size={15} color={colors.brand} strokeWidth={2} />
+                  </BusyIcon>
                 </Pressable>
                 {/* Round like + and sync, so the three actions leave the title room
                     ("Tran…" when this was a text pill). The count badge sits on its corner. */}

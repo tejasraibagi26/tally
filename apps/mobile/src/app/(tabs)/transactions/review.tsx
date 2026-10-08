@@ -10,6 +10,7 @@ import { chartSeries } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { useColorScheme } from "nativewind";
+import { SheetError } from "@/components/ui/FormSheet";
 
 const SWIPE_DISTANCE = 110;
 
@@ -180,7 +181,7 @@ export default function ReviewScreen() {
                 <Switch value={always} onValueChange={setAlways} trackColor={{ true: colors.brand, false: colors["surface-2"] }} />
               </View>
             )}
-            {error && <Text className="font-ui text-negative" style={{ fontSize: rf(13) }}>{error}</Text>}
+            {error && <SheetError>{error}</SheetError>}
             <Pressable onPress={() => resolve(null)} disabled={review.isPending} className="items-center">
               <Text className="font-ui text-text-3" style={{ fontSize: rf(12.5) }}>Looks right, mark reviewed</Text>
             </Pressable>

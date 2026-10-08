@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { View, Text, Pressable, TextInput, Switch, ActivityIndicator, Alert } from "react-native";
+import { View, Text, Pressable, TextInput, Switch, Alert } from "react-native";
 import { ChevronRight } from "lucide-react-native";
 import { useCategories } from "@/lib/queries/categories";
 import { useSaveBudget, useDeleteBudget, type BudgetLine } from "@/lib/queries/budgets";
@@ -7,6 +7,7 @@ import { CategoryPickerSheet } from "@/components/CategoryPickerSheet";
 import { Sheet } from "@/components/ui/Sheet";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
+import { PillButton, SheetError } from "@/components/ui/FormSheet";
 
 // Mirrors web's AddBudgetForm.tsx for creating a budget, and BudgetRow.tsx's
 // inline edit mode for changing one -- same sheet, same fields, either way.
@@ -177,20 +178,11 @@ export function AddBudgetSheet({
             </>
           )}
 
-          {error && <Text className="font-ui text-negative" style={{ fontSize: rf(13) }}>{error}</Text>}
+          {error && <SheetError>{error}</SheetError>}
         </View>
 
         <View className="px-5 pt-3" style={{ paddingBottom: 24 }}>
-          <Pressable
-            onPress={submit}
-            disabled={saveBudget.isPending}
-            className="rounded-full bg-brand items-center justify-center active:opacity-90 disabled:opacity-50"
-            style={{ height: 52 }}
-          >
-            {saveBudget.isPending ? <ActivityIndicator color="#FFFFFF" /> : (
-              <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>{existing ? "Save changes" : "Add budget"}</Text>
-            )}
-          </Pressable>
+          <PillButton label={existing ? "Save changes" : "Add budget"} onPress={submit} loading={saveBudget.isPending} />
         </View>
       </>
 
