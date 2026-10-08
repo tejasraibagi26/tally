@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/cn";
 import { Card } from "@/components/ui/Card";
 import { RangeSlider } from "@/components/ui/RangeSlider";
+import { SaveStatus } from "@/components/ui/SaveStatus";
 import type { FireAccount, FireSettingsView } from "@/lib/fire";
 
 const DEFAULTS = { swr: 0.04, expectedReturn: 0.07, inflation: 0.02 };
@@ -290,9 +291,7 @@ export function FirePlanner({
         <div className="flex items-center justify-between">
           <h2 className="m-0 text-[15px] font-semibold text-text">Your levers</h2>
           <span className="flex items-center gap-3 text-xs">
-            <span className={cn(saveState === "error" ? "text-negative" : "text-text-3")}>
-              {saveState === "saving" ? "Saving…" : saveState === "saved" ? "Saved" : saveState === "error" ? "Couldn't save" : ""}
-            </span>
+            <SaveStatus state={saveState} />
             <button type="button" onClick={resetAll} className="text-brand hover:underline">
               Reset all
             </button>

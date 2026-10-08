@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
+import { Button } from "@/components/ui/Button";
 import { RefreshCw } from "lucide-react";
 import { formatCents } from "@tally/core/money";
 import { prettifyPfc } from "@tally/core/pfc";
@@ -73,7 +74,8 @@ export function TransactionsList({
   const [checked, setChecked] = useState<ReadonlySet<string>>(new Set());
   const [cursor, setCursor] = useState<number>(-1);
   const [pickerFor, setPickerFor] = useState<string | "bulk" | null>(null);
-  const [busy, setBusy] = useState(false);
+  // Which bulk action is running, so only its button shows a spinner.
+  const [busy, setBusy] = useState<"setCategory" | "markReviewed" | "exclude" | null>(null);
   const selected = rows.find((r) => r.id === selectedId) ?? null;
   const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
   const groups = useMemo(() => groupByDay(rows, today), [rows, today]);
@@ -144,7 +146,7 @@ export function TransactionsList({
   const bulk = useCallback(
     async (ids: string[], action: { type: "setCategory"; categoryId: string } | { type: "markReviewed" } | { type: "exclude"; value: boolean }) => {
       if (ids.length === 0) return;
-      setBusy(true);
+      setBusy(action.type);
       try {
         const res = await fetch("/api/transactions/bulk", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids, action }) });
         if (!res.ok) throw new Error("Bulk update failed");
@@ -154,7 +156,7 @@ export function TransactionsList({
         console.error(err);
         showToast("Couldn't update those transactions. Try again.", "negative");
       } finally {
-        setBusy(false);
+        setBusy(null);
         setPickerFor(null);
       }
     },
@@ -296,22 +298,28 @@ export function TransactionsList({
             <b>{checked.size} selected</b> · <span className="tabular text-text-2">{formatCents(checkedTotal, { signed: true })}</span>
           </span>
           <span className="relative">
-            <button type="button" disabled={busy} onClick={() => setPickerFor("bulk")} className="h-8 px-3 rounded-full bg-brand-subtle text-brand font-medium">
-              Set category <span className="text-[11px] opacity-70">c</span>
-            </button>
+            <Button variant="secondary" size="sm" loading={busy === "setCategory"} disabled={busy !== null} onClick={() => setPickerFor("bulk")}>
+              Set category <kbd className="font-sans text-[11px] text-text-3">c</kbd>
+            </Button>
             {pickerFor === "bulk" && (
               <CategoryPicker className="absolute bottom-full mb-2 left-0" categories={categories} onPick={(categoryId) => void bulk([...checked], { type: "setCategory", categoryId })} onClose={() => setPickerFor(null)} />
             )}
           </span>
-          <button type="button" disabled={busy} onClick={() => void bulk([...checked], { type: "markReviewed" })} className="h-8 px-3 rounded-full bg-brand-subtle text-brand font-medium">
-            Mark reviewed <span className="text-[11px] opacity-70">e</span>
-          </button>
-          <button type="button" disabled={busy} onClick={() => void bulk([...checked], { type: "exclude", value: !checkedRows.every((r) => r.excludedFromBudget) })} className="h-8 px-3 rounded-full bg-brand-subtle text-brand font-medium">
+          <Button variant="secondary" size="sm" loading={busy === "markReviewed"} disabled={busy !== null} onClick={() => void bulk([...checked], { type: "markReviewed" })}>
+            Mark reviewed <kbd className="font-sans text-[11px] text-text-3">e</kbd>
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            loading={busy === "exclude"}
+            disabled={busy !== null}
+            onClick={() => void bulk([...checked], { type: "exclude", value: !checkedRows.every((r) => r.excludedFromBudget) })}
+          >
             {checkedRows.every((r) => r.excludedFromBudget) ? "Include" : "Exclude"}
-          </button>
-          <button type="button" onClick={() => setChecked(new Set())} className="h-8 px-2 text-text-3 text-xs">
-            Esc
-          </button>
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => setChecked(new Set())} title="Clear selection (Esc)">
+            Clear
+          </Button>
         </div>
       )}
 

@@ -15,6 +15,17 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.29.0",
+    date: "2026-10-07",
+    changes: [
+      { kind: "improved", text: "Add forms (transactions, bills, budgets, rules, income, API tokens) match the rest of the app: a clear close button, Cancel and Save on the right, and a plain explanation with Try again if something goes wrong." },
+      { kind: "improved", text: "Adding something now confirms it with a short message naming what was added." },
+      { kind: "improved", text: "Undo after editing a budget or transaction uses the same notice as everywhere else." },
+      { kind: "improved", text: "Buttons in the transaction and budget panels, the bulk-edit bar and the review queue are consistent, and show a spinner without changing size." },
+      { kind: "fixed", text: "Saving a card's credit limit now says so if it fails, instead of silently doing nothing." },
+    ],
+  },
+  {
     version: "1.28.3",
     date: "2026-10-07",
     changes: [{ kind: "fixed", text: "The early-retirement planner loads again." }],

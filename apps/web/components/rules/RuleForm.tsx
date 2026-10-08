@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { AmountInput, CheckboxField, FormField, FormPanel, panelInputClass } from "@/components/ui/FormPanel";
+import { showToast } from "@/lib/toast";
 
 type Field = "description" | "merchant" | "amount" | "account" | "direction";
 
@@ -133,11 +134,12 @@ export function RuleForm({ categories, accounts }: { categories: RuleFormCategor
       setExclude(false);
       setMarkTransfer(false);
       setPreviewCount(null);
+      showToast("Rule created");
       close();
       router.refresh();
     } catch (err) {
       console.error(err);
-      setError("Couldn't create the rule.");
+      setError("Couldn't create the rule. Check your connection and try again.");
     } finally {
       setBusy(false);
     }
@@ -155,7 +157,6 @@ export function RuleForm({ categories, accounts }: { categories: RuleFormCategor
         description="Automatically categorize, tag or exclude transactions that match."
         onSubmit={handleSubmit}
         submitLabel="Create rule"
-        submittingLabel="Saving…"
         submitting={busy}
         error={error}
       >

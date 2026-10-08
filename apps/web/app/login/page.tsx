@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
+import { InlineError } from "@/components/ui/InlineError";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LogoMark } from "@/components/Logo";
 
@@ -75,10 +76,10 @@ function LoginForm() {
         />
       </div>
 
-      {error && <p className="text-sm text-negative">{error}</p>}
+      {error && <InlineError>{error}</InlineError>}
 
-      <Button type="submit" disabled={loading} className="w-full">
-        {loading ? "Signing in…" : "Sign in"}
+      <Button type="submit" loading={loading} className="w-full">
+        Sign in
       </Button>
 
       <span className="text-xs text-text-3 text-center whitespace-nowrap">

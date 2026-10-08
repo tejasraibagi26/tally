@@ -3,15 +3,19 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
+import { InlineError } from "@/components/ui/InlineError";
+import { showToast } from "@/lib/toast";
 
 export function CreditLimitEditor({ accountId, creditLimitIsManual }: { accountId: string; creditLimitIsManual: boolean }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [amountInput, setAmountInput] = useState("");
   const [saving, setSaving] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   async function save(creditLimit: number | null) {
     setSaving(true);
+    setFailed(false);
     try {
       const res = await fetch(`/api/accounts/${accountId}`, {
         method: "PATCH",
@@ -21,9 +25,12 @@ export function CreditLimitEditor({ accountId, creditLimitIsManual }: { accountI
       if (!res.ok) throw new Error("Failed to update credit limit");
       setEditing(false);
       setAmountInput("");
+      showToast(creditLimit == null ? "Limit cleared" : `Limit set to $${creditLimit.toLocaleString("en-US", { maximumFractionDigits: 2 })}`);
       router.refresh();
     } catch (err) {
       console.error(err);
+      // Stays in edit mode with the value kept, so trying again is one click.
+      setFailed(true);
     } finally {
       setSaving(false);
     }
@@ -38,7 +45,7 @@ export function CreditLimitEditor({ accountId, creditLimitIsManual }: { accountI
 
   if (editing) {
     return (
-      <form onSubmit={submit} className="flex items-center gap-1.5">
+      <form onSubmit={submit} className="flex flex-wrap items-center gap-1.5">
         <span className="text-text-3 text-sm">$</span>
         <input
           type="number"
@@ -48,14 +55,16 @@ export function CreditLimitEditor({ accountId, creditLimitIsManual }: { accountI
           placeholder="0.00"
           value={amountInput}
           onChange={(e) => setAmountInput(e.target.value)}
-          className="w-24 h-8 rounded-control bg-surface-2 border border-border-strong px-2 text-sm text-text tabular"
+          aria-invalid={failed || undefined}
+          className="w-24 h-[30px] rounded-control bg-surface border border-border-strong px-2 text-sm text-text tabular focus:outline-none focus:ring-2 focus:ring-info"
         />
-        <Button type="submit" size="sm" disabled={saving}>
-          {saving ? "Saving…" : "Save"}
+        <Button type="submit" size="sm" loading={saving}>
+          Save
         </Button>
         <Button type="button" variant="ghost" size="sm" disabled={saving} onClick={() => setEditing(false)}>
           Cancel
         </Button>
+        {failed && <InlineError className="basis-full">Couldn&apos;t save the limit. Try again.</InlineError>}
       </form>
     );
   }

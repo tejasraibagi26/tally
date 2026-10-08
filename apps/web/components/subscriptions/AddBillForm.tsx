@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { AmountInput, FormField, FormPanel, panelInputClass } from "@/components/ui/FormPanel";
+import { showToast } from "@/lib/toast";
 
 export interface BillAccountOption {
   id: string;
@@ -56,9 +57,10 @@ export function AddBillForm({ accounts, categories }: { accounts: BillAccountOpt
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error ?? "Something went wrong");
+        setError(data.error ?? "Couldn't add the bill. Try again.");
         return;
       }
+      showToast(`${description.trim()} added`);
       close();
       setDescription("");
       setAmountInput("");
@@ -67,7 +69,7 @@ export function AddBillForm({ accounts, categories }: { accounts: BillAccountOpt
       router.refresh();
     } catch (err) {
       console.error(err);
-      setError("Something went wrong");
+      setError("Couldn't reach Tally. Check your connection and try again.");
     } finally {
       setSaving(false);
     }
@@ -85,7 +87,6 @@ export function AddBillForm({ accounts, categories }: { accounts: BillAccountOpt
         description="For a recurring charge Tally hasn't picked up on its own, like rent paid in lump sums."
         onSubmit={submit}
         submitLabel="Add bill"
-        submittingLabel="Adding…"
         submitting={saving}
         error={error}
       >

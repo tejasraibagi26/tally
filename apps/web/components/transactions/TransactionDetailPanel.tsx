@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronDown, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { SidePanel } from "@/components/ui/SidePanel";
+import { SaveStatus } from "@/components/ui/SaveStatus";
+import { Button } from "@/components/ui/Button";
+import { InlineError } from "@/components/ui/InlineError";
+import { showToast } from "@/lib/toast";
 import { CategoryPicker } from "@/components/transactions/CategoryPicker";
 import { MerchantAvatar } from "@/components/transactions/MerchantAvatar";
 import { formatCents } from "@tally/core/money";
@@ -62,7 +66,6 @@ type Patch = { categoryId?: string | null; notes?: string | null; tags?: string[
 
 const TERMS = [3, 6, 9, 12] as const;
 const NOTE_DEBOUNCE_MS = 600;
-const TOAST_MS = 5000;
 
 function longDate(dateStr: string): string {
   return new Date(dateStr + "T00:00:00Z").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
@@ -108,7 +111,6 @@ export function TransactionDetailPanel({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [retry, setRetry] = useState<(() => void) | null>(null);
-  const [toast, setToast] = useState<{ text: string; undo?: () => void } | null>(null);
   const noteTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const savedNotes = useRef("");
 
@@ -162,12 +164,6 @@ export function TransactionDetailPanel({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(null), TOAST_MS);
-    return () => clearTimeout(t);
-  }, [toast]);
-
   const patch = useCallback(
     async (body: Patch, opts?: { undo?: Patch; toast?: string; onUndo?: () => void }): Promise<boolean> => {
       if (!id) return false;
@@ -180,15 +176,20 @@ export function TransactionDetailPanel({
         router.refresh();
         if (opts?.toast) {
           const undoBody = opts.undo;
-          setToast({
-            text: opts.toast,
-            undo: undoBody
-              ? () => {
-                  opts.onUndo?.();
-                  void patch(undoBody);
+          // The app-wide toast (lib/toast.ts), with Undo when the change can be reversed.
+          showToast(
+            opts.toast,
+            "positive",
+            undoBody
+              ? {
+                  label: "Undo",
+                  onPress: () => {
+                    opts.onUndo?.();
+                    void patch(undoBody);
+                  },
                 }
               : undefined,
-          });
+          );
         }
         return true;
       } catch {
@@ -333,14 +334,17 @@ export function TransactionDetailPanel({
           }} saving={status === "saving"} />
         ) : view === "spread" ? (
           <SpreadView transaction={transaction} months={v.spreadMonths} onBack={() => setView("main")} onDone={(text) => {
-            setToast({ text });
+            showToast(text);
             router.refresh();
             setView("main");
           }} />
         ) : (
           <>
             <div className="flex items-center justify-between">
-              <SaveStatus status={status} retry={retry} />
+              <div className="flex items-center gap-2.5">
+                <span className="text-xs font-medium uppercase tracking-wide text-text-3">Transaction</span>
+                <SaveStatus state={status} retry={retry} />
+              </div>
               <div className="flex items-center gap-1 text-text-3">
                 {onNavigate && (
                   <>
@@ -374,14 +378,9 @@ export function TransactionDetailPanel({
                 <span className={cn("font-display text-[40px] leading-none tabular money", v.amountTone === "positive" ? "text-positive" : v.amountTone === "muted" ? "text-text-2" : "text-text")}>
                   {formatCents(transaction.amount, { signed: true })}
                 </span>
-                <button
-                  type="button"
-                  onClick={toggleReviewed}
-                  title="Toggle reviewed (e)"
-                  className={cn("h-8 px-3.5 rounded-full text-[12.5px] font-semibold flex-none", reviewed ? "bg-surface-2 text-text-2" : "bg-brand-subtle text-brand")}
-                >
+                <Button variant={reviewed ? "ghost" : "secondary"} size="sm" onClick={toggleReviewed} title="Toggle reviewed (e)" aria-pressed={reviewed} className="flex-none">
                   {reviewed ? "✓ Reviewed" : "Mark reviewed"}
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -567,66 +566,27 @@ export function TransactionDetailPanel({
                       It comes out of your spend. This can&apos;t be undone.
                     </span>
                     <div className="flex gap-2">
-                      <button type="button" onClick={() => setConfirmDelete(false)} className="flex-1 h-8 rounded-full border border-border-strong text-text font-semibold text-[12.5px]">
+                      <Button variant="secondary" size="sm" onClick={() => setConfirmDelete(false)} disabled={status === "saving"} className="flex-1">
                         Keep it
-                      </button>
-                      <button type="button" onClick={() => void deleteTransaction()} disabled={status === "saving"} className="flex-1 h-8 rounded-full bg-negative text-on-brand font-semibold text-[12.5px] disabled:opacity-50">
+                      </Button>
+                      <Button variant="destructive-solid" size="sm" onClick={() => void deleteTransaction()} loading={status === "saving"} className="flex-1">
                         Delete
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 ) : (
-                  <button type="button" onClick={() => setConfirmDelete(true)} className="self-start text-[13px] font-medium text-negative">
+                  <Button variant="destructive" size="sm" onClick={() => setConfirmDelete(true)} className="self-start -ml-3">
                     Delete transaction
-                  </button>
+                  </Button>
                 ))}
             </div>
           </>
         )}
       </div>
-
-      {toast && (
-        <div role="status" className="fixed right-6 bottom-6 z-[60] flex items-center gap-4 rounded-control bg-raised border border-border shadow-overlay px-4 py-2.5 text-[13.5px] text-text">
-          {toast.text}
-          {toast.undo && (
-            <button
-              type="button"
-              className="text-brand font-medium"
-              onClick={() => {
-                toast.undo!();
-                setToast(null);
-              }}
-            >
-              Undo
-            </button>
-          )}
-        </div>
-      )}
     </SidePanel>
   );
 }
 
-function SaveStatus({ status, retry }: { status: "idle" | "saving" | "saved" | "error"; retry: (() => void) | null }) {
-  if (status === "error") {
-    return (
-      <span className="text-[12px] text-negative">
-        Couldn&apos;t save.{" "}
-        {retry && (
-          <button type="button" onClick={retry} className="font-semibold underline">
-            Retry
-          </button>
-        )}
-      </span>
-    );
-  }
-  if (status === "idle") return <span className="text-xs font-medium uppercase tracking-wide text-text-3">Transaction</span>;
-  return (
-    <span className="flex items-center gap-1.5 text-[12px] text-text-3" aria-live="polite">
-      <span className={cn("w-1.5 h-1.5 rounded-full", status === "saving" ? "bg-text-3" : "bg-positive")} />
-      {status === "saving" ? "Saving…" : "Saved"}
-    </span>
-  );
-}
 
 function Group({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
@@ -734,9 +694,9 @@ function SplitView({
         title={`Split ${formatCents(total)}`}
         onBack={onBack}
         right={
-          <button type="button" disabled={!canSave} onClick={() => onSave(lines.map((l, i) => ({ categoryId: l.categoryId!, amount: cents[i]! })))} className="text-[13px] font-semibold text-brand disabled:text-text-3">
-            {saving ? "Saving…" : "Save"}
-          </button>
+          <Button size="sm" disabled={!canSave} loading={saving} onClick={() => onSave(lines.map((l, i) => ({ categoryId: l.categoryId!, amount: cents[i]! })))}>
+            Save
+          </Button>
         }
       />
       <div className="flex h-2 rounded-full overflow-hidden gap-0.5 bg-sunken" aria-hidden="true">
@@ -787,13 +747,9 @@ function SplitView({
       )}
       <div className="flex gap-2">
         {bal.remaining > 0 && lines[lastEdited]?.categoryId && (
-          <button
-            type="button"
-            onClick={() => update(lastEdited, { text: ((cents[lastEdited]! + bal.remaining) / 100).toFixed(2) })}
-            className="flex-1 h-8 rounded-full bg-brand-subtle text-brand text-[12.5px] font-semibold truncate px-3"
-          >
+          <Button variant="secondary" size="sm" onClick={() => update(lastEdited, { text: ((cents[lastEdited]! + bal.remaining) / 100).toFixed(2) })} className="flex-1 min-w-0 truncate">
             Put the rest in {byId.get(lines[lastEdited]!.categoryId!)?.name}
-          </button>
+          </Button>
         )}
         <button
           type="button"
@@ -801,15 +757,15 @@ function SplitView({
             const even = splitEvenly(transaction.amount, lines.length);
             setLines(lines.map((l, i) => ({ ...l, text: (even[i]! / 100).toFixed(2) })));
           }}
-          className="flex-1 h-8 rounded-full border border-border-strong text-text text-[12.5px] font-semibold"
+          className="flex-1 h-[30px] px-3 rounded-control bg-surface border border-border-strong text-sm font-medium text-text hover:bg-sunken"
         >
           Split evenly
         </button>
       </div>
       {transaction.splits.length > 1 && (
-        <button type="button" onClick={() => onSave([])} disabled={saving} className="self-start text-[13px] font-medium text-negative">
+        <Button variant="destructive" size="sm" onClick={() => onSave([])} disabled={saving} className="self-start -ml-3">
           Remove the split
-        </button>
+        </Button>
       )}
     </>
   );
@@ -865,31 +821,30 @@ function SpreadView({ transaction, months, onBack, onDone }: { transaction: Tran
         </b>
         Each month&apos;s budget gets one share instead of the whole charge landing in one month.
       </div>
-      {error && <span className="text-[13px] text-negative">{error}</span>}
+      {error && <InlineError>{error}</InlineError>}
       {months == null ? (
-        <button
-          type="button"
-          disabled={busy}
+        <Button
+          size="lg"
+          loading={busy}
           onClick={() => void run(() => fetch(`/api/transactions/${transaction.id}/mark-annual`, { method: "POST", headers: json, body: JSON.stringify({ months: term }) }), `Spread over ${term} months`)}
-          className="h-10 rounded-full bg-brand text-on-brand text-[13.5px] font-semibold disabled:opacity-50"
         >
-          {busy ? "Spreading…" : `Spread over ${term} months`}
-        </button>
+          {`Spread over ${term} months`}
+        </Button>
       ) : (
         <div className="flex flex-col gap-3">
-          <button
-            type="button"
-            disabled={busy || term === months}
+          <Button
+            size="lg"
+            loading={busy}
+            disabled={term === months}
             onClick={() => void run(() => fetch(`/api/recurring-streams/${transaction.recurringStreamId}`, { method: "PATCH", headers: json, body: JSON.stringify({ amortizeMonths: term }) }), `Now spread over ${term} months`)}
-            className="h-10 rounded-full bg-brand text-on-brand text-[13.5px] font-semibold disabled:opacity-40"
           >
             {term === months ? `Spread over ${months} months` : `Change to ${term} months`}
-          </button>
+          </Button>
           <button
             type="button"
             disabled={busy}
             onClick={() => void run(() => fetch(`/api/recurring-streams/${transaction.recurringStreamId}`, { method: "PATCH", headers: json, body: JSON.stringify({ amortizeMonthly: false }) }), "Stopped spreading")}
-            className="self-start text-[13px] font-medium text-negative"
+            className="self-start h-[30px] -ml-3 px-3 rounded-control text-sm font-medium text-negative hover:bg-negative-subtle disabled:opacity-40"
           >
             Stop spreading
           </button>

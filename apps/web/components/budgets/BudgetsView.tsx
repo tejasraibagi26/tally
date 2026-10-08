@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatCents } from "@tally/core/money";
 import { budgetRowState, groupBudgets, monthSummary, type LabelTone, type MonthContext } from "@tally/core/budgetView";
 import { cn } from "@/lib/cn";
 import { Card } from "@/components/ui/Card";
 import { BudgetPanel } from "@/components/budgets/BudgetPanel";
+import { Button } from "@/components/ui/Button";
+import { InlineError } from "@/components/ui/InlineError";
+import { showToast } from "@/lib/toast";
 import type { BudgetLine, UnbudgetedSpend } from "@/lib/budgets";
 
 export interface SetupSummary {
@@ -52,13 +55,6 @@ export function BudgetsView({
   const router = useRouter();
   const [openId, setOpenId] = useState<string | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ text: string; undo?: () => Promise<void> } | null>(null);
-
-  useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(null), 6000);
-    return () => clearTimeout(t);
-  }, [toast]);
 
   if (budgets.length === 0) {
     return <SetupCard month={month} ctx={ctx} setup={setup} unbudgeted={unbudgeted} />;
@@ -94,7 +90,7 @@ export function BudgetsView({
       router.refresh();
       setOpenId(u.categoryId);
     } catch {
-      setToast({ text: "Couldn't add that budget. Try again." });
+      showToast("Couldn't add that budget. Try again.", "negative");
     } finally {
       setBusy(null);
     }
@@ -185,29 +181,13 @@ export function BudgetsView({
         onClose={() => setOpenId(null)}
         onRemoved={(undo) => {
           setOpenId(null);
-          setToast({ text: `${open?.categoryName ?? "Budget"} removed`, undo });
+          // The app-wide toast, with Undo (lib/toast.ts).
+          showToast(`${open?.categoryName ?? "Budget"} removed`, "positive", {
+            label: "Undo",
+            onPress: () => void undo().then(() => router.refresh()),
+          });
         }}
       />
-
-      {toast && (
-        <div role="status" className="fixed right-6 bottom-6 z-40 flex items-center gap-4 rounded-control bg-raised border border-border shadow-overlay px-4 py-2.5 text-[13.5px] text-text">
-          {toast.text}
-          {toast.undo && (
-            <button
-              type="button"
-              className="text-brand font-medium"
-              onClick={async () => {
-                const undo = toast.undo!;
-                setToast(null);
-                await undo();
-                router.refresh();
-              }}
-            >
-              Undo
-            </button>
-          )}
-        </div>
-      )}
     </>
   );
 }
@@ -270,16 +250,16 @@ function SetupCard({ month, ctx, setup, unbudgeted }: { month: string; ctx: Mont
         {ctx.phase !== "future" && spent > 0 && ` You've spent ${fmt(spent)} so far this month.`}
       </p>
       {setup?.copy && (
-        <button type="button" onClick={() => run("copy")} disabled={busy !== null} className="h-11 px-5 rounded-full bg-brand text-on-brand font-semibold text-[14px] disabled:opacity-60">
-          {busy === "copy" ? "Copying…" : `Copy ${monthName(setup.copy.fromMonth)} · ${setup.copy.count} budgets, ${fmt(setup.copy.total)}`}
-        </button>
+        <Button size="lg" onClick={() => run("copy")} loading={busy === "copy"} disabled={busy === "average"}>
+          {`Copy ${monthName(setup.copy.fromMonth)} · ${setup.copy.count} budgets, ${fmt(setup.copy.total)}`}
+        </Button>
       )}
       {setup?.average && (
-        <button type="button" onClick={() => run("average")} disabled={busy !== null} className="h-10 px-5 rounded-full bg-brand-subtle text-brand font-semibold text-[14px] disabled:opacity-60">
-          {busy === "average" ? "Setting up…" : `Use 3-month averages · ${fmt(setup.average.total)}`}
-        </button>
+        <Button variant="secondary" size="lg" onClick={() => run("average")} loading={busy === "average"} disabled={busy === "copy"}>
+          {`Use 3-month averages · ${fmt(setup.average.total)}`}
+        </Button>
       )}
-      {error && <span className="text-[13px] text-negative">{error}</span>}
+      {error && <InlineError>{error}</InlineError>}
     </Card>
   );
 }

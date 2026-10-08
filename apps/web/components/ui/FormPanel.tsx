@@ -1,18 +1,23 @@
 "use client";
 
 import { type FormEvent, type ReactNode } from "react";
+import { AlertTriangle } from "lucide-react";
 import { SidePanel } from "@/components/ui/SidePanel";
+import { Button } from "@/components/ui/Button";
+import { DialogHeader, DialogNote } from "@/components/ui/Dialog";
 import { cn } from "@/lib/cn";
 
 /** Shared input styling for fields stacked inside a FormPanel. */
-export const panelInputClass = "w-full h-9 rounded-control bg-surface-2 border border-border-strong px-2.5 text-sm text-text";
+export const panelInputClass =
+  "w-full h-9 rounded-control bg-surface border border-border-strong px-3 text-[15px] text-text focus:outline-none focus:ring-2 focus:ring-info disabled:opacity-60";
 
 /**
  * The one way every "add" flow opens on web (budget, bill, transaction,
  * rule, income schedule, API token): a right-hand SidePanel -- the same
- * sheet as TransactionDetailPanel -- with a title, stacked fields, and a
- * Save/Cancel footer pinned to the bottom so it's reachable however long
- * the form gets.
+ * sheet as TransactionDetailPanel -- built like a dialog that slides in:
+ * DialogHeader, stacked fields, and a footer pinned to the bottom with
+ * Cancel then the primary on the right, so it's reachable however long the
+ * form gets. Locked while submitting; failures show above the actions.
  */
 export function FormPanel({
   open,
@@ -21,7 +26,6 @@ export function FormPanel({
   description,
   onSubmit,
   submitLabel,
-  submittingLabel,
   submitting,
   submitDisabled,
   error,
@@ -33,44 +37,36 @@ export function FormPanel({
   description?: ReactNode;
   onSubmit: (e: FormEvent) => void;
   submitLabel: string;
-  submittingLabel: string;
   submitting: boolean;
   submitDisabled?: boolean;
+  /** Shown above the actions with an icon; the primary becomes "Try again". */
   error?: string | null;
   children: ReactNode;
 }) {
   return (
-    <SidePanel open={open} onClose={onClose}>
-      <form onSubmit={onSubmit} className="flex flex-col min-h-full">
-        <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-4 border-b border-border">
-          <div className="flex flex-col gap-1 min-w-0">
-            <h2 className="m-0 text-xl font-semibold text-text">{title}</h2>
-            {description && <p className="text-[13.5px] text-text-3">{description}</p>}
-          </div>
-          <button type="button" onClick={onClose} aria-label="Close" title="Close" className="text-text-3 hover:text-text text-lg leading-none">
-            ×
-          </button>
+    <SidePanel open={open} onClose={onClose} dismissible={!submitting}>
+      <form onSubmit={onSubmit} className="flex flex-col min-h-full" aria-busy={submitting || undefined}>
+        <div className="px-5 pt-5 pb-4 border-b border-border">
+          <DialogHeader title={title} subtitle={description} onClose={submitting ? undefined : onClose} />
         </div>
 
-        <div className="flex-1 flex flex-col gap-4 p-5">{children}</div>
+        <fieldset disabled={submitting} className="flex-1 flex flex-col gap-4 p-5 m-0 border-0 min-w-0">
+          {children}
+        </fieldset>
 
         <div className="sticky bottom-0 flex flex-col gap-3 px-5 py-4 border-t border-border bg-raised">
-          {error && <p className="text-sm text-negative">{error}</p>}
-          <div className="flex items-center gap-3">
-            <button
-              type="submit"
-              disabled={submitting || submitDisabled}
-              className="h-9 px-4 rounded-control bg-brand text-on-brand text-sm font-medium hover:bg-brand-hover disabled:opacity-40"
-            >
-              {submitting ? submittingLabel : submitLabel}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="h-9 px-4 rounded-control bg-surface border border-border-strong text-sm font-medium text-text hover:bg-sunken"
-            >
+          {error && (
+            <DialogNote tone="negative" role="alert" icon={<AlertTriangle size={16} strokeWidth={1.75} className="flex-none mt-0.5" />}>
+              {error}
+            </DialogNote>
+          )}
+          <div className="flex items-center justify-end gap-3">
+            <Button type="button" variant="ghost" onClick={onClose} disabled={submitting}>
               Cancel
-            </button>
+            </Button>
+            <Button type="submit" loading={submitting} disabled={submitDisabled}>
+              {error ? "Try again" : submitLabel}
+            </Button>
           </div>
         </div>
       </form>

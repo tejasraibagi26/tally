@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { FormField, FormPanel, panelInputClass } from "@/components/ui/FormPanel";
+import { showToast } from "@/lib/toast";
 import { useConfirmAction } from "@/components/ui/useConfirmAction";
 
 export interface ApiKeyData {
@@ -73,16 +74,17 @@ export function ApiKeysManager({ apiKeys, shortcutsEndpoint }: { apiKeys: ApiKey
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error ?? "Something went wrong");
+        setError(data.error ?? "Couldn't create the token. Try again.");
         return;
       }
+      showToast("Token created. Copy it now; it won't be shown again");
       setRevealedKey(data.key);
       close();
       setName("");
       router.refresh();
     } catch (err) {
       console.error(err);
-      setError("Something went wrong");
+      setError("Couldn't reach Tally. Check your connection and try again.");
     } finally {
       setSaving(false);
     }
@@ -174,7 +176,6 @@ export function ApiKeysManager({ apiKeys, shortcutsEndpoint }: { apiKeys: ApiKey
         description="The token is shown once after you create it. Copy it somewhere safe."
         onSubmit={submit}
         submitLabel="Create token"
-        submittingLabel="Creating…"
         submitting={saving}
         submitDisabled={!name.trim()}
         error={error}

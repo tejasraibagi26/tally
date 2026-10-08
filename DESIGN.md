@@ -302,7 +302,7 @@ The delta chip uses `--positive`/`--negative` *and* an arrow glyph *and* a compa
 
 **Meter bar** (budget/utilization) — 8px tall, radius 999, track `--sunken`, fill in the category series color, over-budget portion in `--negative`, dashed 2px `--text-3` projection marker, label above (`Spent $X of $Y`) and remaining right-aligned.
 
-**Side panel** — 420px, slides from the right, overlay shadow, ESC + click-outside to close, focus trapped.
+**Side panel** — 420px, slides from the right, overlay shadow, ESC + click-outside to close, focus trapped, over `--scrim` like Modal. Built like a dialog that slides in: `DialogHeader` (no tile), scrolling body, sticky footer with Cancel then the primary on the right (`FormPanel`). Locked while submitting; a failure shows above the actions with an icon (`DialogNote`), and success closes the panel with a toast naming what was added. Autosave uses the shared `SaveStatus` chip.
 
 **Modal** — 480/640px, radius 16, centered, over `--scrim` (light `rgba(26,25,23,.34)`, dark `rgba(0,0,0,.62)`) with a 2px backdrop blur. Built from `components/ui/Dialog.tsx`: header (40px tone tile, 18/600 title, 13.5 subtitle, close button only while dismissible), body (24px padding, 16 gap), footer (hairline above, actions right, primary last). Running work makes it non-dismissible (no close, Esc and scrim ignored). Failures show inline in the dialog, never `window.alert`; simple confirms use `useConfirmAction`. Plaid Link renders in its own iframe modal — don't restyle it; just center it and dim behind.
 
@@ -312,7 +312,7 @@ The delta chip uses `--positive`/`--negative` *and* an arrow glyph *and* a compa
 
 **Skeletons** — shape-matched blocks in `--sunken` with a 1.2s shimmer. Never a centered spinner on a full page.
 
-**Toasts** — bottom-right, 4s, icon + message + optional undo. Sync completion is a toast; sync failure is a persistent banner.
+**Toasts** — bottom-right, 4s, icon + message + optional undo. Sync completion is a toast; sync failure is a persistent banner. One `Toaster` for the whole app: `showToast(message, tone, action?)`; a toast with an action (Undo) holds 6s. Inline failures use `InlineError` (icon + text), never bare red text.
 
 ---
 

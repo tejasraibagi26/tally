@@ -36,7 +36,8 @@ export function DialogHeader({
   titleId,
   onClose,
 }: {
-  tile: ReactNode;
+  /** The 40px tone tile; side panels leave it out. */
+  tile?: ReactNode;
   title: ReactNode;
   subtitle?: ReactNode;
   titleId?: string;

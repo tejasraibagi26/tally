@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { InlineError } from "@/components/ui/InlineError";
 import { formatCents } from "@tally/core/money";
 import { cn } from "@/lib/cn";
 import { SidePanel } from "@/components/ui/SidePanel";
@@ -139,9 +140,7 @@ export function ReviewQueue({ categories, pendingCount }: { categories: DetailCa
             <div className="flex flex-col items-start gap-3 py-6">
               <h3 className="m-0 font-display text-[26px] font-normal text-text">{error ? "Something went wrong" : "You're all caught up"}</h3>
               <p className="m-0 text-[14px] text-text-2">{error ?? (done > 0 ? `${done} reviewed. New transactions show up here as they sync.` : "Nothing left to review.")}</p>
-              <button type="button" onClick={close} className="h-9 px-4 rounded-full bg-brand text-on-brand text-[13.5px] font-semibold">
-                Done
-              </button>
+              <Button onClick={close}>Done</Button>
             </div>
           ) : (
             <>
@@ -187,7 +186,7 @@ export function ReviewQueue({ categories, pendingCount }: { categories: DetailCa
                   </label>
                 )}
               </div>
-              {error && <span className="text-[13px] text-negative">{error}</span>}
+              {error && <InlineError>{error}</InlineError>}
               <div className="flex items-center justify-between text-xs text-text-3">
                 <button type="button" onClick={() => void resolve(null)} disabled={saving} className="hover:text-text">
                   Looks right, mark reviewed

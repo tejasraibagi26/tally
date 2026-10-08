@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { AmountInput, FormField, FormPanel, panelInputClass } from "@/components/ui/FormPanel";
+import { showToast } from "@/lib/toast";
 import { cn } from "@/lib/cn";
 
 export interface TransactionAccountOption {
@@ -69,15 +70,16 @@ export function AddTransactionForm({ accounts, categories }: { accounts: Transac
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error ?? "Something went wrong");
+        setError(data.error ?? "Couldn't add the transaction. Try again.");
         return;
       }
+      showToast(`${name.trim()} added`);
       close();
       reset();
       router.refresh();
     } catch (err) {
       console.error(err);
-      setError("Something went wrong");
+      setError("Couldn't add the transaction. Check your connection and try again.");
     } finally {
       setSaving(false);
     }
@@ -95,7 +97,6 @@ export function AddTransactionForm({ accounts, categories }: { accounts: Transac
         description="For cash, or anything from an account Tally isn't linked to."
         onSubmit={submit}
         submitLabel="Add transaction"
-        submittingLabel="Adding…"
         submitting={saving}
         error={error}
       >

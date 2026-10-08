@@ -5,14 +5,27 @@ import { useEffect, useRef, type ReactNode } from "react";
 // DESIGN.md §8: "420px, slides from the right, overlay shadow, ESC +
 // click-outside to close, focus trapped." §11: 220ms cubic-bezier(.32,.72,0,1),
 // replaced with an instant state change under prefers-reduced-motion.
-export function SidePanel({ open, onClose, children }: { open: boolean; onClose: () => void; children: ReactNode }) {
+export function SidePanel({
+  open,
+  onClose,
+  children,
+  dismissible = true,
+}: {
+  open: boolean;
+  onClose: () => void;
+  children: ReactNode;
+  /** False while a save is in flight: Esc and scrim clicks do nothing (same as Modal). */
+  dismissible?: boolean;
+}) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const dismissibleRef = useRef(dismissible);
+  dismissibleRef.current = dismissible;
 
   useEffect(() => {
     if (!open) return;
 
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape" && dismissibleRef.current) onClose();
       if (e.key === "Tab" && panelRef.current) {
         const focusable = panelRef.current.querySelectorAll<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
@@ -45,9 +58,9 @@ export function SidePanel({ open, onClose, children }: { open: boolean; onClose:
   return (
     <div className="fixed inset-0 z-50 flex justify-end">
       <div
-        className="absolute inset-0 motion-reduce:transition-none transition-opacity"
-        style={{ backgroundColor: "color-mix(in srgb, var(--canvas) 60%, transparent)" }}
-        onClick={onClose}
+        className="absolute inset-0 backdrop-blur-[2px] animate-[fade-in_180ms_ease-out] motion-reduce:animate-none"
+        style={{ backgroundColor: "var(--scrim)" }}
+        onClick={() => dismissible && onClose()}
         aria-hidden="true"
       />
       <div

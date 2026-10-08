@@ -5,6 +5,8 @@ import { TOAST_EVENT, type ToastDetail } from "@/lib/toast";
 import { cn } from "@/lib/cn";
 
 const TOAST_MS = 4000;
+/** Long enough to reach Undo. */
+const ACTION_TOAST_MS = 6000;
 
 /** Renders lib/toast.ts's showToast(). Mounted once, in the app layout. */
 export function Toaster() {
@@ -20,7 +22,7 @@ export function Toaster() {
 
   useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(() => setToast(null), TOAST_MS);
+    const t = setTimeout(() => setToast(null), toast.action ? ACTION_TOAST_MS : TOAST_MS);
     return () => clearTimeout(t);
   }, [toast]);
 
@@ -33,6 +35,18 @@ export function Toaster() {
         >
           <span className={cn("w-1.5 h-1.5 flex-none rounded-full", toast.tone === "negative" ? "bg-negative" : "bg-positive")} />
           {toast.message}
+          {toast.action && (
+            <button
+              type="button"
+              onClick={() => {
+                toast.action!.onPress();
+                setToast(null);
+              }}
+              className="ml-1.5 font-semibold text-brand hover:underline"
+            >
+              {toast.action.label}
+            </button>
+          )}
         </div>
       )}
     </div>

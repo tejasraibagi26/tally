@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { AmountInput, FormField, FormPanel, panelInputClass } from "@/components/ui/FormPanel";
+import { showToast } from "@/lib/toast";
 import { useConfirmAction } from "@/components/ui/useConfirmAction";
 import { formatCents } from "@tally/core/money";
 
@@ -98,9 +99,10 @@ export function IncomeScheduleManager({
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setError(data.error ?? "Something went wrong");
+        setError(data.error ?? "Couldn't add the schedule. Try again.");
         return;
       }
+      showToast(`${label.trim() || "Income"} schedule added`);
       close();
       setLabel("Paycheck");
       setAmountInput("");
@@ -110,7 +112,7 @@ export function IncomeScheduleManager({
       router.refresh();
     } catch (err) {
       console.error(err);
-      setError("Something went wrong");
+      setError("Couldn't reach Tally. Check your connection and try again.");
     } finally {
       setSaving(false);
     }
@@ -193,7 +195,6 @@ export function IncomeScheduleManager({
         description="Adds your paycheck automatically on payday, for income Tally can't see arrive."
         onSubmit={submit}
         submitLabel="Add schedule"
-        submittingLabel="Adding…"
         submitting={saving}
         error={error}
       >

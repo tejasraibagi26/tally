@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { AmountInput, CheckboxField, FormField, FormPanel, panelInputClass } from "@/components/ui/FormPanel";
+import { showToast } from "@/lib/toast";
 
 export interface UnbudgetedCategory {
   id: string;
@@ -60,6 +61,8 @@ export function AddBudgetForm({ month, monthLabel, categories }: { month: string
         body: JSON.stringify({ month, categoryId: resolvedCategoryId, amount, rolloverEnabled: rollover, isFixedAmount: fixed }),
       });
       if (!res.ok) throw new Error("Failed to create budget");
+      const budgetName = categories.find((c) => c.id === resolvedCategoryId)?.name ?? newCategoryName.trim();
+      showToast(budgetName ? `${budgetName} budget added` : "Budget added");
       setAmountInput("");
       setNewCategoryName("");
       setCategoryId(categories[0]?.id ?? "");
@@ -69,7 +72,7 @@ export function AddBudgetForm({ month, monthLabel, categories }: { month: string
       router.refresh();
     } catch (err) {
       console.error(err);
-      setError("Couldn't add the budget. Try again.");
+      setError("Couldn't add the budget. Check your connection and try again.");
     } finally {
       setSaving(false);
     }
@@ -87,7 +90,6 @@ export function AddBudgetForm({ month, monthLabel, categories }: { month: string
         description={`Set a spending limit for ${monthLabel}.`}
         onSubmit={submit}
         submitLabel="Add budget"
-        submittingLabel="Adding…"
         submitting={saving}
         error={error}
       >

@@ -8,6 +8,8 @@ import { formatCents } from "@tally/core/money";
 import { monthLastDay } from "@tally/core/budgetMath";
 import { cn } from "@/lib/cn";
 import { SidePanel } from "@/components/ui/SidePanel";
+import { Button } from "@/components/ui/Button";
+import { InlineError } from "@/components/ui/InlineError";
 import type { BudgetHistoryMonth, BudgetLine } from "@/lib/budgets";
 
 function fmt(c: number) {
@@ -160,7 +162,7 @@ export function BudgetPanel({
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Monthly budget</span>
           <span className="flex items-center gap-1.5">
             <span className="text-text-3 text-sm">$</span>
-            <input type="number" min="0" step="1" value={amountInput} onChange={(e) => setAmountInput(e.target.value)} className="w-full h-9 rounded-control bg-surface-2 border border-border-strong px-2.5 text-sm text-text tabular" />
+            <input type="number" min="0" step="1" value={amountInput} onChange={(e) => setAmountInput(e.target.value)} className="w-full h-9 rounded-control bg-surface border border-border-strong px-3 text-[15px] text-text tabular focus:outline-none focus:ring-2 focus:ring-info" />
           </span>
         </label>
 
@@ -169,21 +171,21 @@ export function BudgetPanel({
           <Toggle label="Fixed amount" hint="For rent or insurance: shows paid / not paid instead of a pace." on={fixed} onChange={setFixed} border />
         </div>
 
-        {error && <span className="text-[13px] text-negative">{error}</span>}
-        <div className="flex gap-2">
-          <button type="button" onClick={save} disabled={!dirty || saving} className="h-9 px-4 rounded-full bg-brand text-on-brand text-[13.5px] font-semibold disabled:opacity-40">
-            {saving ? "Saving…" : "Save"}
-          </button>
+        {error && <InlineError>{error}</InlineError>}
+        <div className="flex flex-wrap gap-2">
+          <Button onClick={save} loading={saving} disabled={!dirty}>
+            Save
+          </Button>
           <Link
             href={`/transactions?category=${current.categoryId}&from=${month}&to=${monthLastDay(month)}&transfer=0&excluded=0`}
-            className="h-9 px-4 rounded-full bg-brand-subtle text-brand text-[13.5px] font-semibold inline-flex items-center"
+            className="h-9 px-3 rounded-control bg-surface border border-border-strong text-[15px] font-medium text-text hover:bg-sunken inline-flex items-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-info"
           >
             See transactions
           </Link>
         </div>
-        <button type="button" onClick={remove} disabled={saving} className="self-start text-[13px] text-negative hover:underline disabled:opacity-50">
+        <Button variant="destructive" size="sm" onClick={remove} disabled={saving} className="self-start -ml-3">
           Remove budget
-        </button>
+        </Button>
       </div>
     </SidePanel>
   );
