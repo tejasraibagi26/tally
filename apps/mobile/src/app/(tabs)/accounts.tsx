@@ -37,7 +37,7 @@ export default function AccountsScreen() {
   const colors = useThemeColors();
   const rf = useRF();
   const { data, isLoading, isError, refetch, isRefetching, dataUpdatedAt } = useAccounts();
-  const { openLink, isLinking, linkingItemId, progressSheet } = usePlaidLink();
+  const { openLink, isLinking, linkingItemId, progressSheet, renderEpoch } = usePlaidLink();
   const sync = useSync();
   const refreshBalances = useRefreshItemBalances();
   const refreshStates = useItemRefreshStates();
@@ -201,7 +201,9 @@ export default function AccountsScreen() {
               <>
                 <AccountsSummary net={data.totals.net} assets={data.totals.assets} liabilities={data.totals.liabilities} />
                 {needsYou.length > 0 && <AttentionStrip count={needsYou.length} blockedNames={blockedNames} onPress={() => setFixOpen(true)} />}
-                <View className="gap-5">
+                {/* Keyed on renderEpoch: re-created after a Link session so Android
+                    redraws cards that changed while Plaid's activity covered the app. */}
+                <View key={renderEpoch} className="gap-5">
                   {cards.map(({ institution, state }) => (
                     <InstitutionCard
                       key={institution.id}

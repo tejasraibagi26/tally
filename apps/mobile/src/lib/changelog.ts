@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.31.1",
+    date: "2026-10-09",
+    changes: [{ kind: "fixed", text: "Android: a bank's card could show up blank on Accounts right after signing back in to it." }],
+  },
+  {
     version: "1.31.0",
     date: "2026-10-07",
     changes: [

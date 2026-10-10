@@ -1,4 +1,5 @@
 import { createElement, useState, useCallback, useEffect, useRef } from "react";
+import { Platform } from "react-native";
 import { createPlaidLinkSession } from "react-native-plaid-link-sdk";
 import { useQueryClient } from "@tanstack/react-query";
 import { SYNC_SUCCESS_HOLD_MS } from "@tally/core/syncDialog";
@@ -44,6 +45,15 @@ export function usePlaidLink() {
   // card's Reconnect spin at once.
   const [linkingItemId, setLinkingItemId] = useState<string | null>(null);
   const [progress, setProgress] = useState<ProgressState | null>(null);
+  // Bumped once a Link session is over and again when the progress sheet
+  // closes. Android can leave views that changed while Plaid Link's own
+  // activity covered the app laid out but undrawn (a blank card after a
+  // relink); screens key their connection list on this so those views are
+  // re-created once the app is back in front.
+  const [renderEpoch, setRenderEpoch] = useState(0);
+  const bumpEpoch = useCallback(() => {
+    setTimeout(() => setRenderEpoch((n) => n + 1), Platform.OS === "android" ? 250 : 0);
+  }, []);
   const lastRequest = useRef<{ mode: "create" | "update"; itemId?: string }>({ mode: "create" });
   const queryClient = useQueryClient();
 
@@ -173,19 +183,26 @@ export function usePlaidLink() {
       } finally {
         setIsLinking(false);
         setLinkingItemId(null);
+        bumpEpoch();
       }
     },
-    [queryClient, finishRequest],
+    [queryClient, finishRequest, bumpEpoch],
   );
 
-  const closeProgress = useCallback(() => setProgress(null), []);
+  const closeProgress = useCallback(() => {
+    setProgress(null);
+    bumpEpoch();
+  }, [bumpEpoch]);
 
   // A clean success holds briefly so it can be read, then closes itself.
   useEffect(() => {
     if (progress?.phase !== "success") return;
-    const t = setTimeout(() => setProgress(null), SYNC_SUCCESS_HOLD_MS[progress.mode]);
+    const t = setTimeout(() => {
+      setProgress(null);
+      bumpEpoch();
+    }, SYNC_SUCCESS_HOLD_MS[progress.mode]);
     return () => clearTimeout(t);
-  }, [progress]);
+  }, [progress, bumpEpoch]);
 
   /** The failed sheet's primary action: a resync if sign-in got through, otherwise a fresh Link session. */
   const retry = useCallback(() => {
@@ -203,5 +220,5 @@ export function usePlaidLink() {
 
   const progressSheet = createElement(ProgressSheet, { state: progress, onClose: closeProgress, onRetry: retry });
 
-  return { openLink, isLinking, linkingItemId, progressSheet };
+  return { openLink, isLinking, linkingItemId, progressSheet, renderEpoch };
 }
