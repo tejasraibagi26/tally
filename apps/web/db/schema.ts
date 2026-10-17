@@ -247,6 +247,21 @@ export const rules = pgTable("rules", {
   userIdx: index("rules_user_idx").on(t.userId),
 }));
 
+// A user's own name for a merchant. sourceKey is the merchantRenameKey() of
+// the name sync would otherwise show (Plaid's merchant_name, or the bank's
+// description when resolveMerchantName() overrules it); sync writes
+// displayName into transactions.merchant_name instead, so every reader
+// (lists, rules, recurring, analytics) sees the rename with no extra join.
+export const merchantRenames = pgTable("merchant_renames", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  sourceKey: text("source_key").notNull(),
+  displayName: text("display_name").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  uniq: uniqueIndex("merchant_renames_user_source_idx").on(t.userId, t.sourceKey),
+}));
+
 // ---------------------------------------------------------------------------
 // Manual income schedules
 // ---------------------------------------------------------------------------
