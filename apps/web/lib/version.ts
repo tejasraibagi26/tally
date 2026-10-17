@@ -171,8 +171,10 @@
  * 1.25.1 moves the large card tile's last four digits to the top-right
  * (they ran into the network mark). The AMEX badge stays on Amex cards
  * even next to Amex's own logo.
+ * 1.30.1 drops Settings' sticky section menu; sections stack in one column
+ * and the version/Changelog line sits at the bottom at every width.
  */
-export const APP_VERSION = "1.30.0";
+export const APP_VERSION = "1.30.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

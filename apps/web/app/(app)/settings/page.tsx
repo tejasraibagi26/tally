@@ -7,23 +7,12 @@ import { DangerZone } from "@/components/settings/DangerZone";
 import { IncomeScheduleManager } from "@/components/settings/IncomeScheduleManager";
 import { AlertSettings } from "@/components/settings/AlertSettings";
 import { SettingsBlock, SettingsGroup, SettingsRow } from "@/components/settings/SettingsLayout";
-import { SettingsNav, type SettingsNavItem } from "@/components/settings/SettingsNav";
 import { loadAlertPreferences } from "@/lib/alerts/preferences";
 import { alertHistory } from "@/lib/alerts/history";
 import { ApiKeysManager } from "@/components/settings/ApiKeysManager";
 import { accountDisplayName } from "@tally/core/accountName";
 import { APP_VERSION } from "@/lib/version";
 import Link from "next/link";
-
-const SECTIONS: SettingsNavItem[] = [
-  { id: "profile", label: "Profile" },
-  { id: "security", label: "Security" },
-  { id: "alerts", label: "Notifications" },
-  { id: "income", label: "Income" },
-  { id: "data", label: "Data" },
-  { id: "developer", label: "Developer" },
-  { id: "delete", label: "Delete data", tone: "negative" },
-];
 
 const exportButton =
   "h-[30px] px-3 inline-flex items-center rounded-control bg-surface border border-border-strong text-sm font-medium text-text hover:bg-sunken focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-info";
@@ -91,55 +80,48 @@ export default async function SettingsPage() {
   const appHost = process.env.APP_URL ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
   const shortcutsEndpoint = `${appHost.replace(/\/$/, "")}/api/shortcuts/transactions`;
 
-  // Rows that show their value, edits in dialogs, a sticky section menu
-  // beside them from 1024px (which hides below that; sections just stack).
+  // Rows that show their value, edits in dialogs; sections stack in one column.
   return (
     <div className="max-w-[1040px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
       <PageHeader title="Settings" />
 
-      <div className="grid grid-cols-1 lg:grid-cols-[180px_minmax(0,1fr)] gap-8 items-start">
-        <div className="hidden lg:block self-stretch">
-          <SettingsNav items={SECTIONS} version={APP_VERSION} />
-        </div>
+      <div className="flex flex-col gap-8 min-w-0 max-w-[720px]">
+        <ProfileSection name={user?.name ?? ""} email={user?.email ?? ""} birthDate={user?.birthDate ?? null} />
 
-        <div className="flex flex-col gap-8 min-w-0 max-w-[720px]">
-          <ProfileSection name={user?.name ?? ""} email={user?.email ?? ""} birthDate={user?.birthDate ?? null} />
+        <AlertSettings initial={alertPrefs} history={recentAlerts} recapsEnabled={user?.recapsEnabled ?? true} />
 
-          <AlertSettings initial={alertPrefs} history={recentAlerts} recapsEnabled={user?.recapsEnabled ?? true} />
+        <SettingsGroup
+          id="income"
+          title="Income"
+          description="For a paycheck your bank doesn't sync reliably: set the amount and pay days once, and Tally adds it on every payday."
+        >
+          <SettingsBlock>
+            <IncomeScheduleManager accounts={accounts} categories={incomeCategories} schedules={incomeSchedulesForDisplay} />
+          </SettingsBlock>
+        </SettingsGroup>
 
-          <SettingsGroup
-            id="income"
-            title="Income"
-            description="For a paycheck your bank doesn't sync reliably: set the amount and pay days once, and Tally adds it on every payday."
-          >
-            <SettingsBlock>
-              <IncomeScheduleManager accounts={accounts} categories={incomeCategories} schedules={incomeSchedulesForDisplay} />
-            </SettingsBlock>
-          </SettingsGroup>
+        <SettingsGroup id="data" title="Data">
+          <SettingsRow title="Export transactions" description="Every transaction you have, for backups or moving your data elsewhere">
+            <a href="/api/export?format=csv" className={exportButton}>
+              CSV
+            </a>
+            <a href="/api/export?format=json" className={exportButton}>
+              JSON
+            </a>
+          </SettingsRow>
+        </SettingsGroup>
 
-          <SettingsGroup id="data" title="Data">
-            <SettingsRow title="Export transactions" description="Every transaction you have, for backups or moving your data elsewhere">
-              <a href="/api/export?format=csv" className={exportButton}>
-                CSV
-              </a>
-              <a href="/api/export?format=json" className={exportButton}>
-                JSON
-              </a>
-            </SettingsRow>
-          </SettingsGroup>
+        <SettingsGroup id="developer" title="Developer" description="For automations like Apple Shortcuts: create a token, then have your automation send it a transaction.">
+          <SettingsBlock>
+            <ApiKeysManager apiKeys={apiKeysForDisplay} shortcutsEndpoint={shortcutsEndpoint} />
+          </SettingsBlock>
+        </SettingsGroup>
 
-          <SettingsGroup id="developer" title="Developer" description="For automations like Apple Shortcuts: create a token, then have your automation send it a transaction.">
-            <SettingsBlock>
-              <ApiKeysManager apiKeys={apiKeysForDisplay} shortcutsEndpoint={shortcutsEndpoint} />
-            </SettingsBlock>
-          </SettingsGroup>
+        <DangerZone itemCount={items.length} />
 
-          <DangerZone itemCount={items.length} />
-
-          <Link href="/settings/changelog" className="lg:hidden self-center font-mono text-[12px] text-text-3 hover:text-text-2 transition-colors">
-            v{APP_VERSION} · Changelog
-          </Link>
-        </div>
+        <Link href="/settings/changelog" className="self-center font-mono text-[12px] text-text-3 hover:text-text-2 transition-colors">
+          v{APP_VERSION} · Changelog
+        </Link>
       </div>
     </div>
   );

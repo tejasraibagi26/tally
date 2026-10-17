@@ -3,8 +3,8 @@ import { cn } from "@/lib/cn";
 
 /**
  * One Settings section: an h2 with an optional one-line description, then a
- * single card of rows. `id` is the anchor the section menu (and links like
- * the alert emails' #alerts) scroll to.
+ * single card of rows. `id` is the anchor links like the alert
+ * emails' #alerts scroll to.
  */
 export function SettingsGroup({
   id,
@@ -21,7 +21,7 @@ export function SettingsGroup({
   children: ReactNode;
 }) {
   return (
-    <section id={id} data-settings-section className="scroll-mt-6 flex flex-col gap-2.5">
+    <section id={id} className="scroll-mt-6 flex flex-col gap-2.5">
       <div className="flex flex-col gap-0.5 px-1">
         <h2 className="m-0 text-base font-semibold text-text">{title}</h2>
         {description && <p className="m-0 text-[13.5px] text-text-2">{description}</p>}

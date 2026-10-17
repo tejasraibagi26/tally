@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.30.1",
+    date: "2026-10-17",
+    changes: [{ kind: "improved", text: "Settings drops its side menu; sections are in one column." }],
+  },
+  {
     version: "1.30.0",
     date: "2026-10-17",
     changes: [
