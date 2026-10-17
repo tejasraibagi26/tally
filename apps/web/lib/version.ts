@@ -173,8 +173,9 @@
  * even next to Amex's own logo.
  * 1.30.1 drops Settings' sticky section menu; sections stack in one column
  * and the version/Changelog line sits at the bottom at every width.
+ * 1.30.2 centers that column on the page.
  */
-export const APP_VERSION = "1.30.1";
+export const APP_VERSION = "1.30.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -80,12 +80,12 @@ export default async function SettingsPage() {
   const appHost = process.env.APP_URL ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
   const shortcutsEndpoint = `${appHost.replace(/\/$/, "")}/api/shortcuts/transactions`;
 
-  // Rows that show their value, edits in dialogs; sections stack in one column.
+  // Rows that show their value, edits in dialogs; one centered 720px column.
   return (
-    <div className="max-w-[1040px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+    <div className="max-w-[784px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
       <PageHeader title="Settings" />
 
-      <div className="flex flex-col gap-8 min-w-0 max-w-[720px]">
+      <div className="flex flex-col gap-8 min-w-0">
         <ProfileSection name={user?.name ?? ""} email={user?.email ?? ""} birthDate={user?.birthDate ?? null} />
 
         <AlertSettings initial={alertPrefs} history={recentAlerts} recapsEnabled={user?.recapsEnabled ?? true} />
