@@ -1,5 +1,6 @@
 import type { Transaction as PlaidTransaction } from "plaid";
 import { DEFAULT_CURRENCY } from "@tally/core/fx";
+import { resolveMerchantName } from "@tally/core/merchantName";
 
 /**
  * Plaid convention: positive amount = money leaving the account (spend),
@@ -36,6 +37,12 @@ export interface PlaidOwnedFields {
 }
 
 export function toPlaidOwnedFields(t: PlaidTransaction): PlaidOwnedFields {
+  // When Plaid's merchant match shares nothing with the bank's description
+  // (resolveMerchantName), its logo, website and counterparties belong to
+  // that wrong merchant too -- drop them rather than show a stranger's logo.
+  // `raw` keeps Plaid's original either way.
+  const merchantName = resolveMerchantName(t.merchant_name, t.name);
+  const overruled = merchantName !== (t.merchant_name?.trim() || null);
   return {
     plaidTransactionId: t.transaction_id,
     pendingTransactionId: t.pending_transaction_id ?? null,
@@ -45,15 +52,15 @@ export function toPlaidOwnedFields(t: PlaidTransaction): PlaidOwnedFields {
     postedDate: t.date,
     authorizedDate: t.authorized_date ?? null,
     name: t.name,
-    merchantName: t.merchant_name ?? null,
-    merchantEntityId: t.merchant_entity_id ?? null,
-    logoUrl: t.logo_url ?? null,
-    website: t.website ?? null,
+    merchantName,
+    merchantEntityId: overruled ? null : t.merchant_entity_id ?? null,
+    logoUrl: overruled ? null : t.logo_url ?? null,
+    website: overruled ? null : t.website ?? null,
     paymentChannel: t.payment_channel ?? null,
     pfcPrimary: t.personal_finance_category?.primary ?? null,
     pfcDetailed: t.personal_finance_category?.detailed ?? null,
     pfcConfidence: t.personal_finance_category?.confidence_level ?? null,
-    counterparties: t.counterparties ?? null,
+    counterparties: overruled ? null : t.counterparties ?? null,
     location: t.location ?? null,
     raw: t,
   };

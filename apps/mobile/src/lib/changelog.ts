@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.32.0",
+    date: "2026-10-17",
+    changes: [
+      { kind: "new", text: "Rename a merchant: tap its name on a transaction. The new name covers every transaction from that merchant, including future ones." },
+      { kind: "fixed", text: "When Plaid matches a charge to an unrelated merchant (\"SONNET INSURANCE\" showing as \"Child Net\"), the bank's own description is shown instead, without the wrong logo." },
+    ],
+  },
+  {
     version: "1.31.1",
     date: "2026-10-09",
     changes: [{ kind: "fixed", text: "Android: a bank's card could show up blank on Accounts right after signing back in to it." }],

@@ -7,6 +7,7 @@ import { isMockPlaidItemId } from "@/lib/mock/isMock";
 import { seedMockTransactionsForItem } from "@/lib/mock/seedTransactions";
 import { toPlaidOwnedFields, mergeTransactionUpdate } from "@/lib/transactionSync/mapPlaidTransaction";
 import { categorizeTransactions } from "@/lib/categorize";
+import { applyMerchantRename, loadMerchantRenames } from "@/lib/merchantRenames";
 import { detectTransfersForUser } from "@/lib/transfers";
 import { detectRecurringForUser } from "@/lib/recurring";
 import { evaluateAfterTransactionSync } from "@/lib/alerts/evaluate";
@@ -266,6 +267,7 @@ async function reconcileTransactions(
     : [];
   const existingByPlaidId = new Map(existingRows.map((r) => [r.plaidTransactionId, r]));
 
+  const renames = await loadMerchantRenames(userId);
   let addedCount = 0;
   let modifiedCount = 0;
 
@@ -278,6 +280,7 @@ async function reconcileTransactions(
       }
       const existing = existingByPlaidId.get(t.transaction_id);
       const values = mergeTransactionUpdate(existing, toPlaidOwnedFields(t));
+      values.merchantName = applyMerchantRename(renames, values.merchantName, values.name);
 
       if (!existing) {
         await tx.insert(schema.transactions).values({

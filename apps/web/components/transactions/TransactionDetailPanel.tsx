@@ -11,6 +11,7 @@ import { InlineError } from "@/components/ui/InlineError";
 import { showToast } from "@/lib/toast";
 import { CategoryPicker } from "@/components/transactions/CategoryPicker";
 import { MerchantAvatar } from "@/components/transactions/MerchantAvatar";
+import { MerchantNameEditor } from "@/components/transactions/MerchantNameEditor";
 import { formatCents } from "@tally/core/money";
 import { describeTransactionDetail, splitBalance, splitEvenly, spreadMonthly } from "@tally/core/transactionView";
 import { cn } from "@/lib/cn";
@@ -366,8 +367,8 @@ export function TransactionDetailPanel({
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
                 <MerchantAvatar name={display} logoUrl={transaction.logoUrl} className="w-10 h-10 rounded-[11px] bg-surface-2 font-semibold text-[15px]" />
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="text-[16px] font-semibold text-text truncate">{display}</span>
+                <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                  <MerchantNameEditor transactionId={transaction.id} display={display} renameable={!!transaction.plaidTransactionId && !transaction.isManual} />
                   <span className="text-[12.5px] text-text-3 truncate">
                     {longDate(transaction.postedDate)} · {transaction.accountName}
                     {transaction.accountMask ? ` ••${transaction.accountMask}` : ""}

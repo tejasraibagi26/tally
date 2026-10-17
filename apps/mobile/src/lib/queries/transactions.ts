@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiGet, apiPatch, apiPost, apiDelete } from "@/lib/api";
+import { apiGet, apiPatch, apiPost, apiPut, apiDelete } from "@/lib/api";
 
 export interface TransactionSplit {
   categoryId: string;
@@ -93,6 +93,33 @@ export function useUpdateTransaction(id: string) {
     mutationFn: (patch: TransactionPatch) => apiPatch<TransactionRow>(`/api/transactions/${id}`, patch),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["transaction", id] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    },
+  });
+}
+
+export interface MerchantRename {
+  original: string;
+  displayName: string | null;
+}
+
+// Matches web's MerchantNameEditor.tsx (GET/PUT /api/transactions/[id]/merchant-name):
+// a rename covers every synced transaction from the same original merchant.
+export function useMerchantRename(id: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["merchant-rename", id],
+    queryFn: () => apiGet<MerchantRename>(`/api/transactions/${id}/merchant-name`),
+    enabled,
+  });
+}
+
+export function useSetMerchantRename(id: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (displayName: string | null) => apiPut<{ original: string; displayName: string; count: number }>(`/api/transactions/${id}/merchant-name`, { displayName }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["merchant-rename", id] });
+      queryClient.invalidateQueries({ queryKey: ["transaction"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
     },
   });

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { View, Text, ScrollView, Pressable, TextInput, Switch, Platform } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { useColorScheme } from "nativewind";
-import { X, ChevronRight, ChevronLeft, ChevronDown } from "lucide-react-native";
+import { X, ChevronRight, ChevronLeft, ChevronDown, Pencil } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { formatCents } from "@tally/core/money";
 import { prettifyPfc } from "@tally/core/pfc";
@@ -14,6 +14,8 @@ import {
   useMarkAnnual,
   useUpdateSpread,
   useMerchantRulePreview,
+  useMerchantRename,
+  useSetMerchantRename,
   type TransactionPatch,
   type TransactionRow,
 } from "@/lib/queries/transactions";
@@ -235,7 +237,7 @@ export default function TransactionDetailScreen() {
           keyboardShouldPersistTaps="handled"
           automaticallyAdjustKeyboardInsets
         >
-          <Header t={t} tone={v.amountTone} reviewed={reviewed} onReviewed={setReviewedTo} />
+          <Header t={t} tone={v.amountTone} reviewed={reviewed} onReviewed={setReviewedTo} onToast={setToast} />
 
           {(v.notice || v.isInstallment) && (
             <View className="rounded-control px-3.5 py-3" style={{ backgroundColor: colors.sunken, borderWidth: 1, borderColor: colors.border }}>
@@ -385,10 +387,49 @@ function SaveStatus({ status, retry }: { status: Status; retry: (() => void) | n
   );
 }
 
-function Header({ t, tone, reviewed, onReviewed }: { t: TransactionRow; tone: "positive" | "default" | "muted"; reviewed: boolean; onReviewed: (v: boolean) => void }) {
+function Header({
+  t,
+  tone,
+  reviewed,
+  onReviewed,
+  onToast,
+}: {
+  t: TransactionRow;
+  tone: "positive" | "default" | "muted";
+  reviewed: boolean;
+  onReviewed: (v: boolean) => void;
+  onToast: (toast: { message: string; undo?: () => void }) => void;
+}) {
   const colors = useThemeColors();
   const rf = useRF();
   const display = t.merchantName ?? t.name;
+  const renameable = !!t.plaidTransactionId && !t.isManual;
+  const [nameDraft, setNameDraft] = useState<string | null>(null);
+  const rename = useMerchantRename(t.id, nameDraft !== null);
+  const setRename = useSetMerchantRename(t.id);
+
+  async function saveName(next: string | null, undo: string | null) {
+    setNameDraft(null);
+    try {
+      const d = await setRename.mutateAsync(next);
+      const what = d.count === 1 ? "1 transaction" : `${d.count} transactions`;
+      onToast({
+        message: d.displayName === d.original ? `Back to ${d.original} on ${what}` : `Renamed to ${d.displayName} on ${what}`,
+        undo: () => void saveName(undo, next),
+      });
+    } catch {
+      onToast({ message: "Couldn't rename. Try again." });
+    }
+  }
+
+  function submitName() {
+    const next = (nameDraft ?? "").trim();
+    const current = rename.data?.displayName ?? null;
+    // Cleared: back to the original name, if there's a rename to undo.
+    if (!next) return current ? void saveName(null, current) : setNameDraft(null);
+    if (next === display) return setNameDraft(null);
+    void saveName(next, current);
+  }
   const text = formatCents(t.amount, { signed: true });
   const dot = text.lastIndexOf(".");
   const color = tone === "positive" ? colors.positive : tone === "muted" ? colors["text-2"] : colors.text;
@@ -398,10 +439,33 @@ function Header({ t, tone, reviewed, onReviewed }: { t: TransactionRow; tone: "p
       <View className="flex-row items-center gap-3">
         <MerchantAvatar name={display} logoUrl={t.isTransfer || t.isManual ? null : t.logoUrl} size={40} radius={11} fontSize={15} />
         <View className="flex-1 min-w-0">
-          <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }} numberOfLines={1}>{display}</Text>
+          {nameDraft !== null ? (
+            <TextInput
+              autoFocus
+              value={nameDraft}
+              onChangeText={setNameDraft}
+              onSubmitEditing={submitName}
+              onBlur={() => setNameDraft(null)}
+              maxLength={80}
+              returnKeyType="done"
+              accessibilityLabel="Merchant name"
+              className="h-8 px-2 rounded-control bg-surface-2 font-ui-semibold text-text"
+              style={{ fontSize: rf(15), borderWidth: 1, borderColor: colors["border-strong"] }}
+            />
+          ) : renameable ? (
+            <Pressable onPress={() => setNameDraft(display)} accessibilityRole="button" accessibilityLabel={`${display}, rename merchant`} className="flex-row items-center gap-1.5">
+              <Text className="font-ui-semibold text-text flex-shrink" style={{ fontSize: rf(16) }} numberOfLines={1}>{display}</Text>
+              <Pencil size={12} color={colors["text-3"]} />
+            </Pressable>
+          ) : (
+            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }} numberOfLines={1}>{display}</Text>
+          )}
           <Text className="font-ui text-text-3" style={{ fontSize: rf(12.5) }} numberOfLines={1}>
-            {date}
-            {t.accountName ? ` · ${t.accountName}${t.accountMask ? ` ••${t.accountMask}` : ""}` : ""}
+            {nameDraft !== null
+              ? rename.data
+                ? `Renames every transaction from ${rename.data.original}.${rename.data.displayName ? " Clear to use it again." : ""}`
+                : "Renames every transaction from this merchant."
+              : `${date}${t.accountName ? ` · ${t.accountName}${t.accountMask ? ` ••${t.accountMask}` : ""}` : ""}`}
           </Text>
         </View>
       </View>
