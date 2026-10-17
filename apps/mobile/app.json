@@ -52,7 +52,8 @@
           }
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "./plugins/withUISceneLifecycle"
     ],
     "experiments": {
       "typedRoutes": true,
