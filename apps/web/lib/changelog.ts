@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.30.5",
+    date: "2026-10-20",
+    changes: [{ kind: "improved", text: "On Budgets, the left-to-spend summary stays in view as you scroll your categories." }],
+  },
+  {
     version: "1.30.4",
     date: "2026-10-20",
     changes: [{ kind: "fixed", text: "The \"to review\" count no longer includes transfers, so it matches what Review shows you." }],

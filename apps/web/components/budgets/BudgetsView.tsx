@@ -126,7 +126,7 @@ export function BudgetsView({
           )}
         </Card>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 lg:sticky lg:top-4">
           <Card className="p-5 flex flex-col gap-2">
             {ctx.phase === "past" ? (
               <>

@@ -175,7 +175,7 @@
  * and the version/Changelog line sits at the bottom at every width.
  * 1.30.2 centers that column on the page.
  */
-export const APP_VERSION = "1.30.4";
+export const APP_VERSION = "1.30.5";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
