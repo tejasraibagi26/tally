@@ -47,7 +47,7 @@ export function ReviewQueue({ categories, pendingCount }: { categories: DetailCa
     setDone(0);
     setError(null);
     try {
-      const res = await fetch("/api/transactions/review");
+      const res = await fetch("/api/transactions/review?scope=month");
       if (!res.ok) throw new Error("Failed");
       const data: { items: QueueItem[] } = await res.json();
       setItems(data.items);
