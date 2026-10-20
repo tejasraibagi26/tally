@@ -74,7 +74,7 @@ export async function GET(req: Request) {
   if (transferFilter != null) conditions.push(eq(schema.transactions.isTransfer, transferFilter));
   if (excludedFilter != null) conditions.push(eq(schema.transactions.excludedFromBudget, excludedFilter));
   // ?review=1: only rows still waiting for review (the mobile "To review" pill).
-  if (url.searchParams.get("review") === "1") conditions.push(eq(schema.transactions.reviewed, false));
+  if (url.searchParams.get("review") === "1") conditions.push(eq(schema.transactions.reviewed, false), eq(schema.transactions.isTransfer, false));
   if (kindFilter) conditions.push(eq(schema.categories.kind, kindFilter));
   if (merchantFilter) {
     const merchantCondition = or(
@@ -136,7 +136,7 @@ export async function GET(req: Request) {
       .select({
         count: sql<number>`count(*)::int`,
         spend: sql<number>`coalesce(sum(abs(${schema.transactions.amount})) filter (where ${schema.categories.kind} = 'expense' and not ${schema.transactions.isTransfer} and not ${schema.transactions.excludedFromBudget}), 0)::float8`,
-        unreviewed: sql<number>`(count(*) filter (where not ${schema.transactions.reviewed}))::int`,
+        unreviewed: sql<number>`(count(*) filter (where not ${schema.transactions.reviewed} and not ${schema.transactions.isTransfer}))::int`,
       })
       .from(schema.transactions)
       .leftJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))

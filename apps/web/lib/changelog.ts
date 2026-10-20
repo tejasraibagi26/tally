@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.30.4",
+    date: "2026-10-20",
+    changes: [{ kind: "fixed", text: "The \"to review\" count no longer includes transfers, so it matches what Review shows you." }],
+  },
+  {
     version: "1.30.3",
     date: "2026-10-20",
     changes: [{ kind: "fixed", text: "Review now only shows this month's unreviewed transactions, matching the count on the button." }],

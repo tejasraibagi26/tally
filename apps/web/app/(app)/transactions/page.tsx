@@ -135,7 +135,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   if (toFilter) conditions.push(lte(schema.transactions.postedDate, toFilter));
   if (transferFilter != null) conditions.push(eq(schema.transactions.isTransfer, transferFilter));
   if (excludedFilter != null) conditions.push(eq(schema.transactions.excludedFromBudget, excludedFilter));
-  if (reviewOnly) conditions.push(eq(schema.transactions.reviewed, false));
+  if (reviewOnly) conditions.push(eq(schema.transactions.reviewed, false), eq(schema.transactions.isTransfer, false));
   if (kindFilter) conditions.push(eq(schema.categories.kind, kindFilter));
   if (merchantFilter) {
     // Mirrors lib/analytics.ts's merchantBreakdown grouping key (merchantName ?? name).
@@ -201,7 +201,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
       .select({
         count: sql<number>`count(*)::int`,
         spend: sql<number>`coalesce(sum(abs(${schema.transactions.amount})) filter (where ${schema.categories.kind} = 'expense' and not ${schema.transactions.isTransfer} and not ${schema.transactions.excludedFromBudget}), 0)::float8`,
-        unreviewed: sql<number>`(count(*) filter (where not ${schema.transactions.reviewed}))::int`,
+        unreviewed: sql<number>`(count(*) filter (where not ${schema.transactions.reviewed} and not ${schema.transactions.isTransfer}))::int`,
       })
       .from(schema.transactions)
       .leftJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))
