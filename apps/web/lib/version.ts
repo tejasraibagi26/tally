@@ -178,7 +178,7 @@
  * link signs a visitor into a pre-seeded demo household with no sign-up,
  * and every write is refused at the middleware gate for that session.
  */
-export const APP_VERSION = "1.31.0";
+export const APP_VERSION = "1.31.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

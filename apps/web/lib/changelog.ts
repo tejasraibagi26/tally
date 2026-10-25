@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.31.1",
+    date: "2026-10-25",
+    changes: [{ kind: "fixed", text: "An account you untick when reconnecting a bank is now removed from Tally, instead of lingering with its old balance." }],
+  },
+  {
     version: "1.31.0",
     date: "2026-10-24",
     changes: [

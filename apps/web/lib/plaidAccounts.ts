@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { and, eq, isNotNull, notInArray, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { plaidClient } from "@/lib/plaid";
 import { DEFAULT_CURRENCY } from "@tally/core/fx";
@@ -55,5 +55,42 @@ export async function upsertAccountsForItem(itemId: string, userId: string, acce
       });
   }
 
+  await pruneDeselectedAccounts(itemId, accountsRes.data.accounts.map((a) => a.account_id));
+
   return accountsRes.data.accounts.length;
+}
+
+/**
+ * Update-mode Link lets the user untick an account; Plaid then stops
+ * returning it from accountsGet, but its row here would sit forever with a
+ * stale balance. Drops those rows -- only when nothing hangs off them, so a
+ * deselected account with history is left alone rather than losing it.
+ * Never runs on an empty list: that's more likely a bad response than
+ * "the user deselected everything".
+ */
+async function pruneDeselectedAccounts(itemId: string, currentPlaidAccountIds: string[]): Promise<void> {
+  if (currentPlaidAccountIds.length === 0) return;
+
+  const gone = await db
+    .select({ id: schema.accounts.id })
+    .from(schema.accounts)
+    .where(
+      and(
+        eq(schema.accounts.itemId, itemId),
+        eq(schema.accounts.isManual, false),
+        isNotNull(schema.accounts.plaidAccountId),
+        notInArray(schema.accounts.plaidAccountId, currentPlaidAccountIds),
+      ),
+    );
+
+  for (const { id } of gone) {
+    const [hasTransactions, hasHoldings, hasInvestmentTransactions, hasRecurring] = await Promise.all([
+      db.select({ id: schema.transactions.id }).from(schema.transactions).where(eq(schema.transactions.accountId, id)).limit(1),
+      db.select({ id: schema.holdings.id }).from(schema.holdings).where(eq(schema.holdings.accountId, id)).limit(1),
+      db.select({ id: schema.investmentTransactions.id }).from(schema.investmentTransactions).where(eq(schema.investmentTransactions.accountId, id)).limit(1),
+      db.select({ id: schema.recurringStreams.id }).from(schema.recurringStreams).where(eq(schema.recurringStreams.accountId, id)).limit(1),
+    ]);
+    if (hasTransactions.length || hasHoldings.length || hasInvestmentTransactions.length || hasRecurring.length) continue;
+    await db.delete(schema.accounts).where(eq(schema.accounts.id, id));
+  }
 }
