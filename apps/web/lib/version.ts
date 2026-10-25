@@ -174,8 +174,11 @@
  * 1.30.1 drops Settings' sticky section menu; sections stack in one column
  * and the version/Changelog line sits at the bottom at every width.
  * 1.30.2 centers that column on the page.
+ * 1.31.0 adds a public read-only demo at /demo (DEMO_MODE): one shareable
+ * link signs a visitor into a pre-seeded demo household with no sign-up,
+ * and every write is refused at the middleware gate for that session.
  */
-export const APP_VERSION = "1.30.5";
+export const APP_VERSION = "1.31.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

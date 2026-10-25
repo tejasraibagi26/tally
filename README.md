@@ -16,6 +16,7 @@ A private finance dashboard — see `WORK.md` for the full spec and milestone pl
 - **Dashboard (M6)**: `/overview` — hero net-worth card with a 12-month trend chart, four stat tiles (spend/income/cash-flow/utilization, each with a vs.-last-month delta), a 13-month cash-flow chart (diverging bars from a zero baseline), a budget burn-down list, a ranked "where it went" category breakdown, upcoming bills (subscriptions + card due dates within 30 days), and recent activity. Recurring/subscription detection (`lib/recurringDetection.ts`) clusters by merchant+account+amount band and needs ≥3 stable-interval occurrences before it promotes a stream; `/subscriptions` lists them with monthly/annualized totals. Nightly net-worth snapshots (`lib/networth.ts`) back the trend chart. Every chart uses the `DESIGN.md` §7 series palette via CSS custom properties (so dark mode needs no separate handling) and there is no dual-axis chart anywhere. `/api/analytics/*`, `/api/recurring`, and `/api/export` (CSV/JSON) round out the API surface from `WORK.md` §10.
 - **Hardening (M7)**: `error.tsx` boundaries (app shell + root) instead of Next's default crash screen; `loading.tsx` skeletons (shape-matched `--sunken` blocks, no full-page spinners) on every data-heavy screen; an Export card in Settings; a `MASTER_KEY` rotation script; this runbook, kept current milestone by milestone.
 - **Mock mode**: runs the whole app with zero Plaid credentials — see below.
+- **Demo mode**: a public read-only tour at `/demo` — one shareable link, no sign-up, every write refused. See below.
 
 Known simplifications, by milestone:
 - **M4**: no category "hide" (no schema field for it), no category merge UI, transfer pairs auto-apply rather than going through a review queue first (`lib/transfers.ts`, `app/api/categories/[id]/route.ts`).
@@ -67,6 +68,28 @@ Automatic sync (twice-daily safety net + nightly balance refresh) runs as Vercel
 `lib/config.ts` resolves `MOCK_MODE`: **dev defaults to mock, production defaults to live.** Override explicitly with `MOCK_DATA=true` / `MOCK_DATA=false` in `.env` in either direction (e.g. to exercise real Plaid Sandbox while developing).
 
 In mock mode, "Add account" calls `/api/mock/connect` instead of opening Plaid Link, inserting one of three canned institutions (`lib/mock/fixtures.ts`) with realistic checking/savings/credit/brokerage accounts and balances directly into Postgres. Everything downstream — balances, health badges, delete, the Overview net worth figure — reads real DB rows, so it exercises the same code paths mock or live. A "Mock data" chip appears in the top bar whenever it's active so it's never mistaken for a real connection.
+
+## Demo mode
+
+A public, read-only tour of the app at one shareable URL — **`/demo`**. Distinct from mock mode above: mock mode is a developer convenience (no Plaid credentials, but you're still a real user who can change things), while demo mode is for showing Tally to someone else.
+
+```bash
+npm run seed:demo          # build the demo household (safe to re-run; resets it)
+# then set DEMO_MODE=true in .env and restart
+```
+
+Send anyone `https://your-host/demo`. One GET signs them into the pre-seeded demo account server-side and lands them on the Overview — no sign-up, no credentials to hand out, nothing to connect. "Explore the demo" buttons on the homepage and login page point at the same route, and only render when `DEMO_MODE=true`.
+
+**What the demo account holds** (`npm run seed:demo`, ~620 transactions): the three mock institutions with their checking/savings/credit/brokerage accounts, 13 months of generated transactions for one fictional household (semi-monthly payroll, rent, seasonal utilities, six subscriptions, a monthly card payment paired against its funding debit, and seeded-random discretionary spend), 7 months of budgets, detected transfer pairs and recurring streams, holdings and card liabilities, 13 months of net-worth history, and FIRE planner defaults. The generator (`lib/demo/demoTransactions.ts`) uses a fixed PRNG seed, so every re-seed reproduces the same household. Dates are relative to the run — re-run it whenever you want the demo's "today" to catch up.
+
+**How read-only is enforced.** Every write in this app is a non-GET request to `/api/*` (there are no Server Actions), so one gate covers all of them: the `authorized` callback in `lib/auth.config.ts` returns `403 {code: "DEMO_READ_ONLY"}` for any write carried by a session whose token has `demo: true`. That claim is stamped at sign-in by the provider used (`lib/auth.ts`) and lives in the signed, httpOnly session cookie, so it can't be cleared client-side. `requireUserId()` re-checks it as a backstop. A visitor can click anything; the UI surfaces the refusal as a toast (`components/demo/DemoReadOnlyNotice.tsx`) and a persistent banner marks the session throughout.
+
+Two reasons the demo can't become a back door into a real account:
+
+- The demo user signs in through a **passwordless provider** that only resolves the one fixed address in `lib/demo.ts`, and only while `DEMO_MODE=true`. Its stored password hash is random and held by nobody, so neither the login form nor the mobile login route can reach it.
+- `/demo` **never replaces an existing session** — a signed-in visitor is redirected to their own Overview untouched. (It's a GET, so a hostile `<img src=".../demo">` elsewhere could otherwise have switched a real user into the demo.)
+
+`seed:demo` resets by *deleting* the demo account, so it refuses to run if `ADMIN_EMAIL` is pointed at the demo address, or if that account has any real Plaid connection. The address lives on the reserved `.invalid` TLD so it can't belong to a real person.
 
 ## Switching to live Plaid Sandbox
 
@@ -147,6 +170,7 @@ For Docker Compose, run `pg_dump`/`pg_restore` from a container with network acc
 | `npm run db:studio` | Drizzle Studio (browse the DB) |
 | `npm run seed:user` | Create/update the single admin user from `ADMIN_EMAIL`/`ADMIN_PASSWORD` |
 | `npm run seed:categories` | Seed system categories from Plaid's PFC taxonomy (idempotent) |
+| `npm run seed:demo` | Build (or reset) the public read-only demo household — see **Demo mode** |
 | `npm run rotate:master-key` | Re-encrypts every stored access token under a new `MASTER_KEY` — see **Secret rotation** |
 
 ## Security notes

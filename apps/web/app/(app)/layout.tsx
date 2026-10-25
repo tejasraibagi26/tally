@@ -7,6 +7,8 @@ import { SideNav } from "@/components/nav/SideNav";
 import { MobileNav } from "@/components/nav/MobileNav";
 import { Toaster } from "@/components/ui/Toaster";
 import { MOCK_MODE } from "@/lib/config";
+import { DemoBanner } from "@/components/demo/DemoBanner";
+import { DemoReadOnlyNotice } from "@/components/demo/DemoReadOnlyNotice";
 import { monthRange } from "@tally/core/budgetMath";
 import { currentMonthFor } from "@/lib/userTimezone";
 import { itemStatusToBadge } from "@/lib/freshness";
@@ -17,6 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!session?.user) redirect("/login");
 
   const userId = (session.user as { id: string }).id;
+  const isDemo = (session.user as { demo?: boolean }).demo === true;
   // Matches the Transactions page's own default (unfiltered) view, which
   // defaults to the current month — this nav badge should read as "how many
   // are waiting in Transactions right now," not an all-time total.
@@ -66,14 +69,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen overflow-hidden bg-canvas">
-      <div className="hidden lg:flex lg:flex-none">
-        <SideNav user={navUser} counts={navCounts} mockMode={MOCK_MODE} />
+    <div className="flex flex-col h-screen overflow-hidden bg-canvas">
+      {isDemo && <DemoBanner />}
+      <div className="flex flex-col lg:flex-row flex-1 min-h-0">
+        <div className="hidden lg:flex lg:flex-none">
+          <SideNav user={navUser} counts={navCounts} mockMode={MOCK_MODE} />
+        </div>
+        <MobileNav user={navUser} counts={navCounts} mockMode={MOCK_MODE} />
+        <div className="flex-1 flex flex-col min-w-0 min-h-0">
+          <main className="flex-1 min-w-0 overflow-y-auto">{children}</main>
+        </div>
       </div>
-      <MobileNav user={navUser} counts={navCounts} mockMode={MOCK_MODE} />
-      <div className="flex-1 flex flex-col min-w-0 min-h-0">
-        <main className="flex-1 min-w-0 overflow-y-auto">{children}</main>
-      </div>
+      {isDemo && <DemoReadOnlyNotice />}
       <Toaster />
     </div>
   );

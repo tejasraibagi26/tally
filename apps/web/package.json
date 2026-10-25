@@ -15,6 +15,7 @@
     "db:studio": "drizzle-kit studio",
     "seed:user": "tsx scripts/create-user.ts",
     "seed:categories": "tsx scripts/seed-categories.ts",
+    "seed:demo": "tsx scripts/seed-demo.ts",
     "rotate:master-key": "tsx scripts/rotate-master-key.ts",
     "clear:mock-data": "tsx scripts/clear-mock-data.ts",
     "alerts:delete-tests": "tsx scripts/delete-test-alerts.ts",

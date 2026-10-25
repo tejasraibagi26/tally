@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.31.0",
+    date: "2026-10-24",
+    changes: [
+      {
+        kind: "new",
+        text: "You can now show Tally to someone without handing over your login: share the /demo link and they land in a sample household that can be looked at but not changed.",
+      },
+    ],
+  },
+  {
     version: "1.30.5",
     date: "2026-10-20",
     changes: [{ kind: "improved", text: "On Budgets, the left-to-spend summary stays in view as you scroll your categories." }],
