@@ -1,4 +1,5 @@
 import { and, eq, isNotNull, notInArray, sql } from "drizzle-orm";
+import type { AccountBase } from "plaid";
 import { db, schema } from "@/db";
 import { plaidClient } from "@/lib/plaid";
 import { DEFAULT_CURRENCY } from "@tally/core/fx";
@@ -17,6 +18,8 @@ import { DEFAULT_CURRENCY } from "@tally/core/fx";
  */
 export async function upsertAccountsForItem(itemId: string, userId: string, accessToken: string): Promise<number> {
   const accountsRes = await plaidClient.accountsGet({ access_token: accessToken });
+
+  await repointReissuedAccounts(itemId, accountsRes.data.accounts);
 
   for (const acct of accountsRes.data.accounts) {
     const limitCents = acct.balances.limit != null ? Math.round(acct.balances.limit * 100) : null;
@@ -58,6 +61,35 @@ export async function upsertAccountsForItem(itemId: string, userId: string, acce
   await pruneDeselectedAccounts(itemId, accountsRes.data.accounts.map((a) => a.account_id));
 
   return accountsRes.data.accounts.length;
+}
+
+/**
+ * Some banks (Wealthsimple) issue brand-new Plaid account ids when a login is
+ * re-linked. Left alone the upsert inserts a second row for the same account
+ * and strands the history on the old one. An account Plaid returns under an
+ * unknown id is matched to a stored one Plaid no longer returns, by last four,
+ * type and subtype -- only when exactly one on each side lines up -- and that
+ * row is pointed at the new id so the upsert updates it in place.
+ */
+async function repointReissuedAccounts(itemId: string, plaidAccounts: AccountBase[]): Promise<void> {
+  const stored = await db
+    .select({ id: schema.accounts.id, plaidAccountId: schema.accounts.plaidAccountId, mask: schema.accounts.mask, type: schema.accounts.type, subtype: schema.accounts.subtype })
+    .from(schema.accounts)
+    .where(and(eq(schema.accounts.itemId, itemId), eq(schema.accounts.isManual, false), isNotNull(schema.accounts.plaidAccountId)));
+
+  const returnedIds = new Set(plaidAccounts.map((a) => a.account_id));
+  const knownIds = new Set(stored.map((a) => a.plaidAccountId));
+  const orphans = stored.filter((a) => !returnedIds.has(a.plaidAccountId!));
+  const fresh = plaidAccounts.filter((a) => !knownIds.has(a.account_id) && a.mask);
+  const key = (a: { mask: string | null | undefined; type: string; subtype: string | null | undefined }) => `${a.mask ?? ""}|${a.type}|${a.subtype ?? ""}`;
+
+  for (const acct of fresh) {
+    const k = key(acct);
+    if (fresh.filter((f) => key(f) === k).length !== 1) continue;
+    const candidates = orphans.filter((o) => o.mask && key(o) === k);
+    if (candidates.length !== 1) continue;
+    await db.update(schema.accounts).set({ plaidAccountId: acct.account_id }).where(eq(schema.accounts.id, candidates[0]!.id));
+  }
 }
 
 /**
