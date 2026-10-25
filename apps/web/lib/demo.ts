@@ -1,20 +1,23 @@
 /**
- * Public read-only demo mode.
+ * Public read-only demo.
  *
  * Distinct from MOCK_MODE (lib/config.ts), which is a *developer* convenience
  * — it swaps Plaid out for canned fixtures so a local clone runs with no
  * credentials, but the signed-in user is still a real user with full write
- * access. DEMO_MODE is a *product* feature: it lets an anonymous visitor sign
- * in as one dedicated, pre-seeded user and look around without being able to
+ * access. This is a *product* feature: it lets an anonymous visitor sign in
+ * as one dedicated, pre-seeded user and look around without being able to
  * change anything.
+ *
+ * There is deliberately no env flag. The demo is on exactly when the demo
+ * account exists in the database — see isDemoAvailable() in
+ * lib/demoAccount.ts. `npm run seed:demo` turns it on, and nothing else has
+ * to be configured or kept in sync; an instance that never seeds it simply
+ * never has a demo, with no way to half-enable one.
  *
  * This module is imported by middleware.ts (Edge runtime) via
  * lib/auth.config.ts, so it must stay free of node/db/bcrypt imports —
- * process.env reads and pure logic only.
+ * pure constants and logic only.
  */
-
-/** Opt-in, in every environment: a demo user is only reachable if this is on. */
-export const DEMO_MODE: boolean = process.env.DEMO_MODE === "true";
 
 /**
  * The one account the demo signs into. Seeded by `npm run seed:demo`, whose

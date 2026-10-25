@@ -74,11 +74,12 @@ In mock mode, "Add account" calls `/api/mock/connect` instead of opening Plaid L
 A public, read-only tour of the app at one shareable URL — **`/demo`**. Distinct from mock mode above: mock mode is a developer convenience (no Plaid credentials, but you're still a real user who can change things), while demo mode is for showing Tally to someone else.
 
 ```bash
-npm run seed:demo          # build the demo household (safe to re-run; resets it)
-# then set DEMO_MODE=true in .env and restart
+npm run seed:demo          # that's the whole setup (safe to re-run; resets it)
 ```
 
-Send anyone `https://your-host/demo`. One GET signs them into the pre-seeded demo account server-side and lands them on the Overview — no sign-up, no credentials to hand out, nothing to connect. "Explore the demo" buttons on the homepage and login page point at the same route, and only render when `DEMO_MODE=true`.
+**There is no env var to set.** The demo is live exactly when the demo account exists, so seeding it is what switches it on — nothing to configure, nothing to keep in sync, and no way to half-enable one. An instance that never seeds it simply never has a demo: `/demo` redirects to the homepage and the buttons don't render.
+
+Send anyone `https://your-host/demo`. One GET signs them into the demo account server-side and lands them on the Overview — no sign-up, no credentials to hand out, nothing to connect. "Explore the demo" buttons on the homepage and login page point at the same route.
 
 **What the demo account holds** (`npm run seed:demo`, ~620 transactions): the three mock institutions with their checking/savings/credit/brokerage accounts, 13 months of generated transactions for one fictional household (semi-monthly payroll, rent, seasonal utilities, six subscriptions, a monthly card payment paired against its funding debit, and seeded-random discretionary spend), 7 months of budgets, detected transfer pairs and recurring streams, holdings and card liabilities, 13 months of net-worth history, and FIRE planner defaults. The generator (`lib/demo/demoTransactions.ts`) uses a fixed PRNG seed, so every re-seed reproduces the same household. Dates are relative to the run — re-run it whenever you want the demo's "today" to catch up.
 
@@ -86,7 +87,7 @@ Send anyone `https://your-host/demo`. One GET signs them into the pre-seeded dem
 
 Two reasons the demo can't become a back door into a real account:
 
-- The demo user signs in through a **passwordless provider** that only resolves the one fixed address in `lib/demo.ts`, and only while `DEMO_MODE=true`. Its stored password hash is random and held by nobody, so neither the login form nor the mobile login route can reach it.
+- The demo user signs in through a **passwordless provider** that only resolves the one fixed address in `lib/demo.ts`, and only if that account has been seeded. Its stored password hash is random and held by nobody, so neither the login form nor the mobile login route can reach it.
 - `/demo` **never replaces an existing session** — a signed-in visitor is redirected to their own Overview untouched. (It's a GET, so a hostile `<img src=".../demo">` elsewhere could otherwise have switched a real user into the demo.)
 
 `seed:demo` resets by *deleting* the demo account, so it refuses to run if `ADMIN_EMAIL` is pointed at the demo address, or if that account has any real Plaid connection. The address lives on the reserved `.invalid` TLD so it can't belong to a real person.

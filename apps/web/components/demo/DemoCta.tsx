@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
  * sign-in call, so this works with JS disabled and the URL stays shareable
  * on its own (that route *is* the demo link).
  *
- * Render it only where the server has confirmed DEMO_MODE is on, so it never
+ * Render it only where the server has confirmed a demo exists, so it never
  * offers a door that isn't there.
  */
 export function DemoCta({

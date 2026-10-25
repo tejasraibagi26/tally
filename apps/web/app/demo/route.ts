@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth, signIn } from "@/lib/auth";
-import { DEMO_MODE, DEMO_PROVIDER_ID } from "@/lib/demo";
+import { DEMO_PROVIDER_ID } from "@/lib/demo";
+import { isDemoAvailable } from "@/lib/demoAccount";
 
 /**
  * `GET /demo` — the whole demo experience behind one shareable link.
@@ -18,9 +19,9 @@ import { DEMO_MODE, DEMO_PROVIDER_ID } from "@/lib/demo";
  * For a signed-out visitor, landing in a read-only demo is the whole point.
  */
 export async function GET() {
-  // Nothing to offer if the demo was never enabled — don't hint that it
-  // exists, just send them where a stranger belongs.
-  if (!DEMO_MODE) redirect("/");
+  // Nothing to offer if this instance never seeded a demo — don't hint
+  // that it exists, just send them where a stranger belongs.
+  if (!(await isDemoAvailable())) redirect("/");
 
   const session = await auth();
   if (session?.user) {

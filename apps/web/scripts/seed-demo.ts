@@ -320,7 +320,7 @@ async function main() {
     .values({ userId, swr: "0.0400", expectedReturn: "0.0700", inflation: "0.0250" })
     .onConflictDoNothing();
 
-  console.log("\nDemo ready. Set DEMO_MODE=true and restart to expose it.");
+  console.log("\nDemo ready — /demo is live. Re-run this to reset it.");
   process.exit(0);
 }
 

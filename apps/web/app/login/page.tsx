@@ -3,9 +3,18 @@ import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LogoMark } from "@/components/Logo";
 import { LoginForm } from "@/components/login/LoginForm";
-import { DEMO_MODE } from "@/lib/demo";
+import { isDemoAvailable } from "@/lib/demoAccount";
 
-export default function LoginPage() {
+/**
+ * This page has no other dynamic input, so Next would otherwise prerender it
+ * at build time — which would bake in whichever answer isDemoAvailable() gave
+ * during the build and leave it there. Seeding the demo after a deploy has to
+ * light the button up without a rebuild, so the check has to run per request.
+ * (The homepage is already dynamic: it reads the session.)
+ */
+export const dynamic = "force-dynamic";
+
+export default async function LoginPage() {
   return (
     <div className="min-h-screen bg-canvas flex flex-col overflow-hidden">
       <div className="fixed inset-0 -z-10 overflow-hidden" aria-hidden>
@@ -29,7 +38,7 @@ export default function LoginPage() {
 
       <div className="flex-1 flex items-center justify-center px-4 pb-16">
         <Suspense fallback={null}>
-          <LoginForm demoMode={DEMO_MODE} />
+          <LoginForm demoMode={await isDemoAvailable()} />
         </Suspense>
       </div>
     </div>

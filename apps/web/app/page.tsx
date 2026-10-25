@@ -7,6 +7,8 @@ import { LogoMark } from "@/components/Logo";
 import { FeatureShowcase } from "@/components/marketing/FeatureShowcase";
 import { HeroVisual } from "@/components/marketing/HeroVisual";
 import { ShieldCheck, Check } from "lucide-react";
+import { isDemoAvailable } from "@/lib/demoAccount";
+import { DemoCta } from "@/components/demo/DemoCta";
 
 const TRUST_POINTS = ["No ads", "No data resale", "Nothing sent to a third-party LLM"] as const;
 
@@ -19,6 +21,8 @@ const STEPS = [
 export default async function RootPage() {
   const session = await auth();
   if (session?.user) redirect("/overview");
+
+  const demoAvailable = await isDemoAvailable();
 
   return (
     <div className="min-h-screen bg-canvas overflow-x-hidden">
@@ -67,19 +71,34 @@ export default async function RootPage() {
               Tally connects your banks, cards, and brokerages, categorizes everything automatically, and shows you
               exactly where you stand, without a single spreadsheet.
             </p>
+            {/* With a demo to show, it leads: a visitor who can't sign in to
+                an invite-only instance has nothing to do with "Sign in",
+                which steps back to secondary. Without one, the original
+                single-button hero is unchanged. */}
             <div className="flex items-center gap-4 flex-wrap">
+              {demoAvailable && <DemoCta />}
               <Link
                 href="/login"
-                className="h-11 px-5 inline-flex items-center rounded-control bg-brand text-on-brand text-[15px] font-medium hover:bg-brand-hover transition-colors"
+                className={
+                  demoAvailable
+                    ? "h-11 px-5 inline-flex items-center rounded-control bg-surface border border-border-strong text-text text-[15px] font-medium hover:bg-sunken transition-colors"
+                    : "h-11 px-5 inline-flex items-center rounded-control bg-brand text-on-brand text-[15px] font-medium hover:bg-brand-hover transition-colors"
+                }
               >
                 Sign in →
               </Link>
               <span className="text-sm text-text-3">
-                No account? This instance is invite-only, but you can{" "}
-                <Link href="/docs" className="text-text-2 hover:text-brand underline underline-offset-2">
-                  self-host your own
-                </Link>
-                .
+                {demoAvailable ? (
+                  <>No sign-up, and nothing to connect — the demo is sample data.</>
+                ) : (
+                  <>
+                    No account? This instance is invite-only, but you can{" "}
+                    <Link href="/docs" className="text-text-2 hover:text-brand underline underline-offset-2">
+                      self-host your own
+                    </Link>
+                    .
+                  </>
+                )}
               </span>
             </div>
           </div>
