@@ -183,6 +183,13 @@
       "when": 1793060020570,
       "tag": "0025_broken_captain_cross",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793118688563,
+      "tag": "0026_tiny_ken_ellis",
+      "breakpoints": true
     }
   ]
 }
