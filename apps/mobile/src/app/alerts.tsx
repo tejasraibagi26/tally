@@ -124,7 +124,7 @@ export default function AlertsScreen() {
                     <Text className="font-ui-medium text-text" style={{ fontSize: rf(14.5) }}>{label}</Text>
                     <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>{description}</Text>
                   </View>
-                  <Switch
+                  <Switch style={{ alignSelf: "center" }}
                     accessibilityLabel={`Email ${label.toLowerCase()} alerts`}
                     value={prefs.data!.channels[type].email}
                     onValueChange={(email) => update.mutate({ channels: { [type]: { email } } })}

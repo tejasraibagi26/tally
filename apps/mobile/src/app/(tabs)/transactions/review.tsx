@@ -188,7 +188,7 @@ export default function ReviewScreen() {
             {current.merchantName && (
               <View className="flex-row items-center justify-between gap-3">
                 <Text className="font-ui text-text-2 flex-1" style={{ fontSize: rf(13) }}>Always use my pick for {current.merchantName}</Text>
-                <Switch value={always} onValueChange={setAlways} trackColor={{ true: colors.brand, false: colors["surface-2"] }} />
+                <Switch style={{ alignSelf: "center" }} value={always} onValueChange={setAlways} trackColor={{ true: colors.brand, false: colors["surface-2"] }} />
               </View>
             )}
             {error && <SheetError>{error}</SheetError>}

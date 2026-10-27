@@ -277,8 +277,10 @@ import Constants from "expo-constants";
  * which in dark Pop were a hairline lost against the dialog.
  * 2.3.3 adds "How it works" to the Goals screen (GoalHowItWorksDialog),
  * sharing web's words via @tally/core/goalMath GOAL_HOW_IT_WORKS.
+ * 2.3.4 centres every Switch in its row (alignSelf: "center"): iOS 26's
+ * switch drew at the top of the row otherwise.
  */
-export const APP_VERSION = "2.3.3";
+export const APP_VERSION = "2.3.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

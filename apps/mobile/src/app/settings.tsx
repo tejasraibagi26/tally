@@ -110,10 +110,12 @@ function Row({
   );
 }
 
+// Every Switch sets alignSelf: "center" -- iOS 26's switch otherwise draws
+// at the top of a taller row instead of in its middle.
 function ThemedSwitch({ value, onValueChange, disabled, label }: { value: boolean; onValueChange: (v: boolean) => void; disabled?: boolean; label: string }) {
   const colors = useThemeColors();
   return (
-    <Switch
+    <Switch style={{ alignSelf: "center" }}
       value={value}
       onValueChange={onValueChange}
       disabled={disabled}

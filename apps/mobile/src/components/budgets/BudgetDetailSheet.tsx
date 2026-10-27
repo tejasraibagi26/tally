@@ -160,7 +160,7 @@ function ToggleRow({ label, hint, value, onChange, border }: { label: string; hi
         <Text className="font-ui text-text" style={{ fontSize: rf(14) }}>{label}</Text>
         <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>{hint}</Text>
       </View>
-      <Switch value={value} onValueChange={onChange} trackColor={{ true: colors.brand, false: colors["surface-2"] }} accessibilityLabel={label} />
+      <Switch style={{ alignSelf: "center" }} value={value} onValueChange={onChange} trackColor={{ true: colors.brand, false: colors["surface-2"] }} accessibilityLabel={label} />
     </View>
   );
 }

@@ -580,7 +580,7 @@ function CategoryCard({
                 Always use <Text className="font-ui-semibold text-text">{current?.name ?? "this category"}</Text> for <Text className="font-ui-semibold text-text">{t.merchantName}</Text>.
                 {rulePreview != null ? ` Changes ${rulePreview} past transaction${rulePreview === 1 ? "" : "s"}.` : ""}
               </Text>
-              <Switch
+              <Switch style={{ alignSelf: "center" }}
                 value={false}
                 disabled={!categoryId || saving}
                 onValueChange={(on) => {

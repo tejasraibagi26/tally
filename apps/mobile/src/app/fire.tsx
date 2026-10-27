@@ -328,7 +328,7 @@ function Planner({
                     <View key={a.id} className="flex-row items-center justify-between gap-3">
                       <Text className="font-ui text-text flex-1" style={{ fontSize: rf(13.5) }} numberOfLines={1}>{a.name}</Text>
                       <MoneyText cents={a.value} className="font-ui text-text-3" style={{ fontSize: rf(12.5) }} />
-                      <Switch
+                      <Switch style={{ alignSelf: "center" }}
                         value={!excluded.has(a.id)}
                         onValueChange={(on) => set({ excluded: on ? plan.excluded.filter((id) => id !== a.id) : [...plan.excluded, a.id] })}
                         trackColor={{ true: colors.brand, false: colors["surface-2"] }}
