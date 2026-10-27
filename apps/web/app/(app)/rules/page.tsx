@@ -7,7 +7,8 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Pager } from "@/components/ui/Pager";
 import { RuleForm } from "@/components/rules/RuleForm";
-import { RuleRow, RULE_COLUMNS } from "@/components/rules/RuleRow";
+import { RuleRow } from "@/components/rules/RuleRow";
+import { RULE_COLUMNS } from "@/components/rules/ruleColumns";
 import { summarizeMatch, summarizeActions } from "@/lib/ruleSummary";
 import { groupCategoryOptions } from "@/lib/categoryOptions";
 import type { RuleActions, RuleMatch } from "@tally/core/rulesEngine";
@@ -74,7 +75,7 @@ export default async function RulesPage({ searchParams }: { searchParams: Promis
         ) : (
           <>
             <div className={`${RULE_COLUMNS} py-2.5 bg-surface-2 border-b border-border text-xs font-medium uppercase tracking-wide text-text-3 flex-none`}>
-              <span>#</span>
+              <span>Priority</span>
               <span>Rule</span>
               <span>Enabled</span>
               <span />

@@ -253,8 +253,14 @@
  * (?page=). The footer both pages share is components/ui/Pager.tsx.
  * Enabled is a Switch, not a checkbox, and no longer sticks disabled after
  * one toggle (the row's busy flag was never cleared on success).
+ * 2.2.5 fixes that header, which rendered as one word: RULE_COLUMNS was an
+ * export of RuleRow ("use client"), and a server component importing a
+ * value from a client module gets a client reference, not the string -- so
+ * the header's className lost its grid while the rows kept theirs. It
+ * lives in components/rules/ruleColumns.ts now, and the first column is
+ * labelled Priority rather than "#".
  */
-export const APP_VERSION = "2.2.4";
+export const APP_VERSION = "2.2.5";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

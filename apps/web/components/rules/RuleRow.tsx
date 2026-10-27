@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Switch } from "@/components/ui/Switch";
 import { useConfirmAction } from "@/components/ui/useConfirmAction";
+import { RULE_COLUMNS } from "@/components/rules/ruleColumns";
 
 export interface RuleRowData {
   id: string;
@@ -12,12 +13,6 @@ export interface RuleRowData {
   matchSummary: string;
   actionsSummary: string;
 }
-
-/**
- * The row's columns, shared with the header the Rules page draws above the
- * scroll area so the two line up.
- */
-export const RULE_COLUMNS = "grid grid-cols-[32px_minmax(0,1fr)_64px_60px] gap-x-3 items-center px-4";
 
 export function RuleRow({ rule }: { rule: RuleRowData }) {
   const router = useRouter();
