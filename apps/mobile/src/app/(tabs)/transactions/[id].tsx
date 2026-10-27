@@ -240,7 +240,7 @@ export default function TransactionDetailScreen() {
           <Header t={t} tone={v.amountTone} reviewed={reviewed} onReviewed={setReviewedTo} onToast={setToast} />
 
           {(v.notice || v.isInstallment) && (
-            <View className="rounded-control px-3.5 py-3" style={{ backgroundColor: colors.sunken, borderWidth: 1, borderColor: colors.ink ?? colors.border }}>
+            <View className="rounded-control px-3.5 py-3" style={{ backgroundColor: colors.sunken, borderWidth: 1, borderColor: colors.border }}>
               <Text className="font-ui-semibold text-text" style={{ fontSize: rf(13) }}>{v.isInstallment ? "One month of a spread plan" : v.notice!.title}</Text>
               <Text className="font-ui text-text-2 mt-0.5" style={{ fontSize: rf(12.5), lineHeight: rf(17) }}>
                 {v.isInstallment ? "Change or stop the spread from the original charge." : v.notice!.body}
@@ -333,7 +333,7 @@ export default function TransactionDetailScreen() {
             {detailsOpen && <Details t={t} />}
             {v.canDelete &&
               (confirmDelete ? (
-                <View className="rounded-card p-4 gap-3" style={{ backgroundColor: colors.sunken, borderWidth: 1, borderColor: colors.ink ?? colors.border }}>
+                <View className="rounded-card p-4 gap-3" style={{ backgroundColor: colors.sunken, borderWidth: 1, borderColor: colors.border }}>
                   <View>
                     <Text className="font-ui-semibold text-text" style={{ fontSize: rf(14) }}>Delete {t.merchantName ?? t.name}?</Text>
                     <Text className="font-ui text-text-2 mt-0.5" style={{ fontSize: rf(13) }}>It comes out of your spend. This can't be undone.</Text>
