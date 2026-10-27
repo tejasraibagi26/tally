@@ -210,8 +210,10 @@
  * section in the Pop recap. A one-time announcement on Overview
  * (users.goals_intro_seen_at, migration 0028); "Not now" leaves the
  * "Set a goal" card in place. GET/PUT/DELETE /api/goals, POST /api/goals/intro.
+ * 2.1.1 gives Pop's Overview header a sticker pill for connections that
+ * need you (icon + words), in place of the plain red link.
  */
-export const APP_VERSION = "2.1.0";
+export const APP_VERSION = "2.1.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

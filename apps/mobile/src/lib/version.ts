@@ -245,8 +245,12 @@ import Constants from "expo-constants";
  * older iOS keep the plain scrim.
  * 2.1.2 puts the goals announcement's "Set a goal" above "Not now", the
  * order the app's other stacked dialogs use.
+ * 2.1.3 brings Pop's ink outline and sticker shadow to the hand-built
+ * cards that missed it: Overview's "banks need you" card (and its fix
+ * buttons), the Investments / Credit used pair, and the filtered-empty
+ * Transactions note. useStickerShadow (ui/Card.tsx) shares the shadow.
  */
-export const APP_VERSION = "2.1.2";
+export const APP_VERSION = "2.1.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

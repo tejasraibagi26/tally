@@ -9,6 +9,7 @@ import { StateButton, toneColor } from "@/components/accounts/InstitutionCard";
 import { hairline, withAlpha } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
+import { useStickerShadow } from "@/components/ui/Card";
 
 const MAX_ROWS = 2;
 // Overview has no in-flight sync or Plaid Link of its own: those live on the
@@ -38,6 +39,7 @@ export function NeedsYouCard({ items }: { items: NeedsYouItem[] }) {
   const router = useRouter();
   const colors = useThemeColors();
   const rf = useRF();
+  const sticker = useStickerShadow();
   if (items.length === 0) return null;
 
   const blocked = items.some((c) => c.state.level === "blocked");
@@ -49,7 +51,8 @@ export function NeedsYouCard({ items }: { items: NeedsYouItem[] }) {
   const shown = items.slice(0, MAX_ROWS);
 
   return (
-    <View className="rounded-card px-[18px] pt-4 pb-3.5" style={{ backgroundColor: colors[`${tone}-subtle`] }}>
+    // border-card/border-ink + the sticker shadow: Tally Pop's outline (none in the classic look).
+    <View className="rounded-card border-card border-ink px-[18px] pt-4 pb-3.5" style={[{ backgroundColor: colors[`${tone}-subtle`] }, sticker]}>
       <Pressable onPress={openFix} className="flex-row items-center gap-2" accessibilityRole="button" accessibilityLabel={title}>
         <TriangleAlert size={16} color={colors[tone]} strokeWidth={2} />
         <Text className="font-ui-semibold flex-1" style={{ fontSize: rf(14.5), color: colors[tone] }} numberOfLines={1}>{title}</Text>

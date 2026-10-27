@@ -55,7 +55,7 @@ export function StateButton({
       disabled={pending}
       accessibilityRole="button"
       accessibilityLabel={action.label}
-      className={`${compact ? "h-8 px-3.5" : "h-9 px-4"} rounded-full items-center justify-center active:opacity-80`}
+      className={`${compact ? "h-8 px-3.5" : "h-9 px-4"} rounded-full border-button border-ink items-center justify-center active:opacity-80`}
       style={{ backgroundColor: bg, minWidth: 64, flexGrow: grow ? 1 : 0, flexShrink: 0, opacity: pending ? 0.75 : 1 }}
     >
       <BusyLabel busy={!!pending} color={fg!}>

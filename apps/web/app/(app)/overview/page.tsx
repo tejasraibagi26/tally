@@ -1,7 +1,7 @@
 import { db, schema } from "@/db";
 import { isLiveAccountRow } from "@/lib/liveAccounts";
 import { and, eq, gte, lt, sql } from "drizzle-orm";
-import { Landmark, CalendarCheck } from "lucide-react";
+import { Landmark, CalendarCheck, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { requireUserId } from "@/lib/session";
 import { formatCents, formatPercent } from "@tally/core/money";
@@ -171,8 +171,9 @@ export default async function OverviewPage() {
         meta={[popLine, items.some((i) => i.lastSyncedAt) && <SyncFreshness key="sync" syncedAt={items.map((i) => i.lastSyncedAt)} />]}
         actions={
           brokenItems > 0 && (
-            <Link href="/accounts" className="text-[13.5px] text-negative">
-              {brokenItems} connection{brokenItems === 1 ? "" : "s"} need attention →
+            <Link href="/accounts" className="ui-btn inline-flex items-center gap-1.5 rounded-full border-2 border-[var(--ink)] bg-negative-subtle px-3 py-1 text-[13.5px] font-semibold text-negative">
+              <AlertTriangle size={14} strokeWidth={2.25} aria-hidden="true" />
+              {brokenItems} connection{brokenItems === 1 ? "" : "s"} need{brokenItems === 1 ? "s" : ""} you
             </Link>
           )
         }

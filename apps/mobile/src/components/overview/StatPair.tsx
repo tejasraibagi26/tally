@@ -8,6 +8,7 @@ import type { UtilizationResult } from "@/lib/queries/liabilities";
 import { hairline } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
+import { useStickerShadow } from "@/components/ui/Card";
 
 /**
  * Investments and Credit used in one card, a hairline between the two. One
@@ -23,6 +24,7 @@ export function StatPair({ investmentsCents, credit, highCards = 0 }: { investme
   const rf = useRF();
   const { width } = useWindowDimensions();
   const { hidden } = usePrivacy();
+  const sticker = useStickerShadow();
   const utilization = credit?.utilization ?? null;
   if (investmentsCents == null && utilization == null) return null;
   const stacked = width < 340 || PixelRatio.getFontScale() > 1.15;
@@ -41,7 +43,9 @@ export function StatPair({ investmentsCents, credit, highCards = 0 }: { investme
   const divider = stacked ? { height: 1, marginHorizontal: 16 } : { width: 1, marginVertical: 16 };
 
   return (
-    <View className={`rounded-card bg-surface overflow-hidden ${stacked ? "" : "flex-row"}`}>
+    // Tally Pop: ink outline + the sticker shadow on an outer view (iOS drops the shadow of a clipping view).
+    <View className="rounded-card" style={sticker}>
+    <View className={`rounded-card bg-surface border-card border-ink overflow-hidden ${stacked ? "" : "flex-row"}`}>
       {investmentsCents != null && (
         <Pressable onPress={() => router.push("/investments")} className="flex-1 p-4 gap-1.5 active:opacity-80" accessibilityRole="button" accessibilityLabel="Investments">
           <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(11.5) }}>Investments</Text>
@@ -86,6 +90,7 @@ export function StatPair({ investmentsCents, credit, highCards = 0 }: { investme
           )}
         </Pressable>
       )}
+    </View>
     </View>
   );
 }

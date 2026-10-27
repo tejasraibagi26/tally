@@ -344,7 +344,7 @@ export default function TransactionsScreen() {
               />
             </View>
           ) : (
-            <Text className="font-ui text-text-3 rounded-card bg-surface p-6" style={{ fontSize: rf(14) }}>No transactions match these filters.</Text>
+            <Text className="font-ui text-text-3 rounded-card bg-surface border-card border-ink p-6" style={{ fontSize: rf(14) }}>No transactions match these filters.</Text>
           )
         }
         ListFooterComponent={isFetchingNextPage ? <ActivityIndicator className="py-4" /> : null}
