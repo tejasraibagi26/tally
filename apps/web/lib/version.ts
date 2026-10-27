@@ -227,8 +227,10 @@
  * 2.1.7 leads the goal card with what's left ("$X" / "left to reach $Y by
  * Dec 31"), not net worth again under Overview's net worth card; the Goals
  * page adds "now $Z" (showCurrent), having no net worth card of its own.
+ * 2.1.8 sets Cash flow's headline and the budget panel's spent/budget
+ * figures in Pop's display face (the ui-figure hook).
  */
-export const APP_VERSION = "2.1.7";
+export const APP_VERSION = "2.1.8";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

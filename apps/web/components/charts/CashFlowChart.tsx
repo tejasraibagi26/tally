@@ -97,7 +97,7 @@ export function CashFlowChart({ months }: { months: CashFlowMonth[] }) {
         <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
           {/* money-fit: shrinks to the dots when hidden, so the chip doesn't
               trail a gap the width of the real figure. */}
-          <span className="text-[26px] font-semibold tracking-[-0.4px] text-text tabular money money-fit">
+          <span className="ui-figure text-[26px] font-semibold tracking-[-0.4px] text-text tabular money money-fit">
             <span>
               {summary.avgSaved < 0 ? "−" : ""}
               {formatCents(Math.abs(summary.avgSaved))}

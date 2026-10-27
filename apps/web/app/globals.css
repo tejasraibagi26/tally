@@ -307,6 +307,13 @@
   letter-spacing: -0.03em;
   line-height: 1.1;
 }
+/* Headline figures set in the UI face in the classic look (Cash flow's
+   average, the budget panel's spent/budget): the display face in Pop. */
+[data-ui="pop"] .ui-figure {
+  font-family: var(--font-bricolage), var(--font-inter), sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
 [data-ui="pop"] .ui-card-title {
   font-family: var(--font-bricolage), var(--font-inter), sans-serif;
   font-weight: 700;

@@ -261,8 +261,10 @@ import Constants from "expo-constants";
  * goal · On track · $X to go" + chevron) instead of a wrapping sentence.
  * 2.2.2 leads the goal card with what's left, not net worth again under
  * Overview's net worth card; the Goals screen adds "now $Z".
+ * 2.2.3 sets the budget sheet's spent/budget and the review card's amount
+ * in Pop's display face.
  */
-export const APP_VERSION = "2.2.2";
+export const APP_VERSION = "2.2.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

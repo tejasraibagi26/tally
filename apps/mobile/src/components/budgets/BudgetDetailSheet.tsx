@@ -5,6 +5,7 @@ import { fmtBudget } from "@/components/budgets/BudgetRowItem";
 import { useBudgetHistory, useDeleteBudget, useSaveBudget, type BudgetLine } from "@/lib/queries/budgets";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
+import { useUiLook } from "@/lib/UiLookContext";
 import { PillButton, SheetError } from "@/components/ui/FormSheet";
 import { BusyIcon } from "@/components/ui/BusyIcon";
 import { Trash2 } from "lucide-react-native";
@@ -30,6 +31,8 @@ export function BudgetDetailSheet({
   onRemoved: (undo: () => void) => void;
 }) {
   const colors = useThemeColors();
+  // Headline figures: the display face in Tally Pop, the UI face otherwise.
+  const figureFont = useUiLook().pop ? "font-display text-text" : "font-ui-semibold text-text";
   const rf = useRF();
   const history = useBudgetHistory(line.categoryId, month);
   const save = useSaveBudget();
@@ -75,11 +78,11 @@ export function BudgetDetailSheet({
         <View className="flex-row justify-between">
           <View className="gap-0.5">
             <Text className="font-ui-medium text-text-3" style={label}>Spent</Text>
-            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(22), fontVariant: ["tabular-nums"] }}>{fmtBudget(line.spend)}</Text>
+            <Text className={figureFont} style={{ fontSize: rf(22), fontVariant: ["tabular-nums"] }}>{fmtBudget(line.spend)}</Text>
           </View>
           <View className="gap-0.5 items-end">
             <Text className="font-ui-medium text-text-3" style={label}>Budget</Text>
-            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(22), fontVariant: ["tabular-nums"] }}>{fmtBudget(line.amount + line.rolloverFromPrior)}</Text>
+            <Text className={figureFont} style={{ fontSize: rf(22), fontVariant: ["tabular-nums"] }}>{fmtBudget(line.amount + line.rolloverFromPrior)}</Text>
           </View>
         </View>
 

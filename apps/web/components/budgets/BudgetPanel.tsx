@@ -117,11 +117,11 @@ export function BudgetPanel({
         <div className="flex justify-between">
           <div className="flex flex-col gap-0.5">
             <span className="text-xs font-medium uppercase tracking-wide text-text-3">Spent</span>
-            <span className="tabular text-[22px] font-semibold text-text">{fmt(current.spend)}</span>
+            <span className="ui-figure tabular text-[22px] font-semibold text-text">{fmt(current.spend)}</span>
           </div>
           <div className="flex flex-col gap-0.5 items-end">
             <span className="text-xs font-medium uppercase tracking-wide text-text-3">Budget</span>
-            <span className="tabular text-[22px] font-semibold text-text">{fmt(current.amount + current.rolloverFromPrior)}</span>
+            <span className="ui-figure tabular text-[22px] font-semibold text-text">{fmt(current.amount + current.rolloverFromPrior)}</span>
           </div>
         </div>
 
