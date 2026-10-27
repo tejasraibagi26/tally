@@ -240,8 +240,11 @@ import Constants from "expo-constants";
  * screen (from the More sheet) with the projection and suggested cuts, a
  * line on Budgets, the goal alert in Alerts, and a one-time announcement
  * (GoalIntroDialog) -- all on GET/PUT/DELETE /api/goals and @tally/core/goalMath.
+ * 2.1.1 blurs the screen behind every TallyDialog on iOS 26+ (a dark-tinted
+ * expo-glass-effect GlassView), like web's modal backdrop-blur; Android and
+ * older iOS keep the plain scrim.
  */
-export const APP_VERSION = "2.1.0";
+export const APP_VERSION = "2.1.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
