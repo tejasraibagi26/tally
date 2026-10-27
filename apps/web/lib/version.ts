@@ -242,8 +242,14 @@
  * intro, which now waits for the next visit.
  * 2.2.2 adds "How it works" to the Goals page (components/goals/
  * GoalHowItWorks.tsx), its words in @tally/core/goalMath GOAL_HOW_IT_WORKS.
+ * 2.2.3 puts the Goals chart on a real time scale: the projection is one
+ * point months past the last recorded day, and the category axis gave it
+ * one day's width, squashing the rest of the year into a sliver at the
+ * edge (mobile already scaled by time). The goal form groups the amount's
+ * digits as you type, sizes its fields to what they hold instead of
+ * stretching the money box across the card, and asks before removing.
  */
-export const APP_VERSION = "2.2.2";
+export const APP_VERSION = "2.2.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

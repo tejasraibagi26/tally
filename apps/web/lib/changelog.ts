@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.2.3",
+    date: "2026-10-27",
+    changes: [
+      { kind: "fixed", text: "The Goals chart drew the stretch between today and your deadline as a sliver at the right edge, with the dates bunched up to match. It now spaces the chart by time, so the months still to come take up the room they should." },
+      { kind: "improved", text: "The goal amount reads as you type it (65,000, not 65000), the two fields are sized to what they hold, and removing a goal asks first." },
+    ],
+  },
+  {
     version: "2.2.2",
     date: "2026-10-27",
     changes: [{ kind: "new", text: "A How it works button on the Goals page explains your pace, the projection, and what Tally suggests when you're behind." }],

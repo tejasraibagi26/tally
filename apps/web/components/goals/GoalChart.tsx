@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { ComposedChart, Line, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { formatCents } from "@tally/core/money";
 import { EdgeTick } from "@/components/charts/EdgeTick";
@@ -13,7 +14,11 @@ export interface GoalChartPoint {
 }
 
 function shortDate(iso: string): string {
-  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+  return shortDateMs(Date.parse(`${iso}T00:00:00Z`));
+}
+
+function shortDateMs(ms: number): string {
+  return new Date(ms).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
 }
 
 /**
@@ -21,18 +26,33 @@ function shortDate(iso: string): string {
  * deadline (dashed) and the target (a labelled line). Runs edge to edge of
  * its card (the caller wraps it in .ui-bleed); EdgeTick keeps the end
  * labels inside.
+ *
+ * The x axis is a real time scale, not one slot per point: the projection is
+ * a single point months past the last recorded day, and a category axis
+ * would give it the same step as one day, squashing the rest of the year
+ * into a sliver and spacing the date labels wrong.
  */
 export function GoalChart({ points, target }: { points: GoalChartPoint[]; target: number }) {
+  const data = useMemo(() => points.map((p) => ({ ...p, t: Date.parse(`${p.date}T00:00:00Z`) })), [points]);
   return (
     <ResponsiveContainer width="100%" height={240}>
-      <ComposedChart data={points} margin={{ top: 20, right: 0, left: 0, bottom: 0 }}>
+      <ComposedChart data={data} margin={{ top: 20, right: 0, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="goalFill" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--brand)" stopOpacity={0.22} />
             <stop offset="100%" stopColor="var(--brand)" stopOpacity={0} />
           </linearGradient>
         </defs>
-        <XAxis dataKey="date" tick={<EdgeTick format={(d) => shortDate(String(d))} />} axisLine={false} tickLine={false} minTickGap={48} />
+        <XAxis
+          dataKey="t"
+          type="number"
+          scale="time"
+          domain={["dataMin", "dataMax"]}
+          tick={<EdgeTick format={(d) => shortDateMs(Number(d))} />}
+          axisLine={false}
+          tickLine={false}
+          minTickGap={48}
+        />
         <YAxis hide domain={[(min: number) => Math.min(min, target) * 0.98, (max: number) => Math.max(max, target) * 1.02]} />
         <Tooltip
           cursor={{ stroke: "var(--text-3)", strokeDasharray: "2 3" }}
