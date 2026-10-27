@@ -68,11 +68,14 @@ export function GoalCard({ summary, className, style }: { summary: GoalSummary |
     <Link href="/goals" className={cn("block", className)} style={style}>
       <Card className="p-5 lg:p-6 flex flex-col gap-3 hover:border-border-strong transition-colors">
         <span className="text-xs font-semibold uppercase tracking-[0.08em] text-text-2">Year-end goal</span>
+        {/* One size per line, so the masked dots read evenly too. */}
         <span className="font-display text-[32px] leading-none text-text tabular">
-          <M cents={p.current} /> <span className="text-text-2 text-[22px]">of <M cents={p.target} /></span>
+          <M cents={p.current} />
         </span>
         <span className="text-[14px] text-text-2 tabular">
-          {p.status === "reached" ? "Reached" : <><M cents={p.gap} /> to go by {deadlineLabel(goal.deadline)}</>}
+          of <M cents={p.target} />
+          {" · "}
+          {p.status === "reached" ? "reached" : <><M cents={p.gap} /> to go by {deadlineLabel(goal.deadline)}</>}
         </span>
         <div className="ui-meter relative h-3 rounded-full bg-sunken overflow-hidden" role="img" aria-label={`${Math.round(p.progress * 100)}% of the way from where it started`}>
           <div className="h-full rounded-full bg-brand" style={{ width: `${p.progress * 100}%` }} />
