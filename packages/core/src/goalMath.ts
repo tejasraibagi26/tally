@@ -151,3 +151,31 @@ export function suggestCuts(rows: CutInput[], need: number): Cut[] {
   }
   return out;
 }
+
+/**
+ * The "How it works" explainer on the Goals page (web GoalHowItWorks,
+ * mobile GoalHowItWorksDialog), in order. Built from the constants above so
+ * the words can't drift from the math.
+ */
+export const GOAL_HOW_IT_WORKS: { title: string; body: string }[] = [
+  {
+    title: "Your goal",
+    body: "Pick a net worth to reach by Dec 31. Tally notes where you started, so the bar shows how far you've come.",
+  },
+  {
+    title: "Your pace",
+    body: `How much your net worth changed on average each month over the last ${PACE_MONTHS} full months. Recent enough to reflect how you're doing now, long enough that one big month doesn't swing it. With less history, Tally uses what it has (at least 4 weeks).`,
+  },
+  {
+    title: "The projection",
+    body: "Today's net worth plus your pace for every month left. If that lands at or above your goal, you're on track.",
+  },
+  {
+    title: "When you're behind",
+    body: `Tally shows how much more a month closes the gap and suggests trimming ${Math.round(CUT_SHARE * 100)}% from your biggest spending categories to find it. You'll get at most one heads-up a month while you're off track.`,
+  },
+  {
+    title: "What counts",
+    body: "Everything in your net worth: cash, investments and debts. Market moves and paying down debt count toward the goal, not just what you save.",
+  },
+];

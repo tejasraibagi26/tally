@@ -240,8 +240,10 @@
  * (components/overview/NewLookModal.tsx, recorded in
  * users.seen_announcements by lib/announcements.ts), ahead of the goals
  * intro, which now waits for the next visit.
+ * 2.2.2 adds "How it works" to the Goals page (components/goals/
+ * GoalHowItWorks.tsx), its words in @tally/core/goalMath GOAL_HOW_IT_WORKS.
  */
-export const APP_VERSION = "2.2.1";
+export const APP_VERSION = "2.2.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

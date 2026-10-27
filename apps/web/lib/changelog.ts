@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.2.2",
+    date: "2026-10-27",
+    changes: [{ kind: "new", text: "A How it works button on the Goals page explains your pace, the projection, and what Tally suggests when you're behind." }],
+  },
+  {
     version: "2.2.1",
     date: "2026-10-27",
     changes: [{ kind: "new", text: "A quick hello to the new look the first time you open Overview, with a one-tap way back to the classic one." }],

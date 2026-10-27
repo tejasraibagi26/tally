@@ -10,6 +10,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { GoalChart, type GoalChartPoint } from "@/components/goals/GoalChart";
 import { GoalForm } from "@/components/goals/GoalForm";
+import { GoalHowItWorks } from "@/components/goals/GoalHowItWorks";
 
 /**
  * The year-end goal (Tally Pop only: reached from Pop's side nav and
@@ -23,7 +24,7 @@ export default async function GoalsPage() {
   if (!summary) {
     return (
       <div className="max-w-[880px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-        <PageHeader title="Year-end goal" meta={["Pick a net worth to reach and Tally tracks the pace"]} />
+        <PageHeader title="Year-end goal" meta={["Pick a net worth to reach and Tally tracks the pace"]} actions={<GoalHowItWorks />} />
         <Card className="p-6 lg:p-7">
           <GoalForm defaultDeadline={defaultDeadline(today)} />
         </Card>
@@ -48,6 +49,7 @@ export default async function GoalsPage() {
           <span key="target"><span className="money money-fit"><span>{formatCents(goal.targetCents)}</span></span> net worth</span>,
           <span key="start">started at <span className="money money-fit"><span>{formatCents(goal.startCents)}</span></span></span>,
         ]}
+        actions={<GoalHowItWorks />}
       />
       <GoalCard summary={summary} showCurrent />
 

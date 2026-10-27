@@ -275,8 +275,10 @@ import Constants from "expo-constants";
  * ahead of the goals intro, which now waits for the next visit.
  * 2.3.2 outlines dialogs' secondary buttons in Pop's 2px ink (TallyDialog),
  * which in dark Pop were a hairline lost against the dialog.
+ * 2.3.3 adds "How it works" to the Goals screen (GoalHowItWorksDialog),
+ * sharing web's words via @tally/core/goalMath GOAL_HOW_IT_WORKS.
  */
-export const APP_VERSION = "2.3.2";
+export const APP_VERSION = "2.3.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

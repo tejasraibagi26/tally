@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
+import { Info } from "lucide-react-native";
 import { formatCents } from "@tally/core/money";
 import { Card } from "@/components/ui/Card";
 import { GoalChart } from "@/components/charts/GoalChart";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { GoalCard } from "@/components/overview/GoalCard";
+import { GoalHowItWorksDialog } from "@/components/overview/GoalHowItWorksDialog";
 import { useGoal, useRemoveGoal, useSaveGoal } from "@/lib/queries/goals";
 import { useNetWorthTrend } from "@/lib/queries/overview";
 import { useThemeColors } from "@/theme/useThemeColors";
@@ -29,6 +31,7 @@ export default function GoalsScreen() {
   const [error, setError] = useState<string | null>(null);
   // A finger on the chart locks the page so dragging along the line reads it instead of scrolling.
   const [scrubbing, setScrubbing] = useState(false);
+  const [howOpen, setHowOpen] = useState(false);
 
   const g = goal.data?.goal ?? null;
   const p = goal.data?.projection;
@@ -53,6 +56,10 @@ export default function GoalsScreen() {
           <ActivityIndicator />
         ) : (
           <>
+            <Pressable onPress={() => setHowOpen(true)} accessibilityRole="button" className="self-start flex-row items-center gap-1.5 h-9 px-3.5 rounded-full border-button border-ink active:opacity-80" style={{ backgroundColor: colors.surface }}>
+              <Info size={15} color={colors.text} strokeWidth={2} />
+              <Text className="font-ui-semibold text-text" style={{ fontSize: rf(13.5) }}>How it works</Text>
+            </Pressable>
             {g && <GoalCard summary={goal.data} showCurrent />}
 
             {g && p && points.length > 1 && (
@@ -110,6 +117,7 @@ export default function GoalsScreen() {
           </>
         )}
       </ScrollView>
+      <GoalHowItWorksDialog visible={howOpen} onClose={() => setHowOpen(false)} />
     </View>
   );
 }
