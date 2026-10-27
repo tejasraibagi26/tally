@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "goals_intro_seen_at" timestamp with time zone;
