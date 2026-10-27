@@ -270,8 +270,11 @@ import Constants from "expo-constants";
  * account chose classic; "New look" in Settings for everyone), and makes
  * Pop's icon and splash the app's own (app.json; the classic icon is the
  * "Classic" alternate) -- the icon and splash need a native build.
+ * 2.3.1 announces the new look once per account on Overview
+ * (components/overview/NewLookDialog.tsx, POST /api/announcements/seen),
+ * ahead of the goals intro, which now waits for the next visit.
  */
-export const APP_VERSION = "2.3.0";
+export const APP_VERSION = "2.3.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

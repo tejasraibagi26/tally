@@ -33,6 +33,8 @@ import { useUiLook } from "@/lib/UiLookContext";
 import { HeroSurface, OnPaceCard } from "@/components/overview/PopOverview";
 import { GoalCard } from "@/components/overview/GoalCard";
 import { GoalIntroDialog } from "@/components/overview/GoalIntroDialog";
+import { NewLookDialog } from "@/components/overview/NewLookDialog";
+import { useAccountProfile } from "@/lib/queries/account";
 import { useGoal } from "@/lib/queries/goals";
 import { monthSummary } from "@tally/core/budgetView";
 import { greetingFor, leftToSpendLine } from "@tally/core/popView";
@@ -51,6 +53,10 @@ export default function OverviewScreen() {
   const rf = useRF();
   const { pop } = useUiLook();
   const goal = useGoal(pop);
+  const profile = useAccountProfile();
+  // One dialog per visit: the new-look announcement first, the goals intro
+  // after (an older server sends no list -- nothing to wait for).
+  const lookSeen = profile.data ? (profile.data.seenAnnouncements?.includes("new-look") ?? true) : false;
   const accounts = useAccounts();
   const overview = useOverview();
   const trend = useNetWorthTrend();
@@ -214,7 +220,8 @@ export default function OverviewScreen() {
       </View>
       </ScrollView>
       <Toast message={undo.message} onHidden={undo.clear} action={undo.action} bottom={tabBarClearance + 16} />
-      {pop && <GoalIntroDialog summary={goal.data} />}
+      <NewLookDialog profile={profile.data} />
+      {pop && lookSeen && <GoalIntroDialog summary={goal.data} />}
     </View>
   );
 }

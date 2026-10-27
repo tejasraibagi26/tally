@@ -33,6 +33,8 @@ import { OnPaceCard, TallyUpBanner } from "@/components/overview/PopOverview";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { goalSummary, goalsIntroSeen } from "@/lib/goals";
 import { GoalIntroModal } from "@/components/goals/GoalIntroModal";
+import { NewLookModal } from "@/components/overview/NewLookModal";
+import { seenAnnouncements } from "@/lib/announcements";
 
 // A short, increasing entrance delay per major section so the page arrives
 // in a quick cascade rather than all at once. Kept small (120ms apart) so
@@ -161,7 +163,9 @@ export default async function OverviewPage() {
   const dailyPace = totalBudgeted > 0 ? Math.floor(totalBudgeted / daysInMonth) : 0;
   const streak = onPaceStreak(spendByDay, dailyPace, today, monthStart);
   const unreviewed = toReview?.count ?? 0;
-  const [goal, introSeen] = await Promise.all([goalSummary(userId), goalsIntroSeen(userId)]);
+  const [goal, introSeen, seen] = await Promise.all([goalSummary(userId), goalsIntroSeen(userId), seenAnnouncements(userId)]);
+  // One modal per visit: the new-look announcement first, the goals intro after.
+  const lookSeen = seen.includes("new-look");
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
@@ -292,7 +296,8 @@ export default async function OverviewPage() {
       {/* Tally Pop: the year-end goal (lib/goals.ts), or a prompt to set one */}
       <GoalCard className="pop-only" summary={goal} style={reveal(2)} />
       {/* Once per account, Pop only, and not once a goal exists */}
-      <GoalIntroModal show={!introSeen && !goal} />
+      <NewLookModal show={!lookSeen} />
+      <GoalIntroModal show={!introSeen && !goal && lookSeen} />
 
       {/* Cash flow trend */}
       <Card style={reveal(3)}>

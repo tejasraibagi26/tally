@@ -23,7 +23,8 @@ export async function GET(req: Request) {
   const [user] = await db
     // uiLook: the Tally Pop flag (lib/uiLook.ts) -- the mobile app has no
     // link to open, so it reads the account copy /labs/pop writes.
-    .select({ name: schema.users.name, email: schema.users.email, birthDate: schema.users.birthDate, recapsEnabled: schema.users.recapsEnabled, uiLook: schema.users.uiLook })
+    // seenAnnouncements: one-time modals already dismissed (lib/announcements.ts).
+    .select({ name: schema.users.name, email: schema.users.email, birthDate: schema.users.birthDate, recapsEnabled: schema.users.recapsEnabled, uiLook: schema.users.uiLook, seenAnnouncements: schema.users.seenAnnouncements })
     .from(schema.users)
     .where(eq(schema.users.id, userId))
     .limit(1);

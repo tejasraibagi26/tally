@@ -94,6 +94,9 @@ export const users = pgTable("users", {
   // (lib/goals.ts); null = not seen yet. Per account, so it shows once
   // across web and mobile.
   goalsIntroSeenAt: timestamp("goals_intro_seen_at", { withTimezone: true }),
+  // One-time announcements the user has dismissed, by key ("new-look", ...),
+  // so a new one needs no migration (lib/announcements.ts).
+  seenAnnouncements: text("seen_announcements").array().notNull().default(sql`'{}'::text[]`),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

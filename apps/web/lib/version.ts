@@ -236,8 +236,12 @@
  * for emails and alerts (lib/uiLook.ts), the "New look" switch shows for
  * everyone, and Pop's icon is the tab icon (app/icon.svg; classic in
  * public/icon-classic.svg). Year-end goals come with it.
+ * 2.2.1 announces the new look once per account on Overview
+ * (components/overview/NewLookModal.tsx, recorded in
+ * users.seen_announcements by lib/announcements.ts), ahead of the goals
+ * intro, which now waits for the next visit.
  */
-export const APP_VERSION = "2.2.0";
+export const APP_VERSION = "2.2.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
