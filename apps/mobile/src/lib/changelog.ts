@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.3.2",
+    date: "2026-10-27",
+    changes: [{ kind: "fixed", text: "The second button in pop-ups now has a clear outline in dark mode." }],
+  },
+  {
     version: "2.3.1",
     date: "2026-10-27",
     changes: [{ kind: "new", text: "A quick hello to the new look the first time you open Overview, with a one-tap way back to the classic one." }],

@@ -273,8 +273,10 @@ import Constants from "expo-constants";
  * 2.3.1 announces the new look once per account on Overview
  * (components/overview/NewLookDialog.tsx, POST /api/announcements/seen),
  * ahead of the goals intro, which now waits for the next visit.
+ * 2.3.2 outlines dialogs' secondary buttons in Pop's 2px ink (TallyDialog),
+ * which in dark Pop were a hairline lost against the dialog.
  */
-export const APP_VERSION = "2.3.1";
+export const APP_VERSION = "2.3.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

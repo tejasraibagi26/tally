@@ -3,6 +3,7 @@ import { ActivityIndicator, Animated, Easing, KeyboardAvoidingView, Modal, Platf
 import { useReducedMotion } from "react-native-reanimated";
 import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
 import { requireOptionalNativeModule } from "expo-modules-core";
+import { useUiLook } from "@/lib/UiLookContext";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 
@@ -137,6 +138,7 @@ export function TallyDialog({
 
 function DialogButton({ action }: { action: DialogAction }) {
   const colors = useThemeColors();
+  const { pop } = useUiLook();
   const rf = useRF();
   const fg = action.variant === "danger" ? colors.surface! : action.variant === "primary" ? colors["on-brand"]! : colors.text!;
   const bg = action.variant === "danger" ? colors.negative! : action.variant === "primary" ? colors.brand! : colors["surface-2"]!;
@@ -150,7 +152,9 @@ function DialogButton({ action }: { action: DialogAction }) {
       className="rounded-full flex-row items-center justify-center gap-2 active:opacity-90"
       style={[
         { height: 48, backgroundColor: bg, opacity: action.disabled && !action.loading ? 0.4 : 1 },
-        action.variant === "secondary" ? { borderWidth: 1, borderColor: colors.border } : null,
+        // Pop outlines it like its other buttons (2px ink); the hairline
+        // border alone melts into dark Pop's dialog fill.
+        action.variant === "secondary" ? (pop ? { borderWidth: 2, borderColor: colors.ink } : { borderWidth: 1, borderColor: colors.border }) : null,
       ]}
     >
       {action.loading && <ActivityIndicator size="small" color={fg} />}
