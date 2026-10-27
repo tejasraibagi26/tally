@@ -10,6 +10,13 @@ import { Platform } from "react-native";
 export const MORE_SHEET_CONTENT_HEIGHT = 464;
 
 /**
+ * Extra height in the Tally Pop look: Figtree's line box is taller than
+ * Inter's at the same size, so the title and captions grow and the build
+ * line fell off the bottom (mobile v2.0.0).
+ */
+export const MORE_SHEET_POP_EXTRA = 34;
+
+/**
  * On iOS 26 the form sheet floats above the home indicator, so no inset is
  * added, and a detent fraction comes out taller than fraction x window
  * height. Calibrated from a device screenshot (mobile v1.11.1): at
@@ -22,8 +29,8 @@ const IOS_CALIBRATION = 0.79;
  * The detent for the More sheet. An explicit fraction, because
  * "fitToContents" leaves a gap (see app/_layout.tsx).
  */
-export function moreSheetDetent(opts: { windowHeight: number; fontScale: number; bottomInset: number }): number {
-  const content = MORE_SHEET_CONTENT_HEIGHT * opts.fontScale;
+export function moreSheetDetent(opts: { windowHeight: number; fontScale: number; bottomInset: number; pop?: boolean }): number {
+  const content = (MORE_SHEET_CONTENT_HEIGHT + (opts.pop ? MORE_SHEET_POP_EXTRA : 0)) * opts.fontScale;
   const height = Platform.OS === "ios" ? (content + opts.bottomInset) * IOS_CALIBRATION : content + opts.bottomInset;
   return Math.min(0.9, height / opts.windowHeight);
 }

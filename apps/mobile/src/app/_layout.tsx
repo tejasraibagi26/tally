@@ -93,7 +93,7 @@ function RootNavigator() {
   const fontScale = useResponsiveFontScale();
   // The More sheet's height as a fraction of the screen, from its actual
   // content rather than a fixed guess (see lib/moreSheet.ts).
-  const moreDetent = moreSheetDetent({ windowHeight, fontScale, bottomInset: insets.bottom });
+  const moreDetent = moreSheetDetent({ windowHeight, fontScale, bottomInset: insets.bottom, pop });
 
   // Applies a user-picked light/dark override (Settings > Appearance) on
   // cold start -- nativewind's own colorScheme.set() doesn't persist across
