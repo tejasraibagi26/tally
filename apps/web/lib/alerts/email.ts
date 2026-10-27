@@ -25,6 +25,12 @@ const COPY: Record<AlertType, { label: string; why: string; cta: string; setting
     cta: "View transaction",
     settingName: "large purchase alerts",
   },
+  goal_off_track: {
+    label: "Goal alert",
+    why: "Tally projects your year-end goal from how fast your net worth grew over the last 3 full months. This alert comes at most once a month.",
+    cta: "View your goal",
+    settingName: "goal alerts",
+  },
   subscription_change: {
     label: "Subscription alert",
     why: "Tally spotted this from your recent charges. You can review or remove subscriptions at any time.",
@@ -76,6 +82,7 @@ const POP_BADGE: Record<AlertType, { bg: string; fg: string; glyph: string }> = 
   connection_broken: { bg: "#D03B3B", fg: "#FFFFFF", glyph: "&#10005;" },
   large_transaction: { bg: "#E6E0FF", fg: "#1D1B2F", glyph: "&#9679;" },
   subscription_change: { bg: "#E6E0FF", fg: "#1D1B2F", glyph: "&#8635;" },
+  goal_off_track: { bg: "#FFC53D", fg: "#1D1B2F", glyph: "&#9650;" },
 };
 
 const POP_FONT = "Figtree,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif";

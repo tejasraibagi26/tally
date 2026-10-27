@@ -7,7 +7,8 @@ import { formatCents } from "./money";
  * database, push or email.
  */
 
-export type AlertType = "budget_threshold" | "connection_broken" | "large_transaction" | "subscription_change";
+/** goal_off_track: the year-end goal (goalMath) projects short; Tally Pop users only. */
+export type AlertType = "budget_threshold" | "connection_broken" | "large_transaction" | "subscription_change" | "goal_off_track";
 
 export interface AlertCandidate {
   type: AlertType;

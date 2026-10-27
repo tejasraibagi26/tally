@@ -13,6 +13,7 @@ import {
   TrendingUp,
   CreditCard,
   Flame,
+  Target,
   Settings,
   type LucideIcon,
 } from "lucide-react";
@@ -38,6 +39,8 @@ interface NavItem {
   meta?: string;
   /** Replaces `meta` with a colored count pill (coral = blocked, amber = act soon). */
   alert?: { count: number; tone: "negative" | "warning"; title: string };
+  /** Only in the Tally Pop look (globals.css .pop-only). */
+  popOnly?: boolean;
 }
 
 interface NavGroup {
@@ -89,7 +92,13 @@ function navGroups(counts: NavCounts): NavGroup[] {
       ],
     },
     { label: "What you owe", items: [{ href: "/cards", label: "Credit cards", icon: CreditCard, meta: String(counts.creditCards) }] },
-    { label: "Plan ahead", items: [{ href: "/fire", label: "Early retirement", icon: Flame }] },
+    {
+      label: "Plan ahead",
+      items: [
+        { href: "/goals", label: "Year-end goal", icon: Target, popOnly: true },
+        { href: "/fire", label: "Early retirement", icon: Flame },
+      ],
+    },
   ];
 }
 
@@ -99,6 +108,7 @@ function NavRow({ item, active }: { item: NavItem; active: boolean }) {
       href={item.href}
       className={cn(
         "flex items-center justify-between px-2.5 py-2 rounded-control text-[15px]",
+        item.popOnly && "pop-only",
         active ? "ui-nav-active bg-brand-subtle text-brand font-medium" : "text-text-2 font-normal hover:bg-sunken",
       )}
     >

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView, TextInput, Switch, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
-import { PieChart, Receipt, Repeat, Landmark, type LucideIcon } from "lucide-react-native";
+import { PieChart, Receipt, Repeat, Landmark, Target, type LucideIcon } from "lucide-react-native";
+import { useUiLook } from "@/lib/UiLookContext";
 import { Card } from "@/components/ui/Card";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
@@ -11,11 +12,12 @@ import { useAlertHistory, useAlertPreferences, useUpdateAlertPreferences, type A
 
 // Native port of apps/web/components/settings/AlertSettings.tsx: same API,
 // same wording. Email is the only channel.
-const TYPES: { type: AlertType; label: string; description: string; icon: LucideIcon }[] = [
+const TYPES: { type: AlertType; label: string; description: string; icon: LucideIcon; popOnly?: boolean }[] = [
   { type: "budget_threshold", label: "Budgets", description: "When a budget reaches 80% and 100% this month.", icon: PieChart },
   { type: "large_transaction", label: "Large purchases", description: "When a charge is over your threshold, or about 3× what you usually spend there.", icon: Receipt },
   { type: "subscription_change", label: "Subscriptions", description: "When a new subscription appears or one gets more expensive.", icon: Repeat },
   { type: "connection_broken", label: "Connections", description: "When a bank needs you to sign in again.", icon: Landmark },
+  { type: "goal_off_track", label: "Year-end goal", description: "When your goal's projection falls short, at most once a month.", icon: Target, popOnly: true },
 ];
 const ICON_BY_TYPE = Object.fromEntries(TYPES.map((t) => [t.type, t.icon])) as Record<AlertType, LucideIcon>;
 
@@ -65,6 +67,7 @@ function HistoryRow({ alert, isLast }: { alert: AlertHistoryItem; isLast: boolea
 
 export default function AlertsScreen() {
   const colors = useThemeColors();
+  const { pop } = useUiLook();
   const rf = useRF();
   const contentTop = useScreenContentTop();
   const prefs = useAlertPreferences();
@@ -110,7 +113,7 @@ export default function AlertsScreen() {
         ) : (
           <>
             <Card className="px-5">
-              {TYPES.map(({ type, label, description, icon: Icon }, i) => (
+              {TYPES.filter((t) => !t.popOnly || pop).map(({ type, label, description, icon: Icon }, i) => (
                 <View
                   key={type}
                   className="flex-row items-center gap-3 py-4"

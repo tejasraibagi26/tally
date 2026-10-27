@@ -129,6 +129,13 @@ chart legend) in both light and dark.
 - **Charts, loader, splash:** charts bleed through `components/ui/Bleed.tsx`. The loader, boot splash and privacy cover use Pop's colours.
 - **Home-screen icon:** it follows the look through `expo-alternate-app-icons` (`assets/images/icon-pop.png`), which needs a native build. Over-the-air updates to older builds skip it safely (`lib/appIcon.ts`).
 
+**Year-end goals (web 2.1.0 / mobile 2.1.0, Pop only):**
+- **What it is:** one net worth target and a deadline (`goals` table). The math is in `@tally/core/goalMath`: pace is net worth's average monthly change over the last 3 full months, and the projection is current + pace × months left.
+- **Surfaces:** an Overview card (`GoalCard`), `/goals` (web) and the Goals screen (mobile, from More), a goal line on Budgets, the `goal_off_track` alert (daily sweep, at most once a month), and a goal section in the Pop recap.
+- **Wording:** shared from `lib/goalCopy.ts`.
+- **Announcement:** a one-time modal on Overview, recorded per account in `users.goals_intro_seen_at`. Either button records it, and so does setting a goal. "Not now" leaves the "Set a goal for the year" card in place.
+- **Spec:** the Year-End Goals spec doc.
+
 The mockups are in the Tally Rebrand canvas artifact.
 
 ## 2. Principles

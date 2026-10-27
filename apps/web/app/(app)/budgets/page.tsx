@@ -7,6 +7,8 @@ import type { MonthContext } from "@tally/core/budgetView";
 import { MonthStepper, PageHeader } from "@/components/ui/PageHeader";
 import { AddBudgetForm } from "@/components/budgets/AddBudgetForm";
 import { BudgetsView } from "@/components/budgets/BudgetsView";
+import { GoalBudgetLine } from "@/components/goals/GoalCard";
+import { goalSummary } from "@/lib/goals";
 import { currentMonthFor, todayFor } from "@/lib/userTimezone";
 
 function monthLabel(month: string): string {
@@ -20,6 +22,8 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
   const month = /^\d{4}-\d{2}-01$/.test(sp.month ?? "") ? (sp.month as string) : currentMonth;
 
   const budgets = await getBudgetsForMonth(userId, month);
+  // Tally Pop: the year-end goal's verdict, this month only.
+  const goal = month === currentMonth ? await goalSummary(userId) : null;
   const budgetedCategoryIds = budgets.map((b) => b.categoryId);
   const [availableCategories, unbudgeted, setup] = await Promise.all([
     db.query.categories.findMany({
@@ -58,6 +62,7 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
           </>
         }
       />
+      <GoalBudgetLine className="pop-only -mt-2" summary={goal} />
       <BudgetsView
         month={month}
         ctx={ctx}

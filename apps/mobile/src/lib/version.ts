@@ -236,8 +236,12 @@ import Constants from "expo-constants";
  * the on-pace streak and "N to tally up"; Review counts in tally marks;
  * charts run edge to edge; the loader, boot splash and the home-screen icon
  * (expo-alternate-app-icons, needs a native build) follow the look.
+ * 2.1.0 adds year-end goals, Tally Pop only: an Overview card, a Goals
+ * screen (from the More sheet) with the projection and suggested cuts, a
+ * line on Budgets, the goal alert in Alerts, and a one-time announcement
+ * (GoalIntroDialog) -- all on GET/PUT/DELETE /api/goals and @tally/core/goalMath.
  */
-export const APP_VERSION = "2.0.0";
+export const APP_VERSION = "2.1.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

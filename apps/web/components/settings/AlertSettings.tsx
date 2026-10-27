@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { isPopOn } from "@/lib/uiFlag";
 import Link from "next/link";
-import { PieChart, Landmark, Receipt, Repeat, type LucideIcon } from "lucide-react";
+import { PieChart, Landmark, Receipt, Repeat, Target, type LucideIcon } from "lucide-react";
 import type { AlertType } from "@tally/core/alerts";
 import type { AlertHistoryItem } from "@/lib/alerts/history";
 import { Switch } from "@/components/ui/Switch";
@@ -18,11 +19,12 @@ export interface AlertSettingsProps {
   recapsEnabled: boolean;
 }
 
-const TYPES: { type: AlertType; label: string; description: string; icon: LucideIcon }[] = [
+const TYPES: { type: AlertType; label: string; description: string; icon: LucideIcon; popOnly?: boolean }[] = [
   { type: "budget_threshold", label: "Budgets", description: "At 80% and 100% of a budget this month", icon: PieChart },
   { type: "large_transaction", label: "Large purchases", description: "A charge over your threshold, or about 3× what you usually spend there", icon: Receipt },
   { type: "subscription_change", label: "Subscriptions", description: "A new subscription appears or one gets more expensive", icon: Repeat },
   { type: "connection_broken", label: "Connections", description: "A bank needs you to sign in again", icon: Landmark },
+  { type: "goal_off_track", label: "Year-end goal", description: "Your goal's projection falls short, at most once a month", icon: Target, popOnly: true },
 ];
 const ICON_BY_TYPE = Object.fromEntries(TYPES.map((t) => [t.type, t.icon])) as Record<AlertType, LucideIcon>;
 
@@ -74,6 +76,9 @@ async function patch(url: string, body: unknown): Promise<boolean> {
  */
 export function AlertSettings({ initial, history, recapsEnabled: initialRecaps }: AlertSettingsProps) {
   const [recaps, setRecaps] = useState(initialRecaps);
+  // The goal alert is Tally Pop's (lib/uiFlag.ts); read after mount.
+  const [pop, setPop] = useState(false);
+  useEffect(() => setPop(isPopOn()), []);
   const [channels, setChannels] = useState(initial.channels);
   const [threshold, setThreshold] = useState(String(initial.largeTransactionCents / 100));
   const [savedThreshold, setSavedThreshold] = useState(initial.largeTransactionCents);
@@ -120,7 +125,7 @@ export function AlertSettings({ initial, history, recapsEnabled: initialRecaps }
         <Switch checked={recaps} onChange={toggleRecaps} label="Monthly recap email" />
       </SettingsRow>
 
-      {TYPES.map(({ type, label, description }) => (
+      {TYPES.filter((t) => !t.popOnly || pop).map(({ type, label, description }) => (
         <SettingsRow key={type} title={label} description={description} htmlFor={type === "large_transaction" ? "large-threshold" : undefined}>
           {type === "large_transaction" && (
             <div className="flex flex-col items-end gap-1">

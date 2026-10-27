@@ -14,6 +14,10 @@ import { liveItem } from "@/lib/liveAccounts";
 import { todayFor } from "@/lib/userTimezone";
 import { loadAlertPreferences } from "@/lib/alerts/preferences";
 import { recordAndDeliver } from "@/lib/alerts/engine";
+import { formatCents } from "@tally/core/money";
+import { goalSummary } from "@/lib/goals";
+import { wantsPopEmail } from "@/lib/uiLook";
+import { deadlineLabel } from "@/lib/goalCopy";
 
 const HISTORY_DAYS = 183; // ~6 months, ALERTS.md §4.3
 
@@ -145,6 +149,29 @@ export async function evaluateAfterTransactionSync(userId: string, plaidTransact
   return recordAndDeliver(userId, candidates, prefs);
 }
 
+/**
+ * The year-end goal (lib/goals.ts) projecting short, for Tally Pop users
+ * only. Daily sweep only; the dedupe key holds the month, so it fires at
+ * most once a month per goal.
+ */
+async function goalCandidates(userId: string): Promise<AlertCandidate[]> {
+  const [user] = await db.select({ uiLook: schema.users.uiLook }).from(schema.users).where(eq(schema.users.id, userId)).limit(1);
+  if (!user || !wantsPopEmail(user)) return [];
+  const summary = await goalSummary(userId);
+  if (!summary || summary.projection.status !== "off_track") return [];
+  const { goal, projection: p } = summary;
+  const month = (await todayFor(userId)).slice(0, 7);
+  return [
+    {
+      type: "goal_off_track",
+      dedupeKey: `goal_off_track:${goal.id}:${month}`,
+      title: "Your year-end goal is off track",
+      body: `At your pace, net worth reaches ${formatCents(Math.round(p.projected!))} by ${deadlineLabel(goal.deadline)}, ${formatCents(Math.round(p.target - p.projected!))} short of ${formatCents(p.target)}. ${formatCents(Math.round(p.shortBy!))} more a month closes it.`,
+      url: "/goals",
+    },
+  ];
+}
+
 /** After a webhook changes a connection's status. */
 export async function evaluateConnections(userId: string): Promise<number> {
   return recordAndDeliver(userId, await connectionCandidates(userId));
@@ -160,6 +187,7 @@ export async function evaluateUserSweep(userId: string): Promise<number> {
     ...(await connectionCandidates(userId)),
     ...(await budgetCandidates(userId)),
     ...(await subscriptionCandidates(userId)),
+    ...(await goalCandidates(userId)),
   ];
   return recordAndDeliver(userId, candidates);
 }

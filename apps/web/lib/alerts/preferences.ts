@@ -10,6 +10,7 @@ export const DEFAULT_CHANNELS: Record<AlertType, Channels> = {
   connection_broken: { email: true },
   large_transaction: { email: true },
   subscription_change: { email: true },
+  goal_off_track: { email: true },
 };
 
 export const ALERT_TYPES = Object.keys(DEFAULT_CHANNELS) as AlertType[];

@@ -12,9 +12,10 @@ export const MORE_SHEET_CONTENT_HEIGHT = 464;
 /**
  * Extra height in the Tally Pop look: Figtree's line box is taller than
  * Inter's at the same size, so the title and captions grow and the build
- * line fell off the bottom (mobile v2.0.0).
+ * line fell off the bottom (mobile v2.0.0), plus the Pop-only "Year-end
+ * goal" row (48pt + a 1pt hairline).
  */
-export const MORE_SHEET_POP_EXTRA = 34;
+export const MORE_SHEET_POP_EXTRA = 34 + 49;
 
 /**
  * On iOS 26 the form sheet floats above the home indicator, so no inset is

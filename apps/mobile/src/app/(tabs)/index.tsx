@@ -31,6 +31,9 @@ import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { useUiLook } from "@/lib/UiLookContext";
 import { HeroSurface, OnPaceCard } from "@/components/overview/PopOverview";
+import { GoalCard } from "@/components/overview/GoalCard";
+import { GoalIntroDialog } from "@/components/overview/GoalIntroDialog";
+import { useGoal } from "@/lib/queries/goals";
 import { monthSummary } from "@tally/core/budgetView";
 import { greetingFor, leftToSpendLine } from "@tally/core/popView";
 import { formatCents } from "@tally/core/money";
@@ -47,6 +50,7 @@ export default function OverviewScreen() {
   const colors = useThemeColors();
   const rf = useRF();
   const { pop } = useUiLook();
+  const goal = useGoal(pop);
   const accounts = useAccounts();
   const overview = useOverview();
   const trend = useNetWorthTrend();
@@ -93,6 +97,7 @@ export default function OverviewScreen() {
     queryClient.invalidateQueries({ queryKey: ["liabilities"] });
     queryClient.invalidateQueries({ queryKey: ["investments"] });
     queryClient.invalidateQueries({ queryKey: ["category-breakdown"] });
+    queryClient.invalidateQueries({ queryKey: ["goal"] });
   }
 
   return (
@@ -145,6 +150,9 @@ export default function OverviewScreen() {
 
         {/* Tally Pop: the on-pace streak, with a budget to pace against */}
         {pop && onPace && <OnPaceCard streak={onPace.streak} dailyPace={onPace.dailyPace} />}
+
+        {/* Tally Pop: the year-end goal, or a prompt to set one */}
+        {pop && <GoalCard summary={goal.data} />}
 
         {/* Banks that need a tap and this month's review backlog (the same count as
             the Transactions tab's "N to review" banner) -- renders nothing when all
@@ -206,6 +214,7 @@ export default function OverviewScreen() {
       </View>
       </ScrollView>
       <Toast message={undo.message} onHidden={undo.clear} action={undo.action} bottom={tabBarClearance + 16} />
+      {pop && <GoalIntroDialog summary={goal.data} />}
     </View>
   );
 }

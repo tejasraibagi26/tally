@@ -18,6 +18,9 @@ import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { useRF } from "@/theme/responsiveFont";
 import { AddBudgetSheet } from "@/components/AddBudgetSheet";
 import { TabHeader } from "@/components/ui/TabHeader";
+import { GoalBudgetLine } from "@/components/overview/GoalCard";
+import { useGoal } from "@/lib/queries/goals";
+import { useUiLook } from "@/lib/UiLookContext";
 
 function shiftMonth(month: string, delta: number): string {
   const d = new Date(month + "T00:00:00Z");
@@ -43,6 +46,8 @@ export default function BudgetsScreen() {
   const insets = useSafeAreaInsets();
   const tabBarClearance = useTabBarBottomClearance();
   const colors = useThemeColors();
+  const { pop } = useUiLook();
+  const goal = useGoal(pop);
   const rf = useRF();
   const router = useRouter();
   const { colorScheme } = useColorScheme();
@@ -113,6 +118,8 @@ export default function BudgetsScreen() {
               <ChevronRight size={20} color={colors["text-2"]} />
             </Pressable>
           </View>
+          {/* Tally Pop: the year-end goal's verdict, this month only */}
+          {pop && ctx.phase === "current" && <GoalBudgetLine summary={goal.data} />}
         </View>
 
         {isLoading ? (

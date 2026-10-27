@@ -90,6 +90,10 @@ export const users = pgTable("users", {
   // The server-side copy of the browser cookie, for what can't read
   // cookies: emails choose their template from it.
   uiLook: text("ui_look"),
+  // When the user dismissed the one-time year-end goals announcement
+  // (lib/goals.ts); null = not seen yet. Per account, so it shows once
+  // across web and mobile.
+  goalsIntroSeenAt: timestamp("goals_intro_seen_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -391,6 +395,22 @@ export const budgets = pgTable("budgets", {
   uniq: uniqueIndex("budgets_user_month_category_idx").on(t.userId, t.month, t.categoryId),
 }));
 
+// Year-end goals (Tally Pop only, @tally/core/goalMath): one net worth
+// target with a deadline. start_cents is net worth when the goal was set;
+// one active goal per user (the partial unique index), older ones archived.
+export const goals = pgTable("goals", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  targetCents: bigint("target_cents", { mode: "number" }).notNull(),
+  startCents: bigint("start_cents", { mode: "number" }).notNull(),
+  startDate: date("start_date").notNull(),
+  deadline: date("deadline").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  archivedAt: timestamp("archived_at", { withTimezone: true }),
+}, (t) => ({
+  activeIdx: uniqueIndex("goals_user_active_idx").on(t.userId).where(sql`${t.archivedAt} is null`),
+}));
+
 // ---------------------------------------------------------------------------
 // Investments
 // ---------------------------------------------------------------------------
@@ -583,6 +603,8 @@ export const alertTypeEnum = pgEnum("alert_type", [
   "connection_broken",
   "large_transaction",
   "subscription_change",
+  // The year-end goal projecting short (lib/alerts/evaluate.ts goalCandidates); Tally Pop users only.
+  "goal_off_track",
 ]);
 
 export type AlertType = (typeof alertTypeEnum.enumValues)[number];

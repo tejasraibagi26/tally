@@ -30,6 +30,9 @@ import { todayInZone } from "@tally/core/zonedDate";
 import { monthSummary } from "@tally/core/budgetView";
 import { greetingFor, leftToSpendLine, onPaceStreak } from "@tally/core/popView";
 import { OnPaceCard, TallyUpBanner } from "@/components/overview/PopOverview";
+import { GoalCard } from "@/components/goals/GoalCard";
+import { goalSummary, goalsIntroSeen } from "@/lib/goals";
+import { GoalIntroModal } from "@/components/goals/GoalIntroModal";
 
 // A short, increasing entrance delay per major section so the page arrives
 // in a quick cascade rather than all at once. Kept small (120ms apart) so
@@ -158,6 +161,7 @@ export default async function OverviewPage() {
   const dailyPace = totalBudgeted > 0 ? Math.floor(totalBudgeted / daysInMonth) : 0;
   const streak = onPaceStreak(spendByDay, dailyPace, today, monthStart);
   const unreviewed = toReview?.count ?? 0;
+  const [goal, introSeen] = await Promise.all([goalSummary(userId), goalsIntroSeen(userId)]);
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
@@ -282,6 +286,11 @@ export default async function OverviewPage() {
       </div>
 
       {unreviewed > 0 && <TallyUpBanner className="pop-only" count={unreviewed} />}
+
+      {/* Tally Pop: the year-end goal (lib/goals.ts), or a prompt to set one */}
+      <GoalCard className="pop-only" summary={goal} />
+      {/* Once per account, Pop only, and not once a goal exists */}
+      <GoalIntroModal show={!introSeen && !goal} />
 
       {/* Cash flow trend */}
       <Card style={reveal(2)}>

@@ -2,6 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { formatCents, formatPercent } from "@tally/core/money";
 import type { MonthlyRecapData } from "@/lib/monthlyRecap";
+import type { GoalSummary } from "@/lib/goals";
+import { GOAL_STATUS_LABEL, goalLine } from "@/lib/goalCopy";
 
 const TEMPLATE_PATH = path.join(process.cwd(), "emails", "month-in-review.html");
 // Tally Pop's version (users.ui_look = "pop", lib/uiLook.ts): same tokens and blocks.
@@ -269,9 +271,11 @@ function companyLineHtml(ctx: RenderContext): string {
   return `<br /><br />${escapeHtml(ctx.companyName)}, ${escapeHtml(ctx.companyAddress)}`;
 }
 
-export function renderMonthInReviewEmail(data: MonthlyRecapData, ctx: RenderContext, look: EmailLook = "classic"): string {
+export function renderMonthInReviewEmail(data: MonthlyRecapData, ctx: RenderContext, look: EmailLook = "classic", goal: GoalSummary | null = null): string {
   const pop = look === "pop";
   let html = fs.readFileSync(pop ? POP_TEMPLATE_PATH : TEMPLATE_PATH, "utf-8");
+  // The year-end goal (Pop template only; the classic one has no GOAL block).
+  html = stripBlock(html, "GOAL", pop && goal != null);
 
   html = stripBlock(html, "BUDGETS", data.hasBudgets);
   html = stripBlock(html, "CATEGORIES", data.hasCategories);
@@ -313,6 +317,10 @@ export function renderMonthInReviewEmail(data: MonthlyRecapData, ctx: RenderCont
     FIRE_BAR_FILLED: String(fireBarFilled),
     FIRE_BAR_REMAINING: String(240 - fireBarFilled),
     FIRE_BAR_FILLED_PCT: String(Math.round(progressClamped * 100)),
+    GOAL_FIGURE: goal ? `${formatCents(goal.projection.current)} of ${formatCents(goal.projection.target)}` : "",
+    GOAL_PCT: goal ? String(Math.max(2, Math.round(goal.projection.progress * 100))) : "0",
+    GOAL_VERDICT: goal ? escapeHtml(GOAL_STATUS_LABEL[goal.projection.status]) : "",
+    GOAL_LINE: goal ? escapeHtml(goalLine(goal)) : "",
     FIRE_CURRENT: fire ? formatCents(fire.currentValue) : "",
     FIRE_TARGET: fire ? formatCents(fire.fireNumberValue) : "",
     FIRE_PROGRESS_PCT: fire ? formatPercent(Math.max(0, fire.progressPct)) : "",

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiGet, apiPatch } from "@/lib/api";
 
-export type AlertType = "budget_threshold" | "connection_broken" | "large_transaction" | "subscription_change";
+export type AlertType = "budget_threshold" | "connection_broken" | "large_transaction" | "subscription_change" | "goal_off_track";
 
 export interface AlertPreferences {
   channels: Record<AlertType, { email: boolean }>;
