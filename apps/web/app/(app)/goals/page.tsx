@@ -45,8 +45,8 @@ export default async function GoalsPage() {
       <PageHeader
         title="Year-end goal"
         meta={[
-          <span key="target"><span className="money">{formatCents(goal.targetCents)}</span> net worth</span>,
-          <span key="start">started at <span className="money">{formatCents(goal.startCents)}</span></span>,
+          <span key="target"><span className="money money-fit"><span>{formatCents(goal.targetCents)}</span></span> net worth</span>,
+          <span key="start">started at <span className="money money-fit"><span>{formatCents(goal.startCents)}</span></span></span>,
         ]}
       />
       <GoalCard summary={summary} />

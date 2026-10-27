@@ -218,8 +218,10 @@
  * also on Investments), the public pages' Sign in and the demo CTAs.
  * 2.1.3: the year-end goal's amounts follow "hide amounts" (a goal is net
  * worth) -- card, Goals page header and chart label, Budgets line.
+ * 2.1.4 masks those amounts inline (money-fit): plain .money kept each
+ * hidden figure's width, leaving gaps in the middle of sentences.
  */
-export const APP_VERSION = "2.1.3";
+export const APP_VERSION = "2.1.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

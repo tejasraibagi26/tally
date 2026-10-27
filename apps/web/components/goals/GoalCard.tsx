@@ -16,9 +16,17 @@ const STATUS_LOOK: Record<GoalStatus, { tone: string; icon: typeof CheckCircle2 
   unknown: { tone: "text-text-2 bg-sunken", icon: Clock },
 };
 
-/** A net worth figure inside running text: masked by "hide amounts" (.money), the words around it stay. */
+/**
+ * A net worth figure inside running text: masked by "hide amounts". money-fit
+ * (globals.css) swaps the figure for dots inline, so no gap the width of the
+ * hidden number opens before the words that follow.
+ */
 function M({ cents }: { cents: number }) {
-  return <span className="money">{formatCents(Math.round(cents))}</span>;
+  return (
+    <span className="money money-fit">
+      <span>{formatCents(Math.round(cents))}</span>
+    </span>
+  );
 }
 
 /** goalLine (lib/goalCopy.ts) with each amount maskable. */
@@ -61,7 +69,7 @@ export function GoalCard({ summary, className, style }: { summary: GoalSummary |
       <Card className="p-5 lg:p-6 flex flex-col gap-3 hover:border-border-strong transition-colors">
         <span className="text-xs font-semibold uppercase tracking-[0.08em] text-text-2">Year-end goal</span>
         <span className="font-display text-[32px] leading-none text-text tabular">
-          <span className="money">{formatCents(p.current)}</span> <span className="text-text-2 text-[22px]">of <M cents={p.target} /></span>
+          <M cents={p.current} /> <span className="text-text-2 text-[22px]">of <M cents={p.target} /></span>
         </span>
         <span className="text-[14px] text-text-2 tabular">
           {p.status === "reached" ? "Reached" : <><M cents={p.gap} /> to go by {deadlineLabel(goal.deadline)}</>}
