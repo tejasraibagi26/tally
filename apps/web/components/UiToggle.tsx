@@ -26,6 +26,13 @@ export function UiToggle() {
     const next = !pop;
     setPop(next);
     applyUi(next);
+    // Saved to the account too, so emails follow the switch. The look has
+    // already changed; a failed save only leaves emails as they were.
+    fetch("/api/settings/ui-look", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ look: next ? "pop" : "classic" }),
+    }).catch(() => {});
   }
 
   return (

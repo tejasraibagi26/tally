@@ -85,6 +85,11 @@ export const users = pgTable("users", {
   timezone: text("timezone").notNull().default("America/New_York"),
   baseCurrency: text("base_currency").notNull().default("USD"),
   recapsEnabled: boolean("recaps_enabled").notNull().default(true),
+  // The Tally Pop preview (lib/uiFlag.ts): null until /labs/pop flags this
+  // user, then "pop" or "classic" as the "New look" switch last set it.
+  // The server-side copy of the browser cookie, for what can't read
+  // cookies: emails choose their template from it.
+  uiLook: text("ui_look"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

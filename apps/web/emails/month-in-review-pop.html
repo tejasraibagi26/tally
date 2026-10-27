@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="color-scheme" content="light" />
+<meta name="supported-color-schemes" content="light" />
+<title>Your {{MONTH_LABEL}}, tallied</title>
+<!--[if mso]>
+<noscript>
+<xml>
+<o:OfficeDocumentSettings>
+<o:PixelsPerInch>96</o:PixelsPerInch>
+</o:OfficeDocumentSettings>
+</xml>
+</noscript>
+<![endif]-->
+<!-- Tally Pop recap (lib/emailTemplate.ts, look "pop"). Fonts load where the
+     client allows and fall back to Arial elsewhere. Cards are ink-outlined
+     with thicker right/bottom borders standing in for the hard shadow
+     (box-shadow doesn't survive Gmail or Outlook). Charts run edge to edge
+     of their card. Every text pair is AA. -->
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  body, table, td { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+  table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+  img { border: 0; line-height: 100%; outline: none; text-decoration: none; -ms-interpolation-mode: bicubic; }
+  body { margin: 0; padding: 0; width: 100% !important; background-color: #FFF6E9; }
+  a { text-decoration: none; }
+  .num { font-variant-numeric: tabular-nums; }
+  @media only screen and (max-width: 600px) {
+    .container { width: 100% !important; }
+    .stack { display: block !important; width: 100% !important; padding: 0 0 10px 0 !important; }
+    .pad-sm { padding-left: 20px !important; padding-right: 20px !important; }
+  }
+</style>
+</head>
+<body style="margin:0; padding:0; background-color:#FFF6E9;">
+  <div style="display:none; max-height:0; overflow:hidden; mso-hide:all; font-size:1px; line-height:1px; color:#FFF6E9;">
+    {{PREHEADER}}
+    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFF6E9;">
+    <tr>
+      <td align="center" style="padding:32px 16px;">
+
+        <table role="presentation" class="container" width="560" cellpadding="0" cellspacing="0" border="0" style="width:560px; max-width:560px;">
+
+          <!-- Wordmark -->
+          <tr>
+            <td style="padding:0 4px 22px 4px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td>
+                    <span style="display:inline-block; background-color:#5B3BF5; color:#FFFFFF; border:2px solid #1D1B2F; border-radius:12px; padding:3px 12px; font-family:'Bricolage Grotesque', Arial, Helvetica, sans-serif; font-size:22px; font-weight:800; letter-spacing:-0.5px;">tally</span>
+                  </td>
+                  <td align="right" style="font-family:Figtree, Arial, Helvetica, sans-serif; font-size:13.5px; font-weight:700; color:#4A4760;">{{MONTH_LABEL}} recap</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Hero card -->
+          <tr>
+            <td style="background-color:#FFFFFF; border:2px solid #1D1B2F; border-right-width:6px; border-bottom-width:6px; border-radius:24px; padding:28px;" class="pad-sm">
+              <div style="font-family:'Bricolage Grotesque', Arial, Helvetica, sans-serif; font-size:40px; line-height:1.02; font-weight:800; letter-spacing:-1.2px; color:#1D1B2F;">
+                {{MONTH_LABEL}}, tallied.
+              </div>
+              <div style="font-family:Figtree, Arial, Helvetica, sans-serif; font-size:16px; line-height:1.55; color:#1D1B2F; padding-top:14px;">
+                {{GREETING}}
+              </div>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:18px;">
+                <tr>
+                  <td class="stack" width="33%" style="padding-right:8px;" valign="top">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFF1DC; border-radius:16px;">
+                      <tr><td style="padding:14px;">
+                        <div style="font-family:Figtree, Arial, Helvetica, sans-serif; font-size:11.5px; font-weight:800; letter-spacing:0.7px; text-transform:uppercase; color:#4A4760;">Came in</div>
+                        <div class="num" style="font-family:'Bricolage Grotesque', Arial, Helvetica, sans-serif; font-size:22px; font-weight:800; color:#1D1B2F; padding-top:4px;">{{INCOME}}</div>
+                      </td></tr>
+                    </table>
+                  </td>
+                  <td class="stack" width="33%" style="padding:0 4px;" valign="top">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFF1DC; border-radius:16px;">
+                      <tr><td style="padding:14px;">
+                        <div style="font-family:Figtree, Arial, Helvetica, sans-serif; font-size:11.5px; font-weight:800; letter-spacing:0.7px; text-transform:uppercase; color:#4A4760;">Went out</div>
+                        <div class="num" style="font-family:'Bricolage Grotesque', Arial, Helvetica, sans-serif; font-size:22px; font-weight:800; color:#1D1B2F; padding-top:4px;">{{SPEND}}</div>
+                      </td></tr>
+                    </table>
+                  </td>
+                  <td class="stack" width="33%" style="padding-left:8px;" valign="top">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#FFC53D; border:2px solid #1D1B2F; border-radius:16px;">
+                      <tr><td style="padding:12px;">
+                        <div style="font-family:Figtree, Arial, Helvetica, sans-serif; font-size:11.5px; font-weight:800; letter-spacing:0.7px; text-transform:uppercase; color:#1D1B2F;">You kept</div>
+                        <div class="num" style="font-family:'Bricolage Grotesque', Arial, Helvetica, sans-serif; font-size:22px; font-weight:800; color:{{SAVED_COLOR}}; padding-top:4px;">{{SAVED}}</div>
+                      </td></tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+              <div style="font-family:Figtree, Arial, Helvetica, sans-serif; font-size:14.5px; color:#4A4760; padding-top:14px;">
+                {{SAVINGS_RATE_LINE}}
+              </div>
+            </td>
+          </tr>
+
+          <tr><td style="height:22px; line-height:22px; font-size:0;">&nbsp;</td></tr>
+
+          <!-- Net worth: solid brand card, sparkline edge to edge -->
+          <tr>
+            <td style="background-color:#5B3BF5; border:2px solid #1D1B2F; border-right-width:6px; border-bottom-width:6px; border-radius:24px; padding:0; overflow:hidden;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td class="pad-sm" style="padding:24px 28px 8px 28px;">
+                    <div style="font-family:Figtree, Arial, Helvetica, sans-serif; font-size:12px; font-weight:800; letter-spacing:0.9px; text-transform:uppercase; color:#E6E0FF;">Net worth</div>
+                    <div class="num" style="font-family:'Bricolage Grotesque', Arial, Helvetica, sans-serif; font-size:44px; line-height:1; font-weight:800; letter-spacing:-1.6px; color:#FFFFFF; padding-top:8px;">{{NET_WORTH}}</div>
+                    <div style="padding-top:12px;">{{NET_WORTH_DELTA_CHIP}}</div>
+                  </td>
+                </tr>
+                <!--BLOCK:SPARKLINE-->
+                <tr>
+                  <td class="pad-sm" style="padding:6px 28px 4px 28px;">
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        {{NW_MONTH_LABELS}}
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <!--[if !mso]><!-->
+                <tr>
+                  <td style="padding:0; font-size:0; line-height:0;">
+                    <svg width="100%" height="72" viewBox="4 0 240 56" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="display:block;">
+                      <path d="{{NW_FILL_PATH}}" fill="#FFFFFF" fill-opacity="0.14" />
+                      <path d="{{NW_LINE_PATH}}" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke" />
+                    </svg>
+                  </td>
+                </tr>
+                <!--<![endif]-->
+                <!--/BLOCK:SPARKLINE-->
+                <tr><td style="height:4px; line-height:4px; font-size:0;">&nbsp;</td></tr>
+              </table>
+            </td>
+          </tr>
+
+          <!--BLOCK:BUDGETS-->
+          <tr><td style="height:22px; line-height:22px; font-size:0;">&nbsp;</td></tr>
+          <tr>
+            <td style="background-color:#FFFFFF; border:2px solid #1D1B2F; border-radius:24px; padding:24px 28px;" class="pad-sm">
+              <div style="font-family:'Bricolage Grotesque', Arial, Helvetica, sans-serif; font-size:22px; font-weight:700; color:#1D1B2F; padding-bottom:16px;">Budgets</div>
+              {{BUDGET_ROWS}}
+              {{BUDGETS_FOOTNOTE}}
+            </td>
+          </tr>
+          <!--/BLOCK:BUDGETS-->
+
+          <!--BLOCK:CATEGORIES-->
+          <tr><td style="height:22px; line-height:22px; font-size:0;">&nbsp;</td></tr>
+          <tr>
+            <td style="background-color:#FFFFFF; border:2px solid #1D1B2F; border-radius:24px; padding:0; overflow:hidden;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td class="pad-sm" style="padding:24px 28px 10px 28px; font-family:'Bricolage Grotesque', Arial, Helvetica, sans-serif; font-size:22px; font-weight:700; color:#1D1B2F;">Where it went</td>
+                </tr>
+                {{CATEGORY_ROWS}}
+                <tr><td style="height:18px; line-height:18px; font-size:0;">&nbsp;</td></tr>
+              </table>
+            </td>
+          </tr>
+          <!--/BLOCK:CATEGORIES-->
+
+          <!--BLOCK:SUBSCRIPTIONS-->
+          <tr><td style="height:22px; line-height:22px; font-size:0;">&nbsp;</td></tr>
+          <tr>
+            <td style="background-color:#FFFFFF; border:2px solid #1D1B2F; border-radius:24px; padding:22px 28px;" class="pad-sm">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="font-family:'Bricolage Grotesque', Arial, Helvetica, sans-serif; font-size:20px; font-weight:700; color:#1D1B2F;">Subscriptions</td>
+                  <td align="right" class="num" style="font-family:'Bricolage Grotesque', Arial, Helvetica, sans-serif; font-size:22px; font-weight:800; color:#1D1B2F;">{{SUB_MONTHLY_TOTAL}}<span style="font-family:Figtree, Arial, Helvetica, sans-serif; font-size:14px; font-weight:600; color:#4A4760;">/mo</span></td>
+                </tr>
+              </table>
+              <div style="font-family:Figtree, Arial, Helvetica, sans-serif; font-size:14px; color:#4A4760; padding-top:8px; line-height:1.55;">
+                {{SUB_COUNT_LINE}}
+              </div>
+              {{SUB_PRICE_INCREASE_BLOCK}}
+            </td>
+          </tr>
+          <!--/BLOCK:SUBSCRIPTIONS-->
+
+          <!--BLOCK:FIRE-->
+          <tr><td style="height:22px; line-height:22px; font-size:0;">&nbsp;</td></tr>
+          <tr>
+            <td style="background-color:#FFFFFF; border:2px solid #1D1B2F; border-radius:24px; padding:22px 28px;" class="pad-sm">
+              <div style="font-family:Figtree, Arial, Helvetica, sans-serif; font-size:12px; font-weight:800; letter-spacing:0.8px; text-transform:uppercase; color:#5B3BF5;">Early retirement</div>
+              <div style="font-family:'Bricolage Grotesque', Arial, Helvetica, sans-serif; font-size:24px; font-weight:800; letter-spacing:-0.5px; line-height:1.15; color:#1D1B2F; padding-top:8px;">
+                On pace for age {{FIRE_AGE}}, in {{FIRE_YEAR}}.
+              </div>
+              <div style="font-family:Figtree, Arial, Helvetica, sans-serif; font-size:14px; color:#4A4760; padding-top:8px; line-height:1.55;">
+                {{FIRE_SENTENCE}}
+              </div>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:14px; border:2px solid #1D1B2F; border-radius:999px; background-color:#F8EDDB;">
+                <tr style="height:10px;">
+                  <td width="{{FIRE_BAR_FILLED_PCT}}%" height="10" style="background-color:#5B3BF5; border-radius:999px 0 0 999px; font-size:0; line-height:0;">&nbsp;</td>
+                  <td height="10" style="font-size:0; line-height:0;">&nbsp;</td>
+                </tr>
+              </table>
+              <div class="num" style="font-family:Figtree, Arial, Helvetica, sans-serif; font-size:13px; color:#4A4760; padding-top:8px;">
+                {{FIRE_CURRENT}} of {{FIRE_TARGET}} &middot; {{FIRE_PROGRESS_PCT}}
+              </div>
+            </td>
+          </tr>
+          <!--/BLOCK:FIRE-->
+
+          <!-- CTA -->
+          <tr>
+            <td align="center" style="padding:30px 0 6px 0;">
+              <!--[if mso]>
+              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="{{APP_URL}}/overview" style="height:48px;v-text-anchor:middle;width:220px;" arcsize="50%" fillcolor="#5B3BF5" strokecolor="#1D1B2F" strokeweight="2px">
+              <center style="color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">Open Tally</center>
+              </v:roundrect>
+              <![endif]-->
+              <!--[if !mso]><!-->
+              <a href="{{APP_URL}}/overview" style="background-color:#5B3BF5; color:#FFFFFF; font-family:Figtree, Arial, Helvetica, sans-serif; font-size:16px; font-weight:800; padding:14px 36px; border:2px solid #1D1B2F; border-right-width:4px; border-bottom-width:4px; border-radius:999px; display:inline-block;">
+                Open Tally
+              </a>
+              <!--<![endif]-->
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:26px 4px 8px 4px;">
+              <div style="border-top:1px solid #EADBC4; padding-top:18px; font-family:Figtree, Arial, Helvetica, sans-serif; font-size:12.5px; color:#4A4760; line-height:1.7; text-align:center;">
+                You're getting this because monthly recaps are turned on in Tally.<br />
+                <a href="{{PREFERENCES_URL}}" style="color:#4A4760; text-decoration:underline;">Manage email preferences</a>
+                &nbsp;&middot;&nbsp;
+                <a href="{{UNSUBSCRIBE_URL}}" style="color:#4A4760; text-decoration:underline;">Unsubscribe</a>
+                {{COMPANY_LINE}}
+              </div>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

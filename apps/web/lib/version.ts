@@ -183,8 +183,17 @@
  * 1.32.1 makes /labs/pop a real feature flag (tally-ff-pop): a flagged
  * browser gets a "New look" switch in the sidebar to flip between Pop and
  * the current UI; unflagged browsers see neither.
+ * 2.0.0 completes Tally Pop end to end, still behind the flag: the flag is
+ * also kept on the account (users.ui_look, migration 0025) so the monthly
+ * recap and alert emails have Pop versions; Overview gets a greeting with
+ * what's left to spend, a brand net-worth card, an on-pace streak in tally
+ * marks and an "N to tally up" banner; the review queue counts in tally
+ * marks; overlays, modals, side panels, meters, titles and every chart
+ * (edge to edge, labels kept inside) take the new look. Also fixes the
+ * Investments chart labelling every tick with the same month on 1Y/All
+ * when the history is short.
  */
-export const APP_VERSION = "1.32.1";
+export const APP_VERSION = "2.0.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

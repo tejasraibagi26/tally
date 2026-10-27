@@ -25,6 +25,7 @@
     "./budgetView": "./src/budgetView.ts",
     "./transactionView": "./src/transactionView.ts",
     "./overviewView": "./src/overviewView.ts",
+    "./popView": "./src/popView.ts",
     "./merchantLogo": "./src/merchantLogo.ts",
     "./merchantName": "./src/merchantName.ts",
     "./cardView": "./src/cardView.ts",

@@ -18,6 +18,7 @@ export function PageHeader({
   eyebrow,
   figure,
   figureContext,
+  className,
 }: {
   title: string;
   /** Short context items, joined with dots. Falsy entries are skipped. */
@@ -26,15 +27,17 @@ export function PageHeader({
   eyebrow?: string;
   figure?: ReactNode;
   figureContext?: ReactNode;
+  className?: string;
 }) {
   const metaItems = (meta ?? []).filter(Boolean);
   const headline = figure != null;
 
   return (
-    <div className={cn("flex flex-wrap justify-between gap-x-6 gap-y-3 flex-none", headline ? "items-end" : "items-center")}>
+    <div className={cn("flex flex-wrap justify-between gap-x-6 gap-y-3 flex-none", headline ? "items-end" : "items-center", className)}>
       <div className={cn("flex flex-col min-w-0", headline ? "gap-1.5" : "gap-1")}>
         {eyebrow && <span className="text-xs font-medium uppercase tracking-[0.06em] text-text-3">{eyebrow}</span>}
-        <h1 className="m-0 text-2xl font-semibold text-text leading-tight">{title}</h1>
+        {/* ui-page-title: Tally Pop sets it in the display face (globals.css). */}
+        <h1 className="ui-page-title m-0 text-2xl font-semibold text-text leading-tight">{title}</h1>
         {headline && (
           <div className="flex flex-wrap items-baseline gap-x-3.5 gap-y-1">
             <span className="font-display text-[40px] leading-[1.06] text-text tabular">{figure}</span>

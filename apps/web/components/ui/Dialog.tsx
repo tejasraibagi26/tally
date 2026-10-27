@@ -23,7 +23,7 @@ const toneClasses: Record<DialogTone, string> = {
 
 export function DialogTile({ tone, children }: { tone: DialogTone; children: ReactNode }) {
   return (
-    <span className={cn("w-10 h-10 flex-none rounded-[10px] flex items-center justify-center transition-colors duration-150", toneClasses[tone])}>
+    <span className={cn("ui-tile w-10 h-10 flex-none rounded-[10px] flex items-center justify-center transition-colors duration-150", toneClasses[tone])}>
       {children}
     </span>
   );

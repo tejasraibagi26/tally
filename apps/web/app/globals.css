@@ -190,6 +190,7 @@
   --ink-shadow: #1D1B2F;
   --marigold: #FFC53D;
   --mark-accent: var(--marigold);
+  --tooltip-border: 2px solid var(--ink);
   --shadow-raised: 4px 4px 0 var(--ink-shadow);
   --shadow-overlay: 6px 6px 0 var(--ink-shadow);
   --scrim: rgba(29,27,47,.4);
@@ -247,6 +248,11 @@
   box-shadow: var(--shadow-raised);
 }
 
+/* Round knobs (switches, toggles) keep a ring, not the offset shadow. */
+[data-ui="pop"] .rounded-full.shadow-raised {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
 /* components/ui/Button.tsx: pills; filled ones press down into their shadow. */
 [data-ui="pop"] .ui-btn {
   border-radius: 999px;
@@ -273,6 +279,102 @@
 }
 [data-ui="pop"] .ui-nav-active .text-text-3 {
   color: inherit;
+}
+
+/* Floating layers (menus, popovers, tooltips, the bulk bar, toasts,
+   modals) and the side panel get the ink outline; their hard shadow comes
+   from --shadow-overlay. */
+[data-ui="pop"] .shadow-overlay.border {
+  border-width: 2px;
+  border-color: var(--ink);
+}
+[data-ui="pop"] .ui-side {
+  border-left: 2px solid var(--ink);
+}
+[data-ui="pop"] .ui-overlay.rounded-\[16px\] {
+  border-radius: var(--radius-panel);
+}
+[data-ui="pop"] .ui-tile {
+  border-radius: var(--radius-control);
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
+/* Titles in the display face. */
+[data-ui="pop"] .ui-page-title {
+  font-family: var(--font-bricolage), var(--font-inter), sans-serif;
+  font-weight: 800;
+  font-size: 32px;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+[data-ui="pop"] .ui-card-title {
+  font-family: var(--font-bricolage), var(--font-inter), sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Pieces that exist only in one look. Both render; the other is hidden, so
+   the "New look" switch flips instantly. */
+:root:not([data-ui="pop"]) .pop-only,
+[data-ui="pop"] .classic-only {
+  display: none !important;
+}
+
+/* Overview's net worth card in solid brand, with its own text, money and
+   chart colors re-declared for that ground (all AA on it). */
+:root[data-ui="pop"] {
+  --hero-bg: #5B3BF5;
+}
+:root[data-ui="pop"][data-theme="dark"] {
+  --hero-bg: #9B87FF;
+}
+[data-ui="pop"] .ui-hero {
+  background: var(--hero-bg);
+  --text: #FFFFFF;
+  --text-2: #E6E0FF;
+  --text-3: #E6E0FF;
+  --brand: #FFFFFF;
+  --series-1: #FFFFFF;
+  --positive: #C8F7DC;
+  --negative: #FFD9D0;
+  --raised: #3A22B8;
+  --border: #3A22B8;
+}
+[data-ui="pop"][data-theme="dark"] .ui-hero {
+  --text: #14121F;
+  --text-2: #2A2150;
+  --text-3: #2A2150;
+  --brand: #14121F;
+  --series-1: #14121F;
+  --positive: #05301A;
+  --negative: #5C1409;
+  --raised: #C4B8FF;
+  --border: #C4B8FF;
+}
+
+/* A marigold sticker (the on-pace card). */
+[data-ui="pop"] .ui-marigold {
+  background: var(--marigold);
+  color: var(--ink-text);
+  --text: var(--ink-text);
+  --mark-accent: var(--marigold-accent);
+}
+:root[data-ui="pop"] {
+  --ink-text: #1D1B2F;
+  --marigold-accent: #5B3BF5;
+}
+:root[data-ui="pop"][data-theme="dark"] {
+  --ink-text: #14121F;
+  --marigold-accent: #3B2A9E;
+}
+
+/* Budget meters: chunkier, outlined in ink, with a solid pace tick. */
+[data-ui="pop"] .ui-meter {
+  height: 12px;
+  outline: 2px solid var(--ink);
+}
+[data-ui="pop"] .ui-meter > .opacity-50 {
+  opacity: 1;
 }
 
 /* Charts run edge to edge of their card. .ui-bleed cancels the side

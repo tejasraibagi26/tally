@@ -113,7 +113,7 @@ export function Modal({
         aria-busy={busy || undefined}
         tabIndex={-1}
         className={cn(
-          "relative w-full bg-raised border border-border rounded-[16px] shadow-overlay outline-none max-h-[90vh] overflow-y-auto",
+          "ui-overlay relative w-full bg-raised border border-border rounded-[16px] shadow-overlay outline-none max-h-[90vh] overflow-y-auto",
           "motion-reduce:animate-none",
           closing ? "animate-[dialog-out_120ms_ease-in_forwards]" : "animate-[dialog-in_180ms_ease-out]",
         )}

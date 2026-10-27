@@ -3,6 +3,7 @@
 import { ComposedChart, Area, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { formatCents } from "@tally/core/money";
 import type { HistoryPoint } from "@tally/core/investments";
+import { EdgeTick } from "@/components/charts/EdgeTick";
 
 function shortDate(iso: string, withYear: boolean): string {
   const d = new Date(`${iso}T00:00:00`);
@@ -15,10 +16,16 @@ function shortDate(iso: string, withYear: boolean): string {
  * hidden so privacy mode has nothing on the chart to mask; exact figures live
  * in the tooltip, which uses .money spans.
  */
-export function PortfolioChart({ points, longRange }: { points: HistoryPoint[]; longRange: boolean }) {
+export function PortfolioChart({ points }: { points: HistoryPoint[] }) {
+  // Month + year only when the history actually spans months: picking 1Y
+  // or All with a few weeks of snapshots used to label every tick "Oct 26".
+  const spanDays = points.length > 1 ? (Date.parse(points[points.length - 1]!.date) - Date.parse(points[0]!.date)) / 86_400_000 : 0;
+  const withYear = spanDays > 120;
   return (
     <ResponsiveContainer width="100%" height={230}>
-      <ComposedChart data={points} margin={{ top: 8, right: 4, left: 4, bottom: 0 }}>
+      {/* No side margin: the chart runs to the card's edges, and EdgeTick
+          keeps the first and last labels inside them. */}
+      <ComposedChart data={points} margin={{ top: 8, right: 0, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="portfolioFill" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--brand)" stopOpacity={0.22} />
@@ -27,8 +34,7 @@ export function PortfolioChart({ points, longRange }: { points: HistoryPoint[]; 
         </defs>
         <XAxis
           dataKey="date"
-          tickFormatter={(d: string) => shortDate(d, longRange)}
-          tick={{ fill: "var(--text-3)", fontSize: 11 }}
+          tick={<EdgeTick format={(d) => shortDate(String(d), withYear)} />}
           axisLine={false}
           tickLine={false}
           minTickGap={48}

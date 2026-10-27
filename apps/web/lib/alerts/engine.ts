@@ -2,6 +2,7 @@ import { and, eq, gte, isNull, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import type { AlertCandidate } from "@tally/core/alerts";
 import { sendEmail } from "@/lib/emailService";
+import { wantsPopEmail } from "@/lib/uiLook";
 import { loadAlertPreferences, type AlertPreferences } from "@/lib/alerts/preferences";
 import { alertEmailHtml, alertEmailSubject } from "@/lib/alerts/email";
 
@@ -82,7 +83,7 @@ async function deliver(row: EventRow, prefs: AlertPreferences): Promise<boolean>
   if (!prefs.channels[row.type].email || row.emailSentAt) return false;
   try {
     const appUrl = process.env.APP_URL;
-    const [user] = await db.select({ email: schema.users.email }).from(schema.users).where(eq(schema.users.id, row.userId)).limit(1);
+    const [user] = await db.select({ email: schema.users.email, uiLook: schema.users.uiLook }).from(schema.users).where(eq(schema.users.id, row.userId)).limit(1);
     if (!appUrl || !user) throw new Error("APP_URL or user email missing");
     await sendEmail({
       to: user.email,
@@ -94,6 +95,7 @@ async function deliver(row: EventRow, prefs: AlertPreferences): Promise<boolean>
         url: row.url ?? "/overview",
         appUrl,
         userId: row.userId,
+        pop: wantsPopEmail(user),
       }),
     });
     await db.update(schema.alertEvents).set({ emailSentAt: new Date() }).where(eq(schema.alertEvents.id, row.id));

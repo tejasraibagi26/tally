@@ -207,7 +207,7 @@ function BudgetBar({ line, ctx, onOpen }: { line: BudgetLine; ctx: MonthContext;
           {fmt(line.spend)} of {fmt(s.available)} · <span className={cn("font-semibold", toneClass[s.labelTone] === "text-text-2" ? "text-text" : toneClass[s.labelTone])}>{s.label}</span>
         </span>
       </span>
-      <span className="relative h-2 rounded-full bg-sunken flex overflow-hidden" aria-hidden="true">
+      <span className="ui-meter relative h-2 rounded-full bg-sunken flex overflow-hidden" aria-hidden="true">
         <span className="h-full" style={{ width: `${s.fillPct * 100}%`, background: color }} />
         {s.overPct > 0 && <span className="h-full bg-negative" style={{ width: `${s.overPct * 100}%` }} />}
         {s.pacePct != null && <span className="absolute -top-0.5 -bottom-0.5 w-0.5 bg-text opacity-50" style={{ left: `${s.pacePct * 100}%` }} title="Where you'd be at an even pace" />}

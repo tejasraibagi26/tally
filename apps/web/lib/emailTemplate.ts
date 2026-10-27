@@ -4,6 +4,11 @@ import { formatCents, formatPercent } from "@tally/core/money";
 import type { MonthlyRecapData } from "@/lib/monthlyRecap";
 
 const TEMPLATE_PATH = path.join(process.cwd(), "emails", "month-in-review.html");
+// Tally Pop's version (users.ui_look = "pop", lib/uiLook.ts): same tokens and blocks.
+const POP_TEMPLATE_PATH = path.join(process.cwd(), "emails", "month-in-review-pop.html");
+
+/** Which template a recap uses. */
+export type EmailLook = "classic" | "pop";
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -144,6 +149,110 @@ function subCountLineText(data: MonthlyRecapData): string {
   return `${n} active subscription${n === 1 ? "" : "s"}.`;
 }
 
+// ---- Tally Pop rows. Inline styles only (email clients); every text pair AA.
+const POP_FONT = "Figtree, Arial, Helvetica, sans-serif";
+const POP_DISPLAY = "'Bricolage Grotesque', Arial, Helvetica, sans-serif";
+const POP_INK = "#1D1B2F";
+const POP_TEXT2 = "#4A4760";
+const POP_NEGATIVE = "#C2341F";
+const POP_TRACK = "#F8EDDB";
+// The chart series in their fixed order (DESIGN.md §7.1), for budget fills.
+const POP_SERIES = ["#1baf7a", "#eb6834", "#2a78d6", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"];
+
+/** One budget: name and "$X under" / "⊘ $X over", then an outlined meter with the overage in red. */
+function budgetRowHtmlPop(b: MonthlyRecapData["budgets"][number], i: number): string {
+  const name = escapeHtml(b.categoryName);
+  const fill = POP_SERIES[i % POP_SERIES.length]!;
+  const over = b.overBy != null;
+  const right = over
+    ? `<span style="color:${POP_NEGATIVE}; font-weight:800;">&#8856; ${formatCents(b.overBy!)} over ${formatCents(b.budgeted)}</span>`
+    : `<span style="color:${POP_TEXT2};">${formatCents(b.spend)} of ${formatCents(b.budgeted)} &middot; </span><strong style="color:${POP_INK};">${formatCents(b.budgeted - b.spend)} under</strong>`;
+  // Over budget: the budget's share in its color, the overage in red.
+  const pct = over ? (b.spend > 0 ? b.budgeted / b.spend : 0) : b.budgeted > 0 ? Math.min(1, b.spend / b.budgeted) : b.spend > 0 ? 1 : 0;
+  const filled = Math.round(pct * 100);
+  const cells = over
+    ? `<td width="${filled}%" height="10" style="background-color:${fill}; font-size:0; line-height:0;">&nbsp;</td><td height="10" style="background-color:${POP_NEGATIVE}; font-size:0; line-height:0;">&nbsp;</td>`
+    : `${filled > 0 ? `<td width="${filled}%" height="10" style="background-color:${fill}; font-size:0; line-height:0;">&nbsp;</td>` : ""}<td height="10" style="font-size:0; line-height:0;">&nbsp;</td>`;
+  return `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td style="font-family:${POP_FONT}; font-size:15px; font-weight:700; color:${POP_INK};">${name}</td>
+        <td align="right" class="num" style="font-family:${POP_FONT}; font-size:14px;">${right}</td>
+      </tr>
+    </table>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 16px 0; border:2px solid ${POP_INK}; border-radius:999px; background-color:${POP_TRACK}; overflow:hidden;">
+      <tr style="height:10px;">${cells}</tr>
+    </table>`;
+}
+
+/** One category: label and amount inside the card's padding, then its bar from the card's left edge. */
+function categoryRowHtmlPop(c: MonthlyRecapData["categories"][number], max: number): string {
+  const width = Math.max(2, Math.round((c.amount / (max || 1)) * 94));
+  return `
+    <tr>
+      <td class="pad-sm" style="padding:10px 28px 4px 28px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="font-family:${POP_FONT}; font-size:14.5px; font-weight:700; color:${POP_INK};">${escapeHtml(c.label)}</td>
+            <td align="right" class="num" style="font-family:${POP_FONT}; font-size:14.5px; color:${POP_INK};">${formatCents(c.amount)} &middot; ${formatPercent(c.pct)}</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:0;">
+        <table role="presentation" width="${width}%" cellpadding="0" cellspacing="0" border="0">
+          <tr style="height:18px;"><td height="18" style="background-color:${c.color}; border:2px solid ${POP_INK}; border-left:0; border-radius:0 8px 8px 0; font-size:0; line-height:0;">&nbsp;</td></tr>
+        </table>
+      </td>
+    </tr>`;
+}
+
+/** A white pill on the brand card: arrow + amount + percent, in money color. */
+function netWorthDeltaChipHtmlPop(data: MonthlyRecapData): string {
+  if (data.netWorthDeltaAmount == null || data.netWorthDeltaPct == null || data.netWorthDeltaDirection == null) return "";
+  const up = data.netWorthDeltaDirection === "up";
+  const color = up ? "#0F7A43" : POP_NEGATIVE;
+  const arrow = up ? "&#9650;" : "&#9660;";
+  return `<span class="num" style="display:inline-block; background-color:#FFFFFF; color:${color}; border:2px solid ${POP_INK}; border-radius:999px; padding:4px 12px; font-family:${POP_FONT}; font-size:14px; font-weight:800;">${arrow} ${formatCents(Math.abs(data.netWorthDeltaAmount))} &middot; ${formatPercent(Math.abs(data.netWorthDeltaPct))} since last month</span>`;
+}
+
+function netWorthMonthLabelsHtmlPop(labels: string[]): string {
+  const n = labels.length;
+  if (n === 0) return "";
+  const width = (100 / n).toFixed(1);
+  return labels
+    .map((label, i) => {
+      const align = i === 0 ? "left" : i === n - 1 ? "right" : "center";
+      return `<td width="${width}%" align="${align}" style="font-family:${POP_FONT}; font-size:12px; color:#E6E0FF;${i === n - 1 ? " font-weight:800;" : ""}">${escapeHtml(label)}</td>`;
+    })
+    .join("\n");
+}
+
+function subPriceIncreaseHtmlPop(data: MonthlyRecapData): string {
+  const p = data.priceIncrease;
+  if (!p) return "";
+  return `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:12px; background-color:#FFF1DC; border-radius:12px;">
+      <tr>
+        <td class="num" style="padding:12px 14px; font-family:${POP_FONT}; font-size:14px; color:${POP_INK}; line-height:1.5;">
+          <strong>${escapeHtml(p.label)} went up.</strong> ${formatCents(p.oldAmount)} &rarr; ${formatCents(p.newAmount)} (+${p.pctIncrease}).
+        </td>
+      </tr>
+    </table>`;
+}
+
+function budgetsFootnoteHtmlPop(data: MonthlyRecapData): string {
+  if (data.budgetsOmitted <= 0) return "";
+  return `<div style="font-family:${POP_FONT}; font-size:13px; color:${POP_TEXT2};">+${data.budgetsOmitted} more in the app</div>`;
+}
+
+function greetingTextPop(data: MonthlyRecapData): string {
+  const name = data.userName ? `, ${escapeHtml(data.userName)}` : "";
+  if (data.saved >= 0) return `Hi${name}! You kept <strong class="num">${formatCents(data.saved)}</strong> in ${escapeHtml(data.monthLabel)}. Here&rsquo;s how it added up.`;
+  return `Hi${name}. ${escapeHtml(data.monthLabel)} went <strong class="num">${formatCents(Math.abs(data.saved))}</strong> past what came in. Here&rsquo;s where it went.`;
+}
+
 export interface RenderContext {
   appUrl: string;
   preferencesUrl: string;
@@ -160,8 +269,9 @@ function companyLineHtml(ctx: RenderContext): string {
   return `<br /><br />${escapeHtml(ctx.companyName)}, ${escapeHtml(ctx.companyAddress)}`;
 }
 
-export function renderMonthInReviewEmail(data: MonthlyRecapData, ctx: RenderContext): string {
-  let html = fs.readFileSync(TEMPLATE_PATH, "utf-8");
+export function renderMonthInReviewEmail(data: MonthlyRecapData, ctx: RenderContext, look: EmailLook = "classic"): string {
+  const pop = look === "pop";
+  let html = fs.readFileSync(pop ? POP_TEMPLATE_PATH : TEMPLATE_PATH, "utf-8");
 
   html = stripBlock(html, "BUDGETS", data.hasBudgets);
   html = stripBlock(html, "CATEGORIES", data.hasCategories);
@@ -172,34 +282,37 @@ export function renderMonthInReviewEmail(data: MonthlyRecapData, ctx: RenderCont
   const fire = data.fire;
   const progressClamped = fire ? Math.min(1, Math.max(0, fire.progressPct)) : 0;
   const fireBarFilled = Math.round(240 * progressClamped);
+  const categoryMax = Math.max(0, ...data.categories.map((c) => c.amount));
 
   const tokens: Record<string, string> = {
     MONTH_LABEL: data.monthLabel,
     PREHEADER: escapeHtml(preheaderText(data)),
-    GREETING: greetingText(data),
+    GREETING: pop ? greetingTextPop(data) : greetingText(data),
     INCOME: formatCents(data.income),
     SPEND: formatCents(data.spend),
     SAVED: formatCents(data.saved, { signed: true }),
-    SAVED_COLOR: data.saved >= 0 ? "#237A3B" : "#B3372A",
+    // Pop prints Saved on marigold: ink when kept, red (large, bold: 3:1 is enough) when over.
+    SAVED_COLOR: pop ? (data.saved >= 0 ? POP_INK : POP_NEGATIVE) : data.saved >= 0 ? "#237A3B" : "#B3372A",
     SAVINGS_RATE_LINE: savingsRateLineText(data),
-    BUDGET_ROWS: data.budgets.map(budgetRowHtml).join("\n"),
-    BUDGETS_FOOTNOTE: budgetsFootnoteHtml(data),
-    CATEGORY_ROWS: data.categories.map(categoryRowHtml).join("\n"),
+    BUDGET_ROWS: pop ? data.budgets.map(budgetRowHtmlPop).join("\n") : data.budgets.map(budgetRowHtml).join("\n"),
+    BUDGETS_FOOTNOTE: pop ? budgetsFootnoteHtmlPop(data) : budgetsFootnoteHtml(data),
+    CATEGORY_ROWS: pop ? data.categories.map((c) => categoryRowHtmlPop(c, categoryMax)).join("\n") : data.categories.map(categoryRowHtml).join("\n"),
     NET_WORTH: formatCents(data.netWorth),
-    NET_WORTH_DELTA_CHIP: netWorthDeltaChipHtml(data),
+    NET_WORTH_DELTA_CHIP: pop ? netWorthDeltaChipHtmlPop(data) : netWorthDeltaChipHtml(data),
     NW_FILL_PATH: data.sparklineFillPath,
     NW_LINE_PATH: data.sparklinePath,
     NW_LAST_X: data.sparklineLastX.toFixed(1),
     NW_LAST_Y: data.sparklineLastY.toFixed(1),
-    NW_MONTH_LABELS: netWorthMonthLabelsHtml(data.sparklineLabels),
+    NW_MONTH_LABELS: pop ? netWorthMonthLabelsHtmlPop(data.sparklineLabels) : netWorthMonthLabelsHtml(data.sparklineLabels),
     SUB_MONTHLY_TOTAL: formatCents(data.subscriptionsMonthlyTotal),
     SUB_COUNT_LINE: subCountLineText(data),
-    SUB_PRICE_INCREASE_BLOCK: subPriceIncreaseHtml(data),
+    SUB_PRICE_INCREASE_BLOCK: pop ? subPriceIncreaseHtmlPop(data) : subPriceIncreaseHtml(data),
     FIRE_AGE: fire ? String(fire.onPaceAge) : "",
     FIRE_YEAR: fire ? String(fire.onPaceYear) : "",
     FIRE_SENTENCE: fireSentenceHtml(data),
     FIRE_BAR_FILLED: String(fireBarFilled),
     FIRE_BAR_REMAINING: String(240 - fireBarFilled),
+    FIRE_BAR_FILLED_PCT: String(Math.round(progressClamped * 100)),
     FIRE_CURRENT: fire ? formatCents(fire.currentValue) : "",
     FIRE_TARGET: fire ? formatCents(fire.fireNumberValue) : "",
     FIRE_PROGRESS_PCT: fire ? formatPercent(Math.max(0, fire.progressPct)) : "",

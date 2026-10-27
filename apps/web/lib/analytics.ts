@@ -40,6 +40,28 @@ export async function monthTotals(userId: string, month: string): Promise<{ inco
   return { income, spend };
 }
 
+/** Spend per day of `month`, in cents by YYYY-MM-DD -- monthTotals' definition of spend (expense categories, no transfers or excluded rows). Days with no spend are absent. */
+export async function dailySpend(userId: string, month: string): Promise<Record<string, number>> {
+  const { start, end } = monthRange(month);
+  const rows = await db
+    .select({ postedDate: schema.transactions.postedDate, amount: schema.transactions.amount })
+    .from(schema.transactions)
+    .innerJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))
+    .where(
+      and(
+        eq(schema.transactions.userId, userId),
+        eq(schema.transactions.isTransfer, false),
+        eq(schema.transactions.excludedFromBudget, false),
+        eq(schema.categories.kind, "expense"),
+        gte(schema.transactions.postedDate, start),
+        lt(schema.transactions.postedDate, end),
+      ),
+    );
+  const byDay: Record<string, number> = {};
+  for (const r of rows) byDay[r.postedDate] = (byDay[r.postedDate] ?? 0) + Math.abs(r.amount);
+  return byDay;
+}
+
 /** §9 "Cash flow": income − spend, per month, N-month trailing series (default 13, matching the spec's own example). */
 export async function cashFlowTrend(userId: string, months = 13): Promise<CashFlowMonth[]> {
   const monthStarts: string[] = [];

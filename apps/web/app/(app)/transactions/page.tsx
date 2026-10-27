@@ -53,6 +53,8 @@ interface SearchParams {
   excluded?: string;
   /** "1" = only transactions that still need review. */
   review?: string;
+  /** "1" = open the review queue on arrival (Tally Pop's "N to tally up"). */
+  queue?: string;
 }
 
 export default async function TransactionsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
@@ -302,7 +304,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
             <Link href="/rules" className="text-sm text-brand mr-1.5">
               Manage rules →
             </Link>
-            <ReviewQueue categories={categoryOptions} pendingCount={unreviewed} />
+            <ReviewQueue categories={categoryOptions} pendingCount={unreviewed} autoOpen={sp.queue === "1"} />
             <SyncButton products={["transactions"]} />
             <AddTransactionForm
               accounts={accounts.map((a) => ({ id: a.id, name: accountDisplayName(a.name, a.nickname), mask: a.mask }))}

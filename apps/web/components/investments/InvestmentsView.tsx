@@ -200,7 +200,7 @@ function HeroCard({ history, today, holdings, baseCurrency }: { history: History
       </div>
       {enough ? (
         <div className="ui-bleed">
-          <PortfolioChart points={summary.points} longRange={range === "1Y" || range === "ALL"} />
+          <PortfolioChart points={summary.points} />
         </div>
       ) : (
         <div className="h-[200px] rounded-control bg-sunken flex items-center justify-center px-8 text-center text-[13.5px] text-text-2">

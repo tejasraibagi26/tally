@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ComposedChart, Area, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot, CartesianGrid } from "recharts";
+import { EdgeTick } from "@/components/charts/EdgeTick";
 import { formatCents, formatPercent } from "@tally/core/money";
 import {
   ageAsOf,
@@ -201,14 +202,20 @@ export function FirePlanner({
 
           <div className="ui-bleed">
             <ResponsiveContainer width="100%" height={250}>
-              <ComposedChart data={points} margin={{ top: 18, right: 12, left: 4, bottom: 0 }}>
+              <ComposedChart data={points} margin={{ top: 18, right: 0, left: 0, bottom: 0 }}>
                 <CartesianGrid stroke="var(--border)" vertical={false} />
                 <XAxis
                   dataKey="t"
                   type="number"
                   domain={[0, "dataMax"]}
-                  tickFormatter={(t: number) => (age != null ? (t === 0 ? `${age} · now` : String(age + t)) : t === 0 ? "Now" : `+${t}y`)}
-                  tick={{ fill: "var(--text-3)", fontSize: 11 }}
+                  tick={
+                    <EdgeTick
+                      format={(v) => {
+                        const t = Number(v);
+                        return age != null ? (t === 0 ? `${age} · now` : String(age + t)) : t === 0 ? "Now" : `+${t}y`;
+                      }}
+                    />
+                  }
                   axisLine={false}
                   tickLine={false}
                   minTickGap={36}

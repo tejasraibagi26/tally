@@ -31,7 +31,7 @@ export function Toaster() {
       {toast && (
         <div
           key={toast.id}
-          className="flex items-center gap-2.5 rounded-control bg-raised border border-border shadow-overlay px-4 py-2.5 text-[13.5px] text-text animate-[fade-in_180ms_ease-out] motion-reduce:animate-none"
+          className="ui-overlay flex items-center gap-2.5 rounded-control bg-raised border border-border shadow-overlay px-4 py-2.5 text-[13.5px] text-text animate-[fade-in_180ms_ease-out] motion-reduce:animate-none"
         >
           <span className={cn("w-1.5 h-1.5 flex-none rounded-full", toast.tone === "negative" ? "bg-negative" : "bg-positive")} />
           {toast.message}

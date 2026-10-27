@@ -1,13 +1,13 @@
 import { db, schema } from "@/db";
 import { isLiveAccountRow } from "@/lib/liveAccounts";
-import { eq } from "drizzle-orm";
+import { and, eq, gte, lt, sql } from "drizzle-orm";
 import { Landmark, CalendarCheck } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { requireUserId } from "@/lib/session";
 import { formatCents, formatPercent } from "@tally/core/money";
 import { getBudgetsForMonth } from "@/lib/budgets";
 import { monthRange, monthLastDay, shiftMonth, computeBurnRateProjection } from "@tally/core/budgetMath";
-import { monthTotals, categoryBreakdown, upcomingBills, cashFlowTrend } from "@/lib/analytics";
+import { monthTotals, categoryBreakdown, upcomingBills, cashFlowTrend, dailySpend } from "@/lib/analytics";
 import { netWorthTrend } from "@/lib/networth";
 import { NET_WORTH_CURRENCY } from "@tally/core/fx";
 import { trimLeadingEmptyMonths } from "@tally/core/cashFlowMath";
@@ -25,7 +25,11 @@ import { BudgetMeterList } from "@/components/budgets/BudgetMeterList";
 import { LinkButton } from "@/components/plaid/LinkButton";
 import { MOCK_MODE } from "@/lib/config";
 import Link from "next/link";
-import { todayFor } from "@/lib/userTimezone";
+import { getUserTimezone } from "@/lib/userTimezone";
+import { todayInZone } from "@tally/core/zonedDate";
+import { monthSummary } from "@tally/core/budgetView";
+import { greetingFor, leftToSpendLine, onPaceStreak } from "@tally/core/popView";
+import { OnPaceCard, TallyUpBanner } from "@/components/overview/PopOverview";
 
 // A short, increasing entrance delay per major section so the page arrives
 // in a quick cascade rather than all at once. Kept small (120ms apart) so
@@ -82,13 +86,14 @@ export default async function OverviewPage() {
   }
 
   // Both in the user's timezone, so the month and day don't roll over at UTC midnight.
-  const today = await todayFor(userId);
+  const timeZone = await getUserTimezone(userId);
+  const today = todayInZone(timeZone);
   const month = today.slice(0, 7) + "-01";
   const priorMonth = shiftMonth(month, -1);
   const { start: monthStart } = monthRange(month);
   const monthEnd = monthLastDay(month);
 
-  const [budgets, thisMonth, lastMonth, breakdown, bills, netWorthPoints, recentTx, cards, cashFlowMonths, holdings] = await Promise.all([
+  const [budgets, thisMonth, lastMonth, breakdown, bills, netWorthPoints, recentTx, cards, cashFlowMonths, holdings, spendByDay, [toReview]] = await Promise.all([
     getBudgetsForMonth(userId, month),
     monthTotals(userId, month),
     monthTotals(userId, priorMonth),
@@ -103,6 +108,20 @@ export default async function OverviewPage() {
     creditCardsForUser(userId),
     cashFlowTrend(userId, 12),
     latestHoldingsForUser(userId),
+    // Tally Pop's on-pace streak and "N to tally up" (the review queue's own scope: this month, transfers aside).
+    dailySpend(userId, month),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(schema.transactions)
+      .where(
+        and(
+          eq(schema.transactions.userId, userId),
+          eq(schema.transactions.reviewed, false),
+          eq(schema.transactions.isTransfer, false),
+          gte(schema.transactions.postedDate, monthStart),
+          lt(schema.transactions.postedDate, monthRange(month).end),
+        ),
+      ),
   ]);
 
   const totalAssets = accounts.filter((a) => a.type === "depository" || a.type === "investment").reduce((sum, a) => sum + (a.currentBalance ?? 0), 0);
@@ -131,9 +150,31 @@ export default async function OverviewPage() {
 
   const totalBudgeted = budgets.reduce((s, b) => s + b.amount + b.rolloverFromPrior, 0);
 
+  // Tally Pop preview (.pop-only below): greeting, the left-to-spend line,
+  // the on-pace streak and the review banner.
+  const hour = Number(new Intl.DateTimeFormat("en-US", { hour: "numeric", hourCycle: "h23", timeZone }).format(new Date()));
+  const monthName = new Date(month + "T00:00:00Z").toLocaleDateString("en-US", { month: "long", timeZone: "UTC" });
+  const popLine = leftToSpendLine(monthSummary(budgets, { phase: "current", daysElapsed, daysInMonth }), (c) => formatCents(c));
+  const dailyPace = totalBudgeted > 0 ? Math.floor(totalBudgeted / daysInMonth) : 0;
+  const streak = onPaceStreak(spendByDay, dailyPace, today, monthStart);
+  const unreviewed = toReview?.count ?? 0;
+
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
       <PageHeader
+        className="pop-only"
+        title={`${greetingFor(hour)} Here's ${monthName}.`}
+        meta={[popLine, items.some((i) => i.lastSyncedAt) && <SyncFreshness key="sync" syncedAt={items.map((i) => i.lastSyncedAt)} />]}
+        actions={
+          brokenItems > 0 && (
+            <Link href="/accounts" className="text-[13.5px] text-negative">
+              {brokenItems} connection{brokenItems === 1 ? "" : "s"} need attention →
+            </Link>
+          )
+        }
+      />
+      <PageHeader
+        className="classic-only"
         title="Overview"
         meta={[monthLabel(month), items.some((i) => i.lastSyncedAt) && <SyncFreshness key="sync" syncedAt={items.map((i) => i.lastSyncedAt)} />]}
         actions={
@@ -147,7 +188,7 @@ export default async function OverviewPage() {
 
       {/* Row 1: hero net worth + connections health */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch" style={reveal(0)}>
-        <Card className="lg:col-span-8 p-5 lg:p-7 flex flex-col gap-4 overflow-hidden">
+        <Card className="ui-hero lg:col-span-8 p-5 lg:p-7 flex flex-col gap-4 overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-12">
             <div className="flex flex-col gap-3">
               <span className="text-xs font-medium uppercase tracking-wide text-text-3">Net worth ({NET_WORTH_CURRENCY})</span>
@@ -176,7 +217,15 @@ export default async function OverviewPage() {
           </div>
         </Card>
 
-        <Card className="lg:col-span-4 flex flex-col">
+        {dailyPace > 0 && (
+          <OnPaceCard
+            className="pop-only lg:col-span-4"
+            streak={streak}
+            dailyPace={dailyPace}
+            href={`/transactions?from=${monthStart}&to=${monthEnd}&kind=expense&transfer=0&excluded=0`}
+          />
+        )}
+        <Card className={cn("lg:col-span-4 flex flex-col", dailyPace > 0 && "classic-only")}>
           <CardHeader title="Connections" />
           <div className="flex-1 flex flex-col gap-3 p-4">
             {items.slice(0, 4).map((item) => (
@@ -231,6 +280,8 @@ export default async function OverviewPage() {
           href="/cards"
         />
       </div>
+
+      {unreviewed > 0 && <TallyUpBanner className="pop-only" count={unreviewed} />}
 
       {/* Cash flow trend */}
       <Card style={reveal(2)}>

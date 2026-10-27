@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.0.0",
+    date: "2026-10-26",
+    changes: [
+      { kind: "improved", text: "More groundwork for the new look we're trying out. Nothing changes for you yet." },
+      { kind: "fixed", text: "On Investments, the chart's dates no longer all read the same month when your history is shorter than the range you picked." },
+    ],
+  },
+  {
     version: "1.32.1",
     date: "2026-10-26",
     changes: [{ kind: "improved", text: "More groundwork for the new look we're trying out. Nothing changes for you yet." }],

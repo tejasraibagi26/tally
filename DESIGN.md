@@ -96,15 +96,30 @@ chart legend) in both light and dark.
 
 ---
 
-## 1a. Tally Pop preview (behind a flag)
+## 1a. Tally Pop (web 2.0.0, behind a flag)
 
-A louder rebrand, "Tally Pop", is being trialled on web behind a link-only feature flag. Visiting `/labs/pop` sets the `tally-ff-pop` flag cookie and starts that browser on Pop; `/labs/pop?off` removes it (`lib/uiFlag.ts`). Nothing in the app links there. A flagged browser gets a "New look" switch in the sidebar footer (`components/UiToggle.tsx`) that flips the `tally-ui` cookie between `pop` and `classic`. The root layout's init script turns flag + choice into `html[data-ui="pop"]` before first paint, and every Pop style lives under that attribute in `app/globals.css`. Unflagged browsers get neither the switch nor Pop, and the system below applies unchanged.
+"Tally Pop" is the louder rebrand, shipped on web behind a link-only feature flag. The finance rules below (§2, §5.4, §7, §9) are unchanged; only the look changes.
 
+**The flag**
+- `/labs/pop` turns it on: it sets the `tally-ff-pop` cookie and starts that browser on Pop. It also saves `users.ui_look = "pop"` (migration 0025, `lib/uiLook.ts`), which emails read.
+- `/labs/pop?off` clears the cookies and `ui_look`. Nothing in the app links to either URL.
+- A flagged browser gets a **New look** switch in the sidebar footer (`components/UiToggle.tsx`). It flips the `tally-ui` cookie between `pop` and `classic` and saves the choice to `ui_look` through `PATCH /api/settings/ui-look`.
+- The root layout's init script sets `html[data-ui="pop"]` before first paint. Every Pop style lives under that attribute in `app/globals.css`.
+- Unflagged users get neither the switch nor Pop. The system below applies unchanged.
+
+**Web**
 - **Palette:** grape brand (`#5B3BF5` light / `#9B87FF` dark), marigold highlight, ink outlines, cream canvas. Every text pair passes AA in both themes. The series palette is unchanged.
-- **Type:** Figtree for UI, Bricolage Grotesque 800 wherever `font-display` was used. Both load with `preload: false`, so browsers without the flag never fetch them.
-- **Shape:** bordered `rounded-card` surfaces become stickers (2px ink outline plus a hard offset shadow). Buttons are pills that press down. The current nav row is a solid brand sticker. The hooks are `ui-btn`, `ui-btn-<variant>` and `ui-nav-active`, which style nothing outside Pop.
-- **Charts run edge to edge of their card.** A `ui-bleed` wrapper cancels the side padding declared as `--bleed` on its padded ancestor; `ui-bleed-flush` drops a chart's own side padding.
-- The mockups (brand board, screens, components, emails) are in the Tally Rebrand canvas artifact. Mobile and email aren't flagged yet.
+- **Type:** Figtree for UI, and Bricolage Grotesque 800 for `font-display`, page titles (`ui-page-title`) and card titles (`ui-card-title`). Both load with `preload: false`.
+- **Stickers:** bordered `rounded-card` surfaces, floating layers (`.shadow-overlay.border`), modals and the side panel get a 2px ink outline and a hard offset shadow.
+- **Controls:** buttons (`ui-btn`, `ui-btn-<variant>`) are pills that press down. The current nav row is a solid brand sticker. Budget meters (`ui-meter`) are outlined. Round knobs keep a ring instead of the offset shadow.
+- **Charts run edge to edge of their card.** `ui-bleed` cancels the padded ancestor's `--bleed`; `ui-bleed-flush` drops a chart's own padding. `components/charts/EdgeTick.tsx` keeps the first and last axis labels inside the edges.
+- **Pop-only pieces:** they carry `.pop-only` (or `.classic-only` for their classic counterpart). Both always render; CSS hides one, so the switch is instant. Rules live in `@tally/core/popView` for mobile to reuse.
+  - Overview: greeting plus the left-to-spend line, the net-worth card in solid brand (`ui-hero`, tokens re-declared for that ground), an on-pace streak card in marigold (`ui-marigold`, tally marks via `components/ui/TallyMarks.tsx`), and an "N to tally up" banner that opens the review queue (`/transactions?review=1&queue=1`).
+  - Review queue: progress as tally marks, and "All tallied." when done.
+
+**Email:** users with `ui_look = "pop"` get the Pop recap (`emails/month-in-review-pop.html`, subject "Your <Month>, tallied") and Pop alert emails (`alertEmailHtml(..., pop)`). Both use the same data and wording as classic. Cards draw their shadow as thicker right and bottom borders, because box-shadow doesn't survive Gmail or Outlook. The net-worth sparkline and category bars run edge to edge.
+
+**Not yet:** the mobile app. The mockups are in the Tally Rebrand canvas artifact.
 
 ## 2. Principles
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { Area, Bar, BarChart, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { EdgeTick } from "@/components/charts/EdgeTick";
 import { formatCents, formatPercent } from "@tally/core/money";
 import { cashFlowSummary, trimLeadingEmptyMonths, withCrossings } from "@tally/core/cashFlowMath";
 
@@ -147,15 +148,14 @@ function GapLines({ months }: { months: CashFlowMonth[] }) {
     <div className="flex flex-col gap-2">
       <div className="ui-bleed">
         <ResponsiveContainer width="100%" height={220}>
-          <ComposedChart data={data} margin={{ top: 8, right: 12, left: 12, bottom: 0 }}>
+          <ComposedChart data={data} margin={{ top: 8, right: 6, left: 6, bottom: 0 }}>
             <CartesianGrid vertical={false} stroke="var(--border)" />
             <XAxis
               dataKey="x"
               type="number"
               domain={[0, months.length - 1]}
               ticks={ticks}
-              tickFormatter={(i: number) => monthLabel(months[i]!.month)}
-              tick={{ fill: "var(--text-3)", fontSize: 12 }}
+              tick={<EdgeTick fontSize={12} format={(i) => monthLabel(months[Number(i)]!.month)} />}
               axisLine={false}
               tickLine={false}
               interval={0}
@@ -187,7 +187,7 @@ function PairedBars({ months }: { months: CashFlowMonth[] }) {
     <div className="flex flex-col gap-2">
       <div className="ui-bleed">
         <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={data} margin={{ top: 8, right: 12, left: 12, bottom: 0 }} barGap={6}>
+          <BarChart data={data} margin={{ top: 8, right: 0, left: 0, bottom: 0 }} barGap={6}>
             <CartesianGrid vertical={false} stroke="var(--border)" />
             <XAxis dataKey="label" tick={{ fill: "var(--text-3)", fontSize: 12 }} axisLine={false} tickLine={false} />
             <YAxis hide domain={[0, "auto"]} />
