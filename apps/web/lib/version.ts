@@ -248,8 +248,13 @@
  * edge (mobile already scaled by time). The goal form groups the amount's
  * digits as you type, sizes its fields to what they hold instead of
  * stretching the money box across the card, and asks before removing.
+ * 2.2.4 gives Rules the table treatment Transactions has: a column header,
+ * rows scrolling inside the card and a pager under them, 25 to a page
+ * (?page=). The footer both pages share is components/ui/Pager.tsx.
+ * Enabled is a Switch, not a checkbox, and no longer sticks disabled after
+ * one toggle (the row's busy flag was never cleared on success).
  */
-export const APP_VERSION = "2.2.3";
+export const APP_VERSION = "2.2.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -5,6 +5,7 @@ import { Receipt, SearchX } from "lucide-react";
 import { requireUserId } from "@/lib/session";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { Pager } from "@/components/ui/Pager";
 import { PageHeader, SyncFreshness } from "@/components/ui/PageHeader";
 import { SyncButton } from "@/components/plaid/SyncButton";
 import { SyncFailureBanner } from "@/components/plaid/SyncFailureBanner";
@@ -384,27 +385,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
             <TransactionsList rows={rowData} accountsById={accountsById} categories={categoryOptions} today={today} defaultCurrency={DEFAULT_CURRENCY} />
           </div>
 
-          {total > 0 && (
-            <div className="flex items-center justify-between px-4 py-3 text-[13.5px] text-text-3 flex-none border-t border-border">
-              <span>
-                Showing {start}–{end} of {total}
-              </span>
-              <div className="flex gap-3">
-                <Link
-                  href={pageHref(Math.max(1, page - 1))}
-                  className={page <= 1 ? "pointer-events-none text-text-3" : "text-text-2"}
-                >
-                  Previous
-                </Link>
-                <Link
-                  href={pageHref(Math.min(totalPages, page + 1))}
-                  className={page >= totalPages ? "pointer-events-none text-text-3" : "text-text-2"}
-                >
-                  Next
-                </Link>
-              </div>
-            </div>
-          )}
+          {total > 0 && <Pager page={page} totalPages={totalPages} start={start} end={end} total={total} hrefFor={pageHref} />}
         </Card>
       )}
     </div>

@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.2.4",
+    date: "2026-10-27",
+    changes: [
+      { kind: "improved", text: "Rules now reads like Transactions: the list scrolls inside its card with 25 rules to a page, under a header row, so a long list no longer pushes the page down forever." },
+      { kind: "improved", text: "A rule's Enabled checkbox is a switch, like everywhere else in Tally." },
+      { kind: "fixed", text: "Turning a rule on or off left its switch and Delete button greyed out until you reloaded the page." },
+    ],
+  },
+  {
     version: "2.2.3",
     date: "2026-10-27",
     changes: [
