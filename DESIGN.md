@@ -98,7 +98,7 @@ chart legend) in both light and dark.
 
 ## 1a. Tally Pop preview (behind a flag)
 
-A louder rebrand, "Tally Pop", is being trialled on web behind a link-only flag: visiting `/labs/pop` sets the `tally-ui=pop` cookie (`lib/uiFlag.ts`) and `/labs/pop?off` clears it. Nothing in the app links there. The root layout's init script turns the cookie into `html[data-ui="pop"]` before first paint, and every Pop style lives under that attribute in `app/globals.css`. Without it, the system below applies unchanged.
+A louder rebrand, "Tally Pop", is being trialled on web behind a link-only feature flag. Visiting `/labs/pop` sets the `tally-ff-pop` flag cookie and starts that browser on Pop; `/labs/pop?off` removes it (`lib/uiFlag.ts`). Nothing in the app links there. A flagged browser gets a "New look" switch in the sidebar footer (`components/UiToggle.tsx`) that flips the `tally-ui` cookie between `pop` and `classic`. The root layout's init script turns flag + choice into `html[data-ui="pop"]` before first paint, and every Pop style lives under that attribute in `app/globals.css`. Unflagged browsers get neither the switch nor Pop, and the system below applies unchanged.
 
 - **Palette:** grape brand (`#5B3BF5` light / `#9B87FF` dark), marigold highlight, ink outlines, cream canvas. Every text pair passes AA in both themes. The series palette is unchanged.
 - **Type:** Figtree for UI, Bricolage Grotesque 800 wherever `font-display` was used. Both load with `preload: false`, so browsers without the flag never fetch them.

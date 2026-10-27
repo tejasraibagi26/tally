@@ -149,9 +149,10 @@
 }
 
 /* "Tally Pop" UI preview (lib/uiFlag.ts), on only while html carries
-   data-ui="pop" -- set before first paint from the cookie /labs/pop writes.
-   Everything Pop changes lives in this block and the component rules
-   below it; without the attribute none of it applies. Every text pair here
+   data-ui="pop" -- set before first paint from the cookies /labs/pop writes.
+   The sidebar's "New look" switch (components/UiToggle.tsx) flips it
+   back and forth once the flag is on. Everything Pop changes lives in this
+   block and the component rules below it; without the attribute none of it applies. Every text pair here
    is checked against WCAG AA (4.5:1 text, 3:1 borders and icons) in both
    themes. Series colors are unchanged: they're the validated chart palette.
    No prefers-color-scheme copy: data-ui only exists when JS ran, and the

@@ -20,6 +20,7 @@ import { cn } from "@/lib/cn";
 import { LogoMark } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PrivacyToggle } from "@/components/PrivacyToggle";
+import { UiToggle } from "@/components/UiToggle";
 import { SignOutButton } from "@/components/nav/SignOutButton";
 import { APP_VERSION, BUILD_SHA } from "@/lib/version";
 
@@ -198,6 +199,7 @@ export function SideNav({
         <div className="flex flex-col gap-[2px]">
           <PrivacyToggle variant="row" />
           <ThemeToggle variant="row" />
+          <UiToggle />
         </div>
 
         <div className="h-px bg-border" />

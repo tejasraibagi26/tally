@@ -180,8 +180,11 @@
  * 1.32.0 adds the Tally Pop UI preview behind a link-only flag: /labs/pop
  * sets the tally-ui cookie (lib/uiFlag.ts), ?off clears it, and
  * globals.css restyles everything under html[data-ui="pop"].
+ * 1.32.1 makes /labs/pop a real feature flag (tally-ff-pop): a flagged
+ * browser gets a "New look" switch in the sidebar to flip between Pop and
+ * the current UI; unflagged browsers see neither.
  */
-export const APP_VERSION = "1.32.0";
+export const APP_VERSION = "1.32.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

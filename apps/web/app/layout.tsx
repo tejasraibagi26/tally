@@ -61,10 +61,11 @@ const THEME_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("tally-the
 // must run synchronously before first paint too.
 const PRIVACY_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("tally-hide-amounts");document.documentElement.setAttribute("data-hide-amounts",s==="true"?"true":"false");}catch(e){}})();`;
 
-// The Tally Pop preview flag (lib/uiFlag.ts), read before first paint for
-// the same no-flash reason as the theme. A cookie rather than localStorage
-// so /labs/pop can set it from the server.
-const UI_INIT_SCRIPT = `(function(){try{if(/(?:^|; )tally-ui=pop(?:;|$)/.test(document.cookie))document.documentElement.setAttribute("data-ui","pop");}catch(e){}})();`;
+// The Tally Pop preview (lib/uiFlag.ts), read before first paint for the
+// same no-flash reason as the theme: Pop only when this browser has the
+// feature flag and hasn't switched back to the current look. Cookies rather
+// than localStorage so /labs/pop can set them from the server.
+const UI_INIT_SCRIPT = `(function(){try{var c=document.cookie;if(/(?:^|; )tally-ff-pop=1(?:;|$)/.test(c)&&!/(?:^|; )tally-ui=classic(?:;|$)/.test(c))document.documentElement.setAttribute("data-ui","pop");}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
