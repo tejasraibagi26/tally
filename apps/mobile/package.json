@@ -61,9 +61,9 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "update:preview": "EXPO_PUBLIC_API_URL=https://tally.useuplift.live eas update --channel preview",
-    "update:production": "EXPO_PUBLIC_API_URL=https://tally.useuplift.live eas update --channel production",
-    "update:ios": "EXPO_PUBLIC_API_URL=https://tally.useuplift.live expo run:ios --device --configuration Release"
+    "update:preview": "EXPO_PUBLIC_API_URL=https://tally.useuplift.live npx eas-cli update --channel preview --environment preview",
+    "update:production": "EXPO_PUBLIC_API_URL=https://tally.useuplift.live npx eas-cli update --channel production --environment production",
+    "update:ios": "expo prebuild -p ios && EXPO_PUBLIC_API_URL=https://tally.useuplift.live expo run:ios --device --configuration Release"
   },
   "private": true
 }
