@@ -176,6 +176,13 @@
       "when": 1792210732023,
       "tag": "0024_happy_abomination",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1793060020570,
+      "tag": "0025_broken_captain_cross",
+      "breakpoints": true
     }
   ]
 }
