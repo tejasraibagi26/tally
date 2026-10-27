@@ -49,7 +49,7 @@ export default async function GoalsPage() {
           <span key="start">started at <span className="money money-fit"><span>{formatCents(goal.startCents)}</span></span></span>,
         ]}
       />
-      <GoalCard summary={summary} />
+      <GoalCard summary={summary} showCurrent />
 
       <Card className="p-5 lg:p-6 [--bleed:20px] lg:[--bleed:24px] flex flex-col gap-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">

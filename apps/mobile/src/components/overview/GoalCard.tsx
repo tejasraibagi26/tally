@@ -44,7 +44,11 @@ export function goalLine(s: GoalSummary, money: Fmt = formatCents): string {
  * The year-end goal on Overview (Tally Pop only; the caller checks). Taps
  * through to the Goals screen. Without a goal: one line, one action.
  */
-export function GoalCard({ summary }: { summary: GoalSummary | undefined }) {
+/**
+ * `showCurrent`: the Goals screen adds today's net worth to the sub line;
+ * Overview leaves it out, since the net worth card above already shows it.
+ */
+export function GoalCard({ summary, showCurrent = false }: { summary: GoalSummary | undefined; showCurrent?: boolean }) {
   const router = useRouter();
   const colors = useThemeColors();
   const rf = useRF();
@@ -74,11 +78,12 @@ export function GoalCard({ summary }: { summary: GoalSummary | undefined }) {
       <Card className="p-5 gap-3">
         <Text className="font-ui-semibold text-text-2" style={{ fontSize: rf(11.5), letterSpacing: 0.8, textTransform: "uppercase" }}>Year-end goal</Text>
         <Text className="font-display text-text" style={{ fontSize: rf(28), fontVariant: ["tabular-nums"] }}>
-          {money(p.current)}
+          {p.status === "reached" ? "Reached" : money(p.gap)}
         </Text>
-        {/* One size per line, so the masked dots read evenly too. */}
+        {/* Leads with what's left, not net worth again (Overview's card above has it). One size per line. */}
         <Text className="font-ui text-text-2" style={{ fontSize: rf(13.5), fontVariant: ["tabular-nums"] }}>
-          of {money(p.target)} · {p.status === "reached" ? "reached" : `${money(p.gap)} to go by ${deadlineLabel(summary.goal.deadline)}`}
+          {p.status === "reached" ? `Your ${money(p.target)} target, ${money(p.current - p.target)} past it` : `left to reach ${money(p.target)} by ${deadlineLabel(summary.goal.deadline)}`}
+          {showCurrent ? ` · now ${money(p.current)}` : ""}
         </Text>
         <View className="h-3 rounded-full bg-sunken overflow-hidden border-card border-ink">
           <View className="h-full rounded-full bg-brand" style={{ width: `${p.progress * 100}%` }} />

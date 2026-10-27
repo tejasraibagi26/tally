@@ -44,7 +44,12 @@ function GoalLineText({ summary: { projection: p, goal } }: { summary: GoalSumma
  * started to the target, the verdict, and the pace behind it. Empty: one
  * line and one action.
  */
-export function GoalCard({ summary, className, style }: { summary: GoalSummary | null; className?: string; style?: React.CSSProperties }) {
+/**
+ * `showCurrent`: the Goals page, which has no net worth card of its own,
+ * adds today's value to the sub line; Overview leaves it out, since the
+ * net worth card right above already shows it.
+ */
+export function GoalCard({ summary, className, style, showCurrent = false }: { summary: GoalSummary | null; className?: string; style?: React.CSSProperties; showCurrent?: boolean }) {
   if (!summary) {
     return (
       <Card className={cn("p-5 flex flex-wrap items-center gap-4", className)} style={style}>
@@ -69,13 +74,17 @@ export function GoalCard({ summary, className, style }: { summary: GoalSummary |
       <Card className="p-5 lg:p-6 flex flex-col gap-3 hover:border-border-strong transition-colors">
         <span className="text-xs font-semibold uppercase tracking-[0.08em] text-text-2">Year-end goal</span>
         {/* One size per line, so the masked dots read evenly too. */}
+        {/* Leads with what's left, not net worth again (Overview's card above has it). One size per line. */}
         <span className="font-display text-[32px] leading-none text-text tabular">
-          <M cents={p.current} />
+          {p.status === "reached" ? "Reached" : <M cents={p.gap} />}
         </span>
         <span className="text-[14px] text-text-2 tabular">
-          of <M cents={p.target} />
-          {" · "}
-          {p.status === "reached" ? "reached" : <><M cents={p.gap} /> to go by {deadlineLabel(goal.deadline)}</>}
+          {p.status === "reached" ? (
+            <>Your <M cents={p.target} /> target, <M cents={p.current - p.target} /> past it</>
+          ) : (
+            <>left to reach <M cents={p.target} /> by {deadlineLabel(goal.deadline)}</>
+          )}
+          {showCurrent && <> · now <M cents={p.current} /></>}
         </span>
         <div className="ui-meter relative h-3 rounded-full bg-sunken overflow-hidden" role="img" aria-label={`${Math.round(p.progress * 100)}% of the way from where it started`}>
           <div className="h-full rounded-full bg-brand" style={{ width: `${p.progress * 100}%` }} />

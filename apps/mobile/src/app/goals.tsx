@@ -53,7 +53,7 @@ export default function GoalsScreen() {
           <ActivityIndicator />
         ) : (
           <>
-            {g && <GoalCard summary={goal.data} />}
+            {g && <GoalCard summary={goal.data} showCurrent />}
 
             {g && p && points.length > 1 && (
               <Card className="pt-5 pb-3 gap-3 overflow-hidden">

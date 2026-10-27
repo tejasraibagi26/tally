@@ -259,8 +259,10 @@ import Constants from "expo-constants";
  * while scrubbing).
  * 2.2.1 turns Budgets' goal line into a one-line outlined row ("Year-end
  * goal · On track · $X to go" + chevron) instead of a wrapping sentence.
+ * 2.2.2 leads the goal card with what's left, not net worth again under
+ * Overview's net worth card; the Goals screen adds "now $Z".
  */
-export const APP_VERSION = "2.2.1";
+export const APP_VERSION = "2.2.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
