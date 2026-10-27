@@ -21,10 +21,10 @@ const STATUS_LOOK: Record<GoalStatus, { tone: string; icon: typeof CheckCircle2 
  * started to the target, the verdict, and the pace behind it. Empty: one
  * line and one action.
  */
-export function GoalCard({ summary, className }: { summary: GoalSummary | null; className?: string }) {
+export function GoalCard({ summary, className, style }: { summary: GoalSummary | null; className?: string; style?: React.CSSProperties }) {
   if (!summary) {
     return (
-      <Card className={cn("p-5 flex flex-wrap items-center gap-4", className)}>
+      <Card className={cn("p-5 flex flex-wrap items-center gap-4", className)} style={style}>
         <span className="w-10 h-10 flex-none rounded-control bg-brand-subtle text-brand flex items-center justify-center" aria-hidden="true">
           <Target size={20} strokeWidth={2} />
         </span>
@@ -42,7 +42,7 @@ export function GoalCard({ summary, className }: { summary: GoalSummary | null; 
   const status = STATUS_LOOK[p.status];
   const projectedPct = p.projected != null && goal.targetCents > goal.startCents ? Math.min(1, Math.max(0, (p.projected - goal.startCents) / (goal.targetCents - goal.startCents))) : null;
   return (
-    <Link href="/goals" className={cn("block", className)}>
+    <Link href="/goals" className={cn("block", className)} style={style}>
       <Card className="p-5 lg:p-6 flex flex-col gap-3 hover:border-border-strong transition-colors">
         <span className="text-xs font-semibold uppercase tracking-[0.08em] text-text-2">Year-end goal</span>
         <span className="font-display text-[32px] leading-none text-text tabular">

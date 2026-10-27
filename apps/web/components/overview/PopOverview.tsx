@@ -34,10 +34,11 @@ export function OnPaceCard({ streak, dailyPace, href, className }: { streak: num
 }
 
 /** "N to tally up": this month's unreviewed transactions, opening the review queue. */
-export function TallyUpBanner({ count, className }: { count: number; className?: string }) {
+export function TallyUpBanner({ count, className, style }: { count: number; className?: string; style?: React.CSSProperties }) {
   return (
     <Link
       href="/transactions?review=1&queue=1"
+      style={style}
       className={cn("ui-tally-up flex flex-wrap items-center gap-3.5 rounded-card border bg-brand-subtle px-4 py-3.5 text-text hover:bg-brand-subtle", className)}
     >
       <span className="w-10 h-10 flex-none rounded-control bg-brand text-on-brand flex items-center justify-center" aria-hidden="true">

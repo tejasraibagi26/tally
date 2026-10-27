@@ -26,8 +26,8 @@ export function DemoCta({
         "h-11 px-5 inline-flex items-center justify-center gap-2 rounded-control text-[15px] font-medium transition-colors",
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-info",
         variant === "primary"
-          ? "bg-brand text-on-brand hover:bg-brand-hover"
-          : "bg-surface border border-border-strong text-text hover:bg-sunken",
+          ? "ui-btn ui-btn-primary bg-brand text-on-brand hover:bg-brand-hover"
+          : "ui-btn ui-btn-secondary bg-surface border border-border-strong text-text hover:bg-sunken",
         className,
       )}
     >

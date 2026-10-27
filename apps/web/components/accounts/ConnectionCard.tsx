@@ -37,6 +37,8 @@ export function StateButton({
         "h-8 px-3.5 rounded-full text-[13px] font-semibold flex-none inline-flex items-center justify-center min-w-[72px] transition-opacity hover:opacity-90",
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-info disabled:opacity-70",
         look,
+        // Tally Pop hooks (globals.css): the fix is a filled pill, Remove a secondary one.
+        action.kind === "remove" ? "ui-btn ui-btn-secondary" : "ui-btn ui-btn-primary",
       )}
     >
       {pending ? <span className="w-3 h-3 rounded-full border-2 border-current border-t-transparent animate-spin" aria-label="Working" /> : action.label}

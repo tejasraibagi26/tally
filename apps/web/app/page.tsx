@@ -49,7 +49,7 @@ export default async function RootPage() {
           <ThemeToggle />
           <Link
             href="/login"
-            className="h-9 px-4 inline-flex items-center rounded-control bg-brand text-on-brand text-sm font-medium hover:bg-brand-hover transition-colors"
+            className="ui-btn ui-btn-primary h-9 px-4 inline-flex items-center rounded-control bg-brand text-on-brand text-sm font-medium hover:bg-brand-hover transition-colors"
           >
             Sign in
           </Link>
@@ -81,8 +81,8 @@ export default async function RootPage() {
                 href="/login"
                 className={
                   demoAvailable
-                    ? "h-11 px-5 inline-flex items-center rounded-control bg-surface border border-border-strong text-text text-[15px] font-medium hover:bg-sunken transition-colors"
-                    : "h-11 px-5 inline-flex items-center rounded-control bg-brand text-on-brand text-[15px] font-medium hover:bg-brand-hover transition-colors"
+                    ? "ui-btn ui-btn-secondary h-11 px-5 inline-flex items-center rounded-control bg-surface border border-border-strong text-text text-[15px] font-medium hover:bg-sunken transition-colors"
+                    : "ui-btn ui-btn-primary h-11 px-5 inline-flex items-center rounded-control bg-brand text-on-brand text-[15px] font-medium hover:bg-brand-hover transition-colors"
                 }
               >
                 Sign in →

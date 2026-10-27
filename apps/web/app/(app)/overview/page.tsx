@@ -286,15 +286,16 @@ export default async function OverviewPage() {
         />
       </div>
 
-      {unreviewed > 0 && <TallyUpBanner className="pop-only" count={unreviewed} />}
+      {/* Same staggered entrance as the sections around them (reveal). */}
+      {unreviewed > 0 && <TallyUpBanner className="pop-only" count={unreviewed} style={reveal(2)} />}
 
       {/* Tally Pop: the year-end goal (lib/goals.ts), or a prompt to set one */}
-      <GoalCard className="pop-only" summary={goal} />
+      <GoalCard className="pop-only" summary={goal} style={reveal(2)} />
       {/* Once per account, Pop only, and not once a goal exists */}
       <GoalIntroModal show={!introSeen && !goal} />
 
       {/* Cash flow trend */}
-      <Card style={reveal(2)}>
+      <Card style={reveal(3)}>
         <CardHeader title="Cash flow" meta={cashFlowMeta} />
         <div className="p-4 [--bleed:16px]">
           <CashFlowChart months={cashFlowMonths} />
@@ -302,7 +303,7 @@ export default async function OverviewPage() {
       </Card>
 
       {/* Row 3: budget + where it went */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch" style={reveal(3)}>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch" style={reveal(4)}>
         <Card className="lg:col-span-7 h-full">
           <CardHeader title="Budget this month" action={<Link href="/budgets" className="text-brand text-[13.5px]">Manage →</Link>} />
           <BudgetMeterList budgets={budgets} from={monthStart} to={monthEnd} daysElapsed={daysElapsed} daysInMonth={daysInMonth} />
@@ -316,7 +317,7 @@ export default async function OverviewPage() {
       </div>
 
       {/* Row 4: upcoming + recent activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch" style={reveal(4)}>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch" style={reveal(5)}>
         <Card className="lg:col-span-5 h-full flex flex-col">
           <CardHeader
             title="Upcoming"

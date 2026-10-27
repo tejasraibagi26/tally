@@ -212,8 +212,12 @@
  * "Set a goal" card in place. GET/PUT/DELETE /api/goals, POST /api/goals/intro.
  * 2.1.1 gives Pop's Overview header a sticker pill for connections that
  * need you (icon + words), in place of the plain red link.
+ * 2.1.2: Pop's goal card and "N to tally up" banner fade in with the rest
+ * of Overview (reveal), and the hand-built buttons that missed Pop's
+ * outline get the ui-btn hooks -- Accounts' fix buttons (StateButton,
+ * also on Investments), the public pages' Sign in and the demo CTAs.
  */
-export const APP_VERSION = "2.1.1";
+export const APP_VERSION = "2.1.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

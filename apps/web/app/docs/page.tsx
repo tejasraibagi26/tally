@@ -108,7 +108,7 @@ export default function DocsPage() {
           <ThemeToggle />
           <Link
             href="/login"
-            className="h-9 px-4 inline-flex items-center rounded-control bg-brand text-on-brand text-sm font-medium hover:bg-brand-hover transition-colors"
+            className="ui-btn ui-btn-primary h-9 px-4 inline-flex items-center rounded-control bg-brand text-on-brand text-sm font-medium hover:bg-brand-hover transition-colors"
           >
             Sign in
           </Link>
