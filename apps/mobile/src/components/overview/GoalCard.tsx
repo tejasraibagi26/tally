@@ -74,10 +74,11 @@ export function GoalCard({ summary }: { summary: GoalSummary | undefined }) {
       <Card className="p-5 gap-3">
         <Text className="font-ui-semibold text-text-2" style={{ fontSize: rf(11.5), letterSpacing: 0.8, textTransform: "uppercase" }}>Year-end goal</Text>
         <Text className="font-display text-text" style={{ fontSize: rf(28), fontVariant: ["tabular-nums"] }}>
-          {money(p.current)} <Text className="text-text-2" style={{ fontSize: rf(18) }}>of {money(p.target)}</Text>
+          {money(p.current)}
         </Text>
+        {/* One size per line, so the masked dots read evenly too. */}
         <Text className="font-ui text-text-2" style={{ fontSize: rf(13.5), fontVariant: ["tabular-nums"] }}>
-          {p.status === "reached" ? "Reached" : `${money(p.gap)} to go by ${deadlineLabel(summary.goal.deadline)}`}
+          of {money(p.target)} · {p.status === "reached" ? "reached" : `${money(p.gap)} to go by ${deadlineLabel(summary.goal.deadline)}`}
         </Text>
         <View className="h-3 rounded-full bg-sunken overflow-hidden border-card border-ink">
           <View className="h-full rounded-full bg-brand" style={{ width: `${p.progress * 100}%` }} />

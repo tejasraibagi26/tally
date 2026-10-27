@@ -249,8 +249,16 @@ import Constants from "expo-constants";
  * cards that missed it: Overview's "banks need you" card (and its fix
  * buttons), the Investments / Credit used pair, and the filtered-empty
  * Transactions note. useStickerShadow (ui/Card.tsx) shares the shadow.
+ * 2.2.0: dialogs blur with expo-blur (UIBlurEffect, every iOS version; a
+ * native module, so it needs a native build -- older builds fall back to
+ * the glass layer, then the scrim, never crash). The year-end goal's
+ * amounts follow "hide amounts" (usePrivateMoney), its card puts the
+ * target under the big figure, and the Goals screen's chart matches web:
+ * area, dashed projection, labelled target, dates, and press-and-drag to
+ * read any point (components/charts/GoalChart.tsx; the page holds still
+ * while scrubbing).
  */
-export const APP_VERSION = "2.1.3";
+export const APP_VERSION = "2.2.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

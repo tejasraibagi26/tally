@@ -1,10 +1,9 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
-import Svg, { Line, Path } from "react-native-svg";
 import { formatCents } from "@tally/core/money";
 import { Card } from "@/components/ui/Card";
-import { Bleed } from "@/components/ui/Bleed";
+import { GoalChart } from "@/components/charts/GoalChart";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { GoalCard } from "@/components/overview/GoalCard";
@@ -12,40 +11,6 @@ import { useGoal, useRemoveGoal, useSaveGoal } from "@/lib/queries/goals";
 import { useNetWorthTrend } from "@/lib/queries/overview";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
-
-const CHART_HEIGHT = 170;
-
-/** Net worth so far (solid), the projection to the deadline (dashed) and the target (a line). */
-function GoalChart({ points, projected, deadline, target }: { points: { asOfDate: string; net: number }[]; projected: number | null; deadline: string; target: number }) {
-  const colors = useThemeColors();
-  const [width, setWidth] = useState(0);
-  const geo = useMemo(() => {
-    if (width <= 0 || points.length < 2) return null;
-    const t = (d: string) => Date.parse(`${d}T00:00:00Z`);
-    const x0 = t(points[0]!.asOfDate);
-    const x1 = Math.max(t(deadline), t(points.at(-1)!.asOfDate));
-    const values = [...points.map((p) => p.net), target, ...(projected != null ? [projected] : [])];
-    const lo = Math.min(...values) * 0.98;
-    const hi = Math.max(...values) * 1.02;
-    const X = (d: string) => ((t(d) - x0) / (x1 - x0 || 1)) * width;
-    const Y = (v: number) => CHART_HEIGHT - 8 - ((v - lo) / (hi - lo || 1)) * (CHART_HEIGHT - 24);
-    const line = points.map((p, i) => `${i === 0 ? "M" : "L"}${X(p.asOfDate).toFixed(1)},${Y(p.net).toFixed(1)}`).join(" ");
-    const last = points.at(-1)!;
-    const proj = projected != null ? `M${X(last.asOfDate).toFixed(1)},${Y(last.net).toFixed(1)} L${X(deadline).toFixed(1)},${Y(projected).toFixed(1)}` : null;
-    return { line, proj, targetY: Y(target) };
-  }, [width, points, projected, deadline, target]);
-  return (
-    <View style={{ height: CHART_HEIGHT }} onLayout={(e) => setWidth(e.nativeEvent.layout.width)} accessible accessibilityLabel={`Net worth so far and the projection to ${deadline}`}>
-      {geo && (
-        <Svg width={width} height={CHART_HEIGHT}>
-          <Line x1={0} x2={width} y1={geo.targetY} y2={geo.targetY} stroke={colors.positive} strokeWidth={1.5} />
-          <Path d={geo.line} fill="none" stroke={colors.brand} strokeWidth={2.5} strokeLinejoin="round" />
-          {geo.proj && <Path d={geo.proj} fill="none" stroke={colors.brand} strokeWidth={2} strokeDasharray="5 5" />}
-        </Svg>
-      )}
-    </View>
-  );
-}
 
 /**
  * The year-end goal (Tally Pop only: reached from Overview's goal card and
@@ -62,6 +27,8 @@ export default function GoalsScreen() {
   const remove = useRemoveGoal();
   const [amount, setAmount] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // A finger on the chart locks the page so dragging along the line reads it instead of scrolling.
+  const [scrubbing, setScrubbing] = useState(false);
 
   const g = goal.data?.goal ?? null;
   const p = goal.data?.projection;
@@ -81,7 +48,7 @@ export default function GoalsScreen() {
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
       <ScreenGlow />
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, gap: 16, paddingBottom: 40 }}>
+      <ScrollView className="flex-1" scrollEnabled={!scrubbing} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, gap: 16, paddingBottom: 40 }}>
         {goal.isLoading ? (
           <ActivityIndicator />
         ) : (
@@ -89,12 +56,13 @@ export default function GoalsScreen() {
             {g && <GoalCard summary={goal.data} />}
 
             {g && p && points.length > 1 && (
-              <Card className="px-5 pt-5 pb-3 gap-3 overflow-hidden">
-                <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }}>Where the pace lands</Text>
-                <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>Pace = net worth&apos;s average change over the last 3 full months</Text>
-                <Bleed>
-                  <GoalChart points={points} projected={p.projected} deadline={g.deadline} target={g.targetCents} />
-                </Bleed>
+              <Card className="pt-5 pb-3 gap-3 overflow-hidden">
+                <View className="px-5 gap-1">
+                  <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }}>Where the pace lands</Text>
+                  <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>Pace = net worth&apos;s average change over the last 3 full months</Text>
+                </View>
+                {/* Edge to edge of the card, like web's: the card has no side padding here. */}
+                <GoalChart points={points} projected={p.projected} deadline={g.deadline} target={g.targetCents} onScrubbingChange={setScrubbing} />
               </Card>
             )}
 
