@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.1.2",
+    date: "2026-10-27",
+    changes: [{ kind: "improved", text: "More groundwork for a feature we're trying out with the new look." }],
+  },
+  {
     version: "2.1.1",
     date: "2026-10-27",
     changes: [{ kind: "improved", text: "On iPhone, dialogs now blur the screen behind them, so what they ask is easier to focus on." }],

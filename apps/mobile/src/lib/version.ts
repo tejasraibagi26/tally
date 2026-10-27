@@ -243,8 +243,10 @@ import Constants from "expo-constants";
  * 2.1.1 blurs the screen behind every TallyDialog on iOS 26+ (a dark-tinted
  * expo-glass-effect GlassView), like web's modal backdrop-blur; Android and
  * older iOS keep the plain scrim.
+ * 2.1.2 puts the goals announcement's "Set a goal" above "Not now", the
+ * order the app's other stacked dialogs use.
  */
-export const APP_VERSION = "2.1.1";
+export const APP_VERSION = "2.1.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

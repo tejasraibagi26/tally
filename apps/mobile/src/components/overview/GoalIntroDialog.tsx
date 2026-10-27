@@ -49,8 +49,10 @@ export function GoalIntroDialog({ summary }: { summary: GoalSummary | undefined 
       title="New: year-end goals"
       subtitle="Pick a net worth to reach by Dec 31."
       actions={[
-        { label: "Not now", variant: "secondary", onPress: () => dismiss() },
+        // Stacked: the likely choice on top, the dismissive one last (iOS
+        // convention, and how the app's other dialogs order theirs).
         { label: "Set a goal", variant: "primary", onPress: () => dismiss(() => router.push("/goals" as Href)) },
+        { label: "Not now", variant: "secondary", onPress: () => dismiss() },
       ]}
     >
       <View className="gap-2">
