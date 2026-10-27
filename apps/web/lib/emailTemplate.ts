@@ -3,7 +3,7 @@ import path from "node:path";
 import { formatCents, formatPercent } from "@tally/core/money";
 import type { MonthlyRecapData } from "@/lib/monthlyRecap";
 import type { GoalSummary } from "@/lib/goals";
-import { GOAL_STATUS_LABEL, goalLine } from "@/lib/goalCopy";
+import { GOAL_STATUS_LABEL, deadlineLabel, goalLine } from "@/lib/goalCopy";
 
 const TEMPLATE_PATH = path.join(process.cwd(), "emails", "month-in-review.html");
 // Tally Pop's version (users.ui_look = "pop", lib/uiLook.ts): same tokens and blocks.
@@ -317,7 +317,13 @@ export function renderMonthInReviewEmail(data: MonthlyRecapData, ctx: RenderCont
     FIRE_BAR_FILLED: String(fireBarFilled),
     FIRE_BAR_REMAINING: String(240 - fireBarFilled),
     FIRE_BAR_FILLED_PCT: String(Math.round(progressClamped * 100)),
-    GOAL_FIGURE: goal ? `${formatCents(goal.projection.current)} of ${formatCents(goal.projection.target)}` : "",
+    // Leads with what's left, not net worth again (the card above shows it), as in the app.
+    GOAL_FIGURE: goal ? (goal.projection.status === "reached" ? "Reached" : formatCents(goal.projection.gap)) : "",
+    GOAL_SUB: goal
+      ? goal.projection.status === "reached"
+        ? `Your ${formatCents(goal.projection.target)} target, ${formatCents(goal.projection.current - goal.projection.target)} past it`
+        : `left to reach ${formatCents(goal.projection.target)} by ${deadlineLabel(goal.goal.deadline)}`
+      : "",
     GOAL_PCT: goal ? String(Math.max(2, Math.round(goal.projection.progress * 100))) : "0",
     GOAL_VERDICT: goal ? escapeHtml(GOAL_STATUS_LABEL[goal.projection.status]) : "",
     GOAL_LINE: goal ? escapeHtml(goalLine(goal)) : "",

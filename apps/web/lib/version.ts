@@ -229,8 +229,10 @@
  * page adds "now $Z" (showCurrent), having no net worth card of its own.
  * 2.1.8 sets Cash flow's headline and the budget panel's spent/budget
  * figures in Pop's display face (the ui-figure hook).
+ * 2.1.9 leads the Pop recap's goal section with what's left, like the
+ * app's goal card, instead of repeating net worth under its own card.
  */
-export const APP_VERSION = "2.1.8";
+export const APP_VERSION = "2.1.9";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
