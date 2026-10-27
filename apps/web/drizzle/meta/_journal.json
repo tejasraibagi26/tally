@@ -204,6 +204,13 @@
       "when": 1793119086772,
       "tag": "0028_thankful_mole_man",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1793126101684,
+      "tag": "0029_flashy_wrecking_crew",
+      "breakpoints": true
     }
   ]
 }

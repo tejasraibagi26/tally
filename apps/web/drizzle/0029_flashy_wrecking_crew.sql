@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "seen_announcements" text[] DEFAULT '{}'::text[] NOT NULL;
