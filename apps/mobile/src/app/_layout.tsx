@@ -12,6 +12,8 @@ import { Platform, View, useWindowDimensions } from "react-native";
 import { AuthProvider, useAuth } from "@/lib/AuthContext";
 import { TransparentHeader } from "@/components/ui/ScreenHeader";
 import { PrivacyProvider } from "@/lib/PrivacyContext";
+import { UiLookProvider, useUiLook } from "@/lib/UiLookContext";
+import { popVars } from "@/theme/pop";
 import { queryClient } from "@/lib/queryClient";
 import { fontsToLoad } from "@/theme/fonts";
 import { getStoredAppearanceMode } from "@/theme/appearance";
@@ -60,6 +62,9 @@ function RootNavigator() {
   const [fontsLoaded] = useFonts(fontsToLoad);
   const { colorScheme, setColorScheme } = useColorScheme();
   const colors = useThemeColors();
+  // Tally Pop (lib/UiLookContext.tsx): its CSS variables on a root view
+  // restyle every className beneath it; useThemeColors covers raw hex.
+  const { pop } = useUiLook();
   // React Navigation's theme drives the native chrome: its \`dark\` flag sets the
   // iOS header's userInterfaceStyle (the Liquid Glass back button and bar) and
   // its colors paint the stack and tab containers. Without a ThemeProvider it
@@ -132,6 +137,7 @@ function RootNavigator() {
       {shellReady ? (
         <>
           <StatusBar style="auto" />
+          <View style={[{ flex: 1 }, pop ? popVars[isDark ? "dark" : "light"] : null]}>
           <ThemeProvider value={navTheme}>
           <Stack
             screenOptions={{
@@ -216,6 +222,7 @@ function RootNavigator() {
             </Stack.Protected>
           </Stack>
           </ThemeProvider>
+          </View>
         </>
       ) : (
         <View className="flex-1 bg-canvas" />
@@ -233,7 +240,9 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <PrivacyProvider>
-              <RootNavigator />
+              <UiLookProvider>
+                <RootNavigator />
+              </UiLookProvider>
             </PrivacyProvider>
           </AuthProvider>
         </QueryClientProvider>

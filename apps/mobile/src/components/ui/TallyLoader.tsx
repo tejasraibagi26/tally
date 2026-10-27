@@ -37,7 +37,7 @@ const WINDOWS: readonly (readonly [number, number])[] = [
   [0.44, 0.56],
 ];
 
-function Stroke({ index, progress, color, still }: { index: number; progress: SharedValue<number>; color: string; still: boolean }) {
+function Stroke({ index, progress, color, width, still }: { index: number; progress: SharedValue<number>; color: string; width: number; still: boolean }) {
   const s = STROKES[index]!;
   const [from, to] = WINDOWS[index]!;
   const animatedProps = useAnimatedProps(() => {
@@ -55,7 +55,7 @@ function Stroke({ index, progress, color, still }: { index: number; progress: Sh
       x2={s.x2}
       y2={s.y2}
       stroke={color}
-      strokeWidth={2}
+      strokeWidth={width}
       strokeLinecap="round"
       strokeDasharray={[s.len, s.len]}
     />
@@ -67,9 +67,10 @@ function Stroke({ index, progress, color, still }: { index: number; progress: Sh
  * tile (ProgressSheet). Header-tile size only: below ~24pt it reads as two
  * bars, so buttons keep ActivityIndicator. `slow` stretches the loop to 3.2s
  * for the "taking longer than usual" phase. Reduce Motion shows the finished
- * mark, still.
+ * mark, still. `accent` colors the crossing fifth stroke (Tally Pop's
+ * marigold); `strokeWidth` thickens all five (Pop draws 2.5).
  */
-export function TallyLoader({ color, size = 24, slow = false }: { color: string; size?: number; slow?: boolean }) {
+export function TallyLoader({ color, accent, strokeWidth = 2, size = 24, slow = false }: { color: string; accent?: string; strokeWidth?: number; size?: number; slow?: boolean }) {
   const reduceMotion = useReducedMotion();
   const progress = useSharedValue(0);
 
@@ -83,7 +84,7 @@ export function TallyLoader({ color, size = 24, slow = false }: { color: string;
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
       {STROKES.map((_, i) => (
-        <Stroke key={i} index={i} progress={progress} color={color} still={reduceMotion} />
+        <Stroke key={i} index={i} progress={progress} color={i === 4 && accent ? accent : color} width={strokeWidth} still={reduceMotion} />
       ))}
     </Svg>
   );

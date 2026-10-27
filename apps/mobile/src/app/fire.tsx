@@ -9,6 +9,7 @@ import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { AppSlider } from "@/components/ui/AppSlider";
 import { FireChart } from "@/components/charts/FireChart";
+import { Bleed } from "@/components/ui/Bleed";
 import { useFireDefaults, useFireSettings, useSaveFireSettings } from "@/lib/queries/fire";
 import { usePlaidLink } from "@/lib/usePlaidLink";
 import { hairline } from "@/theme/colors";
@@ -90,7 +91,7 @@ function EmptyFire({ contentTop, hasAccounts, onStartFromZero }: { contentTop: n
             ? "Tally can work it out from your spending. Connect a brokerage so it also knows what you've invested, or start from $0."
             : "Connect your bank and brokerage, and Tally works it out from your spending and investments. Or start from $0."}
         </Text>
-        <Pressable onPress={() => openLink("create")} disabled={isLinking} className="h-12 rounded-full flex-row items-center justify-center gap-2 bg-brand mt-1">
+        <Pressable onPress={() => openLink("create")} disabled={isLinking} className="h-12 rounded-full flex-row items-center justify-center gap-2 bg-brand mt-1 border-button border-ink">
           {isLinking && <ActivityIndicator size="small" color={colors["on-brand"]} />}
           <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14.5) }}>Connect a brokerage</Text>
         </Pressable>
@@ -207,7 +208,9 @@ function Planner({
                   </Text>
                 </>
               )}
-              <FireChart mid={v.mid} lo={v.lo} hi={v.hi} target={v.target} years={v.years} age={age} startYear={startYear} />
+              <Bleed>
+                <FireChart mid={v.mid} lo={v.lo} hi={v.hi} target={v.target} years={v.years} age={age} startYear={startYear} />
+              </Bleed>
               <View className="flex-row gap-4">
                 <View className="flex-row items-center gap-1.5">
                   <View style={{ width: 14, height: 2, backgroundColor: colors.brand }} />

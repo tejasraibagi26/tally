@@ -192,8 +192,12 @@
  * (edge to edge, labels kept inside) take the new look. Also fixes the
  * Investments chart labelling every tick with the same month on 1Y/All
  * when the history is short.
+ * 2.0.1 rounds out Tally Pop: the loader in Pop's colors (a solid tile,
+ * marigold crossing), Pop's tab icon (public/icon-pop.svg), and the mobile
+ * app's side -- GET /api/account returns uiLook, GET /api/analytics/overview
+ * returns the on-pace streak.
  */
-export const APP_VERSION = "2.0.0";
+export const APP_VERSION = "2.0.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

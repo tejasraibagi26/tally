@@ -855,7 +855,7 @@ function SpreadView({ t, months, bottom, onBack, onDone }: { t: TransactionRow; 
         </View>
         {error && <Text className="font-ui" style={{ fontSize: rf(13), color: colors.negative }}>{error}</Text>}
         {months == null ? (
-          <Pressable onPress={() => void run(() => markAnnual.mutateAsync(term), `Spread over ${term} months`)} disabled={busy} className="h-12 rounded-full bg-brand items-center justify-center disabled:opacity-50">
+          <Pressable onPress={() => void run(() => markAnnual.mutateAsync(term), `Spread over ${term} months`)} disabled={busy} className="h-12 rounded-full bg-brand border-button border-ink items-center justify-center disabled:opacity-50">
             <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>{busy ? "Spreading…" : `Spread over ${term} months`}</Text>
           </Pressable>
         ) : (
@@ -863,7 +863,7 @@ function SpreadView({ t, months, bottom, onBack, onDone }: { t: TransactionRow; 
             <Pressable
               onPress={() => void run(() => updateSpread.mutateAsync({ streamId: t.recurringStreamId!, body: { amortizeMonths: term } }), `Now spread over ${term} months`)}
               disabled={busy || term === months}
-              className="h-12 rounded-full bg-brand items-center justify-center disabled:opacity-40"
+              className="h-12 rounded-full bg-brand border-button border-ink items-center justify-center disabled:opacity-40"
             >
               <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>{term === months ? `Spread over ${months} months` : `Change to ${term} months`}</Text>
             </Pressable>

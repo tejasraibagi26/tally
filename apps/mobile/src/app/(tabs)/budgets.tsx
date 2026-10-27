@@ -98,7 +98,7 @@ export default function BudgetsScreen() {
                 ctx.phase === "past" && "Finished",
               ]}
               actions={
-                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} accessibilityLabel="Add budget" className="items-center justify-center rounded-full bg-brand" style={{ width: 34, height: 34 }}>
+                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} accessibilityLabel="Add budget" className="items-center justify-center rounded-full bg-brand border-button border-ink" style={{ width: 34, height: 34 }}>
                   <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
                 </Pressable>
               }
@@ -122,7 +122,7 @@ export default function BudgetsScreen() {
           </View>
         ) : isError ? (
           <View className="px-5">
-            <View className="rounded-card bg-surface p-8 items-center gap-3">
+            <View className="rounded-card bg-surface border-card border-ink p-8 items-center gap-3">
               <Text className="font-ui text-text-2 text-center" style={{ fontSize: rf(14) }}>{"Couldn't load budgets."}</Text>
               <Pressable onPress={() => refetch()} className="rounded-full bg-brand-subtle px-4 py-2">
                 <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Retry</Text>
@@ -201,7 +201,7 @@ export default function BudgetsScreen() {
                 {unbudgetedTotal > 0 && ctx.phase !== "future" ? ` You've spent ${fmtBudget(unbudgetedTotal)} so far.` : ""}
               </Text>
               {data?.setup?.copy && (
-                <Pressable onPress={() => setup.mutate({ month, source: "copy" })} disabled={setup.isPending} className="h-12 rounded-full items-center justify-center bg-brand mt-1">
+                <Pressable onPress={() => setup.mutate({ month, source: "copy" })} disabled={setup.isPending} className="h-12 rounded-full items-center justify-center bg-brand mt-1 border-button border-ink">
                   <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14) }}>
                     Copy {monthLabel(data.setup.copy.fromMonth).split(" ")[0]} · {data.setup.copy.count} budgets, {fmtBudget(data.setup.copy.total)}
                   </Text>

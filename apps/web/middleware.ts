@@ -16,5 +16,5 @@ export const config = {
   // read-only demo's one-click entry point (app/demo/route.ts) — it has to
   // be reachable with no session at all, since creating one is the whole
   // thing it does. Every other route stays gated here.
-  matcher: ["/((?!api/auth|api/plaid/webhook|api/cron|login|demo|docs|privacy|_next/static|_next/image|favicon.ico|$).*)"],
+  matcher: ["/((?!api/auth|api/plaid/webhook|api/cron|login|demo|docs|privacy|_next/static|_next/image|favicon.ico|icon-pop.svg|$).*)"],
 };

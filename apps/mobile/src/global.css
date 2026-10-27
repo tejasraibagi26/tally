@@ -33,6 +33,20 @@
     --color-info-subtle: #E6EEFA;
     --color-raised: #FFFFFF;
     --color-raised-hover: #F3F2EE;
+    /* Font families and radii behind font-ui/font-display and rounded-*:
+       variables so Tally Pop (theme/pop.ts) can swap them at the root.
+       Scheme-independent, so not repeated under .dark:root. */
+    --font-ui: Inter;
+    --font-ui-medium: Inter_Medium;
+    --font-ui-semibold: Inter_SemiBold;
+    --font-display: InstrumentSerif;
+    --radius-control: 16px;
+    --radius-card: 18px;
+    --radius-panel: 20px;
+    /* Tally Pop's ink outline on cards and filled buttons: none here. */
+    --color-ink: transparent;
+    --border-button: 0px;
+    --border-card: 0px;
   }
 
   /* Same palette as web's dark theme (apps/web/app/globals.css, "dark v2",

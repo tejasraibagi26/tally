@@ -4,6 +4,7 @@ import { AlertTriangle, Check, CheckCircle2, Clock, X, XCircle } from "lucide-re
 import { SYNC_SLOW_AFTER_MS, syncDialogCopy, syncSteps, type SyncDialogMode, type SyncDialogPhase } from "@tally/core/syncDialog";
 import { Sheet } from "@/components/ui/Sheet";
 import { TallyLoader } from "@/components/ui/TallyLoader";
+import { useUiLook } from "@/lib/UiLookContext";
 import { hairline } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
@@ -36,6 +37,7 @@ function elapsedLabel(ms: number): string {
 export function ProgressSheet({ state, onClose, onRetry }: { state: ProgressState | null; onClose: () => void; onRetry: () => void }) {
   const colors = useThemeColors();
   const rf = useRF();
+  const { pop } = useUiLook();
   const [now, setNow] = useState(() => Date.now());
   // Keep the last state through the sheet's close animation.
   const [shown, setShown] = useState(state);
@@ -85,9 +87,21 @@ export function ProgressSheet({ state, onClose, onRetry }: { state: ProgressStat
     <Sheet visible={state !== null} onClose={onClose} dismissible={!isRunning} maxHeight="85%">
       <View className="px-5 pt-1 gap-4" style={{ paddingBottom: 24 }}>
         <View className="flex-row items-start gap-3.5">
-          <View style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: toneBg, alignItems: "center", justifyContent: "center" }}>
+          <View
+            style={[
+              { width: 40, height: 40, borderRadius: 10, backgroundColor: toneBg, alignItems: "center", justifyContent: "center" },
+              // Tally Pop: an ink-outlined tile; while syncing, a solid brand
+              // sticker with the mark in on-brand and the crossing in marigold.
+              pop && { borderRadius: 12, borderWidth: 2, borderColor: colors.ink },
+              pop && phase === "syncing" && { backgroundColor: colors["loader-bg"] },
+            ]}
+          >
             {isRunning ? (
-              <TallyLoader color={toneColor} slow={phase === "slow"} />
+              pop && phase === "syncing" ? (
+                <TallyLoader color={colors["loader-ink"]!} accent={colors["loader-accent"]} strokeWidth={2.5} />
+              ) : (
+                <TallyLoader color={toneColor} accent={pop ? colors.ink : undefined} strokeWidth={pop ? 2.5 : 2} slow={phase === "slow"} />
+              )
             ) : phase === "success" ? (
               <CheckCircle2 size={20} color={toneColor} strokeWidth={1.75} />
             ) : phase === "partial" ? (
@@ -168,7 +182,7 @@ function Pill({ label, onPress, variant }: { label: string; onPress: () => void;
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      className={variant === "primary" ? "rounded-full bg-brand items-center justify-center active:opacity-90" : "rounded-full bg-surface-2 items-center justify-center active:opacity-80"}
+      className={variant === "primary" ? "rounded-full bg-brand border-button border-ink items-center justify-center active:opacity-90" : "rounded-full bg-surface-2 items-center justify-center active:opacity-80"}
       style={[{ height: 50 }, variant === "secondary" ? { borderWidth: 1, borderColor: colors.border } : null]}
     >
       <Text className={variant === "primary" ? "font-ui-semibold text-on-brand" : "font-ui-semibold text-text"} style={{ fontSize: rf(15) }}>

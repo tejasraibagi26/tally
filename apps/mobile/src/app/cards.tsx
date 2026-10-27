@@ -114,7 +114,7 @@ export default function CardsScreen() {
       >
         {syncBanner && <SyncBanner tone="warning" title={syncBanner.title} body={syncBanner.body} onDismiss={() => setSyncBanner(null)} />}
         {isError ? (
-          <View className="rounded-card bg-surface p-5 items-center gap-2">
+          <View className="rounded-card bg-surface border-card border-ink p-5 items-center gap-2">
             <Text className="font-ui text-text" style={{ fontSize: rf(14) }}>Couldn't load your cards</Text>
             <Pressable onPress={() => refetch()} hitSlop={8}>
               <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(14) }}>Retry</Text>
@@ -128,12 +128,12 @@ export default function CardsScreen() {
             <Skeleton style={{ height: 210, borderRadius: 18, marginTop: 8 }} />
           </View>
         ) : rows.length === 0 ? (
-          <View className="rounded-card bg-surface px-5 py-7 items-center gap-2">
+          <View className="rounded-card bg-surface border-card border-ink px-5 py-7 items-center gap-2">
             <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15.5) }}>No credit cards yet</Text>
             <Text className="font-ui text-text-2 text-center" style={{ fontSize: rf(13.5), lineHeight: rf(19) }}>
               Connect a card and its balance, statement and due date show up here.
             </Text>
-            <Pressable onPress={() => router.push("/(tabs)/accounts")} className="mt-2 h-10 px-5 rounded-full bg-brand items-center justify-center">
+            <Pressable onPress={() => router.push("/(tabs)/accounts")} className="mt-2 h-10 px-5 rounded-full bg-brand items-center justify-center border-button border-ink">
               <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14) }}>Connect a card</Text>
             </Pressable>
           </View>
@@ -156,7 +156,7 @@ export default function CardsScreen() {
 
             <NextLine next={next} hidden={hidden} />
 
-            <View className="rounded-card bg-surface overflow-hidden">
+            <View className="rounded-card bg-surface border-card border-ink overflow-hidden">
               {rows.map((r, i) => (
                 <CardRow key={r.card.accountId} row={r} first={i === 0} hidden={hidden} onPress={() => router.push(`/card/${r.card.accountId}` as Href)} />
               ))}

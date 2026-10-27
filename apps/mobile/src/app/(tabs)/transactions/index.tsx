@@ -218,7 +218,7 @@ export default function TransactionsScreen() {
               meta={[hasSynced(syncTimes) && <SyncFreshness key="sync" syncedAt={syncTimes} />]}
               actions={
                 <>
-                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} className="items-center justify-center rounded-full bg-brand" style={{ width: 34, height: 34 }}>
+                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} className="items-center justify-center rounded-full bg-brand border-button border-ink" style={{ width: 34, height: 34 }}>
                   <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
                 </Pressable>
                 <Pressable
@@ -268,7 +268,7 @@ export default function TransactionsScreen() {
                   <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13.5) }}>{summary.unreviewed} to review</Text>
                   <Text className="font-ui text-text-2" style={{ fontSize: rf(12) }}>Confirm categories one by one. Swipe to go fast.</Text>
                 </View>
-                <Pressable onPress={() => router.push("/(tabs)/transactions/review")} className="h-9 px-4 rounded-full items-center justify-center bg-brand">
+                <Pressable onPress={() => router.push("/(tabs)/transactions/review")} className="h-9 px-4 rounded-full items-center justify-center bg-brand border-button border-ink">
                   <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(13) }}>Review</Text>
                 </Pressable>
               </View>
@@ -336,7 +336,7 @@ export default function TransactionsScreen() {
           isLoading ? (
             <ActivityIndicator className="mt-8" />
           ) : activeCount === 0 && !searchQuery ? (
-            <View className="rounded-card bg-surface p-8 mt-2">
+            <View className="rounded-card bg-surface border-card border-ink p-8 mt-2">
               <EmptyState
                 illustration={<EmptyPeriodIllustration />}
                 title={`No transactions in ${currentMonthLabel()}`}

@@ -4,6 +4,8 @@ import { NativeTabs } from "expo-router/unstable-native-tabs";
 import { House, ArrowLeftRight, PiggyBank, Landmark } from "lucide-react-native";
 import { AndroidTabBar } from "@/components/AndroidTabBar";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useUiLook } from "@/lib/UiLookContext";
+import { CLASSIC_FONTS, POP_FONTS } from "@/theme/pop";
 
 const { Icon, Label } = NativeTabs.Trigger;
 
@@ -31,6 +33,8 @@ function AndroidTabsLayout() {
 
 function IosNativeTabsLayout() {
   const colors = useThemeColors();
+  // Native labels take a font name, not a className: follow Tally Pop by hand.
+  const labelFont = useUiLook().pop ? POP_FONTS.ui : CLASSIC_FONTS.ui;
   return (
     <NativeTabs
       tintColor={colors.brand}
@@ -43,8 +47,8 @@ function IosNativeTabsLayout() {
       // full size.
       minimizeBehavior="never"
       labelStyle={{
-        default: { fontFamily: "Inter", fontSize: 10.5, color: colors["text-3"] },
-        selected: { fontFamily: "Inter", fontSize: 10.5, color: colors.brand },
+        default: { fontFamily: labelFont, fontSize: 10.5, color: colors["text-3"] },
+        selected: { fontFamily: labelFont, fontSize: 10.5, color: colors.brand },
       }}
     >
       <NativeTabs.Trigger name="index">

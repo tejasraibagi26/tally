@@ -27,6 +27,8 @@ export interface OverviewResponse {
   netWorth: { assets: number; liabilities: number; net: number; asOfDate: string } | null;
   budgets: { totalBudgeted: number; totalSpend: number; remaining: number; categories: BudgetLine[] };
   upcomingBills: UpcomingBill[];
+  /** Tally Pop's on-pace streak: finished days in a row under an even daily pace. Null with no budget; absent from older servers. */
+  onPace?: { streak: number; dailyPace: number } | null;
 }
 
 export interface NetWorthPoint {

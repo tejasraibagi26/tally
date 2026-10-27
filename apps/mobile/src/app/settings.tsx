@@ -4,7 +4,8 @@ import { useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as LocalAuthentication from "expo-local-authentication";
-import { AlertTriangle, Bell, ChevronRight, Download, KeyRound, Lock, Mail, ScanFace, SunMoon, Trash2, Wallet } from "lucide-react-native";
+import { AlertTriangle, Bell, ChevronRight, Download, KeyRound, Lock, Mail, ScanFace, Sparkles, SunMoon, Trash2, Wallet } from "lucide-react-native";
+import { useUiLook } from "@/lib/UiLookContext";
 import { exportTransactions } from "@/lib/exportData";
 import { useAccountProfile, useUpdateAccountProfile, useUpdateRecaps, useChangePassword, useWipeAccount } from "@/lib/queries/account";
 import { useAlertPreferences } from "@/lib/queries/alerts";
@@ -192,6 +193,7 @@ export default function SettingsScreen() {
   const { biometricLockEnabled, setBiometricLockEnabled } = useAuth();
 
   const [recapsEnabled, setRecapsEnabled] = useState(true);
+  const uiLook = useUiLook();
   const [biometricBusy, setBiometricBusy] = useState(false);
   const [sheet, setSheet] = useState<"profile" | "password" | "export" | null>(null);
   const [wipeOpen, setWipeOpen] = useState(false);
@@ -293,6 +295,10 @@ export default function SettingsScreen() {
             label="Require Face ID to open"
             right={<ThemedSwitch value={biometricLockEnabled} onValueChange={toggleBiometric} disabled={biometricBusy} label="Require Face ID or fingerprint to open Tally" />}
           />
+          {/* Only for an account flagged for the Tally Pop preview (web's /labs/pop). */}
+          {uiLook.flagged && (
+            <Row icon={(c) => <Sparkles size={15} color={c} strokeWidth={1.9} />} label="New look" right={<ThemedSwitch value={uiLook.pop} onValueChange={uiLook.setPop} label="New look" />} />
+          )}
         </Group>
 
         <Group caption="Notifications">

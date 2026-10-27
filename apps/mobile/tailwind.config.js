@@ -105,6 +105,8 @@ const themeColors = { ...light };
 for (const token of CSS_VAR_TOKENS) {
   themeColors[token] = `var(--color-${token})`;
 }
+// Tally Pop's sticker outline (theme/pop.ts); transparent in the classic look.
+themeColors.ink = "var(--color-ink)";
 
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
@@ -120,20 +122,30 @@ module.exports = {
       // instead of the real SemiBold file. Use the weight-specific token
       // (font-ui-medium, font-ui-semibold) instead of stacking font-ui with
       // font-medium/font-semibold/font-bold.
+      // The ui/display families resolve through global.css variables so
+      // Tally Pop (theme/pop.ts) can swap Inter/Instrument Serif for
+      // Figtree/Bricolage at the root.
       fontFamily: {
-        ui: ["Inter"],
-        "ui-medium": ["Inter_Medium"],
-        "ui-semibold": ["Inter_SemiBold"],
-        display: ["InstrumentSerif"],
+        ui: ["var(--font-ui)"],
+        "ui-medium": ["var(--font-ui-medium)"],
+        "ui-semibold": ["var(--font-ui-semibold)"],
+        display: ["var(--font-display)"],
         mono: ["JetBrainsMono"],
         "mono-medium": ["JetBrainsMono_Medium"],
       },
       // MOBILE_DESIGN.md §3.4: larger radii than web (softer, Wealthsimple-
       // inspired texture) -- 16 controls, 18 cards, 999 pills.
+      // Variables for the same reason (Tally Pop rounds further).
+      // Outline widths Tally Pop turns on (0px in the classic look):
+      // border-button on filled buttons, border-card on cards.
+      borderWidth: {
+        button: "var(--border-button)",
+        card: "var(--border-card)",
+      },
       borderRadius: {
-        control: "16px",
-        card: "18px",
-        panel: "20px",
+        control: "var(--radius-control)",
+        card: "var(--radius-card)",
+        panel: "var(--radius-panel)",
       },
     },
   },

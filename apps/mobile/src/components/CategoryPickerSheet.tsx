@@ -123,7 +123,7 @@ export function CategoryPickerSheet({
               <Pressable
                 onPress={submitNewCategory}
                 disabled={!newName.trim() || createCategory.isPending}
-                className="rounded-control bg-brand items-center justify-center px-4 disabled:opacity-50"
+                className="rounded-control bg-brand items-center justify-center px-4 disabled:opacity-50 border-button border-ink"
                 style={{ height: 42 }}
               >
                 {createCategory.isPending ? (

@@ -78,7 +78,7 @@ export function MultiPickerSheet({
             onApply(draft);
             onClose();
           }}
-          className="h-12 rounded-full bg-brand items-center justify-center active:opacity-90"
+          className="h-12 rounded-full bg-brand items-center justify-center active:opacity-90 border-button border-ink"
         >
           <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14.5) }}>
             {draft.length > 0 ? `Done (${draft.length})` : "Done"}

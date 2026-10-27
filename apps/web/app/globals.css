@@ -368,6 +368,30 @@
   --marigold-accent: #3B2A9E;
 }
 
+/* The loader (components/Logo.tsx TallyLoader) in its dialog tile: a solid
+   sticker, the strokes heavier, the crossing in marigold. Dark uses a deep
+   tile (marigold on the light brand would be 2:1). */
+:root[data-ui="pop"] {
+  --loader-bg: #5B3BF5;
+  --loader-ink: #FFFFFF;
+  --loader-accent: #FFC53D;
+}
+:root[data-ui="pop"][data-theme="dark"] {
+  --loader-bg: #2A2150;
+  --loader-ink: #9B87FF;
+  --loader-accent: #FFCF5C;
+}
+[data-ui="pop"] .ui-tile.bg-brand-subtle:has(.tally-loader) {
+  background: var(--loader-bg);
+  color: var(--loader-ink);
+}
+[data-ui="pop"] .tally-loader line {
+  stroke-width: 2.5;
+}
+[data-ui="pop"] .tally-loader line:nth-child(5) {
+  stroke: var(--loader-accent);
+}
+
 /* Budget meters: chunkier, outlined in ink, with a solid pace tick. */
 [data-ui="pop"] .ui-meter {
   height: 12px;

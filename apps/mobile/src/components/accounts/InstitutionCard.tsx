@@ -292,7 +292,7 @@ export function AccountLine({
           </Text>
         )}
         </View>
-        <Pressable onPress={save} disabled={updateNickname.isPending} className="h-9 rounded-full items-center justify-center px-4 bg-brand active:opacity-80">
+        <Pressable onPress={save} disabled={updateNickname.isPending} className="h-9 rounded-full items-center justify-center px-4 bg-brand active:opacity-80 border-button border-ink">
           <BusyLabel busy={updateNickname.isPending} color={colors["on-brand"]!}>
             <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(13) }}>Save</Text>
           </BusyLabel>

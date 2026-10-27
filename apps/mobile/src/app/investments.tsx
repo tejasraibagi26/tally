@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { PortfolioChart } from "@/components/charts/PortfolioChart";
+import { Bleed } from "@/components/ui/Bleed";
 import { PositionRow, ActivityItem, Segmented } from "@/components/investments/parts";
 import { HoldingSheet } from "@/components/investments/HoldingSheet";
 import { StateButton, toneColor, toneSubtle } from "@/components/accounts/InstitutionCard";
@@ -153,7 +154,7 @@ export default function InvestmentsScreen() {
               Connect a brokerage like Wealthsimple or Questrade to see your TFSA, RRSP and FHSA in one place, with growth over time.
             </Text>
           </View>
-          <Pressable onPress={() => openLink("create")} disabled={isLinking} className="h-12 rounded-full flex-row items-center justify-center gap-2 bg-brand active:opacity-90">
+          <Pressable onPress={() => openLink("create")} disabled={isLinking} className="h-12 rounded-full flex-row items-center justify-center gap-2 bg-brand active:opacity-90 border-button border-ink">
             {isLinking && <ActivityIndicator size="small" color={colors["on-brand"]} />}
             <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14.5) }}>Connect a brokerage</Text>
           </Pressable>
@@ -231,7 +232,9 @@ export default function InvestmentsScreen() {
               ))}
             {enough ? (
               <>
-                <PortfolioChart points={summary.points} onScrub={setScrubIndex} onScrubbingChange={setScrubbing} />
+                <Bleed>
+                  <PortfolioChart points={summary.points} onScrub={setScrubIndex} onScrubbingChange={setScrubbing} />
+                </Bleed>
                 <Segmented options={RANGES} value={activeRange} onChange={setRange} disabled={(r) => !coveredFor(r)} />
               </>
             ) : (

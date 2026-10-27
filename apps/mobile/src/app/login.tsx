@@ -86,7 +86,7 @@ export default function LoginScreen() {
             onPress={handleLogin}
             disabled={loading || !email || !password}
             accessibilityState={{ busy: loading }}
-            className="h-14 rounded-full bg-brand flex-row items-center justify-center gap-2 mt-2 active:opacity-90 disabled:opacity-40"
+            className="h-14 rounded-full bg-brand flex-row items-center justify-center gap-2 mt-2 active:opacity-90 disabled:opacity-40 border-button border-ink"
           >
             {loading && <ActivityIndicator size="small" color={colors["on-brand"]} />}
             <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15.5) }}>Log in</Text>

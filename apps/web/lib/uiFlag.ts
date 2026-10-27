@@ -39,4 +39,15 @@ export function applyUi(pop: boolean) {
   document.cookie = `${UI_PREF_COOKIE}=${pop ? UI_POP : UI_CLASSIC}; Path=/; Max-Age=${YEAR}; SameSite=Lax${secure}`;
   if (pop) document.documentElement.setAttribute("data-ui", UI_POP);
   else document.documentElement.removeAttribute("data-ui");
+  applyFavicon(pop);
+}
+
+/** Pop's tab icon (public/icon-pop.svg) in place of app/icon.svg's, and back. */
+export const POP_ICON = "/icon-pop.svg";
+
+export function applyFavicon(pop: boolean) {
+  document.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]').forEach((link) => {
+    if (!link.dataset.classicHref) link.dataset.classicHref = link.href;
+    link.href = pop ? POP_ICON : link.dataset.classicHref;
+  });
 }

@@ -13,6 +13,7 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from "react-native-reanimated";
+import { useUiLook } from "@/lib/UiLookContext";
 
 const AnimatedLine = Animated.createAnimatedComponent(Line);
 
@@ -43,15 +44,28 @@ const FADE_OUT_MS = 320;
 // Native splash colors (app.json expo-splash-screen + splash-icon*.png), so
 // there's no color jump at the hand-off.
 const PALETTE = {
-  light: { bg: "#F5F4F0", ink: "#14513F", text: "#4D4B45" },
-  dark: { bg: "#000000", ink: "#4FB394", text: "#B3B1A8" },
+  light: { bg: "#F5F4F0", ink: "#14513F", accent: "#14513F", text: "#4D4B45" },
+  dark: { bg: "#000000", ink: "#4FB394", accent: "#4FB394", text: "#B3B1A8" },
 };
+// Tally Pop (lib/UiLookContext.tsx): the brand mark with its marigold
+// crossing stroke on Pop's canvas, a little heavier. The native splash
+// before JS can't know the flag, so this one cross-fades in from it.
+const POP_PALETTE = {
+  light: { bg: "#FFF6E9", ink: "#5B3BF5", accent: "#B87A00", text: "#1D1B2F" },
+  dark: { bg: "#14121F", ink: "#9B87FF", accent: "#FFCF5C", text: "#F6F1E7" },
+};
+
+function useSplashPalette() {
+  const scheme = useSystemColorScheme() === "dark" ? "dark" : "light";
+  const { pop } = useUiLook();
+  return { palette: (pop ? POP_PALETTE : PALETTE)[scheme], pop };
+}
 
 function strokeLength(s: (typeof STROKES)[number]): number {
   return Math.hypot(s.x2 - s.x1, s.y2 - s.y1);
 }
 
-function Stroke({ stroke, progress, color }: { stroke: (typeof STROKES)[number]; progress: SharedValue<number>; color: string }) {
+function Stroke({ stroke, progress, color, width }: { stroke: (typeof STROKES)[number]; progress: SharedValue<number>; color: string; width: number }) {
   const length = strokeLength(stroke);
   const animatedProps = useAnimatedProps(() => ({
     strokeDashoffset: length * (1 - progress.value),
@@ -63,7 +77,7 @@ function Stroke({ stroke, progress, color }: { stroke: (typeof STROKES)[number];
     <AnimatedLine
       {...stroke}
       stroke={color}
-      strokeWidth={STROKE_WIDTH}
+      strokeWidth={width}
       strokeLinecap="round"
       strokeDasharray={[length, length]}
       animatedProps={animatedProps}
@@ -79,8 +93,7 @@ function Stroke({ stroke, progress, color }: { stroke: (typeof STROKES)[number];
  * shows fully drawn and only the fade-out runs.
  */
 export function BootSplash({ ready, showWordmark, onDone }: { ready: boolean; showWordmark: boolean; onDone: () => void }) {
-  const scheme = useSystemColorScheme() === "dark" ? "dark" : "light";
-  const palette = PALETTE[scheme];
+  const { palette, pop } = useSplashPalette();
 
   const p0 = useSharedValue(0);
   const p1 = useSharedValue(0);
@@ -161,7 +174,7 @@ export function BootSplash({ ready, showWordmark, onDone }: { ready: boolean; sh
       <Animated.View style={markStyle}>
         <Svg width={LOGO_SIZE} height={LOGO_SIZE} viewBox="0 0 24 24" fill="none">
           {STROKES.map((s, i) => (
-            <Stroke key={i} stroke={s} progress={progress[i]!} color={palette.ink} />
+            <Stroke key={i} stroke={s} progress={progress[i]!} color={i === 4 ? palette.accent : palette.ink} width={pop ? 2.6 : STROKE_WIDTH} />
           ))}
         </Svg>
       </Animated.View>
@@ -169,7 +182,11 @@ export function BootSplash({ ready, showWordmark, onDone }: { ready: boolean; sh
           center, exactly where the native splash put it. */}
       {showWordmark && (
         <Animated.View style={[{ position: "absolute", top: "50%", marginTop: LOGO_SIZE / 2 + 14 }, wordmarkStyle]}>
-          <Text style={{ fontFamily: "InstrumentSerif", fontSize: 30, color: palette.text, letterSpacing: 0.2 }}>Tally</Text>
+          {pop ? (
+            <Text style={{ fontFamily: "BricolageGrotesque_ExtraBold", fontSize: 32, color: palette.text, letterSpacing: -1 }}>tally</Text>
+          ) : (
+            <Text style={{ fontFamily: "InstrumentSerif", fontSize: 30, color: palette.text, letterSpacing: 0.2 }}>Tally</Text>
+          )}
         </Animated.View>
       )}
     </Animated.View>
@@ -182,13 +199,12 @@ export function BootSplash({ ready, showWordmark, onDone }: { ready: boolean; sh
  * switcher snapshot doesn't show balances, without asking for Face ID.
  */
 export function PrivacyCover() {
-  const scheme = useSystemColorScheme() === "dark" ? "dark" : "light";
-  const palette = PALETTE[scheme];
+  const { palette, pop } = useSplashPalette();
   return (
     <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: palette.bg, alignItems: "center", justifyContent: "center" }]} pointerEvents="none">
       <Svg width={LOGO_SIZE} height={LOGO_SIZE} viewBox="0 0 24 24" fill="none">
         {STROKES.map((s, i) => (
-          <Line key={i} {...s} stroke={palette.ink} strokeWidth={STROKE_WIDTH} strokeLinecap="round" />
+          <Line key={i} {...s} stroke={i === 4 ? palette.accent : palette.ink} strokeWidth={pop ? 2.6 : STROKE_WIDTH} strokeLinecap="round" />
         ))}
       </Svg>
     </Animated.View>

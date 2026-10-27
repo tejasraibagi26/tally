@@ -48,7 +48,7 @@ export default function LockScreen() {
             Couldn&apos;t verify it&apos;s you. Try again.
           </Text>
         )}
-        <Pressable onPress={attempt} disabled={attempting} className="rounded-full bg-brand px-6 py-3 mt-2 disabled:opacity-50">
+        <Pressable onPress={attempt} disabled={attempting} className="rounded-full bg-brand px-6 py-3 mt-2 disabled:opacity-50 border-button border-ink">
           <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>
             {attempting ? "Checking…" : "Unlock"}
           </Text>

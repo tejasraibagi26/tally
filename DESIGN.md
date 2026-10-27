@@ -119,7 +119,17 @@ chart legend) in both light and dark.
 
 **Email:** users with `ui_look = "pop"` get the Pop recap (`emails/month-in-review-pop.html`, subject "Your <Month>, tallied") and Pop alert emails (`alertEmailHtml(..., pop)`). Both use the same data and wording as classic. Cards draw their shadow as thicker right and bottom borders, because box-shadow doesn't survive Gmail or Outlook. The net-worth sparkline and category bars run edge to edge.
 
-**Not yet:** the mobile app. The mockups are in the Tally Rebrand canvas artifact.
+**Loader and icon:** in Pop the loader's tile is a solid sticker. Its strokes are heavier and the crossing stroke is marigold, using `--loader-bg`, `--loader-ink` and `--loader-accent`. The dark variant uses a deep tile, because marigold on the light brand colour is only about 2:1. The tab icon becomes `public/icon-pop.svg`.
+
+**Mobile (mobile 2.0.0):**
+- **Flag:** the app reads `users.ui_look` from `GET /api/account` (`lib/UiLookContext.tsx`) and caches it. A flagged account gets **New look** in Settings, which saves through the same `PATCH /api/settings/ui-look`.
+- **Restyling:** Pop restyles from the root with NativeWind `vars()` (`theme/pop.ts`). That covers colours, plus font-family and radius variables (`--font-*`, `--radius-*` in `global.css`). The ink outline is `border-card` / `border-button` with `border-ink`, which are 0px and transparent in classic.
+- **Raw hex:** `useThemeColors()` returns the Pop palette. `ThemeColorsOverride` re-declares tokens for the solid net-worth card.
+- **Overview and Review:** Overview gets the greeting, `HeroSurface`, `OnPaceCard` (from `onPace` on `GET /api/analytics/overview`) and "N to tally up". Review counts in tally marks.
+- **Charts, loader, splash:** charts bleed through `components/ui/Bleed.tsx`. The loader, boot splash and privacy cover use Pop's colours.
+- **Home-screen icon:** it follows the look through `expo-alternate-app-icons` (`assets/images/icon-pop.png`), which needs a native build. Over-the-air updates to older builds skip it safely (`lib/appIcon.ts`).
+
+The mockups are in the Tally Rebrand canvas artifact.
 
 ## 2. Principles
 

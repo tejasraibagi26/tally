@@ -29,6 +29,11 @@ import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { highCardCount, rankBudgets } from "@tally/core/overviewView";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
+import { useUiLook } from "@/lib/UiLookContext";
+import { HeroSurface, OnPaceCard } from "@/components/overview/PopOverview";
+import { monthSummary } from "@tally/core/budgetView";
+import { greetingFor, leftToSpendLine } from "@tally/core/popView";
+import { formatCents } from "@tally/core/money";
 
 // MOBILE_DESIGN.md §5.2 -- hero net worth (unboxed, direct on canvas), what
 // needs a tap (banks, review backlog), "This month", Investments / Credit
@@ -41,6 +46,7 @@ export default function OverviewScreen() {
   const queryClient = useQueryClient();
   const colors = useThemeColors();
   const rf = useRF();
+  const { pop } = useUiLook();
   const accounts = useAccounts();
   const overview = useOverview();
   const trend = useNetWorthTrend();
@@ -69,6 +75,13 @@ export default function OverviewScreen() {
   const investmentsCents = holdings.data && holdings.data.holdings.length > 0 ? holdings.data.value : null;
   const now = new Date();
   const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+
+  // Tally Pop: a greeting with what's left to spend (@tally/core/popView).
+  const popTitle = `${greetingFor(now.getHours())} Here's ${now.toLocaleDateString("en-US", { month: "long" })}.`;
+  const popLine = overview.data
+    ? leftToSpendLine(monthSummary(overview.data.budgets.categories, { phase: "current", daysElapsed: now.getDate(), daysInMonth }), (c) => formatCents(c))
+    : null;
+  const onPace = overview.data?.onPace ?? null;
 
   const refreshing = accounts.isFetching || overview.isFetching || trend.isFetching;
   function onRefresh() {
@@ -102,9 +115,9 @@ export default function OverviewScreen() {
       >
         <View className="px-5 pb-1">
           <TabHeader
-            title="Overview"
+            title={pop ? popTitle : "Overview"}
             meta={[
-              new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+              pop ? popLine : new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
               hasSynced(accounts.data?.institutions.map((i) => i.lastSyncedAt) ?? []) && <SyncFreshness key="sync" syncedAt={accounts.data?.institutions.map((i) => i.lastSyncedAt) ?? []} />,
             ]}
             actions={
@@ -122,7 +135,16 @@ export default function OverviewScreen() {
 
       <View className="gap-7 px-5 pt-3">
         {/* Hero net worth -- unboxed, per MOBILE_DESIGN.md */}
-        <NetWorthHero netCents={netCents} points={trend.data?.points ?? []} loading={accounts.isLoading} onScrubChange={setIsScrubbingChart} />
+        {pop ? (
+          <HeroSurface>
+            <NetWorthHero netCents={netCents} points={trend.data?.points ?? []} loading={accounts.isLoading} onScrubChange={setIsScrubbingChart} />
+          </HeroSurface>
+        ) : (
+          <NetWorthHero netCents={netCents} points={trend.data?.points ?? []} loading={accounts.isLoading} onScrubChange={setIsScrubbingChart} />
+        )}
+
+        {/* Tally Pop: the on-pace streak, with a budget to pace against */}
+        {pop && onPace && <OnPaceCard streak={onPace.streak} dailyPace={onPace.dailyPace} />}
 
         {/* Banks that need a tap and this month's review backlog (the same count as
             the Transactions tab's "N to review" banner) -- renders nothing when all

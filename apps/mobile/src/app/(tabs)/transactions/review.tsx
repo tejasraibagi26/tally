@@ -8,6 +8,8 @@ import { CategoryPickerSheet } from "@/components/CategoryPickerSheet";
 import { useReviewQueue, useReviewTransaction } from "@/lib/queries/transactions";
 import { chartSeries } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
+import { useUiLook } from "@/lib/UiLookContext";
+import { TallyMarks } from "@/components/ui/TallyMarks";
 import { useRF } from "@/theme/responsiveFont";
 import { useColorScheme } from "nativewind";
 import { SheetError } from "@/components/ui/FormSheet";
@@ -24,6 +26,7 @@ export default function ReviewScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const colors = useThemeColors();
+  const { pop } = useUiLook();
   const rf = useRF();
   const queryClient = useQueryClient();
   const { colorScheme } = useColorScheme();
@@ -115,11 +118,17 @@ export default function ReviewScreen() {
           <Text className="font-ui-semibold" style={{ fontSize: rf(15), color: current ? colors.brand : colors["text-3"] }}>Skip</Text>
         </Pressable>
       </View>
-      {total > 0 && (
-        <View className="mx-5 my-2 h-1 rounded-full bg-surface-2 overflow-hidden">
-          <View className="h-full bg-brand" style={{ width: `${(Math.min(index, total) / total) * 100}%` }} />
-        </View>
-      )}
+      {total > 0 &&
+        (pop ? (
+          // Tally Pop: each one done adds a stroke; every fifth crosses.
+          <View className="mx-5 my-2 h-7 justify-center">
+            <TallyMarks count={Math.min(index, total)} height={26} color={colors.text!} accent={colors.brand!} />
+          </View>
+        ) : (
+          <View className="mx-5 my-2 h-1 rounded-full bg-surface-2 overflow-hidden">
+            <View className="h-full bg-brand" style={{ width: `${(Math.min(index, total) / total) * 100}%` }} />
+          </View>
+        ))}
 
       <View className="flex-1 justify-center px-5">
         {isLoading ? (
@@ -128,16 +137,17 @@ export default function ReviewScreen() {
           <Text className="font-ui text-text-2 text-center" style={{ fontSize: rf(14) }}>{"Couldn't load transactions to review."}</Text>
         ) : !current ? (
           <View className="items-center gap-3">
-            <Text className="font-display text-text text-center" style={{ fontSize: rf(28) }}>{"You're all caught up"}</Text>
+            {pop && done > 0 && <TallyMarks count={Math.max(done, 5)} height={44} color={colors.brand!} accent={colors.marigold!} />}
+            <Text className="font-display text-text text-center" style={{ fontSize: rf(28) }}>{pop ? "All tallied." : "You're all caught up"}</Text>
             <Text className="font-ui text-text-2 text-center" style={{ fontSize: rf(14) }}>
               {done > 0 ? `${done} reviewed. New transactions show up here as they sync.` : "Nothing left to review."}
             </Text>
-            <Pressable onPress={finish} className="mt-2 h-11 px-6 rounded-full items-center justify-center bg-brand">
+            <Pressable onPress={finish} className="mt-2 h-11 px-6 rounded-full items-center justify-center bg-brand border-button border-ink">
               <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14) }}>Done</Text>
             </Pressable>
           </View>
         ) : (
-          <Animated.View {...responder.panHandlers} style={{ transform: [{ translateX: x }, { rotate }] }} className="rounded-[20px] bg-surface p-5 gap-4">
+          <Animated.View {...responder.panHandlers} style={{ transform: [{ translateX: x }, { rotate }] }} className="rounded-[20px] bg-surface border-card border-ink p-5 gap-4">
             <View className="flex-row justify-between items-start gap-4">
               <View className="flex-1 gap-1">
                 <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }} numberOfLines={2}>{current.merchantName ?? current.name}</Text>
@@ -155,7 +165,7 @@ export default function ReviewScreen() {
             )}
             <View className="gap-2">
               {current.suggestions[0] && (
-                <Pressable onPress={() => resolve(current.suggestions[0]!.categoryId)} disabled={review.isPending} className="h-12 rounded-full flex-row items-center justify-center gap-2 bg-brand">
+                <Pressable onPress={() => resolve(current.suggestions[0]!.categoryId)} disabled={review.isPending} className="h-12 rounded-full flex-row items-center justify-center gap-2 bg-brand border-button border-ink">
                   {review.isPending ? (
                     <ActivityIndicator color={colors["on-brand"]} />
                   ) : (

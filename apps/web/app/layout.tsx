@@ -65,7 +65,9 @@ const PRIVACY_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("tally-h
 // same no-flash reason as the theme: Pop only when this browser has the
 // feature flag and hasn't switched back to the current look. Cookies rather
 // than localStorage so /labs/pop can set them from the server.
-const UI_INIT_SCRIPT = `(function(){try{var c=document.cookie;if(/(?:^|; )tally-ff-pop=1(?:;|$)/.test(c)&&!/(?:^|; )tally-ui=classic(?:;|$)/.test(c))document.documentElement.setAttribute("data-ui","pop");}catch(e){}})();`;
+// The tab icon swaps to Pop's (public/icon-pop.svg, lib/uiFlag.ts
+// applyFavicon) once the head's icon links exist.
+const UI_INIT_SCRIPT = `(function(){try{var c=document.cookie;if(/(?:^|; )tally-ff-pop=1(?:;|$)/.test(c)&&!/(?:^|; )tally-ui=classic(?:;|$)/.test(c)){document.documentElement.setAttribute("data-ui","pop");document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll('link[rel~="icon"]').forEach(function(l){l.dataset.classicHref=l.href;l.href="/icon-pop.svg";});});}}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -241,7 +241,7 @@ export function TransactionFiltersSheet({
               onApply(draft);
               onClose();
             }}
-            className="h-14 rounded-full bg-brand items-center justify-center active:opacity-90"
+            className="h-14 rounded-full bg-brand items-center justify-center active:opacity-90 border-button border-ink"
           >
             <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>Apply filters</Text>
           </Pressable>

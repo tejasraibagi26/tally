@@ -3,6 +3,8 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
+    "@expo-google-fonts/bricolage-grotesque": "^0.4.1",
+    "@expo-google-fonts/figtree": "^0.4.1",
     "@expo-google-fonts/instrument-serif": "^0.4.1",
     "@expo-google-fonts/inter": "^0.4.2",
     "@expo-google-fonts/jetbrains-mono": "^0.4.1",
@@ -11,6 +13,7 @@
     "@tally/core": "*",
     "@tanstack/react-query": "^5.102.8",
     "expo": "57.0.24",
+    "expo-alternate-app-icons": "^8.0.0",
     "expo-build-properties": "~57.0.15",
     "expo-constants": "~57.0.15",
     "expo-dev-client": "~57.0.16",

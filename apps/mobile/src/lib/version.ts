@@ -227,8 +227,17 @@ import Constants from "expo-constants";
  * iOS header's userInterfaceStyle to light, so the Liquid Glass back button
  * and bar rendered light in Dark Mode, and the stack/tab containers were
  * painted the light theme's grey.
+ * 2.0.0 brings Tally Pop to mobile behind the same flag as web: the app
+ * reads users.ui_look from GET /api/account (lib/UiLookContext.tsx), shows a
+ * "New look" switch in Settings to a flagged account, and restyles from the
+ * root through NativeWind vars() (theme/pop.ts: colors, Figtree/Bricolage,
+ * radii, ink outlines on cards and filled buttons). Overview gets the
+ * greeting with what's left to spend, the net worth on a solid brand card,
+ * the on-pace streak and "N to tally up"; Review counts in tally marks;
+ * charts run edge to edge; the loader, boot splash and the home-screen icon
+ * (expo-alternate-app-icons, needs a native build) follow the look.
  */
-export const APP_VERSION = "1.32.0";
+export const APP_VERSION = "2.0.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

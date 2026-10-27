@@ -53,7 +53,20 @@
         }
       ],
       "@react-native-community/datetimepicker",
-      "./plugins/withUISceneLifecycle"
+      "./plugins/withUISceneLifecycle",
+      [
+        "expo-alternate-app-icons",
+        [
+          {
+            "name": "Pop",
+            "ios": "./assets/images/icon-pop.png",
+            "android": {
+              "foregroundImage": "./assets/images/android-icon-pop-foreground.png",
+              "backgroundColor": "#5B3BF5"
+            }
+          }
+        ]
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
