@@ -284,7 +284,7 @@ function LimitSheet({ row, visible, onClose }: { row: CardRowData; visible: bool
           {row.displayName}
           {row.card.mask ? ` ••${row.card.mask}` : ""} · {row.card.creditLimitIsManual ? "a limit you set" : `${row.bankName} didn't report a limit`}
         </Text>
-        <View className="flex-row items-center rounded-control px-4" style={{ backgroundColor: colors["surface-2"], height: 56 }}>
+        <View className="flex-row items-center rounded-control border-field border-ink px-4" style={{ backgroundColor: colors["surface-2"], height: 56 }}>
           <Text className="font-display text-text-3" style={{ fontSize: rf(28) }}>$</Text>
           <TextInput
             value={text}

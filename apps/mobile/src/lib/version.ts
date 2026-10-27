@@ -263,8 +263,11 @@ import Constants from "expo-constants";
  * Overview's net worth card; the Goals screen adds "now $Z".
  * 2.2.3 sets the budget sheet's spent/budget and the review card's amount
  * in Pop's display face.
+ * 2.2.4 outlines text fields in Pop (border-field + border-ink, 0px in
+ * classic): dark Pop's dialog/sheet fill and the field fill are the same
+ * colour, so fields like Wipe's password disappeared.
  */
-export const APP_VERSION = "2.2.3";
+export const APP_VERSION = "2.2.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
