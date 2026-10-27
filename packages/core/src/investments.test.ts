@@ -122,6 +122,34 @@ describe("buildPortfolioHistory", () => {
     ]);
   });
 
+  it("doesn't count a late-joining account's earlier deposits on top of its starting value", () => {
+    // b is first seen on 01-03 worth 500. Plaid backfills its history, so its
+    // 01-02 deposit is already inside that 500 and must not be added again;
+    // its 01-04 deposit is new money. A deposit to an account with no
+    // holdings history at all never reaches the chart's value either.
+    const history = buildPortfolioHistory(
+      [
+        { accountId: "a", date: "2026-01-01", value: 1000 },
+        { accountId: "a", date: "2026-01-02", value: 1100 },
+        { accountId: "b", date: "2026-01-03", value: 500 },
+        { accountId: "b", date: "2026-01-04", value: 650 },
+      ],
+      [
+        { accountId: "a", date: "2026-01-02", amount: -100 },
+        { accountId: "b", date: "2026-01-02", amount: -300 },
+        { accountId: "b", date: "2026-01-03", amount: -200 },
+        { accountId: "b", date: "2026-01-04", amount: -150 },
+        { accountId: "cash-only", date: "2026-01-04", amount: -9999 },
+      ],
+    );
+    expect(history).toEqual([
+      { date: "2026-01-01", value: 1000, invested: 1000 },
+      { date: "2026-01-02", value: 1100, invested: 1100 },
+      { date: "2026-01-03", value: 1600, invested: 1600 },
+      { date: "2026-01-04", value: 1750, invested: 1750 },
+    ]);
+  });
+
   it("summarizes growth and money added over a range", () => {
     const history = [
       { date: "2026-08-01", value: 1000, invested: 1000 },

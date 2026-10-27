@@ -268,6 +268,13 @@ export interface HistorySnapshot {
 }
 
 export interface HistoryContribution {
+  /**
+   * The account it went into. Only counted once that account is in the
+   * history: anything dated on or before its first snapshot is already
+   * inside that snapshot's value. Without one, the history's first date is
+   * the cutoff instead.
+   */
+  accountId?: string;
   /** YYYY-MM-DD */
   date: string;
   /** Plaid convention (negative = money in). */
@@ -285,30 +292,40 @@ export interface HistoryPoint {
  * Daily portfolio value and money-in from per-account holdings snapshots.
  * An account carries its last snapshot forward on days it has none, and an
  * account that first appears mid-history adds its starting value to
- * "invested" (it was brought in, not earned).
+ * "invested" (it was brought in, not earned). Its own deposits up to that
+ * day are inside that value, so they aren't added again -- Plaid backfills
+ * a newly linked account's past deposits, which used to double-count them.
  */
 export function buildPortfolioHistory(snapshots: HistorySnapshot[], contributions: HistoryContribution[]): HistoryPoint[] {
   if (snapshots.length === 0) return [];
   const dates = [...new Set(snapshots.map((s) => s.date))].sort();
   const byDate = new Map<string, HistorySnapshot[]>();
   for (const s of snapshots) byDate.set(s.date, [...(byDate.get(s.date) ?? []), s]);
-  const contribs = [...contributions].sort((a, b) => a.date.localeCompare(b.date));
+  const firstSeen = new Map<string, string>();
+  for (const s of snapshots) {
+    const seen = firstSeen.get(s.accountId);
+    if (seen == null || s.date < seen) firstSeen.set(s.accountId, s.date);
+  }
+  // New money only: after its account's first snapshot (or the history's
+  // first date when the account isn't known), and never into an account
+  // that has no holdings in the history at all.
+  const contribs = contributions
+    .filter((c) => {
+      const cutoff = c.accountId != null ? firstSeen.get(c.accountId) : dates[0];
+      return cutoff != null && c.date > cutoff;
+    })
+    .sort((a, b) => a.date.localeCompare(b.date));
 
   const latest = new Map<string, number>();
   const points: HistoryPoint[] = [];
   let invested = 0;
   let ci = 0;
-  for (const [i, date] of dates.entries()) {
+  for (const date of dates) {
     for (const s of byDate.get(date)!) {
       if (!latest.has(s.accountId)) invested += s.value; // first sight of this account
       latest.set(s.accountId, s.value);
     }
-    if (i === 0) {
-      // Contributions before the first snapshot are already inside it.
-      while (ci < contribs.length && contribs[ci]!.date <= date) ci++;
-    } else {
-      while (ci < contribs.length && contribs[ci]!.date <= date) invested -= contribs[ci++]!.amount;
-    }
+    while (ci < contribs.length && contribs[ci]!.date <= date) invested -= contribs[ci++]!.amount;
     points.push({ date, value: [...latest.values()].reduce((a, b) => a + b, 0), invested });
   }
   return points;

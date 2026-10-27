@@ -196,8 +196,14 @@
  * marigold crossing), Pop's tab icon (public/icon-pop.svg), and the mobile
  * app's side -- GET /api/account returns uiLook, GET /api/analytics/overview
  * returns the on-pace streak.
+ * 2.0.2 fixes Investments' money-in: an account linked after the history
+ * began had its backfilled deposits counted on top of its starting value
+ * (which already holds them), inflating "Invested"/"added" and pushing
+ * growth negative. Contributions now count only after their own account's
+ * first snapshot, in the chart history (@tally/core/investments) and the
+ * simple return (lib/portfolio.ts).
  */
-export const APP_VERSION = "2.0.1";
+export const APP_VERSION = "2.0.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

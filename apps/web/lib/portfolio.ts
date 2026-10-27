@@ -198,12 +198,18 @@ export async function portfolioSimpleReturn(userId: string): Promise<{ value: nu
   }
   if (!earliestDate || !hasHistory) return { value: 0, investedValue: 0, hasHistory };
 
+  // Each account's own first snapshot is its cutoff: deposits on or before
+  // it are already inside startValue. One global cutoff (the earliest
+  // account's) double-counted a later-linked account's backfilled deposits,
+  // and accounts with no holdings history added deposits that never reach
+  // endValue.
+  const firstSnapshot = new Map(dateRows.map((r) => [r.accountId, r.minDate]));
   const contribRows = await db
-    .select({ amount: schema.investmentTransactions.amount, currency: schema.investmentTransactions.currency })
+    .select({ accountId: schema.investmentTransactions.accountId, date: schema.investmentTransactions.date, amount: schema.investmentTransactions.amount, currency: schema.investmentTransactions.currency })
     .from(schema.investmentTransactions)
     .where(
       and(
-        inArray(schema.investmentTransactions.accountId, accountIds),
+        inArray(schema.investmentTransactions.accountId, [...firstSnapshot.keys()]),
         or(
           eq(schema.investmentTransactions.type, "transfer"),
           and(eq(schema.investmentTransactions.type, "cash"), inArray(schema.investmentTransactions.subtype, ["contribution", "deposit", "withdrawal"])),
@@ -212,7 +218,9 @@ export async function portfolioSimpleReturn(userId: string): Promise<{ value: nu
       ),
     );
   let contribTotal = 0;
-  for (const r of contribRows) contribTotal += await toNetWorthCurrency(r.amount, r.currency);
+  for (const r of contribRows) {
+    if (r.date > firstSnapshot.get(r.accountId)!) contribTotal += await toNetWorthCurrency(r.amount, r.currency);
+  }
   const netContributions = -contribTotal;
   const investedValue = startValue + netContributions;
 
@@ -243,7 +251,12 @@ export async function portfolioHistory(userId: string): Promise<HistoryPoint[]> 
       .where(inArray(schema.holdings.accountId, accountIds))
       .groupBy(schema.holdings.accountId, schema.holdings.asOfDate, schema.holdings.currency),
     db
-      .select({ date: schema.investmentTransactions.date, amount: schema.investmentTransactions.amount, currency: schema.investmentTransactions.currency })
+      .select({
+        accountId: schema.investmentTransactions.accountId,
+        date: schema.investmentTransactions.date,
+        amount: schema.investmentTransactions.amount,
+        currency: schema.investmentTransactions.currency,
+      })
       .from(schema.investmentTransactions)
       .where(
         and(
@@ -265,7 +278,9 @@ export async function portfolioHistory(userId: string): Promise<HistoryPoint[]> 
     snapTotals.set(key, { accountId: r.accountId, date: r.date, value: (prev?.value ?? 0) + converted });
   }
   const contributions: HistoryContribution[] = [];
-  for (const r of contribRows) contributions.push({ date: r.date, amount: await toNetWorthCurrency(r.amount, r.currency) });
+  // With its account, so a newly linked account's backfilled deposits
+  // (already inside its first snapshot) aren't counted twice.
+  for (const r of contribRows) contributions.push({ accountId: r.accountId, date: r.date, amount: await toNetWorthCurrency(r.amount, r.currency) });
 
   return buildPortfolioHistory([...snapTotals.values()], contributions);
 }

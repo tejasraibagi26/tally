@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.0.2",
+    date: "2026-10-26",
+    changes: [{ kind: "fixed", text: "Investments no longer counts money twice when you link an account later: \"Invested\" and \"added\" were too high and growth too low by that account's earlier deposits." }],
+  },
+  {
     version: "2.0.1",
     date: "2026-10-26",
     changes: [{ kind: "improved", text: "More groundwork for the new look we're trying out. Nothing changes for you yet." }],
