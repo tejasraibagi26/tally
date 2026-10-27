@@ -1,6 +1,6 @@
 import { Pressable, Text, View } from "react-native";
 import { useRouter, type Href } from "expo-router";
-import { AlertTriangle, CheckCircle2, Clock, Flag, Target, type LucideIcon } from "lucide-react-native";
+import { AlertTriangle, CheckCircle2, ChevronRight, Clock, Flag, Target, type LucideIcon } from "lucide-react-native";
 import { formatCents } from "@tally/core/money";
 import type { GoalStatus } from "@tally/core/goalMath";
 import { Card } from "@/components/ui/Card";
@@ -104,16 +104,29 @@ export function GoalBudgetLine({ summary }: { summary: GoalSummary | undefined }
   if (!summary?.goal || !summary.projection) return null;
   const p = summary.projection;
   const status = STATUS[p.status];
-  const words =
+  const tone = colors[status.tone]!;
+  // One line: the verdict, then the one number that matters next to a budget.
+  const detail =
     p.status === "off_track"
-      ? `Year-end goal is off track: spending ${money(Math.round(p.shortBy!))} less a month closes it.`
+      ? `spend ${money(Math.round(p.shortBy!))} less a month`
       : p.status === "on_track"
-        ? `Year-end goal is on track, ${money(p.gap)} to go. Staying on budget keeps it there.`
-        : `Year-end goal: ${status.label.toLowerCase()}.`;
+        ? `${money(p.gap)} to go`
+        : p.status === "reached"
+          ? "target reached"
+          : null;
   return (
-    <Pressable onPress={() => router.push("/goals" as Href)} className="flex-row items-start gap-2 mt-3" accessibilityRole="link">
-      <status.icon size={15} color={colors[status.tone]} strokeWidth={2.25} style={{ marginTop: 2 }} />
-      <Text className="font-ui text-text flex-1" style={{ fontSize: rf(13.5), fontVariant: ["tabular-nums"] }}>{words}</Text>
+    <Pressable
+      onPress={() => router.push("/goals" as Href)}
+      className="flex-row items-center gap-2.5 mt-3 rounded-control border-card border-ink bg-surface px-3.5 py-2.5 active:opacity-80"
+      accessibilityRole="link"
+      accessibilityLabel={`Year-end goal, ${status.label}${detail ? `, ${detail}` : ""}`}
+    >
+      <status.icon size={16} color={tone} strokeWidth={2.25} />
+      <Text className="font-ui text-text-2 flex-1" style={{ fontSize: rf(13.5), fontVariant: ["tabular-nums"] }} numberOfLines={1}>
+        <Text className="font-ui-semibold text-text">Year-end goal</Text> · <Text className="font-ui-semibold" style={{ color: tone }}>{status.label}</Text>
+        {detail ? ` · ${detail}` : ""}
+      </Text>
+      <ChevronRight size={16} color={colors["text-3"]} strokeWidth={2.25} />
     </Pressable>
   );
 }

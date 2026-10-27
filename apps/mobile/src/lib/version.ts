@@ -257,8 +257,10 @@ import Constants from "expo-constants";
  * area, dashed projection, labelled target, dates, and press-and-drag to
  * read any point (components/charts/GoalChart.tsx; the page holds still
  * while scrubbing).
+ * 2.2.1 turns Budgets' goal line into a one-line outlined row ("Year-end
+ * goal · On track · $X to go" + chevron) instead of a wrapping sentence.
  */
-export const APP_VERSION = "2.2.0";
+export const APP_VERSION = "2.2.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

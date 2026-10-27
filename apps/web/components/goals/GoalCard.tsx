@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, CheckCircle2, Clock, Flag, Target } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronRight, Clock, Flag, Target } from "lucide-react";
 import { formatCents } from "@tally/core/money";
 import type { GoalStatus } from "@tally/core/goalMath";
 import { Card } from "@/components/ui/Card";
@@ -110,18 +110,23 @@ export function GoalBudgetLine({ summary, className }: { summary: GoalSummary | 
   if (!summary) return null;
   const { projection: p } = summary;
   const status = STATUS_LOOK[p.status];
-  const words =
+  // One line: the verdict, then the one number that matters next to a budget.
+  const detail =
     p.status === "off_track" ? (
-      <>Year-end goal is off track: spending <M cents={p.shortBy!} /> less a month closes it.</>
+      <>spend <M cents={p.shortBy!} /> less a month</>
     ) : p.status === "on_track" ? (
-      <>Year-end goal is on track, <M cents={p.gap} /> to go. Staying on budget keeps it there.</>
-    ) : (
-      `Year-end goal: ${GOAL_STATUS_LABEL[p.status].toLowerCase()}.`
-    );
+      <><M cents={p.gap} /> to go</>
+    ) : p.status === "reached" ? (
+      "target reached"
+    ) : null;
   return (
-    <Link href="/goals" className={cn("flex items-center gap-2 text-[14px] text-text hover:underline w-fit", className)}>
-      <status.icon size={15} strokeWidth={2.25} className={status.tone.split(" ")[0]} aria-hidden="true" />
-      <span className="tabular">{words}</span>
+    <Link href="/goals" className={cn("flex items-center gap-2.5 w-fit max-w-full rounded-control border border-border bg-surface px-3.5 py-2 text-[14px] text-text-2 hover:bg-surface-2", className)}>
+      <status.icon size={16} strokeWidth={2.25} className={cn("flex-none", status.tone.split(" ")[0])} aria-hidden="true" />
+      <span className="tabular truncate">
+        <span className="font-semibold text-text">Year-end goal</span> · <span className={cn("font-semibold", status.tone.split(" ")[0])}>{GOAL_STATUS_LABEL[p.status]}</span>
+        {detail && <> · {detail}</>}
+      </span>
+      <ChevronRight size={16} strokeWidth={2.25} className="flex-none text-text-3" aria-hidden="true" />
     </Link>
   );
 }

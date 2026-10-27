@@ -222,8 +222,10 @@
  * hidden figure's width, leaving gaps in the middle of sentences.
  * 2.1.5 puts the goal card's target on the line under the big figure
  * ("of $X · $Y to go"), so each line is one size, masked or not.
+ * 2.1.6 turns Budgets' goal line into a one-line row: "Year-end goal ·
+ * On track · $X to go" with a chevron, in place of a wrapping sentence.
  */
-export const APP_VERSION = "2.1.5";
+export const APP_VERSION = "2.1.6";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
