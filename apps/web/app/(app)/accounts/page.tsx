@@ -1,6 +1,7 @@
 import { db, schema } from "@/db";
 import { isLiveAccountRow } from "@/lib/liveAccounts";
 import { DisconnectedBanks, type DisconnectedBank } from "@/components/accounts/DisconnectedBanks";
+import { DeselectedAccounts, type DeselectedAccount } from "@/components/accounts/DeselectedAccounts";
 import { desc, eq, inArray } from "drizzle-orm";
 import { Check, Landmark } from "lucide-react";
 import { requireUserId } from "@/lib/session";
@@ -45,6 +46,20 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
       .filter((a) => a.itemId === item.id)
       .map((a) => ({ id: a.id, name: accountDisplayName(a.name, a.nickname), mask: a.mask })),
   }));
+  // Unticked during a reconnect: the bank is still connected, so these
+  // wouldn't show anywhere otherwise. One whose bank was then disconnected
+  // is already listed under that bank above.
+  const institutionById = new Map(allItems.map((i) => [i.id, i.institutionName]));
+  const deselected: DeselectedAccount[] = allAccounts
+    .filter((a) => a.deselectedAt && !(a.itemId && disconnectedIds.has(a.itemId)))
+    .sort((a, b) => b.deselectedAt!.getTime() - a.deselectedAt!.getTime())
+    .map((a) => ({
+      id: a.id,
+      name: accountDisplayName(a.name, a.nickname),
+      mask: a.mask,
+      institutionName: a.itemId ? institutionById.get(a.itemId) ?? null : null,
+      deselectedAt: a.deselectedAt!.toISOString(),
+    }));
 
   // Newest first across all of the user's items, then trimmed per item below.
   const runs =
@@ -194,6 +209,7 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
       )}
 
       {disconnected.length > 0 && <DisconnectedBanks banks={disconnected} mock={MOCK_MODE} />}
+      {deselected.length > 0 && <DeselectedAccounts accounts={deselected} />}
     </div>
   );
 }

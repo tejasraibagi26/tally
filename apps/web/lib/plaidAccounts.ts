@@ -54,11 +54,14 @@ export async function upsertAccountsForItem(itemId: string, userId: string, acce
               : sql`case when ${schema.accounts.creditLimitIsManual} then ${schema.accounts.creditLimit} else null end`,
           creditLimitIsManual: limitCents != null ? false : sql`${schema.accounts.creditLimitIsManual}`,
           balanceAsOf: new Date(),
+          // Plaid is sharing this account again: whatever retiring it did
+          // last time is undone, and it counts as current money from here.
+          deselectedAt: null,
         },
       });
   }
 
-  await pruneDeselectedAccounts(itemId, accountsRes.data.accounts.map((a) => a.account_id));
+  await retireDeselectedAccounts(itemId, accountsRes.data.accounts.map((a) => a.account_id));
 
   return accountsRes.data.accounts.length;
 }
@@ -94,17 +97,24 @@ async function repointReissuedAccounts(itemId: string, plaidAccounts: AccountBas
 
 /**
  * Update-mode Link lets the user untick an account; Plaid then stops
- * returning it from accountsGet, but its row here would sit forever with a
- * stale balance. Drops those rows -- only when nothing hangs off them, so a
- * deselected account with history is left alone rather than losing it.
+ * returning it from accountsGet. Nothing will ever refresh that row again,
+ * so leaving it live meant a balance frozen at whatever it last was still
+ * counting in net worth, card totals and investments forever.
+ *
+ * An account with nothing hanging off it is dropped outright. One with
+ * history is kept and marked deselected instead: the history is the point,
+ * and lib/liveAccounts.ts leaves a deselected account out of everything that
+ * reads current money, the same way it treats a disconnected bank's
+ * accounts. Re-tick the account in Link and the upsert above clears the mark.
+ *
  * Never runs on an empty list: that's more likely a bad response than
  * "the user deselected everything".
  */
-async function pruneDeselectedAccounts(itemId: string, currentPlaidAccountIds: string[]): Promise<void> {
+async function retireDeselectedAccounts(itemId: string, currentPlaidAccountIds: string[]): Promise<void> {
   if (currentPlaidAccountIds.length === 0) return;
 
   const gone = await db
-    .select({ id: schema.accounts.id })
+    .select({ id: schema.accounts.id, deselectedAt: schema.accounts.deselectedAt })
     .from(schema.accounts)
     .where(
       and(
@@ -115,14 +125,20 @@ async function pruneDeselectedAccounts(itemId: string, currentPlaidAccountIds: s
       ),
     );
 
-  for (const { id } of gone) {
+  for (const { id, deselectedAt } of gone) {
     const [hasTransactions, hasHoldings, hasInvestmentTransactions, hasRecurring] = await Promise.all([
       db.select({ id: schema.transactions.id }).from(schema.transactions).where(eq(schema.transactions.accountId, id)).limit(1),
       db.select({ id: schema.holdings.id }).from(schema.holdings).where(eq(schema.holdings.accountId, id)).limit(1),
       db.select({ id: schema.investmentTransactions.id }).from(schema.investmentTransactions).where(eq(schema.investmentTransactions.accountId, id)).limit(1),
       db.select({ id: schema.recurringStreams.id }).from(schema.recurringStreams).where(eq(schema.recurringStreams.accountId, id)).limit(1),
     ]);
-    if (hasTransactions.length || hasHoldings.length || hasInvestmentTransactions.length || hasRecurring.length) continue;
-    await db.delete(schema.accounts).where(eq(schema.accounts.id, id));
+    if (!hasTransactions.length && !hasHoldings.length && !hasInvestmentTransactions.length && !hasRecurring.length) {
+      await db.delete(schema.accounts).where(eq(schema.accounts.id, id));
+      continue;
+    }
+    // Already marked: keep the original date, so "deselected on" doesn't
+    // creep forward with every later sync.
+    if (deselectedAt) continue;
+    await db.update(schema.accounts).set({ deselectedAt: new Date() }).where(eq(schema.accounts.id, id));
   }
 }

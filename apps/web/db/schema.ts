@@ -213,6 +213,12 @@ export const accounts = pgTable("accounts", {
   // Plaid still has nothing — see lib/plaidBalances.ts.
   creditLimitIsManual: boolean("credit_limit_is_manual").notNull().default(false),
   balanceAsOf: timestamp("balance_as_of", { withTimezone: true }),
+  // Set when the user unticks this account in update-mode Link: the bank is
+  // still connected, but Plaid no longer shares this account. It stops
+  // counting as current money the way a disconnected bank's accounts do
+  // (lib/liveAccounts.ts) while its history stays. Cleared if the account is
+  // selected again — see lib/plaidAccounts.ts.
+  deselectedAt: timestamp("deselected_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({
   userIdx: index("accounts_user_idx").on(t.userId),

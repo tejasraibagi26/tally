@@ -211,6 +211,13 @@
       "when": 1793126101684,
       "tag": "0029_flashy_wrecking_crew",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1793138220474,
+      "tag": "0030_careless_paibok",
+      "breakpoints": true
     }
   ]
 }

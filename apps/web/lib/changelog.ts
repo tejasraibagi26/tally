@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.2.6",
+    date: "2026-10-27",
+    changes: [
+      { kind: "fixed", text: "If you left an account out when reconnecting a bank, Tally kept showing it and counting its last known balance in your totals, even though the bank had stopped sending it. It now drops out of your net worth, cards and investments, and sits under \"No longer shared\" on Accounts. Its transactions stay in your history, and ticking it again when you reconnect brings it back." },
+    ],
+  },
+  {
     version: "2.2.5",
     date: "2026-10-27",
     changes: [{ kind: "fixed", text: "The Rules table's column headings ran together into one word above the list." }],

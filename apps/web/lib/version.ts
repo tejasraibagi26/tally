@@ -259,8 +259,18 @@
  * the header's className lost its grid while the rows kept theirs. It
  * lives in components/rules/ruleColumns.ts now, and the first column is
  * labelled Priority rather than "#".
+ * 2.2.6 stops an account the user unticked during a reconnect from counting
+ * (accounts.deselected_at, migration 0030). Plaid stops returning it, so
+ * nothing ever refreshed it again, but lib/plaidAccounts.ts only dropped
+ * the row when nothing hung off it -- one with history stayed live and its
+ * frozen balance kept counting in net worth, card and investment totals
+ * forever. It's marked instead, and liveAccount/isLiveAccountRow leave it
+ * out of everything that reads current money, exactly as they do a
+ * disconnected bank's accounts; its transactions still count and the
+ * Accounts page lists it under "No longer shared". Ticking it again in
+ * Link clears the mark.
  */
-export const APP_VERSION = "2.2.5";
+export const APP_VERSION = "2.2.6";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
