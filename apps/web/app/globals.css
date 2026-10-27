@@ -499,6 +499,12 @@ body {
   white-space: nowrap;
 }
 
+/* The year-end goal chart's "Target $X" label is drawn by recharts (no
+   .money span to hang the mask on), so it hides with the other amounts. */
+[data-hide-amounts="true"] .goal-chart .recharts-reference-line text {
+  visibility: hidden;
+}
+
 /* ConnectionCard's info notice: a bar sliding across a rounded track. No
    hold at the far edge -- the old 60–100% hold left the track blank for
    half a second each loop, which read as stalled. */

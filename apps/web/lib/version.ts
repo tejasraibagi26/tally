@@ -216,8 +216,10 @@
  * of Overview (reveal), and the hand-built buttons that missed Pop's
  * outline get the ui-btn hooks -- Accounts' fix buttons (StateButton,
  * also on Investments), the public pages' Sign in and the demo CTAs.
+ * 2.1.3: the year-end goal's amounts follow "hide amounts" (a goal is net
+ * worth) -- card, Goals page header and chart label, Budgets line.
  */
-export const APP_VERSION = "2.1.2";
+export const APP_VERSION = "2.1.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

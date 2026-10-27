@@ -42,7 +42,13 @@ export default async function GoalsPage() {
 
   return (
     <div className="max-w-[880px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
-      <PageHeader title="Year-end goal" meta={[`${formatCents(goal.targetCents)} net worth`, `started at ${formatCents(goal.startCents)}`]} />
+      <PageHeader
+        title="Year-end goal"
+        meta={[
+          <span key="target"><span className="money">{formatCents(goal.targetCents)}</span> net worth</span>,
+          <span key="start">started at <span className="money">{formatCents(goal.startCents)}</span></span>,
+        ]}
+      />
       <GoalCard summary={summary} />
 
       <Card className="p-5 lg:p-6 [--bleed:20px] lg:[--bleed:24px] flex flex-col gap-3">
@@ -51,7 +57,7 @@ export default async function GoalsPage() {
           <span className="text-[13px] text-text-2">Pace = net worth&apos;s average change over the last 3 full months</span>
         </div>
         {points.length > 1 ? (
-          <div className="ui-bleed">
+          <div className="ui-bleed goal-chart">
             <GoalChart points={points} target={goal.targetCents} />
           </div>
         ) : (
@@ -63,7 +69,7 @@ export default async function GoalsPage() {
 
       {cuts.length > 0 && (
         <Card>
-          <CardHeader title="Where to find it" meta={`${formatCents(Math.round(p.shortBy ?? 0))} more a month`} />
+          <CardHeader title="Where to find it" meta={`${formatCents(Math.round(p.shortBy ?? 0))} more a month`} metaIsMoney />
           <ul className="m-0 p-0 list-none divide-y divide-border">
             {cuts.map((c) => (
               <li key={c.key}>
