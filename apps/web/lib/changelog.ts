@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "1.32.0",
+    date: "2026-10-26",
+    changes: [{ kind: "new", text: "Groundwork for a new look we're trying out. Nothing changes for you yet." }],
+  },
+  {
     version: "1.31.2",
     date: "2026-10-25",
     changes: [{ kind: "fixed", text: "Reconnecting a bank that issues new account ids no longer adds a second copy of an account; the existing one is kept with its history." }],

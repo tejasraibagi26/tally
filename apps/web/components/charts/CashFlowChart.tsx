@@ -145,28 +145,30 @@ function GapLines({ months }: { months: CashFlowMonth[] }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <ResponsiveContainer width="100%" height={220}>
-        <ComposedChart data={data} margin={{ top: 8, right: 12, left: 12, bottom: 0 }}>
-          <CartesianGrid vertical={false} stroke="var(--border)" />
-          <XAxis
-            dataKey="x"
-            type="number"
-            domain={[0, months.length - 1]}
-            ticks={ticks}
-            tickFormatter={(i: number) => monthLabel(months[i]!.month)}
-            tick={{ fill: "var(--text-3)", fontSize: 12 }}
-            axisLine={false}
-            tickLine={false}
-            interval={0}
-          />
-          <YAxis hide domain={[0, "auto"]} />
-          <Tooltip content={<ChartTooltip />} cursor={{ stroke: "var(--border-strong)", strokeDasharray: "3 4" }} />
-          <Area dataKey="savedBand" type="linear" stroke="none" fill="var(--positive)" fillOpacity={0.18} isAnimationActive={false} activeDot={false} />
-          <Area dataKey="overBand" type="linear" stroke="none" fill="var(--negative)" fillOpacity={0.22} isAnimationActive={false} activeDot={false} />
-          <Line dataKey="spend" type="linear" stroke="var(--negative)" strokeWidth={2.5} dot={dot("var(--negative)")} activeDot={{ r: 4.5 }} isAnimationActive={false} />
-          <Line dataKey="income" type="linear" stroke="var(--positive)" strokeWidth={2.5} dot={dot("var(--positive)")} activeDot={{ r: 4.5 }} isAnimationActive={false} />
-        </ComposedChart>
-      </ResponsiveContainer>
+      <div className="ui-bleed">
+        <ResponsiveContainer width="100%" height={220}>
+          <ComposedChart data={data} margin={{ top: 8, right: 12, left: 12, bottom: 0 }}>
+            <CartesianGrid vertical={false} stroke="var(--border)" />
+            <XAxis
+              dataKey="x"
+              type="number"
+              domain={[0, months.length - 1]}
+              ticks={ticks}
+              tickFormatter={(i: number) => monthLabel(months[i]!.month)}
+              tick={{ fill: "var(--text-3)", fontSize: 12 }}
+              axisLine={false}
+              tickLine={false}
+              interval={0}
+            />
+            <YAxis hide domain={[0, "auto"]} />
+            <Tooltip content={<ChartTooltip />} cursor={{ stroke: "var(--border-strong)", strokeDasharray: "3 4" }} />
+            <Area dataKey="savedBand" type="linear" stroke="none" fill="var(--positive)" fillOpacity={0.18} isAnimationActive={false} activeDot={false} />
+            <Area dataKey="overBand" type="linear" stroke="none" fill="var(--negative)" fillOpacity={0.22} isAnimationActive={false} activeDot={false} />
+            <Line dataKey="spend" type="linear" stroke="var(--negative)" strokeWidth={2.5} dot={dot("var(--negative)")} activeDot={{ r: 4.5 }} isAnimationActive={false} />
+            <Line dataKey="income" type="linear" stroke="var(--positive)" strokeWidth={2.5} dot={dot("var(--positive)")} activeDot={{ r: 4.5 }} isAnimationActive={false} />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
       <Legend
         items={[
           { color: "var(--positive)", label: "Income" },
@@ -183,16 +185,18 @@ function PairedBars({ months }: { months: CashFlowMonth[] }) {
   const data = months.map((m) => ({ ...m, label: monthLabel(m.month) }));
   return (
     <div className="flex flex-col gap-2">
-      <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={data} margin={{ top: 8, right: 12, left: 12, bottom: 0 }} barGap={6}>
-          <CartesianGrid vertical={false} stroke="var(--border)" />
-          <XAxis dataKey="label" tick={{ fill: "var(--text-3)", fontSize: 12 }} axisLine={false} tickLine={false} />
-          <YAxis hide domain={[0, "auto"]} />
-          <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--sunken)" }} />
-          <Bar dataKey="income" fill="var(--positive)" radius={[4, 4, 0, 0]} maxBarSize={44} isAnimationActive={false} />
-          <Bar dataKey="spend" fill="var(--negative)" radius={[4, 4, 0, 0]} maxBarSize={44} isAnimationActive={false} />
-        </BarChart>
-      </ResponsiveContainer>
+      <div className="ui-bleed">
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={data} margin={{ top: 8, right: 12, left: 12, bottom: 0 }} barGap={6}>
+            <CartesianGrid vertical={false} stroke="var(--border)" />
+            <XAxis dataKey="label" tick={{ fill: "var(--text-3)", fontSize: 12 }} axisLine={false} tickLine={false} />
+            <YAxis hide domain={[0, "auto"]} />
+            <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--sunken)" }} />
+            <Bar dataKey="income" fill="var(--positive)" radius={[4, 4, 0, 0]} maxBarSize={44} isAnimationActive={false} />
+            <Bar dataKey="spend" fill="var(--negative)" radius={[4, 4, 0, 0]} maxBarSize={44} isAnimationActive={false} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
       <Legend
         items={[
           { color: "var(--positive)", label: "Income" },

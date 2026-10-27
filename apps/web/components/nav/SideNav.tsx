@@ -98,7 +98,7 @@ function NavRow({ item, active }: { item: NavItem; active: boolean }) {
       href={item.href}
       className={cn(
         "flex items-center justify-between px-2.5 py-2 rounded-control text-[15px]",
-        active ? "bg-brand-subtle text-brand font-medium" : "text-text-2 font-normal hover:bg-sunken",
+        active ? "ui-nav-active bg-brand-subtle text-brand font-medium" : "text-text-2 font-normal hover:bg-sunken",
       )}
     >
       <span className="flex items-center gap-2.5 min-w-0">

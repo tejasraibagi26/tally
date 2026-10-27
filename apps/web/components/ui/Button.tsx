@@ -40,7 +40,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       disabled={disabled || !!loading}
       aria-busy={loading || undefined}
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-control font-medium transition-colors",
+        // ui-btn / ui-btn-<variant> are hooks for the Tally Pop preview
+        // (globals.css); they style nothing without it.
+        "ui-btn inline-flex items-center justify-center gap-2 rounded-control font-medium transition-colors",
+        `ui-btn-${variant}`,
         "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-info",
         disabled && !loading && "opacity-40 cursor-not-allowed",
         loading && "cursor-progress",

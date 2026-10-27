@@ -143,7 +143,7 @@ export function FirePlanner({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
       <div className="lg:col-span-2 flex flex-col gap-4">
-        <Card className="p-5 lg:p-6 flex flex-col gap-4">
+        <Card className="p-5 lg:p-6 [--bleed:20px] lg:[--bleed:24px] flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="flex flex-col gap-2">
               {result.alreadyThere ? (
@@ -199,48 +199,50 @@ export function FirePlanner({
             </div>
           </div>
 
-          <ResponsiveContainer width="100%" height={250}>
-            <ComposedChart data={points} margin={{ top: 18, right: 12, left: 4, bottom: 0 }}>
-              <CartesianGrid stroke="var(--border)" vertical={false} />
-              <XAxis
-                dataKey="t"
-                type="number"
-                domain={[0, "dataMax"]}
-                tickFormatter={(t: number) => (age != null ? (t === 0 ? `${age} · now` : String(age + t)) : t === 0 ? "Now" : `+${t}y`)}
-                tick={{ fill: "var(--text-3)", fontSize: 11 }}
-                axisLine={false}
-                tickLine={false}
-                minTickGap={36}
-              />
-              <YAxis tickFormatter={compact} tick={{ fill: "var(--text-3)", fontSize: 11 }} axisLine={false} tickLine={false} width={52} domain={[0, (max: number) => Math.max(max, target * 1.15)]} />
-              <Tooltip
-                content={({ active, payload }) => {
-                  const p = active ? (payload?.[0]?.payload as (typeof points)[number] | undefined) : undefined;
-                  if (!p) return null;
-                  return (
-                    <div className="rounded-control border border-border bg-raised shadow-overlay px-3 py-2 text-xs flex flex-col gap-0.5">
-                      <span className="text-text-3">{age != null ? `Age ${age + p.t}` : `In ${p.t} years`} · {new Date(`${today}T00:00:00`).getFullYear() + p.t}</span>
-                      <span className="tabular text-text">{money(p.mid)}</span>
-                    </div>
-                  );
-                }}
-              />
-              <Area dataKey="band" stroke="none" fill="var(--brand)" fillOpacity={0.12} isAnimationActive={false} />
-              <ReferenceLine y={target} stroke="var(--positive)" strokeWidth={1.5} label={{ value: `Target ${compact(target)}`, position: "insideTopLeft", fill: "var(--positive)", fontSize: 11, fontWeight: 600 }} />
-              <Line dataKey="mid" stroke="var(--brand)" strokeWidth={2.5} dot={false} isAnimationActive={false} />
-              {years != null && years > 0 && (
-                <ReferenceDot
-                  x={years}
-                  y={target}
-                  r={5}
-                  fill="var(--positive)"
-                  stroke="var(--surface)"
-                  strokeWidth={2}
-                  label={{ value: retireAge != null ? `Retire at ${retireAge} · ${year}` : `Retire in ${year}`, position: "bottom", fill: "var(--text)", fontSize: 12, fontWeight: 600, offset: 12 }}
+          <div className="ui-bleed">
+            <ResponsiveContainer width="100%" height={250}>
+              <ComposedChart data={points} margin={{ top: 18, right: 12, left: 4, bottom: 0 }}>
+                <CartesianGrid stroke="var(--border)" vertical={false} />
+                <XAxis
+                  dataKey="t"
+                  type="number"
+                  domain={[0, "dataMax"]}
+                  tickFormatter={(t: number) => (age != null ? (t === 0 ? `${age} · now` : String(age + t)) : t === 0 ? "Now" : `+${t}y`)}
+                  tick={{ fill: "var(--text-3)", fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                  minTickGap={36}
                 />
-              )}
-            </ComposedChart>
-          </ResponsiveContainer>
+                <YAxis tickFormatter={compact} tick={{ fill: "var(--text-3)", fontSize: 11 }} axisLine={false} tickLine={false} width={52} domain={[0, (max: number) => Math.max(max, target * 1.15)]} />
+                <Tooltip
+                  content={({ active, payload }) => {
+                    const p = active ? (payload?.[0]?.payload as (typeof points)[number] | undefined) : undefined;
+                    if (!p) return null;
+                    return (
+                      <div className="rounded-control border border-border bg-raised shadow-overlay px-3 py-2 text-xs flex flex-col gap-0.5">
+                        <span className="text-text-3">{age != null ? `Age ${age + p.t}` : `In ${p.t} years`} · {new Date(`${today}T00:00:00`).getFullYear() + p.t}</span>
+                        <span className="tabular text-text">{money(p.mid)}</span>
+                      </div>
+                    );
+                  }}
+                />
+                <Area dataKey="band" stroke="none" fill="var(--brand)" fillOpacity={0.12} isAnimationActive={false} />
+                <ReferenceLine y={target} stroke="var(--positive)" strokeWidth={1.5} label={{ value: `Target ${compact(target)}`, position: "insideTopLeft", fill: "var(--positive)", fontSize: 11, fontWeight: 600 }} />
+                <Line dataKey="mid" stroke="var(--brand)" strokeWidth={2.5} dot={false} isAnimationActive={false} />
+                {years != null && years > 0 && (
+                  <ReferenceDot
+                    x={years}
+                    y={target}
+                    r={5}
+                    fill="var(--positive)"
+                    stroke="var(--surface)"
+                    strokeWidth={2}
+                    label={{ value: retireAge != null ? `Retire at ${retireAge} · ${year}` : `Retire in ${year}`, position: "bottom", fill: "var(--text)", fontSize: 12, fontWeight: 600, offset: 12 }}
+                  />
+                )}
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
         </Card>
 
         {needed != null && (

@@ -235,7 +235,7 @@ export default async function OverviewPage() {
       {/* Cash flow trend */}
       <Card style={reveal(2)}>
         <CardHeader title="Cash flow" meta={cashFlowMeta} />
-        <div className="p-4">
+        <div className="p-4 [--bleed:16px]">
           <CashFlowChart months={cashFlowMonths} />
         </div>
       </Card>

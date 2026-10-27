@@ -96,6 +96,16 @@ chart legend) in both light and dark.
 
 ---
 
+## 1a. Tally Pop preview (behind a flag)
+
+A louder rebrand, "Tally Pop", is being trialled on web behind a link-only flag: visiting `/labs/pop` sets the `tally-ui=pop` cookie (`lib/uiFlag.ts`) and `/labs/pop?off` clears it. Nothing in the app links there. The root layout's init script turns the cookie into `html[data-ui="pop"]` before first paint, and every Pop style lives under that attribute in `app/globals.css`. Without it, the system below applies unchanged.
+
+- **Palette:** grape brand (`#5B3BF5` light / `#9B87FF` dark), marigold highlight, ink outlines, cream canvas. Every text pair passes AA in both themes. The series palette is unchanged.
+- **Type:** Figtree for UI, Bricolage Grotesque 800 wherever `font-display` was used. Both load with `preload: false`, so browsers without the flag never fetch them.
+- **Shape:** bordered `rounded-card` surfaces become stickers (2px ink outline plus a hard offset shadow). Buttons are pills that press down. The current nav row is a solid brand sticker. The hooks are `ui-btn`, `ui-btn-<variant>` and `ui-nav-active`, which style nothing outside Pop.
+- **Charts run edge to edge of their card.** A `ui-bleed` wrapper cancels the side padding declared as `--bleed` on its padded ancestor; `ui-bleed-flush` drops a chart's own side padding.
+- The mockups (brand board, screens, components, emails) are in the Tally Rebrand canvas artifact. Mobile and email aren't flagged yet.
+
 ## 2. Principles
 
 1. **The number is the interface.** Typography and alignment do the work; decoration doesn't.

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Figtree, Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -24,6 +24,25 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+// Tally Pop preview fonts (lib/uiFlag.ts). preload: false so a browser
+// without the flag never downloads them: the @font-face rules only fetch
+// once something on the page actually uses the family.
+const figtree = Figtree({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-figtree",
+  display: "swap",
+  preload: false,
+});
+
+const bricolage = Bricolage_Grotesque({
+  subsets: ["latin"],
+  weight: ["700", "800"],
+  variable: "--font-bricolage",
+  display: "swap",
+  preload: false,
+});
+
 export const metadata: Metadata = {
   title: "Tally",
   description: "A private finance dashboard, typeset like a financial report.",
@@ -42,15 +61,21 @@ const THEME_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("tally-the
 // must run synchronously before first paint too.
 const PRIVACY_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("tally-hide-amounts");document.documentElement.setAttribute("data-hide-amounts",s==="true"?"true":"false");}catch(e){}})();`;
 
+// The Tally Pop preview flag (lib/uiFlag.ts), read before first paint for
+// the same no-flash reason as the theme. A cookie rather than localStorage
+// so /labs/pop can set it from the server.
+const UI_INIT_SCRIPT = `(function(){try{if(/(?:^|; )tally-ui=pop(?:;|$)/.test(document.cookie))document.documentElement.setAttribute("data-ui","pop");}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" data-theme="light" data-hide-amounts="false" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: PRIVACY_INIT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: UI_INIT_SCRIPT }} />
       </head>
       <body
-        className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} font-ui antialiased`}
+        className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${figtree.variable} ${bricolage.variable} font-ui antialiased`}
       >
         {children}
       </body>

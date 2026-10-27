@@ -25,8 +25,9 @@ export function LogoMark({ size = 28 }: { size?: number }) {
       className="bg-brand flex items-center justify-center flex-none"
     >
       <svg width={iconSize} height={iconSize} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* The crossing stroke takes --mark-accent when a theme sets one (Tally Pop's marigold). */}
         {TALLY_STROKES.map((l, i) => (
-          <line key={i} {...l} stroke="var(--on-brand)" strokeWidth="2" strokeLinecap="round" />
+          <line key={i} {...l} stroke={i === 4 ? "var(--mark-accent, var(--on-brand))" : "var(--on-brand)"} strokeWidth="2" strokeLinecap="round" />
         ))}
       </svg>
     </div>

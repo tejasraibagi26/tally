@@ -177,8 +177,11 @@
  * 1.31.0 adds a public read-only demo at /demo: one shareable
  * link signs a visitor into a pre-seeded demo household with no sign-up,
  * and every write is refused at the middleware gate for that session.
+ * 1.32.0 adds the Tally Pop UI preview behind a link-only flag: /labs/pop
+ * sets the tally-ui cookie (lib/uiFlag.ts), ?off clears it, and
+ * globals.css restyles everything under html[data-ui="pop"].
  */
-export const APP_VERSION = "1.31.2";
+export const APP_VERSION = "1.32.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

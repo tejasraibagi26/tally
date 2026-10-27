@@ -148,7 +148,7 @@ function HeroCard({ history, today, holdings, baseCurrency }: { history: History
   const trackingSince = history[0]?.date;
 
   return (
-    <Card className="lg:col-span-2 p-5 lg:p-6 flex flex-col gap-4">
+    <Card className="lg:col-span-2 p-5 lg:p-6 [--bleed:20px] lg:[--bleed:24px] flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Portfolio value ({baseCurrency})</span>
@@ -199,7 +199,9 @@ function HeroCard({ history, today, holdings, baseCurrency }: { history: History
         )}
       </div>
       {enough ? (
-        <PortfolioChart points={summary.points} longRange={range === "1Y" || range === "ALL"} />
+        <div className="ui-bleed">
+          <PortfolioChart points={summary.points} longRange={range === "1Y" || range === "ALL"} />
+        </div>
       ) : (
         <div className="h-[200px] rounded-control bg-sunken flex items-center justify-center px-8 text-center text-[13.5px] text-text-2">
           Your chart starts filling in tomorrow. Tally records your portfolio once a day.

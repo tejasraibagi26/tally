@@ -148,6 +148,146 @@
   --scrim: rgba(0,0,0,.62);
 }
 
+/* "Tally Pop" UI preview (lib/uiFlag.ts), on only while html carries
+   data-ui="pop" -- set before first paint from the cookie /labs/pop writes.
+   Everything Pop changes lives in this block and the component rules
+   below it; without the attribute none of it applies. Every text pair here
+   is checked against WCAG AA (4.5:1 text, 3:1 borders and icons) in both
+   themes. Series colors are unchanged: they're the validated chart palette.
+   No prefers-color-scheme copy: data-ui only exists when JS ran, and the
+   same script always sets data-theme first. */
+:root[data-ui="pop"] {
+  --canvas: #FFF6E9;
+  --surface: #FFFFFF;
+  --surface-2: #FFF1DC;
+  --sunken: #F8EDDB;
+  --border: #EADBC4;
+  --border-strong: #6B6880;
+  --text: #1D1B2F;
+  --text-2: #4A4760;
+  --text-3: #625F78;
+  --brand: #5B3BF5;
+  --brand-hover: #4527D9;
+  --brand-subtle: #E6E0FF;
+  --brand-border: #B9ABFF;
+  --on-brand: #FFFFFF;
+  --positive: #0F7A43;
+  --negative: #C2341F;
+  --warning: #835600;
+  --info: #2466C6;
+  --positive-subtle: #EBF7F0;
+  --negative-subtle: #FBE6E2;
+  --warning-subtle: #FFF0CC;
+  --info-subtle: #E6EEFA;
+  --raised: #FFFFFF;
+  --raised-hover: #FFF1DC;
+  --radius-control: 12px;
+  --radius-card: 20px;
+  --radius-panel: 28px;
+  /* Sticker outline and its hard offset shadow. */
+  --ink: #1D1B2F;
+  --ink-shadow: #1D1B2F;
+  --marigold: #FFC53D;
+  --mark-accent: var(--marigold);
+  --shadow-raised: 4px 4px 0 var(--ink-shadow);
+  --shadow-overlay: 6px 6px 0 var(--ink-shadow);
+  --scrim: rgba(29,27,47,.4);
+}
+
+:root[data-ui="pop"][data-theme="dark"] {
+  --canvas: #14121F;
+  --surface: #1E1B2E;
+  --surface-2: #282440;
+  --sunken: #110F1B;
+  --border: #2E2A45;
+  --border-strong: #6E6895;
+  --text: #F6F1E7;
+  --text-2: #B9B4CF;
+  --text-3: #9893B2;
+  --brand: #9B87FF;
+  --brand-hover: #B7A8FF;
+  --brand-subtle: #2A2150;
+  --brand-border: #4B3F8A;
+  --on-brand: #14121F;
+  --positive: #4FD69C;
+  --negative: #FF8A73;
+  --warning: #E8B45A;
+  --info: #6AA5F0;
+  --positive-subtle: #123227;
+  --negative-subtle: #3A1E22;
+  --warning-subtle: #33290F;
+  --info-subtle: #172544;
+  --raised: #282440;
+  --raised-hover: #2D2847;
+  --ink: #6E6895;
+  --ink-shadow: #000000;
+  --marigold: #FFCF5C;
+  --scrim: rgba(0,0,0,.62);
+}
+
+/* Figtree for UI, Bricolage Grotesque for display. next/font sets the
+   family variables on body, so they're swapped there. */
+[data-ui="pop"] body {
+  --font-inter: var(--font-figtree);
+  --font-instrument-serif: var(--font-bricolage);
+}
+
+[data-ui="pop"] .font-display {
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+/* Sticker cards: every bordered card surface gets the ink outline and the
+   hard shadow. Tables and rows inside keep their hairlines. */
+[data-ui="pop"] .rounded-card.border,
+[data-ui="pop"] .rounded-panel.border {
+  border-width: 2px;
+  border-color: var(--ink);
+  box-shadow: var(--shadow-raised);
+}
+
+/* components/ui/Button.tsx: pills; filled ones press down into their shadow. */
+[data-ui="pop"] .ui-btn {
+  border-radius: 999px;
+  font-weight: 700;
+  transition: transform 120ms ease-out, box-shadow 120ms ease-out, background-color 120ms ease-out;
+}
+[data-ui="pop"] .ui-btn-primary,
+[data-ui="pop"] .ui-btn-secondary,
+[data-ui="pop"] .ui-btn-destructive-solid {
+  border: 2px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--ink-shadow);
+}
+[data-ui="pop"] .ui-btn:not(:disabled):active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+/* components/nav/SideNav.tsx's current page: a solid brand sticker. */
+[data-ui="pop"] .ui-nav-active {
+  background: var(--brand);
+  color: var(--on-brand);
+  font-weight: 700;
+  box-shadow: inset 0 0 0 2px var(--ink), 3px 3px 0 var(--ink-shadow);
+}
+[data-ui="pop"] .ui-nav-active .text-text-3 {
+  color: inherit;
+}
+
+/* Charts run edge to edge of their card. .ui-bleed cancels the side
+   padding of the nearest ancestor that declares it as --bleed (set with
+   [--bleed:16px] next to that ancestor's padding); .ui-bleed-flush drops
+   a chart's own side padding and its rounded ends. */
+[data-ui="pop"] .ui-bleed {
+  margin-inline: calc(var(--bleed, 0px) * -1);
+}
+[data-ui="pop"] .ui-bleed-flush {
+  padding-inline: 0;
+}
+[data-ui="pop"] .ui-bleed-flush > * {
+  border-radius: 0;
+}
+
 * {
   border-color: var(--border);
 }
