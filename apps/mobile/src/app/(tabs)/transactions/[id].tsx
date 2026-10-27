@@ -293,7 +293,7 @@ export default function TransactionDetailScreen() {
               placeholder="Add a note"
               placeholderTextColor={colors["text-3"]}
               multiline
-              className="rounded-card bg-surface-2 px-[14px] py-3 font-ui text-text"
+              className="rounded-card bg-surface-2 px-[14px] py-3 font-ui text-text border-field border-ink"
               style={{ minHeight: 48, textAlignVertical: "top", fontSize: rf(14) }}
             />
             <View className="flex-row flex-wrap gap-1.5">

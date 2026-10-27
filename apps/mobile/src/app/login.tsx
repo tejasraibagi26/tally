@@ -67,7 +67,7 @@ export default function LoginScreen() {
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="email-address"
-            className="h-14 rounded-control bg-surface-2 px-[18px] font-ui text-text"
+            className="h-14 rounded-control bg-surface-2 px-[18px] font-ui text-text border-field border-ink"
             style={{ fontSize: rf(15.5) }}
           />
           <TextInput
@@ -76,7 +76,7 @@ export default function LoginScreen() {
             placeholder="Password"
             placeholderTextColor={colors["text-3"]}
             secureTextEntry
-            className="h-14 rounded-control bg-surface-2 px-[18px] font-ui text-text"
+            className="h-14 rounded-control bg-surface-2 px-[18px] font-ui text-text border-field border-ink"
             style={{ fontSize: rf(15.5) }}
           />
 

@@ -120,7 +120,7 @@ export function BudgetDetailSheet({
 
         <View className="gap-1.5">
           <Text className="font-ui-medium text-text-3" style={label}>Monthly budget</Text>
-          <View className="flex-row items-center h-12 rounded-control bg-surface-2 px-3">
+          <View className="flex-row items-center h-12 rounded-control bg-surface-2 px-3 border-field border-ink">
             <Text className="font-ui text-text-3 mr-1" style={{ fontSize: rf(14) }}>$</Text>
             <TextInput value={amountInput} onChangeText={setAmountInput} keyboardType="number-pad" className="flex-1 font-ui text-text" style={{ fontSize: rf(15), paddingVertical: 0 }} />
           </View>

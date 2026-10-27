@@ -141,6 +141,7 @@ module.exports = {
       borderWidth: {
         button: "var(--border-button)",
         card: "var(--border-card)",
+        field: "var(--border-field)",
       },
       borderRadius: {
         control: "var(--radius-control)",

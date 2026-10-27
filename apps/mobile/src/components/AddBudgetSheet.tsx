@@ -127,7 +127,7 @@ export function AddBudgetSheet({
             </>
           )}
 
-          <View className="flex-row items-center rounded-control bg-surface-2 px-[14px]" style={{ height: 46 }}>
+          <View className="flex-row items-center rounded-control bg-surface-2 px-[14px] border-field border-ink" style={{ height: 46 }}>
             <Text className="font-ui text-text-3" style={{ fontSize: rf(14.5) }}>$</Text>
             <TextInput
               value={amountInput}

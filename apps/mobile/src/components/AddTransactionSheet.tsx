@@ -143,11 +143,11 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
             onChangeText={setName}
             placeholder="Description"
             placeholderTextColor={colors["text-3"]}
-            className="rounded-control bg-surface-2 px-[14px] font-ui text-text"
+            className="rounded-control bg-surface-2 px-[14px] font-ui text-text border-field border-ink"
             style={{ height: 46, fontSize: rf(14.5) }}
           />
 
-          <View className="flex-row items-center rounded-control bg-surface-2 px-[14px]" style={{ height: 46 }}>
+          <View className="flex-row items-center rounded-control bg-surface-2 px-[14px] border-field border-ink" style={{ height: 46 }}>
             <Text className="font-ui text-text-3" style={{ fontSize: rf(14.5) }}>$</Text>
             <TextInput
               value={amountInput}

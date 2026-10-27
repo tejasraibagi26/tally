@@ -412,7 +412,7 @@ function Lever({
             onSubmitEditing={commit}
             keyboardType="decimal-pad"
             returnKeyType="done"
-            className="font-ui-semibold text-text rounded-[6px] bg-surface-2 px-2"
+            className="font-ui-semibold text-text rounded-[6px] bg-surface-2 px-2 border-field border-ink"
             style={{ fontSize: rf(14), minWidth: 90, textAlign: "right", paddingVertical: 4 }}
           />
         ) : (

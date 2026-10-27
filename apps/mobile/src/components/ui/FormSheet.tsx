@@ -85,7 +85,7 @@ export function SheetInput(props: TextInputProps) {
     <TextInput
       placeholderTextColor={colors["text-3"]}
       {...props}
-      className="rounded-control bg-surface-2 px-[14px] font-ui text-text"
+      className="rounded-control bg-surface-2 px-[14px] font-ui text-text border-field border-ink"
       style={[{ height: 46, fontSize: rf(14.5) }, props.style]}
     />
   );
@@ -96,7 +96,7 @@ export function SheetAmountInput({ value, onChangeText }: { value: string; onCha
   const colors = useThemeColors();
   const rf = useRF();
   return (
-    <View className="flex-row items-center rounded-control bg-surface-2 px-[14px]" style={{ height: 46 }}>
+    <View className="flex-row items-center rounded-control bg-surface-2 px-[14px] border-field border-ink" style={{ height: 46 }}>
       <Text className="font-ui text-text-3" style={{ fontSize: rf(14.5) }}>$</Text>
       <TextInput
         value={value}

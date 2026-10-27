@@ -274,7 +274,7 @@ export default function TransactionsScreen() {
               </View>
             )}
 
-            <View className="flex-row items-center gap-2 rounded-control bg-surface-2 px-3.5 mt-3" style={{ height: 42 }}>
+            <View className="flex-row items-center gap-2 rounded-control bg-surface-2 px-3.5 mt-3 border-field border-ink" style={{ height: 42 }}>
               <Search size={16} color={colors["text-3"]} strokeWidth={2} />
               <TextInput
                 value={searchInput}

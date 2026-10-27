@@ -128,6 +128,9 @@ function buildVars(colors: Record<string, string>) {
   out["--color-ink"] = colors.ink!;
   out["--border-button"] = "2px";
   out["--border-card"] = "2px";
+  // Text fields: an outline so a field never melts into a dialog or sheet
+  // of the same fill (dark Pop's raised and surface-2 match).
+  out["--border-field"] = "1.5px";
   return out;
 }
 
