@@ -1,1 +1,1 @@
-ALTER TABLE "users" ADD COLUMN "ui_look" text;
+ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "ui_look" text;
