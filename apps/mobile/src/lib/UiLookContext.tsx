@@ -5,27 +5,26 @@ import { useAuth } from "@/lib/AuthContext";
 import { syncAppIcon } from "@/lib/appIcon";
 
 /**
- * The Tally Pop flag on mobile. The app has no link to open, so it reads the
- * account copy web's /labs/pop writes (users.ui_look via GET /api/account):
- * null = not flagged (no switch, no Pop), otherwise "pop" or "classic". The
- * last value is cached so a cold start paints the right look before the
- * network answers. The "New look" switch (Settings) saves through the same
- * PATCH /api/settings/ui-look web's switch uses, so web, mobile and emails
- * agree.
+ * The look on mobile: Tally Pop is the default (mobile v2.3.0); the classic
+ * look is an opt-out, chosen with "New look" in Settings. The account copy
+ * (users.ui_look via GET /api/account) is the source of truth -- null means
+ * never chosen, so Pop -- and it's shared with web and emails: the switch
+ * saves through PATCH /api/settings/ui-look. The last value is cached so a
+ * cold start paints the right look before the network answers.
  */
 type Look = "pop" | "classic" | null;
 
 const KEY = "tally.uiLook";
 
 interface UiLookValue {
-  /** Flagged: the "New look" switch is shown. */
+  /** Always true since Pop became the default: the "New look" switch shows for everyone. */
   flagged: boolean;
   /** Pop is on. */
   pop: boolean;
   setPop: (pop: boolean) => void;
 }
 
-const UiLookContext = createContext<UiLookValue>({ flagged: false, pop: false, setPop: () => {} });
+const UiLookContext = createContext<UiLookValue>({ flagged: true, pop: true, setPop: () => {} });
 
 function parse(value: unknown): Look {
   return value === "pop" || value === "classic" ? value : null;
@@ -79,13 +78,14 @@ export function UiLookProvider({ children }: { children: ReactNode }) {
   );
 
   // The home-screen icon follows the look (lib/appIcon.ts). Waits for a
-  // settled answer: null is "not flagged", which means the default icon.
+  // settled answer: null means never chosen, which is Pop (the primary icon).
   useEffect(() => {
     if (!settled) return;
-    void syncAppIcon(look === "pop");
+    void syncAppIcon(look !== "classic");
   }, [look, settled]);
 
-  const value = useMemo(() => ({ flagged: look != null, pop: look === "pop", setPop }), [look, setPop]);
+  // Pop unless the account chose classic (null = never chose).
+  const value = useMemo(() => ({ flagged: true, pop: look !== "classic", setPop }), [look, setPop]);
   return <UiLookContext.Provider value={value}>{children}</UiLookContext.Provider>;
 }
 

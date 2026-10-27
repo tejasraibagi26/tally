@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUserId } from "@/lib/session";
-import { updateFlaggedUiLook } from "@/lib/uiLook";
+import { setUserUiLook } from "@/lib/uiLook";
 
 const bodySchema = z.object({ look: z.enum(["pop", "classic"]) });
 
-// The "New look" switch (components/UiToggle.tsx) saving its choice so
-// emails follow it. Only changes an already-flagged user; flagging stays
-// link-only (/labs/pop).
+// The "New look" switch (web components/UiToggle.tsx, mobile Settings)
+// saving the account's look, so emails and the other app follow it.
 export async function PATCH(req: Request) {
   let userId: string;
   try {
@@ -21,6 +20,6 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  await updateFlaggedUiLook(userId, parsed.data.look);
+  await setUserUiLook(userId, parsed.data.look);
   return NextResponse.json({ ok: true });
 }

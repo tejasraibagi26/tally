@@ -45,7 +45,7 @@ const bricolage = Bricolage_Grotesque({
 
 export const metadata: Metadata = {
   title: "Tally",
-  description: "A private finance dashboard, typeset like a financial report.",
+  description: "Every dollar, counted. A private finance dashboard that keeps track of it all.",
 };
 
 // Runs before first paint so the page never renders light and then flips to
@@ -61,13 +61,11 @@ const THEME_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("tally-the
 // must run synchronously before first paint too.
 const PRIVACY_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("tally-hide-amounts");document.documentElement.setAttribute("data-hide-amounts",s==="true"?"true":"false");}catch(e){}})();`;
 
-// The Tally Pop preview (lib/uiFlag.ts), read before first paint for the
-// same no-flash reason as the theme: Pop only when this browser has the
-// feature flag and hasn't switched back to the current look. Cookies rather
-// than localStorage so /labs/pop can set them from the server.
-// The tab icon swaps to Pop's (public/icon-pop.svg, lib/uiFlag.ts
-// applyFavicon) once the head's icon links exist.
-const UI_INIT_SCRIPT = `(function(){try{var c=document.cookie;if(/(?:^|; )tally-ff-pop=1(?:;|$)/.test(c)&&!/(?:^|; )tally-ui=classic(?:;|$)/.test(c)){document.documentElement.setAttribute("data-ui","pop");document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll('link[rel~="icon"]').forEach(function(l){l.dataset.classicHref=l.href;l.href="/icon-pop.svg";});});}}catch(e){}})();`;
+// The look (lib/uiFlag.ts): Tally Pop unless this browser chose classic,
+// set before first paint for the same no-flash reason as the theme. A
+// classic choice also swaps the tab icon back once the head's icon links
+// exist (app/icon.svg is Pop's).
+const UI_INIT_SCRIPT = `(function(){try{if(/(?:^|; )tally-ui=classic(?:;|$)/.test(document.cookie)){document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll('link[rel~="icon"]').forEach(function(l){l.dataset.popHref=l.href;l.href="/icon-classic.svg";});});}else{document.documentElement.setAttribute("data-ui","pop");}}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

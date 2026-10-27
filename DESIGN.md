@@ -96,16 +96,15 @@ chart legend) in both light and dark.
 
 ---
 
-## 1a. Tally Pop (web 2.0.0, behind a flag)
+## 1a. Tally Pop (the default since web 2.2.0 / mobile 2.3.0)
 
-"Tally Pop" is the louder rebrand, shipped on web behind a link-only feature flag. The finance rules below (§2, §5.4, §7, §9) are unchanged; only the look changes.
+"Tally Pop" is Tally's look. It started behind a link-only flag (web 2.0.0) and is now the default for everyone; the original look below is an opt-out. The finance rules below (§2, §5.4, §7, §9) apply to both; only the look differs.
 
-**The flag**
-- `/labs/pop` turns it on: it sets the `tally-ff-pop` cookie and starts that browser on Pop. It also saves `users.ui_look = "pop"` (migration 0025, `lib/uiLook.ts`), which emails read.
-- `/labs/pop?off` clears the cookies and `ui_look`. Nothing in the app links to either URL.
-- A flagged browser gets a **New look** switch in the sidebar footer (`components/UiToggle.tsx`). It flips the `tally-ui` cookie between `pop` and `classic` and saves the choice to `ui_look` through `PATCH /api/settings/ui-look`.
-- The root layout's init script sets `html[data-ui="pop"]` before first paint. Every Pop style lives under that attribute in `app/globals.css`.
-- Unflagged users get neither the switch nor Pop. The system below applies unchanged.
+**The look**
+- Web: Pop unless the browser chose classic (`tally-ui=classic`, `lib/uiFlag.ts`), set before first paint as `html[data-ui="pop"]`. Every Pop style lives under that attribute in `app/globals.css`, so the classic look is the stylesheet without it.
+- The **New look** switch (web side nav, `components/UiToggle.tsx`; mobile Settings) is shown to everyone and writes the browser cookie and the account copy (`users.ui_look`, `PATCH /api/settings/ui-look`). An account that never chose (null) counts as Pop: emails, alerts and the mobile app read it (`lib/uiLook.ts`, mobile `lib/UiLookContext.tsx`).
+- `/labs/pop` (Pop) and `/labs/pop?off` (classic) remain as shortcuts.
+- Icons: `app/icon.svg` and the mobile app icon are Pop's; the classic ones are the alternates (`public/icon-classic.svg`, the "Classic" expo-alternate-app-icons entry).
 
 **Web**
 - **Palette:** grape brand (`#5B3BF5` light / `#9B87FF` dark), marigold highlight, ink outlines, cream canvas. Every text pair passes AA in both themes. The series palette is unchanged.

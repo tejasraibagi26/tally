@@ -2,32 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { Sparkles } from "lucide-react";
-import { applyUi, hasPopFlag, isPopOn } from "@/lib/uiFlag";
+import { applyUi, isPopOn } from "@/lib/uiFlag";
 import { cn } from "@/lib/cn";
 
 /**
- * The SideNav footer's "New look" row: flips between the Tally Pop preview
- * and the current UI. Renders nothing unless this browser has the Pop
- * feature flag (lib/uiFlag.ts, set only by visiting /labs/pop). Cookies are
- * read after mount, so the server and first client render agree.
+ * The SideNav footer's "New look" row: Tally Pop (the default) or the
+ * classic look (lib/uiFlag.ts), for everyone. Starts on, matching the
+ * default, and reads this browser's choice after mount.
  */
 export function UiToggle() {
-  const [flagged, setFlagged] = useState(false);
-  const [pop, setPop] = useState(false);
+  const [pop, setPop] = useState(true);
 
   useEffect(() => {
-    setFlagged(hasPopFlag());
     setPop(isPopOn());
   }, []);
-
-  if (!flagged) return null;
 
   function toggle() {
     const next = !pop;
     setPop(next);
     applyUi(next);
-    // Saved to the account too, so emails follow the switch. The look has
-    // already changed; a failed save only leaves emails as they were.
+    // Saved to the account too, so emails and the mobile app follow the
+    // switch. The look has already changed; a failed save only leaves them.
     fetch("/api/settings/ui-look", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },

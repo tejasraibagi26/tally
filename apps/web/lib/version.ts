@@ -231,8 +231,13 @@
  * figures in Pop's display face (the ui-figure hook).
  * 2.1.9 leads the Pop recap's goal section with what's left, like the
  * app's goal card, instead of repeating net worth under its own card.
+ * 2.2.0 makes Tally Pop the default for everyone: Pop unless a browser
+ * chose classic (lib/uiFlag.ts), an account with no choice counts as Pop
+ * for emails and alerts (lib/uiLook.ts), the "New look" switch shows for
+ * everyone, and Pop's icon is the tab icon (app/icon.svg; classic in
+ * public/icon-classic.svg). Year-end goals come with it.
  */
-export const APP_VERSION = "2.1.9";
+export const APP_VERSION = "2.2.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

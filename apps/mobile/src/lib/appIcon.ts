@@ -1,7 +1,10 @@
 /**
- * The home-screen icon follows the Tally Pop look: "Pop" (app.json's
- * expo-alternate-app-icons entry, assets/images/icon-pop.png) while Pop is
- * on, the default icon otherwise.
+ * The home-screen icon follows the look. Since mobile v2.3.0 the primary
+ * icon is Tally Pop's (app.json "icon", assets/images/icon-pop.png) and the
+ * classic one is the "Classic" alternate (expo-alternate-app-icons), so the
+ * default look never triggers iOS's "You have changed the icon" alert. A
+ * build from before keeps its classic primary and has no "Classic"
+ * alternate; asking for it fails quietly and the icon stays as it was.
  *
  * Loaded lazily and defensively: the module is native, so an over-the-air
  * update reaching a build made before it was added has no native side, and
@@ -10,7 +13,8 @@
  */
 type IconModule = {
   supportsAlternateIcons: boolean;
-  setAlternateAppIcon: (name: "Pop" | null) => Promise<string | null>;
+  setAlternateAppIcon: (name: "Classic" | null) => Promise<string | null>;
+  /** The alternate showing, or null for the primary; "Pop" on a build from before v2.3.0 that switched to it. */
   getAppIconName: () => string | null;
 };
 
@@ -31,10 +35,23 @@ function iconModule(): IconModule | null {
 export async function syncAppIcon(pop: boolean): Promise<void> {
   const mod = iconModule();
   if (!mod?.supportsAlternateIcons) return;
-  const want = pop ? "Pop" : null;
   try {
-    if ((mod.getAppIconName() ?? null) === want) return;
-    await mod.setAlternateAppIcon(want);
+    const current = mod.getAppIconName() ?? null;
+    if (pop) {
+      // Already Pop: the primary on a current build, or the old "Pop"
+      // alternate a build from before v2.3.0 may be showing -- leave it.
+      if (current === null || current === "Pop") return;
+      await mod.setAlternateAppIcon(null);
+      return;
+    }
+    if (current === "Classic") return;
+    try {
+      await mod.setAlternateAppIcon("Classic");
+    } catch {
+      // A build from before v2.3.0: no "Classic" alternate, but its primary
+      // icon is the classic one -- go back to it from the old "Pop".
+      if (current === "Pop") await mod.setAlternateAppIcon(null);
+    }
   } catch {
     // Not fatal: the look still changed; only the home-screen icon didn't.
   }

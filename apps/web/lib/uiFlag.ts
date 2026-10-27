@@ -1,23 +1,21 @@
 /**
- * The "Tally Pop" UI preview. Two per-browser cookies, not per-user
- * settings: Pop only restyles the web app (globals.css, under
- * html[data-ui="pop"]), so there's nothing to store server-side.
+ * The look: Tally Pop is the default (web v2.2.0); the classic look is an
+ * opt-out, chosen with the "New look" switch (components/UiToggle.tsx) in
+ * the side nav. UI_PREF_COOKIE holds a browser's choice; only "classic"
+ * changes anything. The account copy (users.ui_look, lib/uiLook.ts) is
+ * what emails and the mobile app read; the switch writes both.
  *
- * - UI_FLAG_COOKIE is the feature flag. Only /labs/pop sets it
- *   (app/labs/pop/route.ts) and only /labs/pop?off clears it; nothing in
- *   the app links there. Without it there's no Pop and no toggle.
- * - UI_PREF_COOKIE is which look a flagged browser wants, flipped by the
- *   "New look" switch (components/UiToggle.tsx) that only flagged browsers
- *   see.
- *
- * Not httpOnly: the root layout's init script reads both before first
- * paint, the same way it reads the theme from localStorage, so pages stay
- * static.
+ * Not httpOnly: the root layout's init script reads it before first paint,
+ * the same way it reads the theme from localStorage, so pages stay static.
  */
-export const UI_FLAG_COOKIE = "tally-ff-pop";
 export const UI_PREF_COOKIE = "tally-ui";
 export const UI_POP = "pop";
 export const UI_CLASSIC = "classic";
+/**
+ * The old preview flag cookie, set by /labs/pop before Pop was the default.
+ * Only cleared now (app/labs/pop/route.ts ?off).
+ */
+export const UI_FLAG_COOKIE = "tally-ff-pop";
 
 const YEAR = 60 * 60 * 24 * 365;
 
@@ -26,12 +24,8 @@ function readCookie(name: string): string | null {
   return match ? decodeURIComponent(match[1]!) : null;
 }
 
-export function hasPopFlag(): boolean {
-  return readCookie(UI_FLAG_COOKIE) === "1";
-}
-
 export function isPopOn(): boolean {
-  return hasPopFlag() && readCookie(UI_PREF_COOKIE) !== UI_CLASSIC;
+  return readCookie(UI_PREF_COOKIE) !== UI_CLASSIC;
 }
 
 export function applyUi(pop: boolean) {
@@ -42,12 +36,12 @@ export function applyUi(pop: boolean) {
   applyFavicon(pop);
 }
 
-/** Pop's tab icon (public/icon-pop.svg) in place of app/icon.svg's, and back. */
-export const POP_ICON = "/icon-pop.svg";
+/** The classic tab icon (public/icon-classic.svg); app/icon.svg is Pop's. */
+export const CLASSIC_ICON = "/icon-classic.svg";
 
 export function applyFavicon(pop: boolean) {
   document.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]').forEach((link) => {
-    if (!link.dataset.classicHref) link.dataset.classicHref = link.href;
-    link.href = pop ? POP_ICON : link.dataset.classicHref;
+    if (!link.dataset.popHref) link.dataset.popHref = link.href;
+    link.href = pop ? link.dataset.popHref : CLASSIC_ICON;
   });
 }

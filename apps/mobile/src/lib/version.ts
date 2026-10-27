@@ -266,8 +266,12 @@ import Constants from "expo-constants";
  * 2.2.4 outlines text fields in Pop (border-field + border-ink, 0px in
  * classic): dark Pop's dialog/sheet fill and the field fill are the same
  * colour, so fields like Wipe's password disappeared.
+ * 2.3.0 makes Tally Pop the default (lib/UiLookContext.tsx: Pop unless the
+ * account chose classic; "New look" in Settings for everyone), and makes
+ * Pop's icon and splash the app's own (app.json; the classic icon is the
+ * "Classic" alternate) -- the icon and splash need a native build.
  */
-export const APP_VERSION = "2.2.4";
+export const APP_VERSION = "2.3.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -295,7 +295,7 @@ export default function SettingsScreen() {
             label="Require Face ID to open"
             right={<ThemedSwitch value={biometricLockEnabled} onValueChange={toggleBiometric} disabled={biometricBusy} label="Require Face ID or fingerprint to open Tally" />}
           />
-          {/* Only for an account flagged for the Tally Pop preview (web's /labs/pop). */}
+          {/* Tally Pop is the default; this lets anyone switch back to the classic look. */}
           {uiLook.flagged && (
             <Row icon={(c) => <Sparkles size={15} color={c} strokeWidth={1.9} />} label="New look" right={<ThemedSwitch value={uiLook.pop} onValueChange={uiLook.setPop} label="New look" />} />
           )}

@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.3.0",
+    date: "2026-10-27",
+    changes: [
+      { kind: "new", text: "Tally has a new look: brighter colors, new type, charts that run edge to edge, and a new icon. Prefer the old one? Turn off New look in Settings." },
+      { kind: "new", text: "Year-end goals: pick a net worth to reach by Dec 31 and Tally projects where your pace lands and whether you're on track. Find it on Overview." },
+    ],
+  },
+  {
     version: "2.2.4",
     date: "2026-10-27",
     changes: [{ kind: "improved", text: "More polish on the new look we're trying out." }],
