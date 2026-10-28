@@ -19,6 +19,7 @@ export interface RecurringCandidate {
   description: string;
   amount: number; // cents, signed
   postedDate: string; // YYYY-MM-DD
+  billedDate?: string | null; // YYYY-MM-DD, Plaid's authorized_date -- see isMonthlyPair
 }
 
 export interface DetectedStream {
@@ -92,16 +93,26 @@ function daysInMonth(year: number, month: number): number {
 }
 
 // Waiting for a third charge means a new monthly subscription only shows up
-// after ~60 days. Two charges promote on their own when nothing but the month
-// differs: the exact same name and amount (to the cent), on the same day of
-// back-to-back months. A day past the end of the shorter month counts as its
-// last day (Jan 31 -> Feb 28).
+// after ~60 days. Two charges promote on their own when they have the exact
+// same name and amount (to the cent) and the second lands within
+// MONTHLY_PAIR_DAY_TOLERANCE days of one month after the first. The tolerance
+// absorbs weekends, holidays and settlement lag; a day past the end of the
+// shorter month counts as its last day (Jan 31 -> Feb 28). Uses billedDate
+// (Plaid's authorized_date) when there is one -- it's when the merchant
+// actually charged, so it drifts far less than the posted date.
+const MONTHLY_PAIR_DAY_TOLERANCE = 3;
+
+function oneMonthLater(date: string): string {
+  const [y, m, d] = date.split("-").map(Number) as [number, number, number];
+  const target = new Date(Date.UTC(y, m, 1)); // first of the next month
+  target.setUTCDate(Math.min(d, daysInMonth(target.getUTCFullYear(), target.getUTCMonth() + 1)));
+  return target.toISOString().slice(0, 10);
+}
+
 function isMonthlyPair(a: RecurringCandidate, b: RecurringCandidate): boolean {
   if (a.description !== b.description || a.amount !== b.amount) return false;
-  const [ay, am, ad] = a.postedDate.split("-").map(Number) as [number, number, number];
-  const [by, bm, bd] = b.postedDate.split("-").map(Number) as [number, number, number];
-  if (by * 12 + bm - (ay * 12 + am) !== 1) return false;
-  return Math.min(ad, daysInMonth(by, bm)) === bd;
+  const expected = oneMonthLater(a.billedDate ?? a.postedDate);
+  return Math.abs(daysBetween(expected, b.billedDate ?? b.postedDate)) <= MONTHLY_PAIR_DAY_TOLERANCE;
 }
 
 /**
@@ -109,7 +120,7 @@ function isMonthlyPair(a: RecurringCandidate, b: RecurringCandidate): boolean {
  * a stable interval (every gap within ±4 days of the median gap) to promote
  * to a stream — except a two-occurrence group whose single gap lands in the
  * annual band, which promotes on its own (see ANNUAL_TWO_OCCURRENCE_GAP_RANGE
- * above), or an exact same-day monthly pair (see isMonthlyPair). `now` is injected (not `new Date()`) so status classification is a
+ * above), or an exactly matching monthly pair (see isMonthlyPair). `now` is injected (not `new Date()`) so status classification is a
  * pure, testable function of its inputs.
  */
 export function detectRecurringStreams(candidates: RecurringCandidate[], now: string): DetectedStream[] {

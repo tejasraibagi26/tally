@@ -29,8 +29,8 @@ describe("normalizeMerchantKey", () => {
 });
 
 describe("detectRecurringStreams", () => {
-  it("does not promote 2 monthly occurrences on different days of the month", () => {
-    const txs = [tx({ id: "1", postedDate: "2026-01-01" }), tx({ id: "2", postedDate: "2026-02-03" })];
+  it("does not promote 2 monthly occurrences more than 3 days off the same day of the month", () => {
+    const txs = [tx({ id: "1", postedDate: "2026-01-01" }), tx({ id: "2", postedDate: "2026-02-05" })];
     expect(detectRecurringStreams(txs, "2026-02-15")).toHaveLength(0);
   });
 
@@ -40,6 +40,26 @@ describe("detectRecurringStreams", () => {
     expect(streams).toHaveLength(1);
     expect(streams[0]).toMatchObject({ frequency: "monthly", status: "active", predictedNextDate: "2026-10-15" });
     expect(streams[0]!.confidence).toBeLessThan(0.5);
+  });
+
+  it("allows the second charge up to 3 days either side of the same day", () => {
+    const later = [tx({ id: "1", postedDate: "2026-08-14" }), tx({ id: "2", postedDate: "2026-09-17" })];
+    const earlier = [tx({ id: "1", postedDate: "2026-08-14" }), tx({ id: "2", postedDate: "2026-09-11" })];
+    expect(detectRecurringStreams(later, "2026-09-20")).toHaveLength(1);
+    expect(detectRecurringStreams(earlier, "2026-09-20")).toHaveLength(1);
+  });
+
+  it("matches across a month boundary when the posting slips into the next month", () => {
+    const txs = [tx({ id: "1", postedDate: "2026-08-30" }), tx({ id: "2", postedDate: "2026-10-01" })];
+    expect(detectRecurringStreams(txs, "2026-10-02")).toHaveLength(1);
+  });
+
+  it("compares the billed (authorized) date over the posted date when there is one", () => {
+    const txs = [
+      tx({ id: "1", postedDate: "2026-08-14", billedDate: "2026-08-14" }),
+      tx({ id: "2", postedDate: "2026-09-20", billedDate: "2026-09-14" }), // posted 6 days late
+    ];
+    expect(detectRecurringStreams(txs, "2026-09-21")).toHaveLength(1);
   });
 
   it("treats a day past the end of a shorter month as its last day", () => {
@@ -113,10 +133,10 @@ describe("detectRecurringStreams", () => {
       tx({ id: "1", accountId: "checking", postedDate: "2026-01-01" }),
       tx({ id: "2", accountId: "credit", postedDate: "2026-01-01" }),
       tx({ id: "3", accountId: "checking", postedDate: "2026-02-01" }),
-      tx({ id: "4", accountId: "credit", postedDate: "2026-02-04" }),
+      tx({ id: "4", accountId: "credit", postedDate: "2026-02-08" }),
       tx({ id: "5", accountId: "checking", postedDate: "2026-03-01" }),
     ];
-    // Only "checking" has 3 occurrences ("credit"'s two aren't on the same day of the month).
+    // Only "checking" has 3 occurrences ("credit"'s two are a week off the same day of the month).
     expect(detectRecurringStreams(txs, "2026-03-05")).toHaveLength(1);
   });
 

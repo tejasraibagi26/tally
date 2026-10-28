@@ -336,7 +336,7 @@ Plaid returns **positive = money leaving** the account for depository accounts. 
 Pair transactions across accounts when: opposite signs, `|amount|` equal (±1%), dates within 4 days, and either the pair is card↔bank or both accounts are user-owned. Group under `transfer_group_id`, set `is_transfer = true`, and exclude from income, spend, and budgets. Surface a "possible transfers" review list rather than silently guessing.
 
 ### 7.5 Recurring detection
-Cluster by normalized merchant + account + amount band. Require ≥3 occurrences with a stable interval (±4 days) to promote to a `recurring_stream` — or 2 that match exactly (same name, same amount to the cent, same day of back-to-back months), or 2 about a year apart; both pairs promote at low confidence. Predict the next date; if a stream misses its window by >10 days mark it `at_risk`, and after 2 misses `cancelled`. Surface as "Subscriptions" with an annualized total — that's the number that makes people cancel things.
+Cluster by normalized merchant + account + amount band. Require ≥3 occurrences with a stable interval (±4 days) to promote to a `recurring_stream` — or 2 that match exactly (same name, same amount to the cent, within ±3 days of one month after the first, by authorized date when Plaid gives one), or 2 about a year apart; both pairs promote at low confidence. Predict the next date; if a stream misses its window by >10 days mark it `at_risk`, and after 2 misses `cancelled`. Surface as "Subscriptions" with an annualized total — that's the number that makes people cancel things.
 
 ---
 

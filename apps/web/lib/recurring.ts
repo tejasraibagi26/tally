@@ -22,6 +22,7 @@ export async function detectRecurringForUser(userId: string): Promise<void> {
       name: schema.transactions.name,
       amount: schema.transactions.amount,
       postedDate: schema.transactions.postedDate,
+      authorizedDate: schema.transactions.authorizedDate,
     })
     .from(schema.transactions)
     .where(and(eq(schema.transactions.userId, userId), eq(schema.transactions.isTransfer, false), eq(schema.transactions.isPending, false)));
@@ -34,6 +35,7 @@ export async function detectRecurringForUser(userId: string): Promise<void> {
     description: r.merchantName ?? r.name,
     amount: r.amount,
     postedDate: r.postedDate,
+    billedDate: r.authorizedDate,
   }));
 
   const today = new Date().toISOString().slice(0, 10);

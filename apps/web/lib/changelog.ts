@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.3.1",
+    date: "2026-10-28",
+    changes: [{ kind: "improved", text: "A subscription's second charge still counts when it lands a few days off its usual date, as charges often do around weekends." }],
+  },
+  {
     version: "2.3.0",
     date: "2026-10-28",
     changes: [{ kind: "improved", text: "A new subscription shows up after its second charge, not its third, when both charges have the same name and amount on the same day of the month." }],
