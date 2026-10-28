@@ -322,7 +322,7 @@ export default function SettingsScreen() {
           <Row
             first
             icon={(c) => <Wallet size={15} color={c} strokeWidth={1.9} />}
-            label="Income schedules"
+            label="Income"
             value={schedules ? String(schedules.schedules.length) : undefined}
             onPress={() => router.push("/income-schedules")}
           />

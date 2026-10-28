@@ -305,8 +305,11 @@ import Constants from "expo-constants";
  * 2.4.2: black vanished on the dark canvas.
  * 2.4.1 matches web 2.4.4: the breakdown sheet's sum is a sticker card, and
  * its subtracted amounts are magnitudes (no "− Cushion −$50.00").
+ * 2.4.2 shows "Next paycheque" on the Income screen, as web's Settings →
+ * Income does (components/settings/NextPaychequeCard.tsx, shared with the
+ * Safe to spend screen), and names that screen and its Settings row Income.
  */
-export const APP_VERSION = "2.4.1";
+export const APP_VERSION = "2.4.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

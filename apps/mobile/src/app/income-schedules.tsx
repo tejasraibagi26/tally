@@ -21,6 +21,7 @@ import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { FormSheet, SheetAmountInput, SheetField, SheetInput, SheetPickerRow } from "@/components/ui/FormSheet";
 import { HeaderTextAction } from "@/components/ui/HeaderTextAction";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
+import { NextPaychequeCard } from "@/components/settings/NextPaychequeCard";
 
 const LAST_DAY = "0";
 const NONE = "__none__";
@@ -153,6 +154,12 @@ export default function IncomeSchedulesScreen() {
       <Stack.Screen options={{ headerRight: () => <HeaderTextAction label="Add" onPress={openSheet} />, unstable_headerRightItems: () => [{ type: "custom", element: <HeaderTextAction label="Add" onPress={openSheet} />, hidesSharedBackground: true }] }} />
       <ScreenGlow />
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false} overScrollMode="never" contentContainerStyle={{ paddingHorizontal: 20, gap: 20, paddingBottom: 40 }}>
+        {/* Web's Settings → Income: the paycheque Tally found, then the schedules. */}
+        <NextPaychequeCard />
+        <View className="gap-1 px-1">
+          <Text className="font-ui-semibold text-text-2" style={{ textTransform: "uppercase", fontSize: rf(13) }}>Income schedules</Text>
+          <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>For a paycheque your bank doesn&apos;t sync reliably: set the amount and pay days once, and Tally adds it on every payday.</Text>
+        </View>
         {isLoading ? (
           <ActivityIndicator className="mt-8" />
         ) : (data?.schedules.length ?? 0) > 0 ? (

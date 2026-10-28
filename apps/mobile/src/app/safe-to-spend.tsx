@@ -1,24 +1,18 @@
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView, TextInput, Switch, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
-import { CalendarCheck } from "lucide-react-native";
-import { formatCents } from "@tally/core/money";
-import { CADENCE_LABEL } from "@tally/core/paycheque";
 import { Card } from "@/components/ui/Card";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { hairline } from "@/theme/colors";
-import { usePrivacy } from "@/lib/PrivacyContext";
-import { useSafeToSpend, useSafeToSpendSettings, useSaveSafeToSpendSettings } from "@/lib/queries/safeToSpend";
+import { useSafeToSpendSettings, useSaveSafeToSpendSettings } from "@/lib/queries/safeToSpend";
+import { NextPaychequeCard } from "@/components/settings/NextPaychequeCard";
 
 // Native port of web's Settings → Safe to spend (components/settings/
 // SafeToSpendSettings.tsx) plus the "Next paycheque" line from Income:
-// same API, same wording. Tally Pop only, like the Overview card.
-
-function payday(date: string): string {
-  return new Date(`${date}T00:00:00Z`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
-}
+// same API, same wording. Tally Pop only, like the Overview card. The
+// "Next paycheque" card is shared with the Income screen.
 
 function AmountInput({ value, onChange, onSave, label, prefix = "$", placeholder }: { value: string; onChange: (v: string) => void; onSave: () => void; label: string; prefix?: string; placeholder?: string }) {
   const colors = useThemeColors();
@@ -85,9 +79,7 @@ export default function SafeToSpendScreen() {
   const colors = useThemeColors();
   const rf = useRF();
   const contentTop = useScreenContentTop();
-  const { hidden } = usePrivacy();
   const settings = useSafeToSpendSettings();
-  const safe = useSafeToSpend();
   const save = useSaveSafeToSpendSettings();
 
   const [cushion, setCushion] = useState("");
@@ -111,8 +103,6 @@ export default function SafeToSpendScreen() {
     }
   }
 
-  const p = safe.data?.paycheque ?? null;
-
   return (
     <KeyboardAvoidingView className="flex-1 bg-canvas" behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ paddingTop: contentTop }}>
       <ScreenGlow />
@@ -121,28 +111,7 @@ export default function SafeToSpendScreen() {
           Which accounts count as spending money, and how much to always keep back.
         </Text>
 
-        <Card className="p-5 flex-row items-start gap-3.5">
-          <View className="items-center justify-center rounded-control" style={{ width: 40, height: 40, backgroundColor: colors["positive-subtle"], borderWidth: 2, borderColor: colors.ink ?? colors.border }}>
-            <CalendarCheck size={20} color={colors.positive} strokeWidth={2} />
-          </View>
-          <View className="flex-1 gap-0.5">
-            <Text className="font-ui-semibold" style={{ fontSize: rf(11.5), letterSpacing: 0.8, textTransform: "uppercase", color: p?.confident ? colors.positive : colors["text-3"] }}>Next paycheque</Text>
-            {safe.isLoading ? (
-              <ActivityIndicator style={{ alignSelf: "flex-start" }} />
-            ) : p?.confident ? (
-              <>
-                <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }}>
-                  {payday(p.nextDate)} · about {hidden ? "••••••" : formatCents(Math.round(p.amount / 100) * 100)}
-                </Text>
-                <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>From {p.label} · {CADENCE_LABEL[p.cadence]} · the last 3 landed on time</Text>
-              </>
-            ) : p ? (
-              <Text className="font-ui text-text-2" style={{ fontSize: rf(13.5) }}>Your pay from {p.label} hasn&apos;t landed on a steady schedule lately. Until it does, payday comes from your income schedule, or the end of the month.</Text>
-            ) : (
-              <Text className="font-ui text-text-2" style={{ fontSize: rf(13.5) }}>No steady paycheque found yet. Set your pay&apos;s category to Income and turn on &quot;Always use&quot;. After three paydays, Tally predicts the next one.</Text>
-            )}
-          </View>
-        </Card>
+        <NextPaychequeCard />
 
         {settings.isLoading || !settings.data ? (
           <ActivityIndicator className="mt-4" />
