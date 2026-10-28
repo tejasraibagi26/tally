@@ -312,8 +312,10 @@ import Constants from "expo-constants";
  * a count of hand-made schedules, which read 0 beside a found paycheque.
  * 2.4.4 limits a card's due day to two digits on a number pad and says
  * what it's for, as web 2.4.5 does with a select.
+ * 2.4.5 replaces that field with a day grid in a bottom sheet
+ * (components/ui/DayOfMonthPicker.tsx), matching web 2.4.6.
  */
-export const APP_VERSION = "2.4.4";
+export const APP_VERSION = "2.4.5";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
