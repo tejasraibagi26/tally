@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, gte, inArray, lte, notInArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { plaidClient, getAccessToken, plaidErrorCode, institutionSupportsProduct } from "@/lib/plaid";
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
@@ -174,7 +174,12 @@ async function reconcileHoldings(securities: Security[], holdings: Holding[]): P
 
 const HISTORY_LOOKBACK_DAYS = 730; // ~24 months, matching the transactions history window (§6.3)
 
-/** No cursor for this endpoint (unlike /transactions/sync) — pages the full lookback window every run; upsert-by-id keeps re-fetches idempotent. */
+/**
+ * No cursor for this endpoint (unlike /transactions/sync) — pages the full
+ * lookback window every run; upsert-by-id keeps re-fetches idempotent, and
+ * rows in the window Plaid no longer returns are pruned (see
+ * pruneReissuedInvestmentTransactions).
+ */
 export async function syncInvestmentTransactionsForItem(itemId: string, trigger: SyncTrigger): Promise<void> {
   const startedAt = new Date();
   const [item] = await db.select().from(schema.plaidItems).where(eq(schema.plaidItems.id, itemId)).limit(1);
@@ -215,6 +220,7 @@ export async function syncInvestmentTransactionsForItem(itemId: string, trigger:
     }
 
     await reconcileInvestmentTransactions(allSecurities, all);
+    if (all.length > 0 && all.length >= total) await pruneReissuedInvestmentTransactions(itemId, startDate, endDate, all);
     await recordSyncRun(itemId, "inv_tx", trigger, startedAt, { added: all.length });
   } catch (err) {
     const code = plaidErrorCode(err);
@@ -223,6 +229,30 @@ export async function syncInvestmentTransactionsForItem(itemId: string, trigger:
     await recordSyncRun(itemId, "inv_tx", trigger, startedAt, { error: err instanceof Error ? err.message : "unknown error" });
     throw err; // rethrow so the queue worker retries (§8.2)
   }
+}
+
+/**
+ * Plaid can reissue an investment transaction under a new id (Wealthsimple
+ * does when a transfer settles), with no "removed" list on this endpoint --
+ * so the old row stayed beside the new one and every deposit counted twice
+ * in Investments' "Invested", pushing growth negative. The window was just
+ * fetched in full, so anything stored in it that Plaid didn't return is gone
+ * on Plaid's side. Skipped when the fetch came back empty or short, so a
+ * Plaid hiccup never wipes history.
+ */
+async function pruneReissuedInvestmentTransactions(itemId: string, startDate: string, endDate: string, fetched: InvestmentTransaction[]): Promise<void> {
+  const accountIds = (await db.select({ id: schema.accounts.id }).from(schema.accounts).where(eq(schema.accounts.itemId, itemId))).map((a) => a.id);
+  if (accountIds.length === 0) return;
+  await db
+    .delete(schema.investmentTransactions)
+    .where(
+      and(
+        inArray(schema.investmentTransactions.accountId, accountIds),
+        gte(schema.investmentTransactions.date, startDate),
+        lte(schema.investmentTransactions.date, endDate),
+        notInArray(schema.investmentTransactions.plaidInvestmentTransactionId, fetched.map((r) => r.investment_transaction_id)),
+      ),
+    );
 }
 
 async function reconcileInvestmentTransactions(securities: Security[], rows: InvestmentTransaction[]): Promise<void> {

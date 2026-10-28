@@ -269,8 +269,11 @@
  * disconnected bank's accounts; its transactions still count and the
  * Accounts page lists it under "No longer shared". Ticking it again in
  * Link clears the mark.
+ * 2.2.7 prunes investment transactions Plaid reissued under a new id
+ * (lib/plaidInvestments.ts): the stale copy counted every Wealthsimple
+ * transfer twice in "Invested" and drove growth negative.
  */
-export const APP_VERSION = "2.2.6";
+export const APP_VERSION = "2.2.7";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
