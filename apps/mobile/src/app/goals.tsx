@@ -60,7 +60,7 @@ export default function GoalsScreen() {
               <Info size={15} color={colors.text} strokeWidth={2} />
               <Text className="font-ui-semibold text-text" style={{ fontSize: rf(13.5) }}>How it works</Text>
             </Pressable>
-            {g && <GoalCard summary={goal.data} showCurrent />}
+            {g && <GoalCard summary={goal.data} showCurrent linked={false} />}
 
             {g && p && points.length > 1 && (
               <Card className="pt-5 pb-3 gap-3 overflow-hidden">

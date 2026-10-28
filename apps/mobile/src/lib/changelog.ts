@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.3.5",
+    date: "2026-10-28",
+    changes: [{ kind: "fixed", text: "Tapping the goal card on the Goals screen no longer opens the same screen again on top of itself." }],
+  },
+  {
     version: "2.3.4",
     date: "2026-10-27",
     changes: [{ kind: "fixed", text: "Switches in Settings and elsewhere sit centered in their rows again." }],

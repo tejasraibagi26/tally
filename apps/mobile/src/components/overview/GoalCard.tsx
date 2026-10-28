@@ -47,8 +47,10 @@ export function goalLine(s: GoalSummary, money: Fmt = formatCents): string {
 /**
  * `showCurrent`: the Goals screen adds today's net worth to the sub line;
  * Overview leaves it out, since the net worth card above already shows it.
+ * `linked={false}` on the Goals screen itself, where a tap pushed another
+ * copy of the screen it's already on.
  */
-export function GoalCard({ summary, showCurrent = false }: { summary: GoalSummary | undefined; showCurrent?: boolean }) {
+export function GoalCard({ summary, showCurrent = false, linked = true }: { summary: GoalSummary | undefined; showCurrent?: boolean; linked?: boolean }) {
   const router = useRouter();
   const colors = useThemeColors();
   const rf = useRF();
@@ -56,7 +58,7 @@ export function GoalCard({ summary, showCurrent = false }: { summary: GoalSummar
   if (!summary) return null;
   if (!summary.goal || !summary.projection) {
     return (
-      <Pressable onPress={() => router.push("/goals" as Href)} accessibilityRole="button" accessibilityLabel="Set a goal for the year">
+      <Pressable onPress={() => router.push("/goals" as Href)} disabled={!linked} accessibilityRole={linked ? "button" : undefined} accessibilityLabel="Set a goal for the year">
         <Card className="p-5 flex-row items-center gap-3.5">
           <View className="w-10 h-10 rounded-control bg-brand-subtle items-center justify-center">
             <Target size={20} color={colors.brand} strokeWidth={2} />
@@ -74,7 +76,7 @@ export function GoalCard({ summary, showCurrent = false }: { summary: GoalSummar
   const tone = colors[status.tone]!;
   const toneBg = status.tone === "text-2" ? colors.sunken! : colors[`${status.tone}-subtle`]!;
   return (
-    <Pressable onPress={() => router.push("/goals" as Href)} accessibilityRole="button" accessibilityLabel={`Year-end goal, ${status.label}. ${goalLine(summary, money)}`}>
+    <Pressable onPress={() => router.push("/goals" as Href)} disabled={!linked} accessibilityRole={linked ? "button" : undefined} accessibilityLabel={`Year-end goal, ${status.label}. ${goalLine(summary, money)}`}>
       <Card className="p-5 gap-3">
         <Text className="font-ui-semibold text-text-2" style={{ fontSize: rf(11.5), letterSpacing: 0.8, textTransform: "uppercase" }}>Year-end goal</Text>
         <Text className="font-display text-text" style={{ fontSize: rf(28), fontVariant: ["tabular-nums"] }}>

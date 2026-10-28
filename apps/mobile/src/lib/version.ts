@@ -279,8 +279,10 @@ import Constants from "expo-constants";
  * sharing web's words via @tally/core/goalMath GOAL_HOW_IT_WORKS.
  * 2.3.4 centres every Switch in its row (alignSelf: "center"): iOS 26's
  * switch drew at the top of the row otherwise.
+ * 2.3.5 stops the Goals screen's goal card linking to Goals (GoalCard
+ * linked={false}): each tap stacked another copy of the screen.
  */
-export const APP_VERSION = "2.3.4";
+export const APP_VERSION = "2.3.5";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
