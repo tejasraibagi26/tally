@@ -16,6 +16,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.4.0",
+    date: "2026-10-28",
+    changes: [
+      { kind: "new", text: "Safe to spend on Overview: the cash you can spend before your next paycheque without missing a bill or a card payment. Tap it for the breakdown." },
+      { kind: "new", text: "Settings → Safe to spend: your next paycheque, which accounts count, a cushion, and due days for cards your bank doesn't report." },
+      { kind: "new", text: "An email when safe to spend drops below an amount you choose, set in Alerts." },
+      { kind: "fixed", text: "In dark mode, cards show their sticker edge again instead of fading into the background." },
+    ],
+  },
+  {
     version: "2.3.10",
     date: "2026-10-28",
     changes: [{ kind: "fixed", text: "\"Always use\" now works for transactions with no merchant name, like paycheques: it remembers your category for deposits that look the same, even when the reference number changes." }],

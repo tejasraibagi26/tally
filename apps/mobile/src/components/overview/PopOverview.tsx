@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
+import { ChevronRight } from "lucide-react-native";
 import { useColorScheme, vars } from "nativewind";
 import { formatCents } from "@tally/core/money";
 import { TallyMarks } from "@/components/ui/TallyMarks";
@@ -77,7 +78,7 @@ export function HeroSurface({ children }: { children: ReactNode }) {
 }
 
 /** On-pace days: finished days in a row under an even daily pace, as tally marks on marigold. */
-export function OnPaceCard({ streak, dailyPace }: { streak: number; dailyPace: number }) {
+export function OnPaceCard({ streak, dailyPace, compact = false }: { streak: number; dailyPace: number; /** One row under the safe to spend card: marks, count, a short line. */ compact?: boolean }) {
   const colors = useThemeColors();
   const rf = useRF();
   const router = useRouter();
@@ -88,6 +89,24 @@ export function OnPaceCard({ streak, dailyPace }: { streak: number; dailyPace: n
     streak === 0
       ? `Yesterday went over your ${formatCents(dailyPace)} daily pace. Today's a fresh start.`
       : `${streak === 1 ? "Day" : "Days"} in a row under your ${formatCents(dailyPace)} daily pace.${streak < 15 ? ` ${next === 1 ? "One more closes" : `${next} more close`} the next five.` : ""}`;
+  if (compact) {
+    return (
+      <Pressable
+        onPress={() => router.push("/(tabs)/transactions")}
+        className="rounded-card border-card border-ink px-4 py-3 flex-row items-center gap-3 active:opacity-90"
+        style={[{ backgroundColor: colors.marigold }, sticker]}
+        accessibilityRole="button"
+        accessibilityLabel={`On-pace days: ${streak}. ${line}`}
+      >
+        {streak > 0 && <TallyMarks count={streak} height={24} color={ink} accent={colors["marigold-accent"]!} />}
+        <Text className="font-display" style={{ color: ink, fontSize: rf(28), lineHeight: rf(32), fontVariant: ["tabular-nums"] }}>{streak}</Text>
+        <Text className="font-ui-semibold flex-1" style={{ color: ink, fontSize: rf(13.5) }} numberOfLines={2}>
+          {streak === 1 ? "day" : "days"} under your {formatCents(dailyPace)} pace
+        </Text>
+        <ChevronRight size={16} color={ink} strokeWidth={2.4} />
+      </Pressable>
+    );
+  }
   return (
     <Pressable
       onPress={() => router.push("/(tabs)/transactions")}

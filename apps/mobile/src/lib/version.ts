@@ -295,8 +295,16 @@ import Constants from "expo-constants";
  * 2.3.10 shows "Always use … for transactions like …" on a transaction with
  * no merchant name (ruleTargetFor, as web 2.3.3 does); useRulePreview takes
  * the rule's match instead of a merchant name.
+ * 2.4.0 adds safe to spend, Tally Pop only, as web 2.4.0 does: a card under
+ * the net worth hero (components/overview/SafeToSpend.tsx, GET
+ * /api/safe-to-spend) with a breakdown sheet, a compact on-pace row under
+ * it, a Safe to spend settings screen (app/safe-to-spend.tsx: next
+ * paycheque, accounts that count, cushion, card due days) linked from
+ * Settings → Data, and the safe_to_spend_low alert with its amount in
+ * Alerts. Pop's dark ink-shadow is the ink color (#6E6895), as on web
+ * 2.4.2: black vanished on the dark canvas.
  */
-export const APP_VERSION = "2.3.10";
+export const APP_VERSION = "2.4.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

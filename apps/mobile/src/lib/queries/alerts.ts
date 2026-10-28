@@ -6,6 +6,8 @@ export type AlertType = "budget_threshold" | "connection_broken" | "large_transa
 export interface AlertPreferences {
   channels: Record<AlertType, { email: boolean }>;
   largeTransactionCents: number;
+  /** Absent from servers before web 2.4.0. */
+  safeToSpendLowCents?: number;
 }
 
 export interface AlertHistoryItem {
@@ -22,6 +24,7 @@ export interface AlertHistoryItem {
 export interface AlertPreferencesPatch {
   channels?: Partial<Record<AlertType, { email: boolean }>>;
   largeTransactionCents?: number;
+  safeToSpendLowCents?: number;
 }
 
 // Same contract as web Settings → Alerts (apps/web/app/api/alerts/...).
@@ -45,6 +48,7 @@ export function useUpdateAlertPreferences() {
         queryClient.setQueryData<AlertPreferences>(["alertPreferences"], {
           channels: { ...prev.channels, ...(patch.channels as AlertPreferences["channels"]) },
           largeTransactionCents: patch.largeTransactionCents ?? prev.largeTransactionCents,
+          safeToSpendLowCents: patch.safeToSpendLowCents ?? prev.safeToSpendLowCents,
         });
       }
       return { prev };

@@ -79,7 +79,7 @@ export const popDarkColors: Record<string, string> = {
   raised: "#282440",
   "raised-hover": "#2D2847",
   ink: "#6E6895",
-  "ink-shadow": "#000000",
+  "ink-shadow": "#6E6895", // the ink outline: black vanished on the #14121F canvas
   marigold: "#FFCF5C",
   "on-marigold": "#14121F",
   "marigold-accent": "#3B2A9E",

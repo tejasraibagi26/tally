@@ -216,6 +216,7 @@ function RootNavigator() {
               <Stack.Screen name="income-schedules" options={pushedScreenOptions("Income schedules")} />
               <Stack.Screen name="api-tokens" options={pushedScreenOptions("API tokens")} />
               <Stack.Screen name="alerts" options={pushedScreenOptions("Alerts")} />
+              <Stack.Screen name="safe-to-spend" options={pushedScreenOptions("Safe to spend")} />
               <Stack.Screen name="changelog" options={pushedScreenOptions("Changelog")} />
             </Stack.Protected>
             <Stack.Protected guard={status === "unauthenticated"}>

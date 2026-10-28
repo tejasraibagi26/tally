@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView, TextInput, Switch, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
-import { PieChart, Receipt, Repeat, Landmark, Target, type LucideIcon } from "lucide-react-native";
+import { PieChart, Receipt, Repeat, Landmark, Target, PiggyBank, type LucideIcon } from "lucide-react-native";
 import { useUiLook } from "@/lib/UiLookContext";
 import { Card } from "@/components/ui/Card";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
@@ -18,6 +18,7 @@ const TYPES: { type: AlertType; label: string; description: string; icon: Lucide
   { type: "subscription_change", label: "Subscriptions", description: "When a new subscription appears or one gets more expensive.", icon: Repeat },
   { type: "connection_broken", label: "Connections", description: "When a bank needs you to sign in again.", icon: Landmark },
   { type: "goal_off_track", label: "Year-end goal", description: "When your goal's projection falls short, at most once a month.", icon: Target, popOnly: true },
+  { type: "safe_to_spend_low", label: "Safe to spend", description: "When it drops below your amount before payday, at most once per pay period.", icon: PiggyBank, popOnly: true },
 ];
 const ICON_BY_TYPE = Object.fromEntries(TYPES.map((t) => [t.type, t.icon])) as Record<AlertType, LucideIcon>;
 
@@ -74,6 +75,27 @@ export default function AlertsScreen() {
   const history = useAlertHistory(20);
   const update = useUpdateAlertPreferences();
 
+  const [lowAmount, setLowAmount] = useState("");
+  const [lowMsg, setLowMsg] = useState<string | null>(null);
+  useEffect(() => {
+    if (prefs.data?.safeToSpendLowCents != null) setLowAmount(String(prefs.data.safeToSpendLowCents / 100));
+  }, [prefs.data?.safeToSpendLowCents]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function saveLow() {
+    const cents = Math.round(Number(lowAmount || "0") * 100);
+    if (!Number.isFinite(cents) || cents < 0 || cents > 10_000_000) {
+      setLowMsg("Enter an amount from $0 to $100,000.");
+      return;
+    }
+    if (cents === prefs.data?.safeToSpendLowCents) return;
+    try {
+      await update.mutateAsync({ safeToSpendLowCents: cents });
+      setLowMsg("Saved");
+    } catch {
+      setLowMsg("Couldn't save. Try again.");
+    }
+  }
+
   const [threshold, setThreshold] = useState("");
   const [thresholdMsg, setThresholdMsg] = useState<string | null>(null);
   useEffect(() => {
@@ -126,7 +148,7 @@ export default function AlertsScreen() {
                   </View>
                   <Switch style={{ alignSelf: "center" }}
                     accessibilityLabel={`Email ${label.toLowerCase()} alerts`}
-                    value={prefs.data!.channels[type].email}
+                    value={prefs.data!.channels[type]?.email ?? true}
                     onValueChange={(email) => update.mutate({ channels: { [type]: { email } } })}
                     trackColor={{ false: colors["border-strong"], true: colors.brand }}
                     ios_backgroundColor={colors["border-strong"]}
@@ -165,6 +187,39 @@ export default function AlertsScreen() {
                 </Text>
               )}
             </Card>
+
+            {pop && prefs.data.safeToSpendLowCents != null && (
+              <Card className="p-5 gap-2">
+                <View className="flex-row items-center justify-between gap-4">
+                  <View className="flex-1 gap-0.5">
+                    <Text className="font-ui-medium text-text" style={{ fontSize: rf(14.5) }}>Safe to spend alert amount</Text>
+                    <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>Alerts when safe to spend drops below this. $0 means only when you&apos;re short.</Text>
+                  </View>
+                  <View className="flex-row items-center h-11 rounded-control bg-surface-2 px-3" style={{ borderWidth: 1, borderColor: colors["border-strong"] }}>
+                    <Text className="font-ui text-text-3" style={{ fontSize: rf(15) }}>$</Text>
+                    <TextInput
+                      value={lowAmount}
+                      onChangeText={(t) => {
+                        setLowAmount(t.replace(/[^\d.]/g, ""));
+                        setLowMsg(null);
+                      }}
+                      onBlur={saveLow}
+                      onSubmitEditing={saveLow}
+                      keyboardType="decimal-pad"
+                      returnKeyType="done"
+                      accessibilityLabel="Safe to spend alert amount in dollars"
+                      className="font-ui text-text text-right"
+                      style={{ fontSize: rf(15), minWidth: 72, paddingLeft: 4, fontVariant: ["tabular-nums"] }}
+                    />
+                  </View>
+                </View>
+                {lowMsg && (
+                  <Text className={`font-ui self-end ${lowMsg === "Saved" ? "text-text-3" : "text-negative"}`} style={{ fontSize: rf(12) }}>
+                    {lowMsg}
+                  </Text>
+                )}
+              </Card>
+            )}
           </>
         )}
 

@@ -31,6 +31,8 @@ import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { useUiLook } from "@/lib/UiLookContext";
 import { HeroSurface, OnPaceCard } from "@/components/overview/PopOverview";
+import { SafeToSpendCard } from "@/components/overview/SafeToSpend";
+import { useSafeToSpend } from "@/lib/queries/safeToSpend";
 import { GoalCard } from "@/components/overview/GoalCard";
 import { GoalIntroDialog } from "@/components/overview/GoalIntroDialog";
 import { NewLookDialog } from "@/components/overview/NewLookDialog";
@@ -53,6 +55,7 @@ export default function OverviewScreen() {
   const rf = useRF();
   const { pop } = useUiLook();
   const goal = useGoal(pop);
+  const safe = useSafeToSpend(pop);
   const profile = useAccountProfile();
   // One dialog per visit: the new-look announcement first, the goals intro
   // after (an older server sends no list -- nothing to wait for).
@@ -104,6 +107,7 @@ export default function OverviewScreen() {
     queryClient.invalidateQueries({ queryKey: ["investments"] });
     queryClient.invalidateQueries({ queryKey: ["category-breakdown"] });
     queryClient.invalidateQueries({ queryKey: ["goal"] });
+    queryClient.invalidateQueries({ queryKey: ["safe-to-spend"] });
   }
 
   return (
@@ -154,8 +158,13 @@ export default function OverviewScreen() {
           <NetWorthHero netCents={netCents} points={trend.data?.points ?? []} loading={accounts.isLoading} onScrubChange={setIsScrubbingChart} />
         )}
 
-        {/* Tally Pop: the on-pace streak, with a budget to pace against */}
-        {pop && onPace && <OnPaceCard streak={onPace.streak} dailyPace={onPace.dailyPace} />}
+        {/* Tally Pop: safe to spend over a compact on-pace row (the streak needs a budget to pace against) */}
+        {pop && ((safe.data?.cash.length ?? 0) > 0 || onPace) && (
+          <View className="gap-3.5">
+            {safe.data && safe.data.cash.length > 0 && <SafeToSpendCard s={safe.data} />}
+            {onPace && <OnPaceCard streak={onPace.streak} dailyPace={onPace.dailyPace} compact={(safe.data?.cash.length ?? 0) > 0} />}
+          </View>
+        )}
 
         {/* Tally Pop: the year-end goal, or a prompt to set one */}
         {pop && <GoalCard summary={goal.data} />}

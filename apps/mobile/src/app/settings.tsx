@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { View, Text, ScrollView, Pressable, Switch, ActivityIndicator, Alert, TextInput } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, type Href } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as LocalAuthentication from "expo-local-authentication";
-import { AlertTriangle, Bell, ChevronRight, Download, KeyRound, Lock, Mail, ScanFace, Sparkles, SunMoon, Trash2, Wallet } from "lucide-react-native";
+import { AlertTriangle, Bell, ChevronRight, Download, KeyRound, Lock, Mail, PiggyBank, ScanFace, Sparkles, SunMoon, Trash2, Wallet } from "lucide-react-native";
 import { useUiLook } from "@/lib/UiLookContext";
 import { exportTransactions } from "@/lib/exportData";
 import { useAccountProfile, useUpdateAccountProfile, useUpdateRecaps, useChangePassword, useWipeAccount } from "@/lib/queries/account";
@@ -326,6 +326,14 @@ export default function SettingsScreen() {
             value={schedules ? String(schedules.schedules.length) : undefined}
             onPress={() => router.push("/income-schedules")}
           />
+          {/* Tally Pop only, like the Overview card. */}
+          {uiLook.pop && (
+            <Row
+              icon={(c) => <PiggyBank size={15} color={c} strokeWidth={1.9} />}
+              label="Safe to spend"
+              onPress={() => router.push("/safe-to-spend" as Href)}
+            />
+          )}
           <Row
             icon={(c) => <Download size={15} color={c} strokeWidth={1.9} />}
             label={exporting ? "Exporting…" : "Export transactions"}
