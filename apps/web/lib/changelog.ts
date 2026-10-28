@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.6.0",
+    date: "2026-10-28",
+    changes: [
+      { kind: "new", text: "Tags add up a trip, an event or a project across categories: its total, cost per day, day by day and by category, under Tags in the sidebar." },
+      { kind: "new", text: "Tag many transactions at once: select them on Transactions and choose Tag." },
+      { kind: "improved", text: "A tag on a transaction opens everything with that tag; its × removes it." },
+    ],
+  },
+  {
     version: "2.5.0",
     date: "2026-10-28",
     changes: [{ kind: "new", text: "Year in review: how far your net worth moved, what came in and went out, your top categories and places, and the months that stood out. Overview links to it in December and January." }],

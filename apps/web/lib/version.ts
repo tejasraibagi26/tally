@@ -335,8 +335,15 @@
  * subscriptions a year, from lib/yearReview.ts and @tally/core/yearReview.
  * Overview shows a Pop banner into it in December and January
  * (reviewSeason).
+ * 2.6.0 adds tags as rollups: /tags lists every tag with its net spend,
+ * count and dates, /tags/[tag] adds one up (@tally/core/tagView: total,
+ * per day, day by day, by category; lib/tags.ts, GET /api/tags and
+ * /api/tags/[tag]). Transactions filters by ?tag= (any date unless dates
+ * are given, on web and the API), the bulk bar gets Tag
+ * (components/transactions/TagPicker.tsx), the panel's tag chips link to
+ * their page with a separate ×, and the side nav gets Tags.
  */
-export const APP_VERSION = "2.5.0";
+export const APP_VERSION = "2.6.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

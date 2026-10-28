@@ -9,6 +9,7 @@ import { formatCents } from "@tally/core/money";
 import { prettifyPfc } from "@tally/core/pfc";
 import { describeTransactionRow, groupByDay } from "@tally/core/transactionView";
 import { cn } from "@/lib/cn";
+import { TagPicker } from "@/components/transactions/TagPicker";
 import { CategoryPicker } from "@/components/transactions/CategoryPicker";
 import { MerchantAvatar } from "@/components/transactions/MerchantAvatar";
 import { TransactionDetailPanel, type TransactionDetailData, type DetailCategoryOption, type DetailSplit } from "@/components/transactions/TransactionDetailPanel";
@@ -62,20 +63,23 @@ export function TransactionsList({
   categories,
   today,
   defaultCurrency,
+  knownTags = [],
 }: {
   rows: TransactionRowData[];
   accountsById: Record<string, AccountLookup>;
   categories: DetailCategoryOption[];
   today: string;
   defaultCurrency: string;
+  /** Tags already in use, offered by the bulk bar's Tag picker. */
+  knownTags?: string[];
 }) {
   const router = useRouter();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [checked, setChecked] = useState<ReadonlySet<string>>(new Set());
   const [cursor, setCursor] = useState<number>(-1);
-  const [pickerFor, setPickerFor] = useState<string | "bulk" | null>(null);
+  const [pickerFor, setPickerFor] = useState<string | "bulk" | "tag" | null>(null);
   // Which bulk action is running, so only its button shows a spinner.
-  const [busy, setBusy] = useState<"setCategory" | "markReviewed" | "exclude" | null>(null);
+  const [busy, setBusy] = useState<"setCategory" | "markReviewed" | "exclude" | "addTag" | null>(null);
   const selected = rows.find((r) => r.id === selectedId) ?? null;
   const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
   const groups = useMemo(() => groupByDay(rows, today), [rows, today]);
@@ -144,13 +148,14 @@ export function TransactionsList({
   }
 
   const bulk = useCallback(
-    async (ids: string[], action: { type: "setCategory"; categoryId: string } | { type: "markReviewed" } | { type: "exclude"; value: boolean }) => {
+    async (ids: string[], action: { type: "setCategory"; categoryId: string } | { type: "markReviewed" } | { type: "exclude"; value: boolean } | { type: "addTag"; tag: string }) => {
       if (ids.length === 0) return;
       setBusy(action.type);
       try {
         const res = await fetch("/api/transactions/bulk", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ids, action }) });
         if (!res.ok) throw new Error("Bulk update failed");
         setChecked(new Set());
+        if (action.type === "addTag") showToast(`Tagged ${ids.length} “${action.tag}”`);
         router.refresh();
       } catch (err) {
         console.error(err);
@@ -303,6 +308,14 @@ export function TransactionsList({
             </Button>
             {pickerFor === "bulk" && (
               <CategoryPicker className="absolute bottom-full mb-2 left-0" categories={categories} onPick={(categoryId) => void bulk([...checked], { type: "setCategory", categoryId })} onClose={() => setPickerFor(null)} />
+            )}
+          </span>
+          <span className="relative">
+            <Button variant="secondary" size="sm" loading={busy === "addTag"} disabled={busy !== null} onClick={() => setPickerFor("tag")}>
+              Tag
+            </Button>
+            {pickerFor === "tag" && (
+              <TagPicker className="absolute bottom-full mb-2 left-0" known={knownTags} onPick={(tag) => void bulk([...checked], { type: "addTag", tag })} onClose={() => setPickerFor(null)} />
             )}
           </span>
           <Button variant="secondary" size="sm" loading={busy === "markReviewed"} disabled={busy !== null} onClick={() => void bulk([...checked], { type: "markReviewed" })}>

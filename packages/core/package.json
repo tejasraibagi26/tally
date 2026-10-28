@@ -33,7 +33,8 @@
     "./syncDialog": "./src/syncDialog.ts",
     "./paycheque": "./src/paycheque.ts",
     "./safeToSpend": "./src/safeToSpend.ts",
-    "./yearReview": "./src/yearReview.ts"
+    "./yearReview": "./src/yearReview.ts",
+    "./tagView": "./src/tagView.ts"
   },
   "scripts": {
     "test": "vitest run",

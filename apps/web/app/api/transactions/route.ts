@@ -52,8 +52,11 @@ export async function GET(req: Request) {
   const merchantFilter = sp.get("merchant") ?? "";
   const thisMonth = (await currentMonthFor(userId));
   const hasExplicitDateFilter = sp.has("from") || sp.has("to");
-  const fromFilter = sp.get("from") ?? thisMonth;
-  const toFilter = sp.get("to") ?? monthLastDay(thisMonth);
+  // ?tag=: that tag's transactions; with no dates given, from any date (as on web).
+  const tagFilter = (sp.get("tag") ?? "").trim();
+  const allTime = tagFilter !== "" && !hasExplicitDateFilter;
+  const fromFilter = allTime ? "" : (sp.get("from") ?? thisMonth);
+  const toFilter = allTime ? "" : (sp.get("to") ?? monthLastDay(thisMonth));
   const kindParam = sp.get("kind");
   const kindFilter = kindParam === "income" || kindParam === "expense" ? kindParam : "";
   const transferFilter = sp.get("transfer") === "0" ? false : sp.get("transfer") === "1" ? true : null;
@@ -76,6 +79,7 @@ export async function GET(req: Request) {
   // ?review=1: only rows still waiting for review (the mobile "To review" pill).
   if (url.searchParams.get("review") === "1") conditions.push(eq(schema.transactions.reviewed, false), eq(schema.transactions.isTransfer, false));
   if (kindFilter) conditions.push(eq(schema.categories.kind, kindFilter));
+  if (tagFilter) conditions.push(sql`${schema.transactions.tags} @> ${JSON.stringify([tagFilter])}::jsonb`);
   if (merchantFilter) {
     const merchantCondition = or(
       eq(schema.transactions.merchantName, merchantFilter),

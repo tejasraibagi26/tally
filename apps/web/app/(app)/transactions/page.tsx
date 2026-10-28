@@ -19,6 +19,7 @@ import { monthLastDay } from "@tally/core/budgetMath";
 import { formatCents } from "@tally/core/money";
 import { accountDisplayName } from "@tally/core/accountName";
 import Link from "next/link";
+import { tagsFor } from "@/lib/tags";
 import { currentMonthFor, todayFor } from "@/lib/userTimezone";
 import { DEFAULT_CURRENCY } from "@tally/core/fx";
 import { ReviewQueue } from "@/components/transactions/ReviewQueue";
@@ -56,6 +57,8 @@ interface SearchParams {
   review?: string;
   /** "1" = open the review queue on arrival (Tally Pop's "N to tally up"). */
   queue?: string;
+  /** Only transactions carrying this tag; with no dates given, from any date (a tag page's "See transactions"). */
+  tag?: string;
 }
 
 export default async function TransactionsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
@@ -80,8 +83,11 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   // form resubmitted) is a deliberate "show all time" and is left alone.
   const thisMonth = (await currentMonthFor(userId));
   const hasExplicitDateFilter = sp.from !== undefined || sp.to !== undefined;
-  const fromFilter = sp.from ?? thisMonth;
-  const toFilter = sp.to ?? monthLastDay(thisMonth);
+  const tagFilter = (sp.tag ?? "").trim();
+  // A tag spans whatever dates it was used on, so it isn't held to this month by default.
+  const allTime = tagFilter !== "" && !hasExplicitDateFilter;
+  const fromFilter = allTime ? "" : (sp.from ?? thisMonth);
+  const toFilter = allTime ? "" : (sp.to ?? monthLastDay(thisMonth));
   // These three are drill-down-only (set by Overview links, not exposed in the filter form): they let a metric's
   // link reproduce its exact underlying transaction set, e.g. "Spent this month" excludes transfers/excluded rows.
   const kindFilter = sp.kind === "income" || sp.kind === "expense" ? sp.kind : "";
@@ -125,6 +131,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   if (transferFilter != null) passthroughParams.transfer = transferFilter ? "1" : "0";
   if (excludedFilter != null) passthroughParams.excluded = excludedFilter ? "1" : "0";
   if (reviewOnly) passthroughParams.review = "1";
+  if (tagFilter) passthroughParams.tag = tagFilter;
 
   const conditions = [eq(schema.transactions.userId, userId)];
   if (accountIds.length === 1) conditions.push(eq(schema.transactions.accountId, accountIds[0]!));
@@ -140,6 +147,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   if (excludedFilter != null) conditions.push(eq(schema.transactions.excludedFromBudget, excludedFilter));
   if (reviewOnly) conditions.push(eq(schema.transactions.reviewed, false), eq(schema.transactions.isTransfer, false));
   if (kindFilter) conditions.push(eq(schema.categories.kind, kindFilter));
+  if (tagFilter) conditions.push(sql`${schema.transactions.tags} @> ${JSON.stringify([tagFilter])}::jsonb`);
   if (merchantFilter) {
     // Mirrors lib/analytics.ts's merchantBreakdown grouping key (merchantName ?? name).
     const merchantCondition = or(
@@ -153,7 +161,8 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     if (searchCondition) conditions.push(searchCondition);
   }
   const whereClause = and(...conditions);
-  const hasFilters = Boolean(q || accountFilter || pendingOnly || categoryFilter || merchantFilter || hasExplicitDateFilter || reviewOnly);
+  const knownTags = (await tagsFor(userId)).map((t) => t.tag);
+  const hasFilters = Boolean(q || accountFilter || pendingOnly || categoryFilter || merchantFilter || hasExplicitDateFilter || reviewOnly || tagFilter);
 
   // Explicit columns (not select-all) + a leftJoin so `kindFilter` can reference categories.kind — this
   // lets a drill-down link reproduce a metric's exact filter set (transfers/excluded/category kind) precisely.
@@ -275,6 +284,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     if (transferFilter != null) params.set("transfer", transferFilter ? "1" : "0");
     if (excludedFilter != null) params.set("excluded", excludedFilter ? "1" : "0");
     if (reviewOnly) params.set("review", "1");
+    if (tagFilter) params.set("tag", tagFilter);
     if (p > 1) params.set("page", String(p));
     const qs = params.toString();
     return qs ? `/transactions?${qs}` : "/transactions";
@@ -294,7 +304,12 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
         figureContext={
           <>
             spent across <span className="font-medium text-text">{total}</span> transaction{total === 1 ? "" : "s"}{" "}
-            {hasExplicitDateFilter ? "in this range" : `in ${monthLabel(thisMonth).split(" ")[0]}`}
+            {allTime ? "" : hasExplicitDateFilter ? "in this range" : `in ${monthLabel(thisMonth).split(" ")[0]}`}
+            {tagFilter && (
+              <>
+                {allTime ? "" : " "}tagged <Link href={`/tags/${encodeURIComponent(tagFilter)}`} className="font-medium text-brand">{tagFilter}</Link>
+              </>
+            )}
 
           </>
         }
@@ -381,7 +396,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
           </div>
 
           <div className="flex-1 min-h-0 overflow-y-auto">
-            <TransactionsList rows={rowData} accountsById={accountsById} categories={categoryOptions} today={today} defaultCurrency={DEFAULT_CURRENCY} />
+            <TransactionsList rows={rowData} accountsById={accountsById} categories={categoryOptions} today={today} defaultCurrency={DEFAULT_CURRENCY} knownTags={knownTags} />
           </div>
 
           {total > 0 && <Pager page={page} totalPages={totalPages} start={start} end={end} total={total} hrefFor={pageHref} />}

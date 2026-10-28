@@ -517,9 +517,14 @@ export function TransactionDetailPanel({
               />
               <div className="flex items-center gap-1.5 flex-wrap">
                 {tags.map((t) => (
-                  <button key={t} type="button" onClick={() => saveTags(tags.filter((x) => x !== t), `Removed ${t}`)} className="h-7 px-2.5 rounded-full bg-surface-2 text-[12.5px] text-text-2 hover:text-negative" title="Remove tag">
-                    {t} ×
-                  </button>
+                  <span key={t} className="h-7 inline-flex items-center rounded-full bg-surface-2 text-[12.5px] text-text-2">
+                    <Link href={`/tags/${encodeURIComponent(t)}`} className="pl-2.5 pr-1 hover:text-brand" title={`See everything tagged ${t}`}>
+                      {t}
+                    </Link>
+                    <button type="button" onClick={() => saveTags(tags.filter((x) => x !== t), `Removed ${t}`)} className="pr-2.5 pl-0.5 hover:text-negative" aria-label={`Remove tag ${t}`} title="Remove tag">
+                      ×
+                    </button>
+                  </span>
                 ))}
                 {tagInput !== null ? (
                   <input

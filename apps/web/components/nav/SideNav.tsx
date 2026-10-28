@@ -15,6 +15,7 @@ import {
   Flame,
   Target,
   Settings,
+  Tag,
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
@@ -69,6 +70,7 @@ function navGroups(counts: NavCounts): NavGroup[] {
         { href: "/transactions", label: "Transactions", icon: Receipt, meta: String(counts.transactions) },
         { href: "/budgets", label: "Budgets", icon: PieChart },
         { href: "/subscriptions", label: "Subscriptions", icon: Repeat },
+        { href: "/tags", label: "Tags", icon: Tag },
         { href: "/rules", label: "Rules", icon: ListFilter },
       ],
     },
