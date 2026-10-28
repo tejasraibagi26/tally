@@ -218,6 +218,20 @@
       "when": 1793138220474,
       "tag": "0030_careless_paibok",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1793222342772,
+      "tag": "0031_cool_anthem",
+      "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1793222348166,
+      "tag": "0032_cold_lily_hollister",
+      "breakpoints": true
     }
   ]
 }
