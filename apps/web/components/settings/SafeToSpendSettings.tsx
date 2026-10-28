@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Switch } from "@/components/ui/Switch";
+import { DayOfMonthPicker } from "@/components/ui/DayOfMonthPicker";
 import { SettingsGroup, SettingsRow } from "@/components/settings/SettingsLayout";
 import { showToast } from "@/lib/toast";
 import { cn } from "@/lib/cn";
@@ -45,25 +46,16 @@ function AmountField({ id, value, onChange, onSave, error, label }: { id: string
   );
 }
 
-function ordinal(n: number): string {
-  const rem = n % 100;
-  if (rem >= 11 && rem <= 13) return `${n}th`;
-  return `${n}${({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th"}`;
-}
-
-/** "" = not set; "0" = the month's last day; "1".."30" a day of the month. */
-const DUE_DAY_OPTIONS = [{ value: "", label: "Not set" }, ...Array.from({ length: 30 }, (_, i) => ({ value: String(i + 1), label: ordinal(i + 1) })), { value: "0", label: "Last day" }];
-
 function DueDayRow({ card }: { card: SafeToSpendSettingsProps["cards"][number] }) {
   const router = useRouter();
-  const [value, setValue] = useState(card.dueDay == null ? "" : String(card.dueDay));
+  const [value, setValue] = useState(card.dueDay);
   const [saving, setSaving] = useState(false);
 
-  async function pick(next: string) {
+  async function pick(next: number | null) {
     const prev = value;
     setValue(next);
     setSaving(true);
-    const ok = await put({ dueDays: { [card.id]: next === "" ? null : Number(next) } });
+    const ok = await put({ dueDays: { [card.id]: next } });
     setSaving(false);
     if (ok) router.refresh();
     else {
@@ -76,21 +68,8 @@ function DueDayRow({ card }: { card: SafeToSpendSettingsProps["cards"][number] }
     <SettingsRow
       title={`${card.label} payment due`}
       description="The day of the month this card's payment is due. Your bank doesn't report it, so until you set it, safe to spend assumes the statement is due before payday."
-      htmlFor={`due-${card.id}`}
     >
-      <select
-        id={`due-${card.id}`}
-        value={value}
-        disabled={saving}
-        onChange={(e) => pick(e.target.value)}
-        className="h-8 rounded-control border border-border-strong bg-surface px-2.5 text-[14px] text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-info disabled:opacity-50"
-      >
-        {DUE_DAY_OPTIONS.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
+      <DayOfMonthPicker value={value} onChange={pick} disabled={saving} label={`${card.label} payment due day`} />
     </SettingsRow>
   );
 }

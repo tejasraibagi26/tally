@@ -325,8 +325,10 @@
  * 2.4.5 makes a card's due day (Settings → Safe to spend) a select -- Not
  * set, 1st-30th, Last day -- instead of the money field, which took any
  * number of digits; the row says what it's for.
+ * 2.4.6 swaps that 32-row select for a day grid popover
+ * (components/ui/DayOfMonthPicker.tsx): 1-31, Last day, Clear.
  */
-export const APP_VERSION = "2.4.5";
+export const APP_VERSION = "2.4.6";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
