@@ -1,7 +1,7 @@
 import { View, Text, Pressable, Platform } from "react-native";
 import { useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Repeat, TrendingUp, Flame, Settings, LogOut, ChevronRight, CreditCard, Target } from "lucide-react-native";
+import { Repeat, TrendingUp, Flame, Settings, LogOut, ChevronRight, CreditCard, Target, CalendarDays } from "lucide-react-native";
 import { useUiLook } from "@/lib/UiLookContext";
 import { useAuth } from "@/lib/AuthContext";
 import { useThemeColors } from "@/theme/useThemeColors";
@@ -88,6 +88,9 @@ export default function MoreScreen() {
           )}
           <View style={soft}>
             <Row icon={<Flame size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Early retirement" onPress={() => go("/fire")} colors={colors} />
+          </View>
+          <View style={soft}>
+            <Row icon={<CalendarDays size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Year in review" onPress={() => go("/year-in-review" as Href)} colors={colors} />
           </View>
         </View>
       </View>

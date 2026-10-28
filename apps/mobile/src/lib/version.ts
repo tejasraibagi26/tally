@@ -314,8 +314,11 @@ import Constants from "expo-constants";
  * what it's for, as web 2.4.5 does with a select.
  * 2.4.5 replaces that field with a day grid in a bottom sheet
  * (components/ui/DayOfMonthPicker.tsx), matching web 2.4.6.
+ * 2.5.0 adds Year in review (app/year-in-review.tsx, GET
+ * /api/year-in-review), web 2.5.0's sections in one column with a year
+ * switcher, from a new More row (lib/moreSheet.ts grows 49pt).
  */
-export const APP_VERSION = "2.4.5";
+export const APP_VERSION = "2.5.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.5.0",
+    date: "2026-10-28",
+    changes: [{ kind: "new", text: "Year in review, under More: how far your net worth moved, what came in and went out, your top categories and places, and the months that stood out." }],
+  },
+  {
     version: "2.4.5",
     date: "2026-10-28",
     changes: [{ kind: "improved", text: "A card's payment due day is picked from a calendar grid, like on the web." }],
