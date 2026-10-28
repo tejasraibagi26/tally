@@ -3,6 +3,7 @@ import { useRouter, type Href } from "expo-router";
 import { Tag } from "lucide-react-native";
 import { formatCents } from "@tally/core/money";
 import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { useThemeColors } from "@/theme/useThemeColors";
@@ -32,9 +33,14 @@ export default function TagsScreen() {
         {isLoading ? (
           <ActivityIndicator className="mt-8" />
         ) : (data?.tags.length ?? 0) === 0 ? (
-          <Text className="font-ui text-text-2 px-1" style={{ fontSize: rf(14), lineHeight: rf(20) }}>
-            No tags yet. Tags add up a trip, an event or a project across categories, like a trip&apos;s flights, hotels and meals. Add one from a transaction&apos;s Note and tags, or select several on the web and choose Tag.
-          </Text>
+          // Same card, icon and words as web's Tags page (app/(app)/tags/page.tsx), with mobile's own way to tag.
+          <Card className="py-10 px-5">
+            <EmptyState
+              icon={Tag}
+              title="No tags yet"
+              description="Tag transactions to add them up across categories, like a trip's flights, hotels and meals. Tag one from its Note and tags, select several on the web and choose Tag, or have a rule do it."
+            />
+          </Card>
         ) : (
           data!.tags.map((t) => (
             <Pressable key={t.tag} onPress={() => router.push(`/tag/${encodeURIComponent(t.tag)}` as Href)} accessibilityRole="button" accessibilityLabel={`${t.tag}: ${formatCents(t.spend)}`}>

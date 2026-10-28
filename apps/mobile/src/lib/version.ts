@@ -329,8 +329,9 @@ import Constants from "expo-constants";
  * as web 2.7.1 does.
  * 2.7.2 takes Year in review out of the More menu (lib/moreSheet.ts back
  * to 513pt); Overview's January strip is the way in.
+ * 2.7.3 gives Tags' empty screen web's card, icon and title (EmptyState).
  */
-export const APP_VERSION = "2.7.2";
+export const APP_VERSION = "2.7.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
