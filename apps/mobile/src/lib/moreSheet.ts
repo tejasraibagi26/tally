@@ -6,9 +6,9 @@ import { Platform } from "react-native";
  * (48pt rows plus hairlines), the build line and bottom padding. Update it if
  * rows are added or removed: each row is 48pt plus a 1pt hairline. 464 =
  * 415 + 49 for Credit cards (mobile v1.27.1); 513 = + 49 for Year in
- * review (mobile v2.5.0).
+ * review (mobile v2.5.0); 562 = + 49 for Tags (mobile v2.6.0).
  */
-export const MORE_SHEET_CONTENT_HEIGHT = 513;
+export const MORE_SHEET_CONTENT_HEIGHT = 562;
 
 /**
  * Extra height in the Tally Pop look: Figtree's line box is taller than

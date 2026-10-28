@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { View, Text, ScrollView, Pressable, TextInput, Switch, Platform, Alert } from "react-native";
-import { useLocalSearchParams, useRouter, Stack } from "expo-router";
+import { useLocalSearchParams, useRouter, Stack, type Href } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { X, ChevronRight, ChevronLeft, ChevronDown, Pencil } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -299,9 +299,14 @@ export default function TransactionDetailScreen() {
             />
             <View className="flex-row flex-wrap gap-1.5">
               {tags.map((tag) => (
-                <Pressable key={tag} onPress={() => saveTags(tags.filter((x) => x !== tag), `Removed ${tag}`)} className="h-8 px-3 rounded-full bg-surface-2 justify-center" accessibilityLabel={`Remove tag ${tag}`}>
-                  <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>{tag} ×</Text>
-                </Pressable>
+                <View key={tag} className="h-8 rounded-full bg-surface-2 flex-row items-center">
+                  <Pressable onPress={() => router.push(`/tag/${encodeURIComponent(tag)}` as Href)} className="h-8 pl-3 pr-1 justify-center" accessibilityRole="link" accessibilityLabel={`See everything tagged ${tag}`}>
+                    <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>{tag}</Text>
+                  </Pressable>
+                  <Pressable onPress={() => saveTags(tags.filter((x) => x !== tag), `Removed ${tag}`)} hitSlop={6} className="h-8 pr-3 pl-1 justify-center" accessibilityLabel={`Remove tag ${tag}`}>
+                    <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>×</Text>
+                  </Pressable>
+                </View>
               ))}
               {tagDraft !== null ? (
                 <TextInput

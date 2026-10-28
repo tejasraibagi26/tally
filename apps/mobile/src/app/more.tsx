@@ -1,7 +1,7 @@
 import { View, Text, Pressable, Platform } from "react-native";
 import { useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Repeat, TrendingUp, Flame, Settings, LogOut, ChevronRight, CreditCard, Target, CalendarDays } from "lucide-react-native";
+import { Repeat, TrendingUp, Flame, Settings, LogOut, ChevronRight, CreditCard, Target, CalendarDays, Tag } from "lucide-react-native";
 import { useUiLook } from "@/lib/UiLookContext";
 import { useAuth } from "@/lib/AuthContext";
 import { useThemeColors } from "@/theme/useThemeColors";
@@ -74,6 +74,9 @@ export default function MoreScreen() {
         <Text className="font-ui-medium text-text-3 px-1" style={caption}>Your money</Text>
         <View className="rounded-card bg-surface-2 border border-border overflow-hidden">
           <Row icon={<Repeat size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Subscriptions" onPress={() => go("/subscriptions")} colors={colors} />
+          <View style={soft}>
+            <Row icon={<Tag size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Tags" onPress={() => go("/tags" as Href)} colors={colors} />
+          </View>
           <View style={soft}>
             <Row icon={<TrendingUp size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Investments" onPress={() => go("/investments")} colors={colors} />
           </View>

@@ -317,8 +317,11 @@ import Constants from "expo-constants";
  * 2.5.0 adds Year in review (app/year-in-review.tsx, GET
  * /api/year-in-review), web 2.5.0's sections in one column with a year
  * switcher, from a new More row (lib/moreSheet.ts grows 49pt).
+ * 2.6.0 adds tags: app/tags.tsx lists them from More (another 49pt) and
+ * app/tag/[tag].tsx adds one up (GET /api/tags, /api/tags/[tag]); a
+ * transaction's tag chips open their tag, with a separate ×.
  */
-export const APP_VERSION = "2.5.0";
+export const APP_VERSION = "2.6.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
