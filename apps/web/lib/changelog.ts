@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.3.0",
+    date: "2026-10-28",
+    changes: [{ kind: "improved", text: "A new subscription shows up after its second charge, not its third, when both charges have the same name and amount on the same day of the month." }],
+  },
+  {
     version: "2.2.9",
     date: "2026-10-28",
     changes: [{ kind: "fixed", text: "A dialog's title now lines up with the icon beside it instead of sitting at its top edge." }],

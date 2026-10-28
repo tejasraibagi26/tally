@@ -87,12 +87,29 @@ function amountBand(amountCents: number): number {
 // defaults false — see schema.ts) annual candidate on its own.
 const ANNUAL_TWO_OCCURRENCE_GAP_RANGE: [number, number] = [350, 380];
 
+function daysInMonth(year: number, month: number): number {
+  return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+// Waiting for a third charge means a new monthly subscription only shows up
+// after ~60 days. Two charges promote on their own when nothing but the month
+// differs: the exact same name and amount (to the cent), on the same day of
+// back-to-back months. A day past the end of the shorter month counts as its
+// last day (Jan 31 -> Feb 28).
+function isMonthlyPair(a: RecurringCandidate, b: RecurringCandidate): boolean {
+  if (a.description !== b.description || a.amount !== b.amount) return false;
+  const [ay, am, ad] = a.postedDate.split("-").map(Number) as [number, number, number];
+  const [by, bm, bd] = b.postedDate.split("-").map(Number) as [number, number, number];
+  if (by * 12 + bm - (ay * 12 + am) !== 1) return false;
+  return Math.min(ad, daysInMonth(by, bm)) === bd;
+}
+
 /**
  * Groups by merchant + account + amount band, requires ≥3 occurrences with
  * a stable interval (every gap within ±4 days of the median gap) to promote
  * to a stream — except a two-occurrence group whose single gap lands in the
  * annual band, which promotes on its own (see ANNUAL_TWO_OCCURRENCE_GAP_RANGE
- * above). `now` is injected (not `new Date()`) so status classification is a
+ * above), or an exact same-day monthly pair (see isMonthlyPair). `now` is injected (not `new Date()`) so status classification is a
  * pure, testable function of its inputs.
  */
 export function detectRecurringStreams(candidates: RecurringCandidate[], now: string): DetectedStream[] {
@@ -115,13 +132,14 @@ export function detectRecurringStreams(candidates: RecurringCandidate[], now: st
       group.length === 2 &&
       gaps[0]! >= ANNUAL_TWO_OCCURRENCE_GAP_RANGE[0] &&
       gaps[0]! <= ANNUAL_TWO_OCCURRENCE_GAP_RANGE[1];
-    if (group.length < 3 && !isAnnualPair) continue;
+    const isPair = isAnnualPair || (group.length === 2 && isMonthlyPair(sorted[0]!, sorted[1]!));
+    if (group.length < 3 && !isPair) continue;
 
     const medianGap = median(gaps);
     if (medianGap <= 0) continue;
 
     const maxDeviation = Math.max(...gaps.map((g) => Math.abs(g - medianGap)));
-    const stable = isAnnualPair || maxDeviation <= 4;
+    const stable = isPair || maxDeviation <= 4;
     if (!stable) continue;
 
     const last = sorted[sorted.length - 1]!;
@@ -134,12 +152,12 @@ export function detectRecurringStreams(candidates: RecurringCandidate[], now: st
     else status = "cancelled";
 
     const averageAmount = Math.round(sorted.reduce((sum, c) => sum + c.amount, 0) / sorted.length);
-    const stabilityScore = isAnnualPair ? 1 : Math.max(0, 1 - maxDeviation / 4);
+    const stabilityScore = isPair ? 1 : Math.max(0, 1 - maxDeviation / 4);
     const countBonus = Math.min(1, sorted.length / 6);
-    // Two points a year apart is much weaker evidence than two points a week
-    // or month apart (no way yet to tell a coincidence from a real cadence),
-    // so halve the usual formula's result for an annual pair specifically.
-    const confidence = Math.max(0, Math.min(1, (stabilityScore * 0.7 + countBonus * 0.3) * (isAnnualPair ? 0.5 : 1)));
+    // Two points are much weaker evidence than a run of them (no way yet to
+    // tell a coincidence from a real cadence), so halve the usual formula's
+    // result for a two-charge pair.
+    const confidence = Math.max(0, Math.min(1, (stabilityScore * 0.7 + countBonus * 0.3) * (isPair ? 0.5 : 1)));
 
     streams.push({
       merchantKey: last.merchantKey,

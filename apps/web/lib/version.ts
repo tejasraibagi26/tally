@@ -278,8 +278,12 @@
  * through useConfirmAction.
  * 2.2.9 centres a dialog's title on its icon tile (DialogHeader): a
  * one-line title with no subtitle sat at the tile's top edge.
+ * 2.3.0 finds a monthly subscription from its second charge when the two
+ * match exactly -- same name, same amount to the cent, same day of
+ * back-to-back months (@tally/core/recurringDetection isMonthlyPair) --
+ * instead of waiting ~60 days for a third. Low confidence, like the annual pair.
  */
-export const APP_VERSION = "2.2.9";
+export const APP_VERSION = "2.3.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
