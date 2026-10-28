@@ -97,6 +97,8 @@ export const users = pgTable("users", {
   // One-time announcements the user has dismissed, by key ("new-look", ...),
   // so a new one needs no migration (lib/announcements.ts).
   seenAnnouncements: text("seen_announcements").array().notNull().default(sql`'{}'::text[]`),
+  // Safe to spend never dips into this (cents).
+  safeToSpendCushion: bigint("safe_to_spend_cushion", { mode: "number" }).notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -212,6 +214,12 @@ export const accounts = pgTable("accounts", {
   // one). Balance-refresh syncs must not null this back out just because
   // Plaid still has nothing — see lib/plaidBalances.ts.
   creditLimitIsManual: boolean("credit_limit_is_manual").notNull().default(false),
+  // Safe to spend: whether this account's balance counts as spending money.
+  // Null = the type's default (checking yes, savings no) -- @tally/core/safeToSpend.
+  countsAsCash: boolean("counts_as_cash"),
+  // A card's payment due day the user entered because the bank reports none:
+  // 1-31, 0 = the month's last day. Safe to spend assumes due when unset.
+  paymentDueDay: integer("payment_due_day"),
   balanceAsOf: timestamp("balance_as_of", { withTimezone: true }),
   // Set when the user unticks this account in update-mode Link: the bank is
   // still connected, but Plaid no longer shares this account. It stops
@@ -614,6 +622,8 @@ export const alertTypeEnum = pgEnum("alert_type", [
   "subscription_change",
   // The year-end goal projecting short (lib/alerts/evaluate.ts goalCandidates); Tally Pop users only.
   "goal_off_track",
+  // Safe to spend dropping below alert_preferences.safe_to_spend_low_cents.
+  "safe_to_spend_low",
 ]);
 
 export type AlertType = (typeof alertTypeEnum.enumValues)[number];
@@ -640,6 +650,7 @@ export const alertPreferences = pgTable("alert_preferences", {
   userId: uuid("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
   channels: jsonb("channels").$type<Partial<Record<AlertType, { email: boolean; push?: boolean }>>>().notNull(),
   largeTransactionCents: bigint("large_transaction_cents", { mode: "number" }).notNull().default(50_000),
+  safeToSpendLowCents: bigint("safe_to_spend_low_cents", { mode: "number" }).notNull().default(10_000),
   showAmounts: boolean("show_amounts").notNull().default(true),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });

@@ -4,6 +4,7 @@ import {
   budgetAlerts,
   connectionAlerts,
   largeTransactionAlerts,
+  safeToSpendLowAlert,
   subscriptionAlerts,
   type AlertCandidate,
   type StreamInput,
@@ -18,6 +19,7 @@ import { formatCents } from "@tally/core/money";
 import { goalSummary } from "@/lib/goals";
 import { wantsPopEmail } from "@/lib/uiLook";
 import { deadlineLabel } from "@/lib/goalCopy";
+import { safeToSpendFor } from "@/lib/safeToSpend";
 
 const HISTORY_DAYS = 183; // ~6 months, ALERTS.md §4.3
 
@@ -145,7 +147,11 @@ export async function evaluateAfterTransactionSync(userId: string, plaidTransact
     );
   }
 
-  candidates.push(...(await budgetCandidates(userId)), ...(await subscriptionCandidates(userId)));
+  candidates.push(
+    ...(await budgetCandidates(userId)),
+    ...(await subscriptionCandidates(userId)),
+    ...(await safeToSpendCandidates(userId, prefs.safeToSpendLowCents)),
+  );
   return recordAndDeliver(userId, candidates, prefs);
 }
 
@@ -172,6 +178,26 @@ async function goalCandidates(userId: string): Promise<AlertCandidate[]> {
   ];
 }
 
+/**
+ * Safe to spend (lib/safeToSpend.ts) below the user's amount, Tally Pop
+ * only, once per pay window. Skipped while a counted account's balance is
+ * stale: an old balance can make the number look short when it isn't.
+ */
+async function safeToSpendCandidates(userId: string, threshold?: number): Promise<AlertCandidate[]> {
+  const [user] = await db.select({ uiLook: schema.users.uiLook }).from(schema.users).where(eq(schema.users.id, userId)).limit(1);
+  if (!user || !wantsPopEmail(user)) return [];
+  const s = await safeToSpendFor(userId);
+  if (s.cash.length === 0 || s.stale.length > 0) return [];
+  const alert = safeToSpendLowAlert({
+    amount: s.amount,
+    threshold: threshold ?? (await loadAlertPreferences(userId)).prefs.safeToSpendLowCents,
+    paydayDate: s.payday.date,
+    monthEnd: s.payday.source === "month_end",
+    items: [...s.bills.map((b) => ({ label: b.label, amount: b.amount })), ...s.cards.map((c) => ({ label: `your ${c.label} payment`, amount: c.amount }))],
+  });
+  return alert ? [alert] : [];
+}
+
 /** After a webhook changes a connection's status. */
 export async function evaluateConnections(userId: string): Promise<number> {
   return recordAndDeliver(userId, await connectionCandidates(userId));
@@ -188,6 +214,7 @@ export async function evaluateUserSweep(userId: string): Promise<number> {
     ...(await budgetCandidates(userId)),
     ...(await subscriptionCandidates(userId)),
     ...(await goalCandidates(userId)),
+    ...(await safeToSpendCandidates(userId)),
   ];
   return recordAndDeliver(userId, candidates);
 }

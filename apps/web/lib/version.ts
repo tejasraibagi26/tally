@@ -292,8 +292,21 @@
  * words minus anything holding a digit (@tally/core/rulesEngine
  * ruleTargetFor), so a picked category sticks for the next paycheque. The
  * switch used to show only with a merchant, so nothing carried forward.
+ * 2.4.0 adds safe to spend, Tally Pop only (the Safe to Spend spec): cash
+ * in counted accounts minus bills and card payments due before payday and
+ * a cushion (@tally/core/safeToSpend, loaded by lib/safeToSpend.ts, GET
+ * /api/safe-to-spend). Payday comes from the synced paycheque
+ * (@tally/core/paycheque: same payer, amounts within 15%, a weekly,
+ * biweekly, semi-monthly or monthly cadence, the last three on time),
+ * else the income schedule, else month end. Overview's right column
+ * stacks it over a smaller on-pace card at equal heights, with a ?safe=1
+ * breakdown panel. Settings gets "Next paycheque" under Income and a Safe
+ * to spend section (accounts that count, cushion, due days for cards that
+ * report none; PUT /api/safe-to-spend/settings), and the safe_to_spend_low
+ * alert ($100 default, adjustable) emails once per pay window. Uses
+ * migrations 0031 and 0032.
  */
-export const APP_VERSION = "2.3.3";
+export const APP_VERSION = "2.4.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

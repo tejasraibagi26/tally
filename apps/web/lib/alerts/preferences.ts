@@ -11,6 +11,7 @@ export const DEFAULT_CHANNELS: Record<AlertType, Channels> = {
   large_transaction: { email: true },
   subscription_change: { email: true },
   goal_off_track: { email: true },
+  safe_to_spend_low: { email: true },
 };
 
 export const ALERT_TYPES = Object.keys(DEFAULT_CHANNELS) as AlertType[];
@@ -18,6 +19,7 @@ export const ALERT_TYPES = Object.keys(DEFAULT_CHANNELS) as AlertType[];
 export interface AlertPreferences {
   channels: Record<AlertType, Channels>;
   largeTransactionCents: number;
+  safeToSpendLowCents: number;
 }
 
 /**
@@ -33,6 +35,7 @@ export async function loadAlertPreferences(userId: string): Promise<{ prefs: Ale
           ALERT_TYPES.map((t) => [t, { email: row.channels[t]?.email ?? DEFAULT_CHANNELS[t].email }]),
         ) as Record<AlertType, Channels>,
         largeTransactionCents: row.largeTransactionCents,
+        safeToSpendLowCents: row.safeToSpendLowCents,
       },
       created: false,
     };
@@ -44,5 +47,5 @@ export async function loadAlertPreferences(userId: string): Promise<{ prefs: Ale
     .returning({ userId: schema.alertPreferences.userId });
   // A concurrent first read lost the race: the other one seeds, this one reads.
   if (inserted.length === 0) return loadAlertPreferences(userId);
-  return { prefs: { channels: DEFAULT_CHANNELS, largeTransactionCents: 50_000 }, created: true };
+  return { prefs: { channels: DEFAULT_CHANNELS, largeTransactionCents: 50_000, safeToSpendLowCents: 10_000 }, created: true };
 }

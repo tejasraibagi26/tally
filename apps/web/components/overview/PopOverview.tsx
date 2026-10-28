@@ -15,18 +15,18 @@ import { cn } from "@/lib/cn";
 export function OnPaceCard({ streak, dailyPace, href, className }: { streak: number; dailyPace: number; href: string; className?: string }) {
   const next = 5 - (streak % 5);
   return (
-    <Card className={cn("ui-marigold p-5 lg:p-6 flex flex-col gap-3", className)}>
+    <Card className={cn("ui-marigold p-5 flex flex-col gap-2", className)}>
       <span className="text-xs font-semibold uppercase tracking-[0.08em]">On-pace days</span>
-      <div className="flex items-center gap-4 min-h-[48px]">
-        <TallyMarks count={streak} height={48} />
-        <span className="font-display text-[52px] leading-none tabular">{streak}</span>
+      <div className="flex items-center gap-3.5 min-h-[40px]">
+        <TallyMarks count={streak} height={40} />
+        <span className="font-display text-[40px] leading-none tabular">{streak}</span>
       </div>
-      <p className="m-0 text-[15px] leading-snug font-medium">
+      <p className="m-0 text-[14px] leading-snug font-medium">
         {streak === 0
           ? `Yesterday went over your ${formatCents(dailyPace)} daily pace. Today's a fresh start.`
           : `${streak === 1 ? "Day" : "Days"} in a row under your ${formatCents(dailyPace)} daily pace.${streak < 15 ? ` ${next === 1 ? "One more closes" : `${next} more close`} the next five.` : ""}`}
       </p>
-      <Link href={href} className="mt-auto text-[13.5px] font-semibold underline underline-offset-2">
+      <Link href={href} className="mt-auto text-[13px] font-semibold underline underline-offset-2">
         See the days
       </Link>
     </Card>

@@ -7,8 +7,11 @@ import { formatCents } from "./money";
  * database, push or email.
  */
 
-/** goal_off_track: the year-end goal (goalMath) projects short; Tally Pop users only. */
-export type AlertType = "budget_threshold" | "connection_broken" | "large_transaction" | "subscription_change" | "goal_off_track";
+/**
+ * goal_off_track: the year-end goal (goalMath) projects short; Tally Pop users only.
+ * safe_to_spend_low: safe to spend (safeToSpend) drops below the user's amount; Tally Pop only.
+ */
+export type AlertType = "budget_threshold" | "connection_broken" | "large_transaction" | "subscription_change" | "goal_off_track" | "safe_to_spend_low";
 
 export interface AlertCandidate {
   type: AlertType;
@@ -255,4 +258,34 @@ export function connectionAlerts(items: ItemInput[]): AlertCandidate[] {
     });
   }
   return out;
+}
+
+// ---------------------------------------------------------------------------
+// Safe to spend low (the Safe to Spend spec, "Alert")
+
+export interface SafeToSpendAlertInput {
+  /** Safe to spend in cents; negative when short. */
+  amount: number;
+  /** alert_preferences.safe_to_spend_low_cents. */
+  threshold: number;
+  /** The pay window's payday (or the day after month end with no payday). */
+  paydayDate: string;
+  monthEnd: boolean;
+  /** Bills and card payments in the window, to name the biggest. */
+  items: { label: string; amount: number }[];
+}
+
+function shortDate(date: string): string {
+  return new Date(`${date}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" });
+}
+
+/** Once per pay window: the dedupe key holds the payday, so the next window can alert again. */
+export function safeToSpendLowAlert(s: SafeToSpendAlertInput): AlertCandidate | null {
+  if (s.amount >= s.threshold) return null;
+  const until = s.monthEnd ? `the end of the month` : shortDate(s.paydayDate);
+  const title = s.amount < 0 ? `You're ${formatCents(-s.amount)} short before payday` : `Safe to spend is down to ${formatCents(s.amount)}`;
+  const top = [...s.items].sort((a, b) => b.amount - a.amount).slice(0, 2);
+  const named = top.map((i) => `${i.label} (${formatCents(i.amount)})`).join(" and ");
+  const body = top.length ? `${named} come${top.length === 1 ? "s" : ""} out before ${until}.` : `That's what's left until ${until}.`;
+  return { type: "safe_to_spend_low", dedupeKey: `safe_to_spend_low:${s.paydayDate}`, title, body, url: "/overview?safe=1" };
 }

@@ -31,6 +31,12 @@ const COPY: Record<AlertType, { label: string; why: string; cta: string; setting
     cta: "View your goal",
     settingName: "goal alerts",
   },
+  safe_to_spend_low: {
+    label: "Safe to spend",
+    why: "Safe to spend is the cash in your spending accounts, minus bills and card payments due before payday and your cushion. This alert comes at most once per pay period.",
+    cta: "See the breakdown",
+    settingName: "safe to spend alerts",
+  },
   subscription_change: {
     label: "Subscription alert",
     why: "Tally spotted this from your recent charges. You can review or remove subscriptions at any time.",
@@ -83,6 +89,7 @@ const POP_BADGE: Record<AlertType, { bg: string; fg: string; glyph: string }> = 
   large_transaction: { bg: "#E6E0FF", fg: "#1D1B2F", glyph: "&#9679;" },
   subscription_change: { bg: "#E6E0FF", fg: "#1D1B2F", glyph: "&#8635;" },
   goal_off_track: { bg: "#FFC53D", fg: "#1D1B2F", glyph: "&#9650;" },
+  safe_to_spend_low: { bg: "#FFC53D", fg: "#1D1B2F", glyph: "&#9660;" },
 };
 
 const POP_FONT = "Figtree,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif";

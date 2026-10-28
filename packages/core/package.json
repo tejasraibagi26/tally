@@ -30,7 +30,9 @@
     "./merchantLogo": "./src/merchantLogo.ts",
     "./merchantName": "./src/merchantName.ts",
     "./cardView": "./src/cardView.ts",
-    "./syncDialog": "./src/syncDialog.ts"
+    "./syncDialog": "./src/syncDialog.ts",
+    "./paycheque": "./src/paycheque.ts",
+    "./safeToSpend": "./src/safeToSpend.ts"
   },
   "scripts": {
     "test": "vitest run",

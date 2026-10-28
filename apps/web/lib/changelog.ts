@@ -15,6 +15,16 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.4.0",
+    date: "2026-10-28",
+    changes: [
+      { kind: "new", text: "Safe to spend on Overview: the cash you can spend before your next paycheque without missing a bill or a card payment, with a breakdown one click away." },
+      { kind: "new", text: "Tally now finds your paycheque in your deposits and shows the next one under Settings → Income." },
+      { kind: "new", text: "Settings → Safe to spend: choose which accounts count, set a cushion, and add a due day for a card your bank doesn't report one for." },
+      { kind: "new", text: "An email when safe to spend drops below an amount you choose ($100 to start)." },
+    ],
+  },
+  {
     version: "2.3.3",
     date: "2026-10-28",
     changes: [{ kind: "fixed", text: "\"Always use\" now works for transactions with no merchant name, like paycheques: it remembers your category for deposits that look the same, even when the reference number changes." }],

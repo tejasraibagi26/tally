@@ -30,6 +30,8 @@ import { todayInZone } from "@tally/core/zonedDate";
 import { monthSummary } from "@tally/core/budgetView";
 import { greetingFor, leftToSpendLine, onPaceStreak } from "@tally/core/popView";
 import { OnPaceCard, TallyUpBanner } from "@/components/overview/PopOverview";
+import { SafeToSpendCard } from "@/components/overview/SafeToSpend";
+import { safeToSpendFor } from "@/lib/safeToSpend";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { goalSummary, goalsIntroSeen } from "@/lib/goals";
 import { GoalIntroModal } from "@/components/goals/GoalIntroModal";
@@ -163,7 +165,11 @@ export default async function OverviewPage() {
   const dailyPace = totalBudgeted > 0 ? Math.floor(totalBudgeted / daysInMonth) : 0;
   const streak = onPaceStreak(spendByDay, dailyPace, today, monthStart);
   const unreviewed = toReview?.count ?? 0;
-  const [goal, introSeen, seen] = await Promise.all([goalSummary(userId), goalsIntroSeen(userId), seenAnnouncements(userId)]);
+  const [goal, introSeen, seen, safe] = await Promise.all([goalSummary(userId), goalsIntroSeen(userId), seenAnnouncements(userId), safeToSpendFor(userId)]);
+  // Pop's right-hand column: safe to spend over the on-pace card, at equal
+  // heights; either alone fills it. Classic keeps Connections there.
+  const showSafe = safe.cash.length > 0;
+  const popColumn = showSafe || dailyPace > 0;
   // One modal per visit: the new-look announcement first, the goals intro after.
   const lookSeen = seen.includes("new-look");
 
@@ -226,15 +232,20 @@ export default async function OverviewPage() {
           </div>
         </Card>
 
-        {dailyPace > 0 && (
-          <OnPaceCard
-            className="pop-only lg:col-span-4"
-            streak={streak}
-            dailyPace={dailyPace}
-            href={`/transactions?from=${monthStart}&to=${monthEnd}&kind=expense&transfer=0&excluded=0`}
-          />
+        {popColumn && (
+          <div className="pop-only lg:col-span-4 flex flex-col gap-4">
+            {showSafe && <SafeToSpendCard s={safe} className="flex-1 basis-0" />}
+            {dailyPace > 0 && (
+              <OnPaceCard
+                className="flex-1 basis-0"
+                streak={streak}
+                dailyPace={dailyPace}
+                href={`/transactions?from=${monthStart}&to=${monthEnd}&kind=expense&transfer=0&excluded=0`}
+              />
+            )}
+          </div>
         )}
-        <Card className={cn("lg:col-span-4 flex flex-col", dailyPace > 0 && "classic-only")}>
+        <Card className={cn("lg:col-span-4 flex flex-col", popColumn && "classic-only")}>
           <CardHeader title="Connections" />
           <div className="flex-1 flex flex-col gap-3 p-4">
             {items.slice(0, 4).map((item) => (

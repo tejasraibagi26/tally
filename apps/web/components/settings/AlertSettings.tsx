@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { isPopOn } from "@/lib/uiFlag";
 import Link from "next/link";
-import { PieChart, Landmark, Receipt, Repeat, Target, type LucideIcon } from "lucide-react";
+import { PieChart, Landmark, Receipt, Repeat, Target, Wallet, type LucideIcon } from "lucide-react";
 import type { AlertType } from "@tally/core/alerts";
 import type { AlertHistoryItem } from "@/lib/alerts/history";
 import { Switch } from "@/components/ui/Switch";
@@ -14,7 +14,7 @@ import { cn } from "@/lib/cn";
 type Channels = { email: boolean };
 
 export interface AlertSettingsProps {
-  initial: { channels: Record<AlertType, Channels>; largeTransactionCents: number };
+  initial: { channels: Record<AlertType, Channels>; largeTransactionCents: number; safeToSpendLowCents: number };
   history: AlertHistoryItem[];
   recapsEnabled: boolean;
 }
@@ -25,6 +25,7 @@ const TYPES: { type: AlertType; label: string; description: string; icon: Lucide
   { type: "subscription_change", label: "Subscriptions", description: "A new subscription appears or one gets more expensive", icon: Repeat },
   { type: "connection_broken", label: "Connections", description: "A bank needs you to sign in again", icon: Landmark },
   { type: "goal_off_track", label: "Year-end goal", description: "Your goal's projection falls short, at most once a month", icon: Target, popOnly: true },
+  { type: "safe_to_spend_low", label: "Safe to spend", description: "Drops below this amount before payday, at most once per pay period", icon: Wallet, popOnly: true },
 ];
 const ICON_BY_TYPE = Object.fromEntries(TYPES.map((t) => [t.type, t.icon])) as Record<AlertType, LucideIcon>;
 
@@ -83,6 +84,9 @@ export function AlertSettings({ initial, history, recapsEnabled: initialRecaps }
   const [threshold, setThreshold] = useState(String(initial.largeTransactionCents / 100));
   const [savedThreshold, setSavedThreshold] = useState(initial.largeTransactionCents);
   const [thresholdError, setThresholdError] = useState<string | null>(null);
+  const [lowAmount, setLowAmount] = useState(String(initial.safeToSpendLowCents / 100));
+  const [savedLow, setSavedLow] = useState(initial.safeToSpendLowCents);
+  const [lowError, setLowError] = useState<string | null>(null);
   const [showAll, setShowAll] = useState(false);
 
   async function toggleRecaps(next: boolean) {
@@ -117,6 +121,21 @@ export function AlertSettings({ initial, history, recapsEnabled: initialRecaps }
     }
   }
 
+  async function saveLow() {
+    const cents = Math.round(Number(lowAmount || "0") * 100);
+    if (!Number.isFinite(cents) || cents < 0 || cents > 10_000_000) {
+      setLowError("Enter an amount from $0 to $100,000.");
+      return;
+    }
+    if (cents === savedLow) return;
+    if (await patch("/api/alerts/preferences", { safeToSpendLowCents: cents })) {
+      setSavedLow(cents);
+      showToast(cents === 0 ? "Safe to spend alerts only when you're short" : `Safe to spend alerts below $${(cents / 100).toLocaleString("en-US")}`);
+    } else {
+      setLowError("Couldn't save the amount. Try again.");
+    }
+  }
+
   const shown = showAll ? history : history.slice(0, HISTORY_PREVIEW);
 
   return (
@@ -126,7 +145,34 @@ export function AlertSettings({ initial, history, recapsEnabled: initialRecaps }
       </SettingsRow>
 
       {TYPES.filter((t) => !t.popOnly || pop).map(({ type, label, description }) => (
-        <SettingsRow key={type} title={label} description={description} htmlFor={type === "large_transaction" ? "large-threshold" : undefined}>
+        <SettingsRow key={type} title={label} description={description} htmlFor={type === "large_transaction" ? "large-threshold" : type === "safe_to_spend_low" ? "low-threshold" : undefined}>
+          {type === "safe_to_spend_low" && (
+            <div className="flex flex-col items-end gap-1">
+              <div
+                className={cn(
+                  "flex items-center h-8 rounded-control border bg-surface px-2.5 focus-within:ring-2 focus-within:ring-info focus-within:ring-offset-2 focus-within:ring-offset-surface",
+                  lowError ? "border-negative" : "border-border-strong",
+                )}
+              >
+                <span className="text-text-3 text-[14px] pr-1">$</span>
+                <input
+                  id="low-threshold"
+                  inputMode="decimal"
+                  value={lowAmount}
+                  aria-label="Safe to spend alert amount"
+                  aria-invalid={lowError ? true : undefined}
+                  onChange={(e) => {
+                    setLowAmount(e.target.value.replace(/[^\d.]/g, ""));
+                    setLowError(null);
+                  }}
+                  onBlur={saveLow}
+                  onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
+                  className="w-20 bg-transparent text-right text-[14px] tabular outline-none"
+                />
+              </div>
+              {lowError && <span role="alert" className="text-xs text-negative">{lowError}</span>}
+            </div>
+          )}
           {type === "large_transaction" && (
             <div className="flex flex-col items-end gap-1">
               <div

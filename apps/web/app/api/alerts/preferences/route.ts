@@ -10,6 +10,8 @@ const patchSchema = z.object({
   channels: z.record(z.enum(ALERT_TYPES as [string, ...string[]]), channel).optional(),
   // $10 to $100,000
   largeTransactionCents: z.number().int().min(1_000).max(10_000_000).optional(),
+  // $0 (only when short) to $100,000
+  safeToSpendLowCents: z.number().int().min(0).max(10_000_000).optional(),
 });
 
 export async function GET(req: Request) {
@@ -44,6 +46,7 @@ export async function PATCH(req: Request) {
     .set({
       channels,
       largeTransactionCents: parsed.data.largeTransactionCents ?? prefs.largeTransactionCents,
+      safeToSpendLowCents: parsed.data.safeToSpendLowCents ?? prefs.safeToSpendLowCents,
       updatedAt: new Date(),
     })
     .where(eq(schema.alertPreferences.userId, userId));

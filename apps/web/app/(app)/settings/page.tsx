@@ -12,6 +12,14 @@ import { alertHistory } from "@/lib/alerts/history";
 import { ApiKeysManager } from "@/components/settings/ApiKeysManager";
 import { accountDisplayName } from "@tally/core/accountName";
 import { APP_VERSION } from "@/lib/version";
+import { SafeToSpendSettings } from "@/components/settings/SafeToSpendSettings";
+import { paychequeFor } from "@/lib/safeToSpend";
+import { liveAccount } from "@/lib/liveAccounts";
+import { todayFor } from "@/lib/userTimezone";
+import { countsAsCash } from "@tally/core/safeToSpend";
+import { CADENCE_LABEL } from "@tally/core/paycheque";
+import { formatCents } from "@tally/core/money";
+import { CalendarCheck } from "lucide-react";
 import Link from "next/link";
 
 const exportButton =
@@ -57,6 +65,37 @@ export default async function SettingsPage() {
 
   const [{ prefs: alertPrefs }, recentAlerts] = await Promise.all([loadAlertPreferences(userId), alertHistory(userId, 10)]);
 
+  // Safe to spend: bank accounts that could count, cards with no reported due date, the paycheque.
+  const today = await todayFor(userId);
+  const [moneyAccounts, paycheque] = await Promise.all([
+    db
+      .select({
+        id: schema.accounts.id,
+        name: schema.accounts.name,
+        nickname: schema.accounts.nickname,
+        mask: schema.accounts.mask,
+        type: schema.accounts.type,
+        subtype: schema.accounts.subtype,
+        countsAsCash: schema.accounts.countsAsCash,
+        paymentDueDay: schema.accounts.paymentDueDay,
+        reportedDue: schema.liabilitiesCredit.nextPaymentDueDate,
+      })
+      .from(schema.accounts)
+      .leftJoin(schema.liabilitiesCredit, eq(schema.liabilitiesCredit.accountId, schema.accounts.id))
+      .where(and(eq(schema.accounts.userId, userId), eq(schema.accounts.isHidden, false), liveAccount)),
+    paychequeFor(userId, today),
+  ]);
+  const labelOf = (a: { name: string; nickname: string | null; mask: string | null }) => accountDisplayName(a.name, a.nickname) + (a.mask ? ` ····${a.mask}` : "");
+  const safeSettings = {
+    cushion: user?.safeToSpendCushion ?? 0,
+    accounts: moneyAccounts
+      .filter((a) => a.type === "depository")
+      .map((a) => ({ id: a.id, label: labelOf(a), kind: a.subtype ? a.subtype[0]!.toUpperCase() + a.subtype.slice(1) : "Bank account", counts: countsAsCash(a) })),
+    cards: moneyAccounts.filter((a) => a.type === "credit" && !a.reportedDue).map((a) => ({ id: a.id, label: labelOf(a), dueDay: a.paymentDueDay })),
+  };
+  const paychequeAccount = paycheque ? moneyAccounts.find((a) => a.id === paycheque.accountId) : undefined;
+  const paydayLabel = (d: string) => new Date(`${d}T00:00:00Z`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+
   const apiKeys = await db
     .select({
       id: schema.apiKeys.id,
@@ -93,12 +132,45 @@ export default async function SettingsPage() {
         <SettingsGroup
           id="income"
           title="Income"
-          description="For a paycheck your bank doesn't sync reliably: set the amount and pay days once, and Tally adds it on every payday."
+          description="Tally finds your paycheque in your synced deposits. An income schedule is for one your bank doesn't sync reliably: set the amount and pay days once, and Tally adds it on every payday."
         >
+          <SettingsBlock className="flex items-start gap-3.5">
+            <span className="ui-tile w-10 h-10 rounded-control bg-positive-subtle text-positive flex items-center justify-center flex-none">
+              <CalendarCheck size={20} strokeWidth={2} aria-hidden="true" />
+            </span>
+            {paycheque?.confident ? (
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-xs font-bold uppercase tracking-[0.08em] text-positive">Next paycheque</span>
+                <span className="text-[16px] font-semibold text-text">
+                  {paydayLabel(paycheque.nextDate)} · about <span className="money money-fit"><span>{formatCents(Math.round(paycheque.amount / 100) * 100)}</span></span>
+                </span>
+                <span className="text-[13px] text-text-2">
+                  From {paycheque.label}
+                  {paychequeAccount ? ` into ${labelOf(paychequeAccount)}` : ""} · {CADENCE_LABEL[paycheque.cadence]} · the last 3 landed on time
+                </span>
+              </div>
+            ) : paycheque ? (
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-xs font-bold uppercase tracking-[0.08em] text-text-3">Next paycheque</span>
+                <span className="text-[14px] text-text">Your pay from {paycheque.label} hasn&apos;t landed on a steady schedule lately.</span>
+                <span className="text-[13px] text-text-2">Until it does, payday comes from your income schedule, or the end of the month.</span>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-xs font-bold uppercase tracking-[0.08em] text-text-3">Next paycheque</span>
+                <span className="text-[14px] text-text">No steady paycheque found yet.</span>
+                <span className="text-[13px] text-text-2">Set your pay&apos;s category to Income and turn on &quot;Always use&quot;. After three paydays, Tally predicts the next one.</span>
+              </div>
+            )}
+          </SettingsBlock>
           <SettingsBlock>
             <IncomeScheduleManager accounts={accounts} categories={incomeCategories} schedules={incomeSchedulesForDisplay} />
           </SettingsBlock>
         </SettingsGroup>
+
+        <div className="pop-only">
+          <SafeToSpendSettings {...safeSettings} />
+        </div>
 
         <SettingsGroup id="data" title="Data">
           <SettingsRow title="Export transactions" description="Every transaction you have, for backups or moving your data elsewhere">
