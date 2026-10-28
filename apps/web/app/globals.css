@@ -248,6 +248,16 @@
   box-shadow: var(--shadow-raised);
 }
 
+/* A danger card (Settings' Delete data): outline and hard shadow both in
+   the negative tint, so the shadow doesn't stay ink beside a red edge. */
+.ui-card-negative.border {
+  border-color: color-mix(in srgb, var(--negative) 45%, var(--border));
+}
+[data-ui="pop"] .ui-card-negative.rounded-card.border {
+  border-color: color-mix(in srgb, var(--negative) 70%, var(--ink));
+  box-shadow: 4px 4px 0 color-mix(in srgb, var(--negative) 70%, var(--ink-shadow));
+}
+
 /* Round knobs (switches, toggles) keep a ring, not the offset shadow. */
 [data-ui="pop"] .rounded-full.shadow-raised {
   box-shadow: inset 0 0 0 2px var(--ink);

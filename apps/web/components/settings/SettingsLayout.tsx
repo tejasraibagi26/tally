@@ -26,10 +26,7 @@ export function SettingsGroup({
         <h2 className="m-0 text-base font-semibold text-text">{title}</h2>
         {description && <p className="m-0 text-[13.5px] text-text-2">{description}</p>}
       </div>
-      <div
-        className="bg-surface border border-border rounded-card divide-y divide-border"
-        style={tone === "negative" ? { borderColor: "color-mix(in srgb, var(--negative) 45%, var(--border))" } : undefined}
-      >
+      <div className={cn("bg-surface border border-border rounded-card divide-y divide-border", tone === "negative" && "ui-card-negative")}>
         {children}
       </div>
     </section>

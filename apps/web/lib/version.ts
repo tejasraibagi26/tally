@@ -327,8 +327,10 @@
  * number of digits; the row says what it's for.
  * 2.4.6 swaps that 32-row select for a day grid popover
  * (components/ui/DayOfMonthPicker.tsx): 1-31, Last day, Clear.
+ * 2.4.7 draws the Delete data card's Pop shadow in the same negative tint
+ * as its outline (.ui-card-negative), instead of ink beside a red edge.
  */
-export const APP_VERSION = "2.4.6";
+export const APP_VERSION = "2.4.7";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
