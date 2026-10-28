@@ -14,7 +14,7 @@ import { NextPaychequeCard } from "@/components/settings/NextPaychequeCard";
 // same API, same wording. Tally Pop only, like the Overview card. The
 // "Next paycheque" card is shared with the Income screen.
 
-function AmountInput({ value, onChange, onSave, label, prefix = "$", placeholder }: { value: string; onChange: (v: string) => void; onSave: () => void; label: string; prefix?: string; placeholder?: string }) {
+function AmountInput({ value, onChange, onSave, label, prefix = "$", placeholder, dayOfMonth = false }: { value: string; onChange: (v: string) => void; onSave: () => void; label: string; prefix?: string; placeholder?: string; /** A day of the month: whole numbers, two digits at most. */ dayOfMonth?: boolean }) {
   const colors = useThemeColors();
   const rf = useRF();
   return (
@@ -24,10 +24,11 @@ function AmountInput({ value, onChange, onSave, label, prefix = "$", placeholder
         value={value}
         placeholder={placeholder}
         placeholderTextColor={colors["text-3"]}
-        onChangeText={(t) => onChange(t.replace(/[^\d.]/g, ""))}
+        onChangeText={(t) => onChange(t.replace(dayOfMonth ? /\D/g : /[^\d.]/g, ""))}
+        maxLength={dayOfMonth ? 2 : undefined}
         onBlur={onSave}
         onSubmitEditing={onSave}
-        keyboardType="decimal-pad"
+        keyboardType={dayOfMonth ? "number-pad" : "decimal-pad"}
         returnKeyType="done"
         accessibilityLabel={label}
         className="font-ui text-text text-right"
@@ -65,10 +66,10 @@ function DueDayRow({ card, isLast }: { card: { id: string; label: string; dueDay
     <View className="py-4 gap-2" style={!isLast ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}>
       <View className="flex-row items-center gap-3">
         <View className="flex-1 gap-0.5">
-          <Text className="font-ui-medium text-text" style={{ fontSize: rf(14.5) }}>{card.label} due day</Text>
-          <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>Your bank doesn&apos;t report it, so Tally assumes it&apos;s due before payday.</Text>
+          <Text className="font-ui-medium text-text" style={{ fontSize: rf(14.5) }}>{card.label} payment due</Text>
+          <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>The day of the month it&apos;s due (1–31; 31 means the last day). Your bank doesn&apos;t report it, so until you set it, safe to spend assumes it&apos;s due before payday.</Text>
         </View>
-        <AmountInput prefix="" placeholder="e.g. 22" value={value} onChange={(v) => { setValue(v); setMsg(null); }} onSave={commit} label={`${card.label} payment due day`} />
+        <AmountInput dayOfMonth prefix="" placeholder="Day" value={value} onChange={(v) => { setValue(v); setMsg(null); }} onSave={commit} label={`${card.label} payment due day`} />
       </View>
       {msg && <Text className={`font-ui self-end ${msg === "Saved" ? "text-text-3" : "text-negative"}`} style={{ fontSize: rf(12) }}>{msg}</Text>}
     </View>

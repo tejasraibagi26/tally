@@ -310,8 +310,10 @@ import Constants from "expo-constants";
  * Safe to spend screen), and names that screen and its Settings row Income.
  * 2.4.3 gives that row the next paycheque's date ("Next Nov 14") instead of
  * a count of hand-made schedules, which read 0 beside a found paycheque.
+ * 2.4.4 limits a card's due day to two digits on a number pad and says
+ * what it's for, as web 2.4.5 does with a select.
  */
-export const APP_VERSION = "2.4.3";
+export const APP_VERSION = "2.4.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

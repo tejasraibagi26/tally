@@ -18,7 +18,7 @@ async function put(body: unknown): Promise<boolean> {
   return !!res?.ok;
 }
 
-function AmountField({ id, value, onChange, onSave, error, label, prefix = "$", placeholder }: { id: string; value: string; onChange: (v: string) => void; onSave: () => void; error: string | null; label: string; prefix?: string; placeholder?: string }) {
+function AmountField({ id, value, onChange, onSave, error, label }: { id: string; value: string; onChange: (v: string) => void; onSave: () => void; error: string | null; label: string }) {
   return (
     <div className="flex flex-col items-end gap-1">
       <div
@@ -27,12 +27,11 @@ function AmountField({ id, value, onChange, onSave, error, label, prefix = "$", 
           error ? "border-negative" : "border-border-strong",
         )}
       >
-        {prefix && <span className="text-text-3 text-[14px] pr-1">{prefix}</span>}
+        <span className="text-text-3 text-[14px] pr-1">$</span>
         <input
           id={id}
           inputMode="decimal"
           value={value}
-          placeholder={placeholder}
           aria-label={label}
           aria-invalid={error ? true : undefined}
           onChange={(e) => onChange(e.target.value.replace(/[^\d.]/g, ""))}
@@ -46,30 +45,52 @@ function AmountField({ id, value, onChange, onSave, error, label, prefix = "$", 
   );
 }
 
+function ordinal(n: number): string {
+  const rem = n % 100;
+  if (rem >= 11 && rem <= 13) return `${n}th`;
+  return `${n}${({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th"}`;
+}
+
+/** "" = not set; "0" = the month's last day; "1".."30" a day of the month. */
+const DUE_DAY_OPTIONS = [{ value: "", label: "Not set" }, ...Array.from({ length: 30 }, (_, i) => ({ value: String(i + 1), label: ordinal(i + 1) })), { value: "0", label: "Last day" }];
+
 function DueDayRow({ card }: { card: SafeToSpendSettingsProps["cards"][number] }) {
   const router = useRouter();
-  const [value, setValue] = useState(card.dueDay == null ? "" : card.dueDay === 0 ? "31" : String(card.dueDay));
-  const [saved, setSaved] = useState(card.dueDay);
-  const [error, setError] = useState<string | null>(null);
+  const [value, setValue] = useState(card.dueDay == null ? "" : String(card.dueDay));
+  const [saving, setSaving] = useState(false);
 
-  async function save() {
-    const day = value.trim() === "" ? null : Number(value);
-    if (day != null && (!Number.isInteger(day) || day < 1 || day > 31)) {
-      setError("Enter a day from 1 to 31.");
-      return;
+  async function pick(next: string) {
+    const prev = value;
+    setValue(next);
+    setSaving(true);
+    const ok = await put({ dueDays: { [card.id]: next === "" ? null : Number(next) } });
+    setSaving(false);
+    if (ok) router.refresh();
+    else {
+      setValue(prev);
+      showToast(SAVE_FAILED, "negative");
     }
-    // 31 means "the last day", so it lands on Feb 28 and Apr 30 too.
-    const stored = day === 31 ? 0 : day;
-    if (stored === saved) return;
-    if (await put({ dueDays: { [card.id]: stored } })) {
-      setSaved(stored);
-      router.refresh();
-    } else setError(SAVE_FAILED);
   }
 
   return (
-    <SettingsRow title={`${card.label} due day`} description="Your bank doesn't report it, so Tally assumes it's due before payday. Leave it empty to keep assuming." htmlFor={`due-${card.id}`}>
-      <AmountField id={`due-${card.id}`} prefix="" placeholder="e.g. 22" value={value} onChange={(v) => { setValue(v); setError(null); }} onSave={save} error={error} label={`${card.label} payment due day`} />
+    <SettingsRow
+      title={`${card.label} payment due`}
+      description="The day of the month this card's payment is due. Your bank doesn't report it, so until you set it, safe to spend assumes the statement is due before payday."
+      htmlFor={`due-${card.id}`}
+    >
+      <select
+        id={`due-${card.id}`}
+        value={value}
+        disabled={saving}
+        onChange={(e) => pick(e.target.value)}
+        className="h-8 rounded-control border border-border-strong bg-surface px-2.5 text-[14px] text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-info disabled:opacity-50"
+      >
+        {DUE_DAY_OPTIONS.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
+      </select>
     </SettingsRow>
   );
 }

@@ -322,8 +322,11 @@
  * outline and shadow; it was a bare tint that vanished in dark mode) and
  * passes its subtracted amounts as magnitudes: the labels carry the minus,
  * so the cushion read "− Cushion −$50.00".
+ * 2.4.5 makes a card's due day (Settings → Safe to spend) a select -- Not
+ * set, 1st-30th, Last day -- instead of the money field, which took any
+ * number of digits; the row says what it's for.
  */
-export const APP_VERSION = "2.4.4";
+export const APP_VERSION = "2.4.5";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
