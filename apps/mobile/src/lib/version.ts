@@ -303,8 +303,10 @@ import Constants from "expo-constants";
  * Settings → Data, and the safe_to_spend_low alert with its amount in
  * Alerts. Pop's dark ink-shadow is the ink color (#6E6895), as on web
  * 2.4.2: black vanished on the dark canvas.
+ * 2.4.1 matches web 2.4.4: the breakdown sheet's sum is a sticker card, and
+ * its subtracted amounts are magnitudes (no "− Cushion −$50.00").
  */
-export const APP_VERSION = "2.4.0";
+export const APP_VERSION = "2.4.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

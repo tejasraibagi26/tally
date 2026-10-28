@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.4.4",
+    date: "2026-10-28",
+    changes: [{ kind: "fixed", text: "Safe to spend's breakdown sits on a proper card, and the cushion no longer shows a double minus." }],
+  },
+  {
     version: "2.4.3",
     date: "2026-10-28",
     changes: [{ kind: "fixed", text: "The sidebar fits on a laptop screen again instead of scrolling." }],

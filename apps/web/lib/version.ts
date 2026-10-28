@@ -318,8 +318,12 @@
  * rows, four dividers with 16px either side, Pop's taller Figtree), so it
  * scrolled on most laptops. Rows and the display toggles go to py-1.5,
  * group gaps to 10px; it still scrolls in a shorter window.
+ * 2.4.4 puts the safe to spend breakdown's sum on a real card (Pop's ink
+ * outline and shadow; it was a bare tint that vanished in dark mode) and
+ * passes its subtracted amounts as magnitudes: the labels carry the minus,
+ * so the cushion read "− Cushion −$50.00".
  */
-export const APP_VERSION = "2.4.3";
+export const APP_VERSION = "2.4.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
