@@ -29,7 +29,7 @@ export function ThemeToggle({ variant = "switch" }: { variant?: "switch" | "row"
       <button
         onClick={toggle}
         aria-label={isDark ? "Appearance: dark. Switch to light" : "Appearance: light. Switch to dark"}
-        className="w-full flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-control text-[15px] text-text-2 hover:bg-sunken hover:text-text transition-colors"
+        className="w-full flex items-center justify-between gap-2.5 px-2.5 py-1.5 rounded-control text-[15px] text-text-2 hover:bg-sunken hover:text-text transition-colors"
       >
         <span className="flex items-center gap-2.5">
           {isDark ? <Moon size={17} strokeWidth={1.75} /> : <Sun size={17} strokeWidth={1.75} />}

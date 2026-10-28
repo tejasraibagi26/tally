@@ -314,8 +314,12 @@
  * 2.4.2 draws Pop's hard offset shadow in the ink outline's color in dark
  * mode (--ink-shadow #6E6895): pure black on the #14121F canvas hid the
  * sticker edge of every card, panel and button.
+ * 2.4.3 fits the side nav in a ~800px window: it had grown to ~950px (13
+ * rows, four dividers with 16px either side, Pop's taller Figtree), so it
+ * scrolled on most laptops. Rows and the display toggles go to py-1.5,
+ * group gaps to 10px; it still scrolls in a shorter window.
  */
-export const APP_VERSION = "2.4.2";
+export const APP_VERSION = "2.4.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

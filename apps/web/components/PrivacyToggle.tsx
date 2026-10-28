@@ -23,7 +23,7 @@ export function PrivacyToggle({ variant = "switch" }: { variant?: "switch" | "ro
 
   if (variant === "row") {
     return (
-      <button onClick={toggle} role="switch" aria-checked={hidden} aria-label="Hide sensitive amounts" className="w-full flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-control text-[15px] text-text-2 hover:bg-sunken hover:text-text transition-colors">
+      <button onClick={toggle} role="switch" aria-checked={hidden} aria-label="Hide sensitive amounts" className="w-full flex items-center justify-between gap-2.5 px-2.5 py-1.5 rounded-control text-[15px] text-text-2 hover:bg-sunken hover:text-text transition-colors">
         <span className="flex items-center gap-2.5">
           {hidden ? <EyeOff size={17} strokeWidth={1.75} /> : <Eye size={17} strokeWidth={1.75} />}
           Hide amounts

@@ -107,7 +107,7 @@ function NavRow({ item, active }: { item: NavItem; active: boolean }) {
     <Link
       href={item.href}
       className={cn(
-        "flex items-center justify-between px-2.5 py-2 rounded-control text-[15px]",
+        "flex items-center justify-between px-2.5 py-1.5 rounded-control text-[15px]",
         item.popOnly && "pop-only",
         active ? "ui-nav-active bg-brand-subtle text-brand font-medium" : "text-text-2 font-normal hover:bg-sunken",
       )}
@@ -165,7 +165,8 @@ export function SideNav({
   const isActive = (href: string) => pathname?.startsWith(href) ?? false;
 
   return (
-    <nav className="w-60 h-full flex-none bg-surface border-r border-border px-4 py-6 flex flex-col gap-6 overflow-y-auto">
+    // Sized to fit a ~800px window; it scrolls only when the window is shorter.
+    <nav className="w-60 h-full flex-none bg-surface border-r border-border px-4 py-5 flex flex-col gap-5 overflow-y-auto">
       <div className="flex items-center justify-between gap-2 px-2">
         <div className="flex items-center gap-2">
           <LogoMark size={22} />
@@ -178,13 +179,13 @@ export function SideNav({
         )}
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2.5">
         {navGroups(counts).map((group, i) => (
-          <div key={group.label ?? "top"} className="flex flex-col gap-4">
+          <div key={group.label ?? "top"} className="flex flex-col gap-2.5">
             {i > 0 && <div className="h-px bg-border mx-2" />}
             <div className="flex flex-col gap-[2px]">
               {group.label && (
-                <div className="text-xs font-medium uppercase tracking-[0.06em] text-text-3 px-2 pb-2">{group.label}</div>
+                <div className="text-xs font-medium uppercase tracking-[0.06em] text-text-3 px-2 pb-1">{group.label}</div>
               )}
               {group.items.map((item) => (
                 <NavRow key={item.href} item={item} active={isActive(item.href)} />
@@ -194,7 +195,7 @@ export function SideNav({
         ))}
       </div>
 
-      <div className="mt-auto flex flex-col gap-3">
+      <div className="mt-auto flex flex-col gap-2.5">
         <div className="h-px bg-border" />
 
         {mockMode && (

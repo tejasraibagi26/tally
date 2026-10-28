@@ -31,7 +31,7 @@ export function UiToggle() {
   }
 
   return (
-    <button onClick={toggle} role="switch" aria-checked={pop} aria-label="New look" className="w-full flex items-center justify-between gap-2.5 px-2.5 py-2 rounded-control text-[15px] text-text-2 hover:bg-sunken hover:text-text transition-colors">
+    <button onClick={toggle} role="switch" aria-checked={pop} aria-label="New look" className="w-full flex items-center justify-between gap-2.5 px-2.5 py-1.5 rounded-control text-[15px] text-text-2 hover:bg-sunken hover:text-text transition-colors">
       <span className="flex items-center gap-2.5">
         <Sparkles size={17} strokeWidth={1.75} />
         New look

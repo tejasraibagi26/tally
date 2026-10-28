@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.4.3",
+    date: "2026-10-28",
+    changes: [{ kind: "fixed", text: "The sidebar fits on a laptop screen again instead of scrolling." }],
+  },
+  {
     version: "2.4.2",
     date: "2026-10-28",
     changes: [{ kind: "fixed", text: "In dark mode, cards, panels and buttons show their sticker edge again instead of fading into the background." }],
