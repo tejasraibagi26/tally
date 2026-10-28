@@ -352,8 +352,11 @@
  * paid Apple Developer account -- with the browser as the fallback; on a
  * computer it redirects to the page. @tally/core/appLinks holds the safe
  * path check and the web-to-app path mapping.
+ * 2.7.1 shows Year in review only for finished years: the sticker and the
+ * Overview banner in January for the year just ended (featuredReviewYear),
+ * and the page and API default to and stop at latestCompleteYear.
  */
-export const APP_VERSION = "2.7.0";
+export const APP_VERSION = "2.7.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

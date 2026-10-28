@@ -324,8 +324,11 @@ import Constants from "expo-constants";
  * and opens email links in the app: the web's /open hands off
  * tally://<web path>, which app/+native-intent.tsx maps to a screen
  * (@tally/core/appLinks); ?safe=1 opens the safe to spend sheet.
+ * 2.7.1 shows the Overview strip only in January, for the year just ended,
+ * and the review screen starts at (and stops at) the latest finished year,
+ * as web 2.7.1 does.
  */
-export const APP_VERSION = "2.7.0";
+export const APP_VERSION = "2.7.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

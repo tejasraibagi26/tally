@@ -110,17 +110,15 @@ export function yearTitle(r: Pick<YearReview, "year" | "inProgress">): string {
   return r.inProgress ? `${r.year} so far` : String(r.year);
 }
 
-/** When the review is worth surfacing on Overview: December, and January for the year just ended. */
-export function reviewSeason(today: string): number | null {
-  const y = Number(today.slice(0, 4));
-  const m = Number(today.slice(5, 7));
-  if (m === 12) return y;
-  if (m === 1) return y - 1;
-  return null;
+/** The most recent year that has finished: a review only covers whole years. */
+export function latestCompleteYear(today: string): number {
+  return Number(today.slice(0, 4)) - 1;
 }
 
-/** The review the nav and app feature: last year's in January, this year's (so far) the rest of the year. */
-export function featuredReviewYear(today: string): { year: number; inProgress: boolean } {
-  const y = Number(today.slice(0, 4));
-  return Number(today.slice(5, 7)) === 1 ? { year: y - 1, inProgress: false } : { year: y, inProgress: true };
+/**
+ * The finished year the app features (nav sticker, Overview strip and
+ * banner): only in January, right after it ends. Null the rest of the year.
+ */
+export function featuredReviewYear(today: string): number | null {
+  return Number(today.slice(5, 7)) === 1 ? latestCompleteYear(today) : null;
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildYearReview, featuredReviewYear, reviewSeason, yearTitle, type YearReviewInput } from "./yearReview";
+import { buildYearReview, featuredReviewYear, latestCompleteYear, yearTitle, type YearReviewInput } from "./yearReview";
 
 const months = Array.from({ length: 12 }, (_, i) => ({
   month: `2026-${String(i + 1).padStart(2, "0")}-01`,
@@ -63,17 +63,14 @@ describe("buildYearReview", () => {
   });
 });
 
-describe("reviewSeason", () => {
-  it("is December's year in December and last year's in January", () => {
-    expect(reviewSeason("2026-12-02")).toBe(2026);
-    expect(reviewSeason("2027-01-15")).toBe(2026);
-    expect(reviewSeason("2026-10-28")).toBeNull();
-  });
-});
-
 describe("featuredReviewYear", () => {
-  it("features last year's in January and this year's after", () => {
-    expect(featuredReviewYear("2027-01-20")).toEqual({ year: 2026, inProgress: false });
-    expect(featuredReviewYear("2026-10-28")).toEqual({ year: 2026, inProgress: true });
+  it("features the year just ended, in January only", () => {
+    expect(featuredReviewYear("2027-01-20")).toBe(2026);
+    expect(featuredReviewYear("2026-12-02")).toBeNull();
+    expect(featuredReviewYear("2026-10-28")).toBeNull();
+  });
+
+  it("knows the latest finished year", () => {
+    expect(latestCompleteYear("2026-10-28")).toBe(2025);
   });
 });

@@ -132,20 +132,21 @@ export default function OverviewScreen() {
         scrollEnabled={!isScrubbingChart}
       >
         <View className="px-5 pb-1">
-          {/* Year in review, all year: this year so far, last year's in January. */}
+          {/* Year in review, in January only, for the year that just ended (a review covers whole years). */}
           {(() => {
-            const { year, inProgress } = featuredReviewYear(new Date().toISOString().slice(0, 10));
+            const year = featuredReviewYear(new Date().toISOString().slice(0, 10));
+            if (year == null) return null;
             return (
               <Pressable
                 onPress={() => router.push(`/year-in-review?year=${year}` as Href)}
                 className="flex-row items-center gap-2.5 rounded-full mb-3 active:opacity-90"
                 style={{ backgroundColor: colors.marigold ?? colors["warning-subtle"], borderWidth: 2, borderColor: colors.ink ?? colors["border-strong"], paddingVertical: 7, paddingLeft: 14, paddingRight: 7 }}
                 accessibilityRole="button"
-                accessibilityLabel={`Your ${year}${inProgress ? " so far" : ""}: see your year in review`}
+                accessibilityLabel={`Your ${year} in review is ready`}
               >
                 <Text className="font-display" style={{ fontSize: rf(18), color: colors["on-marigold"] ?? colors.text }}>&apos;{String(year).slice(2)}</Text>
                 <Text className="font-ui-semibold flex-1" style={{ fontSize: rf(14), color: colors["on-marigold"] ?? colors.text }} numberOfLines={1}>
-                  {inProgress ? "Your year so far is ready" : `Your ${year} is ready`}
+                  Your {year} in review is ready
                 </Text>
                 <View className="rounded-full px-3 py-1" style={{ backgroundColor: colors.ink ?? colors.text }}>
                   <Text className="font-ui-semibold" style={{ fontSize: rf(12.5), color: colors.marigold ?? colors.canvas }}>See it</Text>

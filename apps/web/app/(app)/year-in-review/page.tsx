@@ -3,7 +3,7 @@ import { requireUserId } from "@/lib/session";
 import { todayFor } from "@/lib/userTimezone";
 import { yearReviewFor } from "@/lib/yearReview";
 import { formatCents, formatPercent } from "@tally/core/money";
-import { yearTitle } from "@tally/core/yearReview";
+import { latestCompleteYear, yearTitle } from "@tally/core/yearReview";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { cn } from "@/lib/cn";
@@ -47,9 +47,10 @@ function Tile({ label, children, sub, href }: { label: string; children: React.R
 export default async function YearInReviewPage({ searchParams }: { searchParams: Promise<{ year?: string }> }) {
   const userId = await requireUserId();
   const today = await todayFor(userId);
-  const thisYear = Number(today.slice(0, 4));
+  // Whole years only: the year still running isn't a review yet.
+  const lastYear = latestCompleteYear(today);
   const asked = Number((await searchParams).year);
-  const year = Number.isInteger(asked) && asked >= 2000 && asked <= thisYear ? asked : thisYear;
+  const year = Number.isInteger(asked) && asked >= 2000 && asked <= lastYear ? asked : lastYear;
   const r = await yearReviewFor(userId, year);
 
   const maxSpend = Math.max(1, ...r.months.map((m) => m.spend));
@@ -66,7 +67,7 @@ export default async function YearInReviewPage({ searchParams }: { searchParams:
             <Link href={`/year-in-review?year=${year - 1}`} className="text-brand">
               ← {year - 1}
             </Link>
-            {year < thisYear && (
+            {year < lastYear && (
               <Link href={`/year-in-review?year=${year + 1}`} className="text-brand">
                 {year + 1} →
               </Link>

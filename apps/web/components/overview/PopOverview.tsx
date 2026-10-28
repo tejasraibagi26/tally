@@ -55,8 +55,8 @@ export function TallyUpBanner({ count, className, style }: { count: number; clas
   );
 }
 
-/** December and January: a banner into the year's review (reviewSeason in @tally/core/yearReview). */
-export function YearReviewBanner({ year, inProgress, className, style }: { year: number; inProgress: boolean; className?: string; style?: React.CSSProperties }) {
+/** January: a banner into the year that just ended (featuredReviewYear in @tally/core/yearReview). */
+export function YearReviewBanner({ year, className, style }: { year: number; className?: string; style?: React.CSSProperties }) {
   return (
     <Link
       href={`/year-in-review?year=${year}`}
@@ -67,7 +67,7 @@ export function YearReviewBanner({ year, inProgress, className, style }: { year:
         {String(year).slice(2)}
       </span>
       <span className="flex-1 min-w-[220px] flex flex-col">
-        <span className="font-bold text-[16px]">Your {year}{inProgress ? " so far" : ""}</span>
+        <span className="font-bold text-[16px]">Your {year} in review</span>
         <span className="text-[14px]">Where the money went, the months that stood out, and how far net worth moved.</span>
       </span>
       <span className="inline-flex items-center gap-1 text-[15px] font-bold">

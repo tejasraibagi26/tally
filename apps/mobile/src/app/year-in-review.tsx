@@ -3,7 +3,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useColorScheme } from "nativewind";
 import { formatCents, formatPercent } from "@tally/core/money";
-import { yearTitle, type YearReview } from "@tally/core/yearReview";
+import { latestCompleteYear, yearTitle, type YearReview } from "@tally/core/yearReview";
+import { useLocalSearchParams } from "expo-router";
 import { apiGet } from "@/lib/api";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
@@ -39,8 +40,10 @@ export default function YearInReviewScreen() {
   const colors = useThemeColors();
   const contentTop = useScreenContentTop();
   const { pop } = useUiLook();
-  const thisYear = new Date().getFullYear();
-  const [year, setYear] = useState(thisYear);
+  // Whole years only: the latest finished year, and back from there.
+  const lastYear = latestCompleteYear(new Date().toISOString().slice(0, 10));
+  const { year: asked } = useLocalSearchParams<{ year?: string }>();
+  const [year, setYear] = useState(() => (Number(asked) >= 2000 && Number(asked) <= lastYear ? Number(asked) : lastYear));
   const q = useQuery({ queryKey: ["year-in-review", year], queryFn: () => apiGet<YearReview>(`/api/year-in-review?year=${year}`) });
   const r = q.data;
   const { colorScheme } = useColorScheme();
@@ -75,7 +78,7 @@ export default function YearInReviewScreen() {
             <Pressable onPress={() => setYear(year - 1)} hitSlop={10} accessibilityRole="button" accessibilityLabel={`Show ${year - 1}`}>
               <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(14) }}>← {year - 1}</Text>
             </Pressable>
-            {year < thisYear && (
+            {year < lastYear && (
               <Pressable onPress={() => setYear(year + 1)} hitSlop={10} accessibilityRole="button" accessibilityLabel={`Show ${year + 1}`}>
                 <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(14) }}>{year + 1} →</Text>
               </Pressable>

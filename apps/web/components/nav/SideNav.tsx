@@ -106,12 +106,13 @@ function navGroups(counts: NavCounts): NavGroup[] {
 }
 
 /**
- * Year in review as a marigold sticker above the display toggles: this
- * year "so far" from February, last year's finished one in January
- * (@tally/core/yearReview featuredReviewYear).
+ * Year in review as a marigold sticker above the display toggles, in
+ * January only, for the year that just ended (@tally/core/yearReview
+ * featuredReviewYear): a review covers whole years.
  */
 function YearReviewSticker({ active }: { active: boolean }) {
-  const { year, inProgress } = featuredReviewYear(new Date().toISOString().slice(0, 10));
+  const year = featuredReviewYear(new Date().toISOString().slice(0, 10));
+  if (year == null) return null;
   return (
     <Link
       href={`/year-in-review?year=${year}`}
@@ -125,7 +126,7 @@ function YearReviewSticker({ active }: { active: boolean }) {
       <span className="font-display text-[28px] leading-[0.9] tracking-[-0.04em]">&apos;{String(year).slice(2)}</span>
       <span className="flex flex-col min-w-0">
         <span className="text-[15px] font-bold leading-tight">Your year</span>
-        <span className="text-[12.5px] font-medium leading-tight">{inProgress ? "so far · see it ›" : "is ready · see it ›"}</span>
+        <span className="text-[12.5px] font-medium leading-tight">is ready · see it ›</span>
       </span>
     </Link>
   );
