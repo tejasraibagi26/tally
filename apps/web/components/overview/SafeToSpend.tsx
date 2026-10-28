@@ -199,11 +199,13 @@ function SafeToSpendPanel({ s, open, onClose }: { s: SafeToSpendResult; open: bo
           </button>
         </div>
 
-        <div className="flex flex-col gap-1.5 rounded-[16px] bg-surface-2 px-4 py-3.5">
+        {/* A card like any other (Pop's ink outline and hard shadow come from rounded-card.border). The
+            labels carry the minus, so the amounts are magnitudes. */}
+        <div className="flex flex-col gap-1.5 rounded-card border border-border shadow-raised bg-surface-2 px-4 py-3.5">
           {step(`Cash in ${s.cash.length} account${s.cash.length === 1 ? "" : "s"}`, s.cashTotal)}
-          {step("− Bills before payday", -s.billsTotal)}
-          {step("− Card payments due", -s.cardsTotal)}
-          {step("− Cushion", -s.cushion)}
+          {step("− Bills before payday", s.billsTotal)}
+          {step("− Card payments due", s.cardsTotal)}
+          {step("− Cushion", s.cushion)}
           <div className="h-0.5 bg-[var(--ink,var(--border-strong))] my-1" />
           {step("Safe to spend", s.amount, true)}
         </div>

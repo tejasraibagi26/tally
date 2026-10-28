@@ -111,6 +111,7 @@ function SheetRow({ title, sub, cents, onPress, children }: { title: string; sub
 
 function SafeToSpendSheet({ s: next, onClose }: { s: SafeToSpendResult | null; onClose: () => void }) {
   const colors = useThemeColors();
+  const sticker = useStickerShadow();
   const rf = useRF();
   const router = useRouter();
   // Keep the last result while the sheet slides away so it doesn't blank mid-animation.
@@ -146,11 +147,12 @@ function SafeToSpendSheet({ s: next, onClose }: { s: SafeToSpendResult | null; o
             </Text>
           </View>
 
-          <View className="rounded-card px-4 py-3 gap-1.5" style={{ backgroundColor: colors["surface-2"] }}>
+          {/* A sticker card like any other; the labels carry the minus, so the amounts are magnitudes. */}
+          <View className="rounded-card border-card border-ink px-4 py-3 gap-1.5" style={[{ backgroundColor: colors["surface-2"] }, sticker]}>
             {step(`Cash in ${s.cash.length} account${s.cash.length === 1 ? "" : "s"}`, s.cashTotal)}
-            {step("− Bills before payday", -s.billsTotal)}
-            {step("− Card payments due", -s.cardsTotal)}
-            {step("− Cushion", -s.cushion)}
+            {step("− Bills before payday", s.billsTotal)}
+            {step("− Card payments due", s.cardsTotal)}
+            {step("− Cushion", s.cushion)}
             <View style={{ height: 2, backgroundColor: colors.ink ?? colors["border-strong"], marginVertical: 3 }} />
             {step("Safe to spend", s.amount, true)}
           </View>
