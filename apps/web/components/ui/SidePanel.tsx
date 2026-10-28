@@ -26,12 +26,18 @@ export function SidePanel({
   useEffect(() => setMounted(true), []);
   const dismissibleRef = useRef(dismissible);
   dismissibleRef.current = dismissible;
+  // Read through a ref: callers pass a fresh onClose every render, and
+  // re-running the effect below on each one pulled focus back to the panel
+  // -- an input that had just autofocused (the "+ Tag" field) blurred and
+  // closed at once.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!open || !mounted) return;
 
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape" && dismissibleRef.current) onClose();
+      if (e.key === "Escape" && dismissibleRef.current) onCloseRef.current();
       if (e.key === "Tab" && panelRef.current) {
         const focusable = panelRef.current.querySelectorAll<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
@@ -57,7 +63,7 @@ export function SidePanel({
       document.removeEventListener("keydown", handleKeyDown);
       previouslyFocused?.focus();
     };
-  }, [open, onClose, mounted]);
+  }, [open, mounted]);
 
   if (!open || !mounted) return null;
 

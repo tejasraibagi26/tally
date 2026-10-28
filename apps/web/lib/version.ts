@@ -342,8 +342,11 @@
  * are given, on web and the API), the bulk bar gets Tag
  * (components/transactions/TagPicker.tsx), the panel's tag chips link to
  * their page with a separate ×, and the side nav gets Tags.
+ * 2.6.1 stops SidePanel re-focusing itself on every render (its effect
+ * depended on callers' fresh onClose; now read through a ref): the "+ Tag"
+ * field autofocused, blurred at once and closed, so the button did nothing.
  */
-export const APP_VERSION = "2.6.0";
+export const APP_VERSION = "2.6.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

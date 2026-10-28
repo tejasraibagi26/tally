@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.6.1",
+    date: "2026-10-28",
+    changes: [{ kind: "fixed", text: "\"+ Tag\" on a transaction opens a field you can type in again, instead of doing nothing." }],
+  },
+  {
     version: "2.6.0",
     date: "2026-10-28",
     changes: [
