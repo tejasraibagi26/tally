@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.3.8",
+    date: "2026-10-28",
+    changes: [
+      { kind: "fixed", text: "Charts that run edge to edge of their card now stop at its outline instead of drawing over it." },
+      { kind: "fixed", text: "Where it went's bar shows its last category at its real size instead of cutting it short." },
+    ],
+  },
+  {
     version: "2.3.7",
     date: "2026-10-28",
     changes: [{ kind: "fixed", text: "A dialog's title now lines up with the icon beside it instead of sitting at its top edge." }],

@@ -286,8 +286,12 @@ import Constants from "expo-constants";
  * split (transactions/[id].tsx) and a manual card limit (card/[id].tsx).
  * 2.3.7 centres a dialog's title on its icon tile (TallyDialog), as web
  * 2.2.9 does.
+ * 2.3.8 stops Pop's edge-to-edge charts at the card's ink outline
+ * (Bleed cancelled the full padding and drew 2px over it), and sizes Where
+ * it went's segments by flexGrow: percentage widths plus the gaps overflowed
+ * and clipped the last one.
  */
-export const APP_VERSION = "2.3.7";
+export const APP_VERSION = "2.3.8";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

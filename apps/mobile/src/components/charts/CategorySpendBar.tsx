@@ -17,7 +17,6 @@ export function CategorySpendBar({ rows, limit = 6 }: { rows: BreakdownRow[]; li
   const { colorScheme } = useColorScheme();
   const series = colorScheme === "dark" ? chartSeries.dark : chartSeries.light;
   const top = rows.slice(0, limit);
-  const total = top.reduce((s, r) => s + r.total, 0) || 1;
 
   if (top.length === 0) {
     return (
@@ -33,7 +32,8 @@ export function CategorySpendBar({ rows, limit = 6 }: { rows: BreakdownRow[]; li
       <Bleed>
         <View className={`flex-row h-3.5 gap-0.5 overflow-hidden ${pop ? "" : "rounded-full"}`}>
           {top.map((row, i) => (
-            <View key={row.key} style={{ width: `${(row.total / total) * 100}%`, backgroundColor: series[i % series.length] }} />
+            // Shares of what's left after the gaps: percentage widths summed to 100% plus the gaps, and the overflow clipped the last segment.
+            <View key={row.key} style={{ flexGrow: row.total, flexBasis: 0, backgroundColor: series[i % series.length] }} />
           ))}
         </View>
       </Bleed>
