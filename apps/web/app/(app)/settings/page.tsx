@@ -13,10 +13,8 @@ import { ApiKeysManager } from "@/components/settings/ApiKeysManager";
 import { accountDisplayName } from "@tally/core/accountName";
 import { APP_VERSION } from "@/lib/version";
 import { SafeToSpendSettings } from "@/components/settings/SafeToSpendSettings";
-import { paychequeFor } from "@/lib/safeToSpend";
-import { liveAccount } from "@/lib/liveAccounts";
+import { paychequeFor, safeToSpendSettingsFor } from "@/lib/safeToSpend";
 import { todayFor } from "@/lib/userTimezone";
-import { countsAsCash } from "@tally/core/safeToSpend";
 import { CADENCE_LABEL } from "@tally/core/paycheque";
 import { formatCents } from "@tally/core/money";
 import { CalendarCheck } from "lucide-react";
@@ -65,35 +63,11 @@ export default async function SettingsPage() {
 
   const [{ prefs: alertPrefs }, recentAlerts] = await Promise.all([loadAlertPreferences(userId), alertHistory(userId, 10)]);
 
-  // Safe to spend: bank accounts that could count, cards with no reported due date, the paycheque.
+  // Safe to spend's settings and the paycheque behind payday.
   const today = await todayFor(userId);
-  const [moneyAccounts, paycheque] = await Promise.all([
-    db
-      .select({
-        id: schema.accounts.id,
-        name: schema.accounts.name,
-        nickname: schema.accounts.nickname,
-        mask: schema.accounts.mask,
-        type: schema.accounts.type,
-        subtype: schema.accounts.subtype,
-        countsAsCash: schema.accounts.countsAsCash,
-        paymentDueDay: schema.accounts.paymentDueDay,
-        reportedDue: schema.liabilitiesCredit.nextPaymentDueDate,
-      })
-      .from(schema.accounts)
-      .leftJoin(schema.liabilitiesCredit, eq(schema.liabilitiesCredit.accountId, schema.accounts.id))
-      .where(and(eq(schema.accounts.userId, userId), eq(schema.accounts.isHidden, false), liveAccount)),
-    paychequeFor(userId, today),
-  ]);
-  const labelOf = (a: { name: string; nickname: string | null; mask: string | null }) => accountDisplayName(a.name, a.nickname) + (a.mask ? ` ····${a.mask}` : "");
-  const safeSettings = {
-    cushion: user?.safeToSpendCushion ?? 0,
-    accounts: moneyAccounts
-      .filter((a) => a.type === "depository")
-      .map((a) => ({ id: a.id, label: labelOf(a), kind: a.subtype ? a.subtype[0]!.toUpperCase() + a.subtype.slice(1) : "Bank account", counts: countsAsCash(a) })),
-    cards: moneyAccounts.filter((a) => a.type === "credit" && !a.reportedDue).map((a) => ({ id: a.id, label: labelOf(a), dueDay: a.paymentDueDay })),
-  };
-  const paychequeAccount = paycheque ? moneyAccounts.find((a) => a.id === paycheque.accountId) : undefined;
+  const [safeSettings, paycheque] = await Promise.all([safeToSpendSettingsFor(userId), paychequeFor(userId, today)]);
+  const paychequeAccount = paycheque ? accounts.find((a) => a.id === paycheque.accountId) : undefined;
+  const labelOf = (a: { name: string; mask: string | null }) => a.name + (a.mask ? ` ····${a.mask}` : "");
   const paydayLabel = (d: string) => new Date(`${d}T00:00:00Z`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
 
   const apiKeys = await db

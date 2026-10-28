@@ -3,6 +3,7 @@ import { z } from "zod";
 import { and, eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
+import { safeToSpendSettingsFor } from "@/lib/safeToSpend";
 
 const bodySchema = z.object({
   // $0 to $100,000, in cents
@@ -12,6 +13,17 @@ const bodySchema = z.object({
   // A card's due day when the bank reports none: 1-31, 0 = the last day; null clears it.
   dueDays: z.record(z.string().uuid(), z.number().int().min(0).max(31).nullable()).optional(),
 });
+
+/** What Settings → Safe to spend edits (mobile reads it here; web's Settings page loads it directly). */
+export async function GET(req: Request) {
+  let userId: string;
+  try {
+    userId = await requireUserId(req);
+  } catch {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  return NextResponse.json(await safeToSpendSettingsFor(userId));
+}
 
 export async function PUT(req: Request) {
   let userId: string;

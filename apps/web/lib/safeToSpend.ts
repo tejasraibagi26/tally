@@ -8,7 +8,7 @@ import { toNetWorthCurrency } from "@tally/core/fx";
 import { accountDisplayName } from "@tally/core/accountName";
 import { daysBefore, qualifiesAsUpcoming, UPCOMING_GRACE_DAYS } from "@tally/core/overviewView";
 import { detectPaycheques, primaryPaycheque, type Paycheque } from "@tally/core/paycheque";
-import { choosePayday, computeSafeToSpend, nextScheduledPayday, type SafeToSpend } from "@tally/core/safeToSpend";
+import { choosePayday, computeSafeToSpend, countsAsCash, nextScheduledPayday, type SafeToSpend } from "@tally/core/safeToSpend";
 
 /** How far back deposits are read to find a paycheque: enough for six monthly ones. */
 const PAYCHEQUE_LOOKBACK_DAYS = 200;
@@ -169,4 +169,42 @@ export async function safeToSpendFor(userId: string): Promise<SafeToSpendResult>
     now: new Date().toISOString(),
   });
   return { ...result, paycheque };
+}
+
+export interface SafeToSpendSettingsData {
+  cushion: number;
+  /** Bank accounts, each with whether it counts now (the user's choice or its type's default). */
+  accounts: { id: string; label: string; kind: string; counts: boolean }[];
+  /** Cards whose bank reports no due date, with the day the user entered (or null). */
+  cards: { id: string; label: string; dueDay: number | null }[];
+}
+
+/** What Settings → Safe to spend edits, on web and mobile (GET /api/safe-to-spend/settings). */
+export async function safeToSpendSettingsFor(userId: string): Promise<SafeToSpendSettingsData> {
+  const [[user], rows] = await Promise.all([
+    db.select({ cushion: schema.users.safeToSpendCushion }).from(schema.users).where(eq(schema.users.id, userId)).limit(1),
+    db
+      .select({
+        id: schema.accounts.id,
+        name: schema.accounts.name,
+        nickname: schema.accounts.nickname,
+        mask: schema.accounts.mask,
+        type: schema.accounts.type,
+        subtype: schema.accounts.subtype,
+        countsAsCash: schema.accounts.countsAsCash,
+        paymentDueDay: schema.accounts.paymentDueDay,
+        reportedDue: schema.liabilitiesCredit.nextPaymentDueDate,
+      })
+      .from(schema.accounts)
+      .leftJoin(schema.liabilitiesCredit, eq(schema.liabilitiesCredit.accountId, schema.accounts.id))
+      .where(and(eq(schema.accounts.userId, userId), eq(schema.accounts.isHidden, false), liveAccount)),
+  ]);
+  const label = (a: (typeof rows)[number]) => accountDisplayName(a.name, a.nickname) + (a.mask ? ` ····${a.mask}` : "");
+  return {
+    cushion: user?.cushion ?? 0,
+    accounts: rows
+      .filter((a) => a.type === "depository")
+      .map((a) => ({ id: a.id, label: label(a), kind: a.subtype ? a.subtype[0]!.toUpperCase() + a.subtype.slice(1) : "Bank account", counts: countsAsCash(a) })),
+    cards: rows.filter((a) => a.type === "credit" && !a.reportedDue).map((a) => ({ id: a.id, label: label(a), dueDay: a.paymentDueDay })),
+  };
 }

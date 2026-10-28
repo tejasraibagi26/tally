@@ -305,8 +305,14 @@
  * report none; PUT /api/safe-to-spend/settings), and the safe_to_spend_low
  * alert ($100 default, adjustable) emails once per pay window. Uses
  * migrations 0031 and 0032.
+ * 2.4.1 renders SidePanel into <body> (createPortal): Overview's reveal()
+ * entrance animation leaves a transform on its row, which makes that row
+ * the containing block for position: fixed, so the safe to spend panel
+ * opened inside the card's row instead of over the window. Also GET
+ * /api/safe-to-spend/settings (lib/safeToSpend.ts safeToSpendSettingsFor,
+ * shared with the Settings page) for mobile.
  */
-export const APP_VERSION = "2.4.0";
+export const APP_VERSION = "2.4.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 // DESIGN.md §8: "420px, slides from the right, overlay shadow, ESC +
 // click-outside to close, focus trapped." §11: 220ms cubic-bezier(.32,.72,0,1),
@@ -18,11 +19,16 @@ export function SidePanel({
   dismissible?: boolean;
 }) {
   const panelRef = useRef<HTMLDivElement>(null);
+  // Rendered into <body>: an ancestor with a transform (Overview's reveal()
+  // entrance animation) becomes the containing block for position: fixed,
+  // which trapped the panel inside that row instead of the window.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const dismissibleRef = useRef(dismissible);
   dismissibleRef.current = dismissible;
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !mounted) return;
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape" && dismissibleRef.current) onClose();
@@ -51,11 +57,11 @@ export function SidePanel({
       document.removeEventListener("keydown", handleKeyDown);
       previouslyFocused?.focus();
     };
-  }, [open, onClose]);
+  }, [open, onClose, mounted]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex justify-end">
       <div
         className="absolute inset-0 backdrop-blur-[2px] animate-[fade-in_180ms_ease-out] motion-reduce:animate-none"
@@ -72,6 +78,7 @@ export function SidePanel({
       >
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

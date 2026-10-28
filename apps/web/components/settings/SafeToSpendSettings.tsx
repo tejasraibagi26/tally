@@ -7,13 +7,9 @@ import { SettingsGroup, SettingsRow } from "@/components/settings/SettingsLayout
 import { showToast } from "@/lib/toast";
 import { cn } from "@/lib/cn";
 
-export interface SafeToSpendSettingsProps {
-  cushion: number;
-  /** Bank accounts, each with whether it counts now (the user's choice or its type's default). */
-  accounts: { id: string; label: string; kind: string; counts: boolean }[];
-  /** Cards whose bank reports no due date, with the day the user entered (or null). */
-  cards: { id: string; label: string; dueDay: number | null }[];
-}
+import type { SafeToSpendSettingsData } from "@/lib/safeToSpend";
+
+export type SafeToSpendSettingsProps = SafeToSpendSettingsData;
 
 const SAVE_FAILED = "Couldn't save that. Check your connection and try again.";
 
