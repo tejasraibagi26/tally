@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.3.7",
+    date: "2026-10-28",
+    changes: [{ kind: "fixed", text: "A dialog's title now lines up with the icon beside it instead of sitting at its top edge." }],
+  },
+  {
     version: "2.3.6",
     date: "2026-10-28",
     changes: [{ kind: "improved", text: "Removing your goal, a budget, a split or a card limit you entered now asks first, so a stray tap can't remove it." }],

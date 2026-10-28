@@ -284,8 +284,10 @@ import Constants from "expo-constants";
  * 2.3.6 asks before every removal that didn't yet (a native Alert, like
  * AddBudgetSheet's): the goal (goals.tsx), a budget (BudgetDetailSheet), a
  * split (transactions/[id].tsx) and a manual card limit (card/[id].tsx).
+ * 2.3.7 centres a dialog's title on its icon tile (TallyDialog), as web
+ * 2.2.9 does.
  */
-export const APP_VERSION = "2.3.6";
+export const APP_VERSION = "2.3.7";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -117,7 +117,8 @@ export function TallyDialog({
         >
           <View className="flex-row items-start gap-3.5">
             <View style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: colors[`${tone}-subtle`], alignItems: "center", justifyContent: "center" }}>{icon}</View>
-            <View className="flex-1 gap-0.5">
+            {/* Centred on the tile; a title taller than it starts at the top with it. */}
+            <View className="flex-1 gap-0.5 self-center">
               <Text className="font-ui-semibold text-text" style={{ fontSize: rf(17) }} accessibilityRole="header">
                 {title}
               </Text>

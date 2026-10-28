@@ -47,7 +47,8 @@ export function DialogHeader({
   return (
     <div className="flex items-start gap-3.5">
       {tile}
-      <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+      {/* Centred on the tile; a title taller than it starts at the top with it. */}
+      <div className="flex-1 min-w-0 self-center flex flex-col gap-0.5">
         <h2 id={titleId} className="m-0 text-lg font-semibold leading-snug text-text [text-wrap:balance]">
           {title}
         </h2>

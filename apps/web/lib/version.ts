@@ -276,8 +276,10 @@
  * and a split (TransactionDetailPanel) confirm inline, as deleting a
  * transaction does in a panel; a manual card limit (CreditLimitEditor)
  * through useConfirmAction.
+ * 2.2.9 centres a dialog's title on its icon tile (DialogHeader): a
+ * one-line title with no subtitle sat at the tile's top edge.
  */
-export const APP_VERSION = "2.2.8";
+export const APP_VERSION = "2.2.9";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
