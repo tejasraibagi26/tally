@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.4.3",
+    date: "2026-10-28",
+    changes: [{ kind: "fixed", text: "Settings → Income shows your next payday instead of 0 when Tally has found your paycheque." }],
+  },
+  {
     version: "2.4.2",
     date: "2026-10-28",
     changes: [{ kind: "improved", text: "Settings → Income shows your next paycheque, like the web app, above your income schedules." }],

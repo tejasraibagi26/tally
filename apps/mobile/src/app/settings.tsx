@@ -10,6 +10,7 @@ import { exportTransactions } from "@/lib/exportData";
 import { useAccountProfile, useUpdateAccountProfile, useUpdateRecaps, useChangePassword, useWipeAccount } from "@/lib/queries/account";
 import { useAlertPreferences } from "@/lib/queries/alerts";
 import { useIncomeSchedules } from "@/lib/queries/incomeSchedules";
+import { useSafeToSpend } from "@/lib/queries/safeToSpend";
 import { useApiTokens } from "@/lib/queries/apiTokens";
 import { useAccounts } from "@/lib/queries/accounts";
 import { useAuth } from "@/lib/AuthContext";
@@ -189,6 +190,15 @@ export default function SettingsScreen() {
   const { data: profile, isLoading } = useAccountProfile();
   const { data: alertPrefs } = useAlertPreferences();
   const { data: schedules } = useIncomeSchedules();
+  // The Income row leads with the paycheque Tally found ("Nov 14"); the
+  // count of hand-made schedules only when there isn't one.
+  const { data: safe } = useSafeToSpend();
+  const paycheque = safe?.paycheque?.confident ? safe.paycheque : null;
+  const incomeValue = paycheque
+    ? `Next ${new Date(`${paycheque.nextDate}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })}`
+    : schedules && schedules.schedules.length > 0
+      ? `${schedules.schedules.length} schedule${schedules.schedules.length === 1 ? "" : "s"}`
+      : undefined;
   const { data: tokens } = useApiTokens();
   const { data: accounts } = useAccounts();
   const updateRecaps = useUpdateRecaps();
@@ -323,7 +333,7 @@ export default function SettingsScreen() {
             first
             icon={(c) => <Wallet size={15} color={c} strokeWidth={1.9} />}
             label="Income"
-            value={schedules ? String(schedules.schedules.length) : undefined}
+            value={incomeValue}
             onPress={() => router.push("/income-schedules")}
           />
           {/* Tally Pop only, like the Overview card. */}
