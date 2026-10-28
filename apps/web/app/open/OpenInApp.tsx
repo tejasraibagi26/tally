@@ -5,11 +5,13 @@ import { appSchemeUrl } from "@tally/core/appLinks";
 import { LogoMark } from "@/components/Logo";
 
 /** Tries the app once on arrival; the button is there for email apps that block the automatic hand-off. */
-export function OpenInApp({ to }: { to: string }) {
+export function OpenInApp({ to, phone }: { to: string; phone: boolean }) {
   const app = appSchemeUrl(to);
   useEffect(() => {
-    window.location.href = app;
-  }, [app]);
+    // An iPad says it's a Mac; its touchscreen gives it away. A real Mac goes to the page.
+    if (phone || navigator.maxTouchPoints > 1) window.location.href = app;
+    else window.location.replace(to);
+  }, [app, phone, to]);
 
   return (
     <main className="min-h-screen bg-canvas flex items-center justify-center px-6">

@@ -355,8 +355,11 @@
  * 2.7.1 shows Year in review only for finished years: the sticker and the
  * Overview banner in January for the year just ended (featuredReviewYear),
  * and the page and API default to and stop at latestCompleteYear.
+ * 2.7.2 lets /open try the app on an iPad: iPadOS Safari reports macOS, so
+ * a Mac user agent now gets the page, which checks for a touchscreen
+ * (navigator.maxTouchPoints) before trying the app or continuing to the web.
  */
-export const APP_VERSION = "2.7.1";
+export const APP_VERSION = "2.7.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

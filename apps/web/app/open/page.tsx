@@ -13,6 +13,10 @@ export default async function OpenPage({ searchParams }: { searchParams: Promise
   const raw = (await searchParams).to;
   const to = isSafeAppPath(raw) ? raw : "/overview";
   const ua = (await headers()).get("user-agent") ?? "";
-  if (!/iPhone|iPad|iPod|Android/i.test(ua)) redirect(to);
-  return <OpenInApp to={to} />;
+  // A clear phone tries the app; Windows/Linux go straight to the page. A
+  // "Mac" may be an iPad (iPadOS Safari reports macOS), so OpenInApp decides
+  // on the device, from whether it has a touchscreen.
+  const phone = /iPhone|iPad|iPod|Android/i.test(ua);
+  if (!phone && !/Macintosh/i.test(ua)) redirect(to);
+  return <OpenInApp to={to} phone={phone} />;
 }
