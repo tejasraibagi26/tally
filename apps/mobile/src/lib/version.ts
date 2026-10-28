@@ -320,8 +320,12 @@ import Constants from "expo-constants";
  * 2.6.0 adds tags: app/tags.tsx lists them from More (another 49pt) and
  * app/tag/[tag].tsx adds one up (GET /api/tags, /api/tags/[tag]); a
  * transaction's tag chips open their tag, with a separate ×.
+ * 2.7.0 puts a Year in review strip above Overview's greeting, all year,
+ * and opens email links in the app: the web's /open hands off
+ * tally://<web path>, which app/+native-intent.tsx maps to a screen
+ * (@tally/core/appLinks); ?safe=1 opens the safe to spend sheet.
  */
-export const APP_VERSION = "2.6.0";
+export const APP_VERSION = "2.7.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

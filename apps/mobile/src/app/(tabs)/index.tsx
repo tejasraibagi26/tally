@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams, type Href } from "expo-router";
 import { Ellipsis, Eye, EyeOff } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueryClient } from "@tanstack/react-query";
@@ -40,6 +40,7 @@ import { useAccountProfile } from "@/lib/queries/account";
 import { useGoal } from "@/lib/queries/goals";
 import { monthSummary } from "@tally/core/budgetView";
 import { greetingFor, leftToSpendLine } from "@tally/core/popView";
+import { featuredReviewYear } from "@tally/core/yearReview";
 import { formatCents } from "@tally/core/money";
 
 // MOBILE_DESIGN.md §5.2 -- hero net worth (unboxed, direct on canvas), what
@@ -56,6 +57,8 @@ export default function OverviewScreen() {
   const { pop } = useUiLook();
   const goal = useGoal(pop);
   const safe = useSafeToSpend(pop);
+  // ?safe=1 from an alert email (via the web's /open and +native-intent) opens the breakdown.
+  const params = useLocalSearchParams<{ safe?: string }>();
   const profile = useAccountProfile();
   // One dialog per visit: the new-look announcement first, the goals intro
   // after (an older server sends no list -- nothing to wait for).
@@ -129,6 +132,27 @@ export default function OverviewScreen() {
         scrollEnabled={!isScrubbingChart}
       >
         <View className="px-5 pb-1">
+          {/* Year in review, all year: this year so far, last year's in January. */}
+          {(() => {
+            const { year, inProgress } = featuredReviewYear(new Date().toISOString().slice(0, 10));
+            return (
+              <Pressable
+                onPress={() => router.push(`/year-in-review?year=${year}` as Href)}
+                className="flex-row items-center gap-2.5 rounded-full mb-3 active:opacity-90"
+                style={{ backgroundColor: colors.marigold ?? colors["warning-subtle"], borderWidth: 2, borderColor: colors.ink ?? colors["border-strong"], paddingVertical: 7, paddingLeft: 14, paddingRight: 7 }}
+                accessibilityRole="button"
+                accessibilityLabel={`Your ${year}${inProgress ? " so far" : ""}: see your year in review`}
+              >
+                <Text className="font-display" style={{ fontSize: rf(18), color: colors["on-marigold"] ?? colors.text }}>&apos;{String(year).slice(2)}</Text>
+                <Text className="font-ui-semibold flex-1" style={{ fontSize: rf(14), color: colors["on-marigold"] ?? colors.text }} numberOfLines={1}>
+                  {inProgress ? "Your year so far is ready" : `Your ${year} is ready`}
+                </Text>
+                <View className="rounded-full px-3 py-1" style={{ backgroundColor: colors.ink ?? colors.text }}>
+                  <Text className="font-ui-semibold" style={{ fontSize: rf(12.5), color: colors.marigold ?? colors.canvas }}>See it</Text>
+                </View>
+              </Pressable>
+            );
+          })()}
           <TabHeader
             title={pop ? popTitle : "Overview"}
             meta={[
@@ -161,7 +185,7 @@ export default function OverviewScreen() {
         {/* Tally Pop: safe to spend over a compact on-pace row (the streak needs a budget to pace against) */}
         {pop && ((safe.data?.cash.length ?? 0) > 0 || onPace) && (
           <View className="gap-3.5">
-            {safe.data && safe.data.cash.length > 0 && <SafeToSpendCard s={safe.data} />}
+            {safe.data && safe.data.cash.length > 0 && <SafeToSpendCard s={safe.data} initiallyOpen={params.safe === "1"} />}
             {onPace && <OnPaceCard streak={onPace.streak} dailyPace={onPace.dailyPace} compact={(safe.data?.cash.length ?? 0) > 0} />}
           </View>
         )}

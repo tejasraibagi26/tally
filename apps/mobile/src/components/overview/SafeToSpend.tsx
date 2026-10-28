@@ -50,11 +50,11 @@ function Meter({ s }: { s: SafeToSpendResult }) {
   );
 }
 
-export function SafeToSpendCard({ s }: { s: SafeToSpendResult }) {
+export function SafeToSpendCard({ s, initiallyOpen = false }: { s: SafeToSpendResult; /** Open the breakdown on arrival (an email's link). */ initiallyOpen?: boolean }) {
   const colors = useThemeColors();
   const rf = useRF();
   const sticker = useStickerShadow();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(initiallyOpen);
   const short = s.amount < 0;
   const line = safeToSpendLine(s, fmt);
   return (
