@@ -311,8 +311,11 @@
  * opened inside the card's row instead of over the window. Also GET
  * /api/safe-to-spend/settings (lib/safeToSpend.ts safeToSpendSettingsFor,
  * shared with the Settings page) for mobile.
+ * 2.4.2 draws Pop's hard offset shadow in the ink outline's color in dark
+ * mode (--ink-shadow #6E6895): pure black on the #14121F canvas hid the
+ * sticker edge of every card, panel and button.
  */
-export const APP_VERSION = "2.4.1";
+export const APP_VERSION = "2.4.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
