@@ -345,8 +345,15 @@
  * 2.6.1 stops SidePanel re-focusing itself on every render (its effect
  * depended on callers' fresh onClose; now read through a ref): the "+ Tag"
  * field autofocused, blurred at once and closed, so the button did nothing.
+ * 2.7.0 pins a Year in review sticker in the side nav, all year
+ * (featuredReviewYear), and sends email buttons through /open
+ * (app/open/page.tsx, public in middleware): on a phone it tries
+ * tally://<path> -- the app's own scheme, since universal links need a
+ * paid Apple Developer account -- with the browser as the fallback; on a
+ * computer it redirects to the page. @tally/core/appLinks holds the safe
+ * path check and the web-to-app path mapping.
  */
-export const APP_VERSION = "2.6.1";
+export const APP_VERSION = "2.7.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -34,7 +34,8 @@
     "./paycheque": "./src/paycheque.ts",
     "./safeToSpend": "./src/safeToSpend.ts",
     "./yearReview": "./src/yearReview.ts",
-    "./tagView": "./src/tagView.ts"
+    "./tagView": "./src/tagView.ts",
+    "./appLinks": "./src/appLinks.ts"
   },
   "scripts": {
     "test": "vitest run",

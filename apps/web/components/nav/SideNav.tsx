@@ -19,6 +19,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { featuredReviewYear } from "@tally/core/yearReview";
 import { LogoMark } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PrivacyToggle } from "@/components/PrivacyToggle";
@@ -102,6 +103,32 @@ function navGroups(counts: NavCounts): NavGroup[] {
       ],
     },
   ];
+}
+
+/**
+ * Year in review as a marigold sticker above the display toggles: this
+ * year "so far" from February, last year's finished one in January
+ * (@tally/core/yearReview featuredReviewYear).
+ */
+function YearReviewSticker({ active }: { active: boolean }) {
+  const { year, inProgress } = featuredReviewYear(new Date().toISOString().slice(0, 10));
+  return (
+    <Link
+      href={`/year-in-review?year=${year}`}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "mx-1 flex items-center gap-3 rounded-[16px] border-2 border-[var(--ink,var(--border-strong))] bg-[var(--marigold,var(--warning-subtle))] px-3.5 py-2.5 text-[var(--ink-text,var(--text))] -rotate-[1.5deg] transition-transform hover:rotate-0 motion-reduce:transform-none",
+        "shadow-[3px_3px_0_var(--ink-shadow,transparent)]",
+        active && "rotate-0",
+      )}
+    >
+      <span className="font-display text-[28px] leading-[0.9] tracking-[-0.04em]">&apos;{String(year).slice(2)}</span>
+      <span className="flex flex-col min-w-0">
+        <span className="text-[15px] font-bold leading-tight">Your year</span>
+        <span className="text-[12.5px] font-medium leading-tight">{inProgress ? "so far · see it ›" : "is ready · see it ›"}</span>
+      </span>
+    </Link>
+  );
 }
 
 function NavRow({ item, active }: { item: NavItem; active: boolean }) {
@@ -198,6 +225,7 @@ export function SideNav({
       </div>
 
       <div className="mt-auto flex flex-col gap-2.5">
+        <YearReviewSticker active={isActive("/year-in-review")} />
         <div className="h-px bg-border" />
 
         {mockMode && (

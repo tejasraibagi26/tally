@@ -118,3 +118,9 @@ export function reviewSeason(today: string): number | null {
   if (m === 1) return y - 1;
   return null;
 }
+
+/** The review the nav and app feature: last year's in January, this year's (so far) the rest of the year. */
+export function featuredReviewYear(today: string): { year: number; inProgress: boolean } {
+  const y = Number(today.slice(0, 4));
+  return Number(today.slice(5, 7)) === 1 ? { year: y - 1, inProgress: false } : { year: y, inProgress: true };
+}

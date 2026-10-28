@@ -1,5 +1,6 @@
 import type { AlertType } from "@tally/core/alerts";
 import { unsubscribeToken } from "@/lib/emailUnsubscribe";
+import { openLinkPath } from "@tally/core/appLinks";
 
 function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -60,7 +61,7 @@ export function alertEmailHtml(opts: { type: AlertType; title: string; body: str
   if (opts.pop) return alertEmailHtmlPop(opts);
   const copy = COPY[opts.type];
   const title = opts.title;
-  const open = `${opts.appUrl}${opts.url}`;
+  const open = `${opts.appUrl}${openLinkPath(opts.url)}`;
   const manage = `${opts.appUrl}/settings#alerts`;
   const unsub = `${opts.appUrl}/api/email/unsubscribe?uid=${opts.userId}&token=${unsubscribeToken(opts.userId)}&kind=alerts`;
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
@@ -106,7 +107,7 @@ const POP_DISPLAY = "'Bricolage Grotesque',Figtree,-apple-system,Segoe UI,Helvet
 function alertEmailHtmlPop(opts: { type: AlertType; title: string; body: string; url: string; appUrl: string; userId: string }): string {
   const copy = COPY[opts.type];
   const badge = POP_BADGE[opts.type];
-  const open = `${opts.appUrl}${opts.url}`;
+  const open = `${opts.appUrl}${openLinkPath(opts.url)}`;
   const manage = `${opts.appUrl}/settings#alerts`;
   const unsub = `${opts.appUrl}/api/email/unsubscribe?uid=${opts.userId}&token=${unsubscribeToken(opts.userId)}&kind=alerts`;
   const cta = opts.type === "connection_broken" ? "#D03B3B" : "#5B3BF5";

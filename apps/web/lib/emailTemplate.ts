@@ -1,3 +1,4 @@
+import { openLinkPath } from "@tally/core/appLinks";
 import fs from "node:fs";
 import path from "node:path";
 import { formatCents, formatPercent } from "@tally/core/money";
@@ -331,6 +332,8 @@ export function renderMonthInReviewEmail(data: MonthlyRecapData, ctx: RenderCont
     FIRE_TARGET: fire ? formatCents(fire.fireNumberValue) : "",
     FIRE_PROGRESS_PCT: fire ? formatPercent(Math.max(0, fire.progressPct)) : "",
     APP_URL: ctx.appUrl,
+    // Through /open so a phone opens the app (app/open/page.tsx).
+    OPEN_OVERVIEW_URL: `${ctx.appUrl}${openLinkPath("/overview")}`,
     PREFERENCES_URL: ctx.preferencesUrl,
     UNSUBSCRIBE_URL: ctx.unsubscribeUrl,
     COMPANY_LINE: companyLineHtml(ctx),

@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.7.0",
+    date: "2026-10-28",
+    changes: [
+      { kind: "new", text: "Your year in review sits in the sidebar all year, as a sticker you can't miss." },
+      { kind: "new", text: "Buttons in Tally's emails open the mobile app on your phone, with the browser as a fallback." },
+    ],
+  },
+  {
     version: "2.6.1",
     date: "2026-10-28",
     changes: [{ kind: "fixed", text: "\"+ Tag\" on a transaction opens a field you can type in again, instead of doing nothing." }],
