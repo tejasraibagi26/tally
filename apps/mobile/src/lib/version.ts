@@ -327,8 +327,10 @@ import Constants from "expo-constants";
  * 2.7.1 shows the Overview strip only in January, for the year just ended,
  * and the review screen starts at (and stops at) the latest finished year,
  * as web 2.7.1 does.
+ * 2.7.2 takes Year in review out of the More menu (lib/moreSheet.ts back
+ * to 513pt); Overview's January strip is the way in.
  */
-export const APP_VERSION = "2.7.1";
+export const APP_VERSION = "2.7.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

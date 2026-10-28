@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.7.2",
+    date: "2026-10-28",
+    changes: [{ kind: "improved", text: "Year in review moved out of the More menu; it shows at the top of Overview in January." }],
+  },
+  {
     version: "2.7.1",
     date: "2026-10-28",
     changes: [{ kind: "improved", text: "Year in review covers whole years: it appears in January for the year that just ended, and past years stay a tap away." }],
