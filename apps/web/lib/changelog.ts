@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.2.8",
+    date: "2026-10-28",
+    changes: [{ kind: "improved", text: "Removing a budget, a split or a card limit you entered now asks first, so a stray click can't remove it." }],
+  },
+  {
     version: "2.2.7",
     date: "2026-10-28",
     changes: [{ kind: "fixed", text: "Investments no longer counts a transfer twice when your bank updates it after it settles, which made \"Invested\" too high and growth look negative." }],

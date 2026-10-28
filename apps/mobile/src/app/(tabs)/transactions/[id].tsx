@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { View, Text, ScrollView, Pressable, TextInput, Switch, Platform } from "react-native";
+import { View, Text, ScrollView, Pressable, TextInput, Switch, Platform, Alert } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { X, ChevronRight, ChevronLeft, ChevronDown, Pencil } from "lucide-react-native";
@@ -793,7 +793,17 @@ function SplitView({
           </Pressable>
         </View>
         {t.splits.length > 1 && (
-          <Pressable onPress={() => onSave([])} disabled={saving} hitSlop={8} className="self-start">
+          <Pressable
+            onPress={() =>
+              Alert.alert("Remove the split?", "The whole amount goes back to one category.", [
+                { text: "Cancel", style: "cancel" },
+                { text: "Remove", style: "destructive", onPress: () => onSave([]) },
+              ])
+            }
+            disabled={saving}
+            hitSlop={8}
+            className="self-start"
+          >
             <Text className="font-ui-medium" style={{ fontSize: rf(14), color: colors.negative }}>Remove the split</Text>
           </Pressable>
         )}

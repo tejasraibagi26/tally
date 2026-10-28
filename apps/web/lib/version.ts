@@ -272,8 +272,12 @@
  * 2.2.7 prunes investment transactions Plaid reissued under a new id
  * (lib/plaidInvestments.ts): the stale copy counted every Wealthsimple
  * transfer twice in "Invested" and drove growth negative.
+ * 2.2.8 asks before every removal that didn't yet: a budget (BudgetPanel)
+ * and a split (TransactionDetailPanel) confirm inline, as deleting a
+ * transaction does in a panel; a manual card limit (CreditLimitEditor)
+ * through useConfirmAction.
  */
-export const APP_VERSION = "2.2.7";
+export const APP_VERSION = "2.2.8";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

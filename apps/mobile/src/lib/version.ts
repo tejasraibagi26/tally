@@ -281,8 +281,11 @@ import Constants from "expo-constants";
  * switch drew at the top of the row otherwise.
  * 2.3.5 stops the Goals screen's goal card linking to Goals (GoalCard
  * linked={false}): each tap stacked another copy of the screen.
+ * 2.3.6 asks before every removal that didn't yet (a native Alert, like
+ * AddBudgetSheet's): the goal (goals.tsx), a budget (BudgetDetailSheet), a
+ * split (transactions/[id].tsx) and a manual card limit (card/[id].tsx).
  */
-export const APP_VERSION = "2.3.5";
+export const APP_VERSION = "2.3.6";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

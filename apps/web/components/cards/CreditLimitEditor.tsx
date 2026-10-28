@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { InlineError } from "@/components/ui/InlineError";
+import { useConfirmAction } from "@/components/ui/useConfirmAction";
 import { showToast } from "@/lib/toast";
 
 export function CreditLimitEditor({ accountId, creditLimitIsManual }: { accountId: string; creditLimitIsManual: boolean }) {
@@ -12,8 +13,28 @@ export function CreditLimitEditor({ accountId, creditLimitIsManual }: { accountI
   const [amountInput, setAmountInput] = useState("");
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
+  const { confirm, dialog } = useConfirmAction();
 
-  async function save(creditLimit: number | null) {
+  function remove() {
+    confirm({
+      title: "Remove your limit?",
+      description: <p className="m-0">This card stops counting in Credit used until your bank reports a limit or you add one again.</p>,
+      confirmLabel: "Remove limit",
+      failure: "Couldn't remove the limit. Check your connection and try again.",
+      run: async () => {
+        const res = await fetch(`/api/accounts/${accountId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ creditLimit: null }),
+        });
+        if (!res.ok) throw new Error("Failed to remove credit limit");
+        showToast("Limit cleared");
+        router.refresh();
+      },
+    });
+  }
+
+  async function save(creditLimit: number) {
     setSaving(true);
     setFailed(false);
     try {
@@ -25,7 +46,7 @@ export function CreditLimitEditor({ accountId, creditLimitIsManual }: { accountI
       if (!res.ok) throw new Error("Failed to update credit limit");
       setEditing(false);
       setAmountInput("");
-      showToast(creditLimit == null ? "Limit cleared" : `Limit set to $${creditLimit.toLocaleString("en-US", { maximumFractionDigits: 2 })}`);
+      showToast(`Limit set to $${creditLimit.toLocaleString("en-US", { maximumFractionDigits: 2 })}`);
       router.refresh();
     } catch (err) {
       console.error(err);
@@ -85,10 +106,11 @@ export function CreditLimitEditor({ accountId, creditLimitIsManual }: { accountI
           type="button"
           className="text-xs text-text-3 hover:text-negative disabled:opacity-40"
           disabled={saving}
-          onClick={() => void save(null)}
+          onClick={remove}
         >
           Remove
         </button>
+        {dialog}
       </div>
     );
   }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, Switch } from "react-native";
+import { View, Text, TextInput, Pressable, Switch, Alert } from "react-native";
 import { Sheet } from "@/components/ui/Sheet";
 import { fmtBudget } from "@/components/budgets/BudgetRowItem";
 import { useBudgetHistory, useDeleteBudget, useSaveBudget, type BudgetLine } from "@/lib/queries/budgets";
@@ -59,13 +59,21 @@ export function BudgetDetailSheet({
 
   function onRemove() {
     const snapshot = { month, categoryId: line.categoryId, amount: line.amount, rolloverEnabled: line.rolloverEnabled, isFixedAmount: line.isFixedAmount };
-    del.mutate(
-      { month, categoryId: line.categoryId },
+    Alert.alert(`Remove the ${line.categoryName} budget?`, "Its spending stays in your transactions.", [
+      { text: "Cancel", style: "cancel" },
       {
-        onSuccess: () => onRemoved(() => save.mutate(snapshot)),
-        onError: () => setError("Couldn't remove. Try again."),
+        text: "Remove",
+        style: "destructive",
+        onPress: () =>
+          del.mutate(
+            { month, categoryId: line.categoryId },
+            {
+              onSuccess: () => onRemoved(() => save.mutate(snapshot)),
+              onError: () => setError("Couldn't remove. Try again."),
+            },
+          ),
       },
-    );
+    ]);
   }
 
   return (

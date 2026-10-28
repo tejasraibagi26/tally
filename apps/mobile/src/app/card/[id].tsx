@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Pressable, TextInput } from "react-native";
+import { View, Text, ScrollView, Pressable, TextInput, Alert } from "react-native";
 import { useLocalSearchParams, useRouter, Stack, type Href } from "expo-router";
 import { ChevronRight } from "lucide-react-native";
 import { formatCents, formatPercent } from "@tally/core/money";
@@ -305,7 +305,17 @@ function LimitSheet({ row, visible, onClose }: { row: CardRowData; visible: bool
         )}
         {error && <Text className="font-ui" style={{ fontSize: rf(13), color: colors.negative }}>{error}</Text>}
         {row.card.creditLimitIsManual && (
-          <Pressable onPress={() => void save(null)} disabled={setLimit.isPending} hitSlop={8} className="self-start">
+          <Pressable
+            onPress={() =>
+              Alert.alert("Remove your limit?", "This card stops counting in Credit used until your bank reports a limit or you add one again.", [
+                { text: "Cancel", style: "cancel" },
+                { text: "Remove", style: "destructive", onPress: () => void save(null) },
+              ])
+            }
+            disabled={setLimit.isPending}
+            hitSlop={8}
+            className="self-start"
+          >
             <Text className="font-ui-medium" style={{ fontSize: rf(14), color: colors.negative }}>Remove my limit</Text>
           </Pressable>
         )}

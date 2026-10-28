@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.3.6",
+    date: "2026-10-28",
+    changes: [{ kind: "improved", text: "Removing your goal, a budget, a split or a card limit you entered now asks first, so a stray tap can't remove it." }],
+  },
+  {
     version: "2.3.5",
     date: "2026-10-28",
     changes: [{ kind: "fixed", text: "Tapping the goal card on the Goals screen no longer opens the same screen again on top of itself." }],

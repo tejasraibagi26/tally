@@ -18,7 +18,7 @@ function fmt(c: number) {
 
 /**
  * One budget: this month, six months of history (to pick a realistic
- * amount), plain-language toggles, and Remove with undo -- replacing the
+ * amount), plain-language toggles, and Remove (confirmed inline) with undo -- replacing the
  * inline Edit / Remove links and raw checkboxes.
  */
 export function BudgetPanel({
@@ -39,6 +39,7 @@ export function BudgetPanel({
   const [fixed, setFixed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmRemove, setConfirmRemove] = useState(false);
 
   const categoryId = line?.categoryId;
   useEffect(() => {
@@ -183,9 +184,26 @@ export function BudgetPanel({
             See transactions
           </Link>
         </div>
-        <Button variant="destructive" size="sm" onClick={remove} disabled={saving} className="self-start -ml-3">
-          Remove budget
-        </Button>
+        {confirmRemove ? (
+          <div className="rounded-card border border-border bg-sunken p-3.5 flex flex-col gap-3 text-[13px] text-text-2">
+            <span>
+              <b className="block text-text font-semibold">Remove the {current.categoryName} budget?</b>
+              Its spending stays in your transactions.
+            </span>
+            <div className="flex gap-2">
+              <Button variant="secondary" size="sm" onClick={() => setConfirmRemove(false)} disabled={saving} className="flex-1">
+                Keep it
+              </Button>
+              <Button variant="destructive-solid" size="sm" onClick={() => void remove()} loading={saving} className="flex-1">
+                Remove
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button variant="destructive" size="sm" onClick={() => setConfirmRemove(true)} disabled={saving} className="self-start -ml-3">
+            Remove budget
+          </Button>
+        )}
       </div>
     </SidePanel>
   );

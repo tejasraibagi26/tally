@@ -679,6 +679,7 @@ function SplitView({
   );
   const [lastEdited, setLastEdited] = useState(0);
   const [pickerFor, setPickerFor] = useState<number | null>(null);
+  const [confirmUnsplit, setConfirmUnsplit] = useState(false);
   const cents = lines.map((l) => Math.round(parseFloat(l.text || "0") * 100) || 0);
   const bal = splitBalance(transaction.amount, cents);
   const allPicked = lines.every((l) => l.categoryId);
@@ -763,11 +764,27 @@ function SplitView({
           Split evenly
         </button>
       </div>
-      {transaction.splits.length > 1 && (
-        <Button variant="destructive" size="sm" onClick={() => onSave([])} disabled={saving} className="self-start -ml-3">
-          Remove the split
-        </Button>
-      )}
+      {transaction.splits.length > 1 &&
+        (confirmUnsplit ? (
+          <div className="rounded-card border border-border bg-sunken p-3.5 flex flex-col gap-3 text-[13px] text-text-2">
+            <span>
+              <b className="block text-text font-semibold">Remove the split?</b>
+              The whole amount goes back to one category.
+            </span>
+            <div className="flex gap-2">
+              <Button variant="secondary" size="sm" onClick={() => setConfirmUnsplit(false)} disabled={saving} className="flex-1">
+                Keep it
+              </Button>
+              <Button variant="destructive-solid" size="sm" onClick={() => onSave([])} loading={saving} className="flex-1">
+                Remove
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Button variant="destructive" size="sm" onClick={() => setConfirmUnsplit(true)} disabled={saving} className="self-start -ml-3">
+            Remove the split
+          </Button>
+        ))}
     </>
   );
 }

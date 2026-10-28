@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { Info } from "lucide-react-native";
 import { formatCents } from "@tally/core/money";
@@ -46,6 +46,13 @@ export default function GoalsScreen() {
     }
     setError(null);
     save.mutate({ targetCents: cents, deadline: g?.deadline }, { onError: () => setError("Couldn't save the goal. Try again."), onSuccess: () => setAmount(null) });
+  }
+
+  function confirmRemove() {
+    Alert.alert("Remove this goal?", "Tally stops tracking the pace. Your net worth history stays as it is, and you can set a new goal any time.", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Remove goal", style: "destructive", onPress: () => remove.mutate() },
+    ]);
   }
 
   return (
@@ -109,7 +116,7 @@ export default function GoalsScreen() {
                 {save.isPending ? <ActivityIndicator color={colors["on-brand"]} /> : <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>{g ? "Save goal" : "Set goal"}</Text>}
               </Pressable>
               {g && (
-                <Pressable onPress={() => remove.mutate()} disabled={remove.isPending} className="h-11 items-center justify-center">
+                <Pressable onPress={confirmRemove} disabled={remove.isPending} className="h-11 items-center justify-center">
                   <Text className="font-ui-semibold text-negative" style={{ fontSize: rf(14.5) }}>Remove goal</Text>
                 </Pressable>
               )}
