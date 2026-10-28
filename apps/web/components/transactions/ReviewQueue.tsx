@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { InlineError } from "@/components/ui/InlineError";
 import { formatCents } from "@tally/core/money";
+import { ruleTargetFor } from "@tally/core/rulesEngine";
 import { cn } from "@/lib/cn";
 import { SidePanel } from "@/components/ui/SidePanel";
 import { TallyMarks } from "@/components/ui/TallyMarks";
@@ -81,7 +82,7 @@ export function ReviewQueue({ categories, pendingCount, autoOpen = false }: { ca
         const body: Record<string, unknown> = { reviewed: true };
         if (categoryId) {
           body.categoryId = categoryId;
-          if (always && current.merchantName) body.alwaysCategorizeMerchant = true;
+          if (always && ruleTargetFor(current)) body.alwaysCategorizeMerchant = true;
         }
         const res = await fetch(`/api/transactions/${current.id}`, { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
         if (!res.ok) throw new Error("Failed");
@@ -123,6 +124,7 @@ export function ReviewQueue({ categories, pendingCount, autoOpen = false }: { ca
   if (pendingCount === 0 && !open) return null;
   const total = items?.length ?? pendingCount;
   const merchant = current ? (current.merchantName ?? current.name) : "";
+  const ruleTarget = current ? ruleTargetFor(current) : null;
   const first = current?.suggestions[0];
 
   return (
@@ -207,10 +209,10 @@ export function ReviewQueue({ categories, pendingCount, autoOpen = false }: { ca
                     {picking && <CategoryPicker className="absolute top-full mt-1 left-0" categories={categories} onPick={(id) => void resolve(id)} onClose={() => setPicking(false)} />}
                   </span>
                 </div>
-                {current.merchantName && (
+                {ruleTarget && (
                   <label className="flex items-center gap-2 text-[13px] text-text-2 cursor-pointer">
                     <input type="checkbox" checked={always} onChange={(e) => setAlways(e.target.checked)} className="accent-[var(--brand)]" />
-                    Always use my pick for {current.merchantName}
+                    Always use my pick for {ruleTarget.kind === "merchant" ? ruleTarget.label : `transactions like ${ruleTarget.label}`}
                   </label>
                 )}
               </div>

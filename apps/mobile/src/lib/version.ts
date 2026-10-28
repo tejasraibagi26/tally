@@ -292,8 +292,11 @@ import Constants from "expo-constants";
  * and clipped the last one.
  * 2.3.9 drops the "Your money" label above Transactions' title (and
  * TabHeader's eyebrow prop, which only it used).
+ * 2.3.10 shows "Always use … for transactions like …" on a transaction with
+ * no merchant name (ruleTargetFor, as web 2.3.3 does); useRulePreview takes
+ * the rule's match instead of a merchant name.
  */
-export const APP_VERSION = "2.3.9";
+export const APP_VERSION = "2.3.10";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

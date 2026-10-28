@@ -125,3 +125,36 @@ export function resolveRuleActions(tx: MatchableTransaction, rules: RuleLike[]):
 
   return result;
 }
+
+/**
+ * What an "Always use … for …" rule made from one transaction should match.
+ * The merchant name when Plaid gave one. Otherwise the description, minus
+ * the parts that change on every charge: payroll deposits come with no
+ * merchant and a fresh reference number each time ("PAYROLL DEP 0012345
+ * ACME CORP"), so matching the raw description would never fire again.
+ * Tokens holding a digit are dropped and the rest must appear in order
+ * (regex, case-insensitive, like every description rule). Null when too
+ * little is left to tell one payer from another.
+ */
+export interface RuleTarget {
+  kind: "merchant" | "description";
+  /** What the UI names: the merchant, or the description's kept words. */
+  label: string;
+  match: RuleMatch;
+}
+
+const MAX_DESCRIPTION_TOKENS = 6;
+
+export function ruleTargetFor(tx: { merchantName: string | null; name: string }): RuleTarget | null {
+  if (tx.merchantName) return { kind: "merchant", label: tx.merchantName, match: { field: "merchant", op: "equals", value: tx.merchantName } };
+
+  const tokens = tx.name
+    .split(/\s+/)
+    .map((t) => t.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, ""))
+    .filter((t) => !/\d/.test(t) && (t.match(/\p{L}/gu) ?? []).length >= 2)
+    .slice(0, MAX_DESCRIPTION_TOKENS);
+  if (tokens.join("").length < 4) return null;
+
+  const escape = (t: string) => t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return { kind: "description", label: tokens.join(" "), match: { field: "description", op: "regex", value: tokens.map(escape).join(".*") } };
+}

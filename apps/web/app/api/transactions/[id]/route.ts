@@ -4,6 +4,7 @@ import { and, desc, eq, inArray, isNotNull, ne } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { applyRulesToExistingTransactions } from "@/lib/categorize";
+import { ruleTargetFor } from "@tally/core/rulesEngine";
 import { clearOrphanedRecurringStreamRefs } from "@/lib/recurringBillGeneration";
 import { accountDisplayName } from "@tally/core/accountName";
 import { suggestCategories } from "@tally/core/transactionView";
@@ -114,7 +115,9 @@ const patchSchema = z.object({
   excluded: z.boolean().optional(),
   reviewed: z.boolean().optional(),
   splits: z.array(splitSchema).optional(),
-  // "Always categorize Merchant X this way" (§7.2) — creates a rule from this edit.
+  // "Always categorize Merchant X this way" (§7.2) — creates a rule from this
+  // edit: on the merchant, or on the description when there's no merchant
+  // (ruleTargetFor — payroll deposits).
   alwaysCategorizeMerchant: z.boolean().optional(),
 });
 
@@ -169,7 +172,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
 
   let createdRuleId: string | null = null;
-  if (alwaysCategorizeMerchant && categoryId && existing.merchantName) {
+  const ruleTarget = ruleTargetFor(existing);
+  if (alwaysCategorizeMerchant && categoryId && ruleTarget) {
     const [lowestPriorityRow] = await db
       .select({ priority: schema.rules.priority })
       .from(schema.rules)
@@ -184,7 +188,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         // current highest-priority rule so an explicit "always do this" wins.
         priority: (lowestPriorityRow?.priority ?? 0) - 1,
         enabled: true,
-        match: { field: "merchant", op: "equals", value: existing.merchantName },
+        match: ruleTarget.match,
         actions: { setCategoryId: categoryId },
       })
       .returning({ id: schema.rules.id });

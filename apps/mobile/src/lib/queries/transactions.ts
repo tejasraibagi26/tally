@@ -1,4 +1,5 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { RuleMatch } from "@tally/core/rulesEngine";
 import { apiGet, apiPatch, apiPost, apiPut, apiDelete } from "@/lib/api";
 
 export interface TransactionSplit {
@@ -158,12 +159,12 @@ export function useUpdateSpread(transactionId: string) {
 }
 
 /** How many past transactions a merchant rule would change (POST /api/rules?preview=1). */
-export function useMerchantRulePreview(merchantName: string | null | undefined) {
+/** How many past transactions a rule would change, for "Always use …" (match from @tally/core/rulesEngine ruleTargetFor). */
+export function useRulePreview(match: RuleMatch | null | undefined) {
   return useQuery({
-    queryKey: ["rule-preview", merchantName],
-    enabled: Boolean(merchantName),
-    queryFn: () =>
-      apiPost<{ previewCount: number }>("/api/rules?preview=1", { match: { field: "merchant", op: "equals", value: merchantName } }),
+    queryKey: ["rule-preview", match],
+    enabled: Boolean(match),
+    queryFn: () => apiPost<{ previewCount: number }>("/api/rules?preview=1", { match }),
   });
 }
 

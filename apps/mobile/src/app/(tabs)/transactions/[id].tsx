@@ -7,13 +7,14 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { formatCents } from "@tally/core/money";
 import { prettifyPfc } from "@tally/core/pfc";
 import { describeTransactionDetail, splitBalance, splitEvenly, spreadMonthly } from "@tally/core/transactionView";
+import { ruleTargetFor } from "@tally/core/rulesEngine";
 import {
   useTransaction,
   useUpdateTransaction,
   useDeleteTransaction,
   useMarkAnnual,
   useUpdateSpread,
-  useMerchantRulePreview,
+  useRulePreview,
   useMerchantRename,
   useSetMerchantRename,
   type TransactionPatch,
@@ -51,7 +52,7 @@ export default function TransactionDetailScreen() {
   const categories = categoriesData?.categories ?? [];
   const update = useUpdateTransaction(id ?? "");
   const del = useDeleteTransaction(id ?? "");
-  const rulePreview = useMerchantRulePreview(t && !t.isTransfer ? t.merchantName : null);
+  const rulePreview = useRulePreview(t && !t.isTransfer ? ruleTargetFor(t)?.match : null);
 
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [reviewed, setReviewed] = useState(false);
@@ -528,6 +529,7 @@ function CategoryCard({
   const colors = useThemeColors();
   const rf = useRF();
   const color = useSeries();
+  const ruleTarget = ruleTargetFor(t);
   const current = categories.find((c) => c.id === categoryId);
   const isSplit = t.splits.length > 1;
   const splitNames = t.splits.map((s) => categories.find((c) => c.id === s.categoryId)?.name ?? "Uncategorized").join(", ");
@@ -568,16 +570,16 @@ function CategoryCard({
         </View>
       )}
 
-      {!isSplit && t.merchantName && (
+      {!isSplit && ruleTarget && (
         <View className="pt-3 flex-row items-center gap-3" style={{ borderTopWidth: 1, borderTopColor: hairline(colors) }}>
           {ruleMade ? (
             <Text className="font-ui text-text-2 flex-1" style={{ fontSize: rf(13), lineHeight: rf(18) }}>
-              <Text className="font-ui-semibold text-text">{t.merchantName}</Text> now always goes to <Text className="font-ui-semibold text-text">{current?.name}</Text>. Edit it in Rules on the web.
+              {ruleTarget.kind === "merchant" ? "" : "Transactions like "}<Text className="font-ui-semibold text-text">{ruleTarget.label}</Text> now always go{ruleTarget.kind === "merchant" ? "es" : ""} to <Text className="font-ui-semibold text-text">{current?.name}</Text>. Edit it in Rules on the web.
             </Text>
           ) : (
             <>
               <Text className="font-ui text-text-2 flex-1" style={{ fontSize: rf(13), lineHeight: rf(18), opacity: categoryId ? 1 : 0.5 }}>
-                Always use <Text className="font-ui-semibold text-text">{current?.name ?? "this category"}</Text> for <Text className="font-ui-semibold text-text">{t.merchantName}</Text>.
+                Always use <Text className="font-ui-semibold text-text">{current?.name ?? "this category"}</Text> for {ruleTarget.kind === "merchant" ? "" : "transactions like "}<Text className="font-ui-semibold text-text">{ruleTarget.label}</Text>.
                 {rulePreview != null ? ` Changes ${rulePreview} past transaction${rulePreview === 1 ? "" : "s"}.` : ""}
               </Text>
               <Switch style={{ alignSelf: "center" }}
@@ -588,7 +590,7 @@ function CategoryCard({
                 }}
                 trackColor={{ false: colors["border-strong"], true: colors.brand }}
                 ios_backgroundColor={colors["border-strong"]}
-                accessibilityLabel={`Always use this category for ${t.merchantName}`}
+                accessibilityLabel={`Always use this category for ${ruleTarget.label}`}
               />
             </>
           )}

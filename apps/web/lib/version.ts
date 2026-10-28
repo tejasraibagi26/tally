@@ -287,8 +287,13 @@
  * over the posted date: weekends and settlement lag moved the posted day.
  * 2.3.2 drops the "Your money" label above Transactions' title (and
  * PageHeader's eyebrow prop, which only it used).
+ * 2.3.3 offers "Always use … for transactions like …" when Plaid gives no
+ * merchant name (payroll deposits): the rule matches the description's
+ * words minus anything holding a digit (@tally/core/rulesEngine
+ * ruleTargetFor), so a picked category sticks for the next paycheque. The
+ * switch used to show only with a merchant, so nothing carried forward.
  */
-export const APP_VERSION = "2.3.2";
+export const APP_VERSION = "2.3.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

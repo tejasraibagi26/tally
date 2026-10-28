@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.3.3",
+    date: "2026-10-28",
+    changes: [{ kind: "fixed", text: "\"Always use\" now works for transactions with no merchant name, like paycheques: it remembers your category for deposits that look the same, even when the reference number changes." }],
+  },
+  {
     version: "2.3.2",
     date: "2026-10-28",
     changes: [{ kind: "improved", text: "Transactions' header no longer has the \"Your money\" label above its title." }],

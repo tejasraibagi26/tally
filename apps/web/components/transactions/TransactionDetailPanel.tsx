@@ -14,6 +14,7 @@ import { MerchantAvatar } from "@/components/transactions/MerchantAvatar";
 import { MerchantNameEditor } from "@/components/transactions/MerchantNameEditor";
 import { formatCents } from "@tally/core/money";
 import { describeTransactionDetail, splitBalance, splitEvenly, spreadMonthly } from "@tally/core/transactionView";
+import { ruleTargetFor } from "@tally/core/rulesEngine";
 import { cn } from "@/lib/cn";
 
 export interface DetailCategoryOption {
@@ -149,11 +150,12 @@ export function TransactionDetailPanel({
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => !cancelled && d?.suggestions && setSuggestions(d.suggestions))
       .catch(() => {});
-    if (transaction.merchantName && !transaction.isTransfer) {
+    const target = ruleTargetFor(transaction);
+    if (target && !transaction.isTransfer) {
       fetch("/api/rules?preview=1", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ match: { field: "merchant", op: "equals", value: transaction.merchantName } }),
+        body: JSON.stringify({ match: target.match }),
       })
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => !cancelled && typeof d?.previewCount === "number" && setRulePreview(d.previewCount))
@@ -317,6 +319,7 @@ export function TransactionDetailPanel({
   const v = describeTransactionDetail({ ...transaction, amortizeMonths: transaction.amortizeMonths });
   const current = categories.find((c) => c.id === categoryId);
   const display = transaction.merchantName ?? transaction.name;
+  const ruleTarget = ruleTargetFor(transaction);
   const splitNames = transaction.splits.map((s) => nameOf(s.categoryId));
 
   function close() {
@@ -443,11 +446,11 @@ export function TransactionDetailPanel({
                       })}
                     </div>
                   )}
-                  {transaction.merchantName && transaction.splits.length <= 1 && (
+                  {ruleTarget && transaction.splits.length <= 1 && (
                     <div className="pt-3 border-t border-border text-[12.5px] leading-snug text-text-2">
                       {ruleMade ? (
                         <span>
-                          <b className="text-text font-semibold">{transaction.merchantName}</b> now always goes to <b className="text-text font-semibold">{current?.name}</b>.{" "}
+                          {ruleTarget.kind === "merchant" ? <b className="text-text font-semibold">{ruleTarget.label}</b> : <>Transactions like <b className="text-text font-semibold">{ruleTarget.label}</b></>} now always go{ruleTarget.kind === "merchant" ? "es" : ""} to <b className="text-text font-semibold">{current?.name}</b>.{" "}
                           <Link href="/rules" className="text-brand font-medium">
                             Edit in Rules
                           </Link>
@@ -459,7 +462,7 @@ export function TransactionDetailPanel({
                             <span className="absolute left-0.5 top-0.5 w-[14px] h-[14px] rounded-full bg-surface" />
                           </span>
                           <span>
-                            Always use <b className="text-text font-semibold">{current?.name ?? "this category"}</b> for <b className="text-text font-semibold">{transaction.merchantName}</b>.
+                            Always use <b className="text-text font-semibold">{current?.name ?? "this category"}</b> for {ruleTarget.kind === "merchant" ? "" : "transactions like "}<b className="text-text font-semibold">{ruleTarget.label}</b>.
                             {rulePreview != null && ` Changes ${rulePreview} past transaction${rulePreview === 1 ? "" : "s"}.`}
                           </span>
                         </label>

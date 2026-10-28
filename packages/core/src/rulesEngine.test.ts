@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { matchesRule, resolveRuleActions, type MatchableTransaction, type RuleLike } from "./rulesEngine";
+import { matchesRule, resolveRuleActions, ruleTargetFor, type MatchableTransaction, type RuleLike } from "./rulesEngine";
 
 function tx(overrides: Partial<MatchableTransaction> = {}): MatchableTransaction {
   return {
@@ -121,5 +121,39 @@ describe("resolveRuleActions", () => {
   it("ignores a non-matching rule entirely", () => {
     const r = rule({ match: { field: "merchant", op: "equals", value: "Not Starbucks" }, actions: { setCategoryId: "cat_a" } });
     expect(resolveRuleActions(tx(), [r]).categoryId).toBeUndefined();
+  });
+});
+
+describe("ruleTargetFor", () => {
+  const deposit = (name: string): MatchableTransaction => ({ name, merchantName: null, amount: 240000, accountId: "a", pfcPrimary: null, pfcDetailed: null });
+
+  it("uses the merchant name when there is one", () => {
+    expect(ruleTargetFor({ merchantName: "Netflix", name: "NETFLIX.COM 866-579" })).toEqual({
+      kind: "merchant",
+      label: "Netflix",
+      match: { field: "merchant", op: "equals", value: "Netflix" },
+    });
+  });
+
+  it("drops reference numbers from a description with no merchant", () => {
+    const target = ruleTargetFor({ merchantName: null, name: "PAYROLL DEP 0012345 ACME CORP PPD ID: 9876543" });
+    expect(target?.kind).toBe("description");
+    expect(target?.label).toBe("PAYROLL DEP ACME CORP PPD ID");
+  });
+
+  it("matches the next paycheque, whose reference number changed", () => {
+    const target = ruleTargetFor({ merchantName: null, name: "PAYROLL DEP 0012345 ACME CORP" })!;
+    expect(matchesRule(deposit("PAYROLL DEP 0099881 ACME CORP"), target.match)).toBe(true);
+    expect(matchesRule(deposit("payroll dep 0099881 acme corp"), target.match)).toBe(true);
+    expect(matchesRule(deposit("PAYROLL DEP 0099881 OTHER INC"), target.match)).toBe(false);
+  });
+
+  it("escapes regex characters in the kept words", () => {
+    const target = ruleTargetFor({ merchantName: null, name: "E-TRANSFER (A+B) 1234" })!;
+    expect(matchesRule(deposit("E-TRANSFER (A+B) 5678"), target.match)).toBe(true);
+  });
+
+  it("returns null when nothing but numbers is left", () => {
+    expect(ruleTargetFor({ merchantName: null, name: "DEP 00123 4456" })).toBeNull();
   });
 });
