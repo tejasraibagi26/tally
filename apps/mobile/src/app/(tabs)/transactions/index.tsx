@@ -211,7 +211,6 @@ export default function TransactionsScreen() {
         ListHeaderComponent={
           <View className="pb-4">
             <TabHeader
-              eyebrow="Your money"
               title="Transactions"
               figure={summary ? <MoneyText cents={summary.spend} mask={false} className="font-display text-text" style={{ fontSize: rf(36), lineHeight: rf(40) }} /> : undefined}
               figureContext={summary ? `spent across ${total} transaction${total === 1 ? "" : "s"} ${periodLabel}` : undefined}

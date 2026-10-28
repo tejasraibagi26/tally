@@ -285,8 +285,10 @@
  * 2.3.1 lets that pair's second charge land up to 3 days either side of the
  * same day, and compares Plaid's authorized_date (when the merchant charged)
  * over the posted date: weekends and settlement lag moved the posted day.
+ * 2.3.2 drops the "Your money" label above Transactions' title (and
+ * PageHeader's eyebrow prop, which only it used).
  */
-export const APP_VERSION = "2.3.1";
+export const APP_VERSION = "2.3.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

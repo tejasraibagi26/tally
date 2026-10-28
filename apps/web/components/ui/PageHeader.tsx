@@ -7,15 +7,13 @@ import { cn } from "@/lib/cn";
  * The one page header every (app) screen uses. Default layout: the page
  * title with a muted context line under it (period, counts, sync freshness),
  * and the page's controls on the right -- the primary action, when there is
- * one, last. Passing `eyebrow` + `figure` switches to the headline variant
- * (section label, title, then the one number the page is about), used by
- * Transactions.
+ * one, last. Passing `figure` switches to the headline variant (title,
+ * then the one number the page is about), used by Transactions.
  */
 export function PageHeader({
   title,
   meta,
   actions,
-  eyebrow,
   figure,
   figureContext,
   className,
@@ -24,7 +22,6 @@ export function PageHeader({
   /** Short context items, joined with dots. Falsy entries are skipped. */
   meta?: ReactNode[];
   actions?: ReactNode;
-  eyebrow?: string;
   figure?: ReactNode;
   figureContext?: ReactNode;
   className?: string;
@@ -35,7 +32,6 @@ export function PageHeader({
   return (
     <div className={cn("flex flex-wrap justify-between gap-x-6 gap-y-3 flex-none", headline ? "items-end" : "items-center", className)}>
       <div className={cn("flex flex-col min-w-0", headline ? "gap-1.5" : "gap-1")}>
-        {eyebrow && <span className="text-xs font-medium uppercase tracking-[0.06em] text-text-3">{eyebrow}</span>}
         {/* ui-page-title: Tally Pop sets it in the display face (globals.css). */}
         <h1 className="ui-page-title m-0 text-2xl font-semibold text-text leading-tight">{title}</h1>
         {headline && (

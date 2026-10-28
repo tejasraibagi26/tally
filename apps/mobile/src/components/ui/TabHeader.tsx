@@ -9,15 +9,13 @@ import { useUiLook } from "@/lib/UiLookContext";
  * opens with -- mobile's counterpart of web's PageHeader
  * (apps/web/components/ui/PageHeader.tsx). Default: the title with a muted
  * context line under it (period, counts, sync freshness) and the screen's
- * actions on the right. Passing `eyebrow` + `figure` switches to the
- * headline variant (section label, title, then the one number the screen is
- * about), used by Transactions.
+ * actions on the right. Passing `figure` switches to the headline variant
+ * (title, then the one number the screen is about), used by Transactions.
  */
 export function TabHeader({
   title,
   meta,
   actions,
-  eyebrow,
   figure,
   figureContext,
 }: {
@@ -25,7 +23,6 @@ export function TabHeader({
   /** Short context items, joined with dots. Falsy entries are skipped. */
   meta?: ReactNode[];
   actions?: ReactNode;
-  eyebrow?: string;
   figure?: ReactNode;
   figureContext?: ReactNode;
 }) {
@@ -38,11 +35,6 @@ export function TabHeader({
     <View className="gap-1.5">
       <View className="flex-row items-center justify-between gap-3">
         <View className="flex-1 gap-0.5 min-w-0">
-          {eyebrow && (
-            <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(11), letterSpacing: 0.6, textTransform: "uppercase" }}>
-              {eyebrow}
-            </Text>
-          )}
           {/* Tally Pop sets titles in the display face (Bricolage), a step larger. */}
           <Text className={pop ? "font-display text-text" : "font-ui-semibold text-text"} style={pop ? { letterSpacing: -0.8, fontSize: rf(30) } : { letterSpacing: -0.3, fontSize: rf(24) }} numberOfLines={pop ? 2 : 1}>
             {title}

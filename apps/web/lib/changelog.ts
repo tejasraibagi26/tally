@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.3.2",
+    date: "2026-10-28",
+    changes: [{ kind: "improved", text: "Transactions' header no longer has the \"Your money\" label above its title." }],
+  },
+  {
     version: "2.3.1",
     date: "2026-10-28",
     changes: [{ kind: "improved", text: "A subscription's second charge still counts when it lands a few days off its usual date, as charges often do around weekends." }],

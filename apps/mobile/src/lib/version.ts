@@ -290,8 +290,10 @@ import Constants from "expo-constants";
  * (Bleed cancelled the full padding and drew 2px over it), and sizes Where
  * it went's segments by flexGrow: percentage widths plus the gaps overflowed
  * and clipped the last one.
+ * 2.3.9 drops the "Your money" label above Transactions' title (and
+ * TabHeader's eyebrow prop, which only it used).
  */
-export const APP_VERSION = "2.3.8";
+export const APP_VERSION = "2.3.9";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
