@@ -329,8 +329,14 @@
  * (components/ui/DayOfMonthPicker.tsx): 1-31, Last day, Clear.
  * 2.4.7 draws the Delete data card's Pop shadow in the same negative tint
  * as its outline (.ui-card-negative), instead of ink beside a red edge.
+ * 2.5.0 adds Year in review (/year-in-review, ?year= for past years; GET
+ * /api/year-in-review): net worth over the year, money in and out, spend
+ * by month, top categories and places, biggest and calmest months, and
+ * subscriptions a year, from lib/yearReview.ts and @tally/core/yearReview.
+ * Overview shows a Pop banner into it in December and January
+ * (reviewSeason).
  */
-export const APP_VERSION = "2.4.7";
+export const APP_VERSION = "2.5.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

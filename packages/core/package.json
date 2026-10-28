@@ -32,7 +32,8 @@
     "./cardView": "./src/cardView.ts",
     "./syncDialog": "./src/syncDialog.ts",
     "./paycheque": "./src/paycheque.ts",
-    "./safeToSpend": "./src/safeToSpend.ts"
+    "./safeToSpend": "./src/safeToSpend.ts",
+    "./yearReview": "./src/yearReview.ts"
   },
   "scripts": {
     "test": "vitest run",

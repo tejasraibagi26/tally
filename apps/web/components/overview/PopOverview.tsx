@@ -54,3 +54,25 @@ export function TallyUpBanner({ count, className, style }: { count: number; clas
     </Link>
   );
 }
+
+/** December and January: a banner into the year's review (reviewSeason in @tally/core/yearReview). */
+export function YearReviewBanner({ year, inProgress, className, style }: { year: number; inProgress: boolean; className?: string; style?: React.CSSProperties }) {
+  return (
+    <Link
+      href={`/year-in-review?year=${year}`}
+      style={style}
+      className={cn("flex flex-wrap items-center gap-3.5 rounded-card border bg-[var(--marigold,var(--warning-subtle))] px-4 py-3.5 text-[var(--ink-text,var(--text))]", className)}
+    >
+      <span className="w-10 h-10 flex-none rounded-control bg-surface text-text flex items-center justify-center font-display text-[13px]" aria-hidden="true">
+        {String(year).slice(2)}
+      </span>
+      <span className="flex-1 min-w-[220px] flex flex-col">
+        <span className="font-bold text-[16px]">Your {year}{inProgress ? " so far" : ""}</span>
+        <span className="text-[14px]">Where the money went, the months that stood out, and how far net worth moved.</span>
+      </span>
+      <span className="inline-flex items-center gap-1 text-[15px] font-bold">
+        See your year <ChevronRight size={16} strokeWidth={2.5} aria-hidden="true" />
+      </span>
+    </Link>
+  );
+}

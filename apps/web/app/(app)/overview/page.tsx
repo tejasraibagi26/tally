@@ -29,7 +29,8 @@ import { getUserTimezone } from "@/lib/userTimezone";
 import { todayInZone } from "@tally/core/zonedDate";
 import { monthSummary } from "@tally/core/budgetView";
 import { greetingFor, leftToSpendLine, onPaceStreak } from "@tally/core/popView";
-import { OnPaceCard, TallyUpBanner } from "@/components/overview/PopOverview";
+import { OnPaceCard, TallyUpBanner, YearReviewBanner } from "@/components/overview/PopOverview";
+import { reviewSeason } from "@tally/core/yearReview";
 import { SafeToSpendCard } from "@/components/overview/SafeToSpend";
 import { safeToSpendFor } from "@/lib/safeToSpend";
 import { GoalCard } from "@/components/goals/GoalCard";
@@ -303,6 +304,7 @@ export default async function OverviewPage() {
 
       {/* Same staggered entrance as the sections around them (reveal). */}
       {unreviewed > 0 && <TallyUpBanner className="pop-only" count={unreviewed} style={reveal(2)} />}
+      {reviewSeason(today) != null && <YearReviewBanner className="pop-only" year={reviewSeason(today)!} inProgress={reviewSeason(today)! === Number(today.slice(0, 4))} style={reveal(2)} />}
 
       {/* Tally Pop: the year-end goal (lib/goals.ts), or a prompt to set one */}
       <GoalCard className="pop-only" summary={goal} style={reveal(2)} />
