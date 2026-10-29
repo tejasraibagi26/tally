@@ -38,6 +38,12 @@ const COPY: Record<AlertType, { label: string; why: string; cta: string; setting
     cta: "See the breakdown",
     settingName: "safe to spend alerts",
   },
+  projected_shortfall: {
+    label: "Forecast",
+    why: "Tally projects your balance day by day from your bills, card statements, pay schedule and what you usually spend. It warns about the first day it drops below your buffer, at most once a week.",
+    cta: "See the forecast",
+    settingName: "forecast alerts",
+  },
   subscription_change: {
     label: "Subscription alert",
     why: "Tally spotted this from your recent charges. You can review or remove subscriptions at any time.",
@@ -91,6 +97,7 @@ const POP_BADGE: Record<AlertType, { bg: string; fg: string; glyph: string }> = 
   subscription_change: { bg: "#E6E0FF", fg: "#1D1B2F", glyph: "&#8635;" },
   goal_off_track: { bg: "#FFC53D", fg: "#1D1B2F", glyph: "&#9650;" },
   safe_to_spend_low: { bg: "#FFC53D", fg: "#1D1B2F", glyph: "&#9660;" },
+  projected_shortfall: { bg: "#D03B3B", fg: "#FFFFFF", glyph: "&#9660;" },
 };
 
 const POP_FONT = "Figtree,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif";

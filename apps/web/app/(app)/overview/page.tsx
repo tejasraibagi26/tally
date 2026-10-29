@@ -36,8 +36,11 @@ import { safeToSpendFor } from "@/lib/safeToSpend";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { goalSummary, goalsIntroSeen } from "@/lib/goals";
 import { GoalIntroModal } from "@/components/goals/GoalIntroModal";
+import { ForecastCard } from "@/components/forecast/ForecastCard";
+import { ForecastIntroModal } from "@/components/forecast/ForecastIntroModal";
 import { NewLookModal } from "@/components/overview/NewLookModal";
 import { seenAnnouncements } from "@/lib/announcements";
+import { forecastFor } from "@/lib/forecast";
 
 // A short, increasing entrance delay per major section so the page arrives
 // in a quick cascade rather than all at once. Kept small (120ms apart) so
@@ -166,13 +169,16 @@ export default async function OverviewPage() {
   const dailyPace = totalBudgeted > 0 ? Math.floor(totalBudgeted / daysInMonth) : 0;
   const streak = onPaceStreak(spendByDay, dailyPace, today, monthStart);
   const unreviewed = toReview?.count ?? 0;
-  const [goal, introSeen, seen, safe] = await Promise.all([goalSummary(userId), goalsIntroSeen(userId), seenAnnouncements(userId), safeToSpendFor(userId)]);
+  const [goal, introSeen, seen, safe, forecast] = await Promise.all([goalSummary(userId), goalsIntroSeen(userId), seenAnnouncements(userId), safeToSpendFor(userId), forecastFor(userId)]);
   // Pop's right-hand column: safe to spend over the on-pace card, at equal
   // heights; either alone fills it. Classic keeps Connections there.
   const showSafe = safe.cash.length > 0;
   const popColumn = showSafe || dailyPace > 0;
-  // One modal per visit: the new-look announcement first, the goals intro after.
+  // One modal per visit, in the order they shipped: the new-look
+  // announcement, then the goals intro, then the forecast one.
   const lookSeen = seen.includes("new-look");
+  const goalsStepDone = introSeen || !!goal;
+  const forecastSeen = seen.includes("forecast");
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
@@ -308,9 +314,15 @@ export default async function OverviewPage() {
 
       {/* Tally Pop: the year-end goal (lib/goals.ts), or a prompt to set one */}
       <GoalCard className="pop-only" summary={goal} style={reveal(2)} />
+      {/* Where the next two months land (lib/forecast.ts); hidden until
+          there is a pay schedule to project from. */}
+      <div style={reveal(2)}>
+        <ForecastCard forecast={forecast} />
+      </div>
       {/* Once per account, Pop only, and not once a goal exists */}
       <NewLookModal show={!lookSeen} />
       <GoalIntroModal show={!introSeen && !goal && lookSeen} />
+      <ForecastIntroModal show={!forecastSeen && lookSeen && goalsStepDone} />
 
       {/* Cash flow trend */}
       <Card style={reveal(3)}>

@@ -10,8 +10,9 @@ import { formatCents } from "./money";
 /**
  * goal_off_track: the year-end goal (goalMath) projects short; Tally Pop users only.
  * safe_to_spend_low: safe to spend (safeToSpend) drops below the user's amount; Tally Pop only.
+ * projected_shortfall: the forecast (forecast) crosses the buffer on a future day; Tally Pop only.
  */
-export type AlertType = "budget_threshold" | "connection_broken" | "large_transaction" | "subscription_change" | "goal_off_track" | "safe_to_spend_low";
+export type AlertType = "budget_threshold" | "connection_broken" | "large_transaction" | "subscription_change" | "goal_off_track" | "safe_to_spend_low" | "projected_shortfall";
 
 export interface AlertCandidate {
   type: AlertType;
@@ -288,4 +289,64 @@ export function safeToSpendLowAlert(s: SafeToSpendAlertInput): AlertCandidate | 
   const named = top.map((i) => `${i.label} (${formatCents(i.amount)})`).join(" and ");
   const body = top.length ? `${named} come${top.length === 1 ? "s" : ""} out before ${until}.` : `That's what's left until ${until}.`;
   return { type: "safe_to_spend_low", dedupeKey: `safe_to_spend_low:${s.paydayDate}`, title, body, url: "/overview?safe=1" };
+}
+
+// ---------------------------------------------------------------------------
+// Projected shortfall (the Forecast spec §10)
+
+export interface ProjectedShortfallInput {
+  /** The first day the forecast's central line falls under the buffer. */
+  date: string;
+  /** The balance on that day, cents; usually negative. */
+  amount: number;
+  /** The buffer it crossed (users.safe_to_spend_cushion). */
+  cushion: number;
+  /** The biggest obligations in the week before it, to name the cause. */
+  causes: { label: string; amount: number }[];
+  /** safe_to_spend_low has already fired for this pay window — don't say it twice. */
+  alreadyWarned: boolean;
+  /** Only days this far out are worth mailing about. */
+  withinDays: number;
+  today: string;
+}
+
+/** Monday of the ISO week a date falls in, as YYYY-MM-DD. */
+export function isoWeekKey(date: string): string {
+  const d = new Date(`${date}T00:00:00Z`);
+  // getUTCDay: 0 Sun..6 Sat; shift so Monday starts the week.
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * The first alert that fires before the money moves.
+ *
+ * Dedupe holds the ISO week, not the day: the dip slides around by a day as
+ * spending posts, and "you're tight that week" said once is the real message.
+ * A dip that moves into another week is new information and fires again.
+ */
+export function projectedShortfallAlert(s: ProjectedShortfallInput): AlertCandidate | null {
+  if (s.alreadyWarned) return null;
+  const out = Math.round((Date.parse(`${s.date}T00:00:00Z`) - Date.parse(`${s.today}T00:00:00Z`)) / 86_400_000);
+  if (out < 0 || out > s.withinDays) return null;
+
+  const when = shortDate(s.date);
+  const title =
+    s.amount < 0
+      ? `You're ${formatCents(-s.amount)} short on ${when}`
+      : `You're down to ${formatCents(s.amount)} on ${when}`;
+  const top = [...s.causes].sort((a, b) => b.amount - a.amount).slice(0, 2);
+  const named = top.map((c) => `${c.label} (${formatCents(c.amount)})`).join(" and ");
+  const body = top.length
+    ? `${named} come${top.length === 1 ? "s" : ""} out first.`
+    : `That's ${out} day${out === 1 ? "" : "s"} away on what's scheduled so far.`;
+
+  return {
+    type: "projected_shortfall",
+    dedupeKey: `projected_shortfall:${isoWeekKey(s.date)}`,
+    title,
+    body,
+    url: "/forecast",
+    payload: { date: s.date, amount: s.amount, cushion: s.cushion },
+  };
 }

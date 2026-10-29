@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { budgetAlerts, largeTransactionAlerts, subscriptionAlerts, connectionAlerts, median, alertDate } from "./alerts";
+import { budgetAlerts, largeTransactionAlerts, subscriptionAlerts, connectionAlerts, median, alertDate, isoWeekKey, projectedShortfallAlert } from "./alerts";
 
 describe("budgetAlerts", () => {
   const b = (spend: number, limit = 50_000) => [{ categoryId: "c1", categoryName: "Dining", limit, spend }];
@@ -108,5 +108,38 @@ describe("connectionAlerts", () => {
       { id: "a", institutionName: null, status: "healthy", lastSyncedAt: null },
       { id: "b", institutionName: null, status: "revoked", lastSyncedAt: null },
     ])).toEqual([]);
+  });
+});
+
+describe("projectedShortfallAlert", () => {
+  const base = {
+    date: "2026-11-12", amount: -18865, cushion: 40000,
+    causes: [{ label: "Amex Cobalt ····1004", amount: 121044 }, { label: "Hydro One", amount: 11840 }],
+    alreadyWarned: false, withinDays: 30, today: "2026-11-01",
+  };
+  it("names the day, the gap and the two biggest causes", () => {
+    const a = projectedShortfallAlert(base)!;
+    expect(a.title).toBe("You're $188.65 short on Nov 12");
+    expect(a.body).toBe("Amex Cobalt ····1004 ($1,210.44) and Hydro One ($118.40) come out first.");
+    expect(a.url).toBe("/forecast");
+  });
+  it("keys on the ISO week, so a dip sliding a day doesn't mail twice", () => {
+    expect(projectedShortfallAlert(base)!.dedupeKey).toBe("projected_shortfall:2026-11-09");
+    expect(projectedShortfallAlert({ ...base, date: "2026-11-13" })!.dedupeKey).toBe("projected_shortfall:2026-11-09");
+    // ...but a dip in the next week is new information.
+    expect(projectedShortfallAlert({ ...base, date: "2026-11-17" })!.dedupeKey).toBe("projected_shortfall:2026-11-16");
+  });
+  it("says nothing when safe to spend already covered it", () => {
+    expect(projectedShortfallAlert({ ...base, alreadyWarned: true })).toBeNull();
+  });
+  it("ignores a dip further out than the lead time", () => {
+    expect(projectedShortfallAlert({ ...base, date: "2026-12-20" })).toBeNull();
+  });
+  it("still fires when the balance stays positive but under the buffer", () => {
+    expect(projectedShortfallAlert({ ...base, amount: 12000 })!.title).toBe("You're down to $120.00 on Nov 12");
+  });
+  it("isoWeekKey takes Monday as the start of the week", () => {
+    expect(isoWeekKey("2026-11-09")).toBe("2026-11-09"); // a Monday
+    expect(isoWeekKey("2026-11-15")).toBe("2026-11-09"); // the Sunday after
   });
 });

@@ -7,9 +7,10 @@ import { Platform } from "react-native";
  * rows are added or removed: each row is 48pt plus a 1pt hairline. 464 =
  * 415 + 49 for Credit cards (mobile v1.27.1); + 49 for Tags (mobile
  * v2.6.0). Year in review had a row from v2.5.0 to v2.7.1; it's reached
- * from Overview's January strip now.
+ * from Overview's January strip now. 562 = 513 + 49 for Forecast
+ * (mobile v2.8.0).
  */
-export const MORE_SHEET_CONTENT_HEIGHT = 513;
+export const MORE_SHEET_CONTENT_HEIGHT = 562;
 
 /**
  * Extra height in the Tally Pop look: Figtree's line box is taller than

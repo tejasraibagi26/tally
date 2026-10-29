@@ -330,8 +330,15 @@ import Constants from "expo-constants";
  * 2.7.2 takes Year in review out of the More menu (lib/moreSheet.ts back
  * to 513pt); Overview's January strip is the way in.
  * 2.7.3 gives Tags' empty screen web's card, icon and title (EmptyState).
+ * 2.8.0 adds Forecast, web 2.8.0's companion: the projected balance for the
+ * next 30-90 days, the first day it falls under the buffer and the ledger
+ * behind it, from the same GET /api/forecast and the same
+ * @tally/core/forecast math. Reached from the More sheet (lib/moreSheet.ts
+ * to 562pt) and Overview, with a How it works dialog and a one-time
+ * announcement. No scrub gesture on the chart yet -- the ledger below it
+ * carries every figure.
  */
-export const APP_VERSION = "2.7.3";
+export const APP_VERSION = "2.8.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

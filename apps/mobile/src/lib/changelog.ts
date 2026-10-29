@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.8.0",
+    date: "2026-10-28",
+    changes: [
+      { kind: "new", text: "Forecast: where your balance is heading for the next 60 days, from your pay dates, bills and card statements. It leads with the first day you'd drop below your buffer and what put you there — under Forecast in the More menu." },
+    ],
+  },
+  {
     version: "2.7.3",
     date: "2026-10-28",
     changes: [{ kind: "improved", text: "The Tags screen with no tags yet looks like the web app's." }],

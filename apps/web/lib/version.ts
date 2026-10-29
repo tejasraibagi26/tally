@@ -358,8 +358,18 @@
  * 2.7.2 lets /open try the app on an iPad: iPadOS Safari reports macOS, so
  * a Mac user agent now gets the page, which checks for a touchscreen
  * (navigator.maxTouchPoints) before trying the app or continuing to the web.
+ * 2.8.0 adds Forecast: a projected cash balance for the next 30-90 days
+ * (@tally/core/forecast, lib/forecast.ts) built from counted cash, the pay
+ * schedule, recurring_streams and card statements, minus a weekday-median
+ * estimate of day-to-day spending drawn as a band. It leads with the first
+ * day under users.safe_to_spend_cushion rather than the deepest, since that
+ * is the one still worth acting on, and names what caused it. Safe to spend
+ * is the same sum at one point, and a test pins them together. A new
+ * projected_shortfall alert (migration 0033) mails that day once a week,
+ * suppressed when safe_to_spend_low already covered the same money, plus an
+ * Overview card, a How it works explainer and a one-time announcement.
  */
-export const APP_VERSION = "2.7.2";
+export const APP_VERSION = "2.8.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

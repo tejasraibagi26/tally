@@ -36,6 +36,7 @@ import { useSafeToSpend } from "@/lib/queries/safeToSpend";
 import { GoalCard } from "@/components/overview/GoalCard";
 import { GoalIntroDialog } from "@/components/overview/GoalIntroDialog";
 import { NewLookDialog } from "@/components/overview/NewLookDialog";
+import { ForecastIntroDialog } from "@/components/forecast/ForecastIntroDialog";
 import { useAccountProfile } from "@/lib/queries/account";
 import { useGoal } from "@/lib/queries/goals";
 import { monthSummary } from "@tally/core/budgetView";
@@ -63,6 +64,9 @@ export default function OverviewScreen() {
   // One dialog per visit: the new-look announcement first, the goals intro
   // after (an older server sends no list -- nothing to wait for).
   const lookSeen = profile.data ? (profile.data.seenAnnouncements?.includes("new-look") ?? true) : false;
+  // The forecast intro waits for the goals step to be settled, so only one
+  // dialog ever appears per visit.
+  const goalsStepDone = goal.data != null ? goal.data.goal != null || goal.data.introSeen !== false : false;
   const accounts = useAccounts();
   const overview = useOverview();
   const trend = useNetWorthTrend();
@@ -256,6 +260,8 @@ export default function OverviewScreen() {
       <Toast message={undo.message} onHidden={undo.clear} action={undo.action} bottom={tabBarClearance + 16} />
       <NewLookDialog profile={profile.data} />
       {pop && lookSeen && <GoalIntroDialog summary={goal.data} />}
+      {/* Third in the chain: after the look and the goals intro. */}
+      {pop && lookSeen && <ForecastIntroDialog profile={profile.data} show={goalsStepDone} />}
     </View>
   );
 }

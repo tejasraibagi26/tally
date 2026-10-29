@@ -11,6 +11,7 @@ import {
   ListFilter,
   Landmark,
   TrendingUp,
+  TrendingDown,
   CreditCard,
   Flame,
   Target,
@@ -98,6 +99,7 @@ function navGroups(counts: NavCounts): NavGroup[] {
     {
       label: "Plan ahead",
       items: [
+        { href: "/forecast", label: "Forecast", icon: TrendingDown },
         { href: "/goals", label: "Year-end goal", icon: Target, popOnly: true },
         { href: "/fire", label: "Early retirement", icon: Flame },
       ],

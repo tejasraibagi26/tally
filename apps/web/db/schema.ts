@@ -97,8 +97,14 @@ export const users = pgTable("users", {
   // One-time announcements the user has dismissed, by key ("new-look", ...),
   // so a new one needs no migration (lib/announcements.ts).
   seenAnnouncements: text("seen_announcements").array().notNull().default(sql`'{}'::text[]`),
-  // Safe to spend never dips into this (cents).
+  // Safe to spend never dips into this (cents). Forecast reuses it as the
+  // buffer line, so the two screens can't drift apart.
   safeToSpendCushion: bigint("safe_to_spend_cushion", { mode: "number" }).notNull().default(0),
+  // Forecast's "spend about $X a day" override (cents). Null = the weekday
+  // median of the last 90 days, which is what the page computes by default.
+  forecastDailySpendCents: bigint("forecast_daily_spend_cents", { mode: "number" }),
+  // The horizon the user last picked on Forecast: 30, 60 or 90.
+  forecastDays: integer("forecast_days").notNull().default(60),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -624,6 +630,10 @@ export const alertTypeEnum = pgEnum("alert_type", [
   "goal_off_track",
   // Safe to spend dropping below alert_preferences.safe_to_spend_low_cents.
   "safe_to_spend_low",
+  // The forecast's central line crossing users.safe_to_spend_cushion on a
+  // future day (lib/alerts/evaluate.ts forecastCandidates). The first alert
+  // in Tally that fires before the money moves.
+  "projected_shortfall",
 ]);
 
 export type AlertType = (typeof alertTypeEnum.enumValues)[number];

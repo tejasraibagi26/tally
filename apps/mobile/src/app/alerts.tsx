@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView, TextInput, Switch, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
-import { PieChart, Receipt, Repeat, Landmark, Target, PiggyBank, type LucideIcon } from "lucide-react-native";
+import { PieChart, Receipt, Repeat, Landmark, Target, PiggyBank, TrendingDown, type LucideIcon } from "lucide-react-native";
 import { useUiLook } from "@/lib/UiLookContext";
 import { Card } from "@/components/ui/Card";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
@@ -19,6 +19,7 @@ const TYPES: { type: AlertType; label: string; description: string; icon: Lucide
   { type: "connection_broken", label: "Connections", description: "When a bank needs you to sign in again.", icon: Landmark },
   { type: "goal_off_track", label: "Year-end goal", description: "When your goal's projection falls short, at most once a month.", icon: Target, popOnly: true },
   { type: "safe_to_spend_low", label: "Safe to spend", description: "When it drops below your amount before payday, at most once per pay period.", icon: PiggyBank, popOnly: true },
+  { type: "projected_shortfall", label: "Forecast", description: "When a day in the next 30 is projected to fall below your buffer, at most once a week.", icon: TrendingDown, popOnly: true },
 ];
 const ICON_BY_TYPE = Object.fromEntries(TYPES.map((t) => [t.type, t.icon])) as Record<AlertType, LucideIcon>;
 

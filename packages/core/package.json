@@ -33,6 +33,7 @@
     "./syncDialog": "./src/syncDialog.ts",
     "./paycheque": "./src/paycheque.ts",
     "./safeToSpend": "./src/safeToSpend.ts",
+    "./forecast": "./src/forecast.ts",
     "./yearReview": "./src/yearReview.ts",
     "./tagView": "./src/tagView.ts",
     "./appLinks": "./src/appLinks.ts"

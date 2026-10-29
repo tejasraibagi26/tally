@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.8.0",
+    date: "2026-10-28",
+    changes: [
+      { kind: "new", text: "Forecast: where your balance is heading for the next 60 days, day by day, from your pay dates, bills and card statements. It leads with the first day you'd drop below your buffer and what put you there — under Plan ahead in the sidebar." },
+      { kind: "new", text: "Overview shows the next 60 days at a glance, and Tally emails you when a day ahead is heading under your buffer." },
+    ],
+  },
+  {
     version: "2.7.2",
     date: "2026-10-28",
     changes: [{ kind: "fixed", text: "Email buttons open the app on an iPad too, not just an iPhone." }],

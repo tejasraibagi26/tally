@@ -7,7 +7,7 @@ import { db, schema } from "@/db";
  * year-end goals intro predates this and keeps its own column
  * (users.goals_intro_seen_at, lib/goals.ts).
  */
-export const ANNOUNCEMENTS = ["new-look"] as const;
+export const ANNOUNCEMENTS = ["new-look", "forecast"] as const;
 export type AnnouncementKey = (typeof ANNOUNCEMENTS)[number];
 
 export async function seenAnnouncements(userId: string): Promise<string[]> {

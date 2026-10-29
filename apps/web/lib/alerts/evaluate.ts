@@ -4,6 +4,7 @@ import {
   budgetAlerts,
   connectionAlerts,
   largeTransactionAlerts,
+  projectedShortfallAlert,
   safeToSpendLowAlert,
   subscriptionAlerts,
   type AlertCandidate,
@@ -19,6 +20,7 @@ import { formatCents } from "@tally/core/money";
 import { goalSummary } from "@/lib/goals";
 import { wantsPopEmail } from "@/lib/uiLook";
 import { deadlineLabel } from "@/lib/goalCopy";
+import { forecastFor } from "@/lib/forecast";
 import { safeToSpendFor } from "@/lib/safeToSpend";
 
 const HISTORY_DAYS = 183; // ~6 months, ALERTS.md §4.3
@@ -198,6 +200,38 @@ async function safeToSpendCandidates(userId: string, threshold?: number): Promis
   return alert ? [alert] : [];
 }
 
+/** Only a dip this far out is worth an email; past it there is nothing to do yet. */
+const SHORTFALL_LEAD_DAYS = 30;
+
+/**
+ * The forecast (lib/forecast.ts) crossing the buffer on a future day, Tally
+ * Pop only. Daily sweep only: the curve shifts a little with every
+ * transaction that posts, and a per-sync trigger would turn one dip into a
+ * stream of near-identical mail.
+ *
+ * Skipped while a counted balance is stale, same as safe to spend — an old
+ * balance makes a shortfall out of nothing — and suppressed when
+ * safe_to_spend_low already fired this run, since both would be describing
+ * the same money.
+ */
+async function forecastCandidates(userId: string, already: AlertCandidate[]): Promise<AlertCandidate[]> {
+  const [user] = await db.select({ uiLook: schema.users.uiLook }).from(schema.users).where(eq(schema.users.id, userId)).limit(1);
+  if (!user || !wantsPopEmail(user)) return [];
+  const f = await forecastFor(userId);
+  if (f.openingCash === 0 || f.assumptions.stale.length > 0) return [];
+  if (!f.headline || f.headline.kind !== "shortfall") return [];
+  const alert = projectedShortfallAlert({
+    date: f.headline.date,
+    amount: f.headline.amount,
+    cushion: f.cushion,
+    causes: f.headline.causes,
+    alreadyWarned: already.some((c) => c.type === "safe_to_spend_low"),
+    withinDays: SHORTFALL_LEAD_DAYS,
+    today: f.today,
+  });
+  return alert ? [alert] : [];
+}
+
 /** After a webhook changes a connection's status. */
 export async function evaluateConnections(userId: string): Promise<number> {
   return recordAndDeliver(userId, await connectionCandidates(userId));
@@ -216,5 +250,6 @@ export async function evaluateUserSweep(userId: string): Promise<number> {
     ...(await goalCandidates(userId)),
     ...(await safeToSpendCandidates(userId)),
   ];
+  candidates.push(...(await forecastCandidates(userId, candidates)));
   return recordAndDeliver(userId, candidates);
 }

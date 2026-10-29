@@ -1,0 +1,1 @@
+ALTER TYPE "public"."alert_type" ADD VALUE IF NOT EXISTS 'projected_shortfall';
