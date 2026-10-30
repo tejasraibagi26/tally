@@ -352,8 +352,11 @@ import Constants from "expo-constants";
  * day with a centred date tile, merchant initials, the day's closing balance
  * once under it, and an under-the-buffer flag in words. Rows open the card,
  * Subscriptions or Income schedules, as web's rows link.
+ * 2.8.4 pads Forecast outside its ScrollView like every other pushed
+ * screen (Investments' pattern): padded inside, its content slid up behind
+ * the transparent header's title and back button.
  */
-export const APP_VERSION = "2.8.3";
+export const APP_VERSION = "2.8.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

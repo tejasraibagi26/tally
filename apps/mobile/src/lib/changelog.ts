@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.8.4",
+    date: "2026-10-30",
+    changes: [{ kind: "fixed", text: "Forecast: the page no longer scrolls up behind its title and back button." }],
+  },
+  {
     version: "2.8.3",
     date: "2026-10-30",
     changes: [{ kind: "improved", text: "Forecast: What's coming matches the web — one block per day, the balance that day leaves you, and a clear flag when it's under your buffer. Tap a row to open the bill, card or paycheque behind it." }],

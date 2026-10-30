@@ -51,15 +51,17 @@ export default function ForecastScreen() {
 
   if (!f || (f.openingCash === 0 && f.assumptions.paycheques === 0)) {
     return (
-      <ScrollView className="flex-1 bg-canvas" contentContainerStyle={{ paddingTop: contentTop, paddingHorizontal: 20, paddingBottom: 40 }}>
+      <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
         <ScreenGlow />
-        <Card className="p-5">
-          <Text className="font-display text-text" style={{ fontSize: rf(17) }}>Nothing to forecast yet</Text>
-          <Text className="font-ui text-text-2 mt-2" style={{ fontSize: rf(14), lineHeight: rf(20) }}>
-            Tally needs a chequing account to start from. Connect one and your bills, pay dates and card statements fill in the rest.
-          </Text>
-        </Card>
-      </ScrollView>
+        <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}>
+          <Card className="p-5">
+            <Text className="font-display text-text" style={{ fontSize: rf(17) }}>Nothing to forecast yet</Text>
+            <Text className="font-ui text-text-2 mt-2" style={{ fontSize: rf(14), lineHeight: rf(20) }}>
+              Tally needs a chequing account to start from. Connect one and your bills, pay dates and card statements fill in the rest.
+            </Text>
+          </Card>
+        </ScrollView>
+      </View>
     );
   }
 
@@ -67,13 +69,17 @@ export default function ForecastScreen() {
   const visible = showAll ? f.events : f.events.slice(0, 12);
 
   return (
-    <>
+    // Padded outside the ScrollView, as every other pushed screen is: the
+    // header is transparent, so content padded inside the scroll slid up
+    // behind the title and back button.
+    <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
+      <ScreenGlow />
       <ScrollView
-        className="flex-1 bg-canvas"
+        className="flex-1"
         scrollEnabled={!scrubbing}
-        contentContainerStyle={{ paddingTop: contentTop, paddingHorizontal: 20, paddingBottom: 40, gap: 12 }}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40, gap: 12 }}
       >
-        <ScreenGlow />
 
         <View className="flex-row items-center justify-between">
           <View className="flex-row gap-1.5">
@@ -199,7 +205,7 @@ export default function ForecastScreen() {
         </Card>
       </ScrollView>
       <ForecastHowItWorksDialog open={howOpen} onClose={() => setHowOpen(false)} />
-    </>
+    </View>
   );
 }
 
