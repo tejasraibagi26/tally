@@ -77,7 +77,7 @@ export function ForecastLedger({
             <div
               aria-label={isToday ? "Today" : dayLabel(g.date)}
               className={cn(
-                "flex h-fit flex-col items-center rounded-control border py-1.5 leading-none",
+                "flex h-fit flex-col items-center self-center rounded-control border py-1.5 leading-none",
                 isToday ? "border-brand bg-brand-subtle text-brand" : "border-border bg-surface-2 text-text",
               )}
             >

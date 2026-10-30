@@ -380,8 +380,9 @@
  * than against its last cash row (no more columns of dashes). A day under
  * the buffer says so with an icon and words; the red row tint broke
  * DESIGN.md's amounts-not-backgrounds rule.
+ * 2.8.3 centres that date tile on its day's block instead of pinning it top.
  */
-export const APP_VERSION = "2.8.2";
+export const APP_VERSION = "2.8.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
