@@ -172,7 +172,7 @@ export default async function ForecastPage({ searchParams }: { searchParams: Pro
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
         <Card>
-          <CardHeader title="What's coming" meta="Balance after" />
+          <CardHeader title="What's coming" />
           <div className="px-5 pb-4">
             <ForecastLedger events={f.events} days={f.days} cushion={f.cushion} />
           </div>

@@ -374,8 +374,14 @@
  * gone: a subscription found from two matching monthly charges scores 0.4
  * and a late one is at_risk, so both were on Subscriptions and missing from
  * Forecast.
+ * 2.8.2 redesigns Forecast's What's coming (ForecastLedger): one block per
+ * day with a date tile, a merchant initial per row instead of an unexplained
+ * colour square, and the day's closing balance written once under it rather
+ * than against its last cash row (no more columns of dashes). A day under
+ * the buffer says so with an icon and words; the red row tint broke
+ * DESIGN.md's amounts-not-backgrounds rule.
  */
-export const APP_VERSION = "2.8.1";
+export const APP_VERSION = "2.8.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.8.2",
+    date: "2026-10-30",
+    changes: [
+      { kind: "improved", text: "Forecast: What's coming is easier to scan — one block per day, with the balance that day leaves you and a clear flag when it's under your buffer." },
+    ],
+  },
+  {
     version: "2.8.1",
     date: "2026-10-30",
     changes: [
