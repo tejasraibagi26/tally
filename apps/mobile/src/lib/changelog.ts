@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.8.2",
+    date: "2026-10-30",
+    changes: [{ kind: "fixed", text: "Android: the Budgets tab uses the same pie chart icon as iPhone." }],
+  },
+  {
     version: "2.8.1",
     date: "2026-10-30",
     changes: [

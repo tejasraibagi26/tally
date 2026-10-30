@@ -346,8 +346,10 @@ import Constants from "expo-constants";
  * readout of the day's balance and what lands that day, and its ledger's
  * "+ N more" expands instead of being a dead end. Server side, web 2.8.1
  * counts every subscription in Forecast, Safe to spend and Upcoming.
+ * 2.8.2 gives Android's Budgets tab the pie chart iOS (chart.pie) and web
+ * already use, in place of a piggy bank.
  */
-export const APP_VERSION = "2.8.1";
+export const APP_VERSION = "2.8.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

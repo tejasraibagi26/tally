@@ -1,7 +1,7 @@
 import { Platform } from "react-native";
 import { Tabs } from "expo-router";
 import { NativeTabs } from "expo-router/unstable-native-tabs";
-import { House, ArrowLeftRight, PiggyBank, Landmark } from "lucide-react-native";
+import { House, ArrowLeftRight, ChartPie, Landmark } from "lucide-react-native";
 import { AndroidTabBar } from "@/components/AndroidTabBar";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useUiLook } from "@/lib/UiLookContext";
@@ -14,6 +14,8 @@ const { Icon, Label } = NativeTabs.Trigger;
 // wrong (small icons, unfamiliar proportions), and react-navigation's stock
 // JS bar read as flat and generic, so Android renders its own floating bar
 // that matches the iOS pill: components/AndroidTabBar.tsx (mobile v1.15.0).
+// Its lucide icons are the same glyphs as the SF Symbols below (and web's
+// SideNav): house, arrows, pie chart, bank columns. Change both together.
 function AndroidTabsLayout() {
   return (
     <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <AndroidTabBar {...props} />}>
@@ -22,7 +24,7 @@ function AndroidTabsLayout() {
         name="transactions"
         options={{ title: "Transactions", tabBarIcon: ({ color, size }) => <ArrowLeftRight color={color} size={size} strokeWidth={1.9} /> }}
       />
-      <Tabs.Screen name="budgets" options={{ title: "Budgets", tabBarIcon: ({ color, size }) => <PiggyBank color={color} size={size} strokeWidth={1.9} /> }} />
+      <Tabs.Screen name="budgets" options={{ title: "Budgets", tabBarIcon: ({ color, size }) => <ChartPie color={color} size={size} strokeWidth={1.9} /> }} />
       <Tabs.Screen
         name="accounts"
         options={{ title: "Accounts", tabBarIcon: ({ color, size }) => <Landmark color={color} size={size} strokeWidth={1.9} /> }}
