@@ -149,7 +149,6 @@ export async function forecastFor(userId: string, days?: number): Promise<Foreca
         status: schema.recurringStreams.status,
         accountId: schema.recurringStreams.accountId,
         isManual: schema.recurringStreams.isManual,
-        confidence: schema.recurringStreams.confidence,
         amortizeMonthly: schema.recurringStreams.amortizeMonthly,
         amortizeMonths: schema.recurringStreams.amortizeMonths,
       })
@@ -229,7 +228,6 @@ export async function forecastFor(userId: string, days?: number): Promise<Foreca
       manualNextDueDate: s.manualNextDueDate,
       lastDate: s.lastDate,
       status: s.status,
-      confidence: s.confidence,
       isManual: s.isManual,
       accountId: s.accountId,
       amortizeMonthly: s.amortizeMonthly,

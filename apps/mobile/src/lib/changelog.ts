@@ -16,6 +16,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.8.1",
+    date: "2026-10-30",
+    changes: [
+      { kind: "fixed", text: "Android: the tab bar no longer blends into the cards behind it in dark mode, and the screen fades out beneath it." },
+      { kind: "improved", text: "Forecast: press and drag the chart to read any day's balance and what comes out that day. What's coming now shows everything, not just the first twelve." },
+      { kind: "fixed", text: "Forecast, Safe to spend and Upcoming now count every subscription you see in Subscriptions, including new ones and ones running a few days late." },
+    ],
+  },
+  {
     version: "2.8.0",
     date: "2026-10-28",
     changes: [

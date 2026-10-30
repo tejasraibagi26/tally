@@ -3,6 +3,8 @@ import { Keyboard, Pressable, Text, View, type LayoutChangeEvent } from "react-n
 import type { Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from "react-native-reanimated";
+import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
+import { useColorScheme } from "nativewind";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useUiLook } from "@/lib/UiLookContext";
 import { CLASSIC_FONTS, POP_FONTS } from "@/theme/pop";
@@ -87,6 +89,12 @@ function TabItem({
  */
 export function AndroidTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const colors = useThemeColors();
+  const { colorScheme } = useColorScheme();
+  // Android draws no shadow worth the name on a dark canvas, and dark's
+  // raised fill sits a shade off the cards it floats over (and brand-subtle a
+  // shade off raised), so the bar melted into whatever card was behind it.
+  // Dark leans on a firmer outline and a brand-tinted highlight instead.
+  const dark = colorScheme === "dark";
   const insets = useSafeAreaInsets();
   const [width, setWidth] = useState(0);
   const [keyboardUp, setKeyboardUp] = useState(false);
@@ -118,65 +126,83 @@ export function AndroidTabBar({ state, descriptors, navigation }: BottomTabBarPr
   const nestedName = nested?.routes[nested.index ?? 0]?.name;
   if (keyboardUp || (nestedName && HIDE_ON_NESTED.has(nestedName))) return null;
 
+  // Fades content out under the bar and the gesture handle, so text never
+  // scrolls through the gap between them. Absolute like the bar: no layout.
+  const scrimHeight = insets.bottom + ANDROID_TAB_BAR_GAP + ANDROID_TAB_BAR_HEIGHT;
+
   return (
-    <View
-      onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}
-      accessibilityRole="tablist"
-      style={{
-        position: "absolute",
-        left: SIDE_MARGIN,
-        right: SIDE_MARGIN,
-        bottom: insets.bottom + ANDROID_TAB_BAR_GAP,
-        height: ANDROID_TAB_BAR_HEIGHT,
-        borderRadius: ANDROID_TAB_BAR_HEIGHT / 2,
-        backgroundColor: colors.raised,
-        borderWidth: 1,
-        borderColor: withAlpha(colors["border-strong"], 0.35),
-        flexDirection: "row",
-        padding: INNER_PAD,
-        elevation: 12,
-        shadowColor: "#000000",
-        shadowOpacity: 0.18,
-        shadowRadius: 16,
-        shadowOffset: { width: 0, height: 6 },
-      }}
-    >
-      {tabWidth > 0 && (
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            {
-              position: "absolute",
-              top: INNER_PAD,
-              bottom: INNER_PAD,
-              left: INNER_PAD,
-              width: tabWidth,
-              borderRadius: (ANDROID_TAB_BAR_HEIGHT - INNER_PAD * 2) / 2,
-              backgroundColor: colors["brand-subtle"],
-            },
-            indicatorStyle,
-          ]}
-        />
-      )}
-      {state.routes.map((route, index) => {
-        const { options } = descriptors[route.key]!;
-        const focused = state.index === index;
-        const label = typeof options.title === "string" ? options.title : route.name;
-        return (
-          <TabItem
-            key={route.key}
-            label={label}
-            focused={focused}
-            accessibilityLabel={options.tabBarAccessibilityLabel}
-            icon={(color) => options.tabBarIcon?.({ focused, color, size: 22 })}
-            onPress={() => {
-              const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
-              if (!focused && !event.defaultPrevented) navigation.navigate(route.name, route.params);
-            }}
-            onLongPress={() => navigation.emit({ type: "tabLongPress", target: route.key })}
+    <>
+      <View pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: scrimHeight }}>
+        <Svg width="100%" height={scrimHeight}>
+          <Defs>
+            <LinearGradient id="tabBarScrim" x1="0" y1="0" x2="0" y2="1">
+              <Stop offset="0" stopColor={colors.canvas} stopOpacity={0} />
+              <Stop offset="0.55" stopColor={colors.canvas} stopOpacity={0.85} />
+              <Stop offset="1" stopColor={colors.canvas} stopOpacity={1} />
+            </LinearGradient>
+          </Defs>
+          <Rect x={0} y={0} width="100%" height={scrimHeight} fill="url(#tabBarScrim)" />
+        </Svg>
+      </View>
+      <View
+        onLayout={(e: LayoutChangeEvent) => setWidth(e.nativeEvent.layout.width)}
+        accessibilityRole="tablist"
+        style={{
+          position: "absolute",
+          left: SIDE_MARGIN,
+          right: SIDE_MARGIN,
+          bottom: insets.bottom + ANDROID_TAB_BAR_GAP,
+          height: ANDROID_TAB_BAR_HEIGHT,
+          borderRadius: ANDROID_TAB_BAR_HEIGHT / 2,
+          backgroundColor: colors.raised,
+          borderWidth: 1,
+          borderColor: withAlpha(colors["border-strong"], dark ? 0.75 : 0.35),
+          flexDirection: "row",
+          padding: INNER_PAD,
+          elevation: 12,
+          shadowColor: "#000000",
+          shadowOpacity: 0.18,
+          shadowRadius: 16,
+          shadowOffset: { width: 0, height: 6 },
+        }}
+      >
+        {tabWidth > 0 && (
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              {
+                position: "absolute",
+                top: INNER_PAD,
+                bottom: INNER_PAD,
+                left: INNER_PAD,
+                width: tabWidth,
+                borderRadius: (ANDROID_TAB_BAR_HEIGHT - INNER_PAD * 2) / 2,
+                backgroundColor: dark ? withAlpha(colors.brand, 0.22) : colors["brand-subtle"],
+              },
+              indicatorStyle,
+            ]}
           />
-        );
-      })}
-    </View>
+        )}
+        {state.routes.map((route, index) => {
+          const { options } = descriptors[route.key]!;
+          const focused = state.index === index;
+          const label = typeof options.title === "string" ? options.title : route.name;
+          return (
+            <TabItem
+              key={route.key}
+              label={label}
+              focused={focused}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+              icon={(color) => options.tabBarIcon?.({ focused, color, size: 22 })}
+              onPress={() => {
+                const event = navigation.emit({ type: "tabPress", target: route.key, canPreventDefault: true });
+                if (!focused && !event.defaultPrevented) navigation.navigate(route.name, route.params);
+              }}
+              onLongPress={() => navigation.emit({ type: "tabLongPress", target: route.key })}
+            />
+          );
+        })}
+      </View>
+    </>
   );
 }

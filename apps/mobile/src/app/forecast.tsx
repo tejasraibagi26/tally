@@ -31,6 +31,8 @@ export default function ForecastScreen() {
   const { hidden } = usePrivacy();
   const [range, setRange] = useState<ForecastRange | undefined>(undefined);
   const [howOpen, setHowOpen] = useState(false);
+  const [scrubbing, setScrubbing] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const forecast = useForecast(range);
 
   const f = forecast.data;
@@ -60,12 +62,16 @@ export default function ForecastScreen() {
     );
   }
 
-  // The ledger is long; mobile shows the near end and links the rest.
-  const visible = f.events.slice(0, 12);
+  // The ledger is long; mobile shows the near end and expands to the rest.
+  const visible = showAll ? f.events : f.events.slice(0, 12);
 
   return (
     <>
-      <ScrollView className="flex-1 bg-canvas" contentContainerStyle={{ paddingTop: contentTop, paddingHorizontal: 20, paddingBottom: 40, gap: 12 }}>
+      <ScrollView
+        className="flex-1 bg-canvas"
+        scrollEnabled={!scrubbing}
+        contentContainerStyle={{ paddingTop: contentTop, paddingHorizontal: 20, paddingBottom: 40, gap: 12 }}
+      >
         <ScreenGlow />
 
         <View className="flex-row items-center justify-between">
@@ -142,7 +148,13 @@ export default function ForecastScreen() {
         {/* Chart */}
         <Card className="px-4 pt-4 pb-3">
           <Text className="font-display text-text mb-2" style={{ fontSize: rf(15) }}>Projected balance</Text>
-          <ForecastChart days={f.days} cushion={f.cushion} shortfallDate={short ? h.date : null} />
+          <ForecastChart
+            days={f.days}
+            events={f.events}
+            cushion={f.cushion}
+            shortfallDate={short ? h.date : null}
+            onScrubbingChange={setScrubbing}
+          />
         </Card>
 
         {/* Ledger */}
@@ -152,9 +164,11 @@ export default function ForecastScreen() {
             <LedgerRow key={`${e.sourceId}-${e.date}-${e.label}`} event={e} today={f.today} money={money} isLast={i === visible.length - 1} />
           ))}
           {f.events.length > visible.length && (
-            <Text className="font-ui text-text-3 py-3" style={{ fontSize: rf(12.5) }}>
-              + {f.events.length - visible.length} more through {dayLabel(f.days.at(-1)!.date)}
-            </Text>
+            <Pressable onPress={() => setShowAll(true)} hitSlop={6} accessibilityRole="button" className="py-3 active:opacity-70">
+              <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(12.5) }}>
+                Show {f.events.length - visible.length} more through {dayLabel(f.days.at(-1)!.date)}
+              </Text>
+            </Pressable>
           )}
           {f.events.length === 0 && (
             <Text className="font-ui text-text-2 py-5 text-center" style={{ fontSize: rf(13) }}>

@@ -19,7 +19,7 @@
  * currency, and pass "today" (YYYY-MM-DD, the user's zone).
  */
 import { payDatesForMonth, resolvePayDate, type DayAnchor } from "./incomeScheduleMath";
-import { MIN_UPCOMING_CONFIDENCE, UPCOMING_GRACE_DAYS, daysBefore } from "./overviewView";
+import { UPCOMING_GRACE_DAYS, countsAsBill, daysBefore } from "./overviewView";
 import { countsAsCash, nextDueFromDay, type CashAccountInput } from "./safeToSpend";
 import type { PaychequeCadence } from "./paycheque";
 
@@ -78,7 +78,6 @@ export interface ForecastStreamInput {
   manualNextDueDate: string | null;
   lastDate: string | null;
   status: string;
-  confidence: number | string | null;
   isManual: boolean;
   /** The account it is charged to. A credit account means it never touches cash directly. */
   accountId: string | null;
@@ -236,14 +235,12 @@ const STEP: Record<ForecastFrequency, (d: string) => string> = {
 // ── streams ────────────────────────────────────────────────────────────────
 
 /**
- * Whether a stream belongs in the forecast at all — the stream half of
- * `qualifiesAsUpcoming`, without its single-date window check, since a
- * forecast repeats a stream rather than asking about one date.
+ * Whether a stream belongs in the forecast at all — `countsAsBill`, the rule
+ * Upcoming applies before its single-date window check, since a forecast
+ * repeats a stream rather than asking about one date.
  */
 export function streamQualifies(s: ForecastStreamInput): boolean {
-  if (s.isManual || s.manualNextDueDate != null) return true;
-  if (s.status !== "active") return false;
-  return s.averageAmount < 0 && Number(s.confidence ?? 0) >= MIN_UPCOMING_CONFIDENCE;
+  return countsAsBill(s);
 }
 
 /**

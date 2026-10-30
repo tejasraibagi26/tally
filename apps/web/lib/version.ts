@@ -368,8 +368,14 @@
  * projected_shortfall alert (migration 0033) mails that day once a week,
  * suppressed when safe_to_spend_low already covered the same money, plus an
  * Overview card, a How it works explainer and a one-time announcement.
+ * 2.8.1 makes a bill whatever Subscriptions lists (@tally/core/overviewView
+ * countsAsBill: not cancelled, money out, or vouched for by the user) in
+ * Upcoming, Safe to spend and Forecast alike. MIN_UPCOMING_CONFIDENCE is
+ * gone: a subscription found from two matching monthly charges scores 0.4
+ * and a late one is at_risk, so both were on Subscriptions and missing from
+ * Forecast.
  */
-export const APP_VERSION = "2.8.0";
+export const APP_VERSION = "2.8.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

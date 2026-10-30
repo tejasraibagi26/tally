@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { MIN_UPCOMING_CONFIDENCE, UPCOMING_GRACE_DAYS, creditHealth, daysBefore, overdueDays, groupUpcoming, highCardCount, dateTile, dueLabel, monthsAgo, netWorthDelta, qualifiesAsUpcoming, rankBudgets, shortDayLabel, sliceNetWorthRange } from "./overviewView";
+import { UPCOMING_GRACE_DAYS, creditHealth, daysBefore, overdueDays, groupUpcoming, highCardCount, dateTile, dueLabel, monthsAgo, netWorthDelta, qualifiesAsUpcoming, rankBudgets, shortDayLabel, sliceNetWorthRange } from "./overviewView";
 
 describe("dueLabel", () => {
   it("words the distance, and flags today and overdue as urgent", () => {
@@ -97,29 +97,23 @@ describe("qualifiesAsUpcoming", () => {
     manualNextDueDate: null,
     status: "active",
     averageAmount: -1_500,
-    confidence: "0.800",
     ...extra,
   });
   const check = (s: ReturnType<typeof stream>) => qualifiesAsUpcoming(s, "2026-10-14", "2026-11-13");
 
-  it("lists a confident, active, spending stream due inside the window", () => {
+  it("lists an active, spending stream due inside the window", () => {
     expect(check(stream())).toBe(true);
   });
   it("leaves out a detected paycheck, bonus or refund (money in)", () => {
     expect(check(stream({ averageAmount: 250_000 }))).toBe(false);
   });
-  it("leaves out a stream the detector isn't confident about", () => {
-    expect(check(stream({ confidence: "0.400" }))).toBe(false);
-    expect(check(stream({ confidence: String(MIN_UPCOMING_CONFIDENCE) }))).toBe(true);
-    expect(check(stream({ confidence: null }))).toBe(false);
-  });
-  it("leaves out detected streams that are at risk or cancelled", () => {
-    expect(check(stream({ status: "at_risk" }))).toBe(false);
+  it("lists what Subscriptions lists: a late (at risk) stream counts, a cancelled one doesn't", () => {
+    expect(check(stream({ status: "at_risk" }))).toBe(true);
     expect(check(stream({ status: "cancelled" }))).toBe(false);
   });
   it("trusts a bill the user added or whose date they set, whatever the detector thinks", () => {
-    expect(check(stream({ isManual: true, status: "cancelled", confidence: null, averageAmount: 210_000 }))).toBe(true);
-    expect(check(stream({ manualNextDueDate: "2026-10-20", status: "at_risk", confidence: "0.1" }))).toBe(true);
+    expect(check(stream({ isManual: true, status: "cancelled", averageAmount: 210_000 }))).toBe(true);
+    expect(check(stream({ manualNextDueDate: "2026-10-20", status: "cancelled" }))).toBe(true);
   });
   it("keeps to the window, both ends included", () => {
     expect(check(stream({ dueDate: "2026-10-13" }))).toBe(false);
@@ -168,7 +162,7 @@ describe("overdue window", () => {
   it("starts the window three days back so a just-missed bill stays listed", () => {
     const from = daysBefore("2026-10-14", UPCOMING_GRACE_DAYS);
     expect(from).toBe("2026-10-11");
-    const s = { dueDate: "2026-10-11", isManual: false, manualNextDueDate: null, status: "active", averageAmount: -1_500, confidence: "0.8" };
+    const s = { dueDate: "2026-10-11", isManual: false, manualNextDueDate: null, status: "active", averageAmount: -1_500 };
     expect(qualifiesAsUpcoming(s, from, "2026-11-13")).toBe(true);
     expect(qualifiesAsUpcoming({ ...s, dueDate: "2026-10-10" }, from, "2026-11-13")).toBe(false);
   });

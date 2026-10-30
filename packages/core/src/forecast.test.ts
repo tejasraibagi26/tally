@@ -22,7 +22,7 @@ function stream(over: Partial<ForecastStreamInput> = {}): ForecastStreamInput {
   return {
     id: "s1", label: "Rent", averageAmount: -145000, frequency: "monthly",
     predictedNextDate: "2026-11-03", manualNextDueDate: null, lastDate: "2026-10-03",
-    status: "active", confidence: "0.95", isManual: false, accountId: "chq",
+    status: "active", isManual: false, accountId: "chq",
     amortizeMonthly: false, amortizeMonths: 12, ...over,
   };
 }
@@ -146,10 +146,13 @@ describe("bills", () => {
     expect(dayAt(f, "2026-11-18").balance).toBe(dayAt(f, "2026-11-17").balance);
   });
 
-  it("vouches for a manual stream whatever its status and confidence (Trap 3)", () => {
-    expect(streamQualifies(stream({ isManual: true, status: "cancelled", confidence: null }))).toBe(true);
-    expect(streamQualifies(stream({ manualNextDueDate: "2026-11-09", status: "at_risk", confidence: "0.1" }))).toBe(true);
-    expect(streamQualifies(stream({ confidence: "0.4" }))).toBe(false);
+  it("vouches for a manual stream whatever its status (Trap 3)", () => {
+    expect(streamQualifies(stream({ isManual: true, status: "cancelled" }))).toBe(true);
+    expect(streamQualifies(stream({ manualNextDueDate: "2026-11-09", status: "cancelled" }))).toBe(true);
+  });
+
+  it("counts every subscription Subscriptions lists, late ones included", () => {
+    expect(streamQualifies(stream({ status: "at_risk" }))).toBe(true);
     expect(streamQualifies(stream({ status: "cancelled" }))).toBe(false);
     expect(streamQualifies(stream({ averageAmount: 245000 }))).toBe(false);
   });

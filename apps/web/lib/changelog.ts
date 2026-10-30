@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.8.1",
+    date: "2026-10-30",
+    changes: [
+      { kind: "fixed", text: "Forecast, Safe to spend and Upcoming now count every subscription you see in Subscriptions, including new ones and ones running a few days late." },
+    ],
+  },
+  {
     version: "2.8.0",
     date: "2026-10-28",
     changes: [

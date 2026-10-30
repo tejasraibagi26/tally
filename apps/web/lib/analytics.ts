@@ -270,9 +270,9 @@ export interface UpcomingBill {
  *
  * Only money going out is listed (a detected paycheck, bonus or refund isn't a
  * bill, and none of it is guaranteed), a stream the user dismissed stays gone,
- * and a guessed stream must clear MIN_UPCOMING_CONFIDENCE
- * (qualifiesAsUpcoming in @tally/core/overviewView). Dates are the
- * user's own today, not the server's UTC day.
+ * and a cancelled one is left out (countsAsBill in @tally/core/overviewView,
+ * the same rule as Subscriptions). Dates are the user's own today, not the
+ * server's UTC day.
  */
 export async function upcomingBills(userId: string, withinDays = 30): Promise<UpcomingBill[]> {
   const today = await todayFor(userId);
@@ -290,7 +290,6 @@ export async function upcomingBills(userId: string, withinDays = 30): Promise<Up
       status: schema.recurringStreams.status,
       accountId: schema.recurringStreams.accountId,
       isManual: schema.recurringStreams.isManual,
-      confidence: schema.recurringStreams.confidence,
     })
     .from(schema.recurringStreams)
     .where(and(eq(schema.recurringStreams.userId, userId), isNull(schema.recurringStreams.dismissedAt)));

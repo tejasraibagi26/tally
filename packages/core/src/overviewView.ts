@@ -125,14 +125,6 @@ export function creditHealth(utilization: number): { label: "Healthy" | "High"; 
 }
 
 /**
- * How sure the detector has to be before a guessed bill is listed. A stream
- * scores 0.7 x (1 - biggest gap wobble / 4 days) + 0.3 x (charges / 6), so 0.5
- * keeps three or more charges that land within about two days of each other
- * and drops loose three-charge patterns and lone annual pairs (capped at 0.4).
- */
-export const MIN_UPCOMING_CONFIDENCE = 0.5;
-
-/**
  * How long a bill stays listed after its due date. Detection reruns after
  * every transaction sync and moves a stream's date forward once the charge
  * posts, so a bill still listed past its date hasn't been charged yet. Three
@@ -161,22 +153,34 @@ export interface UpcomingStreamInput {
   status: string;
   /** Cents; negative is money out, positive is money in. */
   averageAmount: number;
-  confidence: number | string | null;
 }
 
 /**
- * Whether a recurring stream belongs in Upcoming. A bill the user added, or
- * whose due date they set, is theirs to vouch for and only has to be in the
- * window. A detected one must also be active, be spending (a paycheck, bonus
- * or refund is never a bill) and clear MIN_UPCOMING_CONFIDENCE. `from` and
- * `cutoff` are YYYY-MM-DD, both inclusive; `from` is normally today minus
- * UPCOMING_GRACE_DAYS so a bill that's just slipped past due stays listed.
+ * Whether a recurring stream is a bill — the one rule Upcoming, Safe to spend
+ * and Forecast share. A bill the user added, or whose due date they set, is
+ * theirs to vouch for. A detected one counts while it's spending (a paycheck,
+ * bonus or refund is never a bill) and not cancelled: exactly what the
+ * Subscriptions list shows (@tally/core/subscriptionMath isActiveExpenseStream).
+ *
+ * There used to be a detection-confidence bar here too. It dropped every
+ * subscription found from two matching monthly charges (scored 0.4) and every
+ * one running a few days late (at_risk), so a bill on Subscriptions went
+ * missing from Forecast. Dismissing a stream is how a wrong guess goes away.
+ */
+export function countsAsBill(s: Pick<UpcomingStreamInput, "isManual" | "manualNextDueDate" | "status" | "averageAmount">): boolean {
+  if (s.isManual || s.manualNextDueDate != null) return true;
+  return s.status !== "cancelled" && s.averageAmount < 0;
+}
+
+/**
+ * Whether a recurring stream belongs in Upcoming: a bill (countsAsBill) due
+ * in the window. `from` and `cutoff` are YYYY-MM-DD, both inclusive; `from`
+ * is normally today minus UPCOMING_GRACE_DAYS so a bill that's just slipped
+ * past due stays listed.
  */
 export function qualifiesAsUpcoming(s: UpcomingStreamInput, from: string, cutoff: string): boolean {
   if (s.dueDate == null || s.dueDate < from || s.dueDate > cutoff) return false;
-  if (s.isManual || s.manualNextDueDate != null) return true;
-  if (s.status !== "active") return false;
-  return s.averageAmount < 0 && Number(s.confidence ?? 0) >= MIN_UPCOMING_CONFIDENCE;
+  return countsAsBill(s);
 }
 
 export interface CardBalanceLike {

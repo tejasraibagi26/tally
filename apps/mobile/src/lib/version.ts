@@ -337,8 +337,17 @@ import Constants from "expo-constants";
  * to 562pt) and Overview, with a How it works dialog and a one-time
  * announcement. No scrub gesture on the chart yet -- the ledger below it
  * carries every figure.
+ * 2.8.1 fixes Android's floating tab bar in dark mode: dark's raised fill
+ * and brand-subtle highlight sat a shade off the cards behind them and
+ * Android drew no shadow, so the bar melted in. Dark now gets a firmer
+ * outline and a brand-tinted highlight, and both schemes fade content out
+ * under the bar and the gesture handle (an SVG scrim, no layout). Forecast's
+ * chart scrubs (press and drag, same PanResponder as GoalChart) with a
+ * readout of the day's balance and what lands that day, and its ledger's
+ * "+ N more" expands instead of being a dead end. Server side, web 2.8.1
+ * counts every subscription in Forecast, Safe to spend and Upcoming.
  */
-export const APP_VERSION = "2.8.0";
+export const APP_VERSION = "2.8.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

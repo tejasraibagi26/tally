@@ -96,7 +96,6 @@ export async function safeToSpendFor(userId: string): Promise<SafeToSpendResult>
         status: schema.recurringStreams.status,
         accountId: schema.recurringStreams.accountId,
         isManual: schema.recurringStreams.isManual,
-        confidence: schema.recurringStreams.confidence,
       })
       .from(schema.recurringStreams)
       .where(and(eq(schema.recurringStreams.userId, userId), isNull(schema.recurringStreams.dismissedAt))),
