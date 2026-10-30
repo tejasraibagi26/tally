@@ -381,8 +381,10 @@
  * the buffer says so with an icon and words; the red row tint broke
  * DESIGN.md's amounts-not-backgrounds rule.
  * 2.8.3 centres that date tile on its day's block instead of pinning it top.
+ * 2.8.4 gives What's coming and Assumptions one height side by side: the
+ * ledger scrolls inside its card (min 560px) instead of running the page on.
  */
-export const APP_VERSION = "2.8.3";
+export const APP_VERSION = "2.8.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

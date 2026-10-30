@@ -170,11 +170,17 @@ export default async function ForecastPage({ searchParams }: { searchParams: Pro
         </div>
       </Card>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] lg:items-start">
-        <Card>
-          <CardHeader title="What's coming" />
-          <div className="px-5 pb-4">
-            <ForecastLedger events={f.events} days={f.days} cushion={f.cushion} />
+      {/* Side by side, the two cards share one height: Assumptions sets it
+          (with a floor), and the ledger scrolls inside rather than running
+          the page on for screens past the card beside it. The ledger's
+          content sits in an absolute layer on lg so it adds no height. */}
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <Card className="lg:relative lg:min-h-[560px]">
+          <div className="flex flex-col overflow-hidden rounded-[inherit] lg:absolute lg:inset-0">
+            <CardHeader title="What's coming" meta={`${f.events.length} in ${f.range} days`} />
+            <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-4">
+              <ForecastLedger events={f.events} days={f.days} cushion={f.cushion} />
+            </div>
           </div>
         </Card>
         <Card>
