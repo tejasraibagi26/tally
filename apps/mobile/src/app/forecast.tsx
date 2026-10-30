@@ -3,12 +3,13 @@ import { View, Text, ScrollView, Pressable, ActivityIndicator } from "react-nati
 import { useRouter, type Href } from "expo-router";
 import { AlertTriangle, Info } from "lucide-react-native";
 import { formatCents } from "@tally/core/money";
-import { FORECAST_RANGES, type ForecastEvent, type ForecastRange } from "@tally/core/forecast";
+import { FORECAST_RANGES, type ForecastDay, type ForecastEvent, type ForecastRange } from "@tally/core/forecast";
 import { Card } from "@/components/ui/Card";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { ForecastChart } from "@/components/charts/ForecastChart";
 import { ForecastHowItWorksDialog } from "@/components/forecast/ForecastHowItWorksDialog";
+import { MerchantAvatar } from "@/components/transactions/MerchantAvatar";
 import { useForecast } from "@/lib/queries/forecast";
 import { usePrivacy } from "@/lib/PrivacyContext";
 import { useThemeColors } from "@/theme/useThemeColors";
@@ -160,9 +161,7 @@ export default function ForecastScreen() {
         {/* Ledger */}
         <Card className="px-4 pt-3 pb-2">
           <Text className="font-display text-text" style={{ fontSize: rf(15) }}>What&apos;s coming</Text>
-          {visible.map((e, i) => (
-            <LedgerRow key={`${e.sourceId}-${e.date}-${e.label}`} event={e} today={f.today} money={money} isLast={i === visible.length - 1} />
-          ))}
+          <Ledger events={visible} days={f.days} today={f.today} cushion={f.cushion} money={money} />
           {f.events.length > visible.length && (
             <Pressable onPress={() => setShowAll(true)} hitSlop={6} accessibilityRole="button" className="py-3 active:opacity-70">
               <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(12.5) }}>
@@ -204,50 +203,152 @@ export default function ForecastScreen() {
   );
 }
 
-function LedgerRow({
-  event: e,
+/** Where a row goes when tapped: the thing that made it, as on web. */
+function hrefFor(e: ForecastEvent): Href {
+  if (e.kind === "card") return `/card/${e.sourceId}` as Href;
+  if (e.kind === "income") return "/income-schedules" as Href;
+  return "/subscriptions" as Href;
+}
+
+function tile(iso: string) {
+  const d = new Date(`${iso}T00:00:00Z`);
+  return {
+    weekday: d.toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" }).toUpperCase(),
+    day: String(d.getUTCDate()),
+    month: d.toLocaleDateString("en-US", { month: "short", timeZone: "UTC" }).toUpperCase(),
+  };
+}
+
+/**
+ * Web's components/forecast/ForecastLedger.tsx on mobile: one block per day,
+ * a date tile centred beside the day's events, and the balance the day
+ * leaves behind written once under them. A card-only day doesn't move cash
+ * and has no balance; a day under the buffer says so in words beside it.
+ */
+function Ledger({
+  events,
+  days,
   today,
+  cushion,
   money,
-  isLast,
 }: {
-  event: ForecastEvent;
+  events: ForecastEvent[];
+  days: ForecastDay[];
   today: string;
+  cushion: number;
   money: (c: number) => string;
-  isLast: boolean;
 }) {
+  const router = useRouter();
   const colors = useThemeColors();
   const rf = useRF();
-  const date = e.date < today ? today : e.date;
+  const balanceOn = new Map(days.map((d) => [d.date, d.balance]));
+
+  // Anything in the grace window lands on day 0, as it does in the curve.
+  const groups: { date: string; events: ForecastEvent[] }[] = [];
+  for (const e of events) {
+    const date = e.date < today ? today : e.date;
+    const last = groups.at(-1);
+    if (last?.date === date) last.events.push(e);
+    else groups.push({ date, events: [e] });
+  }
+
   return (
-    <View className="flex-row items-center gap-3 py-2.5" style={!isLast ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}>
-      <View
-        style={{
-          width: 9,
-          height: 9,
-          borderRadius: 2,
-          backgroundColor: e.amount > 0 ? colors.positive : e.kind === "card" ? colors["status-critical"] : e.affectsCash ? colors.brand : colors["border-strong"],
-        }}
-      />
-      <View className="flex-1">
-        <Text
-          className="font-ui-medium"
-          numberOfLines={1}
-          style={{ fontSize: rf(14), color: e.affectsCash ? colors.text : colors["text-3"] }}
-        >
-          {e.label}
-          {e.modelled ? " · projected" : ""}
-        </Text>
-        <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>
-          {date === today ? "Today" : dayLabel(date)}
-          {!e.affectsCash ? " · on a card" : ""}
-        </Text>
-      </View>
-      <Text
-        className="font-ui-semibold"
-        style={{ fontSize: rf(14), fontVariant: ["tabular-nums"], color: e.amount > 0 ? colors.positive : e.affectsCash ? colors.negative : colors["text-3"] }}
-      >
-        {money(e.amount)}
-      </Text>
+    <View>
+      {groups.map((g, gi) => {
+        const t = tile(g.date);
+        const isToday = g.date === today;
+        const after = g.events.some((e) => e.affectsCash) ? balanceOn.get(g.date) : undefined;
+        const short = after != null && after < cushion;
+        const tileText = isToday ? colors.brand : colors["text-3"];
+        return (
+          <View
+            key={g.date}
+            className="flex-row gap-3 py-3"
+            style={gi < groups.length - 1 ? { borderBottomWidth: 1, borderBottomColor: hairline(colors) } : undefined}
+          >
+            <View
+              accessible
+              accessibilityLabel={isToday ? "Today" : dayLabel(g.date)}
+              className="items-center rounded-lg py-1.5"
+              style={{
+                alignSelf: "center",
+                width: 42,
+                borderWidth: 1,
+                borderColor: isToday ? colors.brand : colors.border,
+                backgroundColor: isToday ? colors["brand-subtle"] : colors["surface-2"],
+              }}
+            >
+              <Text className="font-ui-semibold" style={{ fontSize: rf(9.5), letterSpacing: 0.6, color: tileText }}>
+                {isToday ? "TODAY" : t.weekday}
+              </Text>
+              <Text className="font-ui-semibold" style={{ fontSize: rf(17), marginTop: 1, color: isToday ? colors.brand : colors.text, fontVariant: ["tabular-nums"] }}>
+                {t.day}
+              </Text>
+              <Text className="font-ui-semibold" style={{ fontSize: rf(9.5), letterSpacing: 0.6, color: tileText }}>
+                {t.month}
+              </Text>
+            </View>
+
+            <View className="flex-1">
+              {g.events.map((e) => (
+                <Pressable
+                  key={`${e.sourceId}-${e.date}-${e.label}`}
+                  onPress={() => router.push(hrefFor(e))}
+                  accessibilityRole="button"
+                  className="flex-row items-center gap-2.5 py-1.5 active:opacity-70"
+                >
+                  <View style={{ opacity: e.affectsCash ? 1 : 0.6 }}>
+                    <MerchantAvatar name={e.label} size={28} radius={8} fontSize={12} />
+                  </View>
+                  <View className="flex-1">
+                    <View className="flex-row items-center gap-1.5">
+                      <Text className="font-ui-medium shrink" numberOfLines={1} style={{ fontSize: rf(14), color: e.affectsCash ? colors.text : colors["text-3"] }}>
+                        {e.label}
+                      </Text>
+                      {e.modelled && (
+                        <View className="rounded-full px-1.5" style={{ borderWidth: 1, borderStyle: "dashed", borderColor: colors["border-strong"] }}>
+                          <Text className="font-ui-semibold text-text-3" style={{ fontSize: rf(10.5) }}>projected</Text>
+                        </View>
+                      )}
+                    </View>
+                    {(e.date < today || !e.affectsCash) && (
+                      <Text
+                        className={e.date < today ? "font-ui-medium" : "font-ui"}
+                        numberOfLines={1}
+                        style={{ fontSize: rf(11.5), color: e.date < today ? colors.warning : colors["text-3"] }}
+                      >
+                        {e.date < today ? `Overdue · was ${dayLabel(e.date)}` : "On a card · paid with its statement"}
+                      </Text>
+                    )}
+                  </View>
+                  <Text
+                    className="font-ui-semibold"
+                    style={{ fontSize: rf(14), fontVariant: ["tabular-nums"], color: e.amount > 0 ? colors.positive : e.affectsCash ? colors.negative : colors["text-3"] }}
+                  >
+                    {e.amount > 0 ? "+" : ""}
+                    {money(e.amount)}
+                  </Text>
+                </Pressable>
+              ))}
+
+              {after != null && (
+                <View className="flex-row items-center justify-end flex-wrap gap-x-2 mt-1">
+                  {short && (
+                    <View className="flex-row items-center gap-1">
+                      <AlertTriangle size={12} color={colors.negative} strokeWidth={2.5} />
+                      <Text className="font-ui-semibold" style={{ fontSize: rf(12), color: colors.negative }}>Under your {money(cushion)} buffer</Text>
+                    </View>
+                  )}
+                  <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>Balance after</Text>
+                  <Text className="font-ui-semibold" style={{ fontSize: rf(12), fontVariant: ["tabular-nums"], color: after < 0 ? colors.negative : colors.text }}>
+                    {money(after)}
+                  </Text>
+                </View>
+              )}
+            </View>
+          </View>
+        );
+      })}
     </View>
   );
 }

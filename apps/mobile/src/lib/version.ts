@@ -348,8 +348,12 @@ import Constants from "expo-constants";
  * counts every subscription in Forecast, Safe to spend and Upcoming.
  * 2.8.2 gives Android's Budgets tab the pie chart iOS (chart.pie) and web
  * already use, in place of a piggy bank.
+ * 2.8.3 mirrors web 2.8.2-2.8.3's What's coming on Forecast: one block per
+ * day with a centred date tile, merchant initials, the day's closing balance
+ * once under it, and an under-the-buffer flag in words. Rows open the card,
+ * Subscriptions or Income schedules, as web's rows link.
  */
-export const APP_VERSION = "2.8.2";
+export const APP_VERSION = "2.8.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
