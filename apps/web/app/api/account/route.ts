@@ -6,6 +6,7 @@ import { requireUserId } from "@/lib/session";
 import { verifyCurrentPassword } from "@/lib/authenticateCredentials";
 import { RATE_LIMITED_MESSAGE } from "@/lib/rateLimit";
 import { sendEmailChangeEmails } from "@/lib/emailChange";
+import { wantsPopEmail } from "@/lib/uiLook";
 
 const bodySchema = z.object({
   name: z.string().trim().max(200).optional(),
@@ -79,7 +80,7 @@ export async function PATCH(req: Request) {
     const appUrl = process.env.APP_URL;
     if (!appUrl) return NextResponse.json({ error: "APP_URL not configured" }, { status: 500 });
     try {
-      await sendEmailChangeEmails({ appUrl, userId, fromEmail: user.email, toEmail: email });
+      await sendEmailChangeEmails({ appUrl, userId, fromEmail: user.email, toEmail: email, pop: wantsPopEmail(user) });
     } catch (err) {
       console.error("email change: sending the confirm link failed", err);
       return NextResponse.json({ error: "Couldn't send the confirmation email. Try again." }, { status: 502 });

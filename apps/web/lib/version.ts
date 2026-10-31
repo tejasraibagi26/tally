@@ -425,8 +425,11 @@
  * 2.10.4 enforces it, after a crawl of every page in production reported
  * no violations. next.config's CSP is API-only: on Vercel a config CSP
  * reached the render in place of middleware's, hiding the nonce.
+ * 2.10.5 gives the email-change emails (lib/emailChange.ts) the alert
+ * emails' layout in both looks -- label, title, body, why, button, footer
+ * -- chosen by wantsPopEmail like every other Tally email.
  */
-export const APP_VERSION = "2.10.4";
+export const APP_VERSION = "2.10.5";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
