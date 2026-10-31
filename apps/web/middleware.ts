@@ -1,23 +1,100 @@
 import NextAuth from "next-auth";
+import { NextResponse, type NextRequest } from "next/server";
 import { authConfig } from "@/lib/auth.config";
 
 // Edge-runtime middleware: only the provider-less config, so bcrypt/postgres
 // (Node-only) never get bundled here. Real authorization happens per-request
 // in route handlers and server components via lib/auth.ts.
-export const { auth: middleware } = NextAuth(authConfig);
+//
+// It does two jobs on every page and API request:
+// 1. The session gate: anything not public needs a session (or, for /api,
+//    an Authorization header the route verifies itself). Handing NextAuth a
+//    handler below means it no longer redirects on its own -- only a
+//    Response from `authorized` (the demo's read-only 403) short-circuits --
+//    so the gate lives here, in requiresSession().
+// 2. A per-request CSP nonce for pages. Next.js reads it from the request's
+//    Content-Security-Policy header and stamps its own scripts with it;
+//    app/layout.tsx stamps the inline init scripts. 'strict-dynamic' lets
+//    those scripts load what they load (Plaid Link injects its own).
+
+/**
+ * Paths reachable with no session at all, as prefixes after the leading
+ * "/" -- the same set the matcher used to exclude:
+ * - "" exactly: the marketing homepage (app/page.tsx), which redirects
+ *   signed-in users itself. "docs", "privacy": public pages, no user data.
+ * - "login"; "demo", the read-only demo's entry (app/demo/route.ts), which
+ *   creates the session; "open", the email link hand-off.
+ * - "api/auth": NextAuth and the mobile token routes. "api/plaid/webhook"
+ *   (Plaid's signature) and "api/cron" (CRON_SECRET / QStash) carry their
+ *   own auth. "api/email/unsubscribe" and "api/account/email/confirm" are
+ *   opened from emails; their signed token is the auth.
+ */
+const PUBLIC_PREFIXES = [
+  "api/auth",
+  "api/plaid/webhook",
+  "api/cron",
+  "api/email/unsubscribe",
+  "api/account/email/confirm",
+  "login",
+  "demo",
+  "docs",
+  "privacy",
+  "open",
+];
+
+function requiresSession(pathname: string): boolean {
+  const path = pathname.slice(1);
+  if (path === "") return false;
+  return !PUBLIC_PREFIXES.some((p) => path.startsWith(p));
+}
+
+function contentSecurityPolicy(nonce: string): string {
+  // Dev needs eval for React Refresh; production never does.
+  const devEval = process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : "";
+  return [
+    // 'unsafe-inline' and https: are fallbacks for browsers without CSP3;
+    // any browser that understands the nonce ignores both.
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https: 'unsafe-inline'${devEval}`,
+    "object-src 'none'",
+    "base-uri 'self'",
+    "frame-ancestors 'none'",
+    "form-action 'self'",
+  ].join("; ");
+}
+
+// Report-only while the nonce policy is checked against every app page in
+// production; switched to the enforcing header once that comes back clean.
+const CSP_RESPONSE_HEADER = "Content-Security-Policy-Report-Only";
+
+const { auth } = NextAuth(authConfig);
+
+export default auth((req) => {
+  const { pathname } = req.nextUrl;
+  const isApi = pathname.startsWith("/api/");
+
+  // Mobile has no session cookie: let a request carrying an Authorization
+  // header through to the route, which verifies it (requireUserId).
+  if (requiresSession(pathname) && !req.auth?.user && !(isApi && req.headers.get("authorization"))) {
+    if (isApi) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const signIn = new URL("/login", req.nextUrl);
+    signIn.searchParams.set("callbackUrl", req.nextUrl.href);
+    return NextResponse.redirect(signIn);
+  }
+
+  if (isApi) return NextResponse.next();
+
+  const nonce = btoa(crypto.randomUUID());
+  const csp = contentSecurityPolicy(nonce);
+  const headers = new Headers(req.headers);
+  headers.set("x-nonce", nonce);
+  headers.set("Content-Security-Policy", csp);
+  const res = NextResponse.next({ request: { headers } });
+  res.headers.set(CSP_RESPONSE_HEADER, csp);
+  return res;
+}) as unknown as (req: NextRequest) => Promise<Response>;
 
 export const config = {
-  // "|$" excludes the bare root path — it's the public marketing homepage
-  // (app/page.tsx), which does its own auth check and redirects signed-in
-  // users to /overview itself. "docs" and "privacy" are public pages with
-  // no user data — no auth check needed. "api/cron" is Vercel Cron Jobs
-  // calling in with no user session at all — CRON_SECRET (lib/cronAuth.ts)
-  // is its own auth, checked inside each route. "demo" is the public
-  // read-only demo's one-click entry point (app/demo/route.ts) — it has to
-  // be reachable with no session at all, since creating one is the whole
-  // thing it does. "api/email/unsubscribe" is opened from an email by
-  // someone who may not be signed in; its signed token is its auth, and the
-  // same goes for "api/account/email/confirm" (lib/emailChange.ts). Every
-  // other route stays gated here.
-  matcher: ["/((?!api/auth|api/plaid/webhook|api/cron|api/email/unsubscribe|api/account/email/confirm|login|demo|docs|privacy|open|_next/static|_next/image|favicon.ico|icon-classic.svg|$).*)"],
+  // Everything but build assets and plain static files (no session or
+  // nonce needed to serve an icon).
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|webp|ico)$).*)"],
 };

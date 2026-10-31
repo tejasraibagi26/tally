@@ -28,11 +28,11 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_BUILD_SHA: resolveBuildSha(),
   },
-  // Baseline hardening on every response. The CSP deliberately has no
-  // script-src yet: Next's hydration and app/layout.tsx's pre-paint init
-  // scripts are inline, so a script policy needs per-request nonces first.
-  // What's here is safe without them -- no framing (clickjacking), no
-  // <base> hijack, no plugins, forms only post back to this origin.
+  // Baseline hardening on every response -- API routes and static files
+  // included. Pages also get middleware.ts's nonce-based CSP with a
+  // script-src; a browser enforces both, and they agree on the rest: no
+  // framing (clickjacking), no <base> hijack, no plugins, forms only post
+  // back to this origin.
   async headers() {
     return [
       {

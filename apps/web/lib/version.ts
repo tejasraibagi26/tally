@@ -416,8 +416,14 @@
  * injection fix) with drizzle-kit 0.31, and zod 3 -> 4 (oversized-array
  * memory exhaustion fix). zod 4's record with an enum key demands every
  * key, so alert preferences' channels uses z.partialRecord.
+ * 2.10.3 gives every page a per-request CSP nonce (middleware.ts): Next.js
+ * stamps its own scripts, app/layout.tsx the inline init scripts, and
+ * script-src allows only those ('strict-dynamic' for what they load).
+ * Middleware now runs on public pages too, so the session gate moved from
+ * the matcher regex into requiresSession(); API calls with no session get
+ * a 401 instead of a redirect. Shipped report-only first.
  */
-export const APP_VERSION = "2.10.2";
+export const APP_VERSION = "2.10.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

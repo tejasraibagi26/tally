@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Bricolage_Grotesque, Figtree, Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -72,14 +73,18 @@ const UI_INIT_SCRIPT = `(function(){try{if(/(?:^|; )tally-ui=classic(?:;|$)/.tes
 // flashing the splash for a frame. Reduced motion skips it outright.
 const BOOT_INIT_SCRIPT = `(function(){try{if(sessionStorage.getItem("tally-booted")||window.matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.setAttribute("data-booted","");}}catch(e){}})();`;
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // middleware.ts's per-request CSP nonce. Reading headers() also makes every
+  // page render per request, which a nonce needs: a prerendered page would
+  // carry a stale one the CSP refuses.
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html lang="en" data-theme="light" data-hide-amounts="false" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-        <script dangerouslySetInnerHTML={{ __html: PRIVACY_INIT_SCRIPT }} />
-        <script dangerouslySetInnerHTML={{ __html: UI_INIT_SCRIPT }} />
-        <script dangerouslySetInnerHTML={{ __html: BOOT_INIT_SCRIPT }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: PRIVACY_INIT_SCRIPT }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: UI_INIT_SCRIPT }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: BOOT_INIT_SCRIPT }} />
       </head>
       <body
         className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${figtree.variable} ${bricolage.variable} font-ui antialiased`}

@@ -51,14 +51,11 @@ export const authConfig = {
         return NextResponse.json(demoReadOnlyBody, { status: 403 });
       }
 
-      if (user) return true;
-      // No cookie session — let a request carrying an Authorization header
-      // through to the route handler, which verifies it for real via
-      // requireUserId() (lib/session.ts). Mobile has no session cookie at
-      // all, so without this every mobile API call would be redirected to
-      // /login here before its own bearer-token check ever runs. Page
-      // routes never send this header, so this doesn't loosen their gate.
-      return request.nextUrl.pathname.startsWith("/api/") && Boolean(request.headers.get("authorization"));
+      // Everything else passes here: middleware.ts hands NextAuth a handler,
+      // and with one NextAuth only acts on a Response from this callback --
+      // the session gate itself (public paths, the mobile bearer-header
+      // pass-through) is requiresSession() in middleware.ts.
+      return true;
     },
   },
 } satisfies NextAuthConfig;
