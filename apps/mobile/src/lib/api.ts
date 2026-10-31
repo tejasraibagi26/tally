@@ -86,6 +86,16 @@ async function rawFetch(path: string, options: RequestInit, accessToken: string 
 // rotated it out.
 let inFlightRefresh: Promise<string | null> | null = null;
 
+// The auth endpoints answer 401 for a wrong password or a dead refresh
+// token -- that IS the answer, not an expired access token to refresh
+// around. Retrying through refreshOnce() from inside the refresh call
+// itself also awaited its own in-flight promise forever, so a revoked
+// session (password changed, signed out elsewhere) hung on Overview
+// instead of reaching the login screen.
+function retriesOn401(path: string): boolean {
+  return !path.startsWith("/api/auth/");
+}
+
 function refreshOnce(): Promise<string | null> {
   if (!refreshHandler) return Promise.resolve(null);
   if (!inFlightRefresh) {
@@ -99,7 +109,7 @@ function refreshOnce(): Promise<string | null> {
 export async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   let res = await rawFetch(path, options, inMemoryAccessToken);
 
-  if (res.status === 401 && refreshHandler) {
+  if (res.status === 401 && refreshHandler && retriesOn401(path)) {
     const newToken = await refreshOnce();
     if (newToken) {
       res = await rawFetch(path, options, newToken);
@@ -129,7 +139,7 @@ export function apiGet<T>(path: string): Promise<T> {
 export async function apiGetText(path: string): Promise<string> {
   let res = await rawFetch(path, { method: "GET" }, inMemoryAccessToken);
 
-  if (res.status === 401 && refreshHandler) {
+  if (res.status === 401 && refreshHandler && retriesOn401(path)) {
     const newToken = await refreshOnce();
     if (newToken) {
       res = await rawFetch(path, { method: "GET" }, newToken);

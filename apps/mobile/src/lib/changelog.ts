@@ -16,6 +16,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.9.1",
+    date: "2026-10-31",
+    changes: [
+      { kind: "fixed", text: "When your session ends (a password change, or signing out everywhere), the app goes straight to sign-in instead of hanging on Overview." },
+      { kind: "fixed", text: "A wrong password at sign-in says so, instead of \"Session expired\"." },
+      { kind: "fixed", text: "Losing signal for a moment no longer signs you out." },
+    ],
+  },
+  {
     version: "2.9.0",
     date: "2026-10-31",
     changes: [

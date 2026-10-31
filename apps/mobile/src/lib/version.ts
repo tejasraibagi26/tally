@@ -361,8 +361,14 @@ import Constants from "expo-constants";
  * this device out (the server ends every session), and changing the email
  * says to check the new inbox -- it only changes once that address confirms.
  * Sign-in shows the server's "too many attempts" message as-is.
+ * 2.9.1 sends a revoked session to the login screen: refreshing from inside
+ * the 401 retry awaited its own in-flight refresh forever, so a password
+ * change elsewhere left the app hanging on Overview. The /api/auth/ calls
+ * no longer go through that retry (which also showed "Session expired" for
+ * a wrong password at login), and being offline during a refresh no longer
+ * signs you out.
  */
-export const APP_VERSION = "2.9.0";
+export const APP_VERSION = "2.9.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

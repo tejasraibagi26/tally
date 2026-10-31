@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AppState } from "react-native";
 import * as LocalAuthentication from "expo-local-authentication";
-import { apiPost, ApiError, setAccessToken, registerRefreshHandler, registerSessionExpiredHandler } from "@/lib/api";
+import { apiPost, ApiError, NetworkError, setAccessToken, registerRefreshHandler, registerSessionExpiredHandler } from "@/lib/api";
 import { getStoredTokens, storeTokens, clearTokens } from "@/lib/tokenStorage";
 import { getStoredBiometricLockEnabled, storeBiometricLockEnabled } from "@/lib/biometricLock";
 
@@ -82,7 +82,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await storeTokens(res.accessToken, res.refreshToken);
         setAccessToken(res.accessToken);
         return res.accessToken;
-      } catch {
+      } catch (err) {
+        // Offline isn't signed out: let the request fail as a network error
+        // and keep the session. Only the server refusing the refresh token
+        // (revoked by a password change, expired, signed out) ends it.
+        if (err instanceof NetworkError) throw err;
         return null;
       }
     });
