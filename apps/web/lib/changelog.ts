@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.10.6",
+    date: "2026-10-31",
+    changes: [{ kind: "improved", text: "Confirming a new email and unsubscribing from emails open proper Tally pages, in your look and theme." }],
+  },
+  {
     version: "2.10.5",
     date: "2026-10-31",
     changes: [{ kind: "improved", text: "The emails for changing your sign-in email look like the rest of Tally's emails, in your chosen look." }],

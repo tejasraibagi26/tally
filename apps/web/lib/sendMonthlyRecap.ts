@@ -68,7 +68,7 @@ export async function sendMonthlyRecapForUser(
   const html = renderMonthInReviewEmail(data, {
     appUrl: env.appUrl,
     preferencesUrl: `${env.appUrl}/settings`,
-    unsubscribeUrl: `${env.appUrl}/api/email/unsubscribe?uid=${user.id}&token=${unsubscribeToken(user.id)}`,
+    unsubscribeUrl: `${env.appUrl}/unsubscribe?uid=${user.id}&token=${unsubscribeToken(user.id)}`,
     companyName: env.companyName,
     companyAddress: env.companyAddress,
   }, pop ? "pop" : "classic", goal);

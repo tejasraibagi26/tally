@@ -428,8 +428,13 @@
  * 2.10.5 gives the email-change emails (lib/emailChange.ts) the alert
  * emails' layout in both looks -- label, title, body, why, button, footer
  * -- chosen by wantsPopEmail like every other Tally email.
+ * 2.10.6 moves the pages those links open into the app (app/email-change,
+ * app/unsubscribe, components/AccountNotice.tsx: the login page's shell),
+ * replacing the bare HTML the API routes returned. The routes now only act
+ * on the button's POST and redirect back with ?status=; their GET forwards
+ * links in emails sent before this to the pages.
  */
-export const APP_VERSION = "2.10.5";
+export const APP_VERSION = "2.10.6";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

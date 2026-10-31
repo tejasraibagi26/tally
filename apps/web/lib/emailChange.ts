@@ -4,9 +4,10 @@ import { sendEmail } from "./emailService";
 /**
  * Changing the login email goes through the new address: the account form
  * only sends a link there, and the email changes when that link is used
- * (app/api/account/email/confirm). The link is a short-lived JWT naming the
- * user, the address it moves *from* and the one it moves *to* -- so it's
- * dead once the email has changed by any route, and nothing is stored.
+ * (the app/email-change page, which posts to app/api/account/email/confirm).
+ * The link is a short-lived JWT naming the user, the address it moves
+ * *from* and the one it moves *to* -- so it's dead once the email has
+ * changed by any route, and nothing is stored.
  */
 
 const TTL_SECONDS = 60 * 60; // 1 hour
@@ -133,7 +134,7 @@ export function emailChangeNoticeHtml(opts: { toEmail: string; pop: boolean }): 
  * in the account's look (lib/uiLook.ts), like every other Tally email. */
 export async function sendEmailChangeEmails(opts: { appUrl: string; userId: string; fromEmail: string; toEmail: string; pop: boolean }): Promise<void> {
   const token = await emailChangeToken(opts.userId, opts.fromEmail, opts.toEmail);
-  const link = `${opts.appUrl}/api/account/email/confirm?token=${encodeURIComponent(token)}`;
+  const link = `${opts.appUrl}/email-change?token=${encodeURIComponent(token)}`;
 
   await sendEmail({
     to: opts.toEmail,

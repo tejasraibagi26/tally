@@ -26,8 +26,10 @@ import { authConfig } from "@/lib/auth.config";
  *   creates the session; "open", the email link hand-off.
  * - "api/auth": NextAuth and the mobile token routes. "api/plaid/webhook"
  *   (Plaid's signature) and "api/cron" (CRON_SECRET / QStash) carry their
- *   own auth. "api/email/unsubscribe" and "api/account/email/confirm" are
- *   opened from emails; their signed token is the auth.
+ *   own auth.
+ * - "email-change" and "unsubscribe" are the pages an email's link opens,
+ *   and "api/account/email/confirm" / "api/email/unsubscribe" what their
+ *   buttons post to; the signed token in the link is the auth.
  */
 const PUBLIC_PREFIXES = [
   "api/auth",
@@ -35,6 +37,8 @@ const PUBLIC_PREFIXES = [
   "api/cron",
   "api/email/unsubscribe",
   "api/account/email/confirm",
+  "email-change",
+  "unsubscribe",
   "login",
   "demo",
   "docs",

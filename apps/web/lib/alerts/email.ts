@@ -69,7 +69,7 @@ export function alertEmailHtml(opts: { type: AlertType; title: string; body: str
   const title = opts.title;
   const open = `${opts.appUrl}${openLinkPath(opts.url)}`;
   const manage = `${opts.appUrl}/settings#alerts`;
-  const unsub = `${opts.appUrl}/api/email/unsubscribe?uid=${opts.userId}&token=${unsubscribeToken(opts.userId)}&kind=alerts`;
+  const unsub = `${opts.appUrl}/unsubscribe?uid=${opts.userId}&token=${unsubscribeToken(opts.userId)}&kind=alerts`;
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
 <body style="margin:0;background:#F1F0EC;font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;color:#1A1917;">
 <div style="display:none;max-height:0;overflow:hidden;">${esc(opts.body)}</div>
@@ -116,7 +116,7 @@ function alertEmailHtmlPop(opts: { type: AlertType; title: string; body: string;
   const badge = POP_BADGE[opts.type];
   const open = `${opts.appUrl}${openLinkPath(opts.url)}`;
   const manage = `${opts.appUrl}/settings#alerts`;
-  const unsub = `${opts.appUrl}/api/email/unsubscribe?uid=${opts.userId}&token=${unsubscribeToken(opts.userId)}&kind=alerts`;
+  const unsub = `${opts.appUrl}/unsubscribe?uid=${opts.userId}&token=${unsubscribeToken(opts.userId)}&kind=alerts`;
   const cta = opts.type === "connection_broken" ? "#D03B3B" : "#5B3BF5";
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet"></head>
