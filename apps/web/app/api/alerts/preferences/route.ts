@@ -7,7 +7,9 @@ import { ALERT_TYPES, loadAlertPreferences } from "@/lib/alerts/preferences";
 
 const channel = z.object({ email: z.boolean().optional() });
 const patchSchema = z.object({
-  channels: z.record(z.enum(ALERT_TYPES as [string, ...string[]]), channel).optional(),
+  // partialRecord: the client sends one alert type at a time. (zod 4's plain
+  // record with an enum key would demand every type in every request.)
+  channels: z.partialRecord(z.enum(ALERT_TYPES as [string, ...string[]]), channel).optional(),
   // $10 to $100,000
   largeTransactionCents: z.number().int().min(1_000).max(10_000_000).optional(),
   // $0 (only when short) to $100,000

@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.10.2",
+    date: "2026-10-31",
+    changes: [{ kind: "fixed", text: "Security updates under the hood. Nothing changes in how Tally works." }],
+  },
+  {
     version: "2.10.1",
     date: "2026-10-31",
     changes: [{ kind: "improved", text: "Renaming, recolouring or moving a category only changes it for you." }],

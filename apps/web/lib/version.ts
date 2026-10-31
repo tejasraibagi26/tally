@@ -412,8 +412,12 @@
  * through lib/userCategories.ts, so no one else sees it. Categories a user
  * creates were already theirs. scripts/claim-category-edits.ts moves edits
  * made before this onto their owner.
+ * 2.10.2 upgrades drizzle-orm 0.38 -> 0.45 (identifier-escaping SQL
+ * injection fix) with drizzle-kit 0.31, and zod 3 -> 4 (oversized-array
+ * memory exhaustion fix). zod 4's record with an enum key demands every
+ * key, so alert preferences' channels uses z.partialRecord.
  */
-export const APP_VERSION = "2.10.1";
+export const APP_VERSION = "2.10.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
