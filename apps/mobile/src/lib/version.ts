@@ -367,8 +367,11 @@ import Constants from "expo-constants";
  * no longer go through that retry (which also showed "Session expired" for
  * a wrong password at login), and being offline during a refresh no longer
  * signs you out.
+ * 2.9.2 puts web's legend under the Safe to spend meter (Bills, Cards,
+ * Cushion with their amounts, then Safe), so each colour says what it is;
+ * the card's spoken label reads the same breakdown.
  */
-export const APP_VERSION = "2.9.1";
+export const APP_VERSION = "2.9.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

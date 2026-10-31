@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.9.2",
+    date: "2026-10-31",
+    changes: [{ kind: "improved", text: "Safe to spend labels its bar: bills, card payments and your cushion, with what each takes, then what's safe." }],
+  },
+  {
     version: "2.9.1",
     date: "2026-10-31",
     changes: [

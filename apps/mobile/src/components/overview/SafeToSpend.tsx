@@ -31,21 +31,38 @@ function syncedAgo(iso: string | null): string {
   return `last synced ${days === 1 ? "a day" : `${days} days`} ago`;
 }
 
-/** Bills, card payments, cushion, then what's safe, as one meter. */
+/** Bills, card payments, cushion, then what's safe, as one meter -- with
+ * web's legend under it, so each colour says what it is. */
 function Meter({ s }: { s: SafeToSpendResult }) {
   const colors = useThemeColors();
+  const rf = useRF();
   const total = Math.max(s.cashTotal, s.billsTotal + s.cardsTotal + s.cushion, 1);
   const parts = [
-    { key: "bills", cents: s.billsTotal, color: colors.text },
-    { key: "cards", cents: s.cardsTotal, color: colors["border-strong"] },
-    { key: "cushion", cents: s.cushion, color: colors["brand-border"] },
-    { key: "safe", cents: Math.max(0, s.amount), color: colors.marigold ?? colors.positive },
+    { key: "bills", label: "Bills", cents: s.billsTotal, color: colors.text },
+    { key: "cards", label: "Cards", cents: s.cardsTotal, color: colors["border-strong"] },
+    { key: "cushion", label: "Cushion", cents: s.cushion, color: colors["brand-border"] },
+    { key: "safe", label: "Safe", cents: Math.max(0, s.amount), color: colors.marigold ?? colors.positive },
   ].filter((p) => p.cents > 0);
   return (
-    <View className="flex-row rounded-full overflow-hidden" style={{ height: 12, borderWidth: 2, borderColor: colors.ink ?? colors["border-strong"], backgroundColor: colors.surface }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      {parts.map((p) => (
-        <View key={p.key} style={{ flexGrow: p.cents / total, flexBasis: 0, backgroundColor: p.color }} />
-      ))}
+    // The card is one button whose label already reads this breakdown out.
+    <View className="gap-2" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      <View className="flex-row rounded-full overflow-hidden" style={{ height: 12, borderWidth: 2, borderColor: colors.ink ?? colors["border-strong"], backgroundColor: colors.surface }}>
+        {parts.map((p) => (
+          <View key={p.key} style={{ flexGrow: p.cents / total, flexBasis: 0, backgroundColor: p.color }} />
+        ))}
+      </View>
+      <View className="flex-row flex-wrap" style={{ columnGap: 12, rowGap: 4 }}>
+        {parts.map((p) => (
+          <View key={p.key} className="flex-row items-center" style={{ gap: 6 }}>
+            <View style={{ width: 9, height: 9, borderRadius: 2, backgroundColor: p.color, borderWidth: 1, borderColor: colors.ink ?? "transparent" }} />
+            <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>
+              {p.label}
+            </Text>
+            {/* Safe's amount is the big number above. */}
+            {p.key !== "safe" && <MoneyText cents={p.cents} className="text-text-2" style={{ fontSize: rf(12.5) }} />}
+          </View>
+        ))}
+      </View>
     </View>
   );
 }
@@ -64,7 +81,7 @@ export function SafeToSpendCard({ s, initiallyOpen = false }: { s: SafeToSpendRe
         className="rounded-card border-card border-ink p-4 gap-2 active:opacity-90"
         style={[{ backgroundColor: short ? colors["negative-subtle"] : colors["brand-subtle"] }, sticker]}
         accessibilityRole="button"
-        accessibilityLabel={`Safe to spend: ${fmt(s.amount)}. ${line.before}${line.emphasis}${line.after}. Opens the breakdown.`}
+        accessibilityLabel={`Safe to spend: ${fmt(s.amount)}. ${line.before}${line.emphasis}${line.after}. ${s.billsTotal > 0 ? `Bills ${fmt(s.billsTotal)}. ` : ""}${s.cardsTotal > 0 ? `Cards ${fmt(s.cardsTotal)}. ` : ""}${s.cushion > 0 ? `Cushion ${fmt(s.cushion)}. ` : ""}Opens the breakdown.`}
       >
         <View className="flex-row items-center justify-between">
           <Text className="font-ui-semibold text-text" style={{ fontSize: rf(11.5), letterSpacing: 0.8, textTransform: "uppercase" }}>Safe to spend</Text>
