@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   X,
-  LayoutDashboard,
-  Receipt,
-  PieChart,
+  House,
+  ArrowLeftRight,
+  ChartPie,
   Repeat,
   ListFilter,
   Landmark,
@@ -63,14 +63,17 @@ export interface NavCounts {
 // Grouped by what the money is doing, not by page type: what you have and
 // what you owe are separate blocks (credit cards used to sit under
 // "Assets"), and the retirement planner is its own "Plan ahead" block.
+// Icons are the same glyphs as mobile's: its tab bar (app/(tabs)/_layout.tsx
+// -- SF Symbols on iOS, these lucide icons on Android) and its More sheet.
+// Mobile's set wins a disagreement: iOS 16 has no SF receipt symbol, say.
 function navGroups(counts: NavCounts): NavGroup[] {
   return [
-    { items: [{ href: "/overview", label: "Overview", icon: LayoutDashboard }] },
+    { items: [{ href: "/overview", label: "Overview", icon: House }] },
     {
       label: "Your money",
       items: [
-        { href: "/transactions", label: "Transactions", icon: Receipt, meta: String(counts.transactions) },
-        { href: "/budgets", label: "Budgets", icon: PieChart },
+        { href: "/transactions", label: "Transactions", icon: ArrowLeftRight, meta: String(counts.transactions) },
+        { href: "/budgets", label: "Budgets", icon: ChartPie },
         { href: "/subscriptions", label: "Subscriptions", icon: Repeat },
         { href: "/tags", label: "Tags", icon: Tag },
         { href: "/rules", label: "Rules", icon: ListFilter },

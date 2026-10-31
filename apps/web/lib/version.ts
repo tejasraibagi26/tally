@@ -433,8 +433,10 @@
  * replacing the bare HTML the API routes returned. The routes now only act
  * on the button's POST and redirect back with ?status=; their GET forwards
  * links in emails sent before this to the pages.
+ * 2.10.7 matches the side nav's icons to mobile's tab bar: Overview is a
+ * house (was a dashboard grid), Transactions two arrows (was a receipt).
  */
-export const APP_VERSION = "2.10.6";
+export const APP_VERSION = "2.10.7";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

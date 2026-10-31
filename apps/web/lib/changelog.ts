@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.10.7",
+    date: "2026-10-31",
+    changes: [{ kind: "improved", text: "The sidebar's icons match the app's: a house for Overview, two arrows for Transactions." }],
+  },
+  {
     version: "2.10.6",
     date: "2026-10-31",
     changes: [{ kind: "improved", text: "Confirming a new email and unsubscribing from emails open proper Tally pages, in your look and theme." }],
