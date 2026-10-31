@@ -1,6 +1,7 @@
 import { and, eq, isNull, or } from "drizzle-orm";
 import { Repeat } from "lucide-react";
 import { db, schema } from "@/db";
+import { userCategories } from "@/lib/userCategories";
 import { requireUserId } from "@/lib/session";
 import { formatCents } from "@tally/core/money";
 import { Card } from "@/components/ui/Card";
@@ -15,6 +16,7 @@ import { isActiveExpenseStream, subscriptionsMonthlyTotal } from "@tally/core/su
 export default async function SubscriptionsPage() {
   const userId = await requireUserId();
 
+  const uc = userCategories(userId);
   const streams = await db
     .select({
       id: schema.recurringStreams.id,
@@ -31,12 +33,12 @@ export default async function SubscriptionsPage() {
       accountName: schema.accounts.name,
       accountNickname: schema.accounts.nickname,
       accountMask: schema.accounts.mask,
-      categoryName: schema.categories.name,
-      categoryColorSlot: schema.categories.colorSlot,
+      categoryName: uc.name,
+      categoryColorSlot: uc.colorSlot,
     })
     .from(schema.recurringStreams)
     .leftJoin(schema.accounts, eq(schema.recurringStreams.accountId, schema.accounts.id))
-    .leftJoin(schema.categories, eq(schema.recurringStreams.categoryId, schema.categories.id))
+    .leftJoin(uc, eq(schema.recurringStreams.categoryId, uc.id))
     .where(and(eq(schema.recurringStreams.userId, userId), isNull(schema.recurringStreams.dismissedAt)));
 
   const accountRows = await db
@@ -45,9 +47,9 @@ export default async function SubscriptionsPage() {
     .where(eq(schema.accounts.userId, userId));
   const accounts = accountRows.map((a) => ({ id: a.id, name: accountDisplayName(a.name, a.nickname), mask: a.mask }));
   const expenseCategories = await db
-    .select({ id: schema.categories.id, name: schema.categories.name })
-    .from(schema.categories)
-    .where(and(eq(schema.categories.kind, "expense"), or(isNull(schema.categories.userId), eq(schema.categories.userId, userId))));
+    .select({ id: uc.id, name: uc.name })
+    .from(uc)
+    .where(and(eq(uc.kind, "expense"), or(isNull(uc.userId), eq(uc.userId, userId))));
 
   streams.sort((a, b) => Math.abs(b.averageAmount) - Math.abs(a.averageAmount));
 

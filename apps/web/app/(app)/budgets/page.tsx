@@ -1,5 +1,6 @@
 import { and, eq, isNull, notInArray, or } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { listUserCategories } from "@/lib/userCategories";
 import { requireUserId } from "@/lib/session";
 import { budgetSetupOptions, getBudgetsForMonth, shiftMonth, unbudgetedSpend } from "@/lib/budgets";
 import { monthLastDay } from "@tally/core/budgetMath";
@@ -26,14 +27,7 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
   const goal = month === currentMonth ? await goalSummary(userId) : null;
   const budgetedCategoryIds = budgets.map((b) => b.categoryId);
   const [availableCategories, unbudgeted, setup] = await Promise.all([
-    db.query.categories.findMany({
-      where: and(
-        eq(schema.categories.kind, "expense"),
-        or(isNull(schema.categories.userId), eq(schema.categories.userId, userId)),
-        budgetedCategoryIds.length > 0 ? notInArray(schema.categories.id, budgetedCategoryIds) : undefined,
-      ),
-      orderBy: (c, { asc }) => [asc(c.name)],
-    }),
+    listUserCategories(userId).then((all) => all.filter((c) => c.kind === "expense" && !budgetedCategoryIds.includes(c.id))),
     unbudgetedSpend(userId, month, budgets),
     budgets.length === 0 ? budgetSetupOptions(userId, month) : Promise.resolve(null),
   ]);

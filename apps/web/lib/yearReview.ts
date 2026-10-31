@@ -1,5 +1,6 @@
 import { and, asc, desc, eq, gte, isNull, lt, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { userCategories } from "@/lib/userCategories";
 import { monthTotals, categoryBreakdown } from "@/lib/analytics";
 import { computeAndStoreNetWorthSnapshot } from "@/lib/networth";
 import { todayFor } from "@/lib/userTimezone";
@@ -13,6 +14,7 @@ import { buildYearReview, type YearRankInput, type YearReview } from "@tally/cor
  * started months, shaped by @tally/core/yearReview.
  */
 export async function yearReviewFor(userId: string, year: number): Promise<YearReview> {
+  const uc = userCategories(userId);
   const today = await todayFor(userId);
   const start = `${year}-01-01`;
   const end = `${year + 1}-01-01`;
@@ -27,16 +29,16 @@ export async function yearReviewFor(userId: string, year: number): Promise<YearR
         label: sql<string>`coalesce(${schema.transactions.merchantName}, ${schema.transactions.name})`,
         total: sql<number>`sum(abs(${schema.transactions.amount}))::bigint`,
         count: sql<number>`count(*)::int`,
-        colorSlot: sql<number>`min(${schema.categories.colorSlot})::int`,
+        colorSlot: sql<number>`min(${uc.colorSlot})::int`,
       })
       .from(schema.transactions)
-      .innerJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))
+      .innerJoin(uc, eq(schema.transactions.categoryId, uc.id))
       .where(
         and(
           eq(schema.transactions.userId, userId),
           eq(schema.transactions.isTransfer, false),
           eq(schema.transactions.excludedFromBudget, false),
-          eq(schema.categories.kind, "expense"),
+          eq(uc.kind, "expense"),
           gte(schema.transactions.postedDate, start),
           lt(schema.transactions.postedDate, end),
         ),

@@ -1,5 +1,6 @@
 import { and, desc, eq, isNull, or } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { userCategories } from "@/lib/userCategories";
 import { requireUserId } from "@/lib/session";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ProfileSection } from "@/components/settings/ProfileSection";
@@ -34,10 +35,11 @@ export default async function SettingsPage() {
     .from(schema.accounts)
     .where(eq(schema.accounts.userId, userId));
   const accounts = accountRows.map((a) => ({ id: a.id, name: accountDisplayName(a.name, a.nickname), mask: a.mask }));
+  const uc = userCategories(userId);
   const incomeCategories = await db
-    .select({ id: schema.categories.id, name: schema.categories.name })
-    .from(schema.categories)
-    .where(and(eq(schema.categories.kind, "income"), or(isNull(schema.categories.userId), eq(schema.categories.userId, userId))));
+    .select({ id: uc.id, name: uc.name })
+    .from(uc)
+    .where(and(eq(uc.kind, "income"), or(isNull(uc.userId), eq(uc.userId, userId))));
   const incomeSchedules = await db
     .select({
       id: schema.incomeSchedules.id,
@@ -50,11 +52,11 @@ export default async function SettingsPage() {
       accountName: schema.accounts.name,
       accountNickname: schema.accounts.nickname,
       accountMask: schema.accounts.mask,
-      categoryName: schema.categories.name,
+      categoryName: uc.name,
     })
     .from(schema.incomeSchedules)
     .leftJoin(schema.accounts, eq(schema.incomeSchedules.accountId, schema.accounts.id))
-    .leftJoin(schema.categories, eq(schema.incomeSchedules.categoryId, schema.categories.id))
+    .leftJoin(uc, eq(schema.incomeSchedules.categoryId, uc.id))
     .where(eq(schema.incomeSchedules.userId, userId));
   const incomeSchedulesForDisplay = incomeSchedules.map(({ accountNickname, ...s }) => ({
     ...s,

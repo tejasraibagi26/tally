@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { and, desc, eq, gte, inArray, isNotNull, isNull, lte, or } from "drizzle-orm";
+import { and, desc, eq, gte, inArray, isNotNull, lte } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { listUserCategories } from "@/lib/userCategories";
 import { requireUserId } from "@/lib/session";
 import { accountDisplayName } from "@tally/core/accountName";
 import { suggestCategories } from "@tally/core/transactionView";
@@ -53,7 +54,7 @@ export async function GET(req: Request) {
       )
       .orderBy(desc(schema.transactions.postedDate), desc(schema.transactions.createdAt))
       .limit(QUEUE_LIMIT),
-    db.query.categories.findMany({ where: or(isNull(schema.categories.userId), eq(schema.categories.userId, userId)) }),
+    listUserCategories(userId),
     db.query.accounts.findMany({ where: eq(schema.accounts.userId, userId) }),
   ]);
 

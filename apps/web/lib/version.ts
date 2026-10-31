@@ -406,8 +406,14 @@
  * change waits for the new address to confirm a signed link
  * (lib/emailChange.ts, /api/account/email/confirm) and tells the old one;
  * the login form only follows a same-site callbackUrl.
+ * 2.10.1 ties category edits to the user who made them (migration 0036):
+ * renaming, recolouring or moving a system category writes that user's
+ * category_overrides row instead of the shared one, and every read goes
+ * through lib/userCategories.ts, so no one else sees it. Categories a user
+ * creates were already theirs. scripts/claim-category-edits.ts moves edits
+ * made before this onto their owner.
  */
-export const APP_VERSION = "2.10.0";
+export const APP_VERSION = "2.10.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

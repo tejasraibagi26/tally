@@ -3,6 +3,7 @@ import { resolveMerchantLogos } from "@/lib/merchantLogos";
 import { z } from "zod";
 import { and, desc, eq, gte, ilike, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { listUserCategories } from "@/lib/userCategories";
 import { requireUserId } from "@/lib/session";
 import { categoryIdsInGroup } from "@/lib/categoryOptions";
 import { clearOrphanedRecurringStreamRefs } from "@/lib/recurringBillGeneration";
@@ -62,10 +63,7 @@ export async function GET(req: Request) {
   const transferFilter = sp.get("transfer") === "0" ? false : sp.get("transfer") === "1" ? true : null;
   const excludedFilter = sp.get("excluded") === "0" ? false : sp.get("excluded") === "1" ? true : null;
 
-  const categories = await db.query.categories.findMany({
-    where: or(isNull(schema.categories.userId), eq(schema.categories.userId, userId)),
-    orderBy: (c, { asc }) => [asc(c.name)],
-  });
+  const categories = await listUserCategories(userId);
 
   const conditions = [eq(schema.transactions.userId, userId)];
   if (accountIds.length === 1) conditions.push(eq(schema.transactions.accountId, accountIds[0]!));

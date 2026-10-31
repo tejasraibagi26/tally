@@ -1,4 +1,5 @@
 import { db, schema } from "@/db";
+import { listUserCategories } from "@/lib/userCategories";
 import { resolveMerchantLogos } from "@/lib/merchantLogos";
 import { and, desc, eq, gte, ilike, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { Receipt, SearchX } from "lucide-react";
@@ -106,10 +107,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
     accountsById[a.id] = { name: accountDisplayName(a.name, a.nickname), mask: a.mask, plaidItemLabel: (a.itemId && itemById.get(a.itemId)?.plaidItemId) || null };
   }
 
-  const categories = await db.query.categories.findMany({
-    where: or(isNull(schema.categories.userId), eq(schema.categories.userId, userId)),
-    orderBy: (c, { asc }) => [asc(c.name)],
-  });
+  const categories = await listUserCategories(userId);
   const categoryOptions = groupCategoryOptions(categories);
   // No "All accounts" placeholder entry here (unlike categorySelectOptions
   // below) -- MultiSelect's empty-selection state already reads "All

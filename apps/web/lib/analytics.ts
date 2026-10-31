@@ -1,5 +1,6 @@
 import { and, asc, eq, gte, isNull, lt, not } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { userCategories } from "@/lib/userCategories";
 import { creditCardsForUser, viewForCard } from "@/lib/liabilities";
 import { monthRange, shiftMonth } from "@tally/core/budgetMath";
 import { hasSplits } from "@/lib/budgets";
@@ -158,12 +159,13 @@ export interface BreakdownRow {
  * A split transaction counts through its lines' categories, same as spendByCategory.
  */
 export async function categoryBreakdown(userId: string, month: string): Promise<BreakdownRow[]> {
+  const uc = userCategories(userId);
   const { start, end } = monthRange(month);
   const inMonth = and(
     eq(schema.transactions.userId, userId),
     eq(schema.transactions.isTransfer, false),
     eq(schema.transactions.excludedFromBudget, false),
-    eq(schema.categories.kind, "expense"),
+    eq(uc.kind, "expense"),
     gte(schema.transactions.postedDate, start),
     lt(schema.transactions.postedDate, end),
   );
@@ -171,23 +173,23 @@ export async function categoryBreakdown(userId: string, month: string): Promise<
     db
       .select({
         categoryId: schema.transactions.categoryId,
-        categoryName: schema.categories.name,
-        colorSlot: schema.categories.colorSlot,
+        categoryName: uc.name,
+        colorSlot: uc.colorSlot,
         amount: schema.transactions.amount,
       })
       .from(schema.transactions)
-      .innerJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))
+      .innerJoin(uc, eq(schema.transactions.categoryId, uc.id))
       .where(and(inMonth, not(hasSplits))),
     db
       .select({
         categoryId: schema.transactionSplits.categoryId,
-        categoryName: schema.categories.name,
-        colorSlot: schema.categories.colorSlot,
+        categoryName: uc.name,
+        colorSlot: uc.colorSlot,
         amount: schema.transactionSplits.amount,
       })
       .from(schema.transactionSplits)
       .innerJoin(schema.transactions, eq(schema.transactionSplits.transactionId, schema.transactions.id))
-      .innerJoin(schema.categories, eq(schema.transactionSplits.categoryId, schema.categories.id))
+      .innerJoin(uc, eq(schema.transactionSplits.categoryId, uc.id))
       .where(inMonth),
   ]);
   const rows = [...whole, ...split];
@@ -203,22 +205,23 @@ export async function categoryBreakdown(userId: string, month: string): Promise<
 }
 
 export async function merchantBreakdown(userId: string, month: string): Promise<BreakdownRow[]> {
+  const uc = userCategories(userId);
   const { start, end } = monthRange(month);
   const rows = await db
     .select({
       merchantName: schema.transactions.merchantName,
       name: schema.transactions.name,
       amount: schema.transactions.amount,
-      colorSlot: schema.categories.colorSlot,
+      colorSlot: uc.colorSlot,
     })
     .from(schema.transactions)
-    .innerJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))
+    .innerJoin(uc, eq(schema.transactions.categoryId, uc.id))
     .where(
       and(
         eq(schema.transactions.userId, userId),
         eq(schema.transactions.isTransfer, false),
         eq(schema.transactions.excludedFromBudget, false),
-        eq(schema.categories.kind, "expense"),
+        eq(uc.kind, "expense"),
         gte(schema.transactions.postedDate, start),
         lt(schema.transactions.postedDate, end),
       ),

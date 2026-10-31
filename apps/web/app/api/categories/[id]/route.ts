@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { and, eq, or, isNull, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
+import { userCategories } from "@/lib/userCategories";
 
 const patchSchema = z.object({
   name: z.string().min(1).max(80).optional(),
@@ -12,10 +13,11 @@ const patchSchema = z.object({
   icon: z.string().max(40).nullable().optional(),
 });
 
-// §7.1: users can rename/recolor/reparent any category, including a system
-// one seeded from Plaid's taxonomy — there's only one owner of this
-// instance's data, so there's no need to fork a system category into a
-// per-user override first.
+// §7.1: users can rename/recolor/reparent any category they see. Their own
+// category is edited in place; a system one (seeded from Plaid's taxonomy,
+// shared by every user) never is -- the edit becomes this user's override
+// (category_overrides, read back through lib/userCategories.ts), so nobody
+// else sees it and the seed script can keep the shared row in sync.
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
@@ -41,11 +43,36 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (Object.keys(parsed.data).length === 0) {
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
   }
+  if (parsed.data.parentId === id) {
+    return NextResponse.json({ error: "A category can't be its own parent" }, { status: 400 });
+  }
   if (!(await categoriesUsableBy(userId, [parsed.data.parentId]))) {
     return NextResponse.json(unknownCategoryBody, { status: 400 });
   }
 
-  const [updated] = await db.update(schema.categories).set(parsed.data).where(eq(schema.categories.id, id)).returning();
+  if (category.userId === userId) {
+    await db.update(schema.categories).set(parsed.data).where(eq(schema.categories.id, id));
+  } else {
+    // Start from what this user sees now (their earlier override, or the
+    // system row), so the snapshot carries every field, not just this edit.
+    const uc = userCategories(userId);
+    const [current] = await db.select().from(uc).where(eq(uc.id, id)).limit(1);
+    if (!current) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const next = {
+      name: parsed.data.name ?? current.name,
+      colorSlot: parsed.data.colorSlot ?? current.colorSlot,
+      icon: parsed.data.icon !== undefined ? parsed.data.icon : current.icon,
+      parentId: parsed.data.parentId !== undefined ? parsed.data.parentId : current.parentId,
+      updatedAt: new Date(),
+    };
+    await db
+      .insert(schema.categoryOverrides)
+      .values({ userId, categoryId: id, ...next })
+      .onConflictDoUpdate({ target: [schema.categoryOverrides.userId, schema.categoryOverrides.categoryId], set: next });
+  }
+
+  const uc = userCategories(userId);
+  const [updated] = await db.select().from(uc).where(eq(uc.id, id)).limit(1);
   return NextResponse.json({ category: updated });
 }
 
@@ -80,10 +107,13 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     .select({ count: sql<number>`count(*)::int` })
     .from(schema.budgets)
     .where(eq(schema.budgets.categoryId, id));
+  // Children as this user sees them -- a system category they moved under
+  // this one (an override) counts as much as one they created there.
+  const uc = userCategories(userId);
   const childCountRows = await db
     .select({ count: sql<number>`count(*)::int` })
-    .from(schema.categories)
-    .where(and(eq(schema.categories.parentId, id), or(isNull(schema.categories.userId), eq(schema.categories.userId, userId))));
+    .from(uc)
+    .where(eq(uc.parentId, id));
 
   const txCount = txCountRows[0]?.count ?? 0;
   const budgetCount = budgetCountRows[0]?.count ?? 0;

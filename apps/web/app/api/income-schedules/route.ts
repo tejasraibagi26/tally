@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { userCategories } from "@/lib/userCategories";
 import { requireUserId } from "@/lib/session";
 import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
 import { generateDuePaychecks } from "@/lib/incomeSchedule";
@@ -15,6 +16,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const uc = userCategories(userId);
   const schedules = await db
     .select({
       id: schema.incomeSchedules.id,
@@ -27,11 +29,11 @@ export async function GET(req: Request) {
       accountName: schema.accounts.name,
       accountNickname: schema.accounts.nickname,
       accountMask: schema.accounts.mask,
-      categoryName: schema.categories.name,
+      categoryName: uc.name,
     })
     .from(schema.incomeSchedules)
     .leftJoin(schema.accounts, eq(schema.incomeSchedules.accountId, schema.accounts.id))
-    .leftJoin(schema.categories, eq(schema.incomeSchedules.categoryId, schema.categories.id))
+    .leftJoin(uc, eq(schema.incomeSchedules.categoryId, uc.id))
     .where(eq(schema.incomeSchedules.userId, userId));
 
   return NextResponse.json({

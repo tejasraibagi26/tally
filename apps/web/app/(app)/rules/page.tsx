@@ -1,6 +1,7 @@
-import { asc, eq, isNull, or } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { Wand2 } from "lucide-react";
 import { db, schema } from "@/db";
+import { listUserCategories } from "@/lib/userCategories";
 import { requireUserId } from "@/lib/session";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -22,10 +23,7 @@ export default async function RulesPage({ searchParams }: { searchParams: Promis
 
   const [rules, categories, accounts] = await Promise.all([
     db.select().from(schema.rules).where(eq(schema.rules.userId, userId)).orderBy(asc(schema.rules.priority)),
-    db.query.categories.findMany({
-      where: or(isNull(schema.categories.userId), eq(schema.categories.userId, userId)),
-      orderBy: (c, { asc: ascOrder }) => [ascOrder(c.name)],
-    }),
+    listUserCategories(userId),
     db.query.accounts.findMany({ where: eq(schema.accounts.userId, userId) }),
   ]);
 

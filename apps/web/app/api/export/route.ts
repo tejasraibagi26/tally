@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { and, desc, eq, gte, lte } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { userCategories } from "@/lib/userCategories";
 import { requireUserId } from "@/lib/session";
 import { accountDisplayName } from "@tally/core/accountName";
 
@@ -36,6 +37,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "from/to must be YYYY-MM-DD" }, { status: 400 });
   }
 
+  const uc = userCategories(userId);
   const conditions = [eq(schema.transactions.userId, userId)];
   if (from) conditions.push(gte(schema.transactions.postedDate, from));
   if (to) conditions.push(lte(schema.transactions.postedDate, to));
@@ -50,7 +52,7 @@ export async function GET(req: Request) {
       accountName: schema.accounts.name,
       accountNickname: schema.accounts.nickname,
       accountMask: schema.accounts.mask,
-      categoryName: schema.categories.name,
+      categoryName: uc.name,
       isPending: schema.transactions.isPending,
       isTransfer: schema.transactions.isTransfer,
       notes: schema.transactions.notes,
@@ -58,7 +60,7 @@ export async function GET(req: Request) {
     })
     .from(schema.transactions)
     .innerJoin(schema.accounts, eq(schema.transactions.accountId, schema.accounts.id))
-    .leftJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))
+    .leftJoin(uc, eq(schema.transactions.categoryId, uc.id))
     .where(and(...conditions))
     .orderBy(desc(schema.transactions.postedDate))
     .limit(MAX_ROWS);

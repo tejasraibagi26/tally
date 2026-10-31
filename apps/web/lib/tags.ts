@@ -1,5 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { userCategories } from "@/lib/userCategories";
 import { summarizeTag, type TagSummary } from "@tally/core/tagView";
 
 export interface TagListItem {
@@ -31,6 +32,7 @@ export async function tagsFor(userId: string): Promise<TagListItem[]> {
 
 /** One tag summed across categories (@tally/core/tagView). */
 export async function tagSummaryFor(userId: string, tag: string): Promise<TagSummary> {
+  const uc = userCategories(userId);
   const rows = await db
     .select({
       id: schema.transactions.id,
@@ -38,12 +40,12 @@ export async function tagSummaryFor(userId: string, tag: string): Promise<TagSum
       amount: schema.transactions.amount,
       isTransfer: schema.transactions.isTransfer,
       categoryId: schema.transactions.categoryId,
-      categoryName: schema.categories.name,
-      colorSlot: schema.categories.colorSlot,
-      categoryKind: schema.categories.kind,
+      categoryName: uc.name,
+      colorSlot: uc.colorSlot,
+      categoryKind: uc.kind,
     })
     .from(schema.transactions)
-    .leftJoin(schema.categories, eq(schema.transactions.categoryId, schema.categories.id))
+    .leftJoin(uc, eq(schema.transactions.categoryId, uc.id))
     .where(and(eq(schema.transactions.userId, userId), sql`${schema.transactions.tags} @> ${JSON.stringify([tag])}::jsonb`));
   return summarizeTag(tag, rows);
 }

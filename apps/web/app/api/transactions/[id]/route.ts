@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { and, desc, eq, inArray, isNotNull, ne } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { userCategories } from "@/lib/userCategories";
 import { requireUserId } from "@/lib/session";
 import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
 import { applyRulesToExistingTransactions } from "@/lib/categorize";
@@ -39,8 +40,9 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     .from(schema.transactionSplits)
     .where(inArray(schema.transactionSplits.transactionId, [t.id]));
 
+  const uc = userCategories(userId);
   const category = t.categoryId
-    ? await db.query.categories.findFirst({ where: eq(schema.categories.id, t.categoryId) })
+    ? ((await db.select().from(uc).where(eq(uc.id, t.categoryId)).limit(1))[0] ?? null)
     : null;
   const account = await db.query.accounts.findFirst({ where: eq(schema.accounts.id, t.accountId) });
   const stream = t.recurringStreamId
@@ -67,7 +69,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     : [];
   const suggested = suggestCategories(t.categoryId, history.map((h) => h.categoryId!));
   const suggestedCategories = suggested.length
-    ? await db.query.categories.findMany({ where: inArray(schema.categories.id, suggested.map((s) => s.categoryId)) })
+    ? await db.select().from(uc).where(inArray(uc.id, suggested.map((s) => s.categoryId)))
     : [];
   const suggestions = suggested
     .map((s) => {
