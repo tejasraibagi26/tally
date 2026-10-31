@@ -253,6 +253,13 @@
       "when": 1793568000002,
       "tag": "0035_auth_hardening",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1793654400002,
+      "tag": "0036_category_overrides",
+      "breakpoints": true
     }
   ]
 }

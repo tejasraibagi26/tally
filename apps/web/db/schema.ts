@@ -12,6 +12,7 @@ import {
   uniqueIndex,
   index,
   pgEnum,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 
@@ -280,6 +281,23 @@ export const categories = pgTable("categories", {
   kind: categoryKindEnum("kind").notNull().default("expense"),
   sortOrder: integer("sort_order").notNull().default(0),
 });
+
+// One user's own name/colour/icon/parent for a *system* category
+// (categories.user_id null). System rows stay as the taxonomy seeds them,
+// shared by everyone; a user's edits live here, a full snapshot of the four
+// editable fields, and lib/userCategories.ts lays them over the system row
+// for that user only. Categories a user creates are their own rows instead.
+export const categoryOverrides = pgTable("category_overrides", {
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  categoryId: uuid("category_id").notNull().references(() => categories.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  colorSlot: integer("color_slot").notNull(),
+  icon: text("icon"),
+  parentId: uuid("parent_id"),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  pk: primaryKey({ columns: [t.userId, t.categoryId] }),
+}));
 
 export const rules = pgTable("rules", {
   id: uuid("id").primaryKey().defaultRandom(),
