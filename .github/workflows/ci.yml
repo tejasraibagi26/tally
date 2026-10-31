@@ -1,0 +1,53 @@
+# Checks every push and pull request to master: typecheck all three
+# workspaces, run the test suites, and do a production build of the web
+# app -- the same things a deploy would trip over, run before one does.
+# Free: the repo is public, so GitHub Actions minutes are unlimited.
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+# A newer push to the same branch makes an in-flight run moot.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      # Pinned to release commits, not tags (a moved tag can't change what runs).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: |
+          npm run typecheck -w @tally/core
+          npm run typecheck -w web
+          npm run typecheck -w mobile
+
+      - name: Test
+        run: |
+          npm test -w @tally/core
+          npm test -w web
+
+      # Placeholders only: the build imports modules that read these at
+      # load time, but nothing connects to a database or signs a session.
+      - name: Build web
+        run: npm run build -w web
+        env:
+          DATABASE_URL: postgres://ci:ci@127.0.0.1:5432/ci
+          AUTH_SECRET: ci-build-only-not-a-secret
+          NEXT_TELEMETRY_DISABLED: "1"
