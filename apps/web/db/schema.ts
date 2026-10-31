@@ -105,8 +105,23 @@ export const users = pgTable("users", {
   forecastDailySpendCents: bigint("forecast_daily_spend_cents", { mode: "number" }),
   // The horizon the user last picked on Forecast: 30, 60 or 90.
   forecastDays: integer("forecast_days").notNull().default(60),
+  // Bumped to end every session at once (password change, "Sign out
+  // everywhere"): web JWTs and mobile access tokens carry the value they
+  // were issued under, and lib/session.ts refuses one that's behind.
+  sessionVersion: integer("session_version").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+// Failed sign-in / password-check attempts, for lib/rateLimit.ts. One row per
+// failure keyed by what's being guessed at ("email:<addr>") and who's
+// guessing ("ip:<addr>"); the nightly cron prunes rows past the window.
+export const authAttempts = pgTable("auth_attempts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  key: text("key").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => ({
+  keyCreatedIdx: index("auth_attempts_key_created_idx").on(t.key, t.createdAt),
+}));
 
 // Refresh tokens for the mobile app's bearer-token auth path, parallel to
 // (and independent of) NextAuth's own cookie session. Only a hash of the
