@@ -388,8 +388,12 @@
  * in, and it fades away (~1.6s). Pure CSS so it plays before hydration; the
  * root layout's BOOT_INIT_SCRIPT marks <html data-booted> before first paint
  * on a repeat load or with reduced motion, so it never flashes.
+ * 2.9.1 is a security patch: next 15.5.28 (image-optimizer RCE, ISR cache
+ * poisoning, Server Actions DoS) and next-auth 5.0.0-beta.32 (fail-open
+ * session checks, malformed-Bearer crash), plus Next's bundled postcss
+ * forced to 8.5.x via the root package.json override.
  */
-export const APP_VERSION = "2.9.0";
+export const APP_VERSION = "2.9.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
