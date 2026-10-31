@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.10.8",
+    date: "2026-10-31",
+    changes: [{ kind: "improved", text: "Tally's fonts now load from Tally itself, not a third-party font service." }],
+  },
+  {
     version: "2.10.7",
     date: "2026-10-31",
     changes: [{ kind: "improved", text: "The sidebar's icons match the app's: a house for Overview, two arrows for Transactions." }],
