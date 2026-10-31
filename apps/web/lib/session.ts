@@ -1,6 +1,21 @@
 import { auth } from "@/lib/auth";
 import { verifyAccessToken } from "@/lib/mobileAuth";
 import { isWriteRequest } from "@/lib/demo";
+import { eq } from "drizzle-orm";
+import { db, schema } from "@/db";
+
+/** A session (web JWT or mobile access token) carries the users.session_version
+ * it was issued under; a password change or "Sign out everywhere" bumps the
+ * column, and every session issued before that stops working here. A
+ * deleted user has no row, so their sessions end too. */
+async function sessionStillCurrent(userId: string, sessionVersion: number): Promise<boolean> {
+  const [row] = await db
+    .select({ sessionVersion: schema.users.sessionVersion })
+    .from(schema.users)
+    .where(eq(schema.users.id, userId))
+    .limit(1);
+  return row !== undefined && row.sessionVersion === sessionVersion;
+}
 
 /** Throws if unauthenticated. Every API route that touches user data calls this first.
  *
@@ -13,15 +28,16 @@ export async function requireUserId(req?: Request): Promise<string> {
   if (authHeader?.startsWith("Bearer ")) {
     // A demo visitor can't reach this path: the demo account has no usable
     // password, so it can't mint a mobile token (lib/auth.ts).
-    const userId = await verifyAccessToken(authHeader.slice(7));
-    if (!userId) throw new Error("UNAUTHENTICATED");
-    return userId;
+    const claims = await verifyAccessToken(authHeader.slice(7));
+    if (!claims || !(await sessionStillCurrent(claims.userId, claims.sessionVersion))) throw new Error("UNAUTHENTICATED");
+    return claims.userId;
   }
 
   const session = await auth();
-  const user = session?.user as { id?: string; demo?: boolean } | undefined;
+  const user = session?.user as { id?: string; demo?: boolean; sv?: number } | undefined;
   const userId = user?.id;
   if (!userId) throw new Error("UNAUTHENTICATED");
+  if (!(await sessionStillCurrent(userId, user?.sv ?? 0))) throw new Error("UNAUTHENTICATED");
 
   // Defence in depth behind middleware's read-only gate (lib/auth.config.ts),
   // which already refuses demo writes with a 403 before they get this far.

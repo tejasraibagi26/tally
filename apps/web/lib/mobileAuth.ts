@@ -16,8 +16,10 @@ function mobileJwtSecret(): Uint8Array {
   return new TextEncoder().encode(secret);
 }
 
-export async function signAccessToken(userId: string): Promise<{ token: string; expiresIn: number }> {
-  const token = await new SignJWT({ sub: userId })
+/** `sessionVersion` is users.session_version at issue time; lib/session.ts
+ * refuses the token once the column has moved past it. */
+export async function signAccessToken(userId: string, sessionVersion: number): Promise<{ token: string; expiresIn: number }> {
+  const token = await new SignJWT({ sub: userId, sv: sessionVersion })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(`${ACCESS_TOKEN_TTL_SECONDS}s`)
@@ -25,11 +27,14 @@ export async function signAccessToken(userId: string): Promise<{ token: string; 
   return { token, expiresIn: ACCESS_TOKEN_TTL_SECONDS };
 }
 
-/** Returns the userId if the access token is valid, otherwise null. Never throws. */
-export async function verifyAccessToken(token: string): Promise<string | null> {
+/** Returns the userId and its session version if the access token is
+ * valid, otherwise null. Never throws. Tokens minted before session
+ * versions existed carry no `sv` and count as 0, the column's default. */
+export async function verifyAccessToken(token: string): Promise<{ userId: string; sessionVersion: number } | null> {
   try {
-    const { payload } = await jwtVerify(token, mobileJwtSecret());
-    return typeof payload.sub === "string" ? payload.sub : null;
+    const { payload } = await jwtVerify(token, mobileJwtSecret(), { algorithms: ["HS256"] });
+    if (typeof payload.sub !== "string") return null;
+    return { userId: payload.sub, sessionVersion: typeof payload.sv === "number" ? payload.sv : 0 };
   } catch {
     return null;
   }

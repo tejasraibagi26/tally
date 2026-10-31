@@ -399,8 +399,15 @@
  * timingSafeEqual on CRON_SECRET; CSV formula escaping; Plaid webhook kid
  * negative cache + expired_at; unsubscribe asks before it acts (POST does
  * it), signs under its own label, and no longer sits behind the login gate.
+ * 2.10.0 is the rest of that review, on migration 0035: failed sign-ins and
+ * current-password checks are rate limited (lib/rateLimit.ts, auth_attempts);
+ * sessions carry users.session_version and lib/session.ts refuses an old one,
+ * so a password change signs out every web and mobile session; an email
+ * change waits for the new address to confirm a signed link
+ * (lib/emailChange.ts, /api/account/email/confirm) and tells the old one;
+ * the login form only follows a same-site callbackUrl.
  */
-export const APP_VERSION = "2.9.2";
+export const APP_VERSION = "2.10.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

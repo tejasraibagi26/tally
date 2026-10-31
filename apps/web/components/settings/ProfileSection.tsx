@@ -106,15 +106,11 @@ function EditProfileDialog({ open, onClose, initial }: { open: boolean; onClose:
         setError(data.error ?? "Couldn't save your profile. Try again.");
         return;
       }
-      if (data.emailChanged) {
-        // Email is embedded in the JWT session token at sign-in — force a
-        // fresh login so the session reflects what's actually in the DB.
-        await signOut({ callbackUrl: "/login" });
-        return;
-      }
       onClose();
       setCurrentPassword("");
-      showToast("Profile saved");
+      // An email change only happens once the new address confirms the
+      // link it was just sent (lib/emailChange.ts).
+      showToast(data.emailChangePending ? `Check ${email} to confirm the change` : "Profile saved");
       router.refresh();
     } catch (err) {
       console.error(err);

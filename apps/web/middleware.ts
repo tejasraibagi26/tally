@@ -16,7 +16,8 @@ export const config = {
   // read-only demo's one-click entry point (app/demo/route.ts) — it has to
   // be reachable with no session at all, since creating one is the whole
   // thing it does. "api/email/unsubscribe" is opened from an email by
-  // someone who may not be signed in; its signed token is its auth. Every
+  // someone who may not be signed in; its signed token is its auth, and the
+  // same goes for "api/account/email/confirm" (lib/emailChange.ts). Every
   // other route stays gated here.
-  matcher: ["/((?!api/auth|api/plaid/webhook|api/cron|api/email/unsubscribe|login|demo|docs|privacy|open|_next/static|_next/image|favicon.ico|icon-classic.svg|$).*)"],
+  matcher: ["/((?!api/auth|api/plaid/webhook|api/cron|api/email/unsubscribe|api/account/email/confirm|login|demo|docs|privacy|open|_next/static|_next/image|favicon.ico|icon-classic.svg|$).*)"],
 };

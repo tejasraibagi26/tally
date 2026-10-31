@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db, schema } from "@/db";
-import { authenticateCredentials } from "@/lib/authenticateCredentials";
+import { authenticateWithRateLimit } from "@/lib/authenticateCredentials";
+import { RATE_LIMITED_MESSAGE } from "@/lib/rateLimit";
 import { signAccessToken, generateRefreshToken, REFRESH_TOKEN_TTL_MS } from "@/lib/mobileAuth";
 
 const bodySchema = z.object({
@@ -21,12 +22,15 @@ export async function POST(req: Request) {
   }
   const { email, password, deviceInfo } = parsed.data;
 
-  const user = await authenticateCredentials(email, password);
+  const user = await authenticateWithRateLimit(email, password, req);
+  if (user === "rate_limited") {
+    return NextResponse.json({ error: RATE_LIMITED_MESSAGE, code: "rate_limited" }, { status: 429 });
+  }
   if (!user) {
     return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
   }
 
-  const { token: accessToken, expiresIn } = await signAccessToken(user.id);
+  const { token: accessToken, expiresIn } = await signAccessToken(user.id, user.sessionVersion);
   const { token: refreshToken, hash } = generateRefreshToken();
 
   await db.insert(schema.mobileRefreshTokens).values({

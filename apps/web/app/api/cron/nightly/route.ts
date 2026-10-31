@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { pruneAuthAttempts } from "@/lib/rateLimit";
 import { isAuthorizedCronRequest } from "@/lib/cronAuth";
 import { activeItems } from "@/lib/activeItems";
 import { refreshAccountBalances } from "@/lib/plaidBalances";
@@ -55,6 +56,8 @@ export async function GET(req: Request) {
   } catch (err) {
     console.error("Cron nightly: manual bill generation failed", err);
   }
+
+  await pruneAuthAttempts().catch((err) => console.error("Cron nightly: auth_attempts prune failed", err));
 
   return NextResponse.json({ ok: true, itemCount: items.length, paychecksGenerated, billsGenerated });
 }

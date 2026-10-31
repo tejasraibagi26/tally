@@ -64,6 +64,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid or expired refresh token" }, { status: 401 });
   }
 
-  const { token: accessToken, expiresIn } = await signAccessToken(result.userId);
+  const [user] = await db.select({ sessionVersion: schema.users.sessionVersion }).from(schema.users).where(eq(schema.users.id, result.userId)).limit(1);
+  if (!user) return NextResponse.json({ error: "Invalid or expired refresh token" }, { status: 401 });
+  const { token: accessToken, expiresIn } = await signAccessToken(result.userId, user.sessionVersion);
   return NextResponse.json({ accessToken, refreshToken: result.refreshToken, expiresIn });
 }

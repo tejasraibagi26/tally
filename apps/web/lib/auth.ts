@@ -1,11 +1,16 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { db, schema } from "@/db";
 import { authConfig } from "@/lib/auth.config";
-import { authenticateCredentials } from "@/lib/authenticateCredentials";
+import { authenticateWithRateLimit } from "@/lib/authenticateCredentials";
 import { DEMO_EMAIL, DEMO_PROVIDER_ID } from "@/lib/demo";
+
+/** Surfaces to the login form as `code: "rate_limited"` (LoginForm.tsx). */
+class RateLimitedSignin extends CredentialsSignin {
+  code = "rate_limited";
+}
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -20,15 +25,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(raw) {
+      async authorize(raw, request) {
         const parsed = credentialsSchema.safeParse(raw);
         if (!parsed.success) return null;
         const { email, password } = parsed.data;
 
-        const user = await authenticateCredentials(email, password);
+        const user = await authenticateWithRateLimit(email, password, request);
+        if (user === "rate_limited") throw new RateLimitedSignin();
         if (!user) return null;
 
-        return { id: user.id, email: user.email, name: user.name ?? undefined };
+        return { id: user.id, email: user.email, name: user.name ?? undefined, sessionVersion: user.sessionVersion };
       },
     }),
 
@@ -50,13 +56,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       credentials: {},
       async authorize() {
         const [user] = await db
-          .select({ id: schema.users.id, email: schema.users.email, name: schema.users.name })
+          .select({ id: schema.users.id, email: schema.users.email, name: schema.users.name, sessionVersion: schema.users.sessionVersion })
           .from(schema.users)
           .where(eq(schema.users.email, DEMO_EMAIL))
           .limit(1);
         if (!user) return null;
 
-        return { id: user.id, email: user.email, name: user.name ?? undefined };
+        return { id: user.id, email: user.email, name: user.name ?? undefined, sessionVersion: user.sessionVersion };
       },
     }),
   ],

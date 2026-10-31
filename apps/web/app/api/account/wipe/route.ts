@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
+import { verifyCurrentPassword } from "@/lib/authenticateCredentials";
+import { RATE_LIMITED_MESSAGE } from "@/lib/rateLimit";
 import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
 
@@ -29,7 +30,10 @@ export async function POST(req: Request) {
   const [user] = await db.select().from(schema.users).where(eq(schema.users.id, userId)).limit(1);
   if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const valid = await bcrypt.compare(parsed.data.currentPassword, user.passwordHash);
+  const valid = await verifyCurrentPassword(userId, user.passwordHash, parsed.data.currentPassword, req);
+  if (valid === "rate_limited") {
+    return NextResponse.json({ error: RATE_LIMITED_MESSAGE }, { status: 429 });
+  }
   if (!valid) {
     return NextResponse.json({ error: "Current password is incorrect" }, { status: 403 });
   }

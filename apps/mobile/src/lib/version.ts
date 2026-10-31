@@ -357,8 +357,12 @@ import Constants from "expo-constants";
  * the transparent header's title and back button.
  * 2.8.5 draws BootSplash's crossing stroke in light Pop's marigold
  * (#FFC53D, the loader-accent token) -- it was a dark ochre (#B87A00).
+ * 2.9.0 follows web 2.10.0's account security: changing the password signs
+ * this device out (the server ends every session), and changing the email
+ * says to check the new inbox -- it only changes once that address confirms.
+ * Sign-in shows the server's "too many attempts" message as-is.
  */
-export const APP_VERSION = "2.8.5";
+export const APP_VERSION = "2.9.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

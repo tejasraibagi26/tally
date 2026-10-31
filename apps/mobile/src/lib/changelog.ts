@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.9.0",
+    date: "2026-10-31",
+    changes: [
+      { kind: "improved", text: "Changing your password signs you out everywhere, this phone included, so you sign in again with the new one." },
+      { kind: "improved", text: "Changing your email sends a link to the new address; it changes once you tap it." },
+    ],
+  },
+  {
     version: "2.8.5",
     date: "2026-10-30",
     changes: [{ kind: "fixed", text: "The opening animation's fifth stroke is marigold in light mode again, not dark." }],

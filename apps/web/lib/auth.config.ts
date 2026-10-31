@@ -19,7 +19,12 @@ export const authConfig = {
   providers: [],
   callbacks: {
     async jwt({ token, user, account }) {
-      if (user?.id) token.userId = user.id;
+      if (user?.id) {
+        token.userId = user.id;
+        // lib/session.ts compares this to users.session_version on every
+        // request, so bumping the column signs this session out.
+        token.sv = (user as { sessionVersion?: number }).sessionVersion ?? 0;
+      }
       // `account` is only present on the sign-in pass, so this records how
       // the session was created once and then persists in the (signed,
       // httpOnly) token — a demo visitor can't flip it by editing a cookie.
@@ -30,6 +35,7 @@ export const authConfig = {
       if (session.user) {
         if (token.userId) (session.user as { id?: string }).id = token.userId as string;
         (session.user as { demo?: boolean }).demo = token.demo === true;
+        (session.user as { sv?: number }).sv = typeof token.sv === "number" ? token.sv : 0;
       }
       return session;
     },

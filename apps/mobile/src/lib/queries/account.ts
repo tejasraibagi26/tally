@@ -30,7 +30,7 @@ export interface AccountPatch {
 export function useUpdateAccountProfile() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (patch: AccountPatch) => apiPatch<{ ok: true; emailChanged: boolean }>("/api/account", patch),
+    mutationFn: (patch: AccountPatch) => apiPatch<{ ok: true; emailChanged: boolean; emailChangePending?: boolean }>("/api/account", patch),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["account"] }),
   });
 }

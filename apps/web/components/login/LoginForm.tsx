@@ -9,6 +9,19 @@ import { InlineError } from "@/components/ui/InlineError";
 import { LogoMark } from "@/components/Logo";
 import { DemoCta } from "@/components/demo/DemoCta";
 
+/** Middleware hands over an absolute URL on this site; anything pointing
+ * elsewhere (a crafted ?callbackUrl= link) lands on the Overview instead of
+ * sending a freshly signed-in user off-site. */
+function sameSiteDestination(callbackUrl: string | null): string {
+  if (!callbackUrl) return "/overview";
+  try {
+    const url = new URL(callbackUrl, window.location.origin);
+    return url.origin === window.location.origin ? `${url.pathname}${url.search}${url.hash}` : "/overview";
+  } catch {
+    return "/overview";
+  }
+}
+
 export function LoginForm({ demoMode }: { demoMode: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -24,10 +37,10 @@ export function LoginForm({ demoMode }: { demoMode: boolean }) {
     const res = await signIn("credentials", { email, password, redirect: false });
     setLoading(false);
     if (res?.error) {
-      setError("Incorrect email or password.");
+      setError(res.code === "rate_limited" ? "Too many attempts. Wait 15 minutes and try again." : "Incorrect email or password.");
       return;
     }
-    router.push(params.get("callbackUrl") ?? "/overview");
+    router.push(sameSiteDestination(params.get("callbackUrl")));
     router.refresh();
   }
 

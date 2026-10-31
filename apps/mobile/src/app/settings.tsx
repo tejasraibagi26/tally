@@ -202,7 +202,7 @@ export default function SettingsScreen() {
   const { data: tokens } = useApiTokens();
   const { data: accounts } = useAccounts();
   const updateRecaps = useUpdateRecaps();
-  const { biometricLockEnabled, setBiometricLockEnabled } = useAuth();
+  const { biometricLockEnabled, setBiometricLockEnabled, logout } = useAuth();
 
   const [recapsEnabled, setRecapsEnabled] = useState(true);
   const uiLook = useUiLook();
@@ -378,17 +378,19 @@ export default function SettingsScreen() {
         visible={sheet === "profile"}
         onClose={() => setSheet(null)}
         profile={profile}
-        onSaved={() => {
+        onSaved={(message) => {
           setSheet(null);
-          setToast("Profile saved");
+          setToast(message);
         }}
       />
       <PasswordSheet
         visible={sheet === "password"}
         onClose={() => setSheet(null)}
         onSaved={() => {
+          // The server ends every session on a password change, this one
+          // included -- sign in again with the new one, same as web.
           setSheet(null);
-          setToast("Password changed");
+          void logout();
         }}
       />
       <SimplePickerSheet
@@ -430,7 +432,7 @@ function EditProfileSheet({
   visible: boolean;
   onClose: () => void;
   profile: { name: string | null; email: string; birthDate: string | null };
-  onSaved: () => void;
+  onSaved: (message: string) => void;
 }) {
   const updateProfile = useUpdateAccountProfile();
   const [name, setName] = useState("");
@@ -454,13 +456,14 @@ function EditProfileSheet({
   async function save() {
     setError(null);
     try {
-      await updateProfile.mutateAsync({
+      const res = await updateProfile.mutateAsync({
         name: name.trim() || undefined,
         email: email.trim(),
         birthDate: birthDate.trim() || null,
         currentPassword: password,
       });
-      onSaved();
+      // A new email only takes effect once that address confirms its link.
+      onSaved(res.emailChangePending ? `Check ${email.trim()} to confirm the change` : "Profile saved");
     } catch (err) {
       setError(errorMessage(err, "Couldn't save your profile. Check your current password and try again."));
     }
