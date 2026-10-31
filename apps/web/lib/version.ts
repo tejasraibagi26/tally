@@ -435,8 +435,11 @@
  * links in emails sent before this to the pages.
  * 2.10.7 matches the side nav's icons to mobile's tab bar: Overview is a
  * house (was a dashboard grid), Transactions two arrows (was a receipt).
+ * 2.10.8 self-hosts the five font families (app/fonts, next/font/local):
+ * the build no longer fetches from Google, which failed intermittently
+ * and, with CI now gating deploys, would have blocked releases.
  */
-export const APP_VERSION = "2.10.7";
+export const APP_VERSION = "2.10.8";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

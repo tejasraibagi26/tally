@@ -1,26 +1,32 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { Bricolage_Grotesque, Figtree, Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+// Self-hosted (app/fonts, Latin subset, SIL OFL) rather than next/font/google:
+// fetching from Google at build time failed intermittently ("An error occurred
+// in next/font", seen on Vercel and in CI), and with CI gating deploys a
+// flaky fetch would block releases. Same families, weights, CSS variables and
+// display/preload settings as before; each is one variable file.
+const inter = localFont({
+  src: "./fonts/inter-latin-var.woff2",
+  weight: "400 600",
   variable: "--font-inter",
   display: "swap",
 });
 
-const instrumentSerif = Instrument_Serif({
-  subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
+const instrumentSerif = localFont({
+  src: [
+    { path: "./fonts/instrument-serif-latin-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/instrument-serif-latin-400-italic.woff2", weight: "400", style: "italic" },
+  ],
   variable: "--font-instrument-serif",
   display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
+const jetbrainsMono = localFont({
+  src: "./fonts/jetbrains-mono-latin-var.woff2",
+  weight: "400 500",
   variable: "--font-jetbrains-mono",
   display: "swap",
 });
@@ -28,17 +34,17 @@ const jetbrainsMono = JetBrains_Mono({
 // Tally Pop preview fonts (lib/uiFlag.ts). preload: false so a browser
 // without the flag never downloads them: the @font-face rules only fetch
 // once something on the page actually uses the family.
-const figtree = Figtree({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+const figtree = localFont({
+  src: "./fonts/figtree-latin-var.woff2",
+  weight: "400 800",
   variable: "--font-figtree",
   display: "swap",
   preload: false,
 });
 
-const bricolage = Bricolage_Grotesque({
-  subsets: ["latin"],
-  weight: ["700", "800"],
+const bricolage = localFont({
+  src: "./fonts/bricolage-grotesque-latin-var.woff2",
+  weight: "700 800",
   variable: "--font-bricolage",
   display: "swap",
   preload: false,
