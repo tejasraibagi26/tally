@@ -28,22 +28,25 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_BUILD_SHA: resolveBuildSha(),
   },
-  // Baseline hardening on every response -- API routes and static files
-  // included. Pages also get middleware.ts's nonce-based CSP with a
-  // script-src; a browser enforces both, and they agree on the rest: no
-  // framing (clickjacking), no <base> hijack, no plugins, forms only post
-  // back to this origin.
+  // Baseline hardening on every response, static files included. The CSP
+  // here is only for API routes: pages get theirs from middleware.ts, with
+  // a per-request nonce -- and on Vercel a CSP set here for a page reaches
+  // the render as its request header in place of middleware's, so Next.js
+  // finds no nonce to stamp its scripts with. Both policies agree on the
+  // rest: no framing (clickjacking), no <base> hijack, no plugins, forms
+  // only post back to this origin.
   async headers() {
+    const shared = [
+      { key: "X-Frame-Options", value: "DENY" },
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+    ];
     return [
+      { source: "/:path*", headers: shared },
       {
-        source: "/:path*",
-        headers: [
-          { key: "Content-Security-Policy", value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'" },
-          { key: "X-Frame-Options", value: "DENY" },
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
-        ],
+        source: "/api/:path*",
+        headers: [{ key: "Content-Security-Policy", value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'" }],
       },
     ];
   },

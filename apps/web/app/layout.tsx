@@ -77,14 +77,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // middleware.ts's per-request CSP nonce. Reading headers() also makes every
   // page render per request, which a nonce needs: a prerendered page would
   // carry a stale one the CSP refuses.
-  const h = await headers();
-  const nonce = h.get("x-nonce") ?? undefined;
-  // TEMP diagnostic (CSP rollout): what the render sees as its CSP header.
-  const cspSeen = (h.get("content-security-policy") ?? "(none)").slice(0, 40) + " | ro=" + (h.get("content-security-policy-report-only") ?? "(none)").slice(0, 20);
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html lang="en" data-theme="light" data-hide-amounts="false" suppressHydrationWarning>
       <head>
-        <meta name="csp-seen" content={cspSeen} />
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: PRIVACY_INIT_SCRIPT }} />
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: UI_INIT_SCRIPT }} />
