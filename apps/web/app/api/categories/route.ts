@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db, schema } from "@/db";
 import { eq, isNull, or } from "drizzle-orm";
 import { requireUserId } from "@/lib/session";
+import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
 
 // System categories (user_id null, seeded from Plaid's PFC taxonomy) plus
 // this user's own additions — every category a user is allowed to see or use.
@@ -43,6 +44,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid request", issues: parsed.error.issues }, { status: 400 });
   }
   const { name, parentId, kind, colorSlot, icon } = parsed.data;
+  if (!(await categoriesUsableBy(userId, [parentId]))) {
+    return NextResponse.json(unknownCategoryBody, { status: 400 });
+  }
 
   const slug = name
     .toLowerCase()

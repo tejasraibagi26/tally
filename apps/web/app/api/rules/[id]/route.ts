@@ -3,6 +3,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
+import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
 import { previewRuleMatchCount, applyRulesToExistingTransactions } from "@/lib/categorize";
 import type { RuleMatch } from "@tally/core/rulesEngine";
 
@@ -65,6 +66,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const { applyToExisting, ...fields } = parsed.data;
   if (Object.keys(fields).length === 0 && !applyToExisting) {
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
+  }
+  if (!(await categoriesUsableBy(userId, [fields.actions?.setCategoryId, ...(fields.actions?.split ?? []).map((s) => s.categoryId)]))) {
+    return NextResponse.json(unknownCategoryBody, { status: 400 });
   }
 
   const [rule] = Object.keys(fields).length > 0

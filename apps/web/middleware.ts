@@ -15,6 +15,8 @@ export const config = {
   // is its own auth, checked inside each route. "demo" is the public
   // read-only demo's one-click entry point (app/demo/route.ts) — it has to
   // be reachable with no session at all, since creating one is the whole
-  // thing it does. Every other route stays gated here.
-  matcher: ["/((?!api/auth|api/plaid/webhook|api/cron|login|demo|docs|privacy|open|_next/static|_next/image|favicon.ico|icon-classic.svg|$).*)"],
+  // thing it does. "api/email/unsubscribe" is opened from an email by
+  // someone who may not be signed in; its signed token is its auth. Every
+  // other route stays gated here.
+  matcher: ["/((?!api/auth|api/plaid/webhook|api/cron|api/email/unsubscribe|login|demo|docs|privacy|open|_next/static|_next/image|favicon.ico|icon-classic.svg|$).*)"],
 };

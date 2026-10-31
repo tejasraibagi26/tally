@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { Receiver } from "@upstash/qstash";
 
 /**
@@ -10,7 +11,9 @@ import { Receiver } from "@upstash/qstash";
 export function isAuthorizedCronRequest(req: Request): boolean {
   const secret = process.env.CRON_SECRET;
   if (!secret) return false;
-  return req.headers.get("authorization") === `Bearer ${secret}`;
+  const given = Buffer.from(req.headers.get("authorization") ?? "");
+  const expected = Buffer.from(`Bearer ${secret}`);
+  return given.length === expected.length && timingSafeEqual(given, expected);
 }
 
 let receiver: Receiver | null = null;

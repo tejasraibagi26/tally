@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.9.2",
+    date: "2026-10-31",
+    changes: [
+      { kind: "fixed", text: "Unsubscribe links in emails work even when you're signed out, and ask before turning anything off." },
+      { kind: "improved", text: "More security hardening under the hood." },
+    ],
+  },
+  {
     version: "2.9.1",
     date: "2026-10-31",
     changes: [{ kind: "fixed", text: "Security updates under the hood. Nothing changes in how Tally works." }],

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { and, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
+import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
 import { normalizeMerchantKey } from "@tally/core/recurringDetection";
 import { generateDueManualBillPayments } from "@/lib/recurringBillGeneration";
 
@@ -32,6 +33,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid request", issues: parsed.error.issues }, { status: 400 });
   }
   const { description, accountId, categoryId, amount, manualNextDueDate } = parsed.data;
+  if (!(await categoriesUsableBy(userId, [categoryId]))) {
+    return NextResponse.json(unknownCategoryBody, { status: 400 });
+  }
 
   const [account] = await db
     .select({ id: schema.accounts.id, userId: schema.accounts.userId })

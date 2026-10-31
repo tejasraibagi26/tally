@@ -4,9 +4,15 @@ import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { accountDisplayName } from "@tally/core/accountName";
 
+// A cell starting with = + - @ (or tab/CR) runs as a formula in Excel and
+// Sheets; merchant names come from banks and the Shortcuts API, so a leading
+// quote makes them plain text first.
 function csvEscape(value: string): string {
-  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+  const safe = /^[=+\-@\t\r]/.test(value) ? `'${value}` : value;
+  return /[",\n\r]/.test(safe) ? `"${safe.replace(/"/g, '""')}"` : safe;
 }
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 // §10 GET /api/export?format=csv|json&from&to — a full data export, not a
 // paginated view; capped at 20k rows so a pathological range can't hang the
@@ -25,6 +31,10 @@ export async function GET(req: Request) {
   const format = url.searchParams.get("format") === "json" ? "json" : "csv";
   const from = url.searchParams.get("from");
   const to = url.searchParams.get("to");
+  // Both also end up in the download's filename, so nothing but a date.
+  if ((from && !DATE_RE.test(from)) || (to && !DATE_RE.test(to))) {
+    return NextResponse.json({ error: "from/to must be YYYY-MM-DD" }, { status: 400 });
+  }
 
   const conditions = [eq(schema.transactions.userId, userId)];
   if (from) conditions.push(gte(schema.transactions.postedDate, from));

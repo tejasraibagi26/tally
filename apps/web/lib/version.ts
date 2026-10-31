@@ -392,8 +392,15 @@
  * poisoning, Server Actions DoS) and next-auth 5.0.0-beta.32 (fail-open
  * session checks, malformed-Bearer crash), plus Next's bundled postcss
  * forced to 8.5.x via the root package.json override.
+ * 2.9.2 hardens what the security review found short of a migration:
+ * mobile refresh-token reuse ends every device's session; category ids in
+ * requests must be system or the caller's own (lib/categoryAccess.ts);
+ * baseline security headers (next.config.ts); constant-cost login misses;
+ * timingSafeEqual on CRON_SECRET; CSV formula escaping; Plaid webhook kid
+ * negative cache + expired_at; unsubscribe asks before it acts (POST does
+ * it), signs under its own label, and no longer sits behind the login gate.
  */
-export const APP_VERSION = "2.9.1";
+export const APP_VERSION = "2.9.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

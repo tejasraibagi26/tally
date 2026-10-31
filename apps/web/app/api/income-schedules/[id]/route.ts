@@ -3,6 +3,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
+import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
 import { generateDuePaychecks } from "@/lib/incomeSchedule";
 
 const anchorSchema = z.number().int().min(0).max(31);
@@ -38,6 +39,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
   if (Object.keys(parsed.data).length === 0) {
     return NextResponse.json({ error: "No changes" }, { status: 400 });
+  }
+  if (!(await categoriesUsableBy(userId, [parsed.data.categoryId]))) {
+    return NextResponse.json(unknownCategoryBody, { status: 400 });
   }
 
   const [schedule] = await db

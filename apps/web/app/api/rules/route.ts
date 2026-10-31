@@ -3,6 +3,7 @@ import { z } from "zod";
 import { asc, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
+import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
 import { previewRuleMatchCount, applyRulesToExistingTransactions } from "@/lib/categorize";
 import type { RuleMatch } from "@tally/core/rulesEngine";
 
@@ -69,6 +70,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid request", issues: parsed.error.issues }, { status: 400 });
   }
   const { priority, enabled, match, actions, applyToExisting } = parsed.data;
+  if (!(await categoriesUsableBy(userId, [actions.setCategoryId, ...(actions.split ?? []).map((s) => s.categoryId)]))) {
+    return NextResponse.json(unknownCategoryBody, { status: 400 });
+  }
 
   const [rule] = await db
     .insert(schema.rules)

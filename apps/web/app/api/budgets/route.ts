@@ -3,6 +3,7 @@ import { z } from "zod";
 import { and, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
+import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
 import { getBudgetsForMonth, unbudgetedSpend, budgetSetupOptions } from "@/lib/budgets";
 
 const monthSchema = z.string().regex(/^\d{4}-\d{2}-01$/, "month must be YYYY-MM-01");
@@ -60,6 +61,9 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: "Invalid request", issues: parsed.error.issues }, { status: 400 });
   }
   const { month, categoryId, amount, rolloverEnabled, isFixedAmount } = parsed.data;
+  if (!(await categoriesUsableBy(userId, [categoryId]))) {
+    return NextResponse.json(unknownCategoryBody, { status: 400 });
+  }
 
   const [budget] = await db
     .insert(schema.budgets)

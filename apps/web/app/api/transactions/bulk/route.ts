@@ -3,6 +3,7 @@ import { z } from "zod";
 import { and, eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
+import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
 
 const bodySchema = z.object({
   ids: z.array(z.string().uuid()).min(1).max(500),
@@ -27,6 +28,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid request", issues: parsed.error.issues }, { status: 400 });
   }
   const { ids, action } = parsed.data;
+  if (action.type === "setCategory" && !(await categoriesUsableBy(userId, [action.categoryId]))) {
+    return NextResponse.json(unknownCategoryBody, { status: 400 });
+  }
 
   // Ownership check first — a bulk action is only ever scoped to the
   // caller's own rows, regardless of which ids were posted.

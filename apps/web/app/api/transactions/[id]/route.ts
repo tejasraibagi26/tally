@@ -3,6 +3,7 @@ import { z } from "zod";
 import { and, desc, eq, inArray, isNotNull, ne } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
+import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
 import { applyRulesToExistingTransactions } from "@/lib/categorize";
 import { ruleTargetFor } from "@tally/core/rulesEngine";
 import { clearOrphanedRecurringStreamRefs } from "@/lib/recurringBillGeneration";
@@ -149,6 +150,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Invalid request", issues: parsed.error.issues }, { status: 400 });
   }
   const { categoryId, notes, tags, excluded, reviewed, splits, alwaysCategorizeMerchant } = parsed.data;
+  if (!(await categoriesUsableBy(userId, [categoryId, ...(splits ?? []).map((s) => s.categoryId)]))) {
+    return NextResponse.json(unknownCategoryBody, { status: 400 });
+  }
 
   const update: Partial<typeof schema.transactions.$inferInsert> = {};
   if (categoryId !== undefined) {

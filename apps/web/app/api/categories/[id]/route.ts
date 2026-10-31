@@ -3,6 +3,7 @@ import { z } from "zod";
 import { and, eq, or, isNull, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
+import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
 
 const patchSchema = z.object({
   name: z.string().min(1).max(80).optional(),
@@ -39,6 +40,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   }
   if (Object.keys(parsed.data).length === 0) {
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
+  }
+  if (!(await categoriesUsableBy(userId, [parsed.data.parentId]))) {
+    return NextResponse.json(unknownCategoryBody, { status: 400 });
   }
 
   const [updated] = await db.update(schema.categories).set(parsed.data).where(eq(schema.categories.id, id)).returning();
