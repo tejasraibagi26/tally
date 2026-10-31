@@ -422,8 +422,11 @@
  * Middleware now runs on public pages too, so the session gate moved from
  * the matcher regex into requiresSession(); API calls with no session get
  * a 401 instead of a redirect. Shipped report-only first.
+ * 2.10.4 enforces it, after a crawl of every page in production reported
+ * no violations. next.config's CSP is API-only: on Vercel a config CSP
+ * reached the render in place of middleware's, hiding the nonce.
  */
-export const APP_VERSION = "2.10.3";
+export const APP_VERSION = "2.10.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

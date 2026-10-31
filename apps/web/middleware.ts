@@ -62,10 +62,6 @@ function contentSecurityPolicy(nonce: string): string {
   ].join("; ");
 }
 
-// Report-only while the nonce policy is checked against every app page in
-// production; switched to the enforcing header once that comes back clean.
-const CSP_RESPONSE_HEADER = "Content-Security-Policy-Report-Only";
-
 const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
@@ -89,7 +85,7 @@ export default auth((req) => {
   headers.set("x-nonce", nonce);
   headers.set("Content-Security-Policy", csp);
   const res = NextResponse.next({ request: { headers } });
-  res.headers.set(CSP_RESPONSE_HEADER, csp);
+  res.headers.set("Content-Security-Policy", csp);
   return res;
 }) as unknown as (req: NextRequest) => Promise<Response>;
 
