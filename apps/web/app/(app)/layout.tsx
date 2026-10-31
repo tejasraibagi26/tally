@@ -6,6 +6,7 @@ import { liveAccount, liveItem } from "@/lib/liveAccounts";
 import { SideNav } from "@/components/nav/SideNav";
 import { MobileNav } from "@/components/nav/MobileNav";
 import { Toaster } from "@/components/ui/Toaster";
+import { BootSplash } from "@/components/BootSplash";
 import { MOCK_MODE } from "@/lib/config";
 import { DemoBanner } from "@/components/demo/DemoBanner";
 import { DemoReadOnlyNotice } from "@/components/demo/DemoReadOnlyNotice";
@@ -70,6 +71,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-canvas">
+      <BootSplash />
       {isDemo && <DemoBanner />}
       <div className="flex flex-col lg:flex-row flex-1 min-h-0">
         <div className="hidden lg:flex lg:flex-none">

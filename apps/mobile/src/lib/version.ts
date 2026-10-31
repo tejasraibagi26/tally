@@ -355,8 +355,10 @@ import Constants from "expo-constants";
  * 2.8.4 pads Forecast outside its ScrollView like every other pushed
  * screen (Investments' pattern): padded inside, its content slid up behind
  * the transparent header's title and back button.
+ * 2.8.5 draws BootSplash's crossing stroke in light Pop's marigold
+ * (#FFC53D, the loader-accent token) -- it was a dark ochre (#B87A00).
  */
-export const APP_VERSION = "2.8.4";
+export const APP_VERSION = "2.8.5";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

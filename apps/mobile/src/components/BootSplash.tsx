@@ -51,7 +51,7 @@ const PALETTE = {
 // crossing stroke on Pop's canvas, a little heavier. The native splash
 // before JS can't know the flag, so this one cross-fades in from it.
 const POP_PALETTE = {
-  light: { bg: "#FFF6E9", ink: "#5B3BF5", accent: "#B87A00", text: "#1D1B2F" },
+  light: { bg: "#FFF6E9", ink: "#5B3BF5", accent: "#FFC53D", text: "#1D1B2F" },
   dark: { bg: "#14121F", ink: "#9B87FF", accent: "#FFCF5C", text: "#F6F1E7" },
 };
 

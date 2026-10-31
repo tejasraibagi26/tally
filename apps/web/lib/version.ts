@@ -383,8 +383,13 @@
  * 2.8.3 centres that date tile on its day's block instead of pinning it top.
  * 2.8.4 gives What's coming and Assumptions one height side by side: the
  * ledger scrolls inside its card (min 560px) instead of running the page on.
+ * 2.9.0 adds mobile's boot splash (components/BootSplash.tsx): the first
+ * time the app opens in a tab session, the mark draws itself, "Tally" fades
+ * in, and it fades away (~1.6s). Pure CSS so it plays before hydration; the
+ * root layout's BOOT_INIT_SCRIPT marks <html data-booted> before first paint
+ * on a repeat load or with reduced motion, so it never flashes.
  */
-export const APP_VERSION = "2.8.4";
+export const APP_VERSION = "2.9.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

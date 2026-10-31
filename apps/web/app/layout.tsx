@@ -67,6 +67,11 @@ const PRIVACY_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("tally-h
 // exist (app/icon.svg is Pop's).
 const UI_INIT_SCRIPT = `(function(){try{if(/(?:^|; )tally-ui=classic(?:;|$)/.test(document.cookie)){document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll('link[rel~="icon"]').forEach(function(l){l.dataset.popHref=l.href;l.href="/icon-classic.svg";});});}else{document.documentElement.setAttribute("data-ui","pop");}}catch(e){}})();`;
 
+// components/BootSplash.tsx plays once per tab session. Marking <html>
+// before first paint, rather than after hydration, keeps a reload from
+// flashing the splash for a frame. Reduced motion skips it outright.
+const BOOT_INIT_SCRIPT = `(function(){try{if(sessionStorage.getItem("tally-booted")||window.matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.setAttribute("data-booted","");}}catch(e){}})();`;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" data-theme="light" data-hide-amounts="false" suppressHydrationWarning>
@@ -74,6 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: PRIVACY_INIT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: UI_INIT_SCRIPT }} />
+        <script dangerouslySetInnerHTML={{ __html: BOOT_INIT_SCRIPT }} />
       </head>
       <body
         className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${figtree.variable} ${bricolage.variable} font-ui antialiased`}

@@ -559,6 +559,54 @@ body {
   .tally-loader line { animation: none; stroke-dashoffset: 0; opacity: 1; }
 }
 
+/* components/BootSplash.tsx: mobile's cold-start splash -- each upright
+   draws in 220ms, 130ms apart, a beat, then the slash in 320ms; "Tally"
+   fades in as it lands. Brand strokes; the slash takes --mark-accent (Pop's
+   marigold), else the brand. Hidden once this tab has seen it. */
+.boot-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: var(--canvas);
+  transition: opacity 320ms ease;
+}
+.boot-splash-out { opacity: 0; pointer-events: none; }
+:root[data-booted] .boot-splash { display: none; }
+.boot-splash line {
+  stroke: var(--brand);
+  stroke-width: 2;
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  animation: boot-draw 220ms cubic-bezier(.33, 1, .68, 1) forwards;
+}
+[data-ui="pop"] .boot-splash line { stroke-width: 2.5; }
+.boot-splash line:nth-child(2) { animation-delay: 130ms; }
+.boot-splash line:nth-child(3) { animation-delay: 260ms; }
+.boot-splash line:nth-child(4) { animation-delay: 390ms; }
+.boot-splash line:nth-child(5) {
+  stroke: var(--mark-accent, var(--brand));
+  animation-duration: 320ms;
+  animation-delay: 750ms;
+  animation-timing-function: cubic-bezier(.65, 0, .35, 1);
+}
+.boot-splash-word {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  opacity: 0;
+  animation: fade-in 360ms ease-out 990ms forwards;
+}
+@keyframes boot-draw {
+  0% { stroke-dashoffset: 1; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 1; }
+}
+
 /* DESIGN.md §11 modal: 180ms fade + 2% scale in, 120ms fade out. */
 @keyframes dialog-in {
   from { opacity: 0; transform: scale(.98); }
