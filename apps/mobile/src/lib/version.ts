@@ -412,8 +412,13 @@ import Constants from "expo-constants";
  * splash, native header and alerts follow it. It used to load
  * asynchronously after the first screens drew in the phone's theme:
  * a light choice on a phone in Dark Mode opened dark, then flipped.
+ * 2.13.7 finishes that: NativeWind's colorScheme.set() only forwards to
+ * Appearance and waits for a change event it ignores until the app is
+ * "active", so Overview still drew in the phone's scheme first.
+ * applyAppearanceMode now also sets NativeWind's systemColorScheme
+ * observable directly (react-native-css-interop appearance-observables).
  */
-export const APP_VERSION = "2.13.6";
+export const APP_VERSION = "2.13.7";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

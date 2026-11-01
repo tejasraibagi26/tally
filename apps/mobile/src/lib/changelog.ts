@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.13.7",
+    date: "2026-11-01",
+    changes: [{ kind: "fixed", text: "Overview no longer opens in your phone's theme before switching to the appearance you chose." }],
+  },
+  {
     version: "2.13.6",
     date: "2026-11-01",
     changes: [{ kind: "fixed", text: "Tally opens straight in the appearance you chose, instead of flashing your phone's theme first." }],

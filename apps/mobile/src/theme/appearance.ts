@@ -1,6 +1,8 @@
 import { Appearance } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { colorScheme } from "nativewind";
+// NativeWind's own scheme value (the module nativewind itself uses). See applyAppearanceMode.
+import { systemColorScheme } from "react-native-css-interop/dist/runtime/native/appearance-observables";
 
 export type AppearanceMode = "light" | "dark" | "system";
 
@@ -21,14 +23,21 @@ export async function storeAppearanceMode(mode: AppearanceMode): Promise<void> {
 }
 
 /**
- * Makes the whole app follow `mode`: NativeWind's classNames, and React
- * Native's Appearance -- which is what useColorScheme from react-native (the
- * boot splash), the native header and system alerts read. Setting only
- * NativeWind left those on the phone's own theme.
+ * Makes the whole app follow `mode`: React Native's Appearance (what
+ * react-native's useColorScheme -- the boot splash -- the native header and
+ * system alerts read) and NativeWind's classNames and useColorScheme.
+ *
+ * NativeWind needs its value set directly. colorScheme.set() only forwards
+ * to Appearance and waits for the change event, which NativeWind ignores
+ * unless the app is "active" -- and at cold start it isn't yet. So it kept
+ * the scheme it captured when its module loaded (the phone's, dark) until
+ * the app turned active, and Overview drew dark, then flipped to light.
  */
 export function applyAppearanceMode(mode: AppearanceMode): void {
   Appearance.setColorScheme(mode === "system" ? "unspecified" : mode);
   colorScheme.set(mode);
+  const resolved = mode === "system" ? Appearance.getColorScheme() : mode;
+  systemColorScheme.set(resolved === "dark" ? "dark" : "light");
 }
 
 /**
