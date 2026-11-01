@@ -54,6 +54,24 @@ export function onPaceStreak(dailySpend: Record<string, number>, dailyPace: numb
   return streak;
 }
 
+/**
+ * The month's first day: no day of it has finished, so the streak is 0 by
+ * definition -- not because yesterday (last month) went over. The card says
+ * "New month" instead of a zero and a scolding.
+ */
+export function isFirstDayOfMonth(today: string): boolean {
+  return today.slice(8, 10) === "01";
+}
+
+/** The On-pace card's line, shared by web and mobile. */
+export function onPaceLine(streak: number, dailyPace: number, today: string, formatMoney: (cents: number) => string): string {
+  const pace = formatMoney(dailyPace);
+  if (isFirstDayOfMonth(today)) return `Stay under ${pace} today and tomorrow starts your count.`;
+  if (streak === 0) return `Yesterday went over your ${pace} daily pace. Today's a fresh start.`;
+  const next = 5 - (streak % 5);
+  return `${streak === 1 ? "Day" : "Days"} in a row under your ${pace} daily pace.${streak < 15 ? ` ${next === 1 ? "One more closes" : `${next} more close`} the next five.` : ""}`;
+}
+
 /** A count as tally marks: full groups of five (four strokes + a crossing) and the strokes left over. */
 export function tallyGroups(count: number): { full: number; rest: number } {
   const n = Math.max(0, Math.floor(count));

@@ -404,8 +404,10 @@ import Constants from "expo-constants";
  * stands alone before the month's figures load.
  * 2.13.4 sends deviceInfo ("ios 26.1", "android 35") with the login, so
  * each device session (web 2.14.2) says which phone it is.
+ * 2.13.5 shows "New month" on the On-pace card on a month's first day
+ * (device date), with web's copy from @tally/core/popView onPaceLine.
  */
-export const APP_VERSION = "2.13.4";
+export const APP_VERSION = "2.13.5";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

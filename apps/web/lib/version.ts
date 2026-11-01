@@ -485,8 +485,11 @@
  * instead of a sign-out. Before this, reuse ended every device and a token
  * the alarm had revoked counted as reuse too, so two phones kept signing
  * each other out. Logout ends just that device's family.
+ * 2.14.3 shows "New month" on the On-pace card on a month's first day, not
+ * a 0 with "Yesterday went over" -- yesterday was last month, and no day of
+ * this one has finished. Copy lives in @tally/core/popView onPaceLine.
  */
-export const APP_VERSION = "2.14.2";
+export const APP_VERSION = "2.14.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

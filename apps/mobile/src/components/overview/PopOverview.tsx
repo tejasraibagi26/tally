@@ -4,6 +4,8 @@ import { useRouter } from "expo-router";
 import { ChevronRight } from "lucide-react-native";
 import { useColorScheme, vars } from "nativewind";
 import { formatCents } from "@tally/core/money";
+import { isFirstDayOfMonth, onPaceLine } from "@tally/core/popView";
+import { todayISO } from "@/lib/today";
 import { TallyMarks } from "@/components/ui/TallyMarks";
 import { ThemeColorsOverride, useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
@@ -83,11 +85,11 @@ export function OnPaceCard({ streak, dailyPace, compact = false }: { streak: num
   const router = useRouter();
   const sticker = useSticker();
   const ink = colors["on-marigold"]!;
-  const next = 5 - (streak % 5);
-  const line =
-    streak === 0
-      ? `Yesterday went over your ${formatCents(dailyPace)} daily pace. Today's a fresh start.`
-      : `${streak === 1 ? "Day" : "Days"} in a row under your ${formatCents(dailyPace)} daily pace.${streak < 15 ? ` ${next === 1 ? "One more closes" : `${next} more close`} the next five.` : ""}`;
+  // The device's date: the user's own day. On the month's first day nothing
+  // has finished yet, so the card says "New month" instead of a zero.
+  const today = todayISO();
+  const fresh = isFirstDayOfMonth(today);
+  const line = onPaceLine(streak, dailyPace, today, (c) => formatCents(c));
   if (compact) {
     return (
       <Pressable
@@ -95,13 +97,21 @@ export function OnPaceCard({ streak, dailyPace, compact = false }: { streak: num
         className="rounded-card border-card border-ink px-4 py-3 flex-row items-center gap-3 active:opacity-90"
         style={[{ backgroundColor: colors.marigold }, sticker]}
         accessibilityRole="button"
-        accessibilityLabel={`On-pace days: ${streak}. ${line}`}
+        accessibilityLabel={fresh ? `On-pace days: new month. ${line}` : `On-pace days: ${streak}. ${line}`}
       >
-        {streak > 0 && <TallyMarks count={streak} height={24} color={ink} accent={colors["marigold-accent"]!} />}
-        <Text className="font-display" style={{ color: ink, fontSize: rf(28), lineHeight: rf(32), fontVariant: ["tabular-nums"] }}>{streak}</Text>
-        <Text className="font-ui-semibold flex-1" style={{ color: ink, fontSize: rf(13.5) }} numberOfLines={2}>
-          {streak === 1 ? "day" : "days"} under your {formatCents(dailyPace)} pace
-        </Text>
+        {fresh ? (
+          <Text className="font-ui-semibold flex-1" style={{ color: ink, fontSize: rf(13.5) }} numberOfLines={2}>
+            <Text className="font-display" style={{ fontSize: rf(17) }}>New month</Text> · stay under {formatCents(dailyPace)} today
+          </Text>
+        ) : (
+          <>
+            {streak > 0 && <TallyMarks count={streak} height={24} color={ink} accent={colors["marigold-accent"]!} />}
+            <Text className="font-display" style={{ color: ink, fontSize: rf(28), lineHeight: rf(32), fontVariant: ["tabular-nums"] }}>{streak}</Text>
+            <Text className="font-ui-semibold flex-1" style={{ color: ink, fontSize: rf(13.5) }} numberOfLines={2}>
+              {streak === 1 ? "day" : "days"} under your {formatCents(dailyPace)} pace
+            </Text>
+          </>
+        )}
         <ChevronRight size={16} color={ink} strokeWidth={2.4} />
       </Pressable>
     );
@@ -112,12 +122,18 @@ export function OnPaceCard({ streak, dailyPace, compact = false }: { streak: num
       className="rounded-card border-card border-ink p-5 gap-3 active:opacity-90"
       style={[{ backgroundColor: colors.marigold }, sticker]}
       accessibilityRole="button"
-      accessibilityLabel={`On-pace days: ${streak}. ${line}`}
+      accessibilityLabel={fresh ? `On-pace days: new month. ${line}` : `On-pace days: ${streak}. ${line}`}
     >
       <Text className="font-ui-semibold" style={{ color: ink, fontSize: rf(11.5), letterSpacing: 0.8, textTransform: "uppercase" }}>On-pace days</Text>
       <View className="flex-row items-center gap-4" style={{ minHeight: 44 }}>
-        <TallyMarks count={streak} height={44} color={ink} accent={colors["marigold-accent"]!} />
-        <Text className="font-display" style={{ color: ink, fontSize: rf(48), lineHeight: rf(52), fontVariant: ["tabular-nums"] }}>{streak}</Text>
+        {fresh ? (
+          <Text className="font-display" style={{ color: ink, fontSize: rf(34), lineHeight: rf(40) }}>New month</Text>
+        ) : (
+          <>
+            <TallyMarks count={streak} height={44} color={ink} accent={colors["marigold-accent"]!} />
+            <Text className="font-display" style={{ color: ink, fontSize: rf(48), lineHeight: rf(52), fontVariant: ["tabular-nums"] }}>{streak}</Text>
+          </>
+        )}
       </View>
       <Text className="font-ui-medium" style={{ color: ink, fontSize: rf(14.5), lineHeight: rf(20) }}>{line}</Text>
     </Pressable>

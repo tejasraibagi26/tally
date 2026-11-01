@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.13.5",
+    date: "2026-11-01",
+    changes: [{ kind: "fixed", text: "On the first of the month, On-pace days says \"New month\" instead of blaming yesterday." }],
+  },
+  {
     version: "2.13.4",
     date: "2026-10-31",
     changes: [{ kind: "fixed", text: "You can stay signed in on your iPhone and Android phone at the same time." }],

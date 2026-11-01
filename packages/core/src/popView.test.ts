@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { greetingFor, leftToSpendLine, onPaceStreak, tallyGroups } from "./popView";
+import { greetingFor, isFirstDayOfMonth, leftToSpendLine, onPaceLine, onPaceStreak, tallyGroups } from "./popView";
 import type { MonthSummary } from "./budgetView";
 
 const money = (c: number) => `$${(c / 100).toFixed(2)}`;
@@ -50,5 +50,19 @@ describe("tallyGroups", () => {
     expect(tallyGroups(9)).toEqual({ full: 1, rest: 4 });
     expect(tallyGroups(10)).toEqual({ full: 2, rest: 0 });
     expect(tallyGroups(0)).toEqual({ full: 0, rest: 0 });
+  });
+});
+
+describe("onPaceLine", () => {
+  const fmt = (c: number) => `$${c / 100}`;
+  it("greets a new month instead of blaming last month's last day", () => {
+    expect(isFirstDayOfMonth("2026-11-01")).toBe(true);
+    expect(onPaceLine(0, 12200, "2026-11-01", fmt)).toBe("Stay under $122 today and tomorrow starts your count.");
+  });
+  it("says yesterday went over only mid-month", () => {
+    expect(onPaceLine(0, 12200, "2026-11-09", fmt)).toBe("Yesterday went over your $122 daily pace. Today's a fresh start.");
+  });
+  it("counts toward the next five", () => {
+    expect(onPaceLine(3, 12200, "2026-11-04", fmt)).toBe("Days in a row under your $122 daily pace. 2 more close the next five.");
   });
 });

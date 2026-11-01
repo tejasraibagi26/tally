@@ -222,6 +222,7 @@ export default async function OverviewPage() {
               <OnPaceCard
                 className="flex-1 basis-0"
                 streak={streak}
+                today={today}
                 dailyPace={dailyPace}
                 href={`/transactions?from=${monthStart}&to=${monthEnd}&kind=expense&transfer=0&excluded=0`}
               />

@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.14.3",
+    date: "2026-11-01",
+    changes: [{ kind: "fixed", text: "On the first of the month, On-pace days says \"New month\" instead of blaming yesterday." }],
+  },
+  {
     version: "2.14.2",
     date: "2026-10-31",
     changes: [{ kind: "fixed", text: "Signing in on a second phone no longer signs the first one out. Each device keeps its own session." }],
