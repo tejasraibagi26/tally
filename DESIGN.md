@@ -107,7 +107,7 @@ chart legend) in both light and dark.
 - `users.ui_look` (the old switch's account copy) is no longer read or written.
 
 **Web**
-- **Palette:** grape brand (`#5B3BF5` light / `#9B87FF` dark), marigold highlight, ink outlines, cream canvas. Every text pair passes AA in both themes. The series palette is unchanged.
+- **Palette:** grape brand (`#5B3BF5` light / `#9B87FF` dark), marigold highlight, ink outlines, cream canvas. In dark the outline is cream (`#F6F1E7`) over a hard grape shadow (`#6A4BFF`), and the net-worth hero and current nav item stay solid grape `#5B3BF5` with white text (the hero on a marigold shadow), so dark pops as hard as light. Every text pair passes AA in both themes. The series palette is unchanged.
 - **Type:** Figtree for UI, and Bricolage Grotesque 800 for `font-display`, page titles (`ui-page-title`) and card titles (`ui-card-title`). Both load with `preload: false`.
 - **Stickers:** bordered `rounded-card` surfaces, floating layers (`.shadow-overlay.border`), modals and the side panel get a 2px ink outline and a hard offset shadow.
 - **Controls:** buttons (`ui-btn`, `ui-btn-<variant>`) are pills that press down. The current nav row is a solid brand sticker. Budget meters (`ui-meter`) are outlined. Round knobs keep a ring instead of the offset shadow.

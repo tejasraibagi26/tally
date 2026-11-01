@@ -29,15 +29,15 @@ const HERO = {
     "negative-subtle": "#FFFFFF",
   },
   dark: {
-    text: "#14121F",
-    "text-2": "#2A2150",
-    "text-3": "#2A2150",
-    brand: "#14121F",
-    "brand-subtle": "#B7A8FF",
-    positive: "#4FD69C",
-    negative: "#FF8A73",
-    "positive-subtle": "#14121F",
-    "negative-subtle": "#14121F",
+    text: "#FFFFFF",
+    "text-2": "#E6E0FF",
+    "text-3": "#E6E0FF",
+    brand: "#FFFFFF",
+    "brand-subtle": "#4A2DD6",
+    positive: "#0F7A43",
+    negative: "#C2341F",
+    "positive-subtle": "#FFFFFF",
+    "negative-subtle": "#FFFFFF",
   },
 };
 
@@ -64,10 +64,12 @@ export function HeroSurface({ children }: { children: ReactNode }) {
   const { colorScheme } = useColorScheme();
   const scheme = colorScheme === "dark" ? "dark" : "light";
   const sticker = useSticker();
+  // Dark lifts the grape card off the canvas on marigold, not the grape shadow.
+  const shadow = scheme === "dark" && sticker ? { ...sticker, shadowColor: colors.marigold } : sticker;
   // Two views: iOS drops the shadow of a view that clips (overflow-hidden,
   // needed so the chart's square ends follow the card's corners).
   return (
-    <View className="rounded-card" style={sticker}>
+    <View className="rounded-card" style={shadow}>
       <View
         className="rounded-card border-card border-ink overflow-hidden"
         style={[{ backgroundColor: colors["hero-bg"], paddingHorizontal: 20, paddingTop: 20, paddingBottom: 14 }, HERO_VARS[scheme]]}

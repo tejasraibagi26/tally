@@ -488,8 +488,12 @@
  * 2.14.3 shows "New month" on the On-pace card on a month's first day, not
  * a 0 with "Yesterday went over" -- yesterday was last month, and no day of
  * this one has finished. Copy lives in @tally/core/popView onPaceLine.
+ *
+ * 2.15.0 makes dark Pop pop: cream ink outlines over a hard grape shadow
+ * (was #6E6895, 3.6:1), the net-worth hero and current nav item in solid
+ * grape with white text, the hero on a marigold shadow.
  */
-export const APP_VERSION = "2.14.3";
+export const APP_VERSION = "2.15.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

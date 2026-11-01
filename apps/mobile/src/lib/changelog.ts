@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.14.0",
+    date: "2026-11-01",
+    changes: [{ kind: "improved", text: "Dark mode pops like light mode: bold outlines, a grape shadow under every card, and a solid grape net worth card." }],
+  },
+  {
     version: "2.13.7",
     date: "2026-11-01",
     changes: [{ kind: "fixed", text: "Overview no longer opens in your phone's theme before switching to the appearance you chose." }],

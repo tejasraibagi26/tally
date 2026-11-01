@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.15.0",
+    date: "2026-11-01",
+    changes: [
+      { kind: "improved", text: "Dark mode pops like light mode: bold outlines, a grape shadow under every card, and a solid grape net worth card." },
+      { kind: "improved", text: "Click the build number at the bottom of the sidebar to see what's new." },
+    ],
+  },
+  {
     version: "2.14.3",
     date: "2026-11-01",
     changes: [{ kind: "fixed", text: "On the first of the month, On-pace days says \"New month\" instead of blaming yesterday." }],

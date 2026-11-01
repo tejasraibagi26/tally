@@ -78,19 +78,22 @@ export const popDarkColors: Record<string, string> = {
   "info-subtle": "#172544",
   raised: "#282440",
   "raised-hover": "#2D2847",
-  ink: "#6E6895",
-  "ink-shadow": "#6E6895", // the ink outline: black vanished on the #14121F canvas
+  // Cream outline (as strong as light's ink) over a hard grape shadow: a
+  // dark shadow vanishes on the #14121F canvas, a coloured one reads.
+  ink: "#F6F1E7",
+  "ink-shadow": "#6A4BFF",
   marigold: "#FFCF5C",
   "on-marigold": "#14121F",
   "marigold-accent": "#3B2A9E",
   "loader-bg": "#2A2150",
   "loader-ink": "#9B87FF",
   "loader-accent": "#FFCF5C",
-  "hero-bg": "#9B87FF",
-  "hero-text": "#14121F",
-  "hero-text-2": "#2A2150",
-  "hero-positive": "#05301A",
-  "hero-negative": "#5C1409",
+  // Light's solid grape hero; it sits on a marigold shadow (PopOverview).
+  "hero-bg": "#5B3BF5",
+  "hero-text": "#FFFFFF",
+  "hero-text-2": "#E6E0FF",
+  "hero-positive": "#C8F7DC",
+  "hero-negative": "#FFD9D0",
 };
 
 // The color tokens global.css declares as CSS variables (the same list as

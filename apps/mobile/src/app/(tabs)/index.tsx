@@ -143,7 +143,7 @@ export default function OverviewScreen() {
                 <Text className="font-ui-semibold flex-1" style={{ fontSize: rf(14), color: colors["on-marigold"] ?? colors.text }} numberOfLines={1}>
                   Your {year} in review is ready
                 </Text>
-                <View className="rounded-full px-3 py-1" style={{ backgroundColor: colors.ink ?? colors.text }}>
+                <View className="rounded-full px-3 py-1" style={{ backgroundColor: colors["on-marigold"] ?? colors.text }}>
                   <Text className="font-ui-semibold" style={{ fontSize: rf(12.5), color: colors.marigold ?? colors.canvas }}>See it</Text>
                 </View>
               </Pressable>

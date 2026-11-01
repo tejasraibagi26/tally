@@ -219,8 +219,11 @@
   --info-subtle: #172544;
   --raised: #282440;
   --raised-hover: #2D2847;
-  --ink: #6E6895;
-  --ink-shadow: #6E6895; /* the ink outline: black vanished on the #14121F canvas */
+  /* Cream outline (as strong as light's ink, 15:1) over a hard grape
+     shadow: a dark shadow vanishes on the #14121F canvas, a coloured one
+     reads as the sticker's edge. */
+  --ink: #F6F1E7;
+  --ink-shadow: #6A4BFF;
   --marigold: #FFCF5C;
   --scrim: rgba(0,0,0,.62);
 }
@@ -285,6 +288,10 @@
   font-weight: 700;
   box-shadow: inset 0 0 0 2px var(--ink), 3px 3px 0 var(--ink-shadow);
 }
+[data-ui="pop"][data-theme="dark"] .ui-nav-active {
+  background: var(--hero-bg);
+  color: #FFFFFF;
+}
 [data-ui="pop"] .ui-nav-active .text-text-3 {
   color: inherit;
 }
@@ -334,7 +341,7 @@
   --hero-bg: #5B3BF5;
 }
 :root[data-ui="pop"][data-theme="dark"] {
-  --hero-bg: #9B87FF;
+  --hero-bg: #5B3BF5;
 }
 [data-ui="pop"] .ui-hero {
   background: var(--hero-bg);
@@ -348,16 +355,10 @@
   --raised: #3A22B8;
   --border: #3A22B8;
 }
+/* Dark keeps light's solid grape hero (same text set) and lifts it off
+   the canvas with a marigold shadow instead of the grape one. */
 [data-ui="pop"][data-theme="dark"] .ui-hero {
-  --text: #14121F;
-  --text-2: #2A2150;
-  --text-3: #2A2150;
-  --brand: #14121F;
-  --series-1: #14121F;
-  --positive: #05301A;
-  --negative: #5C1409;
-  --raised: #C4B8FF;
-  --border: #C4B8FF;
+  box-shadow: 4px 4px 0 var(--marigold);
 }
 
 /* A marigold sticker (the on-pace card). */

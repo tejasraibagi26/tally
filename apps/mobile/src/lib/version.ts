@@ -417,8 +417,11 @@ import Constants from "expo-constants";
  * "active", so Overview still drew in the phone's scheme first.
  * applyAppearanceMode now also sets NativeWind's systemColorScheme
  * observable directly (react-native-css-interop appearance-observables).
+ *
+ * 2.14.0 makes dark Pop pop, as web 2.15.0: cream ink outlines over a hard
+ * grape shadow, the net-worth hero in solid grape on a marigold shadow.
  */
-export const APP_VERSION = "2.13.7";
+export const APP_VERSION = "2.14.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
