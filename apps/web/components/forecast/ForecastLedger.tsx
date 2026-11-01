@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn";
 /** Where a row goes when you click it: the thing that made it, not this page. */
 function hrefFor(e: ForecastEvent): string {
   if (e.kind === "card") return `/cards?card=${e.sourceId}`;
+  if (e.kind === "loan") return "/loans";
   if (e.kind === "income") return "/settings#income";
   return `/subscriptions?stream=${e.sourceId}`;
 }

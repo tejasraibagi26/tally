@@ -34,6 +34,7 @@
     "./paycheque": "./src/paycheque.ts",
     "./safeToSpend": "./src/safeToSpend.ts",
     "./forecast": "./src/forecast.ts",
+    "./loans": "./src/loans.ts",
     "./yearReview": "./src/yearReview.ts",
     "./tagView": "./src/tagView.ts",
     "./appLinks": "./src/appLinks.ts"

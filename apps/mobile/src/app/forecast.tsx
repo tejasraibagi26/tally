@@ -221,6 +221,7 @@ export default function ForecastScreen() {
 /** Where a row goes when tapped: the thing that made it, as on web. */
 function hrefFor(e: ForecastEvent): Href {
   if (e.kind === "card") return `/card/${e.sourceId}` as Href;
+  if (e.kind === "loan") return "/loans" as Href;
   if (e.kind === "income") return "/income-schedules" as Href;
   return "/subscriptions" as Href;
 }

@@ -21,6 +21,7 @@
 import { payDatesForMonth, resolvePayDate, type DayAnchor } from "./incomeScheduleMath";
 import { UPCOMING_GRACE_DAYS, countsAsBill, daysBefore } from "./overviewView";
 import { countsAsCash, nextDueFromDay, type CashAccountInput } from "./safeToSpend";
+import { loanPaymentsBesideBills, type LoanInput } from "./loans";
 import type { PaychequeCadence } from "./paycheque";
 
 const DAY_MS = 86_400_000;
@@ -129,7 +130,7 @@ export interface DailySpendProfile {
 
 export const NO_SPEND: DailySpendProfile = { byWeekday: [], sd: 0, source: "none" };
 
-export type ForecastEventKind = "income" | "bill" | "card";
+export type ForecastEventKind = "income" | "bill" | "card" | "loan";
 
 export interface ForecastEvent {
   date: string;
@@ -196,6 +197,8 @@ export interface ForecastInput {
   accounts: CashAccountInput[];
   streams: ForecastStreamInput[];
   cards: ForecastCardInput[];
+  /** Loans with a known payment (@tally/core/loans). Optional: absent means none. */
+  loans?: LoanInput[];
   /** Active income schedules. These win over `paycheque` — they are the user's own declaration. */
   incomes: ForecastIncomeInput[];
   paycheque: ForecastPaychequeInput | null;
@@ -463,10 +466,21 @@ export function computeForecast(input: ForecastInput): Forecast {
     cardEvents(c, bills.filter((b) => !b.affectsCash && streamAccount(input.streams, b.sourceId) === c.accountId), today, end, from),
   );
 
+  // Loan payments, unless a detected bill already is one (loans.ts).
+  const loans: ForecastEvent[] = loanPaymentsBesideBills(input.loans ?? [], bills.filter((b) => b.affectsCash), today, from, end).map((p) => ({
+    date: p.date,
+    amount: -p.amount,
+    kind: "loan",
+    label: `${p.label} payment`,
+    sourceId: p.accountId,
+    modelled: p.modelled,
+    affectsCash: true,
+  }));
+
   // Income starts at `today`, not at the grace window: a paycheque that
   // already landed is in the balance, and counting it again invents money.
   // The grace window exists for bills, which are money still to move.
-  const events = [...incomeEvents(input, today, end), ...bills, ...cards].sort(
+  const events = [...incomeEvents(input, today, end), ...bills, ...cards, ...loans].sort(
     (a, b) => a.date.localeCompare(b.date) || b.amount - a.amount,
   );
 

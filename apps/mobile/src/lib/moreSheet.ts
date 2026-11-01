@@ -11,8 +11,9 @@ import { Platform } from "react-native";
  * (mobile v2.8.0). 645 = 562 + 34 for Figtree's taller line box (the
  * title and captions; mobile v2.0.0) + 49 for Year-end goal. 596 = 645 -
  * 49: Year-end goal and Early retirement became one Goals row (v2.12.0).
+ * 645 = 596 + 49 for Loans (v2.13.0).
  */
-export const MORE_SHEET_CONTENT_HEIGHT = 596;
+export const MORE_SHEET_CONTENT_HEIGHT = 645;
 
 /**
  * On iOS 26 the form sheet floats above the home indicator, so no inset is

@@ -6,9 +6,10 @@ import { seedMockLiabilitiesForItem } from "@/lib/mock/seedLiabilities";
 import { recordSyncRun } from "@/lib/syncRuns";
 import type { SyncTrigger } from "@/lib/plaidSync";
 
-// §6.5: v1 only tracks credit-card liabilities (the schema has no
-// mortgage/student-loan tables) — student/mortgage liabilities in the
-// response, if any, are ignored.
+// Credit cards go to liabilities_credit; mortgages and student loans (the
+// other two kinds /liabilities/get reports) go to liabilities_loan, keyed by
+// the same loan account whose balance already counts against net worth.
+// Other loans (auto, personal, lines of credit) have no Plaid detail.
 const NOT_SUPPORTED_CODES = new Set(["NO_LIABILITY_ACCOUNTS", "PRODUCTS_NOT_SUPPORTED", "PRODUCT_NOT_ENABLED"]);
 
 export async function syncLiabilitiesForItem(itemId: string, trigger: SyncTrigger): Promise<void> {
@@ -32,12 +33,14 @@ export async function syncLiabilitiesForItem(itemId: string, trigger: SyncTrigge
     const accessToken = await getAccessToken(itemId);
     const res = await plaidClient.liabilitiesGet({ access_token: accessToken });
     const creditLiabilities = res.data.liabilities.credit ?? [];
-    if (creditLiabilities.length === 0) {
+    const mortgages = res.data.liabilities.mortgage ?? [];
+    const studentLoans = res.data.liabilities.student ?? [];
+    if (creditLiabilities.length + mortgages.length + studentLoans.length === 0) {
       await recordSyncRun(itemId, "liabilities", trigger, startedAt, {});
       return;
     }
 
-    const plaidAccountIds = creditLiabilities.map((c) => c.account_id).filter((id): id is string => id != null);
+    const plaidAccountIds = [...creditLiabilities, ...mortgages, ...studentLoans].map((c) => c.account_id).filter((id): id is string => id != null);
     const acctRows = await db
       .select({ id: schema.accounts.id, plaidAccountId: schema.accounts.plaidAccountId })
       .from(schema.accounts)
@@ -65,7 +68,50 @@ export async function syncLiabilitiesForItem(itemId: string, trigger: SyncTrigge
       await db.insert(schema.liabilitiesCredit).values(values).onConflictDoUpdate({ target: schema.liabilitiesCredit.accountId, set: values });
     }
 
-    await recordSyncRun(itemId, "liabilities", trigger, startedAt, { added: creditLiabilities.length });
+    const loanRows: (typeof schema.liabilitiesLoan.$inferInsert)[] = [];
+    for (const m of mortgages) {
+      const accountId = m.account_id ? acctIdByPlaidId.get(m.account_id) : undefined;
+      if (!accountId) continue;
+      loanRows.push({
+        accountId,
+        kind: "mortgage",
+        interestRate: rate(m.interest_rate?.percentage),
+        nextPaymentDueDate: m.next_payment_due_date,
+        nextPaymentAmount: cents(m.next_monthly_payment),
+        lastPaymentAmount: cents(m.last_payment_amount),
+        lastPaymentDate: m.last_payment_date,
+        isOverdue: (m.past_due_amount ?? 0) > 0,
+        pastDueAmount: cents(m.past_due_amount),
+        originationPrincipal: cents(m.origination_principal_amount),
+        originationDate: m.origination_date,
+        payoffDate: m.maturity_date,
+        asOf: now,
+      });
+    }
+    for (const l of studentLoans) {
+      const accountId = l.account_id ? acctIdByPlaidId.get(l.account_id) : undefined;
+      if (!accountId) continue;
+      loanRows.push({
+        accountId,
+        kind: "student",
+        interestRate: rate(l.interest_rate_percentage),
+        nextPaymentDueDate: l.next_payment_due_date,
+        nextPaymentAmount: cents(l.minimum_payment_amount),
+        lastPaymentAmount: cents(l.last_payment_amount),
+        lastPaymentDate: l.last_payment_date,
+        isOverdue: l.is_overdue ?? false,
+        pastDueAmount: null,
+        originationPrincipal: cents(l.origination_principal_amount),
+        originationDate: l.origination_date,
+        payoffDate: l.expected_payoff_date,
+        asOf: now,
+      });
+    }
+    for (const values of loanRows) {
+      await db.insert(schema.liabilitiesLoan).values(values).onConflictDoUpdate({ target: schema.liabilitiesLoan.accountId, set: values });
+    }
+
+    await recordSyncRun(itemId, "liabilities", trigger, startedAt, { added: creditLiabilities.length + loanRows.length });
   } catch (err) {
     const code = plaidErrorCode(err);
     if (code && NOT_SUPPORTED_CODES.has(code)) return; // not a failure — no liability-eligible accounts on this item
@@ -73,4 +119,14 @@ export async function syncLiabilitiesForItem(itemId: string, trigger: SyncTrigge
     await recordSyncRun(itemId, "liabilities", trigger, startedAt, { error: err instanceof Error ? err.message : "unknown error" });
     throw err; // rethrow so the queue worker retries (§8.2)
   }
+}
+
+/** Plaid's dollars to cents; null stays null (unknown is never $0). */
+function cents(amount: number | null | undefined): number | null {
+  return amount == null ? null : Math.round(amount * 100);
+}
+
+/** An interest rate as numeric's string, or null. */
+function rate(percentage: number | null | undefined): string | null {
+  return percentage == null ? null : String(percentage);
 }

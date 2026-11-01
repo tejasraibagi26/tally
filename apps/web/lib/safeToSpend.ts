@@ -2,6 +2,8 @@ import { and, eq, gt, gte, isNull, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { liveAccount } from "@/lib/liveAccounts";
 import { creditCardsForUser, viewForCard } from "@/lib/liabilities";
+import { loanInputsFor } from "@/lib/loans";
+import { loanPaymentsBesideBills } from "@tally/core/loans";
 import { getUserTimezone } from "@/lib/userTimezone";
 import { todayInZone } from "@tally/core/zonedDate";
 import { toNetWorthCurrency } from "@tally/core/fx";
@@ -62,7 +64,7 @@ export async function safeToSpendFor(userId: string): Promise<SafeToSpendResult>
   const today = todayInZone(await getUserTimezone(userId));
   const cutoff = daysBefore(today, -LOOKAHEAD_DAYS);
 
-  const [accountRows, [user], streamRows, cards, schedules, paycheque] = await Promise.all([
+  const [accountRows, [user], streamRows, cards, schedules, paycheque, loans] = await Promise.all([
     db
       .select({
         id: schema.accounts.id,
@@ -105,6 +107,7 @@ export async function safeToSpendFor(userId: string): Promise<SafeToSpendResult>
       .from(schema.incomeSchedules)
       .where(and(eq(schema.incomeSchedules.userId, userId), eq(schema.incomeSchedules.active, true))),
     paychequeFor(userId, today),
+    loanInputsFor(userId),
   ]);
 
   const currencyOf = new Map(accountRows.map((a) => [a.id, a.currency]));
@@ -139,6 +142,18 @@ export async function safeToSpendFor(userId: string): Promise<SafeToSpendResult>
       })),
   );
 
+  // Loan payments, unless a detected bill already is one (@tally/core/loans;
+  // the same rule Forecast applies, so the two screens agree). Only bills
+  // that come out of cash can stand for a loan payment.
+  const creditIds = new Set(accountRows.filter((a) => a.type === "credit").map((a) => a.id));
+  const loanBills = loanPaymentsBesideBills(
+    loans,
+    bills.filter((b) => b.accountId == null || !creditIds.has(b.accountId)).map((b) => ({ amount: b.amount, date: b.dueDate })),
+    today,
+    from,
+    cutoff,
+  ).map((p) => ({ id: `loan:${p.accountId}:${p.date}`, label: `${p.label} payment`, amount: p.amount, dueDate: p.date, accountId: null, loanAccountId: p.accountId }));
+
   const cardInputs = await Promise.all(
     cards.map(async (c) => {
       const view = viewForCard(c, today);
@@ -160,7 +175,7 @@ export async function safeToSpendFor(userId: string): Promise<SafeToSpendResult>
 
   const result = computeSafeToSpend({
     accounts,
-    bills,
+    bills: [...bills, ...loanBills],
     cards: cardInputs,
     cushion: user?.cushion ?? 0,
     payday,

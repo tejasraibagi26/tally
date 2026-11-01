@@ -3,6 +3,7 @@ import { db, schema } from "@/db";
 import { liveAccount } from "@/lib/liveAccounts";
 import { creditCardsForUser, viewForCard } from "@/lib/liabilities";
 import { paychequeFor } from "@/lib/safeToSpend";
+import { loanInputsFor } from "@/lib/loans";
 import { getUserTimezone } from "@/lib/userTimezone";
 import { todayInZone } from "@tally/core/zonedDate";
 import { toNetWorthCurrency } from "@tally/core/fx";
@@ -105,7 +106,7 @@ export async function forecastFor(userId: string, days?: number): Promise<Foreca
   const today = todayInZone(await getUserTimezone(userId));
   const spendFrom = daysBefore(today, SPEND_WINDOW_DAYS);
 
-  const [accountRows, [user], streamRows, cards, schedules, paycheque, spendRows, [earliest]] = await Promise.all([
+  const [accountRows, [user], streamRows, cards, schedules, paycheque, spendRows, [earliest], loans] = await Promise.all([
     db
       .select({
         id: schema.accounts.id,
@@ -197,6 +198,7 @@ export async function forecastFor(userId: string, days?: number): Promise<Foreca
       .where(eq(schema.transactions.userId, userId))
       .orderBy(schema.transactions.postedDate)
       .limit(1),
+    loanInputsFor(userId),
   ]);
 
   const currencyOf = new Map(accountRows.map((a) => [a.id, a.currency]));
@@ -274,6 +276,7 @@ export async function forecastFor(userId: string, days?: number): Promise<Foreca
     accounts,
     streams,
     cards: cardInputs,
+    loans,
     incomes,
     paycheque: paycheque?.confident
       ? { label: paycheque.label, amount: paycheque.amount, cadence: paycheque.cadence, nextDate: paycheque.nextDate, lastDate: paycheque.lastDate }

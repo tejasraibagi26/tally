@@ -31,7 +31,10 @@ export interface BillInput {
   label: string;
   amount: number; // cents, positive
   dueDate: string;
+  /** The account it's paid from; null when unknown (counts against cash). */
   accountId: string | null;
+  /** A loan payment (@tally/core/loans) rather than a detected or added bill; absent means a bill. */
+  loanAccountId?: string;
 }
 
 export interface CardInput {

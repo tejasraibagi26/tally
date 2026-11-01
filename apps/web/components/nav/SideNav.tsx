@@ -13,6 +13,7 @@ import {
   TrendingUp,
   TrendingDown,
   CreditCard,
+  Banknote,
   Target,
   Settings,
   Tag,
@@ -52,6 +53,8 @@ export interface NavCounts {
   transactions: number;
   accounts: number;
   creditCards: number;
+  /** Loan accounts (mortgage, student, auto, ...). Optional for callers built before Loans. */
+  loans?: number;
   /** Banks needing a tap (lib/connectionState via the app layout), so a broken one shows from any page. */
   accountsAttention?: { count: number; blocked: boolean; names: string[] };
 }
@@ -94,7 +97,13 @@ function navGroups(counts: NavCounts): NavGroup[] {
         { href: "/investments", label: "Investments", icon: TrendingUp },
       ],
     },
-    { label: "What you owe", items: [{ href: "/cards", label: "Credit cards", icon: CreditCard, meta: String(counts.creditCards) }] },
+    {
+      label: "What you owe",
+      items: [
+        { href: "/cards", label: "Credit cards", icon: CreditCard, meta: String(counts.creditCards) },
+        { href: "/loans", label: "Loans", icon: Banknote, meta: String(counts.loans ?? 0) },
+      ],
+    },
     {
       label: "Plan ahead",
       items: [

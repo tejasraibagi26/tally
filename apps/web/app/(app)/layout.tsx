@@ -26,7 +26,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // are waiting in Transactions right now," not an all-time total.
   const { start, end } = monthRange((await currentMonthFor(userId)));
 
-  const [[user], [txnCount], [acctCount], [cardCount], items] = await Promise.all([
+  const [[user], [txnCount], [acctCount], [cardCount], [loanCount], items] = await Promise.all([
     db.select({ name: schema.users.name, email: schema.users.email }).from(schema.users).where(eq(schema.users.id, userId)).limit(1),
     db
       .select({ count: sql<number>`count(*)::int` })
@@ -39,6 +39,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       .select({ count: sql<number>`count(*)::int` })
       .from(schema.accounts)
       .where(and(eq(schema.accounts.userId, userId), eq(schema.accounts.type, "credit"), liveAccount)),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(schema.accounts)
+      .where(and(eq(schema.accounts.userId, userId), eq(schema.accounts.type, "loan"), eq(schema.accounts.isHidden, false), liveAccount)),
     db
       .select({
         institutionName: schema.plaidItems.institutionName,
@@ -62,6 +66,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     transactions: txnCount?.count ?? 0,
     accounts: acctCount?.count ?? 0,
     creditCards: cardCount?.count ?? 0,
+    loans: loanCount?.count ?? 0,
     accountsAttention: {
       count: needsYou.length,
       blocked: needsYou.some((i) => i.state.level === "blocked"),

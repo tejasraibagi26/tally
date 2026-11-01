@@ -462,8 +462,16 @@
  * lib/analytics.ts (nothing reads it since mobile 2.11.0; older builds
  * fall back to an empty list), and turns on noUnusedLocals in every
  * workspace.
+ * 2.14.0 tracks every kind of debt. Loan accounts (mortgage, student, car,
+ * personal, line of credit, ...) already counted against net worth; now
+ * /liabilities/get's mortgage and student entries are stored in
+ * liabilities_loan (migration 0037), /loans lists every loan with balance,
+ * rate, next payment and payoff, the side nav's "What you owe" has a Loans
+ * row, and loan payments come out of Forecast (kind "loan") and Safe to
+ * spend -- unless a detected bill already is that payment
+ * (@tally/core/loans duplicatesBill). GET /api/loans serves mobile.
  */
-export const APP_VERSION = "2.13.2";
+export const APP_VERSION = "2.14.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

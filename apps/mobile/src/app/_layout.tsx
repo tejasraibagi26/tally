@@ -212,6 +212,7 @@ function RootNavigator() {
               <Stack.Screen name="goals" options={pushedScreenOptions("Goals")} />
               <Stack.Screen name="subscriptions" options={pushedScreenOptions("Subscriptions")} />
               <Stack.Screen name="cards" options={pushedScreenOptions("Credit cards")} />
+              <Stack.Screen name="loans" options={pushedScreenOptions("Loans")} />
               <Stack.Screen name="card/[id]" options={pushedScreenOptions("Card")} />
               <Stack.Screen name="investments" options={pushedScreenOptions("Investments")} />
               <Stack.Screen name="investment-holdings" options={pushedScreenOptions("Holdings")} />

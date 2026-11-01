@@ -4,7 +4,7 @@ import { appPathForWebPath } from "@tally/core/appLinks";
 // /open page, which hands off tally://<web path> (no universal links
 // without a paid Apple Developer account). Anything else passes through
 // to expo-router unchanged.
-const WEB_PATH = /^\/(overview|transactions|cards|tags|settings|year-in-review|budgets|accounts|subscriptions|goals|investments|fire|forecast|upcoming|alerts|safe-to-spend)?(?=\/|\?|#|$)/;
+const WEB_PATH = /^\/(overview|transactions|cards|tags|settings|year-in-review|budgets|accounts|subscriptions|goals|investments|fire|forecast|loans|upcoming|alerts|safe-to-spend)?(?=\/|\?|#|$)/;
 
 export function redirectSystemPath({ path }: { path: string; initial: boolean }): string {
   try {

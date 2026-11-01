@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.14.0",
+    date: "2026-10-31",
+    changes: [
+      { kind: "new", text: "Loans: every mortgage, student, car and personal loan and line of credit in one place, with the rate, next payment and payoff date when your lender shares them." },
+      { kind: "improved", text: "Loan payments now come out of Forecast and Safe to spend, so a mortgage is counted before payday." },
+    ],
+  },
+  {
     version: "2.13.2",
     date: "2026-10-31",
     changes: [{ kind: "improved", text: "Behind-the-scenes cleanup: a developer-only design page is no longer reachable on the live site." }],

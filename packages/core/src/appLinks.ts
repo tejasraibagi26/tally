@@ -49,6 +49,6 @@ export function appPathForWebPath(webPath: string): string {
   if (path === "/fire") return "/goals?view=retirement";
   if (path === "/goals") return q.get("view") === "retirement" ? "/goals?view=retirement" : "/goals";
 
-  const same = ["/budgets", "/accounts", "/subscriptions", "/investments", "/tags", "/forecast", "/alerts", "/safe-to-spend"];
+  const same = ["/budgets", "/accounts", "/subscriptions", "/investments", "/tags", "/forecast", "/loans", "/alerts", "/safe-to-spend"];
   return same.includes(path) ? path : "/";
 }

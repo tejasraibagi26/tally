@@ -202,7 +202,7 @@ function SafeToSpendSheet({ s: next, onClose, forecastLink }: { s: SafeToSpendRe
           ) : (
             <View>
               {s.bills.map((b) => (
-                <SheetRow key={b.id} title={b.label} sub={b.overdue ? `Was due ${shortDate(b.dueDate)}` : shortDate(b.dueDate)} cents={b.amount} onPress={() => go("/subscriptions")} />
+                <SheetRow key={b.id} title={b.label} sub={b.overdue ? `Was due ${shortDate(b.dueDate)}` : shortDate(b.dueDate)} cents={b.amount} onPress={() => go((b.loanAccountId ? "/loans" : "/subscriptions") as Href)} />
               ))}
             </View>
           )}

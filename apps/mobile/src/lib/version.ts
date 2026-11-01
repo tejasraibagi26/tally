@@ -389,8 +389,12 @@ import Constants from "expo-constants";
  * fire route is gone, the More sheet has one "Goals" row
  * (MORE_SHEET_CONTENT_HEIGHT 645 -> 596), and tally:// /fire opens
  * /goals?view=retirement.
+ * 2.13.0 adds Loans (app/loans.tsx, GET /api/loans, a More row; sheet
+ * height 645): every non-card debt with the lender's rate, next payment
+ * and payoff when reported. Forecast's loan rows and Safe to spend's loan
+ * payments open it; tally:// /loans does too.
  */
-export const APP_VERSION = "2.12.0";
+export const APP_VERSION = "2.13.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

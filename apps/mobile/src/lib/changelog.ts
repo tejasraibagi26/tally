@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.13.0",
+    date: "2026-10-31",
+    changes: [
+      { kind: "new", text: "Loans, in the More menu: every mortgage, student, car and personal loan and line of credit, with the rate and next payment when your lender shares them." },
+      { kind: "improved", text: "Loan payments now come out of Forecast and Safe to spend." },
+    ],
+  },
+  {
     version: "2.12.0",
     date: "2026-10-31",
     changes: [{ kind: "improved", text: "Your year-end goal and early retirement plan now live together under Goals in the More menu, a tab each." }],

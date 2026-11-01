@@ -295,3 +295,23 @@ describe("the worked household from the spec", () => {
     expect(f.events.filter((e) => e.kind === "income")).toHaveLength(4);
   });
 });
+
+describe("loans", () => {
+  const mortgage = { accountId: "mtg", label: "RBC Mortgage", payment: 180_000, dueDate: "2026-11-15", dueDay: null };
+
+  it("takes a loan payment out of cash each month, as the lender's date then modelled", () => {
+    const f = computeForecast(base({ loans: [mortgage] }));
+    const loans = f.events.filter((e) => e.kind === "loan");
+    expect(loans.map((e) => [e.date, e.amount, e.modelled])).toEqual([
+      ["2026-11-15", -180_000, false],
+      ["2026-12-15", -180_000, true],
+    ]);
+    const without = computeForecast(base());
+    expect(dayAt(f, "2026-11-15").balance).toBe(dayAt(without, "2026-11-15").balance - 180_000);
+  });
+
+  it("adds nothing when a detected bill already is that payment", () => {
+    const f = computeForecast(base({ loans: [mortgage], streams: [stream({ id: "mtgbill", label: "MORTGAGE PMT", averageAmount: -180_000, predictedNextDate: "2026-11-14" })] }));
+    expect(f.events.filter((e) => e.kind === "loan")).toEqual([]);
+  });
+});

@@ -232,7 +232,7 @@ function SafeToSpendPanel({ s, open, onClose, forecastLink }: { s: SafeToSpendRe
           ) : (
             <ul className="m-0 p-0 list-none">
               {s.bills.map((b) => (
-                <Row key={b.id} title={<Link href="/subscriptions" className="hover:underline">{b.label}</Link>} sub={b.overdue ? `Was due ${shortDate(b.dueDate)}` : shortDate(b.dueDate)} cents={b.amount} />
+                <Row key={b.id} title={<Link href={b.loanAccountId ? "/loans" : "/subscriptions"} className="hover:underline">{b.label}</Link>} sub={b.overdue ? `Was due ${shortDate(b.dueDate)}` : shortDate(b.dueDate)} cents={b.amount} />
               ))}
             </ul>
           )}
