@@ -86,10 +86,6 @@ export const users = pgTable("users", {
   timezone: text("timezone").notNull().default("America/New_York"),
   baseCurrency: text("base_currency").notNull().default("USD"),
   recapsEnabled: boolean("recaps_enabled").notNull().default(true),
-  // Unused since web v2.11.0 retired the classic look (it held "pop" or
-  // "classic" from the old "New look" switch). Nothing reads or writes it;
-  // drop it in a later migration.
-  uiLook: text("ui_look"),
   // When the user dismissed the one-time year-end goals announcement
   // (lib/goals.ts); null = not seen yet. Per account, so it shows once
   // across web and mobile.
@@ -541,6 +537,33 @@ export const liabilitiesCredit = pgTable("liabilities_credit", {
   asOf: timestamp("as_of", { withTimezone: true }),
 });
 
+// Mortgage and student-loan details from Plaid's /liabilities/get, one row
+// per loan account. The balance itself lives on accounts (type "loan") and
+// already counts against net worth; this adds what the payment looks like.
+// Other loans (auto, personal, line of credit) have no Plaid detail: they
+// carry a balance only, unless the user sets a payment day on the account.
+export const liabilitiesLoan = pgTable("liabilities_loan", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  accountId: uuid("account_id").notNull().references(() => accounts.id, { onDelete: "cascade" }).unique(),
+  // "mortgage" | "student"
+  kind: text("kind").notNull(),
+  // Annual percentage, e.g. 4.85; null when the lender doesn't report it.
+  interestRate: numeric("interest_rate", { precision: 7, scale: 4 }),
+  nextPaymentDueDate: date("next_payment_due_date"),
+  // Cents. A mortgage's next monthly payment, a student loan's minimum.
+  nextPaymentAmount: bigint("next_payment_amount", { mode: "number" }),
+  lastPaymentAmount: bigint("last_payment_amount", { mode: "number" }),
+  lastPaymentDate: date("last_payment_date"),
+  isOverdue: boolean("is_overdue").notNull().default(false),
+  // Cents past due, when the lender says so.
+  pastDueAmount: bigint("past_due_amount", { mode: "number" }),
+  originationPrincipal: bigint("origination_principal", { mode: "number" }),
+  originationDate: date("origination_date"),
+  // Maturity for a mortgage, expected payoff for a student loan.
+  payoffDate: date("payoff_date"),
+  asOf: timestamp("as_of", { withTimezone: true }),
+});
+
 // ---------------------------------------------------------------------------
 // Recurring / subscriptions
 // ---------------------------------------------------------------------------
@@ -791,6 +814,7 @@ export const accountsRelations = relations(accounts, ({ one, many }) => ({
   user: one(users, { fields: [accounts.userId], references: [users.id] }),
   transactions: many(transactions),
   liability: one(liabilitiesCredit, { fields: [accounts.id], references: [liabilitiesCredit.accountId] }),
+  loan: one(liabilitiesLoan, { fields: [accounts.id], references: [liabilitiesLoan.accountId] }),
 }));
 
 export const transactionsRelations = relations(transactions, ({ one, many }) => ({

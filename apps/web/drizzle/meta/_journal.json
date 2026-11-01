@@ -260,6 +260,13 @@
       "when": 1793654400002,
       "tag": "0036_category_overrides",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1793740800002,
+      "tag": "0037_loans_and_drop_ui_look",
+      "breakpoints": true
     }
   ]
 }
