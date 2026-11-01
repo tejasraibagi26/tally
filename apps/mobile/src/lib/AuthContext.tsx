@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { AppState } from "react-native";
+import { AppState, Platform } from "react-native";
 import * as LocalAuthentication from "expo-local-authentication";
 import { apiPost, ApiError, NetworkError, setAccessToken, registerRefreshHandler, registerSessionExpiredHandler } from "@/lib/api";
 import { getStoredTokens, storeTokens, clearTokens } from "@/lib/tokenStorage";
@@ -162,7 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false;
       },
       async login(email: string, password: string) {
-        const res = await apiPost<LoginResponse>("/api/auth/mobile/login", { email, password });
+        const res = await apiPost<LoginResponse>("/api/auth/mobile/login", { email, password, deviceInfo: `${Platform.OS} ${Platform.Version}` });
         await storeTokens(res.accessToken, res.refreshToken);
         setAccessToken(res.accessToken);
         setUser(res.user);

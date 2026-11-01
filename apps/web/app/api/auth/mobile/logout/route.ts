@@ -17,10 +17,20 @@ export async function POST(req: Request) {
   }
   const hash = hashRefreshToken(parsed.data.refreshToken);
 
-  await db
-    .update(schema.mobileRefreshTokens)
-    .set({ revokedAt: new Date() })
-    .where(and(eq(schema.mobileRefreshTokens.tokenHash, hash), isNull(schema.mobileRefreshTokens.revokedAt)));
+  // Ends this device's session (its whole family), and nothing else: the
+  // user's other phones and web stay signed in.
+  const [row] = await db.select().from(schema.mobileRefreshTokens).where(eq(schema.mobileRefreshTokens.tokenHash, hash)).limit(1);
+  if (row) {
+    await db
+      .update(schema.mobileRefreshTokens)
+      .set({ revokedAt: new Date() })
+      .where(
+        and(
+          isNull(schema.mobileRefreshTokens.revokedAt),
+          row.familyId ? eq(schema.mobileRefreshTokens.familyId, row.familyId) : eq(schema.mobileRefreshTokens.id, row.id),
+        ),
+      );
+  }
 
   return NextResponse.json({ ok: true });
 }

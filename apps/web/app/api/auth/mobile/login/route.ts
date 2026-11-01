@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db, schema } from "@/db";
@@ -33,11 +34,14 @@ export async function POST(req: Request) {
   const { token: accessToken, expiresIn } = await signAccessToken(user.id, user.sessionVersion);
   const { token: refreshToken, hash } = generateRefreshToken();
 
+  // Each login is its own device session (family): every rotation stays in
+  // it, and anything that ends it ends only this device (refresh/route.ts).
   await db.insert(schema.mobileRefreshTokens).values({
     userId: user.id,
     tokenHash: hash,
     expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_MS),
-    deviceInfo: deviceInfo ?? null,
+    deviceInfo: deviceInfo?.slice(0, 120) ?? null,
+    familyId: randomUUID(),
   });
 
   return NextResponse.json({

@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.14.2",
+    date: "2026-10-31",
+    changes: [{ kind: "fixed", text: "Signing in on a second phone no longer signs the first one out. Each device keeps its own session." }],
+  },
+  {
     version: "2.14.1",
     date: "2026-10-31",
     changes: [{ kind: "fixed", text: "Evenings no longer count as tomorrow: This month, net worth history, bills, paydays and new transactions all use your own timezone." }],

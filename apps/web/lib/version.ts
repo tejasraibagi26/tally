@@ -478,8 +478,15 @@
  * code uses the browser's date (lib/localToday.ts): Add transaction's
  * default date, a card's "charges since" link, the side nav's Year in
  * review sticker.
+ * 2.14.2 gives each mobile login its own session (refresh-token family,
+ * migration 0038): rotation stays in the family, a reused token ends only
+ * that family, a token revoked by anything but rotation is a plain 401
+ * (replaced_at), and a retry within 30s of a rotation gets a fresh token
+ * instead of a sign-out. Before this, reuse ended every device and a token
+ * the alarm had revoked counted as reuse too, so two phones kept signing
+ * each other out. Logout ends just that device's family.
  */
-export const APP_VERSION = "2.14.1";
+export const APP_VERSION = "2.14.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

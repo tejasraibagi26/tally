@@ -402,8 +402,10 @@ import Constants from "expo-constants";
  * 2.13.3 folds Investments and Credit used into Overview's This month
  * card as its last row (StatPair inCard, MonthCard footer); the pair only
  * stands alone before the month's figures load.
+ * 2.13.4 sends deviceInfo ("ios 26.1", "android 35") with the login, so
+ * each device session (web 2.14.2) says which phone it is.
  */
-export const APP_VERSION = "2.13.3";
+export const APP_VERSION = "2.13.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
