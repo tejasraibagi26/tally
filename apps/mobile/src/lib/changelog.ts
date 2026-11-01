@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.13.6",
+    date: "2026-11-01",
+    changes: [{ kind: "fixed", text: "Tally opens straight in the appearance you chose, instead of flashing your phone's theme first." }],
+  },
+  {
     version: "2.13.5",
     date: "2026-11-01",
     changes: [{ kind: "fixed", text: "On the first of the month, On-pace days says \"New month\" instead of blaming yesterday." }],

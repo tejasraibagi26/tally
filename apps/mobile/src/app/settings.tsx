@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { View, Text, ScrollView, Pressable, Switch, ActivityIndicator, Alert, TextInput } from "react-native";
 import { useRouter, type Href } from "expo-router";
-import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as LocalAuthentication from "expo-local-authentication";
 import { AlertTriangle, Bell, ChevronRight, Download, KeyRound, Lock, Mail, PiggyBank, ScanFace, SunMoon, Trash2, Wallet } from "lucide-react-native";
@@ -21,7 +20,7 @@ import { Toast } from "@/components/ui/Toast";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { useThemeColors } from "@/theme/useThemeColors";
-import { type AppearanceMode, getStoredAppearanceMode, storeAppearanceMode } from "@/theme/appearance";
+import { type AppearanceMode, applyAppearanceMode, getStoredAppearanceMode, storeAppearanceMode } from "@/theme/appearance";
 import { hairline } from "@/theme/colors";
 import { useRF } from "@/theme/responsiveFont";
 import { APP_VERSION } from "@/lib/version";
@@ -134,7 +133,6 @@ const APPEARANCE_OPTIONS: { mode: AppearanceMode; label: string }[] = [
 
 /** Compact segmented control that fits in a row. */
 function AppearanceSegments() {
-  const { setColorScheme } = useColorScheme();
   const rf = useRF();
   const [selected, setSelected] = useState<AppearanceMode>("system");
 
@@ -145,7 +143,7 @@ function AppearanceSegments() {
   async function choose(mode: AppearanceMode) {
     setSelected(mode);
     await storeAppearanceMode(mode);
-    setColorScheme(mode);
+    applyAppearanceMode(mode);
   }
 
   return (

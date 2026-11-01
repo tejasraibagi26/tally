@@ -406,8 +406,14 @@ import Constants from "expo-constants";
  * each device session (web 2.14.2) says which phone it is.
  * 2.13.5 shows "New month" on the On-pace card on a month's first day
  * (device date), with web's copy from @tally/core/popView onPaceLine.
+ * 2.13.6 applies the saved light/dark choice before the first render
+ * (theme/appearance.ts applyStoredAppearanceModeSync, SecureStore.getItem)
+ * and to React Native's Appearance as well as NativeWind, so the boot
+ * splash, native header and alerts follow it. It used to load
+ * asynchronously after the first screens drew in the phone's theme:
+ * a light choice on a phone in Dark Mode opened dark, then flipped.
  */
-export const APP_VERSION = "2.13.5";
+export const APP_VERSION = "2.13.6";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

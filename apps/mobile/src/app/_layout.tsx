@@ -16,13 +16,15 @@ import { resetAppIcon } from "@/lib/appIcon";
 import { popVars } from "@/theme/pop";
 import { queryClient } from "@/lib/queryClient";
 import { fontsToLoad } from "@/theme/fonts";
-import { getStoredAppearanceMode } from "@/theme/appearance";
+import { applyStoredAppearanceModeSync } from "@/theme/appearance";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useResponsiveFontScale } from "@/theme/responsiveFont";
 import { moreSheetDetent } from "@/lib/moreSheet";
 import { BootSplash, PrivacyCover } from "@/components/BootSplash";
 
 SplashScreen.preventAutoHideAsync();
+// Before anything renders, so the first frame is already in the chosen theme.
+applyStoredAppearanceModeSync();
 
 // Longest the boot screen waits on first data before letting go anyway.
 const BOOT_DATA_TIMEOUT_MS = 6000;
@@ -60,7 +62,7 @@ function useInitialDataSettled(active: boolean): boolean {
 function RootNavigator() {
   const { status, isLocked, isCovered } = useAuth();
   const [fontsLoaded] = useFonts(fontsToLoad);
-  const { colorScheme, setColorScheme } = useColorScheme();
+  const { colorScheme } = useColorScheme();
   const colors = useThemeColors();
   // Tally Pop's CSS variables on a root view restyle every className
   // beneath it; useThemeColors covers raw hex.
@@ -98,16 +100,6 @@ function RootNavigator() {
   // The More sheet's height as a fraction of the screen, from its actual
   // content rather than a fixed guess (see lib/moreSheet.ts).
   const moreDetent = moreSheetDetent({ windowHeight, fontScale, bottomInset: insets.bottom });
-
-  // Applies a user-picked light/dark override (Settings > Appearance) on
-  // cold start -- nativewind's own colorScheme.set() doesn't persist across
-  // relaunches on its own, so the choice is stored separately and re-applied
-  // here. No stored value (the default) leaves nativewind on "system".
-  useEffect(() => {
-    getStoredAppearanceMode().then((mode) => {
-      if (mode !== "system") setColorScheme(mode);
-    });
-  }, [setColorScheme]);
 
   // The native splash is background-only (no mark); BootSplash takes over
   // on the same background as soon as JS is running and draws the mark.
