@@ -131,6 +131,14 @@ export const mobileRefreshTokens = pgTable("mobile_refresh_tokens", {
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   revokedAt: timestamp("revoked_at", { withTimezone: true }),
   deviceInfo: text("device_info"),
+  // One device session: set at login and carried through every rotation, so
+  // a reused token ends only its own device, never the user's other ones.
+  // Null on rows from before migration 0038 (each counts as its own family).
+  familyId: uuid("family_id"),
+  // Set only when this token was swapped for a newer one. A token revoked any
+  // other way (logout, its family ended) coming back is just signed out, not
+  // treated as reuse.
+  replacedAt: timestamp("replaced_at", { withTimezone: true }),
 });
 
 // Long-lived bearer tokens for server-to-server / automation callers (Apple
