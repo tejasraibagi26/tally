@@ -26,6 +26,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { PrivacyToggle } from "@/components/PrivacyToggle";
 import { SignOutButton } from "@/components/nav/SignOutButton";
 import { APP_VERSION, BUILD_SHA } from "@/lib/version";
+import { localToday } from "@/lib/localToday";
 
 /**
  * Pixel-matched to the Claude Design canvas (TallyNav.dc.html): 240px shell,
@@ -120,7 +121,7 @@ function navGroups(counts: NavCounts): NavGroup[] {
  * featuredReviewYear): a review covers whole years.
  */
 function YearReviewSticker({ active }: { active: boolean }) {
-  const year = featuredReviewYear(new Date().toISOString().slice(0, 10));
+  const year = featuredReviewYear(localToday());
   if (year == null) return null;
   return (
     <Link

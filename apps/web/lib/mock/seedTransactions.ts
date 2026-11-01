@@ -7,6 +7,7 @@ import { detectTransfersForUser } from "@/lib/transfers";
 import { detectRecurringForUser } from "@/lib/recurring";
 import { computeAndStoreNetWorthSnapshot } from "@/lib/networth";
 import type { SyncResult } from "@/lib/plaidSync";
+import { todayFor } from "@/lib/userTimezone";
 
 function isoDate(daysAgo: number): string {
   const d = new Date();
@@ -65,7 +66,7 @@ export async function seedMockTransactionsForItem(itemId: string): Promise<SyncR
     await detectRecurringForUser(userId);
   }
   if (userId) {
-    await computeAndStoreNetWorthSnapshot(userId, new Date().toISOString().slice(0, 10));
+    await computeAndStoreNetWorthSnapshot(userId, await todayFor(userId));
   }
 
   return { added, modified: 0, removed: 0 };

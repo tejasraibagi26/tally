@@ -16,6 +16,7 @@ import { usePrivacy } from "@/lib/PrivacyContext";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { hairline } from "@/theme/colors";
+import { todayISO } from "@/lib/today";
 
 const APR_TYPE_LABEL: Record<string, string> = {
   purchase_apr: "Purchase",
@@ -179,7 +180,7 @@ function Charges({ row, hidden }: { row: CardRowData; hidden: boolean }) {
   const colors = useThemeColors();
   const router = useRouter();
   const from = row.card.liability?.lastStatementIssueDate ?? null;
-  const filters: Record<string, string> = { account: row.card.accountId, ...(from ? { from, to: new Date().toISOString().slice(0, 10) } : {}) };
+  const filters: Record<string, string> = { account: row.card.accountId, ...(from ? { from, to: todayISO() } : {}) };
   const { data, isLoading } = useTransactions(filters);
   const items = data?.pages[0]?.items.slice(0, 5) ?? [];
   const total = data?.pages[0]?.pagination.total ?? 0;

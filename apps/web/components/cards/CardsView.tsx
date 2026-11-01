@@ -11,6 +11,7 @@ import { CreditLimitEditor } from "@/components/cards/CreditLimitEditor";
 import { AccountNicknameEditor } from "@/components/accounts/AccountNicknameEditor";
 import { MerchantAvatar } from "@/components/transactions/MerchantAvatar";
 import { cn } from "@/lib/cn";
+import { localToday } from "@/lib/localToday";
 
 export interface CardItem {
   accountId: string;
@@ -262,7 +263,7 @@ function CardPanel({ card, onClose }: { card: CardItem | null; onClose: () => vo
     let cancelled = false;
     const params = new URLSearchParams({ account: id });
     if (from) params.set("from", from);
-    params.set("to", new Date().toISOString().slice(0, 10));
+    params.set("to", localToday());
     fetch(`/api/transactions?${params}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => !cancelled && d && setCharges({ items: d.items.slice(0, 6), total: d.pagination.total }))

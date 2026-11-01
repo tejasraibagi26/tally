@@ -8,6 +8,7 @@ import { holdingPriceCurrency, isMarketQuote, listingCurrency } from "@tally/cor
 import type { SyncTrigger } from "@/lib/plaidSync";
 import type { Holding, InvestmentTransaction, Security } from "plaid";
 import { DEFAULT_CURRENCY } from "@tally/core/fx";
+import { todayFor } from "@/lib/userTimezone";
 
 // §6.4 coverage reality: not every institution supports Investments, and
 // some are holdings-only. These codes mean "nothing to sync here", not
@@ -78,7 +79,7 @@ export async function syncHoldingsForItem(itemId: string, trigger: SyncTrigger):
 
     const accessToken = await getAccessToken(itemId);
     const res = await plaidClient.investmentsHoldingsGet({ access_token: accessToken });
-    await reconcileHoldings(res.data.securities, res.data.holdings);
+    await reconcileHoldings(res.data.securities, res.data.holdings, await todayFor(item.userId));
     await recordSyncRun(itemId, "holdings", trigger, startedAt, { added: res.data.holdings.length });
   } catch (err) {
     const code = plaidErrorCode(err);
@@ -89,12 +90,12 @@ export async function syncHoldingsForItem(itemId: string, trigger: SyncTrigger):
   }
 }
 
-async function reconcileHoldings(securities: Security[], holdings: Holding[]): Promise<void> {
+/** `today` is the owner's own date, so the snapshot is dated the day they see it (never the server's UTC day). */
+async function reconcileHoldings(securities: Security[], holdings: Holding[], today: string): Promise<void> {
   if (holdings.length === 0) return;
   const securityIdByPlaidId = await upsertSecurities(securities);
   const acctIdByPlaidId = await accountIdsByPlaidId([...new Set(holdings.map((h) => h.account_id))]);
   const securityByPlaidId = new Map(securities.map((s) => [s.security_id, s]));
-  const today = new Date().toISOString().slice(0, 10);
 
   for (const h of holdings) {
     const accountId = acctIdByPlaidId.get(h.account_id);
@@ -196,6 +197,7 @@ export async function syncInvestmentTransactionsForItem(itemId: string, trigger:
     if (!(await institutionSupportsProduct(item.institutionId, "investments"))) return;
 
     const accessToken = await getAccessToken(itemId);
+    // Plaid's request window: UTC is fine here, a day long is harmless.
     const endDate = new Date().toISOString().slice(0, 10);
     const startDate = new Date(Date.now() - HISTORY_LOOKBACK_DAYS * 86_400_000).toISOString().slice(0, 10);
 

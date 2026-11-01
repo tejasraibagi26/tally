@@ -13,6 +13,7 @@ import { detectRecurringForUser } from "@/lib/recurring";
 import { evaluateAfterTransactionSync } from "@/lib/alerts/evaluate";
 import { computeAndStoreNetWorthSnapshot } from "@/lib/networth";
 import type { Transaction as PlaidTransaction } from "plaid";
+import { todayFor } from "@/lib/userTimezone";
 
 export type SyncTrigger = "webhook" | "cron" | "manual" | "initial";
 
@@ -162,7 +163,7 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
       // Keeps today's net-worth snapshot live-updated intraday as balances
       // change; once the date rolls over, today's final value becomes a
       // permanent history point rather than being overwritten again.
-      await computeAndStoreNetWorthSnapshot(item.userId, new Date().toISOString().slice(0, 10));
+      await computeAndStoreNetWorthSnapshot(item.userId, await todayFor(item.userId));
     } catch (err) {
       console.error(`Categorization/transfer detection failed for item ${itemId}`, err);
     }

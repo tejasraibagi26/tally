@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { duePayDates, type DayAnchor } from "@tally/core/incomeScheduleMath";
 import { DEFAULT_CURRENCY } from "@tally/core/fx";
+import { todayFor } from "@/lib/userTimezone";
 
 interface ScheduleRow {
   id: string;
@@ -66,7 +67,8 @@ export async function generateDuePaychecks(schedule: ScheduleRow, throughDate: s
 }
 
 /** Runs generateDuePaychecks for every active schedule across every user — the nightly cron's hook into this feature. */
-export async function generateDuePaychecksForAllActiveSchedules(throughDate: string): Promise<number> {
+/** Each schedule through its owner's own today (the nightly cron runs on UTC). */
+export async function generateDuePaychecksForAllActiveSchedules(): Promise<number> {
   const schedules = await db
     .select({
       id: schema.incomeSchedules.id,
@@ -82,7 +84,7 @@ export async function generateDuePaychecksForAllActiveSchedules(throughDate: str
 
   let total = 0;
   for (const schedule of schedules) {
-    total += await generateDuePaychecks(schedule, throughDate);
+    total += await generateDuePaychecks(schedule, await todayFor(schedule.userId));
   }
   return total;
 }

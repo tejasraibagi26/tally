@@ -7,6 +7,7 @@ import { SearchableSelect } from "@/components/ui/SearchableSelect";
 import { AmountInput, FormField, FormPanel, panelInputClass } from "@/components/ui/FormPanel";
 import { showToast } from "@/lib/toast";
 import { cn } from "@/lib/cn";
+import { localToday } from "@/lib/localToday";
 
 export interface TransactionAccountOption {
   id: string;
@@ -22,7 +23,7 @@ export interface TransactionCategoryOption {
 }
 
 function todayDate(): string {
-  return new Date().toISOString().slice(0, 10);
+  return localToday();
 }
 
 // For a purchase Plaid never saw -- cash, a bank this app isn't linked to,

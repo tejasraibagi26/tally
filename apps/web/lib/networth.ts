@@ -2,6 +2,7 @@ import { and, desc, eq, gte } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { liveAccount } from "@/lib/liveAccounts";
 import { toNetWorthCurrency } from "@tally/core/fx";
+import { todayFor } from "@/lib/userTimezone";
 
 /** §9 "Net worth": Σ depository + investment balances − Σ credit + loan balances, as of now. One row per user per day (§5). */
 export async function computeAndStoreNetWorthSnapshot(userId: string, asOfDate: string): Promise<void> {
@@ -61,7 +62,7 @@ export interface NetWorthPoint {
  * alongside it, which is computed fresh from current balances every time.
  */
 export async function netWorthTrend(userId: string, days = 365): Promise<NetWorthPoint[]> {
-  await computeAndStoreNetWorthSnapshot(userId, new Date().toISOString().slice(0, 10));
+  await computeAndStoreNetWorthSnapshot(userId, await todayFor(userId));
 
   const since = new Date(Date.now() - days * 86_400_000).toISOString().slice(0, 10);
   const rows = await db

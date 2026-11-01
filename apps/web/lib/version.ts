@@ -470,8 +470,16 @@
  * row, and loan payments come out of Forecast (kind "loan") and Safe to
  * spend -- unless a detected bill already is that payment
  * (@tally/core/loans duplicatesBill). GET /api/loans serves mobile.
+ * 2.14.1 dates everything in the user's timezone, never the server's UTC
+ * day: cashFlowTrend's current month (mobile's "This month" read $0 from
+ * 8pm Toronto on the last of the month), net-worth and holdings snapshots,
+ * recurring detection, income-schedule paydays (per user in the nightly
+ * cron), the recap's FIRE age, and Overview's recent-activity dates. Client
+ * code uses the browser's date (lib/localToday.ts): Add transaction's
+ * default date, a card's "charges since" link, the side nav's Year in
+ * review sticker.
  */
-export const APP_VERSION = "2.14.0";
+export const APP_VERSION = "2.14.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -38,6 +38,7 @@ import { monthSummary } from "@tally/core/budgetView";
 import { greetingFor, leftToSpendLine } from "@tally/core/popView";
 import { featuredReviewYear } from "@tally/core/yearReview";
 import { formatCents } from "@tally/core/money";
+import { todayISO } from "@/lib/today";
 
 // MOBILE_DESIGN.md §5.2 -- hero net worth (unboxed, direct on canvas), what
 // needs a tap (banks, review backlog), "This month", Investments / Credit
@@ -128,7 +129,7 @@ export default function OverviewScreen() {
         <View className="px-5 pb-1">
           {/* Year in review, in January only, for the year that just ended (a review covers whole years). */}
           {(() => {
-            const year = featuredReviewYear(new Date().toISOString().slice(0, 10));
+            const year = featuredReviewYear(todayISO());
             if (year == null) return null;
             return (
               <Pressable

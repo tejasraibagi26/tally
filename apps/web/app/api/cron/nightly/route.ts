@@ -9,6 +9,7 @@ import { computeAndStoreNetWorthSnapshot } from "@/lib/networth";
 import { generateDuePaychecksForAllActiveSchedules } from "@/lib/incomeSchedule";
 import { generateDueManualBillPaymentsForAllStreams } from "@/lib/recurringBillGeneration";
 import { runSyncStep, type SyncFailure } from "@/lib/syncSteps";
+import { todayFor } from "@/lib/userTimezone";
 
 export const maxDuration = 300;
 
@@ -25,7 +26,6 @@ export async function GET(req: Request) {
   }
 
   const items = await activeItems();
-  const today = new Date().toISOString().slice(0, 10);
 
   for (const item of items) {
     const failures: SyncFailure[] = [];
@@ -37,7 +37,8 @@ export async function GET(req: Request) {
       console.error(`Cron nightly: item ${item.id} product failures`, failures);
     }
     try {
-      await computeAndStoreNetWorthSnapshot(item.userId, today);
+      // Each user's own date: the cron runs on UTC, a day ahead of the Americas' evening.
+      await computeAndStoreNetWorthSnapshot(item.userId, await todayFor(item.userId));
     } catch (err) {
       console.error(`Cron nightly: net-worth snapshot failed for user ${item.userId}`, err);
     }
@@ -45,7 +46,7 @@ export async function GET(req: Request) {
 
   let paychecksGenerated = 0;
   try {
-    paychecksGenerated = await generateDuePaychecksForAllActiveSchedules(today);
+    paychecksGenerated = await generateDuePaychecksForAllActiveSchedules();
   } catch (err) {
     console.error("Cron nightly: income schedule generation failed", err);
   }

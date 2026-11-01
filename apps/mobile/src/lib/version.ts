@@ -396,8 +396,11 @@ import Constants from "expo-constants";
  * 2.13.1 gives Android the cards' hard offset shadow iOS already had:
  * useStickerShadow returns a boxShadow there (Android 9+), where elevation
  * could only draw a soft shadow straight down.
+ * 2.13.2 uses the device's date (lib/today.ts todayISO) for Overview's
+ * Year in review strip and a card's "charges since" link, not UTC. The
+ * "This month" $0 in the evening was the server's (web 2.14.1).
  */
-export const APP_VERSION = "2.13.1";
+export const APP_VERSION = "2.13.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

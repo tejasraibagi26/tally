@@ -7,6 +7,7 @@ import { requireUserId } from "@/lib/session";
 import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
 import { generateDuePaychecks } from "@/lib/incomeSchedule";
 import { accountDisplayName } from "@tally/core/accountName";
+import { todayFor } from "@/lib/userTimezone";
 
 export async function GET(req: Request) {
   let userId: string;
@@ -92,7 +93,7 @@ export async function POST(req: Request) {
   // late, last month's) already-passed payday(s) rather than waiting for the
   // next nightly cron — "do the math for the month" shouldn't require an
   // overnight delay.
-  const today = new Date().toISOString().slice(0, 10);
+  const today = await todayFor(userId);
   const generated = await generateDuePaychecks(schedule, today);
 
   return NextResponse.json({ schedule, generated });

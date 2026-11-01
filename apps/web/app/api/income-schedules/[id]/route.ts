@@ -5,6 +5,7 @@ import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
 import { generateDuePaychecks } from "@/lib/incomeSchedule";
+import { todayFor } from "@/lib/userTimezone";
 
 const anchorSchema = z.number().int().min(0).max(31);
 const patchSchema = z.object({
@@ -55,7 +56,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   let generated = 0;
   if (schedule.active) {
-    const today = new Date().toISOString().slice(0, 10);
+    const today = await todayFor(userId);
     generated = await generateDuePaychecks(schedule, today);
   }
 

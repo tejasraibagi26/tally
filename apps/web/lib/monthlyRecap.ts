@@ -8,6 +8,7 @@ import { monthRange, shiftMonth, monthLastDay } from "@tally/core/budgetMath";
 import { fireNumber, fireProgressPct, yearsToFire, ageAsOf, fireAgeAndYear, realReturn } from "@tally/core/fireMath";
 import { fireInputs } from "@/lib/fire";
 import { formatPercent } from "@tally/core/money";
+import { todayFor } from "@/lib/userTimezone";
 
 // Matches CategorySpendBar.tsx's convention: color by rank position, not the
 // category's own stored colorSlot (siblings under one parent all share a
@@ -250,7 +251,7 @@ async function computeFire(userId: string, birthDate: string | null, priorYearsT
   const result = yearsToFire({ currentValue: investableNetWorth, monthlyContribution, annualReturnRate, targetValue: fireNumberValue });
   if (result.years == null) return null;
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = await todayFor(userId);
   const currentAge = ageAsOf(birthDate, today);
   const { age, year } = fireAgeAndYear(currentAge, result.years, today);
 

@@ -3,6 +3,7 @@ import { db, schema } from "@/db";
 import { userCategories } from "@/lib/userCategories";
 import { monthRange, shiftMonth } from "@tally/core/budgetMath";
 import { hasSplits } from "@/lib/budgets";
+import { todayFor } from "@/lib/userTimezone";
 
 export interface CashFlowMonth {
   month: string; // YYYY-MM-01
@@ -62,7 +63,8 @@ export async function dailySpend(userId: string, month: string): Promise<Record<
 /** §9 "Cash flow": income − spend, per month, N-month trailing series (default 13, matching the spec's own example). */
 export async function cashFlowTrend(userId: string, months = 13): Promise<CashFlowMonth[]> {
   const monthStarts: string[] = [];
-  let cursor = new Date().toISOString().slice(0, 8) + "01";
+  // The user's own month, not the server's UTC one: evenings in the Americas are already next month in UTC.
+  let cursor = (await todayFor(userId)).slice(0, 8) + "01";
   for (let i = 0; i < months; i++) {
     monthStarts.unshift(cursor);
     cursor = shiftMonth(cursor, -1);

@@ -2,6 +2,7 @@ import { and, eq, isNull } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { detectRecurringStreams, normalizeMerchantKey, type RecurringCandidate } from "@tally/core/recurringDetection";
 import { excludeAmortizedRealCharges, generateDueManualBillPaymentsForAllStreams } from "@/lib/recurringBillGeneration";
+import { todayFor } from "@/lib/userTimezone";
 
 /**
  * Re-runs recurring detection (§7.5) over the user's full non-transfer,
@@ -38,7 +39,7 @@ export async function detectRecurringForUser(userId: string): Promise<void> {
     billedDate: r.authorizedDate,
   }));
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = await todayFor(userId);
   const streams = detectRecurringStreams(candidates, today);
 
   for (const s of streams) {

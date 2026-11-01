@@ -52,11 +52,10 @@ function pctChip(current: number, prior: number): { direction: "up" | "down"; pc
   return { direction: change >= 0 ? "up" : "down", pctLabel: formatPercent(Math.abs(change)) };
 }
 
-function relativeDate(dateStr: string): string {
-  const date = new Date(dateStr + "T00:00:00");
-  const now = new Date();
-  const sameYear = date.getFullYear() === now.getFullYear();
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: sameYear ? undefined : "numeric" });
+/** `today` is the user's own date (todayInZone), so the year only shows for last year's rows. */
+function relativeDate(dateStr: string, today: string): string {
+  const sameYear = dateStr.slice(0, 4) === today.slice(0, 4);
+  return new Date(`${dateStr}T00:00:00Z`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: sameYear ? undefined : "numeric", timeZone: "UTC" });
 }
 
 export default async function OverviewPage() {
@@ -330,7 +329,7 @@ export default async function OverviewPage() {
                   <span className="text-[15px] text-text truncate">{t.merchantName ?? t.name}</span>
                   {t.isPending && <span className="text-[11px] text-warning uppercase tracking-wide flex-none">Pending</span>}
                 </div>
-                <span className="font-mono text-xs text-text-3 tabular flex-none w-20 text-right whitespace-nowrap">{relativeDate(t.postedDate)}</span>
+                <span className="font-mono text-xs text-text-3 tabular flex-none w-20 text-right whitespace-nowrap">{relativeDate(t.postedDate, today)}</span>
                 <span className={`text-[15px] tabular flex-none w-24 text-right ${t.amount > 0 ? "text-positive" : "text-text"}`}>
                   {formatCents(t.amount, { signed: true })}
                 </span>
