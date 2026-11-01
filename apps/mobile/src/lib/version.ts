@@ -393,8 +393,11 @@ import Constants from "expo-constants";
  * height 645): every non-card debt with the lender's rate, next payment
  * and payoff when reported. Forecast's loan rows and Safe to spend's loan
  * payments open it; tally:// /loans does too.
+ * 2.13.1 gives Android the cards' hard offset shadow iOS already had:
+ * useStickerShadow returns a boxShadow there (Android 9+), where elevation
+ * could only draw a soft shadow straight down.
  */
-export const APP_VERSION = "2.13.0";
+export const APP_VERSION = "2.13.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

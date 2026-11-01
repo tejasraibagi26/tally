@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.13.1",
+    date: "2026-10-31",
+    changes: [{ kind: "fixed", text: "On Android, cards now have the same offset shadow as on iPhone." }],
+  },
+  {
     version: "2.13.0",
     date: "2026-10-31",
     changes: [
