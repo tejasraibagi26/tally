@@ -29,13 +29,11 @@ import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { highCardCount, rankBudgets } from "@tally/core/overviewView";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
-import { useUiLook } from "@/lib/UiLookContext";
 import { HeroSurface, OnPaceCard } from "@/components/overview/PopOverview";
 import { SafeToSpendCard } from "@/components/overview/SafeToSpend";
 import { useSafeToSpend } from "@/lib/queries/safeToSpend";
 import { GoalCard } from "@/components/overview/GoalCard";
 import { GoalIntroDialog } from "@/components/overview/GoalIntroDialog";
-import { NewLookDialog } from "@/components/overview/NewLookDialog";
 import { ForecastIntroDialog } from "@/components/forecast/ForecastIntroDialog";
 import { useAccountProfile } from "@/lib/queries/account";
 import { useGoal } from "@/lib/queries/goals";
@@ -55,15 +53,11 @@ export default function OverviewScreen() {
   const queryClient = useQueryClient();
   const colors = useThemeColors();
   const rf = useRF();
-  const { pop } = useUiLook();
-  const goal = useGoal(pop);
-  const safe = useSafeToSpend(pop);
+  const goal = useGoal();
+  const safe = useSafeToSpend();
   // ?safe=1 from an alert email (via the web's /open and +native-intent) opens the breakdown.
   const params = useLocalSearchParams<{ safe?: string }>();
   const profile = useAccountProfile();
-  // One dialog per visit: the new-look announcement first, the goals intro
-  // after (an older server sends no list -- nothing to wait for).
-  const lookSeen = profile.data ? (profile.data.seenAnnouncements?.includes("new-look") ?? true) : false;
   // The forecast intro waits for the goals step to be settled, so only one
   // dialog ever appears per visit.
   const goalsStepDone = goal.data != null ? goal.data.goal != null || goal.data.introSeen !== false : false;
@@ -159,9 +153,9 @@ export default function OverviewScreen() {
             );
           })()}
           <TabHeader
-            title={pop ? popTitle : "Overview"}
+            title={popTitle}
             meta={[
-              pop ? popLine : new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+              popLine,
               hasSynced(accounts.data?.institutions.map((i) => i.lastSyncedAt) ?? []) && <SyncFreshness key="sync" syncedAt={accounts.data?.institutions.map((i) => i.lastSyncedAt) ?? []} />,
             ]}
             actions={
@@ -179,24 +173,20 @@ export default function OverviewScreen() {
 
       <View className="gap-7 px-5 pt-3">
         {/* Hero net worth -- unboxed, per MOBILE_DESIGN.md */}
-        {pop ? (
-          <HeroSurface>
-            <NetWorthHero netCents={netCents} points={trend.data?.points ?? []} loading={accounts.isLoading} onScrubChange={setIsScrubbingChart} />
-          </HeroSurface>
-        ) : (
+        <HeroSurface>
           <NetWorthHero netCents={netCents} points={trend.data?.points ?? []} loading={accounts.isLoading} onScrubChange={setIsScrubbingChart} />
-        )}
+        </HeroSurface>
 
-        {/* Tally Pop: safe to spend over a compact on-pace row (the streak needs a budget to pace against) */}
-        {pop && ((safe.data?.cash.length ?? 0) > 0 || onPace) && (
+        {/* Safe to spend over a compact on-pace row (the streak needs a budget to pace against) */}
+        {((safe.data?.cash.length ?? 0) > 0 || onPace) && (
           <View className="gap-3.5">
             {safe.data && safe.data.cash.length > 0 && <SafeToSpendCard s={safe.data} initiallyOpen={params.safe === "1"} />}
             {onPace && <OnPaceCard streak={onPace.streak} dailyPace={onPace.dailyPace} compact={(safe.data?.cash.length ?? 0) > 0} />}
           </View>
         )}
 
-        {/* Tally Pop: the year-end goal, or a prompt to set one */}
-        {pop && <GoalCard summary={goal.data} />}
+        {/* The year-end goal, or a prompt to set one */}
+        <GoalCard summary={goal.data} />
 
         {/* Banks that need a tap and this month's review backlog (the same count as
             the Transactions tab's "N to review" banner) -- renders nothing when all
@@ -258,10 +248,9 @@ export default function OverviewScreen() {
       </View>
       </ScrollView>
       <Toast message={undo.message} onHidden={undo.clear} action={undo.action} bottom={tabBarClearance + 16} />
-      <NewLookDialog profile={profile.data} />
-      {pop && lookSeen && <GoalIntroDialog summary={goal.data} />}
-      {/* Third in the chain: after the look and the goals intro. */}
-      {pop && lookSeen && <ForecastIntroDialog profile={profile.data} show={goalsStepDone} />}
+      {profile.data && <GoalIntroDialog summary={goal.data} />}
+      {/* Second in the chain: after the goals intro. */}
+      <ForecastIntroDialog profile={profile.data} show={goalsStepDone} />
     </View>
   );
 }

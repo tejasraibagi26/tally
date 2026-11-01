@@ -24,7 +24,6 @@ import { featuredReviewYear } from "@tally/core/yearReview";
 import { LogoMark } from "@/components/Logo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PrivacyToggle } from "@/components/PrivacyToggle";
-import { UiToggle } from "@/components/UiToggle";
 import { SignOutButton } from "@/components/nav/SignOutButton";
 import { APP_VERSION, BUILD_SHA } from "@/lib/version";
 
@@ -42,8 +41,6 @@ interface NavItem {
   meta?: string;
   /** Replaces `meta` with a colored count pill (coral = blocked, amber = act soon). */
   alert?: { count: number; tone: "negative" | "warning"; title: string };
-  /** Only in the Tally Pop look (globals.css .pop-only). */
-  popOnly?: boolean;
 }
 
 interface NavGroup {
@@ -103,7 +100,7 @@ function navGroups(counts: NavCounts): NavGroup[] {
       label: "Plan ahead",
       items: [
         { href: "/forecast", label: "Forecast", icon: TrendingDown },
-        { href: "/goals", label: "Year-end goal", icon: Target, popOnly: true },
+        { href: "/goals", label: "Year-end goal", icon: Target },
         { href: "/fire", label: "Early retirement", icon: Flame },
       ],
     },
@@ -143,7 +140,6 @@ function NavRow({ item, active }: { item: NavItem; active: boolean }) {
       href={item.href}
       className={cn(
         "flex items-center justify-between px-2.5 py-1.5 rounded-control text-[15px]",
-        item.popOnly && "pop-only",
         active ? "ui-nav-active bg-brand-subtle text-brand font-medium" : "text-text-2 font-normal hover:bg-sunken",
       )}
     >
@@ -246,7 +242,6 @@ export function SideNav({
         <div className="flex flex-col gap-[2px]">
           <PrivacyToggle variant="row" />
           <ThemeToggle variant="row" />
-          <UiToggle />
         </div>
 
         <div className="h-px bg-border" />

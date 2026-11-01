@@ -111,13 +111,6 @@ export const POP_FONTS = {
   display: "BricolageGrotesque_ExtraBold",
 } as const;
 
-export const CLASSIC_FONTS = {
-  ui: "Inter",
-  "ui-medium": "Inter_Medium",
-  "ui-semibold": "Inter_SemiBold",
-  display: "InstrumentSerif",
-} as const;
-
 function buildVars(colors: Record<string, string>) {
   const out: Record<string, string> = {};
   for (const token of VAR_TOKENS) out[`--color-${token}`] = colors[token]!;

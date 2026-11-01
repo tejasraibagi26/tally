@@ -8,7 +8,6 @@ import { CategoryPickerSheet } from "@/components/CategoryPickerSheet";
 import { useReviewQueue, useReviewTransaction } from "@/lib/queries/transactions";
 import { chartSeries } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
-import { useUiLook } from "@/lib/UiLookContext";
 import { TallyMarks } from "@/components/ui/TallyMarks";
 import { useRF } from "@/theme/responsiveFont";
 import { useColorScheme } from "nativewind";
@@ -26,7 +25,6 @@ export default function ReviewScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const colors = useThemeColors();
-  const { pop } = useUiLook();
   const rf = useRF();
   const queryClient = useQueryClient();
   const { colorScheme } = useColorScheme();
@@ -119,16 +117,10 @@ export default function ReviewScreen() {
         </Pressable>
       </View>
       {total > 0 &&
-        (pop ? (
-          // Tally Pop: each one done adds a stroke; every fifth crosses.
-          <View className="mx-5 my-2 h-7 justify-center">
-            <TallyMarks count={Math.min(index, total)} height={26} color={colors.text!} accent={colors.brand!} />
-          </View>
-        ) : (
-          <View className="mx-5 my-2 h-1 rounded-full bg-surface-2 overflow-hidden">
-            <View className="h-full bg-brand" style={{ width: `${(Math.min(index, total) / total) * 100}%` }} />
-          </View>
-        ))}
+        // Each one done adds a stroke; every fifth crosses.
+        <View className="mx-5 my-2 h-7 justify-center">
+          <TallyMarks count={Math.min(index, total)} height={26} color={colors.text!} accent={colors.brand!} />
+        </View>}
 
       <View className="flex-1 justify-center px-5">
         {isLoading ? (
@@ -137,8 +129,8 @@ export default function ReviewScreen() {
           <Text className="font-ui text-text-2 text-center" style={{ fontSize: rf(14) }}>{"Couldn't load transactions to review."}</Text>
         ) : !current ? (
           <View className="items-center gap-3">
-            {pop && done > 0 && <TallyMarks count={Math.max(done, 5)} height={44} color={colors.brand!} accent={colors.marigold!} />}
-            <Text className="font-display text-text text-center" style={{ fontSize: rf(28) }}>{pop ? "All tallied." : "You're all caught up"}</Text>
+            {done > 0 && <TallyMarks count={Math.max(done, 5)} height={44} color={colors.brand!} accent={colors.marigold!} />}
+            <Text className="font-display text-text text-center" style={{ fontSize: rf(28) }}>All tallied.</Text>
             <Text className="font-ui text-text-2 text-center" style={{ fontSize: rf(14) }}>
               {done > 0 ? `${done} reviewed. New transactions show up here as they sync.` : "Nothing left to review."}
             </Text>
@@ -156,7 +148,7 @@ export default function ReviewScreen() {
                   {current.isPending ? " · pending" : ""}
                 </Text>
               </View>
-              <Text className={pop ? "font-display" : "font-ui-semibold"} style={{ fontSize: rf(20), color: current.amount > 0 ? colors.positive : colors.text, fontVariant: ["tabular-nums"] }}>
+              <Text className="font-display" style={{ fontSize: rf(20), color: current.amount > 0 ? colors.positive : colors.text, fontVariant: ["tabular-nums"] }}>
                 {formatCents(current.amount, { signed: true })}
               </Text>
             </View>

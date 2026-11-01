@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.11.0",
+    date: "2026-10-31",
+    changes: [
+      { kind: "improved", text: "Tally has one look now. The classic look and the \"New look\" switch are gone, and every email uses the new design." },
+      { kind: "new", text: "Year-end goal, Safe to spend and Forecast alerts are available to everyone." },
+    ],
+  },
+  {
     version: "2.10.8",
     date: "2026-10-31",
     changes: [{ kind: "improved", text: "Tally's fonts now load from Tally itself, not a third-party font service." }],

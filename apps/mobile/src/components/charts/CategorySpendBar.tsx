@@ -4,7 +4,6 @@ import { MoneyText } from "@/components/ui/MoneyText";
 import { chartSeries } from "@/theme/colors";
 import { useRF } from "@/theme/responsiveFont";
 import { Bleed } from "@/components/ui/Bleed";
-import { useUiLook } from "@/lib/UiLookContext";
 import type { BreakdownRow } from "@/lib/queries/spendBreakdown";
 
 // Matches web's CategorySpendBar (DESIGN.md §7.2 "Portfolio allocation"
@@ -13,7 +12,6 @@ import type { BreakdownRow } from "@/lib/queries/spendBreakdown";
 // parent), labeled legend below.
 export function CategorySpendBar({ rows, limit = 6 }: { rows: BreakdownRow[]; limit?: number }) {
   const rf = useRF();
-  const { pop } = useUiLook();
   const { colorScheme } = useColorScheme();
   const series = colorScheme === "dark" ? chartSeries.dark : chartSeries.light;
   const top = rows.slice(0, limit);
@@ -28,9 +26,9 @@ export function CategorySpendBar({ rows, limit = 6 }: { rows: BreakdownRow[]; li
 
   return (
     <View className="gap-4 py-1">
-      {/* Tally Pop: edge to edge of its card (Overview's p-5), square ends. */}
+      {/* Edge to edge of its card (Overview's p-5), square ends. */}
       <Bleed>
-        <View className={`flex-row h-3.5 gap-0.5 overflow-hidden ${pop ? "" : "rounded-full"}`}>
+        <View className="flex-row h-3.5 gap-0.5 overflow-hidden">
           {top.map((row, i) => (
             // Shares of what's left after the gaps: percentage widths summed to 100% plus the gaps, and the overflow clipped the last segment.
             <View key={row.key} style={{ flexGrow: row.total, flexBasis: 0, backgroundColor: series[i % series.length] }} />

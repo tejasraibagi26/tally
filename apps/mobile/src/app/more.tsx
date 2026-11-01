@@ -2,7 +2,6 @@ import { View, Text, Pressable, Platform } from "react-native";
 import { useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Repeat, TrendingUp, TrendingDown, Flame, Settings, LogOut, ChevronRight, CreditCard, Target, Tag } from "lucide-react-native";
-import { useUiLook } from "@/lib/UiLookContext";
 import { useAuth } from "@/lib/AuthContext";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { hairline } from "@/theme/colors";
@@ -44,7 +43,6 @@ function Row({
 export default function MoreScreen() {
   const router = useRouter();
   const colors = useThemeColors();
-  const { pop } = useUiLook();
   const insets = useSafeAreaInsets();
   const { logout } = useAuth();
   const rf = useRF();
@@ -86,12 +84,9 @@ export default function MoreScreen() {
           <View style={soft}>
             <Row icon={<CreditCard size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Credit cards" onPress={() => go("/cards" as Href)} colors={colors} />
           </View>
-          {/* Tally Pop only; lib/moreSheet.ts adds this row's height in Pop. */}
-          {pop && (
-            <View style={soft}>
-              <Row icon={<Target size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Year-end goal" onPress={() => go("/goals" as Href)} colors={colors} />
-            </View>
-          )}
+          <View style={soft}>
+            <Row icon={<Target size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Year-end goal" onPress={() => go("/goals" as Href)} colors={colors} />
+          </View>
           <View style={soft}>
             <Row icon={<Flame size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Early retirement" onPress={() => go("/fire")} colors={colors} />
           </View>

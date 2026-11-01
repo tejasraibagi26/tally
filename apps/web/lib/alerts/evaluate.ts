@@ -18,7 +18,6 @@ import { loadAlertPreferences } from "@/lib/alerts/preferences";
 import { recordAndDeliver } from "@/lib/alerts/engine";
 import { formatCents } from "@tally/core/money";
 import { goalSummary } from "@/lib/goals";
-import { wantsPopEmail } from "@/lib/uiLook";
 import { deadlineLabel } from "@/lib/goalCopy";
 import { forecastFor } from "@/lib/forecast";
 import { safeToSpendFor } from "@/lib/safeToSpend";
@@ -158,13 +157,10 @@ export async function evaluateAfterTransactionSync(userId: string, plaidTransact
 }
 
 /**
- * The year-end goal (lib/goals.ts) projecting short, for Tally Pop users
- * only. Daily sweep only; the dedupe key holds the month, so it fires at
+ * The year-end goal (lib/goals.ts) projecting short. Daily sweep only; the dedupe key holds the month, so it fires at
  * most once a month per goal.
  */
 async function goalCandidates(userId: string): Promise<AlertCandidate[]> {
-  const [user] = await db.select({ uiLook: schema.users.uiLook }).from(schema.users).where(eq(schema.users.id, userId)).limit(1);
-  if (!user || !wantsPopEmail(user)) return [];
   const summary = await goalSummary(userId);
   if (!summary || summary.projection.status !== "off_track") return [];
   const { goal, projection: p } = summary;
@@ -181,13 +177,11 @@ async function goalCandidates(userId: string): Promise<AlertCandidate[]> {
 }
 
 /**
- * Safe to spend (lib/safeToSpend.ts) below the user's amount, Tally Pop
- * only, once per pay window. Skipped while a counted account's balance is
+ * Safe to spend (lib/safeToSpend.ts) below the user's amount, once per
+ * pay window. Skipped while a counted account's balance is
  * stale: an old balance can make the number look short when it isn't.
  */
 async function safeToSpendCandidates(userId: string, threshold?: number): Promise<AlertCandidate[]> {
-  const [user] = await db.select({ uiLook: schema.users.uiLook }).from(schema.users).where(eq(schema.users.id, userId)).limit(1);
-  if (!user || !wantsPopEmail(user)) return [];
   const s = await safeToSpendFor(userId);
   if (s.cash.length === 0 || s.stale.length > 0) return [];
   const alert = safeToSpendLowAlert({
@@ -204,8 +198,8 @@ async function safeToSpendCandidates(userId: string, threshold?: number): Promis
 const SHORTFALL_LEAD_DAYS = 30;
 
 /**
- * The forecast (lib/forecast.ts) crossing the buffer on a future day, Tally
- * Pop only. Daily sweep only: the curve shifts a little with every
+ * The forecast (lib/forecast.ts) crossing the buffer on a future day.
+ * Daily sweep only: the curve shifts a little with every
  * transaction that posts, and a per-sync trigger would turn one dip into a
  * stream of near-identical mail.
  *
@@ -215,8 +209,6 @@ const SHORTFALL_LEAD_DAYS = 30;
  * the same money.
  */
 async function forecastCandidates(userId: string, already: AlertCandidate[]): Promise<AlertCandidate[]> {
-  const [user] = await db.select({ uiLook: schema.users.uiLook }).from(schema.users).where(eq(schema.users.id, userId)).limit(1);
-  if (!user || !wantsPopEmail(user)) return [];
   const f = await forecastFor(userId);
   if (f.openingCash === 0 || f.assumptions.stale.length > 0) return [];
   if (!f.headline || f.headline.kind !== "shortfall") return [];

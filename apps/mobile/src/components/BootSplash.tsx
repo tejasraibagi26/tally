@@ -13,7 +13,6 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from "react-native-reanimated";
-import { useUiLook } from "@/lib/UiLookContext";
 
 const AnimatedLine = Animated.createAnimatedComponent(Line);
 
@@ -30,7 +29,7 @@ const STROKES = [
   { x1: 5, y1: 17.5, x2: 18.5, y2: 5.5 },
 ] as const;
 const LOGO_SIZE = 76;
-const STROKE_WIDTH = 2;
+const STROKE_WIDTH = 2.6;
 
 // Timing: each upright draws in 220ms, 130ms apart; a short beat, then the
 // slash in 320ms. ~1.2s to a finished mark.
@@ -41,14 +40,7 @@ const CROSS_MS = 320;
 export const BOOT_DRAW_MS = CROSS_DELAY_MS + CROSS_MS;
 const FADE_OUT_MS = 320;
 
-// Native splash colors (app.json expo-splash-screen + splash-icon*.png), so
-// there's no color jump at the hand-off.
-const PALETTE = {
-  light: { bg: "#F5F4F0", ink: "#14513F", accent: "#14513F", text: "#4D4B45" },
-  dark: { bg: "#000000", ink: "#4FB394", accent: "#4FB394", text: "#B3B1A8" },
-};
-// Tally Pop (lib/UiLookContext.tsx): the brand mark with its marigold
-// crossing stroke on Pop's canvas, a little heavier. The native splash
+// The brand mark with its marigold crossing stroke on Pop's canvas. The native splash
 // before JS can't know the flag, so this one cross-fades in from it.
 const POP_PALETTE = {
   light: { bg: "#FFF6E9", ink: "#5B3BF5", accent: "#FFC53D", text: "#1D1B2F" },
@@ -57,8 +49,7 @@ const POP_PALETTE = {
 
 function useSplashPalette() {
   const scheme = useSystemColorScheme() === "dark" ? "dark" : "light";
-  const { pop } = useUiLook();
-  return { palette: (pop ? POP_PALETTE : PALETTE)[scheme], pop };
+  return { palette: POP_PALETTE[scheme] };
 }
 
 function strokeLength(s: (typeof STROKES)[number]): number {
@@ -93,7 +84,7 @@ function Stroke({ stroke, progress, color, width }: { stroke: (typeof STROKES)[n
  * shows fully drawn and only the fade-out runs.
  */
 export function BootSplash({ ready, showWordmark, onDone }: { ready: boolean; showWordmark: boolean; onDone: () => void }) {
-  const { palette, pop } = useSplashPalette();
+  const { palette } = useSplashPalette();
 
   const p0 = useSharedValue(0);
   const p1 = useSharedValue(0);
@@ -174,7 +165,7 @@ export function BootSplash({ ready, showWordmark, onDone }: { ready: boolean; sh
       <Animated.View style={markStyle}>
         <Svg width={LOGO_SIZE} height={LOGO_SIZE} viewBox="0 0 24 24" fill="none">
           {STROKES.map((s, i) => (
-            <Stroke key={i} stroke={s} progress={progress[i]!} color={i === 4 ? palette.accent : palette.ink} width={pop ? 2.6 : STROKE_WIDTH} />
+            <Stroke key={i} stroke={s} progress={progress[i]!} color={i === 4 ? palette.accent : palette.ink} width={STROKE_WIDTH} />
           ))}
         </Svg>
       </Animated.View>
@@ -182,11 +173,7 @@ export function BootSplash({ ready, showWordmark, onDone }: { ready: boolean; sh
           center, exactly where the native splash put it. */}
       {showWordmark && (
         <Animated.View style={[{ position: "absolute", top: "50%", marginTop: LOGO_SIZE / 2 + 14 }, wordmarkStyle]}>
-          {pop ? (
-            <Text style={{ fontFamily: "BricolageGrotesque_ExtraBold", fontSize: 32, color: palette.text, letterSpacing: -1 }}>tally</Text>
-          ) : (
-            <Text style={{ fontFamily: "InstrumentSerif", fontSize: 30, color: palette.text, letterSpacing: 0.2 }}>Tally</Text>
-          )}
+          <Text style={{ fontFamily: "BricolageGrotesque_ExtraBold", fontSize: 32, color: palette.text, letterSpacing: -1 }}>tally</Text>
         </Animated.View>
       )}
     </Animated.View>
@@ -199,12 +186,12 @@ export function BootSplash({ ready, showWordmark, onDone }: { ready: boolean; sh
  * switcher snapshot doesn't show balances, without asking for Face ID.
  */
 export function PrivacyCover() {
-  const { palette, pop } = useSplashPalette();
+  const { palette } = useSplashPalette();
   return (
     <Animated.View style={[StyleSheet.absoluteFill, { backgroundColor: palette.bg, alignItems: "center", justifyContent: "center" }]} pointerEvents="none">
       <Svg width={LOGO_SIZE} height={LOGO_SIZE} viewBox="0 0 24 24" fill="none">
         {STROKES.map((s, i) => (
-          <Line key={i} {...s} stroke={i === 4 ? palette.accent : palette.ink} strokeWidth={pop ? 2.6 : STROKE_WIDTH} strokeLinecap="round" />
+          <Line key={i} {...s} stroke={i === 4 ? palette.accent : palette.ink} strokeWidth={STROKE_WIDTH} strokeLinecap="round" />
         ))}
       </Svg>
     </Animated.View>

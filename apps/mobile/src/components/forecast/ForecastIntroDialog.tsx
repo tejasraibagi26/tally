@@ -10,8 +10,7 @@ import { useRF } from "@/theme/responsiveFont";
 
 /**
  * Mobile's one-time announcement of Forecast (web's ForecastIntroModal):
- * once per account (POST /api/announcements/seen "forecast"), and only when
- * the account hasn't chosen classic. "Not now" just closes -- the More sheet
+ * once per account (POST /api/announcements/seen "forecast"). "Not now" just closes -- the More sheet
  * row and Overview's card stay, so dismissing never loses the way in.
  */
 export function ForecastIntroDialog({ profile, show }: { profile: AccountProfile | undefined; show: boolean }) {
@@ -24,7 +23,7 @@ export function ForecastIntroDialog({ profile, show }: { profile: AccountProfile
   useEffect(() => {
     // Older servers don't send the list: never show rather than nag.
     if (done || !show || !profile?.seenAnnouncements) return;
-    if (!profile.seenAnnouncements.includes("forecast") && profile.uiLook !== "classic") setVisible(true);
+    if (!profile.seenAnnouncements.includes("forecast")) setVisible(true);
   }, [profile, show, done]);
 
   function dismiss(open = false) {

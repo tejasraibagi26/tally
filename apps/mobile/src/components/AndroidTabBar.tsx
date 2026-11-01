@@ -6,8 +6,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring, w
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { useColorScheme } from "nativewind";
 import { useThemeColors } from "@/theme/useThemeColors";
-import { useUiLook } from "@/lib/UiLookContext";
-import { CLASSIC_FONTS, POP_FONTS } from "@/theme/pop";
+import { POP_FONTS } from "@/theme/pop";
 import { withAlpha } from "@/theme/colors";
 
 // Geometry shared with useTabBarBottomClearance (lib/), which pads tab
@@ -42,7 +41,6 @@ function TabItem({
   accessibilityLabel?: string;
 }) {
   const colors = useThemeColors();
-  const { pop: popLook } = useUiLook();
   const pop = useSharedValue(1);
   const [pressed, setPressed] = useState(false);
 
@@ -71,7 +69,7 @@ function TabItem({
         style={{ flex: 1, alignItems: "center", justifyContent: "center", opacity: pressed && !focused ? 0.6 : 1 }}
       >
         <Animated.View style={iconStyle}>{icon(color)}</Animated.View>
-        <Text numberOfLines={1} style={{ marginTop: 3, fontFamily: (popLook ? POP_FONTS : CLASSIC_FONTS)[focused ? "ui-semibold" : "ui-medium"], fontSize: 11, color }}>
+        <Text numberOfLines={1} style={{ marginTop: 3, fontFamily: POP_FONTS[focused ? "ui-semibold" : "ui-medium"], fontSize: 11, color }}>
           {label}
         </Text>
       </Pressable>

@@ -31,15 +31,12 @@ const jetbrainsMono = localFont({
   display: "swap",
 });
 
-// Tally Pop preview fonts (lib/uiFlag.ts). preload: false so a browser
-// without the flag never downloads them: the @font-face rules only fetch
-// once something on the page actually uses the family.
+// Tally Pop's fonts: the UI face and the display face.
 const figtree = localFont({
   src: "./fonts/figtree-latin-var.woff2",
   weight: "400 800",
   variable: "--font-figtree",
   display: "swap",
-  preload: false,
 });
 
 const bricolage = localFont({
@@ -47,7 +44,6 @@ const bricolage = localFont({
   weight: "700 800",
   variable: "--font-bricolage",
   display: "swap",
-  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -68,12 +64,6 @@ const THEME_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("tally-the
 // must run synchronously before first paint too.
 const PRIVACY_INIT_SCRIPT = `(function(){try{var s=localStorage.getItem("tally-hide-amounts");document.documentElement.setAttribute("data-hide-amounts",s==="true"?"true":"false");}catch(e){}})();`;
 
-// The look (lib/uiFlag.ts): Tally Pop unless this browser chose classic,
-// set before first paint for the same no-flash reason as the theme. A
-// classic choice also swaps the tab icon back once the head's icon links
-// exist (app/icon.svg is Pop's).
-const UI_INIT_SCRIPT = `(function(){try{if(/(?:^|; )tally-ui=classic(?:;|$)/.test(document.cookie)){document.addEventListener("DOMContentLoaded",function(){document.querySelectorAll('link[rel~="icon"]').forEach(function(l){l.dataset.popHref=l.href;l.href="/icon-classic.svg";});});}else{document.documentElement.setAttribute("data-ui","pop");}}catch(e){}})();`;
-
 // components/BootSplash.tsx plays once per tab session. Marking <html>
 // before first paint, rather than after hydration, keeps a reload from
 // flashing the splash for a frame. Reduced motion skips it outright.
@@ -85,11 +75,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // carry a stale one the CSP refuses.
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
-    <html lang="en" data-theme="light" data-hide-amounts="false" suppressHydrationWarning>
+    <html lang="en" data-theme="light" data-ui="pop" data-hide-amounts="false" suppressHydrationWarning>
       <head>
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: PRIVACY_INIT_SCRIPT }} />
-        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: UI_INIT_SCRIPT }} />
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: BOOT_INIT_SCRIPT }} />
       </head>
       <body

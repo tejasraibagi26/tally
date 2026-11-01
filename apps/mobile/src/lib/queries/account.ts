@@ -6,7 +6,6 @@ export interface AccountProfile {
   email: string;
   birthDate: string | null;
   recapsEnabled: boolean;
-  uiLook?: string | null;
   /** One-time modals already dismissed (web lib/announcements.ts); missing on older servers. */
   seenAnnouncements?: string[];
 }

@@ -11,7 +11,6 @@ import { MoneyText } from "@/components/ui/MoneyText";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { HeroSurface } from "@/components/overview/PopOverview";
-import { useUiLook } from "@/lib/UiLookContext";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { chartSeries } from "@/theme/colors";
@@ -39,7 +38,6 @@ export default function YearInReviewScreen() {
   const rf = useRF();
   const colors = useThemeColors();
   const contentTop = useScreenContentTop();
-  const { pop } = useUiLook();
   // Whole years only: the latest finished year, and back from there.
   const lastYear = latestCompleteYear(new Date().toISOString().slice(0, 10));
   const { year: asked } = useLocalSearchParams<{ year?: string }>();
@@ -93,7 +91,7 @@ export default function YearInReviewScreen() {
         ) : (
           <>
             <Text className="font-ui text-text-3 px-1" style={{ fontSize: rf(13) }}>{r.transactionCount.toLocaleString("en-US")} transactions</Text>
-            {pop ? <HeroSurface>{heroBody}</HeroSurface> : <Card className="p-5">{heroBody}</Card>}
+            <HeroSurface>{heroBody}</HeroSurface>
 
             <View className="flex-row gap-3">
               <Tile label="Money in">
@@ -151,7 +149,7 @@ export default function YearInReviewScreen() {
               <Text className="font-display text-text" style={{ fontSize: rf(17) }}>Top places</Text>
               {r.topMerchants.map((m, i) => (
                 <View key={m.key} className="flex-row items-center gap-3">
-                  <View className="items-center justify-center rounded-control" style={{ width: 32, height: 32, backgroundColor: colors.sunken, borderWidth: pop ? 2 : 0, borderColor: colors.ink ?? colors.border }}>
+                  <View className="items-center justify-center rounded-control" style={{ width: 32, height: 32, backgroundColor: colors.sunken, borderWidth: 2, borderColor: colors.ink ?? colors.border }}>
                     <Text className="font-display text-text" style={{ fontSize: rf(14) }}>{i + 1}</Text>
                   </View>
                   <View className="flex-1 min-w-0">

@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.10.0",
+    date: "2026-10-31",
+    changes: [
+      { kind: "improved", text: "Tally has one look now. The classic look and the \"New look\" switch in Settings are gone." },
+      { kind: "new", text: "Year-end goal, Safe to spend and their alerts are available to everyone." },
+    ],
+  },
+  {
     version: "2.9.2",
     date: "2026-10-31",
     changes: [{ kind: "improved", text: "Safe to spend labels its bar: bills, card payments and your cushion, with what each takes, then what's safe." }],

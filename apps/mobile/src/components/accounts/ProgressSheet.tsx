@@ -4,7 +4,6 @@ import { AlertTriangle, Check, CheckCircle2, Clock, X, XCircle } from "lucide-re
 import { SYNC_SLOW_AFTER_MS, syncDialogCopy, syncSteps, type SyncDialogMode, type SyncDialogPhase } from "@tally/core/syncDialog";
 import { Sheet } from "@/components/ui/Sheet";
 import { TallyLoader } from "@/components/ui/TallyLoader";
-import { useUiLook } from "@/lib/UiLookContext";
 import { hairline } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
@@ -37,7 +36,6 @@ function elapsedLabel(ms: number): string {
 export function ProgressSheet({ state, onClose, onRetry }: { state: ProgressState | null; onClose: () => void; onRetry: () => void }) {
   const colors = useThemeColors();
   const rf = useRF();
-  const { pop } = useUiLook();
   const [now, setNow] = useState(() => Date.now());
   // Keep the last state through the sheet's close animation.
   const [shown, setShown] = useState(state);
@@ -90,17 +88,17 @@ export function ProgressSheet({ state, onClose, onRetry }: { state: ProgressStat
           <View
             style={[
               { width: 40, height: 40, borderRadius: 10, backgroundColor: toneBg, alignItems: "center", justifyContent: "center" },
-              // Tally Pop: an ink-outlined tile; while syncing, a solid brand
-              // sticker with the mark in on-brand and the crossing in marigold.
-              pop && { borderRadius: 12, borderWidth: 2, borderColor: colors.ink },
-              pop && phase === "syncing" && { backgroundColor: colors["loader-bg"] },
+              // An ink-outlined tile; while syncing, a solid brand sticker
+              // with the mark in on-brand and the crossing in marigold.
+              { borderRadius: 12, borderWidth: 2, borderColor: colors.ink },
+              phase === "syncing" && { backgroundColor: colors["loader-bg"] },
             ]}
           >
             {isRunning ? (
-              pop && phase === "syncing" ? (
+              phase === "syncing" ? (
                 <TallyLoader color={colors["loader-ink"]!} accent={colors["loader-accent"]} strokeWidth={2.5} />
               ) : (
-                <TallyLoader color={toneColor} accent={pop ? colors.ink : undefined} strokeWidth={pop ? 2.5 : 2} slow={phase === "slow"} />
+                <TallyLoader color={toneColor} accent={colors.ink} strokeWidth={2.5} slow={phase === "slow"} />
               )
             ) : phase === "success" ? (
               <CheckCircle2 size={20} color={toneColor} strokeWidth={1.75} />

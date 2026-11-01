@@ -1,5 +1,4 @@
 import { Platform, View, type ViewProps } from "react-native";
-import { useUiLook } from "@/lib/UiLookContext";
 import { useThemeColors } from "@/theme/useThemeColors";
 
 // MOBILE_DESIGN.md §3.4 originally called for a soft drop shadow here; the
@@ -9,12 +8,11 @@ import { useThemeColors } from "@/theme/useThemeColors";
 // against bg-canvas alone for separation, same as dark mode already did.
 //
 // Tally Pop brings an edge back as a sticker: border-card's ink outline
-// (0px in the classic look) plus, on iOS, a hard offset shadow with no blur.
+// plus, on iOS, a hard offset shadow with no blur.
 // Android's elevation can't draw an offset, so it keeps the outline alone.
 export function useStickerShadow() {
-  const { pop } = useUiLook();
   const colors = useThemeColors();
-  return pop && Platform.OS === "ios" ? { shadowColor: colors["ink-shadow"], shadowOffset: { width: 4, height: 4 }, shadowOpacity: 1, shadowRadius: 0 } : null;
+  return Platform.OS === "ios" ? { shadowColor: colors["ink-shadow"], shadowOffset: { width: 4, height: 4 }, shadowOpacity: 1, shadowRadius: 0 } : null;
 }
 
 export function Card({ className, style, ...props }: ViewProps) {

@@ -370,8 +370,14 @@ import Constants from "expo-constants";
  * 2.9.2 puts web's legend under the Safe to spend meter (Bills, Cards,
  * Cushion with their amounts, then Safe), so each colour says what it is;
  * the card's spoken label reads the same breakdown.
+ * 2.10.0 retires the classic look: Tally Pop is the only one. The look
+ * context (lib/UiLookContext.tsx), the "New look" switch, NewLookDialog and
+ * CLASSIC_FONTS are gone; useThemeColors always returns Pop's palette and
+ * the root view always carries popVars. An install still showing the
+ * "Classic" alternate icon is reset to the primary once (lib/appIcon.ts);
+ * the alternate stays in app.json until the next native build.
  */
-export const APP_VERSION = "2.9.2";
+export const APP_VERSION = "2.10.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

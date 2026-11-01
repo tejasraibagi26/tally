@@ -4,7 +4,6 @@ import { monthTotals } from "@/lib/analytics";
 import { computeMonthlyRecap } from "@/lib/monthlyRecap";
 import { renderMonthInReviewEmail } from "@/lib/emailTemplate";
 import { sendEmail } from "@/lib/emailService";
-import { wantsPopEmail } from "@/lib/uiLook";
 import { goalSummary } from "@/lib/goals";
 import { unsubscribeToken } from "@/lib/emailUnsubscribe";
 
@@ -62,18 +61,16 @@ export async function sendMonthlyRecapForUser(
   }
 
   const data = await computeMonthlyRecap(user.id, month);
-  const [lookRow] = await db.select({ uiLook: schema.users.uiLook }).from(schema.users).where(eq(schema.users.id, user.id)).limit(1);
-  const pop = lookRow != null && wantsPopEmail(lookRow);
-  const goal = pop ? await goalSummary(user.id) : null;
+  const goal = await goalSummary(user.id);
   const html = renderMonthInReviewEmail(data, {
     appUrl: env.appUrl,
     preferencesUrl: `${env.appUrl}/settings`,
     unsubscribeUrl: `${env.appUrl}/unsubscribe?uid=${user.id}&token=${unsubscribeToken(user.id)}`,
     companyName: env.companyName,
     companyAddress: env.companyAddress,
-  }, pop ? "pop" : "classic", goal);
+  }, goal);
 
-  await sendEmail({ to: user.email, subject: pop ? `Your ${data.monthLabel}, tallied` : `Your ${data.monthLabel} recap`, html });
+  await sendEmail({ to: user.email, subject: `Your ${data.monthLabel}, tallied`, html });
 
   if (recordSend) {
     const yearsToFire = data.fire ? data.fire.yearsToGo.toFixed(2) : null;

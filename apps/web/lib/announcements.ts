@@ -7,6 +7,7 @@ import { db, schema } from "@/db";
  * year-end goals intro predates this and keeps its own column
  * (users.goals_intro_seen_at, lib/goals.ts).
  */
+// "new-look" is retired (web v2.11.0) but still accepted: older mobile builds post it.
 export const ANNOUNCEMENTS = ["new-look", "forecast"] as const;
 export type AnnouncementKey = (typeof ANNOUNCEMENTS)[number];
 

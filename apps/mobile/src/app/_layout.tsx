@@ -12,7 +12,7 @@ import { Platform, View, useWindowDimensions } from "react-native";
 import { AuthProvider, useAuth } from "@/lib/AuthContext";
 import { TransparentHeader } from "@/components/ui/ScreenHeader";
 import { PrivacyProvider } from "@/lib/PrivacyContext";
-import { UiLookProvider, useUiLook } from "@/lib/UiLookContext";
+import { resetAppIcon } from "@/lib/appIcon";
 import { popVars } from "@/theme/pop";
 import { queryClient } from "@/lib/queryClient";
 import { fontsToLoad } from "@/theme/fonts";
@@ -62,9 +62,13 @@ function RootNavigator() {
   const [fontsLoaded] = useFonts(fontsToLoad);
   const { colorScheme, setColorScheme } = useColorScheme();
   const colors = useThemeColors();
-  // Tally Pop (lib/UiLookContext.tsx): its CSS variables on a root view
-  // restyle every className beneath it; useThemeColors covers raw hex.
-  const { pop } = useUiLook();
+  // Tally Pop's CSS variables on a root view restyle every className
+  // beneath it; useThemeColors covers raw hex.
+  // An install that chose the classic look before it was retired (mobile
+  // v2.10.0) may still show the "Classic" home-screen icon: put Pop's back.
+  useEffect(() => {
+    void resetAppIcon();
+  }, []);
   // React Navigation's theme drives the native chrome: its \`dark\` flag sets the
   // iOS header's userInterfaceStyle (the Liquid Glass back button and bar) and
   // its colors paint the stack and tab containers. Without a ThemeProvider it
@@ -93,7 +97,7 @@ function RootNavigator() {
   const fontScale = useResponsiveFontScale();
   // The More sheet's height as a fraction of the screen, from its actual
   // content rather than a fixed guess (see lib/moreSheet.ts).
-  const moreDetent = moreSheetDetent({ windowHeight, fontScale, bottomInset: insets.bottom, pop });
+  const moreDetent = moreSheetDetent({ windowHeight, fontScale, bottomInset: insets.bottom });
 
   // Applies a user-picked light/dark override (Settings > Appearance) on
   // cold start -- nativewind's own colorScheme.set() doesn't persist across
@@ -137,7 +141,7 @@ function RootNavigator() {
       {shellReady ? (
         <>
           <StatusBar style="auto" />
-          <View style={[{ flex: 1 }, pop ? popVars[isDark ? "dark" : "light"] : null]}>
+          <View style={[{ flex: 1 }, popVars[isDark ? "dark" : "light"]]}>
           <ThemeProvider value={navTheme}>
           <Stack
             screenOptions={{
@@ -246,9 +250,7 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
             <PrivacyProvider>
-              <UiLookProvider>
-                <RootNavigator />
-              </UiLookProvider>
+              <RootNavigator />
             </PrivacyProvider>
           </AuthProvider>
         </QueryClientProvider>

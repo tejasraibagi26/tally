@@ -6,7 +6,6 @@ import { TrendingDown } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { DialogBody, DialogFooter, DialogHeader, DialogTile } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
-import { isPopOn } from "@/lib/uiFlag";
 
 /**
  * The one-time announcement of Forecast (Tally Pop only), on Overview.
@@ -19,9 +18,8 @@ export function ForecastIntroModal({ show }: { show: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
 
-  // Pop is a browser cookie, so this decides after mount.
   useEffect(() => {
-    if (show && isPopOn()) setOpen(true);
+    if (show) setOpen(true);
   }, [show]);
 
   function dismiss(then?: () => void) {

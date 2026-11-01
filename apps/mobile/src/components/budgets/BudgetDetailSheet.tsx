@@ -5,7 +5,6 @@ import { fmtBudget } from "@/components/budgets/BudgetRowItem";
 import { useBudgetHistory, useDeleteBudget, useSaveBudget, type BudgetLine } from "@/lib/queries/budgets";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
-import { useUiLook } from "@/lib/UiLookContext";
 import { PillButton, SheetError } from "@/components/ui/FormSheet";
 import { BusyIcon } from "@/components/ui/BusyIcon";
 import { Trash2 } from "lucide-react-native";
@@ -31,8 +30,8 @@ export function BudgetDetailSheet({
   onRemoved: (undo: () => void) => void;
 }) {
   const colors = useThemeColors();
-  // Headline figures: the display face in Tally Pop, the UI face otherwise.
-  const figureFont = useUiLook().pop ? "font-display text-text" : "font-ui-semibold text-text";
+  // Headline figures in the display face.
+  const figureFont = "font-display text-text";
   const rf = useRF();
   const history = useBudgetHistory(line.categoryId, month);
   const save = useSaveBudget();

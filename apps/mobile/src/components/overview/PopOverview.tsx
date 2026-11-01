@@ -9,9 +9,8 @@ import { ThemeColorsOverride, useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 
 /*
- * Overview pieces that only exist in the Tally Pop look (mobile's copy of
- * web's components/overview/PopOverview.tsx). Callers render them only
- * when useUiLook().pop.
+ * Overview's Pop pieces (mobile's copy of web's
+ * components/overview/PopOverview.tsx).
  */
 
 // What sits on the solid net-worth card: every pair AA on its ground.

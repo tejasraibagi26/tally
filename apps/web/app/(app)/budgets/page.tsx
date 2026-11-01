@@ -56,7 +56,7 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
           </>
         }
       />
-      <GoalBudgetLine className="pop-only -mt-2" summary={goal} />
+      <GoalBudgetLine className="-mt-2" summary={goal} />
       <BudgetsView
         month={month}
         ctx={ctx}

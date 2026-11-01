@@ -144,9 +144,7 @@ export default async function SettingsPage() {
           </SettingsBlock>
         </SettingsGroup>
 
-        <div className="pop-only">
-          <SafeToSpendSettings {...safeSettings} />
-        </div>
+        <SafeToSpendSettings {...safeSettings} />
 
         <SettingsGroup id="data" title="Data">
           <SettingsRow title="Export transactions" description="Every transaction you have, for backups or moving your data elsewhere">

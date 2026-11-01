@@ -8,17 +8,10 @@ import { Platform } from "react-native";
  * 415 + 49 for Credit cards (mobile v1.27.1); + 49 for Tags (mobile
  * v2.6.0). Year in review had a row from v2.5.0 to v2.7.1; it's reached
  * from Overview's January strip now. 562 = 513 + 49 for Forecast
- * (mobile v2.8.0).
+ * (mobile v2.8.0). 645 = 562 + 34 for Figtree's taller line box (the
+ * title and captions; mobile v2.0.0) + 49 for Year-end goal.
  */
-export const MORE_SHEET_CONTENT_HEIGHT = 562;
-
-/**
- * Extra height in the Tally Pop look: Figtree's line box is taller than
- * Inter's at the same size, so the title and captions grow and the build
- * line fell off the bottom (mobile v2.0.0), plus the Pop-only "Year-end
- * goal" row (48pt + a 1pt hairline).
- */
-export const MORE_SHEET_POP_EXTRA = 34 + 49;
+export const MORE_SHEET_CONTENT_HEIGHT = 645;
 
 /**
  * On iOS 26 the form sheet floats above the home indicator, so no inset is
@@ -33,8 +26,8 @@ const IOS_CALIBRATION = 0.79;
  * The detent for the More sheet. An explicit fraction, because
  * "fitToContents" leaves a gap (see app/_layout.tsx).
  */
-export function moreSheetDetent(opts: { windowHeight: number; fontScale: number; bottomInset: number; pop?: boolean }): number {
-  const content = (MORE_SHEET_CONTENT_HEIGHT + (opts.pop ? MORE_SHEET_POP_EXTRA : 0)) * opts.fontScale;
+export function moreSheetDetent(opts: { windowHeight: number; fontScale: number; bottomInset: number }): number {
+  const content = MORE_SHEET_CONTENT_HEIGHT * opts.fontScale;
   const height = Platform.OS === "ios" ? (content + opts.bottomInset) * IOS_CALIBRATION : content + opts.bottomInset;
   return Math.min(0.9, height / opts.windowHeight);
 }

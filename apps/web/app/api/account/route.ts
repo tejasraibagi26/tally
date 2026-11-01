@@ -6,7 +6,6 @@ import { requireUserId } from "@/lib/session";
 import { verifyCurrentPassword } from "@/lib/authenticateCredentials";
 import { RATE_LIMITED_MESSAGE } from "@/lib/rateLimit";
 import { sendEmailChangeEmails } from "@/lib/emailChange";
-import { wantsPopEmail } from "@/lib/uiLook";
 
 const bodySchema = z.object({
   name: z.string().trim().max(200).optional(),
@@ -24,10 +23,8 @@ export async function GET(req: Request) {
   }
 
   const [user] = await db
-    // uiLook: the Tally Pop flag (lib/uiLook.ts) -- the mobile app has no
-    // link to open, so it reads the account copy /labs/pop writes.
     // seenAnnouncements: one-time modals already dismissed (lib/announcements.ts).
-    .select({ name: schema.users.name, email: schema.users.email, birthDate: schema.users.birthDate, recapsEnabled: schema.users.recapsEnabled, uiLook: schema.users.uiLook, seenAnnouncements: schema.users.seenAnnouncements })
+    .select({ name: schema.users.name, email: schema.users.email, birthDate: schema.users.birthDate, recapsEnabled: schema.users.recapsEnabled, seenAnnouncements: schema.users.seenAnnouncements })
     .from(schema.users)
     .where(eq(schema.users.id, userId))
     .limit(1);
@@ -80,7 +77,7 @@ export async function PATCH(req: Request) {
     const appUrl = process.env.APP_URL;
     if (!appUrl) return NextResponse.json({ error: "APP_URL not configured" }, { status: 500 });
     try {
-      await sendEmailChangeEmails({ appUrl, userId, fromEmail: user.email, toEmail: email, pop: wantsPopEmail(user) });
+      await sendEmailChangeEmails({ appUrl, userId, fromEmail: user.email, toEmail: email });
     } catch (err) {
       console.error("email change: sending the confirm link failed", err);
       return NextResponse.json({ error: "Couldn't send the confirmation email. Try again." }, { status: 502 });

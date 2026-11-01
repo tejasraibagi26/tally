@@ -4,8 +4,7 @@ import { useRouter, type Href } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as LocalAuthentication from "expo-local-authentication";
-import { AlertTriangle, Bell, ChevronRight, Download, KeyRound, Lock, Mail, PiggyBank, ScanFace, Sparkles, SunMoon, Trash2, Wallet } from "lucide-react-native";
-import { useUiLook } from "@/lib/UiLookContext";
+import { AlertTriangle, Bell, ChevronRight, Download, KeyRound, Lock, Mail, PiggyBank, ScanFace, SunMoon, Trash2, Wallet } from "lucide-react-native";
 import { exportTransactions } from "@/lib/exportData";
 import { useAccountProfile, useUpdateAccountProfile, useUpdateRecaps, useChangePassword, useWipeAccount } from "@/lib/queries/account";
 import { useAlertPreferences } from "@/lib/queries/alerts";
@@ -205,7 +204,6 @@ export default function SettingsScreen() {
   const { biometricLockEnabled, setBiometricLockEnabled, logout } = useAuth();
 
   const [recapsEnabled, setRecapsEnabled] = useState(true);
-  const uiLook = useUiLook();
   const [biometricBusy, setBiometricBusy] = useState(false);
   const [sheet, setSheet] = useState<"profile" | "password" | "export" | null>(null);
   const [wipeOpen, setWipeOpen] = useState(false);
@@ -307,10 +305,6 @@ export default function SettingsScreen() {
             label="Require Face ID to open"
             right={<ThemedSwitch value={biometricLockEnabled} onValueChange={toggleBiometric} disabled={biometricBusy} label="Require Face ID or fingerprint to open Tally" />}
           />
-          {/* Tally Pop is the default; this lets anyone switch back to the classic look. */}
-          {uiLook.flagged && (
-            <Row icon={(c) => <Sparkles size={15} color={c} strokeWidth={1.9} />} label="New look" right={<ThemedSwitch value={uiLook.pop} onValueChange={uiLook.setPop} label="New look" />} />
-          )}
         </Group>
 
         <Group caption="Notifications">
@@ -336,14 +330,11 @@ export default function SettingsScreen() {
             value={incomeValue}
             onPress={() => router.push("/income-schedules")}
           />
-          {/* Tally Pop only, like the Overview card. */}
-          {uiLook.pop && (
-            <Row
-              icon={(c) => <PiggyBank size={15} color={c} strokeWidth={1.9} />}
-              label="Safe to spend"
-              onPress={() => router.push("/safe-to-spend" as Href)}
-            />
-          )}
+          <Row
+            icon={(c) => <PiggyBank size={15} color={c} strokeWidth={1.9} />}
+            label="Safe to spend"
+            onPress={() => router.push("/safe-to-spend" as Href)}
+          />
           <Row
             icon={(c) => <Download size={15} color={c} strokeWidth={1.9} />}
             label={exporting ? "Exporting…" : "Export transactions"}
@@ -607,7 +598,7 @@ function WipeDialog({ visible, onClose, bankCount, onWiped }: { visible: boolean
           placeholderTextColor={colors["text-3"]}
           accessibilityLabel="Current password"
           className="rounded-control bg-surface-2 px-[14px] font-ui text-text"
-          // Pop outlines fields in ink (dark Pop's dialog and field fills match); classic stays borderless.
+          // Fields are outlined in ink (dark mode's dialog and field fills match).
           style={{ height: 46, fontSize: rf(14.5), borderWidth: colors.ink ? 1.5 : 1, borderColor: error ? colors.negative : (colors.ink ?? "transparent") }}
         />
       </View>

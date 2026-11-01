@@ -5,11 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { TallyMarks } from "@/components/ui/TallyMarks";
 import { cn } from "@/lib/cn";
 
-/*
- * Overview pieces that only exist in the Tally Pop preview. They render for
- * everyone and globals.css hides them (.pop-only) unless html[data-ui="pop"],
- * so the "New look" switch flips instantly without a reload.
- */
+/* Overview's streak card and banners. */
 
 /** On-pace days: finished days in a row under an even daily pace, as tally marks. */
 export function OnPaceCard({ streak, dailyPace, href, className }: { streak: number; dailyPace: number; href: string; className?: string }) {

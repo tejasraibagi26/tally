@@ -57,39 +57,7 @@ export function alertEmailSubject(title: string): string {
   return `Tally · ${title}`;
 }
 
-/**
- * One alert as an email (ALERTS.md §5.2). Light v2 palette, inline styles
- * only (email clients). The footer says exactly which setting sent it, links
- * to Settings → Alerts, and has a one-click link that turns off alert email
- * only; recaps keep their own switch.
- */
-export function alertEmailHtml(opts: { type: AlertType; title: string; body: string; url: string; appUrl: string; userId: string; pop?: boolean }): string {
-  if (opts.pop) return alertEmailHtmlPop(opts);
-  const copy = COPY[opts.type];
-  const title = opts.title;
-  const open = `${opts.appUrl}${openLinkPath(opts.url)}`;
-  const manage = `${opts.appUrl}/settings#alerts`;
-  const unsub = `${opts.appUrl}/unsubscribe?uid=${opts.userId}&token=${unsubscribeToken(opts.userId)}&kind=alerts`;
-  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head>
-<body style="margin:0;background:#F1F0EC;font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;color:#1A1917;">
-<div style="display:none;max-height:0;overflow:hidden;">${esc(opts.body)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F1F0EC;padding:32px 16px;"><tr><td align="center">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;">
-<tr><td style="padding:0 4px 16px;font-family:Georgia,serif;font-size:22px;color:#1A1917;">Tally</td></tr>
-<tr><td style="background:#FFFFFF;border:1px solid #E3E1DB;border-radius:12px;padding:24px;">
-<div style="font-size:12px;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;color:#65635C;margin-bottom:8px;">${esc(copy.label)}</div>
-<div style="font-size:20px;font-weight:600;line-height:1.3;margin-bottom:6px;">${esc(title)}</div>
-<div style="font-size:15px;line-height:1.55;color:#1A1917;margin-bottom:16px;">${esc(opts.body)}</div>
-<div style="font-size:14px;line-height:1.55;color:#4D4B45;margin-bottom:20px;">${esc(copy.why)}</div>
-<a href="${esc(open)}" style="display:inline-block;background:#14513F;color:#FFFFFF;text-decoration:none;font-size:14px;font-weight:500;padding:10px 16px;border-radius:8px;">${esc(copy.cta)}</a>
-</td></tr>
-<tr><td style="padding:16px 4px;font-size:12px;line-height:1.6;color:#65635C;">
-You're getting this because email is on for ${esc(copy.settingName)} in Tally.<br>
-<a href="${esc(manage)}" style="color:#65635C;">Change alert settings</a> · <a href="${esc(unsub)}" style="color:#65635C;">Turn off all alert emails</a>
-</td></tr></table></td></tr></table></body></html>`;
-}
-
-/** Tally Pop's badge per alert type: background, text, the glyph that carries the meaning beside the color. */
+/** The badge per alert type: background, text, the glyph that carries the meaning beside the color. */
 const POP_BADGE: Record<AlertType, { bg: string; fg: string; glyph: string }> = {
   budget_threshold: { bg: "#FFC53D", fg: "#1D1B2F", glyph: "&#9650;" },
   connection_broken: { bg: "#D03B3B", fg: "#FFFFFF", glyph: "&#10005;" },
@@ -104,14 +72,16 @@ const POP_FONT = "Figtree,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-ser
 const POP_DISPLAY = "'Bricolage Grotesque',Figtree,-apple-system,Segoe UI,Helvetica,Arial,sans-serif";
 
 /**
- * The same alert in the Tally Pop look, for users on it (users.ui_look,
- * lib/uiLook.ts): cream ground, an ink-outlined card whose thicker right
- * and bottom borders stand in for the hard shadow (box-shadow doesn't
- * survive Gmail or Outlook), a colored badge with a glyph, and a pill
- * button -- red for a broken connection, like the app's fix buttons.
- * Every text pair is AA. Same wording and footer as the classic email.
+ * One alert as an email (ALERTS.md §5.2), inline styles only (email
+ * clients): cream ground, an ink-outlined card whose thicker right and
+ * bottom borders stand in for the hard shadow (box-shadow doesn't survive
+ * Gmail or Outlook), a colored badge with a glyph, and a pill button --
+ * red for a broken connection, like the app's fix buttons. Every text pair
+ * is AA. The footer says exactly which setting sent it, links to Settings
+ * → Alerts, and has a one-click link that turns off alert email only;
+ * recaps keep their own switch.
  */
-function alertEmailHtmlPop(opts: { type: AlertType; title: string; body: string; url: string; appUrl: string; userId: string }): string {
+export function alertEmailHtml(opts: { type: AlertType; title: string; body: string; url: string; appUrl: string; userId: string }): string {
   const copy = COPY[opts.type];
   const badge = POP_BADGE[opts.type];
   const open = `${opts.appUrl}${openLinkPath(opts.url)}`;

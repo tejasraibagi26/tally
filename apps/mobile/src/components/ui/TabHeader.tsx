@@ -2,7 +2,6 @@ import { Fragment, type ReactNode } from "react";
 import { View, Text } from "react-native";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
-import { useUiLook } from "@/lib/UiLookContext";
 
 /**
  * The header every tab screen (Overview, Transactions, Budgets, Accounts)
@@ -28,15 +27,14 @@ export function TabHeader({
 }) {
   const colors = useThemeColors();
   const rf = useRF();
-  const { pop } = useUiLook();
   const metaItems = (meta ?? []).filter(Boolean);
 
   return (
     <View className="gap-1.5">
       <View className="flex-row items-center justify-between gap-3">
         <View className="flex-1 gap-0.5 min-w-0">
-          {/* Tally Pop sets titles in the display face (Bricolage), a step larger. */}
-          <Text className={pop ? "font-display text-text" : "font-ui-semibold text-text"} style={pop ? { letterSpacing: -0.8, fontSize: rf(30) } : { letterSpacing: -0.3, fontSize: rf(24) }} numberOfLines={pop ? 2 : 1}>
+          {/* Titles in the display face (Bricolage). */}
+          <Text className="font-display text-text" style={{ letterSpacing: -0.8, fontSize: rf(30) }} numberOfLines={2}>
             {title}
           </Text>
         </View>

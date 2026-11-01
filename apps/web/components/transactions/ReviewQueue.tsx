@@ -140,11 +140,8 @@ export function ReviewQueue({ categories, pendingCount, autoOpen = false }: { ca
           </div>
           {items != null && total > 0 && (
             <>
-              <div className="classic-only h-1 rounded-full bg-sunken overflow-hidden">
-                <div className="h-full bg-brand transition-[width]" style={{ width: `${(Math.min(index, total) / total) * 100}%` }} />
-              </div>
-              {/* Tally Pop: each one done adds a stroke; every fifth crosses. */}
-              <div className="pop-only flex h-7 items-center text-text" aria-hidden="true">
+              {/* Each one done adds a stroke; every fifth crosses. */}
+              <div className="flex h-7 items-center text-text" aria-hidden="true">
                 <TallyMarks count={Math.min(index, total)} height={28} />
               </div>
             </>
@@ -155,7 +152,7 @@ export function ReviewQueue({ categories, pendingCount, autoOpen = false }: { ca
           ) : !current ? (
             <div className="flex flex-col items-start gap-3 py-6">
               {!error && done > 0 && (
-                <span className="pop-only text-brand" aria-hidden="true">
+                <span className="text-brand" aria-hidden="true">
                   <TallyMarks count={Math.max(done, 5)} height={44} />
                 </span>
               )}
@@ -163,10 +160,7 @@ export function ReviewQueue({ categories, pendingCount, autoOpen = false }: { ca
                 {error ? (
                   "Something went wrong"
                 ) : (
-                  <>
-                    <span className="classic-only">You&apos;re all caught up</span>
-                    <span className="pop-only">All tallied.</span>
-                  </>
+                  "All tallied."
                 )}
               </h3>
               <p className="m-0 text-[14px] text-text-2">{error ?? (done > 0 ? `${done} reviewed. New transactions show up here as they sync.` : "Nothing left to review.")}</p>

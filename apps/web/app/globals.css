@@ -148,15 +148,13 @@
   --scrim: rgba(0,0,0,.62);
 }
 
-/* "Tally Pop" UI preview (lib/uiFlag.ts), on only while html carries
-   data-ui="pop" -- set before first paint from the cookies /labs/pop writes.
-   The sidebar's "New look" switch (components/UiToggle.tsx) flips it
-   back and forth once the flag is on. Everything Pop changes lives in this
-   block and the component rules below it; without the attribute none of it applies. Every text pair here
-   is checked against WCAG AA (4.5:1 text, 3:1 borders and icons) in both
-   themes. Series colors are unchanged: they're the validated chart palette.
-   No prefers-color-scheme copy: data-ui only exists when JS ran, and the
-   same script always sets data-theme first. */
+/* Tally Pop: the only look since web v2.11.0. app/layout.tsx always renders
+   <html data-ui="pop">; the tokens above are the base layer and everything
+   Pop changes lives in this block and the component rules below it. Every
+   text pair here is checked against WCAG AA (4.5:1 text, 3:1 borders and
+   icons) in both themes. Series colors are unchanged: they're the validated
+   chart palette. No prefers-color-scheme copy: the theme script always sets
+   data-theme before first paint. */
 :root[data-ui="pop"] {
   --canvas: #FFF6E9;
   --surface: #FFFFFF;
@@ -317,8 +315,8 @@
   letter-spacing: -0.03em;
   line-height: 1.1;
 }
-/* Headline figures set in the UI face in the classic look (Cash flow's
-   average, the budget panel's spent/budget): the display face in Pop. */
+/* Headline figures (Cash flow's average, the budget panel's spent/budget)
+   in the display face. */
 [data-ui="pop"] .ui-figure {
   font-family: var(--font-bricolage), var(--font-inter), sans-serif;
   font-weight: 800;
@@ -328,13 +326,6 @@
   font-family: var(--font-bricolage), var(--font-inter), sans-serif;
   font-weight: 700;
   letter-spacing: -0.01em;
-}
-
-/* Pieces that exist only in one look. Both render; the other is hidden, so
-   the "New look" switch flips instantly. */
-:root:not([data-ui="pop"]) .pop-only,
-[data-ui="pop"] .classic-only {
-  display: none !important;
 }
 
 /* Overview's net worth card in solid brand, with its own text, money and

@@ -438,8 +438,14 @@
  * 2.10.8 self-hosts the five font families (app/fonts, next/font/local):
  * the build no longer fetches from Google, which failed intermittently
  * and, with CI now gating deploys, would have blocked releases.
+ * 2.11.0 retires the classic look: Tally Pop is the only one. <html> always
+ * carries data-ui="pop" (app/layout.tsx); the "New look" switch, the
+ * tally-ui cookie, /labs/pop, PATCH /api/settings/ui-look, the New-look
+ * modal, .pop-only/.classic-only and the classic emails are gone, and the
+ * goal, safe-to-spend and forecast alerts go to everyone. users.ui_look is
+ * left in place, unused, for a later migration to drop.
  */
-export const APP_VERSION = "2.10.8";
+export const APP_VERSION = "2.11.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

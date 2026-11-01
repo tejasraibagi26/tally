@@ -1,8 +1,6 @@
 import { createContext, useContext } from "react";
 import { useColorScheme } from "nativewind";
-import { colorsFor } from "@/theme/colors";
 import { popDarkColors, popLightColors } from "@/theme/pop";
-import { useUiLook } from "@/lib/UiLookContext";
 
 // For raw hex values RN props require directly (icon color/fill, Switch
 // trackColor, chart series, shadowColor) rather than a className -- those
@@ -10,14 +8,13 @@ import { useUiLook } from "@/lib/UiLookContext";
 // etc. do automatically. nativewind's useColorScheme already tracks
 // Appearance and defaults to "system", so this stays in sync for free.
 //
-// Follows the Tally Pop flag too (lib/UiLookContext.tsx): its palette adds
-// ink, marigold and hero-* tokens that only exist there.
+// Tally Pop's palette (theme/pop.ts) on top: it adds ink, marigold and
+// hero-* tokens.
 export function useThemeColors() {
   const { colorScheme } = useColorScheme();
-  const { pop } = useUiLook();
   const override = useContext(ThemeColorsOverride);
   const dark = colorScheme === "dark";
-  const base = pop ? (dark ? popDarkColors : popLightColors) : colorsFor(dark ? "dark" : "light");
+  const base = dark ? popDarkColors : popLightColors;
   return override ? { ...base, ...override } : base;
 }
 

@@ -38,7 +38,6 @@ import { goalSummary, goalsIntroSeen } from "@/lib/goals";
 import { GoalIntroModal } from "@/components/goals/GoalIntroModal";
 import { ForecastCard } from "@/components/forecast/ForecastCard";
 import { ForecastIntroModal } from "@/components/forecast/ForecastIntroModal";
-import { NewLookModal } from "@/components/overview/NewLookModal";
 import { seenAnnouncements } from "@/lib/announcements";
 import { forecastFor } from "@/lib/forecast";
 
@@ -60,10 +59,6 @@ function relativeDate(dateStr: string): string {
   const now = new Date();
   const sameYear = date.getFullYear() === now.getFullYear();
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: sameYear ? undefined : "numeric" });
-}
-
-function monthLabel(month: string): string {
-  return new Date(month + "T00:00:00Z").toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
 }
 
 export default async function OverviewPage() {
@@ -161,8 +156,7 @@ export default async function OverviewPage() {
 
   const totalBudgeted = budgets.reduce((s, b) => s + b.amount + b.rolloverFromPrior, 0);
 
-  // Tally Pop preview (.pop-only below): greeting, the left-to-spend line,
-  // the on-pace streak and the review banner.
+  // The greeting, the left-to-spend line, the on-pace streak and the review banner.
   const hour = Number(new Intl.DateTimeFormat("en-US", { hour: "numeric", hourCycle: "h23", timeZone }).format(new Date()));
   const monthName = new Date(month + "T00:00:00Z").toLocaleDateString("en-US", { month: "long", timeZone: "UTC" });
   const popLine = leftToSpendLine(monthSummary(budgets, { phase: "current", daysElapsed, daysInMonth }), (c) => formatCents(c));
@@ -170,20 +164,18 @@ export default async function OverviewPage() {
   const streak = onPaceStreak(spendByDay, dailyPace, today, monthStart);
   const unreviewed = toReview?.count ?? 0;
   const [goal, introSeen, seen, safe, forecast] = await Promise.all([goalSummary(userId), goalsIntroSeen(userId), seenAnnouncements(userId), safeToSpendFor(userId), forecastFor(userId)]);
-  // Pop's right-hand column: safe to spend over the on-pace card, at equal
-  // heights; either alone fills it. Classic keeps Connections there.
+  // The right-hand column: safe to spend over the on-pace card, at equal
+  // heights; either alone fills it. With neither, Connections takes it.
   const showSafe = safe.cash.length > 0;
   const popColumn = showSafe || dailyPace > 0;
-  // One modal per visit, in the order they shipped: the new-look
-  // announcement, then the goals intro, then the forecast one.
-  const lookSeen = seen.includes("new-look");
+  // One modal per visit, in the order they shipped: the goals intro, then
+  // the forecast one.
   const goalsStepDone = introSeen || !!goal;
   const forecastSeen = seen.includes("forecast");
 
   return (
     <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
       <PageHeader
-        className="pop-only"
         title={`${greetingFor(hour)} Here's ${monthName}.`}
         meta={[popLine, items.some((i) => i.lastSyncedAt) && <SyncFreshness key="sync" syncedAt={items.map((i) => i.lastSyncedAt)} />]}
         actions={
@@ -191,18 +183,6 @@ export default async function OverviewPage() {
             <Link href="/accounts" className="ui-btn inline-flex items-center gap-1.5 rounded-full border-2 border-[var(--ink)] bg-negative-subtle px-3 py-1 text-[13.5px] font-semibold text-negative">
               <AlertTriangle size={14} strokeWidth={2.25} aria-hidden="true" />
               {brokenItems} connection{brokenItems === 1 ? "" : "s"} need{brokenItems === 1 ? "s" : ""} you
-            </Link>
-          )
-        }
-      />
-      <PageHeader
-        className="classic-only"
-        title="Overview"
-        meta={[monthLabel(month), items.some((i) => i.lastSyncedAt) && <SyncFreshness key="sync" syncedAt={items.map((i) => i.lastSyncedAt)} />]}
-        actions={
-          brokenItems > 0 && (
-            <Link href="/accounts" className="text-[13.5px] text-negative">
-              {brokenItems} connection{brokenItems === 1 ? "" : "s"} need attention →
             </Link>
           )
         }
@@ -240,7 +220,7 @@ export default async function OverviewPage() {
         </Card>
 
         {popColumn && (
-          <div className="pop-only lg:col-span-4 flex flex-col gap-4">
+          <div className="lg:col-span-4 flex flex-col gap-4">
             {showSafe && <SafeToSpendCard s={safe} className="flex-1 basis-0" />}
             {dailyPace > 0 && (
               <OnPaceCard
@@ -252,7 +232,8 @@ export default async function OverviewPage() {
             )}
           </div>
         )}
-        <Card className={cn("lg:col-span-4 flex flex-col", popColumn && "classic-only")}>
+        {!popColumn && (
+        <Card className="lg:col-span-4 flex flex-col">
           <CardHeader title="Connections" />
           <div className="flex-1 flex flex-col gap-3 p-4">
             {items.slice(0, 4).map((item) => (
@@ -271,6 +252,7 @@ export default async function OverviewPage() {
             </Link>
           </div>
         </Card>
+        )}
       </div>
 
       {/* Row 2: stat tiles */}
@@ -309,20 +291,19 @@ export default async function OverviewPage() {
       </div>
 
       {/* Same staggered entrance as the sections around them (reveal). */}
-      {unreviewed > 0 && <TallyUpBanner className="pop-only" count={unreviewed} style={reveal(2)} />}
-      {featuredReviewYear(today) != null && <YearReviewBanner className="pop-only" year={featuredReviewYear(today)!} style={reveal(2)} />}
+      {unreviewed > 0 && <TallyUpBanner count={unreviewed} style={reveal(2)} />}
+      {featuredReviewYear(today) != null && <YearReviewBanner year={featuredReviewYear(today)!} style={reveal(2)} />}
 
-      {/* Tally Pop: the year-end goal (lib/goals.ts), or a prompt to set one */}
-      <GoalCard className="pop-only" summary={goal} style={reveal(2)} />
+      {/* The year-end goal (lib/goals.ts), or a prompt to set one */}
+      <GoalCard summary={goal} style={reveal(2)} />
       {/* Where the next two months land (lib/forecast.ts); hidden until
           there is a pay schedule to project from. */}
       <div style={reveal(2)}>
         <ForecastCard forecast={forecast} />
       </div>
-      {/* Once per account, Pop only, and not once a goal exists */}
-      <NewLookModal show={!lookSeen} />
-      <GoalIntroModal show={!introSeen && !goal && lookSeen} />
-      <ForecastIntroModal show={!forecastSeen && lookSeen && goalsStepDone} />
+      {/* Once per account, and not once a goal exists */}
+      <GoalIntroModal show={!introSeen && !goal} />
+      <ForecastIntroModal show={!forecastSeen && goalsStepDone} />
 
       {/* Cash flow trend */}
       <Card style={reveal(3)}>
