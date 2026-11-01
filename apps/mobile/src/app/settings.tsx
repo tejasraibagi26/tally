@@ -182,7 +182,6 @@ function AppearanceSegments() {
 // Sign out stays in the More sheet.
 export default function SettingsScreen() {
   const router = useRouter();
-  const colors = useThemeColors();
   const insets = useSafeAreaInsets();
   const contentTop = useScreenContentTop();
   const rf = useRF();

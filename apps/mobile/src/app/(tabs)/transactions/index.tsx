@@ -107,7 +107,6 @@ export default function TransactionsScreen() {
   // as if they were separately chosen. Search isn't counted here -- it has
   // its own visible input, same as web doesn't fold search into its Filters count.
   const activeCount = Object.keys(queryFilters).length - (filters.category ? 2 : 0) - (searchQuery ? 1 : 0) - (reviewOnly ? 1 : 0);
-  const hasAnyFilter = activeCount > 0 || Boolean(searchQuery);
 
   // The sheet's own "Clear all" only ever touched `filters` -- it had
   // nothing to do with `searchQuery`/`searchInput` before those existed on

@@ -83,7 +83,6 @@ function DesktopShowcase() {
     return () => clearTimeout(id);
   }, [active, displayed]);
 
-  const current = FEATURES[active]!;
   const shown = FEATURES[displayed]!;
   const running = !paused && inView;
 

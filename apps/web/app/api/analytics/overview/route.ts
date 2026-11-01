@@ -3,7 +3,7 @@ import { eq, desc } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 import { getBudgetsForMonth } from "@/lib/budgets";
-import { dailySpend, upcomingBills } from "@/lib/analytics";
+import { dailySpend } from "@/lib/analytics";
 import { todayFor } from "@/lib/userTimezone";
 import { monthLastDay } from "@tally/core/budgetMath";
 import { onPaceStreak } from "@tally/core/popView";
@@ -31,7 +31,7 @@ export async function GET(req: Request) {
     .orderBy(desc(schema.netWorthSnapshots.asOfDate))
     .limit(1);
 
-  const [budgets, bills] = await Promise.all([getBudgetsForMonth(userId, month), upcomingBills(userId)]);
+  const budgets = await getBudgetsForMonth(userId, month);
 
   const totalBudgeted = budgets.reduce((s, b) => s + b.amount + b.rolloverFromPrior, 0);
   const totalSpend = budgets.reduce((s, b) => s + b.spend, 0);
@@ -49,7 +49,6 @@ export async function GET(req: Request) {
     month,
     netWorth: latestSnapshot ?? null,
     budgets: { totalBudgeted, totalSpend, remaining: totalBudgeted - totalSpend, categories: budgets },
-    upcomingBills: bills,
     onPace,
   });
 }

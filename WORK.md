@@ -2,6 +2,8 @@
 
 > Working name: **Tally**. Rename freely — it appears in `DESIGN.md` too.
 >
+> **Status:** this is the original build brief, kept as written. Where it and the code disagree, the code and `README.md` are current. The main departures: webhooks are verified and then synced inline in the request, not through a queue and worker (Vercel Functions have no persistent worker; see README "Webhooks + automation"); the product has grown past §1's scope (mobile app, Forecast, Goals, alerts — README "Since the milestones").
+>
 > **How to use this file**
 > - **§1** is a copy-paste prompt. Paste it into Claude Code (or an agent session) in an empty repo. It references this file, so keep `WORK.md` and `DESIGN.md` in the repo root.
 > - **§2–§15** are the actual specification. The prompt is deliberately short because the spec lives here — don't inline it.

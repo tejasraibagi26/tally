@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -21,6 +22,8 @@ const COLOR_GROUPS = [
 const SERIES = Array.from({ length: 8 }, (_, i) => `series-${i + 1}`);
 
 export default function StyleguidePage() {
+  // A design reference for building Tally, not part of the product: dev only.
+  if (process.env.NODE_ENV === "production") notFound();
   return (
     <div className="max-w-[1280px] mx-auto px-8 py-10 flex flex-col gap-10">
       <div>

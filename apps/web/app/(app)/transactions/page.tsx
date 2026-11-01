@@ -98,7 +98,6 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   const today = await todayFor(userId);
 
   const accounts = await db.query.accounts.findMany({ where: eq(schema.accounts.userId, userId) });
-  const accountById = new Map(accounts.map((a) => [a.id, a]));
 
   const items = await db.query.plaidItems.findMany({ where: eq(schema.plaidItems.userId, userId) });
   const itemById = new Map(items.map((i) => [i.id, i]));

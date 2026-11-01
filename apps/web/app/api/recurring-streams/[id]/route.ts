@@ -22,8 +22,8 @@ const patchSchema = z.object({
 });
 
 // Sets or clears manualNextDueDate (schema.ts's override for a recurring
-// stream's next-due prediction) — lib/analytics.ts's upcomingBills and the
-// Subscriptions page both prefer this over the auto-detected
+// stream's next-due prediction) — Forecast, Safe to spend and the
+// Subscriptions page all prefer this over the auto-detected
 // predictedNextDate whenever it's set.
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;

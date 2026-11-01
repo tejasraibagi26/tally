@@ -8,7 +8,7 @@ import { ago, type ConnectionAction, type ConnectionState, type ConnectionTone }
 import { hairline, withAlpha } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
-import { BusyIcon, BusyLabel } from "@/components/ui/BusyIcon";
+import { BusyLabel } from "@/components/ui/BusyIcon";
 
 type Colors = ReturnType<typeof useThemeColors>;
 

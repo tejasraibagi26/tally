@@ -266,19 +266,12 @@ net-worth range and delta, credit band) live in `@tally/core/overviewView`.
    cards in different currencies are converted before summing.
 5. **Budget this month** — the three most-used budgets (over-budget first;
    paid fixed-amount budgets skipped) as meter rows, "View all" → Budgets tab.
-6. **Upcoming** — next 3 bills with a date tile, a due label ("Due today",
-   "tomorrow", "in 3 days") and the amount; "View all" only when more exist.
-   Only spending is listed (never a detected paycheck, bonus or refund), a
-   dismissed bill stays gone, and a guessed bill must clear a confidence bar
-   (`qualifiesAsUpcoming`); card payments and bills you added or dated
-   yourself always count. A bill Tally guessed shows a "⋯" and opens a sheet
-   with "This won't recur", which dismisses the stream behind it. "View all"
-   (always shown when there are bills) opens the Upcoming screen: every bill in the window, card payments
-   included, grouped Overdue / This week / Later. A bill stays listed 3 days
-   past due, first and marked "Overdue · 2 days" (a card only when the bank
-   flags it); a card with no reported minimum reads "Min. unknown" with its
-   statement balance. "This won't recur" offers Undo for 5 seconds, and
-   Subscriptions keeps a collapsed Dismissed group with Restore.
+6. *(Upcoming, removed in mobile 2.11.0.)* Bills and card payments now
+   live on the Forecast screen ("What's coming"), reached from the Safe to
+   spend card's sheet. Forecast opens with that same Safe to spend card,
+   then the projected balance, then every bill, card payment and payday in
+   the window; a row opens what produced it (Subscriptions is where a
+   guessed bill is dismissed).
 7. **Recent activity** — last 5 transactions in the Transactions row grammar
    (avatar, merchant, Pending chip, review dot, "Category · day", amount).
 8. **Where it went** — category spend bar, last because it's analysis rather
@@ -499,6 +492,9 @@ app. Accounts isn't linked (it's a tab); Sign out stays in More. The version
 and Changelog link close the list.
 
 ### 5.8 FIRE calculator (Phase D)
+
+*Since mobile 2.12.0 this is the Early retirement tab of the Goals screen
+(`app/goals.tsx`, from More); tally:// links to `/fire` open that tab.*
 
 Single scrolling form: inputs (current net worth, monthly savings, expected
 return, SWR — matching whatever `fireSettings` shape `lib/fireMath.ts` already

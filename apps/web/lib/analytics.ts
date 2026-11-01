@@ -1,12 +1,8 @@
-import { and, asc, eq, gte, isNull, lt, not } from "drizzle-orm";
+import { and, asc, eq, gte, lt, not } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { userCategories } from "@/lib/userCategories";
-import { creditCardsForUser, viewForCard } from "@/lib/liabilities";
 import { monthRange, shiftMonth } from "@tally/core/budgetMath";
 import { hasSplits } from "@/lib/budgets";
-import { accountDisplayName } from "@tally/core/accountName";
-import { UPCOMING_GRACE_DAYS, daysBefore, overdueDays, qualifiesAsUpcoming } from "@tally/core/overviewView";
-import { todayFor } from "@/lib/userTimezone";
 
 export interface CashFlowMonth {
   month: string; // YYYY-MM-01
@@ -235,109 +231,4 @@ export async function merchantBreakdown(userId: string, month: string): Promise<
     else totals.set(label, { key: label, label, colorSlot: r.colorSlot, total: Math.abs(r.amount) });
   }
   return [...totals.values()].sort((a, b) => b.total - a.total);
-}
-
-export interface UpcomingBill {
-  type: "subscription" | "card";
-  label: string;
-  /** Cents. Null for a card payment whose bank reported no minimum: unknown, never zero. */
-  amount: number | null;
-  /** A card's last statement balance in cents, when the bank sent one; null otherwise. */
-  statementBalance: number | null;
-  /** A card: payments toward that statement so far (transactions or the bank's record); absent/null when none. */
-  paidSoFar?: number | null;
-  /** Past its due date, or a card the bank flags as past due. */
-  overdue: boolean;
-  /** Whole days past the due date; 0 when not past it (a bank-flagged card can be overdue with 0). */
-  overdueDays: number;
-  dueDate: string;
-  accountId: string | null;
-  /** The recurring stream behind a "subscription" bill; null for a card payment. */
-  streamId: string | null;
-  /** True when Tally guessed this from past charges, so the user can tell it "this won't recur". False for a card payment (the bank's own due date) and for a bill the user added themselves. */
-  canDismiss: boolean;
-}
-
-/**
- * §9 "Upcoming bills": recurring streams predicted (or manually overridden,
- * schema.ts's recurringStreams.manualNextDueDate) within 30 days, plus credit
- * card due dates within 30 days. A manual override is honored even over a
- * stream the gap-based detector marked at_risk/cancelled — a bill paid in
- * occasional lump sums (rent prepaid several months at once) can look
- * "cancelled" to that algorithm despite the user knowing exactly when it's
- * next due.
- *
- * A bill stays listed for UPCOMING_GRACE_DAYS after its due date, marked
- * overdue; a card the bank flags as past due is listed whatever its date. A
- * card with no reported minimum has a null amount rather than a misleading 0.
- *
- * Only money going out is listed (a detected paycheck, bonus or refund isn't a
- * bill, and none of it is guaranteed), a stream the user dismissed stays gone,
- * and a cancelled one is left out (countsAsBill in @tally/core/overviewView,
- * the same rule as Subscriptions). Dates are the user's own today, not the
- * server's UTC day.
- */
-export async function upcomingBills(userId: string, withinDays = 30): Promise<UpcomingBill[]> {
-  const today = await todayFor(userId);
-  const from = daysBefore(today, UPCOMING_GRACE_DAYS);
-  const cutoff = new Date(new Date(`${today}T00:00:00Z`).getTime() + withinDays * 86_400_000).toISOString().slice(0, 10);
-
-  const streamRows = await db
-    .select({
-      id: schema.recurringStreams.id,
-      description: schema.recurringStreams.description,
-      merchantKey: schema.recurringStreams.merchantKey,
-      averageAmount: schema.recurringStreams.averageAmount,
-      predictedNextDate: schema.recurringStreams.predictedNextDate,
-      manualNextDueDate: schema.recurringStreams.manualNextDueDate,
-      status: schema.recurringStreams.status,
-      accountId: schema.recurringStreams.accountId,
-      isManual: schema.recurringStreams.isManual,
-    })
-    .from(schema.recurringStreams)
-    .where(and(eq(schema.recurringStreams.userId, userId), isNull(schema.recurringStreams.dismissedAt)));
-
-  const streams = streamRows
-    .map((s) => ({ ...s, dueDate: s.manualNextDueDate ?? s.predictedNextDate }))
-    .filter((s) => qualifiesAsUpcoming(s, from, cutoff));
-
-  // Card payments go through @tally/core/cardView: payments found in the
-  // card's transactions (or the bank's own record) since the statement closed
-  // count, so a paid statement drops off instead of lingering at the bank's
-  // $0.00 minimum, and a partly paid one shows what's left.
-  const cards = (await creditCardsForUser(userId))
-    .map((c) => ({ c, view: viewForCard(c, today), dueDate: c.liability?.nextPaymentDueDate ?? null }))
-    .filter(({ view, dueDate }) => view.state !== "paid" && (view.state === "overdue" || (dueDate != null && dueDate >= today && dueDate <= cutoff)));
-
-  const bills: UpcomingBill[] = [
-    ...streams.map((s) => ({
-      type: "subscription" as const,
-      label: s.description ?? s.merchantKey,
-      amount: Math.abs(s.averageAmount),
-      statementBalance: null,
-      overdue: s.dueDate! < today,
-      overdueDays: overdueDays(s.dueDate!, today),
-      dueDate: s.dueDate!,
-      accountId: s.accountId,
-      streamId: s.id,
-      canDismiss: !s.isManual,
-    })),
-    ...cards.map(({ c, view, dueDate }) => ({
-      type: "card" as const,
-      label: `${accountDisplayName(c.name, c.nickname)} payment`,
-      amount: view.amountDue,
-      statementBalance: c.liability?.lastStatementBalance ?? null,
-      paidSoFar: view.paid > 0 ? view.paid : null,
-      // Overdue when the bank says so, or the date passed with the minimum unpaid.
-      overdue: view.state === "overdue",
-      overdueDays: view.overdueDays,
-      dueDate: dueDate ?? today,
-      accountId: c.accountId,
-      streamId: null,
-      canDismiss: false,
-    })),
-  ];
-
-  // Overdue first, then by date.
-  return bills.sort((a, b) => Number(b.overdue) - Number(a.overdue) || a.dueDate.localeCompare(b.dueDate));
 }

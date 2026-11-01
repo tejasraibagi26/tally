@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db, schema } from "@/db";
 import { listUserCategories } from "@/lib/userCategories";
-import { eq, isNull, or } from "drizzle-orm";
 import { requireUserId } from "@/lib/session";
 import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
 

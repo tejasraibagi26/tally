@@ -457,8 +457,13 @@
  * and /fire redirects (keeping ?start=zero).
  * 2.13.1 gives both Goals tabs the same 1280px container (the year-end tab
  * was 880px), so the header and tabs stay put when switching.
+ * 2.13.2 returns 404 for /styleguide in production (a build reference,
+ * not product), drops upcomingBills from GET /api/analytics/overview and
+ * lib/analytics.ts (nothing reads it since mobile 2.11.0; older builds
+ * fall back to an empty list), and turns on noUnusedLocals in every
+ * workspace.
  */
-export const APP_VERSION = "2.13.1";
+export const APP_VERSION = "2.13.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

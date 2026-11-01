@@ -39,7 +39,6 @@ export function FormSheet({
   children: ReactNode;
   overlays?: ReactNode;
 }) {
-  const colors = useThemeColors();
   const rf = useRF();
 
   return (

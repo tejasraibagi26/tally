@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.13.2",
+    date: "2026-10-31",
+    changes: [{ kind: "improved", text: "Behind-the-scenes cleanup: a developer-only design page is no longer reachable on the live site." }],
+  },
+  {
     version: "2.13.1",
     date: "2026-10-31",
     changes: [{ kind: "fixed", text: "Switching between Goals tabs no longer shifts the page: both use the same width." }],

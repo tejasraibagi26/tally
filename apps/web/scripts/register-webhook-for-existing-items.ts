@@ -1,5 +1,4 @@
 import "dotenv/config";
-import { eq } from "drizzle-orm";
 import { db, schema } from "../db";
 import { plaidClient, getAccessToken, PLAID_WEBHOOK_URL } from "../lib/plaid";
 import { isMockPlaidItemId } from "../lib/mock/isMock";

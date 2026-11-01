@@ -51,7 +51,6 @@ function subCountLineText(data: MonthlyRecapData): string {
 
 // ---- Tally Pop rows. Inline styles only (email clients); every text pair AA.
 const POP_FONT = "Figtree, Arial, Helvetica, sans-serif";
-const POP_DISPLAY = "'Bricolage Grotesque', Arial, Helvetica, sans-serif";
 const POP_INK = "#1D1B2F";
 const POP_TEXT2 = "#4A4760";
 const POP_NEGATIVE = "#C2341F";
