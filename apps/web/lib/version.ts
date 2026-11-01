@@ -455,8 +455,10 @@
  * and FIRE planner bodies moved to components/goals/YearEndGoal.tsx and
  * components/fire/RetirementGoal.tsx, the side nav has one "Goals" row,
  * and /fire redirects (keeping ?start=zero).
+ * 2.13.1 gives both Goals tabs the same 1280px container (the year-end tab
+ * was 880px), so the header and tabs stay put when switching.
  */
-export const APP_VERSION = "2.13.0";
+export const APP_VERSION = "2.13.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

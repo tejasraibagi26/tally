@@ -15,6 +15,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.13.1",
+    date: "2026-10-31",
+    changes: [{ kind: "fixed", text: "Switching between Goals tabs no longer shifts the page: both use the same width." }],
+  },
+  {
     version: "2.13.0",
     date: "2026-10-31",
     changes: [{ kind: "improved", text: "Your year-end goal and early retirement plan now live together under Goals, a tab each." }],
