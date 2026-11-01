@@ -399,8 +399,11 @@ import Constants from "expo-constants";
  * 2.13.2 uses the device's date (lib/today.ts todayISO) for Overview's
  * Year in review strip and a card's "charges since" link, not UTC. The
  * "This month" $0 in the evening was the server's (web 2.14.1).
+ * 2.13.3 folds Investments and Credit used into Overview's This month
+ * card as its last row (StatPair inCard, MonthCard footer); the pair only
+ * stands alone before the month's figures load.
  */
-export const APP_VERSION = "2.13.2";
+export const APP_VERSION = "2.13.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import { budgetRowState, type MonthContext } from "@tally/core/budgetView";
@@ -20,7 +21,9 @@ function deltaLabel(current: number, prior: number | undefined): string | undefi
  * This month in one card: what's been spent against the month's budget (the
  * same bar rules as a budget row -- no tick, projection or pace verdict), then
  * income and what's left of it so far. Income and Saved mask with the privacy toggle (Saved would
- * reveal income); Spent and the budget don't.
+ * reveal income); Spent and the budget don't. `footer` closes the card --
+ * Overview puts Investments and Credit used there (StatPair `inCard`), so
+ * the month's money is one card rather than two.
  */
 export function MonthCard({
   spend,
@@ -29,6 +32,7 @@ export function MonthCard({
   totalBudgeted,
   daysElapsed,
   daysInMonth,
+  footer,
 }: {
   spend: number;
   income: number;
@@ -36,6 +40,7 @@ export function MonthCard({
   totalBudgeted: number;
   daysElapsed: number;
   daysInMonth: number;
+  footer?: ReactNode;
 }) {
   const router = useRouter();
   const colors = useThemeColors();
@@ -103,6 +108,7 @@ export function MonthCard({
             {!hidden && income > 0 && saved >= 0 && <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }} numberOfLines={1}>{Math.round((saved / income) * 100)}% of income</Text>}
           </View>
         </View>
+        {footer}
       </Card>
     </View>
   );

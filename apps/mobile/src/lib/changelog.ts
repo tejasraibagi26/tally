@@ -16,6 +16,11 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.13.3",
+    date: "2026-10-31",
+    changes: [{ kind: "improved", text: "This month on Overview is one card: spending, income and savings, with investments and credit used at the bottom." }],
+  },
+  {
     version: "2.13.2",
     date: "2026-10-31",
     changes: [{ kind: "fixed", text: "This month no longer resets to $0 in the evening on the last day of the month." }],

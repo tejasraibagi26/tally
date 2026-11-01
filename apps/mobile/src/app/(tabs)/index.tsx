@@ -190,20 +190,21 @@ export default function OverviewScreen() {
             is well; sync freshness already sits in the header meta line. */}
         <AttentionStack institutions={accounts.data?.institutions ?? []} unreviewed={recent.data?.pages[0]?.summary?.unreviewed ?? 0} />
 
-        {/* This month: spend against budget, income, saved -- with Investments and Credit used tucked just beneath */}
-        <View className="gap-3">
-          {currentMonth && (
-            <MonthCard
-              spend={currentMonth.spend}
-              income={currentMonth.income}
-              priorIncome={priorMonth?.income}
-              totalBudgeted={totalBudgeted}
-              daysElapsed={now.getDate()}
-              daysInMonth={daysInMonth}
-            />
-          )}
+        {/* This month, one card: spend against budget, income, saved, then Investments
+            and Credit used as its last row. Before the month loads the pair stands alone. */}
+        {currentMonth ? (
+          <MonthCard
+            spend={currentMonth.spend}
+            income={currentMonth.income}
+            priorIncome={priorMonth?.income}
+            totalBudgeted={totalBudgeted}
+            daysElapsed={now.getDate()}
+            daysInMonth={daysInMonth}
+            footer={<StatPair inCard investmentsCents={investmentsCents} credit={liabilities.data?.utilization ?? null} highCards={highCardCount(liabilities.data?.cards ?? [])} />}
+          />
+        ) : (
           <StatPair investmentsCents={investmentsCents} credit={liabilities.data?.utilization ?? null} highCards={highCardCount(liabilities.data?.cards ?? [])} />
-        </View>
+        )}
 
         {/* Budget this month */}
         {topBudgets.length > 0 && (

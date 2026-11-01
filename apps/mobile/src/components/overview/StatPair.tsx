@@ -17,8 +17,12 @@ import { useStickerShadow } from "@/components/ui/Card";
  * the balance and limit behind the percentage (hidden with the privacy toggle,
  * since a card balance is an account balance) and says when a card without a
  * reported limit is left out of the ratio.
+ *
+ * `inCard` renders it as the last section of another card (Overview's This
+ * month): no card of its own, a hairline above like the Income / Saved row,
+ * and no divider between the two -- the same grammar as the row above it.
  */
-export function StatPair({ investmentsCents, credit, highCards = 0 }: { investmentsCents: number | null; credit: UtilizationResult | null; highCards?: number }) {
+export function StatPair({ investmentsCents, credit, highCards = 0, inCard = false }: { investmentsCents: number | null; credit: UtilizationResult | null; highCards?: number; inCard?: boolean }) {
   const router = useRouter();
   const colors = useThemeColors();
   const rf = useRF();
@@ -41,23 +45,23 @@ export function StatPair({ investmentsCents, credit, highCards = 0 }: { investme
   const highNote = health?.label === "Healthy" && highCards > 0 ? `${highCards} card${highCards === 1 ? " is" : "s are"} high` : null;
   const excluded = credit && credit.excludedCount > 0 ? `${credit.excludedCount} card${credit.excludedCount === 1 ? "" : "s"} without a limit not counted` : null;
   const divider = stacked ? { height: 1, marginHorizontal: 16 } : { width: 1, marginVertical: 16 };
+  // Inside another card the sides take no padding of their own (the card has it) and sit in a row with a gap.
+  const pad = inCard ? "" : "p-4";
 
-  return (
-    // Tally Pop: ink outline + the sticker shadow on an outer view (iOS drops the shadow of a clipping view).
-    <View className="rounded-card" style={sticker}>
-    <View className={`rounded-card bg-surface border-card border-ink overflow-hidden ${stacked ? "" : "flex-row"}`}>
+  const body = (
+    <>
       {investmentsCents != null && (
-        <Pressable onPress={() => router.push("/investments")} className="flex-1 p-4 gap-1.5 active:opacity-80" accessibilityRole="button" accessibilityLabel="Investments">
+        <Pressable onPress={() => router.push("/investments")} className={`flex-1 ${pad} gap-1.5 active:opacity-80`} accessibilityRole="button" accessibilityLabel="Investments">
           <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(11.5) }}>Investments</Text>
           <MoneyText cents={investmentsCents} className="font-ui-semibold text-text" style={{ fontSize: rf(19) }} numberOfLines={1} adjustsFontSizeToFit />
           <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>Portfolio value</Text>
         </Pressable>
       )}
-      {both && <View style={[{ backgroundColor: hairline(colors) }, divider]} />}
+      {both && !inCard && <View style={[{ backgroundColor: hairline(colors) }, divider]} />}
       {utilization != null && health && (
         <Pressable
           onPress={() => router.push("/cards" as Href)}
-          className={`flex-1 p-4 active:opacity-80 ${both ? "gap-1.5" : "flex-row items-center justify-between gap-4"}`}
+          className={`flex-1 ${pad} active:opacity-80 ${both ? "gap-1.5" : "flex-row items-center justify-between gap-4"}`}
           accessibilityRole="button"
           accessibilityLabel={`Credit used ${formatPercent(utilization)}, ${health.label}${highNote ? `, ${highNote}` : ""}`}
         >
@@ -90,6 +94,22 @@ export function StatPair({ investmentsCents, credit, highCards = 0 }: { investme
           )}
         </Pressable>
       )}
+    </>
+  );
+
+  if (inCard) {
+    return (
+      <View className={`mt-4 pt-4 ${stacked ? "gap-4" : "flex-row gap-3"}`} style={{ borderTopWidth: 1, borderTopColor: hairline(colors) }}>
+        {body}
+      </View>
+    );
+  }
+
+  return (
+    // Tally Pop: ink outline + the sticker shadow on an outer view (iOS drops the shadow of a clipping view).
+    <View className="rounded-card" style={sticker}>
+    <View className={`rounded-card bg-surface border-card border-ink overflow-hidden ${stacked ? "" : "flex-row"}`}>
+      {body}
     </View>
     </View>
   );
