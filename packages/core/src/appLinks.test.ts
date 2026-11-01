@@ -35,6 +35,9 @@ describe("appPathForWebPath", () => {
     ["/year-in-review?year=2025", "/year-in-review?year=2025"],
     ["/forecast", "/forecast"],
     ["/upcoming", "/forecast"],
+    ["/goals", "/goals"],
+    ["/goals?view=retirement", "/goals?view=retirement"],
+    ["/fire", "/goals?view=retirement"],
     ["/rules", "/"],
   ])("%s → %s", (web, app) => {
     expect(appPathForWebPath(web)).toBe(app);

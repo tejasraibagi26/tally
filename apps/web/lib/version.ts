@@ -450,8 +450,13 @@
  * Forecast instead, and "What's coming" there lists every bill, card
  * payment and payday. GET /api/analytics/overview still returns
  * upcomingBills for mobile builds from before 2.11.0.
+ * 2.13.0 folds Early retirement into Goals: /goals has a tab each
+ * (components/goals/GoalsTabs.tsx, ?view=retirement), the year-end goal
+ * and FIRE planner bodies moved to components/goals/YearEndGoal.tsx and
+ * components/fire/RetirementGoal.tsx, the side nav has one "Goals" row,
+ * and /fire redirects (keeping ?start=zero).
  */
-export const APP_VERSION = "2.12.0";
+export const APP_VERSION = "2.13.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

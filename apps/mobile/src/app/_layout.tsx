@@ -208,9 +208,8 @@ function RootNavigator() {
                   headerRight, set from inside each screen via its own
                   <Stack.Screen options={{...}}/> -- TransparentHeader renders
                   them on Android. */}
-              <Stack.Screen name="fire" options={pushedScreenOptions("Early retirement")} />
               <Stack.Screen name="forecast" options={pushedScreenOptions("Forecast")} />
-              <Stack.Screen name="goals" options={pushedScreenOptions("Year-end goal")} />
+              <Stack.Screen name="goals" options={pushedScreenOptions("Goals")} />
               <Stack.Screen name="subscriptions" options={pushedScreenOptions("Subscriptions")} />
               <Stack.Screen name="cards" options={pushedScreenOptions("Credit cards")} />
               <Stack.Screen name="card/[id]" options={pushedScreenOptions("Card")} />

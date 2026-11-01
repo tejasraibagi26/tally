@@ -13,7 +13,6 @@ import {
   TrendingUp,
   TrendingDown,
   CreditCard,
-  Flame,
   Target,
   Settings,
   Tag,
@@ -100,8 +99,7 @@ function navGroups(counts: NavCounts): NavGroup[] {
       label: "Plan ahead",
       items: [
         { href: "/forecast", label: "Forecast", icon: TrendingDown },
-        { href: "/goals", label: "Year-end goal", icon: Target },
-        { href: "/fire", label: "Early retirement", icon: Flame },
+        { href: "/goals", label: "Goals", icon: Target },
       ],
     },
   ];

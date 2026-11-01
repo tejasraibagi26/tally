@@ -9,9 +9,10 @@ import { Platform } from "react-native";
  * v2.6.0). Year in review had a row from v2.5.0 to v2.7.1; it's reached
  * from Overview's January strip now. 562 = 513 + 49 for Forecast
  * (mobile v2.8.0). 645 = 562 + 34 for Figtree's taller line box (the
- * title and captions; mobile v2.0.0) + 49 for Year-end goal.
+ * title and captions; mobile v2.0.0) + 49 for Year-end goal. 596 = 645 -
+ * 49: Year-end goal and Early retirement became one Goals row (v2.12.0).
  */
-export const MORE_SHEET_CONTENT_HEIGHT = 645;
+export const MORE_SHEET_CONTENT_HEIGHT = 596;
 
 /**
  * On iOS 26 the form sheet floats above the home indicator, so no inset is

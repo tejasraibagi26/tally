@@ -383,8 +383,14 @@ import Constants from "expo-constants";
  * sheet links to Forecast. tally:// links to /upcoming open /forecast, and
  * /forecast itself now opens in the app instead of falling back to
  * Overview (@tally/core/appLinks, +native-intent).
+ * 2.12.0 folds Early retirement into Goals: app/goals.tsx is a tab bar
+ * over components/goals/YearEndGoal.tsx and RetirementGoal.tsx (the old
+ * goals and fire screens, minus their own header padding and glow), the
+ * fire route is gone, the More sheet has one "Goals" row
+ * (MORE_SHEET_CONTENT_HEIGHT 645 -> 596), and tally:// /fire opens
+ * /goals?view=retirement.
  */
-export const APP_VERSION = "2.11.0";
+export const APP_VERSION = "2.12.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

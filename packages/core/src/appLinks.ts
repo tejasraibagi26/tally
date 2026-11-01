@@ -43,9 +43,12 @@ export function appPathForWebPath(webPath: string): string {
   if (path === "/settings") return url.hash === "#alerts" ? "/alerts" : url.hash === "#safe-to-spend" ? "/safe-to-spend" : url.hash === "#income" ? "/income-schedules" : "/settings";
   if (path === "/year-in-review") return q.get("year") ? `/year-in-review?year=${q.get("year")}` : "/year-in-review";
 
-  // Upcoming was folded into Forecast (mobile v2.11.0); old links land there.
+  // Upcoming was folded into Forecast (mobile v2.11.0) and Early retirement
+  // into Goals (v2.12.0); old links land there.
   if (path === "/upcoming") return "/forecast";
+  if (path === "/fire") return "/goals?view=retirement";
+  if (path === "/goals") return q.get("view") === "retirement" ? "/goals?view=retirement" : "/goals";
 
-  const same = ["/budgets", "/accounts", "/subscriptions", "/goals", "/investments", "/fire", "/tags", "/forecast", "/alerts", "/safe-to-spend"];
+  const same = ["/budgets", "/accounts", "/subscriptions", "/investments", "/tags", "/forecast", "/alerts", "/safe-to-spend"];
   return same.includes(path) ? path : "/";
 }

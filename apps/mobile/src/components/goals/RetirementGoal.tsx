@@ -5,8 +5,6 @@ import { formatCents, formatPercent } from "@tally/core/money";
 import { ageAsOf, fireMilestones, fireNumber, fireProgressPct, fireWhatIfs, projectionSeries, realReturn, requiredMonthlySaving, yearsToFire } from "@tally/core/fireMath";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
-import { ScreenGlow } from "@/components/ui/ScreenGlow";
-import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { AppSlider } from "@/components/ui/AppSlider";
 import { FireChart } from "@/components/charts/FireChart";
 import { Bleed } from "@/components/ui/Bleed";
@@ -46,16 +44,18 @@ interface Plan {
 // answer first (age and year), a projection with the target and a ±1%
 // band, what-ifs in years, milestones, and levers that save themselves.
 // Projection runs on the return after inflation (@tally/core/fireMath).
-export default function FireScreen() {
-  const contentTop = useScreenContentTop();
+// Goals' early-retirement tab (app/goals.tsx; was its own screen, /fire,
+// until mobile v2.12.0): the screen's header and tabs sit above it, so
+// nothing here pads for the header.
+export function RetirementGoal() {
+  const contentTop = 0;
   const { data: defaults, isLoading: loadingDefaults } = useFireDefaults();
   const { data: settingsData, isLoading: loadingSettings } = useFireSettings();
   const [startFromZero, setStartFromZero] = useState(false);
 
   if (loadingDefaults || loadingSettings || !defaults || settingsData === undefined) {
     return (
-      <View className="flex-1 bg-canvas items-center justify-center" style={{ paddingTop: contentTop }}>
-        <ScreenGlow />
+      <View className="flex-1 items-center justify-center" style={{ paddingTop: contentTop }}>
         <ActivityIndicator />
       </View>
     );
@@ -81,8 +81,7 @@ function EmptyFire({ contentTop, hasAccounts, onStartFromZero }: { contentTop: n
   const rf = useRF();
   const { openLink, isLinking, progressSheet } = usePlaidLink();
   return (
-    <View className="flex-1 bg-canvas px-5" style={{ paddingTop: contentTop }}>
-      <ScreenGlow />
+    <View className="flex-1 px-5" style={{ paddingTop: contentTop }}>
       {progressSheet}
       <Card className="px-5 pt-6 pb-5 gap-3">
         <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>When could you stop working?</Text>
@@ -173,8 +172,7 @@ function Planner({
   const coveredMonths = defaults.coveredMonths ?? 12;
 
   return (
-    <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
-      <ScreenGlow />
+    <View className="flex-1" style={{ paddingTop: contentTop }}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 16, paddingBottom: 40 }}>
           <Card className="overflow-hidden">
