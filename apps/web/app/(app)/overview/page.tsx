@@ -1,13 +1,13 @@
 import { db, schema } from "@/db";
 import { isLiveAccountRow } from "@/lib/liveAccounts";
 import { and, eq, gte, lt, sql } from "drizzle-orm";
-import { Landmark, CalendarCheck, AlertTriangle } from "lucide-react";
+import { Landmark, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { requireUserId } from "@/lib/session";
 import { formatCents, formatPercent } from "@tally/core/money";
 import { getBudgetsForMonth } from "@/lib/budgets";
 import { monthRange, monthLastDay, shiftMonth, computeBurnRateProjection } from "@tally/core/budgetMath";
-import { monthTotals, categoryBreakdown, upcomingBills, cashFlowTrend, dailySpend } from "@/lib/analytics";
+import { monthTotals, categoryBreakdown, cashFlowTrend, dailySpend } from "@/lib/analytics";
 import { netWorthTrend } from "@/lib/networth";
 import { NET_WORTH_CURRENCY } from "@tally/core/fx";
 import { trimLeadingEmptyMonths } from "@tally/core/cashFlowMath";
@@ -36,10 +36,8 @@ import { safeToSpendFor } from "@/lib/safeToSpend";
 import { GoalCard } from "@/components/goals/GoalCard";
 import { goalSummary, goalsIntroSeen } from "@/lib/goals";
 import { GoalIntroModal } from "@/components/goals/GoalIntroModal";
-import { ForecastCard } from "@/components/forecast/ForecastCard";
 import { ForecastIntroModal } from "@/components/forecast/ForecastIntroModal";
 import { seenAnnouncements } from "@/lib/announcements";
-import { forecastFor } from "@/lib/forecast";
 
 // A short, increasing entrance delay per major section so the page arrives
 // in a quick cascade rather than all at once. Kept small (120ms apart) so
@@ -99,12 +97,11 @@ export default async function OverviewPage() {
   const { start: monthStart } = monthRange(month);
   const monthEnd = monthLastDay(month);
 
-  const [budgets, thisMonth, lastMonth, breakdown, bills, netWorthPoints, recentTx, cards, cashFlowMonths, holdings, spendByDay, [toReview]] = await Promise.all([
+  const [budgets, thisMonth, lastMonth, breakdown, netWorthPoints, recentTx, cards, cashFlowMonths, holdings, spendByDay, [toReview]] = await Promise.all([
     getBudgetsForMonth(userId, month),
     monthTotals(userId, month),
     monthTotals(userId, priorMonth),
     categoryBreakdown(userId, month),
-    upcomingBills(userId),
     netWorthTrend(userId, 365),
     db.query.transactions.findMany({
       where: eq(schema.transactions.userId, userId),
@@ -163,7 +160,7 @@ export default async function OverviewPage() {
   const dailyPace = totalBudgeted > 0 ? Math.floor(totalBudgeted / daysInMonth) : 0;
   const streak = onPaceStreak(spendByDay, dailyPace, today, monthStart);
   const unreviewed = toReview?.count ?? 0;
-  const [goal, introSeen, seen, safe, forecast] = await Promise.all([goalSummary(userId), goalsIntroSeen(userId), seenAnnouncements(userId), safeToSpendFor(userId), forecastFor(userId)]);
+  const [goal, introSeen, seen, safe] = await Promise.all([goalSummary(userId), goalsIntroSeen(userId), seenAnnouncements(userId), safeToSpendFor(userId)]);
   // The right-hand column: safe to spend over the on-pace card, at equal
   // heights; either alone fills it. With neither, Connections takes it.
   const showSafe = safe.cash.length > 0;
@@ -296,11 +293,6 @@ export default async function OverviewPage() {
 
       {/* The year-end goal (lib/goals.ts), or a prompt to set one */}
       <GoalCard summary={goal} style={reveal(2)} />
-      {/* Where the next two months land (lib/forecast.ts); hidden until
-          there is a pay schedule to project from. */}
-      <div style={reveal(2)}>
-        <ForecastCard forecast={forecast} />
-      </div>
       {/* Once per account, and not once a goal exists */}
       <GoalIntroModal show={!introSeen && !goal} />
       <ForecastIntroModal show={!forecastSeen && goalsStepDone} />
@@ -327,43 +319,9 @@ export default async function OverviewPage() {
         </Card>
       </div>
 
-      {/* Row 4: upcoming + recent activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch" style={reveal(5)}>
-        <Card className="lg:col-span-5 h-full flex flex-col">
-          <CardHeader
-            title="Upcoming"
-            meta={
-              bills.length > 0
-                ? [bills.some((b) => b.overdue) && `${bills.filter((b) => b.overdue).length} overdue`, `${bills.filter((b) => !b.overdue).length} in the next 30 days`].filter(Boolean).join(" · ")
-                : undefined
-            }
-          />
-          {bills.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center px-4 py-8">
-              <EmptyState icon={CalendarCheck} title="Nothing due in the next 30 days." compact />
-            </div>
-          ) : (
-            <div className="flex flex-col">
-              {bills.map((bill, i) => (
-                <div key={i} className="flex items-center justify-between px-4 py-3 border-b border-border last:border-b-0">
-                  <div className="flex flex-col gap-0.5 min-w-0">
-                    <span className="text-[15px] text-text truncate">{bill.label}</span>
-                    <span className={bill.overdue ? "text-xs font-medium text-warning" : "text-xs text-text-3"}>
-                      {bill.overdue ? `Overdue${bill.overdueDays > 0 ? ` · ${bill.overdueDays} day${bill.overdueDays === 1 ? "" : "s"}` : ""} · ${bill.dueDate}` : bill.dueDate}
-                      {bill.statementBalance != null && <span className="money"> · statement {formatCents(bill.statementBalance)}</span>}
-                    </span>
-                  </div>
-                  {bill.amount == null ? (
-                    <span className="text-right text-[13px] text-text-3">Min. unknown</span>
-                  ) : (
-                    <span className="text-right text-[15px] text-text tabular">{formatCents(bill.amount)}</span>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
-        <Card className="lg:col-span-7 h-full">
+      {/* Recent activity. What's coming lives on Forecast, reached from Safe to spend. */}
+      <div style={reveal(5)}>
+        <Card>
           <CardHeader title="Recent activity" action={<Link href="/transactions" className="text-brand text-[13.5px]">View all →</Link>} />
           <div className="flex flex-col">
             {recentTx.map((t) => (

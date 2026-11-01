@@ -376,8 +376,15 @@ import Constants from "expo-constants";
  * the root view always carries popVars. An install still showing the
  * "Classic" alternate icon is reset to the primary once (lib/appIcon.ts);
  * the alternate stays in app.json until the next native build.
+ * 2.11.0 makes Forecast the one screen for what's ahead: Safe to spend
+ * heads it (SafeToSpendCard with forecastLink off), the Upcoming screen,
+ * Overview's Upcoming list and its bill sheet are gone (a bill is dismissed
+ * from Subscriptions, where Forecast's rows lead), and the Safe to spend
+ * sheet links to Forecast. tally:// links to /upcoming open /forecast, and
+ * /forecast itself now opens in the app instead of falling back to
+ * Overview (@tally/core/appLinks, +native-intent).
  */
-export const APP_VERSION = "2.10.0";
+export const APP_VERSION = "2.11.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

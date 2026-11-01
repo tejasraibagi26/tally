@@ -11,6 +11,8 @@ import { ForecastChart } from "@/components/charts/ForecastChart";
 import { ForecastHowItWorksDialog } from "@/components/forecast/ForecastHowItWorksDialog";
 import { MerchantAvatar } from "@/components/transactions/MerchantAvatar";
 import { useForecast } from "@/lib/queries/forecast";
+import { useSafeToSpend } from "@/lib/queries/safeToSpend";
+import { SafeToSpendCard } from "@/components/overview/SafeToSpend";
 import { usePrivacy } from "@/lib/PrivacyContext";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
@@ -20,9 +22,12 @@ const dayLabel = (iso: string) =>
   new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
 
 /**
- * Forecast (reached from the More sheet and Overview's card): mobile's
- * counterpart of web's /forecast. Same API, same wording, same headline
- * rule — the first day under the buffer, not the deepest.
+ * Forecast: the one screen for what's ahead (mobile v2.11.0 folded Upcoming
+ * into it). Safe to spend up top, then where the balance lands, then every
+ * bill, card payment and payday in the window. Reached from the More sheet
+ * and Overview's Safe to spend sheet; mobile's counterpart of web's
+ * /forecast. Same API, same wording, same headline rule — the first day
+ * under the buffer, not the deepest.
  */
 export default function ForecastScreen() {
   const router = useRouter();
@@ -35,6 +40,7 @@ export default function ForecastScreen() {
   const [scrubbing, setScrubbing] = useState(false);
   const [showAll, setShowAll] = useState(false);
   const forecast = useForecast(range);
+  const safe = useSafeToSpend();
 
   const f = forecast.data;
   const money = (c: number) => (hidden ? "••••" : formatCents(c));
@@ -106,6 +112,9 @@ export default function ForecastScreen() {
             <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(13) }}>How it works</Text>
           </Pressable>
         </View>
+
+        {/* What's safe until payday: the near-term answer, before the curve. */}
+        {safe.data && safe.data.cash.length > 0 && <SafeToSpendCard s={safe.data} forecastLink={false} />}
 
         {/* Headline */}
         <Card className="p-4">

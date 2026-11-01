@@ -444,8 +444,14 @@
  * modal, .pop-only/.classic-only and the classic emails are gone, and the
  * goal, safe-to-spend and forecast alerts go to everyone. users.ui_look is
  * left in place, unused, for a later migration to drop.
+ * 2.12.0 makes Forecast the one page for what's ahead: Safe to spend heads
+ * it (SafeToSpendCard with forecastLink off), and Overview drops its
+ * Forecast card and Upcoming list -- the Safe to spend panel links to
+ * Forecast instead, and "What's coming" there lists every bill, card
+ * payment and payday. GET /api/analytics/overview still returns
+ * upcomingBills for mobile builds from before 2.11.0.
  */
-export const APP_VERSION = "2.11.0";
+export const APP_VERSION = "2.12.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

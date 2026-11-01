@@ -76,12 +76,13 @@ function Line({ s }: { s: SafeToSpendResult }) {
 }
 
 /**
- * Overview's Safe to spend card (Tally Pop only) and its breakdown panel
- * (?safe=1), from lib/safeToSpend.ts. The card shares the right-hand column
- * with the on-pace card, both at equal height (the Safe to Spend spec,
- * option B).
+ * The Safe to spend card and its breakdown panel (?safe=1), from
+ * lib/safeToSpend.ts. On Overview it shares the right-hand column with the
+ * on-pace card, both at equal height (the Safe to Spend spec, option B), and
+ * is the way into Forecast; it also heads Forecast itself, where the panel
+ * drops that link.
  */
-export function SafeToSpendCard({ s, className }: { s: SafeToSpendResult; className?: string }) {
+export function SafeToSpendCard({ s, className, forecastLink = true }: { s: SafeToSpendResult; className?: string; forecastLink?: boolean }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -128,7 +129,7 @@ export function SafeToSpendCard({ s, className }: { s: SafeToSpendResult; classN
           )}
         </span>
       </button>
-      <SafeToSpendPanel s={s} open={open} onClose={() => toggle(false)} />
+      <SafeToSpendPanel s={s} open={open} onClose={() => toggle(false)} forecastLink={forecastLink} />
     </>
   );
 }
@@ -146,7 +147,7 @@ function Row({ title, sub, cents, children }: { title: React.ReactNode; sub?: Re
   );
 }
 
-function SafeToSpendPanel({ s, open, onClose }: { s: SafeToSpendResult; open: boolean; onClose: () => void }) {
+function SafeToSpendPanel({ s, open, onClose, forecastLink }: { s: SafeToSpendResult; open: boolean; onClose: () => void; forecastLink: boolean }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [cushion, setCushion] = useState(String(s.cushion / 100));
@@ -293,6 +294,11 @@ function SafeToSpendPanel({ s, open, onClose }: { s: SafeToSpendResult; open: bo
             Choose which accounts count
           </Link>
         </div>
+        {forecastLink && (
+          <Link href="/forecast" className="ui-btn ui-btn-secondary inline-flex justify-center rounded-full border border-border-strong bg-surface hover:bg-sunken px-4 py-2 text-[14px] font-semibold text-text">
+            See everything due, and where your balance lands →
+          </Link>
+        )}
       </div>
     </SidePanel>
   );

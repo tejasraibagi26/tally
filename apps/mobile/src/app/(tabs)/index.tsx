@@ -20,11 +20,8 @@ import { NetWorthHero } from "@/components/overview/NetWorthHero";
 import { AttentionStack } from "@/components/overview/AttentionStack";
 import { MonthCard } from "@/components/overview/MonthCard";
 import { StatPair } from "@/components/overview/StatPair";
-import { UpcomingList } from "@/components/overview/UpcomingList";
 import { RecentList } from "@/components/overview/RecentList";
 import { usePrivacy } from "@/lib/PrivacyContext";
-import { useDismissUndo } from "@/lib/useDismissUndo";
-import { Toast } from "@/components/ui/Toast";
 import { useTabBarBottomClearance } from "@/lib/useTabBarBottomClearance";
 import { highCardCount, rankBudgets } from "@tally/core/overviewView";
 import { useThemeColors } from "@/theme/useThemeColors";
@@ -44,7 +41,7 @@ import { formatCents } from "@tally/core/money";
 
 // MOBILE_DESIGN.md §5.2 -- hero net worth (unboxed, direct on canvas), what
 // needs a tap (banks, review backlog), "This month", Investments / Credit
-// used, "Budget this month" (the three most-used), "Upcoming", "Recent
+// used, "Budget this month" (the three most-used), "Recent
 // activity" and "Where it went."
 export default function OverviewScreen() {
   const router = useRouter();
@@ -74,7 +71,6 @@ export default function OverviewScreen() {
   // (its scrollEnabled prop below) so a vertical wobble mid-drag can't hand
   // the touch to the scroll view instead of the chart.
   const [isScrubbingChart, setIsScrubbingChart] = useState(false);
-  const undo = useDismissUndo();
 
   const netCents = accounts.data?.totals.net ?? 0;
 
@@ -225,9 +221,6 @@ export default function OverviewScreen() {
           </View>
         )}
 
-        {/* Upcoming */}
-        <UpcomingList bills={overview.data?.upcomingBills ?? []} onDismissed={undo.onDismissed} />
-
         {/* Recent activity */}
         <RecentList items={recentItems} />
 
@@ -247,7 +240,6 @@ export default function OverviewScreen() {
         )}
       </View>
       </ScrollView>
-      <Toast message={undo.message} onHidden={undo.clear} action={undo.action} bottom={tabBarClearance + 16} />
       {profile.data && <GoalIntroDialog summary={goal.data} />}
       {/* Second in the chain: after the goals intro. */}
       <ForecastIntroDialog profile={profile.data} show={goalsStepDone} />

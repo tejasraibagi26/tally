@@ -43,6 +43,9 @@ export function appPathForWebPath(webPath: string): string {
   if (path === "/settings") return url.hash === "#alerts" ? "/alerts" : url.hash === "#safe-to-spend" ? "/safe-to-spend" : url.hash === "#income" ? "/income-schedules" : "/settings";
   if (path === "/year-in-review") return q.get("year") ? `/year-in-review?year=${q.get("year")}` : "/year-in-review";
 
-  const same = ["/budgets", "/accounts", "/subscriptions", "/goals", "/investments", "/fire", "/tags", "/upcoming", "/alerts", "/safe-to-spend"];
+  // Upcoming was folded into Forecast (mobile v2.11.0); old links land there.
+  if (path === "/upcoming") return "/forecast";
+
+  const same = ["/budgets", "/accounts", "/subscriptions", "/goals", "/investments", "/fire", "/tags", "/forecast", "/alerts", "/safe-to-spend"];
   return same.includes(path) ? path : "/";
 }

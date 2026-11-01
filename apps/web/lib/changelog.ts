@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.12.0",
+    date: "2026-10-31",
+    changes: [
+      { kind: "improved", text: "Forecast is now the one place for what's ahead: Safe to spend sits at the top, then where your balance lands, then every bill, card payment and payday." },
+      { kind: "improved", text: "Overview is shorter. The Forecast card and Upcoming list moved into Forecast; open Safe to spend to get there." },
+    ],
+  },
+  {
     version: "2.11.0",
     date: "2026-10-31",
     changes: [

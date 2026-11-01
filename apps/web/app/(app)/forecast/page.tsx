@@ -2,6 +2,8 @@ import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import { requireUserId } from "@/lib/session";
 import { forecastFor } from "@/lib/forecast";
+import { safeToSpendFor } from "@/lib/safeToSpend";
+import { SafeToSpendCard } from "@/components/overview/SafeToSpend";
 import { formatCents } from "@tally/core/money";
 import { Card, CardHeader } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -21,16 +23,17 @@ function daysAway(from: string, to: string): number {
 }
 
 /**
- * Forecast (Tally Pop and classic alike): the projected cash balance for
- * the next 30-90 days, the first day it crosses the buffer, and the ledger
- * behind it. Reads only — a wrong bill is fixed in Subscriptions, a wrong
+ * Forecast, the one page for what's ahead (web v2.12.0 folded Safe to spend
+ * and Overview's Upcoming list into it): what's safe to spend until payday,
+ * the projected cash balance for the next 30-90 days, the first day it
+ * crosses the buffer, and every bill, card payment and payday behind it. Reads only — a wrong bill is fixed in Subscriptions, a wrong
  * payday in Income; a view that quietly writes is a view people stop
  * trusting.
  */
 export default async function ForecastPage({ searchParams }: { searchParams: Promise<{ days?: string }> }) {
   const userId = await requireUserId();
   const { days } = await searchParams;
-  const f = await forecastFor(userId, days == null ? undefined : Number(days));
+  const [f, safe] = await Promise.all([forecastFor(userId, days == null ? undefined : Number(days)), safeToSpendFor(userId)]);
 
   if (f.openingCash === 0 && f.assumptions.paycheques === 0) {
     return (
@@ -71,6 +74,9 @@ export default async function ForecastPage({ searchParams }: { searchParams: Pro
           </div>
         }
       />
+
+      {/* What's safe until payday: the near-term answer, before the curve. */}
+      {safe.cash.length > 0 && <SafeToSpendCard s={safe} forecastLink={false} />}
 
       {/* Headline: the first day under the buffer, not the deepest — it is the
           one still worth acting on — and always with what caused it. */}

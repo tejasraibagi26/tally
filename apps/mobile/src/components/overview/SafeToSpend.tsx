@@ -13,8 +13,8 @@ import { useRF } from "@/theme/responsiveFont";
 import { hairline } from "@/theme/colors";
 
 /*
- * Overview's Safe to spend card and its breakdown sheet (Tally Pop only):
- * mobile's copy of web's components/overview/SafeToSpend.tsx, from the same
+ * The Safe to spend card and its breakdown sheet, on Overview and at the top
+ * of Forecast (the one screen for what's ahead): mobile's copy of web's components/overview/SafeToSpend.tsx, from the same
  * GET /api/safe-to-spend and @tally/core/safeToSpend wording.
  */
 
@@ -67,7 +67,17 @@ function Meter({ s }: { s: SafeToSpendResult }) {
   );
 }
 
-export function SafeToSpendCard({ s, initiallyOpen = false }: { s: SafeToSpendResult; /** Open the breakdown on arrival (an email's link). */ initiallyOpen?: boolean }) {
+export function SafeToSpendCard({
+  s,
+  initiallyOpen = false,
+  forecastLink = true,
+}: {
+  s: SafeToSpendResult;
+  /** Open the breakdown on arrival (an email's link). */
+  initiallyOpen?: boolean;
+  /** The sheet's "See the forecast" row; off on Forecast itself. */
+  forecastLink?: boolean;
+}) {
   const colors = useThemeColors();
   const rf = useRF();
   const sticker = useStickerShadow();
@@ -106,7 +116,7 @@ export function SafeToSpendCard({ s, initiallyOpen = false }: { s: SafeToSpendRe
           <Meter s={s} />
         )}
       </Pressable>
-      <SafeToSpendSheet s={open ? s : null} onClose={() => setOpen(false)} />
+      <SafeToSpendSheet s={open ? s : null} onClose={() => setOpen(false)} forecastLink={forecastLink} />
     </>
   );
 }
@@ -126,7 +136,7 @@ function SheetRow({ title, sub, cents, onPress, children }: { title: string; sub
   );
 }
 
-function SafeToSpendSheet({ s: next, onClose }: { s: SafeToSpendResult | null; onClose: () => void }) {
+function SafeToSpendSheet({ s: next, onClose, forecastLink }: { s: SafeToSpendResult | null; onClose: () => void; forecastLink: boolean }) {
   const colors = useThemeColors();
   const sticker = useStickerShadow();
   const rf = useRF();
@@ -226,6 +236,12 @@ function SafeToSpendSheet({ s: next, onClose }: { s: SafeToSpendResult | null; o
             </Text>
             <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Settings</Text>
           </Pressable>
+          {forecastLink && (
+            <Pressable onPress={() => go("/forecast" as Href)} accessibilityRole="link" className="flex-row items-center justify-between pt-3 active:opacity-70" style={{ borderTopWidth: 1, borderTopColor: hairline(colors) }}>
+              <Text className="font-ui text-text-2 flex-1" style={{ fontSize: rf(13) }}>Everything due, and where your balance lands</Text>
+              <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>See the forecast</Text>
+            </Pressable>
+          )}
         </ScrollView>
       )}
     </Sheet>

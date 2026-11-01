@@ -33,6 +33,8 @@ describe("appPathForWebPath", () => {
     ["/budgets", "/budgets"],
     ["/accounts?bank=b1", "/accounts"],
     ["/year-in-review?year=2025", "/year-in-review?year=2025"],
+    ["/forecast", "/forecast"],
+    ["/upcoming", "/forecast"],
     ["/rules", "/"],
   ])("%s → %s", (web, app) => {
     expect(appPathForWebPath(web)).toBe(app);
