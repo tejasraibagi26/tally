@@ -67,7 +67,8 @@ export function IncomeScheduleManager({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState("Paycheck");
-  const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
+  // Never preselected or remembered: the user must choose the account.
+  const [accountId, setAccountId] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [amountInput, setAmountInput] = useState("");
   const [anchor1, setAnchor1] = useState("15");
@@ -82,12 +83,17 @@ export function IncomeScheduleManager({
   function close() {
     setOpen(false);
     setError(null);
+    setAccountId("");
   }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const amount = Math.round(parseFloat(amountInput) * 100);
-    if (!accountId || !Number.isFinite(amount) || amount <= 0) return;
+    if (!accountId) {
+      setError("Choose an account.");
+      return;
+    }
+    if (!Number.isFinite(amount) || amount <= 0) return;
     const dayAnchors = anchor2 === NONE ? [Number(anchor1)] : [Number(anchor1), Number(anchor2)];
     setSaving(true);
     setError(null);

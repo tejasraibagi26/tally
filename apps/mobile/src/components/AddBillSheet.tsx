@@ -43,7 +43,8 @@ export function AddBillSheet({ visible, onClose }: { visible: boolean; onClose: 
   const [pickingCategory, setPickingCategory] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const selectedAccount = accounts.find((a) => a.id === accountId) ?? accounts[0];
+  // Never preselected: the user must choose the account themselves.
+  const selectedAccount = accounts.find((a) => a.id === accountId);
   const selectedCategory = expenseCategories.find((c) => c.id === categoryId);
 
   function handleClose() {

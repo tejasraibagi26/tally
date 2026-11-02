@@ -46,7 +46,8 @@ export function RuleForm({ categories, accounts }: { categories: RuleFormCategor
   const [op, setOp] = useState("equals");
   const [textValue, setTextValue] = useState("");
   const [amountValue, setAmountValue] = useState("");
-  const [accountValue, setAccountValue] = useState(accounts[0]?.id ?? "");
+  // Never preselected or remembered: the user must choose the account.
+  const [accountValue, setAccountValue] = useState("");
   const [directionValue, setDirectionValue] = useState<"in" | "out">("out");
 
   const [setCategoryId, setSetCategoryId] = useState("");
@@ -63,6 +64,7 @@ export function RuleForm({ categories, accounts }: { categories: RuleFormCategor
   function close() {
     setOpen(false);
     setError(null);
+    setAccountValue("");
   }
 
   function buildMatch() {
@@ -86,6 +88,10 @@ export function RuleForm({ categories, accounts }: { categories: RuleFormCategor
   }
 
   async function handlePreview() {
+    if (field === "account" && !accountValue) {
+      setError("Choose an account.");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -107,6 +113,10 @@ export function RuleForm({ categories, accounts }: { categories: RuleFormCategor
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (field === "account" && !accountValue) {
+      setError("Choose an account.");
+      return;
+    }
     const actions = buildActions();
     if (!hasAnyAction(actions)) {
       setError("Pick at least one action.");

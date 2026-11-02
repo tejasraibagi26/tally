@@ -52,7 +52,8 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
   const [pickingAccount, setPickingAccount] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const selectedAccount = allAccounts.find((a) => a.id === accountId) ?? allAccounts[0];
+  // Never preselected: the user must choose the account themselves.
+  const selectedAccount = allAccounts.find((a) => a.id === accountId);
   const category = categoriesData?.categories.find((c) => c.id === categoryId);
 
   function reset() {
@@ -201,8 +202,8 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
               className="flex-row items-center justify-between rounded-control bg-surface-2 px-[14px] border-field border-ink"
               style={{ height: 46 }}
             >
-              <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>
-                {selectedAccount ? `${selectedAccount.name}${selectedAccount.mask ? ` ····${selectedAccount.mask}` : ""}` : "Choose account"}
+              <Text className={selectedAccount ? "font-ui text-text" : "font-ui text-text-3"} style={{ fontSize: rf(14.5) }}>
+                {selectedAccount ? `${selectedAccount.name}${selectedAccount.mask ? ` ····${selectedAccount.mask}` : ""}` : "Choose an account"}
               </Text>
               <ChevronRight size={16} color={colors["text-3"]} />
             </Pressable>
@@ -222,7 +223,7 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
         onClose={() => setPickingAccount(false)}
         title="Account"
         items={allAccounts.map((a) => ({ id: a.id, label: a.name, sublabel: a.mask ? `····${a.mask}` : undefined }))}
-        selectedId={accountId ?? allAccounts[0]?.id ?? null}
+        selectedId={accountId}
         onSelect={setAccountId}
       />
     </Sheet>

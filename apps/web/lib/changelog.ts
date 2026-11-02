@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.16.1",
+    date: "2026-11-02",
+    changes: [
+      { kind: "fixed", text: "Adding a transaction, bill, income schedule or rule no longer picks an account for you. You choose it, so nothing lands in the wrong account." },
+    ],
+  },
+  {
     version: "2.16.0",
     date: "2026-11-01",
     changes: [

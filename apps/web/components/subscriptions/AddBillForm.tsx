@@ -29,7 +29,8 @@ export function AddBillForm({ accounts, categories }: { accounts: BillAccountOpt
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [description, setDescription] = useState("");
-  const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
+  // Never preselected or remembered: the user must choose the account.
+  const [accountId, setAccountId] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [amountInput, setAmountInput] = useState("");
   const [dueDate, setDueDate] = useState("");
@@ -41,12 +42,17 @@ export function AddBillForm({ accounts, categories }: { accounts: BillAccountOpt
   function close() {
     setOpen(false);
     setError(null);
+    setAccountId("");
   }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const amount = Math.round(parseFloat(amountInput) * 100);
-    if (!description.trim() || !accountId || !dueDate || !Number.isFinite(amount) || amount <= 0) return;
+    if (!accountId) {
+      setError("Choose an account.");
+      return;
+    }
+    if (!description.trim() || !dueDate || !Number.isFinite(amount) || amount <= 0) return;
     setSaving(true);
     setError(null);
     try {

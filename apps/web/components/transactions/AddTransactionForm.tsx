@@ -35,7 +35,8 @@ export function AddTransactionForm({ accounts, categories }: { accounts: Transac
   const [open, setOpen] = useState(false);
   const [kind, setKind] = useState<"expense" | "income">("expense");
   const [name, setName] = useState("");
-  const [accountId, setAccountId] = useState(accounts[0]?.id ?? "");
+  // Never preselected or remembered: the user must choose the account.
+  const [accountId, setAccountId] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [amountInput, setAmountInput] = useState("");
   const [postedDate, setPostedDate] = useState(todayDate());
@@ -47,9 +48,11 @@ export function AddTransactionForm({ accounts, categories }: { accounts: Transac
   function close() {
     setOpen(false);
     setError(null);
+    setAccountId("");
   }
 
   function reset() {
+    setAccountId("");
     setName("");
     setAmountInput("");
     setCategoryId("");
@@ -60,7 +63,11 @@ export function AddTransactionForm({ accounts, categories }: { accounts: Transac
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     const amount = Math.round(parseFloat(amountInput) * 100);
-    if (!name.trim() || !accountId || !postedDate || !Number.isFinite(amount) || amount <= 0) return;
+    if (!accountId) {
+      setError("Choose an account.");
+      return;
+    }
+    if (!name.trim() || !postedDate || !Number.isFinite(amount) || amount <= 0) return;
     setSaving(true);
     setError(null);
     try {

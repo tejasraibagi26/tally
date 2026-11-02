@@ -117,7 +117,7 @@ export default function IncomeSchedulesScreen() {
 
   function resetForm() {
     setLabel("Paycheck");
-    setAccountId(accounts[0]?.id ?? null);
+    setAccountId(null); // never preselected: the user picks it
     setCategoryId(null);
     setAmountInput("");
     setAnchor1("15");

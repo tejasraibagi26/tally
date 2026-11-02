@@ -465,8 +465,11 @@ import Constants from "expo-constants";
  * iOS (formSheet at a 0.92 detent with GLASS_FORM_SHEET_IOS from
  * ui/nativeBlur.ts, SHEET_WASH painted by the screen) instead of a solid
  * full-height modal. Android keeps the modal.
+ *
+ * 2.16.4 never preselects an account: Add transaction, Add bill and income
+ * schedules start with no account and the user must pick one.
  */
-export const APP_VERSION = "2.16.3";
+export const APP_VERSION = "2.16.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

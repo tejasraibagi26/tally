@@ -512,8 +512,12 @@
  * #14121C, surface-2/raised #1C1A27, sunken #060509, border #252233, and
  * the subtle tints darker to match (web and mobile together; text pairs
  * still AA, text-3 6.3:1 on surface).
+ *
+ * 2.16.1 never preselects an account: Add transaction, Add bill, income
+ * schedules and the rule form's account match start empty, clear on
+ * close, and say "Choose an account." instead of silently not submitting.
  */
-export const APP_VERSION = "2.16.0";
+export const APP_VERSION = "2.16.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
