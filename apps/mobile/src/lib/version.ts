@@ -440,8 +440,11 @@ import Constants from "expo-constants";
  *
  * 2.15.2 stacks the budget sheet's Save and See transactions full width,
  * so "See transactions" no longer truncates at half width.
+ *
+ * 2.15.3 gives Add transaction's date, category and account rows (and the
+ * Expense/Income switch) the same ink field outline as its text inputs.
  */
-export const APP_VERSION = "2.15.2";
+export const APP_VERSION = "2.15.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.15.3",
+    date: "2026-11-02",
+    changes: [
+      { kind: "fixed", text: "In Add transaction, the date, category and account look like fields you can tap, matching the rest of the form." },
+    ],
+  },
+  {
     version: "2.15.2",
     date: "2026-11-02",
     changes: [

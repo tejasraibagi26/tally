@@ -121,7 +121,7 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
         </View>
 
         <ScrollView className="px-5" showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 16, paddingBottom: 8 }} keyboardShouldPersistTaps="handled">
-          <View className="flex-row rounded-control overflow-hidden" style={{ borderWidth: 1, borderColor: colors["border-strong"], height: 44 }}>
+          <View className="flex-row rounded-control overflow-hidden border-field border-ink" style={{ height: 44 }}>
             <Pressable
               onPress={() => setKind("expense")}
               className="flex-1 items-center justify-center"
@@ -162,7 +162,7 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
 
           <Pressable
             onPress={openDatePicker}
-            className="flex-row items-center justify-between rounded-control bg-surface-2 px-[14px]"
+            className="flex-row items-center justify-between rounded-control bg-surface-2 px-[14px] border-field border-ink"
             style={{ height: 46 }}
           >
             <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>{formatDisplayDate(date)}</Text>
@@ -184,7 +184,7 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
 
           <Pressable
             onPress={() => setPickerOpen(true)}
-            className="flex-row items-center justify-between rounded-control bg-surface-2 px-[14px]"
+            className="flex-row items-center justify-between rounded-control bg-surface-2 px-[14px] border-field border-ink"
             style={{ height: 46 }}
           >
             <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>{category?.name ?? "Uncategorized"}</Text>
@@ -198,7 +198,7 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
           {allAccounts.length > 0 && (
             <Pressable
               onPress={() => setPickingAccount(true)}
-              className="flex-row items-center justify-between rounded-control bg-surface-2 px-[14px]"
+              className="flex-row items-center justify-between rounded-control bg-surface-2 px-[14px] border-field border-ink"
               style={{ height: 46 }}
             >
               <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>
