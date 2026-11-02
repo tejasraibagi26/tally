@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.17.2",
+    date: "2026-11-02",
+    changes: [
+      { kind: "fixed", text: "Transactions are dated by when you made the purchase, not when the bank posted it, so a purchase on Oct 31 that posts Nov 1 counts in October." },
+    ],
+  },
+  {
     version: "2.17.1",
     date: "2026-11-02",
     changes: [

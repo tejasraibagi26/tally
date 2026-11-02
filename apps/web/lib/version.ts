@@ -536,8 +536,15 @@
  * lastDate landed on or up to 5 days (3 for weekly) before it, which covers
  * a charge that posted while predicted_next_date hadn't moved on yet. Shared
  * with mobile (forecast comes from /api/forecast).
+ *
+ * 2.17.2: a bank transaction's date is the day the purchase happened
+ * (Plaid's authorized_date), not the day it posted, so a charge made Oct 31
+ * that posts Nov 1 counts in October everywhere: budgets, totals, lists,
+ * recaps, mobile. mapPlaidTransaction stores it in posted_date; migration
+ * 0039 (data only) moves existing rows; Plaid's posting date stays in
+ * raw.date.
  */
-export const APP_VERSION = "2.17.1";
+export const APP_VERSION = "2.17.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

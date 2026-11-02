@@ -49,7 +49,11 @@ export function toPlaidOwnedFields(t: PlaidTransaction): PlaidOwnedFields {
     isPending: t.pending,
     amount: toInternalAmountCents(t.amount),
     currency: t.iso_currency_code ?? t.unofficial_currency_code ?? DEFAULT_CURRENCY,
-    postedDate: t.date,
+    // The day the purchase happened, not the day the bank posted it: a
+    // charge made Oct 31 that posts Nov 1 belongs to October's budget and
+    // totals. Plaid's posting date stays in `raw.date` (migration 0039
+    // moved existing rows the same way).
+    postedDate: t.authorized_date ?? t.date,
     authorizedDate: t.authorized_date ?? null,
     name: t.name,
     merchantName,

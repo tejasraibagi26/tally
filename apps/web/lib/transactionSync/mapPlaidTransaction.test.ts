@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { toInternalAmountCents, mergeTransactionUpdate, type PlaidOwnedFields } from "./mapPlaidTransaction";
+import { toInternalAmountCents, mergeTransactionUpdate, toPlaidOwnedFields, type PlaidOwnedFields } from "./mapPlaidTransaction";
 
 function plaidOwned(overrides: Partial<PlaidOwnedFields> = {}): PlaidOwnedFields {
   return {
@@ -84,5 +84,24 @@ describe("mergeTransactionUpdate", () => {
     );
     expect(result.isPending).toBe(false);
     expect(result.amount).toBe(-9000);
+  });
+});
+
+describe("toPlaidOwnedFields dates", () => {
+  const plaid = (over: Record<string, unknown>) =>
+    toPlaidOwnedFields({
+      transaction_id: "t", pending_transaction_id: null, pending: false, amount: 12.5,
+      iso_currency_code: "CAD", unofficial_currency_code: null, name: "Shop", merchant_name: "Shop",
+      date: "2026-11-01", authorized_date: "2026-10-31", ...over,
+    } as unknown as Parameters<typeof toPlaidOwnedFields>[0]);
+
+  it("dates a transaction by when it happened, not when the bank posted it", () => {
+    const f = plaid({});
+    expect(f.postedDate).toBe("2026-10-31");
+    expect(f.authorizedDate).toBe("2026-10-31");
+  });
+
+  it("falls back to the posting date when Plaid has no authorized date", () => {
+    expect(plaid({ authorized_date: null }).postedDate).toBe("2026-11-01");
   });
 });
