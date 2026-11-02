@@ -40,13 +40,12 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react-native";
-import Svg, { Ellipse } from "react-native-svg";
-import { chartSeries } from "@/theme/colors";
+import { chartSeries, withAlpha } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 
 /*
- * A transaction's category as a white icon on a skewed ellipse in the
- * category's own color (mobile v2.19.0; replaces the merchant logo in lists). Categories are the
+ * A transaction's category as its icon in the category's color on a soft
+ * tinted circle (mobile v2.19.0; replaces the merchant logo in lists). Categories are the
  * user's own names, so the icon is matched from the name first, then from
  * Plaid's category (pfcDetailed) when the name says nothing, then a tag.
  */
@@ -143,7 +142,7 @@ export function CategoryAvatar({
   isTransfer?: boolean;
   uncategorized?: boolean;
   size: number;
-  /** Unused since the ellipse (v2.19.3); kept so call sites needn't change. */
+  /** Unused since the circle (v2.19.3+); kept so call sites needn't change. */
   radius?: number;
 }) {
   const colors = useThemeColors();
@@ -152,25 +151,27 @@ export function CategoryAvatar({
   const series = dark ? chartSeries.dark : chartSeries.light;
 
   let Icon: LucideIcon;
-  let fill: string;
+  let tone: string;
   if (isTransfer) {
     Icon = ArrowLeftRight;
-    fill = colors["text-3"]!;
+    tone = colors["text-3"]!;
   } else if (uncategorized) {
     Icon = CircleHelp;
-    fill = colors.warning!;
+    tone = colors.warning!;
   } else {
     Icon = categoryIcon(categoryName, pfcDetailed);
-    fill = colorSlot ? series[(colorSlot - 1) % series.length]! : colors["text-3"]!;
+    tone = colorSlot ? series[(colorSlot - 1) % series.length]! : colors["text-3"]!;
   }
-  // A bold, skewed ellipse in the category's own color at full strength,
-  // with the icon in white on top (mobile v2.19.3).
+  // A soft circle (mobile v2.19.4, the user's pick from the canvas's eight
+  // options): a tint of the category color behind the icon in the full color.
   return (
-    <View style={{ width: size, height: size }} className="items-center justify-center" accessibilityElementsHidden importantForAccessibility="no">
-      <Svg width={size} height={size} viewBox="0 0 100 100" style={{ position: "absolute" }}>
-        <Ellipse cx={50} cy={50} rx={50} ry={39} fill={fill} transform="rotate(-20 50 50)" />
-      </Svg>
-      <Icon size={Math.round(size * 0.5)} color="#FFFFFF" strokeWidth={2.4} />
+    <View
+      className="items-center justify-center"
+      style={{ width: size, height: size, borderRadius: size / 2, backgroundColor: withAlpha(tone, dark ? 0.22 : 0.15) }}
+      accessibilityElementsHidden
+      importantForAccessibility="no"
+    >
+      <Icon size={Math.round(size * 0.5)} color={tone} strokeWidth={2} />
     </View>
   );
 }

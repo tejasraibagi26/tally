@@ -16,10 +16,10 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
-    version: "2.19.3",
+    version: "2.19.4",
     date: "2026-11-02",
     changes: [
-      { kind: "improved", text: "Category icons now sit on a bold shape in the category's own colour." },
+      { kind: "improved", text: "Category icons now sit on a soft circle in the category's own colour." },
     ],
   },
   {

@@ -522,8 +522,11 @@ import Constants from "expo-constants";
  * 2.19.3: CategoryAvatar draws a bold ellipse tilted -20deg in the
  * category's exact color (no tint) with a white icon; transfers on text-3,
  * uncategorized on warning.
+ *
+ * 2.19.4: CategoryAvatar is option 2 from the canvas: a soft circle, the
+ * category color at 15% (22% dark) behind the icon in the full color.
  */
-export const APP_VERSION = "2.19.3";
+export const APP_VERSION = "2.19.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
