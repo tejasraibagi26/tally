@@ -520,8 +520,18 @@
  * 2.16.2 adds GET /api/categories/top?kind=expense|income: the user's five
  * most-used categories of that kind over the last 90 days (from their own
  * today), for mobile's Add transaction quick-pick chips.
+ *
+ * 2.17.0 rebuilds Add transaction (AddTransactionForm.tsx) as mobile's
+ * approved "quick chips" design: the amount is the hero (display face,
+ * focused on open, steps 56 -> 46 -> 38px as it grows, capped at
+ * 9,999,999.99), a pill Expense/Income switch, chips for the top-5
+ * categories of that kind (GET /api/categories/top, topped up with
+ * top-level ones) plus "More categories…", Today/Yesterday/Pick a date
+ * chips, an account that's never preselected, and "Add expense · $X"
+ * disabled until amount, description and account are set. Category
+ * options now carry kind (lib/categoryOptions.ts).
  */
-export const APP_VERSION = "2.16.2";
+export const APP_VERSION = "2.17.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

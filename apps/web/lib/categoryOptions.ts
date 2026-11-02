@@ -4,6 +4,7 @@ export interface CategoryOptionSource {
   colorSlot: number;
   parentId: string | null;
   sortOrder: number;
+  kind?: string;
 }
 
 export interface GroupedCategoryOption {
@@ -11,6 +12,8 @@ export interface GroupedCategoryOption {
   name: string;
   colorSlot: number;
   indent: boolean;
+  /** income / expense / transfer / ignore, when the source carried it. */
+  kind?: string;
 }
 
 /**
@@ -34,9 +37,9 @@ export function groupCategoryOptions(categories: CategoryOptionSource[]): Groupe
 
   const result: GroupedCategoryOption[] = [];
   for (const p of parents) {
-    result.push({ id: p.id, name: p.name, colorSlot: p.colorSlot, indent: false });
+    result.push({ id: p.id, name: p.name, colorSlot: p.colorSlot, indent: false, kind: p.kind });
     for (const child of byParent.get(p.id) ?? []) {
-      result.push({ id: child.id, name: child.name, colorSlot: child.colorSlot, indent: true });
+      result.push({ id: child.id, name: child.name, colorSlot: child.colorSlot, indent: true, kind: child.kind });
     }
   }
   return result;

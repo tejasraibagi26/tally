@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.17.0",
+    date: "2026-11-02",
+    changes: [
+      { kind: "new", text: "A faster Add transaction: type the amount straight away, then click your usual category and the day. Your most-used categories are right there." },
+      { kind: "improved", text: "The button tells you exactly what it'll add, like \"Add expense · $42.50\"." },
+    ],
+  },
+  {
     version: "2.16.2",
     date: "2026-11-02",
     changes: [
