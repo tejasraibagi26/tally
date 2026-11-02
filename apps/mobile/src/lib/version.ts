@@ -518,8 +518,12 @@ import Constants from "expo-constants";
  * 2.19.2: the net worth hero's change row (delta pill + range caption, or
  * the scrub date) is a fixed 26pt row that empties instead of collapsing,
  * so a range with no change to show no longer pulls the chart up.
+ *
+ * 2.19.3: CategoryAvatar draws a bold ellipse tilted -20deg in the
+ * category's exact color (no tint) with a white icon; transfers on text-3,
+ * uncategorized on warning.
  */
-export const APP_VERSION = "2.19.2";
+export const APP_VERSION = "2.19.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

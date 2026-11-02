@@ -40,12 +40,13 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react-native";
-import { chartSeries, withAlpha } from "@/theme/colors";
+import Svg, { Ellipse } from "react-native-svg";
+import { chartSeries } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 
 /*
- * A transaction's category as an icon tile, in the category's own color
- * (mobile v2.18.1; replaces the merchant logo in lists). Categories are the
+ * A transaction's category as a white icon on a skewed ellipse in the
+ * category's own color (mobile v2.19.0; replaces the merchant logo in lists). Categories are the
  * user's own names, so the icon is matched from the name first, then from
  * Plaid's category (pfcDetailed) when the name says nothing, then a tag.
  */
@@ -135,7 +136,6 @@ export function CategoryAvatar({
   isTransfer = false,
   uncategorized = false,
   size,
-  radius,
 }: {
   categoryName: string | null | undefined;
   pfcDetailed?: string | null;
@@ -143,7 +143,8 @@ export function CategoryAvatar({
   isTransfer?: boolean;
   uncategorized?: boolean;
   size: number;
-  radius: number;
+  /** Unused since the ellipse (v2.19.3); kept so call sites needn't change. */
+  radius?: number;
 }) {
   const colors = useThemeColors();
   const { colorScheme } = useColorScheme();
@@ -151,25 +152,25 @@ export function CategoryAvatar({
   const series = dark ? chartSeries.dark : chartSeries.light;
 
   let Icon: LucideIcon;
-  let fg: string;
-  let bg: string;
+  let fill: string;
   if (isTransfer) {
     Icon = ArrowLeftRight;
-    fg = colors["text-2"]!;
-    bg = colors["surface-2"]!;
+    fill = colors["text-3"]!;
   } else if (uncategorized) {
     Icon = CircleHelp;
-    fg = colors.warning!;
-    bg = colors["warning-subtle"]!;
+    fill = colors.warning!;
   } else {
     Icon = categoryIcon(categoryName, pfcDetailed);
-    fg = colorSlot ? series[(colorSlot - 1) % series.length]! : colors["text-2"]!;
-    // A tint of the category's color, so the icon (not text) carries it.
-    bg = colorSlot ? withAlpha(fg, dark ? 0.22 : 0.15) : colors["surface-2"]!;
+    fill = colorSlot ? series[(colorSlot - 1) % series.length]! : colors["text-3"]!;
   }
+  // A bold, skewed ellipse in the category's own color at full strength,
+  // with the icon in white on top (mobile v2.19.3).
   return (
-    <View className="items-center justify-center" style={{ width: size, height: size, borderRadius: radius, backgroundColor: bg }} accessibilityElementsHidden importantForAccessibility="no">
-      <Icon size={Math.round(size * 0.52)} color={fg} strokeWidth={2} />
+    <View style={{ width: size, height: size }} className="items-center justify-center" accessibilityElementsHidden importantForAccessibility="no">
+      <Svg width={size} height={size} viewBox="0 0 100 100" style={{ position: "absolute" }}>
+        <Ellipse cx={50} cy={50} rx={50} ry={39} fill={fill} transform="rotate(-20 50 50)" />
+      </Svg>
+      <Icon size={Math.round(size * 0.5)} color="#FFFFFF" strokeWidth={2.4} />
     </View>
   );
 }
