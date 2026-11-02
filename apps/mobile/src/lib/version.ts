@@ -437,8 +437,11 @@ import Constants from "expo-constants";
  * to the type and radius scale. AppSlider is drawn in JS in Pop's colours
  * (ink-outlined track, brand fill, marigold thumb) instead of the native
  * SwiftUI/Material sliders, and locks the scroll while dragging.
+ *
+ * 2.15.2 stacks the budget sheet's Save and See transactions full width,
+ * so "See transactions" no longer truncates at half width.
  */
-export const APP_VERSION = "2.15.1";
+export const APP_VERSION = "2.15.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
