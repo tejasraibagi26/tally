@@ -468,8 +468,16 @@ import Constants from "expo-constants";
  *
  * 2.16.4 never preselects an account: Add transaction, Add bill and income
  * schedules start with no account and the user must pick one.
+ *
+ * 2.17.0 rebuilds Add transaction as the approved "quick chips" design
+ * (https://claude.ai/artifact/5yBCsdYtpRYBewyW1X5TDa): the amount is the
+ * hero (Bricolage, focused on open), a pill Expense/Income switch, chips for
+ * your top-5 categories (GET /api/categories/top, topped up with top-level
+ * categories of that kind) and for Today/Yesterday/a date, an account row
+ * that is never preselected, and "Add expense · $X" disabled until amount,
+ * description and account are set. Switching kind clears the category.
  */
-export const APP_VERSION = "2.16.4";
+export const APP_VERSION = "2.17.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

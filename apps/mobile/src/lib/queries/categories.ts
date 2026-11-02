@@ -27,3 +27,16 @@ export function useCreateCategory() {
     },
   });
 }
+
+/**
+ * The user's most-used categories of one kind over the last 90 days, most
+ * used first (GET /api/categories/top) -- Add transaction's quick-pick chips.
+ * Ids only; resolve them against useCategories().
+ */
+export function useTopCategories(kind: "expense" | "income") {
+  return useQuery({
+    queryKey: ["categories-top", kind],
+    queryFn: () => apiGet<{ categoryIds: string[] }>(`/api/categories/top?kind=${kind}`),
+    staleTime: 5 * 60_000,
+  });
+}

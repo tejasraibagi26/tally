@@ -516,8 +516,12 @@
  * 2.16.1 never preselects an account: Add transaction, Add bill, income
  * schedules and the rule form's account match start empty, clear on
  * close, and say "Choose an account." instead of silently not submitting.
+ *
+ * 2.16.2 adds GET /api/categories/top?kind=expense|income: the user's five
+ * most-used categories of that kind over the last 90 days (from their own
+ * today), for mobile's Add transaction quick-pick chips.
  */
-export const APP_VERSION = "2.16.1";
+export const APP_VERSION = "2.16.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

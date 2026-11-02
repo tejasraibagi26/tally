@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.16.2",
+    date: "2026-11-02",
+    changes: [
+      { kind: "improved", text: "Behind the scenes: Tally now knows your most-used categories, so the mobile app can offer them one tap away." },
+    ],
+  },
+  {
     version: "2.16.1",
     date: "2026-11-02",
     changes: [
