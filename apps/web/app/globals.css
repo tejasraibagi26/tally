@@ -110,7 +110,7 @@
     --series-8: #ea7575;
     --shadow-raised: inset 0 1px 0 rgba(255,255,255,.045), 0 1px 2px rgba(0,0,0,.45);
     --shadow-overlay: inset 0 1px 0 rgba(255,255,255,.06), 0 16px 40px -8px rgba(0,0,0,.7);
-    --scrim: rgba(0,0,0,.62);
+    --scrim: rgba(0,0,0,.7);
   }
 }
 
@@ -156,7 +156,7 @@
   --series-8: #ea7575;
   --shadow-raised: inset 0 1px 0 rgba(255,255,255,.045), 0 1px 2px rgba(0,0,0,.45);
   --shadow-overlay: inset 0 1px 0 rgba(255,255,255,.06), 0 16px 40px -8px rgba(0,0,0,.7);
-  --scrim: rgba(0,0,0,.62);
+  --scrim: rgba(0,0,0,.7);
 }
 
 /* Tally Pop: the only look since web v2.11.0. app/layout.tsx always renders
@@ -206,37 +206,37 @@
 }
 
 :root[data-ui="pop"][data-theme="dark"] {
-  --canvas: #14121F;
-  --surface: #1E1B2E;
-  --surface-2: #282440;
-  --sunken: #110F1B;
-  --border: #2E2A45;
+  --canvas: #0A0910;
+  --surface: #14121C;
+  --surface-2: #1C1A27;
+  --sunken: #060509;
+  --border: #252233;
   --border-strong: #6E6895;
   --text: #F6F1E7;
   --text-2: #B9B4CF;
   --text-3: #9893B2;
   --brand: #9B87FF;
   --brand-hover: #B7A8FF;
-  --brand-subtle: #2A2150;
+  --brand-subtle: #1F1840;
   --brand-border: #4B3F8A;
-  --on-brand: #14121F;
+  --on-brand: #0A0910;
   --positive: #4FD69C;
   --negative: #FF8A73;
   --warning: #E8B45A;
   --info: #6AA5F0;
-  --positive-subtle: #123227;
-  --negative-subtle: #3A1E22;
-  --warning-subtle: #33290F;
-  --info-subtle: #172544;
-  --raised: #282440;
-  --raised-hover: #2D2847;
+  --positive-subtle: #0C241B;
+  --negative-subtle: #2B1519;
+  --warning-subtle: #251E0A;
+  --info-subtle: #101B33;
+  --raised: #1C1A27;
+  --raised-hover: #22202F;
   /* Cream outline (as strong as light's ink, 15:1) over a hard grape
-     shadow: a dark shadow vanishes on the #14121F canvas, a coloured one
+     shadow: a dark shadow vanishes on the #0A0910 canvas, a coloured one
      reads as the sticker's edge. */
   --ink: #F6F1E7;
   --ink-shadow: #6A4BFF;
   --marigold: #FFCF5C;
-  --scrim: rgba(0,0,0,.62);
+  --scrim: rgba(0,0,0,.7);
 }
 
 /* Figtree for UI, Bricolage Grotesque for display. next/font sets the
@@ -381,7 +381,7 @@
   --marigold-accent: #5B3BF5;
 }
 :root[data-ui="pop"][data-theme="dark"] {
-  --ink-text: #14121F;
+  --ink-text: #0A0910;
   --marigold-accent: #3B2A9E;
 }
 
@@ -394,7 +394,7 @@
   --loader-accent: #FFC53D;
 }
 :root[data-ui="pop"][data-theme="dark"] {
-  --loader-bg: #2A2150;
+  --loader-bg: #1F1840;
   --loader-ink: #9B87FF;
   --loader-accent: #FFCF5C;
 }

@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.16.0",
+    date: "2026-11-01",
+    changes: [
+      { kind: "improved", text: "Dark mode is darker: deeper, near-black backgrounds and cards, so it's easier on your eyes at night." },
+    ],
+  },
+  {
     version: "2.15.3",
     date: "2026-11-01",
     changes: [

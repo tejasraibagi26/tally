@@ -44,7 +44,7 @@ const FADE_OUT_MS = 320;
 // before JS can't know the flag, so this one cross-fades in from it.
 const POP_PALETTE = {
   light: { bg: "#FFF6E9", ink: "#5B3BF5", accent: "#FFC53D", text: "#1D1B2F" },
-  dark: { bg: "#14121F", ink: "#9B87FF", accent: "#FFCF5C", text: "#F6F1E7" },
+  dark: { bg: "#0A0910", ink: "#9B87FF", accent: "#FFCF5C", text: "#F6F1E7" },
 };
 
 function useSplashPalette() {

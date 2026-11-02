@@ -425,8 +425,13 @@ import Constants from "expo-constants";
  * centred spinner; PillButton (components/ui/PillButton.tsx, lg/md/sm) is
  * the one button, with the spinner beside a label that stays; "last month"
  * in filters and Year in review use this device's date, not UTC.
+ *
+ * 2.15.0 deepens dark Pop toward near-black: canvas #0A0910, surface
+ * #14121C, surface-2/raised #1C1A27, sunken #060509, border #252233, and
+ * the subtle tints darker to match (web and mobile together; text pairs
+ * still AA, text-3 6.3:1 on surface).
  */
-export const APP_VERSION = "2.14.1";
+export const APP_VERSION = "2.15.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
