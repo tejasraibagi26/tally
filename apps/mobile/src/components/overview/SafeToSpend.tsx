@@ -41,12 +41,12 @@ function Meter({ s }: { s: SafeToSpendResult }) {
     { key: "bills", label: "Bills", cents: s.billsTotal, color: colors.text },
     { key: "cards", label: "Cards", cents: s.cardsTotal, color: colors["border-strong"] },
     { key: "cushion", label: "Cushion", cents: s.cushion, color: colors["brand-border"] },
-    { key: "safe", label: "Safe", cents: Math.max(0, s.amount), color: colors.marigold ?? colors.positive },
+    { key: "safe", label: "Safe", cents: Math.max(0, s.amount), color: colors.brand },
   ].filter((p) => p.cents > 0);
   return (
     // The card is one button whose label already reads this breakdown out.
     <View className="gap-2" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-      <View className="flex-row rounded-full overflow-hidden" style={{ height: 12, borderWidth: 2, borderColor: colors.ink ?? colors["border-strong"], backgroundColor: colors.surface }}>
+      <View className="flex-row rounded-full overflow-hidden" style={{ height: 10, gap: 2, backgroundColor: colors.sunken }}>
         {parts.map((p) => (
           <View key={p.key} style={{ flexGrow: p.cents / total, flexBasis: 0, backgroundColor: p.color }} />
         ))}
@@ -54,7 +54,7 @@ function Meter({ s }: { s: SafeToSpendResult }) {
       <View className="flex-row flex-wrap" style={{ columnGap: 12, rowGap: 4 }}>
         {parts.map((p) => (
           <View key={p.key} className="flex-row items-center" style={{ gap: 6 }}>
-            <View style={{ width: 9, height: 9, borderRadius: 2, backgroundColor: p.color, borderWidth: 1, borderColor: colors.ink ?? "transparent" }} />
+            <View style={{ width: 9, height: 9, borderRadius: 2, backgroundColor: p.color }} />
             <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>
               {p.label}
             </Text>
@@ -88,17 +88,17 @@ export function SafeToSpendCard({
     <>
       <Pressable
         onPress={() => setOpen(true)}
-        className="rounded-card border-card border-ink p-4 gap-2 active:opacity-90"
-        style={[{ backgroundColor: short ? colors["negative-subtle"] : colors["brand-subtle"] }, sticker]}
+        className="rounded-card p-4 gap-2 active:opacity-90"
+        style={[{ backgroundColor: short ? colors["negative-subtle"] : colors.surface }, sticker]}
         accessibilityRole="button"
         accessibilityLabel={`Safe to spend: ${fmt(s.amount)}. ${line.before}${line.emphasis}${line.after}. ${s.billsTotal > 0 ? `Bills ${fmt(s.billsTotal)}. ` : ""}${s.cardsTotal > 0 ? `Cards ${fmt(s.cardsTotal)}. ` : ""}${s.cushion > 0 ? `Cushion ${fmt(s.cushion)}. ` : ""}Opens the breakdown.`}
       >
         <View className="flex-row items-center justify-between">
-          <Text className="font-ui-semibold text-text" style={{ fontSize: rf(11.5), letterSpacing: 0.8, textTransform: "uppercase" }}>Safe to spend</Text>
-          <ChevronRight size={17} color={colors.text} strokeWidth={2.4} />
+          <Text className="font-ui-semibold text-text" style={{ fontSize: rf(14) }}>Safe to spend</Text>
+          <ChevronRight size={17} color={colors["text-3"]} strokeWidth={2.2} />
         </View>
         <View className="flex-row items-baseline flex-wrap" style={{ columnGap: 10 }}>
-          <MoneyText cents={s.amount} className={`font-display ${short ? "text-negative" : "text-text"}`} style={{ fontSize: rf(34), lineHeight: rf(38) }} />
+          <MoneyText cents={s.amount} className={`font-display ${short ? "text-negative" : "text-text"}`} style={{ fontSize: rf(30), lineHeight: rf(34) }} />
         </View>
         <Text className="font-ui text-text-2" style={{ fontSize: rf(13.5), lineHeight: rf(19) }}>
           {line.before}
@@ -106,7 +106,7 @@ export function SafeToSpendCard({
           {line.after}
         </Text>
         {s.stale.length > 0 ? (
-          <View className="self-start flex-row items-center gap-1.5 rounded-full px-2.5 py-1" style={{ backgroundColor: colors["warning-subtle"], borderWidth: 2, borderColor: colors.ink ?? colors.warning }}>
+          <View className="self-start flex-row items-center gap-1.5 rounded-full px-2.5 py-1" style={{ backgroundColor: colors["warning-subtle"] }}>
             <AlertTriangle size={13} color={colors.warning} strokeWidth={2.4} />
             <Text className="font-ui-semibold" style={{ color: colors.warning, fontSize: rf(12) }}>
               {s.stale[0]!.name} {syncedAgo(s.stale[0]!.syncedAt)}
@@ -166,7 +166,7 @@ function SafeToSpendSheet({ s: next, onClose, forecastLink }: { s: SafeToSpendRe
       {s && (
         <ScrollView className="px-5" contentContainerStyle={{ paddingTop: 4, paddingBottom: 8, gap: 10 }}>
           <View className="gap-1">
-            <Text className="font-ui-semibold text-text-3" style={{ fontSize: rf(11.5), letterSpacing: 0.8, textTransform: "uppercase" }}>Safe to spend</Text>
+            <Text className="font-ui-semibold text-text-3" style={{ fontSize: rf(14) }}>Safe to spend</Text>
             <MoneyText cents={s.amount} className={`font-display ${s.amount < 0 ? "text-negative" : "text-text"}`} style={{ fontSize: rf(38), lineHeight: rf(42) }} />
             <Text className="font-ui text-text-2" style={{ fontSize: rf(13.5) }}>
               Today – {shortDate(s.window.end)} · {s.window.days} day{s.window.days === 1 ? "" : "s"}

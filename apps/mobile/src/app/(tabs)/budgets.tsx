@@ -74,7 +74,7 @@ export default function BudgetsScreen() {
   const unbudgetedTotal = unbudgeted.reduce((s, u) => s + u.spend, 0);
   const colorFor = (b: BudgetLine) => series[((b.colorSlot ?? b.categoryColorSlot) - 1) % series.length] ?? series[0]!;
   const open = budgets.find((b) => b.categoryId === openId) ?? null;
-  const label = { fontSize: rf(11), letterSpacing: 0.6, textTransform: "uppercase" as const };
+  const label = { fontSize: rf(13) };
 
   function openTransactionsFor(budget: BudgetLine) {
     router.push({
@@ -102,7 +102,7 @@ export default function BudgetsScreen() {
                 ctx.phase === "past" && "Finished",
               ]}
               actions={
-                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} accessibilityLabel="Add budget" className="items-center justify-center rounded-full bg-brand border-button border-ink" style={{ width: 34, height: 34 }}>
+                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} accessibilityLabel="Add budget" className="items-center justify-center rounded-control bg-brand" style={{ width: 34, height: 34 }}>
                   <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
                 </Pressable>
               }

@@ -135,7 +135,7 @@ export default function OverviewScreen() {
               <Pressable
                 onPress={() => router.push(`/year-in-review?year=${year}` as Href)}
                 className="flex-row items-center gap-2.5 rounded-full mb-3 active:opacity-90"
-                style={{ backgroundColor: colors.marigold ?? colors["warning-subtle"], borderWidth: 2, borderColor: colors.ink ?? colors["border-strong"], paddingVertical: 7, paddingLeft: 14, paddingRight: 7 }}
+                style={{ backgroundColor: colors.marigold ?? colors["warning-subtle"], paddingVertical: 7, paddingLeft: 14, paddingRight: 7 }}
                 accessibilityRole="button"
                 accessibilityLabel={`Your ${year} in review is ready`}
               >

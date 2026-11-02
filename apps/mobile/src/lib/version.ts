@@ -481,8 +481,19 @@ import Constants from "expo-constants";
  * field is as wide as an invisible measured twin of its text (no more
  * 0.62em guess), the number steps 60 -> 48 -> 40pt as it grows, and input
  * is capped at 7 whole digits + 2 decimals.
+ *
+ * 2.18.0: "Pop Calm", a quieter Pop on mobile only (web keeps the sticker
+ * look). Cards drop the ink outline and hard offset shadow for a soft
+ * shadow (light) or a hairline border (dark); corners go to 12 (cards) and
+ * 8 (controls and buttons); the canvas turns a neutral warm grey. The net
+ * worth hero leaves its solid grape card and sits on the canvas with a
+ * taller (140pt) edge-to-edge chart and centered range buttons. Safe to
+ * spend and on-pace days are plain surface cards (no marigold fill), and
+ * section labels on the four tabs are sentence case instead of uppercase.
+ * Sheets keep their floating glass: surface-2/raised and the panel radius
+ * are unchanged.
  */
-export const APP_VERSION = "2.17.1";
+export const APP_VERSION = "2.18.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -217,7 +217,7 @@ export default function AccountsScreen() {
                 </View>
                 {data.unlinkedAccounts.length > 0 && (
                   <View className="gap-2 mt-1">
-                    <Text className="font-ui-semibold text-text-3 px-1" style={{ fontSize: rf(11.5), letterSpacing: 0.6, textTransform: "uppercase" }}>
+                    <Text className="font-ui-semibold text-text-3 px-1" style={{ fontSize: rf(13) }}>
                       Other accounts
                     </Text>
                     {/* Accounts with no bank connection behind them -- already

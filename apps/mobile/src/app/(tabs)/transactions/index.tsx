@@ -190,7 +190,7 @@ export default function TransactionsScreen() {
               className="flex-row justify-between px-4 py-2 bg-sunken"
               style={index > 0 ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined}
             >
-              <Text className="font-ui-semibold text-text-3" style={{ fontSize: rf(11), letterSpacing: 0.6, textTransform: "uppercase" }}>{g.label}</Text>
+              <Text className="font-ui-semibold text-text-3" style={{ fontSize: rf(13) }}>{g.label}</Text>
               <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(12), fontVariant: ["tabular-nums"] }}>{formatCents(g.net, { signed: true })}</Text>
             </View>
             {g.rows.map((t, i) => (
@@ -218,7 +218,7 @@ export default function TransactionsScreen() {
               meta={[hasSynced(syncTimes) && <SyncFreshness key="sync" syncedAt={syncTimes} />]}
               actions={
                 <>
-                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} className="items-center justify-center rounded-full bg-brand border-button border-ink" style={{ width: 34, height: 34 }}>
+                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} className="items-center justify-center rounded-control bg-brand" style={{ width: 34, height: 34 }}>
                   <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
                 </Pressable>
                 <Pressable
@@ -272,7 +272,7 @@ export default function TransactionsScreen() {
               </View>
             )}
 
-            <View className="flex-row items-center gap-2 rounded-control bg-surface-2 px-3.5 mt-3 border-field border-ink" style={{ height: 42 }}>
+            <View className="flex-row items-center gap-2 rounded-control bg-surface px-3.5 mt-3 border border-border" style={{ height: 42 }}>
               <Search size={16} color={colors["text-3"]} strokeWidth={2} />
               <TextInput
                 value={searchInput}

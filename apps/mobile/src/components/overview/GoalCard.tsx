@@ -78,7 +78,7 @@ export function GoalCard({ summary, showCurrent = false, linked = true }: { summ
   return (
     <Pressable onPress={() => router.push("/goals" as Href)} disabled={!linked} accessibilityRole={linked ? "button" : undefined} accessibilityLabel={`Year-end goal, ${status.label}. ${goalLine(summary, money)}`}>
       <Card className="p-5 gap-3">
-        <Text className="font-ui-semibold text-text-2" style={{ fontSize: rf(11.5), letterSpacing: 0.8, textTransform: "uppercase" }}>Year-end goal</Text>
+        <Text className="font-ui-semibold text-text-2" style={{ fontSize: rf(14) }}>Year-end goal</Text>
         <Text className="font-display text-text" style={{ fontSize: rf(28), fontVariant: ["tabular-nums"] }}>
           {p.status === "reached" ? "Reached" : money(p.gap)}
         </Text>
@@ -87,7 +87,7 @@ export function GoalCard({ summary, showCurrent = false, linked = true }: { summ
           {p.status === "reached" ? `Your ${money(p.target)} target, ${money(p.current - p.target)} past it` : `left to reach ${money(p.target)} by ${deadlineLabel(summary.goal.deadline)}`}
           {showCurrent ? ` · now ${money(p.current)}` : ""}
         </Text>
-        <View className="h-3 rounded-full bg-sunken overflow-hidden border-card border-ink">
+        <View className="h-2.5 rounded-full bg-sunken overflow-hidden">
           <View className="h-full rounded-full bg-brand" style={{ width: `${p.progress * 100}%` }} />
         </View>
         <View className="flex-row flex-wrap items-center gap-2">

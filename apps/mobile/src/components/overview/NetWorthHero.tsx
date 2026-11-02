@@ -5,6 +5,7 @@ import { formatCents } from "@tally/core/money";
 import { NET_WORTH_RANGES, RANGE_CAPTION, netWorthDelta, sliceNetWorthRange, type NetWorthRange } from "@tally/core/overviewView";
 import { SplitMoney } from "@/components/ui/SplitMoney";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useStickerShadow } from "@/components/ui/Card";
 import { usePrivacy } from "@/lib/PrivacyContext";
 import { todayISO } from "@/lib/today";
 import type { NetWorthPoint } from "@/lib/queries/overview";
@@ -14,7 +15,7 @@ import { useRF } from "@/theme/responsiveFont";
 
 // Net worth chart height -- taller than the old 56px strip now that it runs
 // full-bleed, matching web's more immersive Overview chart.
-const HERO_CHART_HEIGHT = 112;
+const HERO_CHART_HEIGHT = 140;
 // The line stops this far short of the screen edge so the "today" dot (7pt
 // radius with its halo) isn't cut in half by it.
 const END_INSET = 8;
@@ -47,6 +48,8 @@ export function NetWorthHero({
   onScrubChange: (scrubbing: boolean) => void;
 }) {
   const colors = useThemeColors();
+  // The selected range sits on a small card: the same soft edge as every card.
+  const rangeEdge = useStickerShadow();
   const rf = useRF();
   const { hidden } = usePrivacy();
   const { width: windowWidth } = useWindowDimensions();
@@ -216,7 +219,7 @@ export function NetWorthHero({
 
   return (
     <View className="gap-3">
-      <Text className="font-ui-medium tracking-wide text-text-2" style={{ textTransform: "uppercase", fontSize: rf(11) }}>
+      <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(14) }}>
         Net worth
       </Text>
       {loading ? (
@@ -226,7 +229,7 @@ export function NetWorthHero({
         </View>
       ) : (
         <View className="gap-2.5" accessible accessibilityLabel={spoken}>
-          <SplitMoney cents={heroCents} size={68} centsSize={32} lineHeight={72} />
+          <SplitMoney cents={heroCents} size={50} centsSize={28} lineHeight={56} />
           {hoveredPoint ? (
             <View className="h-[26px] justify-center">
               <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(13) }}>{dateLabel(hoveredPoint.asOfDate)}</Text>
@@ -295,7 +298,7 @@ export function NetWorthHero({
               />
             )}
           </Animated.View>
-          <View className="flex-row gap-1" accessibilityRole="tablist">
+          <View className="flex-row gap-1 justify-center" accessibilityRole="tablist">
             {NET_WORTH_RANGES.map((r) => {
               const on = r === range;
               return (
@@ -303,13 +306,13 @@ export function NetWorthHero({
                   key={r}
                   onPress={() => chooseRange(r)}
                   hitSlop={{ top: 8, bottom: 8 }}
-                  className="h-7 px-3 rounded-full items-center justify-center"
-                  style={on ? { backgroundColor: colors["brand-subtle"] } : undefined}
+                  className="h-8 px-3.5 rounded-control items-center justify-center"
+                  style={on ? [{ backgroundColor: colors.surface }, rangeEdge] : undefined}
                   accessibilityRole="tab"
                   accessibilityState={{ selected: on }}
                   accessibilityLabel={RANGE_CAPTION[r]}
                 >
-                  <Text className="font-ui-medium" style={{ fontSize: rf(12), color: on ? colors.brand : colors["text-3"] }}>{r}</Text>
+                  <Text className="font-ui-semibold" style={{ fontSize: rf(13), color: on ? colors.text : colors["text-3"] }}>{r}</Text>
                 </Pressable>
               );
             })}

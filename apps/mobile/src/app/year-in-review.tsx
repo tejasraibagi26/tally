@@ -11,7 +11,6 @@ import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
-import { HeroSurface } from "@/components/overview/PopOverview";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { todayISO } from "@/lib/today";
@@ -93,7 +92,7 @@ export default function YearInReviewScreen() {
         ) : (
           <>
             <Text className="font-ui text-text-3 px-1" style={{ fontSize: rf(13) }}>{r.transactionCount.toLocaleString("en-US")} transactions</Text>
-            <HeroSurface>{heroBody}</HeroSurface>
+            <Card className="p-5">{heroBody}</Card>
 
             <View className="flex-row gap-3">
               <Tile label="Money in">

@@ -11,6 +11,19 @@ Nothing here invents a new visual language; it translates `DESIGN.md`'s system
 into native primitives (bottom sheets instead of side panels, card lists instead
 of tables, tab bars instead of a left nav).
 
+> **Current look: "Pop Calm" (mobile v2.18.0, mobile only).** The app wears
+> Tally Pop's brand (grape, marigold, Bricolage Grotesque for display numbers,
+> Figtree for UI) in a quieter form than web: a neutral warm canvas
+> (`#F6F4F0` light / `#0B0A10` dark), no ink outlines or hard offset shadows,
+> cards lifted by one soft shadow in light and a 1px `--border` hairline in
+> dark (`useStickerShadow`, components/ui/Card.tsx), 12px card and 8px control
+> radii, and sentence-case section labels. The net worth hero is unboxed on
+> the canvas with a 140pt edge-to-edge chart. Marigold is an accent (tally
+> marks, small chips), never a card fill. Sheets keep their floating glass
+> unchanged (surface-2/raised and `--radius-panel` are not part of Pop Calm).
+> Tokens: theme/pop.ts. Older sections below that describe the editorial
+> ledger or sticker outlines are history.
+
 ---
 
 ## 1. Platform posture

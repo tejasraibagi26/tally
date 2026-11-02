@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.18.0",
+    date: "2026-11-02",
+    changes: [
+      { kind: "improved", text: "A calmer look that's easier to read: softer cards without heavy outlines, less rounded corners and quieter colours." },
+      { kind: "improved", text: "Your net worth now sits at the top of Overview with a bigger chart that runs edge to edge." },
+    ],
+  },
+  {
     version: "2.17.1",
     date: "2026-11-02",
     changes: [
