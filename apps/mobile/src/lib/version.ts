@@ -514,8 +514,12 @@ import Constants from "expo-constants";
  * MoneyText maps a caller's UI weight to the matching Bricolage weight,
  * SplitMoney and big figures use font-display (800), and plain Texts that
  * show only a number use font-num*.
+ *
+ * 2.19.2: the net worth hero's change row (delta pill + range caption, or
+ * the scrub date) is a fixed 26pt row that empties instead of collapsing,
+ * so a range with no change to show no longer pulls the chart up.
  */
-export const APP_VERSION = "2.19.1";
+export const APP_VERSION = "2.19.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -230,20 +230,21 @@ export function NetWorthHero({
       ) : (
         <View className="gap-2.5" accessible accessibilityLabel={spoken}>
           <SplitMoney cents={heroCents} size={50} centsSize={28} lineHeight={56} />
-          {hoveredPoint ? (
-            <View className="h-[26px] justify-center">
+          {/* One fixed-height row: the scrub date, the change for the range,
+              or (while a new range has no change to show yet) an empty row.
+              It never collapses, so switching ranges doesn't jump the chart. */}
+          <View className="h-[26px] justify-center">
+            {hoveredPoint ? (
               <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(13) }}>{dateLabel(hoveredPoint.asOfDate)}</Text>
-            </View>
-          ) : (
-            delta && deltaText && (
+            ) : delta && deltaText ? (
               <View className="flex-row items-center gap-2.5">
                 <View className="h-[26px] justify-center rounded-full px-2.5" style={{ backgroundColor: up ? colors["positive-subtle"] : colors["negative-subtle"] }}>
                   <Text className="font-num-semibold" style={{ fontSize: rf(12.5), color: up ? colors.positive : colors.negative, fontVariant: ["tabular-nums"] }}>{deltaText}</Text>
                 </View>
                 <Text className="font-ui text-text-3" style={{ fontSize: rf(12.5) }}>{RANGE_CAPTION[range]}</Text>
               </View>
-            )
-          )}
+            ) : null}
+          </View>
         </View>
       )}
       {points.length > 1 && (

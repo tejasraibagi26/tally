@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.19.2",
+    date: "2026-11-02",
+    changes: [
+      { kind: "fixed", text: "Switching the net worth chart's range no longer makes the chart jump up." },
+    ],
+  },
+  {
     version: "2.19.1",
     date: "2026-11-02",
     changes: [
