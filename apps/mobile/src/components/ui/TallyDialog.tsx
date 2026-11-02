@@ -2,26 +2,14 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ActivityIndicator, Animated, Easing, KeyboardAvoidingView, Modal, Platform, Pressable, Text, View, useWindowDimensions } from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
 import { GlassView, isLiquidGlassAvailable } from "expo-glass-effect";
-import { requireOptionalNativeModule } from "expo-modules-core";
+import { NativeBlur } from "@/components/ui/nativeBlur";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 
 export type DialogTone = "brand" | "positive" | "warning" | "negative";
 
-// The backdrop blur, best first, checked once. expo-blur (UIBlurEffect)
-// works on every iOS version; it's loaded only when this build has its
-// native side, since an over-the-air update can reach a build made before
-// it was added (mobile v2.1.4). Without it, iOS 26's glass; else the scrim.
-type BlurComponent = (props: { intensity?: number; tint?: "dark" | "light" | "default"; style?: object }) => ReactNode;
-const NativeBlur: BlurComponent | null = (() => {
-  if (Platform.OS !== "ios" || !requireOptionalNativeModule("ExpoBlur")) return null;
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    return (require("expo-blur") as { BlurView: BlurComponent }).BlurView;
-  } catch {
-    return null;
-  }
-})();
+// The backdrop blur, best first: expo-blur (components/ui/nativeBlur.ts),
+// else iOS 26's glass, else the scrim.
 const BLUR_AVAILABLE = NativeBlur == null && Platform.OS === "ios" && isLiquidGlassAvailable();
 
 export interface DialogAction {

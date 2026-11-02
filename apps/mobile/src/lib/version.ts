@@ -448,8 +448,14 @@ import Constants from "expo-constants";
  * the sides and bottom, all corners rounded concentric with the display
  * (46 iOS / 28 Android), hairline border. The inset comes out of the iOS
  * bottom padding so content ends where it did; Android sits above the nav bar.
+ *
+ * 2.16.1: sheets are see-through on iOS -- expo-blur (systemThickMaterial)
+ * under a 72% wash of raised, backdrop eased to 30% (loader shared with
+ * TallyDialog in ui/nativeBlur.ts). The native More sheet's corner radius
+ * is 44 on iOS (was 24), so iOS 26's floating sheet clears the display's
+ * corners instead of being clipped by them.
  */
-export const APP_VERSION = "2.16.0";
+export const APP_VERSION = "2.16.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

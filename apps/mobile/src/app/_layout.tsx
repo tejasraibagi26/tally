@@ -178,7 +178,12 @@ function RootNavigator() {
                   sheetAllowedDetents: [moreDetent],
                   sheetInitialDetentIndex: 0,
                   sheetGrabberVisible: true,
-                  sheetCornerRadius: 24,
+                  // iOS 26 floats this sheet, and the radius applies to all four
+                  // corners: 24 was tighter than the display's own corners, which
+                  // clipped the bottom two. 44 sits concentric with them. (Leaving
+                  // it unset stopped the sheet floating -- flush to the bottom,
+                  // build line pushed off-screen.)
+                  sheetCornerRadius: Platform.OS === "ios" ? 44 : 24,
                   sheetExpandsWhenScrolledToEdge: false,
                   headerShown: false,
                 }}

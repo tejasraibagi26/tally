@@ -12,6 +12,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { withAlpha } from "@/theme/colors";
+import { NativeBlur } from "@/components/ui/nativeBlur";
+import { useColorScheme } from "nativewind";
 import { useThemeColors } from "@/theme/useThemeColors";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
@@ -52,6 +54,7 @@ export function Sheet({
   dismissible?: boolean;
 }) {
   const colors = useThemeColors();
+  const { colorScheme } = useColorScheme();
   const insets = useSafeAreaInsets();
   const [mounted, setMounted] = useState(visible);
   const [reduceMotion, setReduceMotion] = useState(false);
@@ -119,7 +122,7 @@ export function Sheet({
   }));
 
   const backdropStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(translateY.value, [0, SCREEN_HEIGHT * 0.6], [0.42, 0], Extrapolation.CLAMP),
+    opacity: interpolate(translateY.value, [0, SCREEN_HEIGHT * 0.6], [NativeBlur ? 0.3 : 0.42, 0], Extrapolation.CLAMP),
   }));
 
   // Every sheet's content already ends with its own bottom padding (a
@@ -157,7 +160,7 @@ export function Sheet({
           pointerEvents="box-none"
         >
           <Animated.View
-            className="bg-raised overflow-hidden"
+            className={NativeBlur ? "overflow-hidden" : "bg-raised overflow-hidden"}
             style={[
               {
                 maxHeight,
@@ -172,6 +175,19 @@ export function Sheet({
               sheetStyle,
             ]}
           >
+            {/* See-through like Spotify's sheets: the screen behind blurs through a
+                translucent wash of the sheet colour (dense enough to keep text AA).
+                Builds without expo-blur's native side, and Android, stay solid. */}
+            {NativeBlur && (
+              <>
+                <NativeBlur
+                  intensity={60}
+                  tint={colorScheme === "dark" ? "systemThickMaterialDark" : "systemThickMaterialLight"}
+                  style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+                />
+                <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: withAlpha(colors.raised!, 0.72) }} />
+              </>
+            )}
             <GestureDetector gesture={panGesture}>
               <View style={{ alignItems: "center", paddingTop: 8, paddingBottom: 4 }} hitSlop={{ top: 12, bottom: 12, left: 48, right: 48 }}>
                 {/* Kept in layout while locked so the content doesn't jump when the grabber returns. */}
