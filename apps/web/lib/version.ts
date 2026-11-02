@@ -503,8 +503,12 @@
  * rounded-badge (6) / rounded-tile (10) / the card and panel tokens, and
  * arbitrary text sizes 11/11.5/13/14/14.5 snap to 12/13.5/15; chart labels
  * are 12 and tooltips use the control radius.
+ *
+ * 2.15.3 puts every in-app page in one frame, .ui-page (1280px, the same
+ * gutter and rhythm): Forecast, Tags, a tag and Year in review were 1080,
+ * Settings 784, Changelog and the error page 720.
  */
-export const APP_VERSION = "2.15.2";
+export const APP_VERSION = "2.15.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

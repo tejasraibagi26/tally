@@ -39,7 +39,7 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
   const daysLeft = ctx.phase === "current" ? daysInMonth - ctx.daysElapsed! : null;
 
   return (
-    <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+    <div className="ui-page flex flex-col gap-6">
       <PageHeader
         title="Budgets"
         meta={[

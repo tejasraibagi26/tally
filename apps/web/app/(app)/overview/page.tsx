@@ -72,7 +72,7 @@ export default async function OverviewPage() {
 
   if (allAccounts.length === 0) {
     return (
-      <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7">
+      <div className="ui-page">
         <div className="mb-6">
           <PageHeader title="Overview" />
         </div>
@@ -170,7 +170,7 @@ export default async function OverviewPage() {
   const forecastSeen = seen.includes("forecast");
 
   return (
-    <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+    <div className="ui-page flex flex-col gap-6">
       <PageHeader
         title={`${greetingFor(hour)} Here's ${monthName}.`}
         meta={[popLine, items.some((i) => i.lastSyncedAt) && <SyncFreshness key="sync" syncedAt={items.map((i) => i.lastSyncedAt)} />]}

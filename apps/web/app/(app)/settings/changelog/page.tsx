@@ -19,7 +19,7 @@ function formatDate(date: string): string {
 
 export default function ChangelogPage() {
   return (
-    <div className="max-w-[720px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+    <div className="ui-page flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         <Link href="/settings" className="text-[13.5px] text-text-3 hover:text-text-2 self-start">
           ← Settings

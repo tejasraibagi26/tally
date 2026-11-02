@@ -11,7 +11,7 @@ export default function AppError({ error, reset }: { error: Error & { digest?: s
   }, [error]);
 
   return (
-    <div className="max-w-[720px] mx-auto px-8 py-16">
+    <div className="ui-page">
       <Card className="p-10 flex flex-col items-center gap-3 text-center">
         <span className="font-display text-2xl text-text">Something went wrong</span>
         <p className="text-text-2 text-[15px]">

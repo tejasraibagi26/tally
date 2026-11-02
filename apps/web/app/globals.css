@@ -1,5 +1,13 @@
 @tailwind base;
 @tailwind components;
+
+/* Every in-app page sits in the same frame (DESIGN.md §6): one content
+   width, one gutter, one top/bottom rhythm. Pages add their own flex/gap. */
+@layer components {
+  .ui-page {
+    @apply mx-auto w-full max-w-[1280px] px-4 py-5 lg:px-8 lg:py-7;
+  }
+}
 @tailwind utilities;
 
 :root {

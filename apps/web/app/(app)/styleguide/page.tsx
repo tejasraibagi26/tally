@@ -25,7 +25,7 @@ export default function StyleguidePage() {
   // A design reference for building Tally, not part of the product: dev only.
   if (process.env.NODE_ENV === "production") notFound();
   return (
-    <div className="max-w-[1280px] mx-auto px-8 py-10 flex flex-col gap-10">
+    <div className="ui-page flex flex-col gap-10">
       <div>
         <h1 className="font-display text-5xl text-text mb-2">Styleguide</h1>
         <p className="text-text-2">Design tokens from DESIGN.md §14, rendered live.</p>

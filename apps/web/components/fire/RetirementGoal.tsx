@@ -24,7 +24,7 @@ export async function RetirementGoal({ userId, startFromZero, tabs }: { userId: 
   // (startFromZero, ?start=zero) so someone without a brokerage still gets an answer.
   if (inputs.accounts.length === 0 && !startFromZero) {
     return (
-      <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+      <div className="ui-page flex flex-col gap-6">
         <PageHeader title="Goals" />
         {tabs}
         <Card className="p-8 lg:p-10 flex flex-col items-start gap-4 max-w-[600px]">
@@ -46,7 +46,7 @@ export async function RetirementGoal({ userId, startFromZero, tabs }: { userId: 
   }
 
   return (
-    <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+    <div className="ui-page flex flex-col gap-6">
       <PageHeader title="Goals" meta={["In today's dollars", "Saves as you go"]} />
       {tabs}
       <FirePlanner

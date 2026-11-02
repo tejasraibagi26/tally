@@ -27,7 +27,7 @@ export default async function CardsPage() {
 
   if (rows.length === 0) {
     return (
-      <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+      <div className="ui-page flex flex-col gap-6">
         <PageHeader title="Credit cards" />
         <Card className="p-10">
           <EmptyState
@@ -81,7 +81,7 @@ export default async function CardsPage() {
   const next = nextPayment(cards);
 
   return (
-    <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+    <div className="ui-page flex flex-col gap-6">
       <PageHeader
         title="Credit cards"
         meta={[`${cards.length} card${cards.length === 1 ? "" : "s"}`, rows.some((r) => r.lastSyncedAt) && <SyncFreshness key="sync" syncedAt={rows.map((r) => r.lastSyncedAt)} />]}

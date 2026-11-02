@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.15.3",
+    date: "2026-11-01",
+    changes: [
+      { kind: "fixed", text: "Every page is the same width now, so titles and edges line up as you move around." },
+    ],
+  },
+  {
     version: "2.15.2",
     date: "2026-11-01",
     changes: [

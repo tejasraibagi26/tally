@@ -37,7 +37,7 @@ export default async function ForecastPage({ searchParams }: { searchParams: Pro
 
   if (f.openingCash === 0 && f.assumptions.paycheques === 0) {
     return (
-      <div className="mx-auto flex max-w-[1080px] flex-col gap-6 px-4 py-5 lg:px-8 lg:py-7">
+      <div className="ui-page flex flex-col gap-6">
         <PageHeader title="Forecast" meta={["Where your balance is heading"]} actions={<ForecastHowItWorks />} />
         <Card className="p-6 lg:p-7">
           <h2 className="ui-card-title m-0 text-xl font-semibold text-text">Nothing to forecast yet</h2>
@@ -63,7 +63,7 @@ export default async function ForecastPage({ searchParams }: { searchParams: Pro
   const out = h ? daysAway(f.today, h.date) : 0;
 
   return (
-    <div className="mx-auto flex max-w-[1080px] flex-col gap-6 px-4 py-5 lg:px-8 lg:py-7">
+    <div className="ui-page flex flex-col gap-6">
       <PageHeader
         title="Forecast"
         meta={[`Next ${f.range} days`, f.assumptions.stale.length > 0 ? "balances are out of date" : "spending accounts only"]}

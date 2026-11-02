@@ -30,7 +30,7 @@ export default async function TagPage({ params }: { params: Promise<{ tag: strin
   const bars = span.length > 0 ? span.map((d) => ({ date: d, total: byDay.get(d) ?? 0 })) : s.byDay;
 
   return (
-    <div className="max-w-[1080px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+    <div className="ui-page flex flex-col gap-6">
       <PageHeader
         title={tag}
         meta={[

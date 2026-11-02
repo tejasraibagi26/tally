@@ -26,7 +26,7 @@ export default async function InvestmentsPage({ searchParams }: { searchParams: 
 
   if (holdings.length === 0) {
     return (
-      <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+      <div className="ui-page flex flex-col gap-6">
         <PageHeader title="Investments" />
         <Card className="p-8 lg:p-10 flex flex-col items-start gap-4 max-w-[640px]">
           <span className="w-11 h-11 rounded-tile bg-brand-subtle text-brand flex items-center justify-center">
@@ -110,7 +110,7 @@ export default async function InvestmentsPage({ searchParams }: { searchParams: 
   const originalCurrencies = currenciesInvolved(holdings);
 
   return (
-    <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+    <div className="ui-page flex flex-col gap-6">
       <PageHeader
         title="Investments"
         meta={[

@@ -294,7 +294,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   const reviewToggleHref = reviewParams.toString() ? `/transactions?${reviewParams}` : "/transactions";
 
   return (
-    <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 h-full min-h-0 flex flex-col gap-4">
+    <div className="ui-page h-full min-h-0 flex flex-col gap-4">
       <PageHeader
         title="Transactions"
         figure={formatCents(periodSpend)}

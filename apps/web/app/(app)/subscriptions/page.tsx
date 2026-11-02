@@ -68,7 +68,7 @@ export default async function SubscriptionsPage() {
   }).length;
 
   return (
-    <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+    <div className="ui-page flex flex-col gap-6">
       <PageHeader
         title="Subscriptions & recurring"
         meta={[streams.length > 0 && `${activeCount} subscription${activeCount === 1 ? "" : "s"}`, dueThisWeek > 0 && `${dueThisWeek} due in the next 7 days`]}

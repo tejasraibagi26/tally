@@ -239,7 +239,7 @@ Status colors **always ship with an icon and a text label**. On the light surfac
 
 ## 6. Layout, shape, elevation
 
-- **Grid:** 12 columns, 24px gutter, page padding 32 (desktop) / 16 (mobile). Content max-width 1280px, centered.
+- **Grid:** 12 columns, 24px gutter, page padding 32 (desktop) / 16 (mobile). Content max-width 1280px, centered. Every in-app page, Settings and Changelog included, uses the `ui-page` frame (globals.css) for that width and padding; a page never sets its own `max-w`. Long text inside caps itself (`max-w-[60ch]`).
 - **App shell:** fixed 240px left nav (collapses to 64px icon rail < 1200px, drawer < 900px), 64px top bar with month picker + global search + sync status.
 - **Spacing scale (px):** 4, 8, 12, 16, 24, 32, 48, 64, 96. Nothing off-scale.
 - **Radii:** 8 (buttons, inputs, chips) · 12 (cards) · 16 (panels, modals) · 999 (pills, avatars), as `rounded-control` / `rounded-card` / `rounded-panel` / `rounded-full`. Two fixed small radii Pop doesn't restyle: `rounded-badge` 6 (status chips, tags) and `rounded-tile` 10 (32–44px icon and logo tiles). Only marks under 6px (swatches, checkboxes, thin bars) take a literal radius.

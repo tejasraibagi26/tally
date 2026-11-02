@@ -95,9 +95,9 @@ export default async function SettingsPage() {
   const appHost = process.env.APP_URL ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
   const shortcutsEndpoint = `${appHost.replace(/\/$/, "")}/api/shortcuts/transactions`;
 
-  // Rows that show their value, edits in dialogs; one centered 720px column.
+  // Rows that show their value, edits in dialogs; the same page frame as every other page.
   return (
-    <div className="max-w-[784px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+    <div className="ui-page flex flex-col gap-6">
       <PageHeader title="Settings" />
 
       <div className="flex flex-col gap-8 min-w-0">

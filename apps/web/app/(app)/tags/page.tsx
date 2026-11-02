@@ -19,7 +19,7 @@ export default async function TagsPage() {
   const tags = await tagsFor(userId);
 
   return (
-    <div className="max-w-[1080px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+    <div className="ui-page flex flex-col gap-6">
       <PageHeader title="Tags" meta={[tags.length > 0 ? `${tags.length} tag${tags.length === 1 ? "" : "s"}` : "Add up a trip, an event or a project across categories"]} />
       {tags.length === 0 ? (
         <Card className="p-12">

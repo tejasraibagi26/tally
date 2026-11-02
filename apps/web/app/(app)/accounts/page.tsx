@@ -149,7 +149,7 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
     .sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name));
 
   return (
-    <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
+    <div className="ui-page flex flex-col gap-6">
       <PageHeader
         title="Accounts & connections"
         meta={[
