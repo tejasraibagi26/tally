@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.15.1",
+    date: "2026-11-01",
+    changes: [
+      { kind: "improved", text: "Goals has a fresh layout: your goal and its pace come first, and changing or removing the target lives in one tidy place." },
+      { kind: "improved", text: "The retirement sliders now match Tally's colours, and dragging one no longer scrolls the page." },
+    ],
+  },
+  {
     version: "2.15.0",
     date: "2026-11-01",
     changes: [

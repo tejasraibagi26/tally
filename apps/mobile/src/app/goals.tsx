@@ -12,7 +12,7 @@ type View_ = "year" | "retirement";
 
 const TABS: { view: View_; label: string }[] = [
   { view: "year", label: "Year-end goal" },
-  { view: "retirement", label: "Early retirement" },
+  { view: "retirement", label: "Retirement" },
 ];
 
 /**
@@ -31,7 +31,8 @@ export default function GoalsScreen() {
   return (
     <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
       <ScreenGlow />
-      <View className="flex-row gap-1.5 px-5 pb-3" accessibilityRole="tablist">
+      {/* One full-width switch in the ink outline (Pop's segmented control). */}
+      <View className="mx-5 mb-4 flex-row rounded-full border-button border-ink bg-surface p-1" accessibilityRole="tablist">
         {TABS.map((t) => {
           const on = t.view === view;
           return (
@@ -40,9 +41,9 @@ export default function GoalsScreen() {
               onPress={() => setView(t.view)}
               accessibilityRole="tab"
               accessibilityState={{ selected: on }}
-              className={`rounded-full border-button border-ink px-3.5 py-1.5 ${on ? "bg-brand" : "bg-surface"}`}
+              className={`flex-1 h-9 rounded-full items-center justify-center ${on ? "bg-brand" : "active:opacity-70"}`}
             >
-              <Text className="font-ui-semibold" style={{ fontSize: rf(13.5), color: on ? colors["on-brand"] : colors.text }}>
+              <Text className="font-ui-semibold" numberOfLines={1} style={{ fontSize: rf(13.5), color: on ? colors["on-brand"] : colors["text-2"] }}>
                 {t.label}
               </Text>
             </Pressable>

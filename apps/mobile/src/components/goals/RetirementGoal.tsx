@@ -10,6 +10,7 @@ import { MoneyText } from "@/components/ui/MoneyText";
 import { AppSlider } from "@/components/ui/AppSlider";
 import { FireChart } from "@/components/charts/FireChart";
 import { Bleed } from "@/components/ui/Bleed";
+import { SectionLabel } from "@/components/goals/parts";
 import { useFireDefaults, useFireSettings, useSaveFireSettings } from "@/lib/queries/fire";
 import { usePlaidLink } from "@/lib/usePlaidLink";
 import { hairline } from "@/theme/colors";
@@ -85,16 +86,14 @@ function EmptyFire({ contentTop, hasAccounts, onStartFromZero }: { contentTop: n
     <View className="flex-1 px-5" style={{ paddingTop: contentTop }}>
       {progressSheet}
       <Card className="px-5 pt-6 pb-5 gap-3">
-        <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>When could you stop working?</Text>
+        <Text className="font-display text-text" style={{ fontSize: rf(22) }}>When could you stop working?</Text>
         <Text className="font-ui text-text-2" style={{ fontSize: rf(13.5), lineHeight: rf(19) }}>
           {hasAccounts
             ? "Tally can work it out from your spending. Connect a brokerage so it also knows what you've invested, or start from $0."
             : "Connect your bank and brokerage, and Tally works it out from your spending and investments. Or start from $0."}
         </Text>
         <PillButton label="Connect a brokerage" onPress={() => openLink("create")} loading={isLinking} size="md" className="mt-1" />
-        <Pressable onPress={onStartFromZero} className="h-11 rounded-full items-center justify-center bg-brand-subtle">
-          <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(14) }}>Start from $0</Text>
-        </Pressable>
+        <PillButton label="Start from $0" onPress={onStartFromZero} variant="subtle" size="md" />
       </Card>
     </View>
   );
@@ -115,6 +114,8 @@ function Planner({
   const save = useSaveFireSettings();
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [accountsOpen, setAccountsOpen] = useState(false);
+  // A finger on a slider locks the page, so a slightly diagonal drag still moves the slider.
+  const [sliding, setSliding] = useState(false);
   const first = useRef(true);
   const [plan, setPlan] = useState<Plan>(seed);
   const set = (patch: Partial<Plan>) => setPlan((p) => ({ ...p, ...patch }));
@@ -166,13 +167,13 @@ function Planner({
   const retireYear = v.years != null ? startYear + Math.round(v.years) : null;
   const yearsToTarget = age != null ? Math.max(1, TARGET_AGE - age) : 20;
   const needed = v.res.years == null && !v.res.alreadyThere ? Math.ceil(requiredMonthlySaving(invested, v.target, r, yearsToTarget) / 100) * 100 : null;
-  const label = { fontSize: rf(11), letterSpacing: 0.6, textTransform: "uppercase" as const };
+  const label = { fontSize: rf(12), letterSpacing: 0.6, textTransform: "uppercase" as const };
   const coveredMonths = defaults.coveredMonths ?? 12;
 
   return (
     <View className="flex-1" style={{ paddingTop: contentTop }}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1 }}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 16, paddingBottom: 40 }}>
+        <ScrollView scrollEnabled={!sliding} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, gap: 16, paddingBottom: 40 }}>
           <Card className="overflow-hidden">
             <View className="px-5 pt-5 pb-3 gap-2">
               {v.res.alreadyThere ? (
@@ -210,11 +211,11 @@ function Planner({
               <View className="flex-row gap-4">
                 <View className="flex-row items-center gap-1.5">
                   <View style={{ width: 14, height: 2, backgroundColor: colors.brand }} />
-                  <Text className="font-ui text-text-3" style={{ fontSize: rf(11) }}>Projected at {pct1(r)}</Text>
+                  <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>Projected at {pct1(r)}</Text>
                 </View>
                 <View className="flex-row items-center gap-1.5">
                   <View style={{ width: 14, height: 8, borderRadius: 2, backgroundColor: colors.brand, opacity: 0.25 }} />
-                  <Text className="font-ui text-text-3" style={{ fontSize: rf(11) }}>±1% return</Text>
+                  <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>±1% return</Text>
                 </View>
               </View>
             </View>
@@ -229,32 +230,30 @@ function Planner({
                   <MoneyText cents={v.target} mask={false} className="font-ui-semibold text-text" style={{ fontSize: rf(16) }} />
                 </View>
               </View>
-              <View className="h-2 rounded-full bg-sunken overflow-hidden">
-                <View className="h-full bg-brand" style={{ width: `${Math.min(100, v.progress * 100)}%` }} />
+              <View className="h-3 rounded-full bg-sunken overflow-hidden border-card border-ink">
+                <View className="h-full rounded-full bg-brand" style={{ width: `${Math.min(100, v.progress * 100)}%` }} />
               </View>
-              <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>{formatPercent(v.progress)} of the way there</Text>
+              <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>{formatPercent(v.progress)} of the way there</Text>
             </View>
           </Card>
 
           {needed != null && (
-            <View className="flex-row items-center gap-3 rounded-[14px] bg-info-subtle pl-4 pr-3 py-3">
+            <View className="flex-row items-center gap-3 rounded-card bg-info-subtle border-card border-ink pl-4 pr-3 py-3.5">
               <View className="flex-1 gap-0.5">
                 <Text className="font-ui-semibold text-info" style={{ fontSize: rf(13.5) }}>To retire {age != null ? `at ${TARGET_AGE}` : `in ${yearsToTarget} years`}</Text>
-                <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>Save {money(needed)} a month at these returns.</Text>
+                <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>Save {money(needed)} a month at these returns.</Text>
               </View>
-              <Pressable onPress={() => set({ saving: needed })} className="h-9 px-3.5 rounded-full items-center justify-center bg-brand-subtle">
-                <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>Use {money(needed)}</Text>
-              </Pressable>
+              <PillButton label={`Use ${money(needed)}`} onPress={() => set({ saving: needed })} variant="subtle" size="sm" inline className="self-center" />
             </View>
           )}
 
-          <Text className="font-ui-semibold text-text-3 px-1" style={label}>What if</Text>
+          <SectionLabel>What if</SectionLabel>
           <View className="flex-row flex-wrap gap-2">
             {whatIfs
               .filter((w) => w.yearsSooner != null)
               .map((w) => (
-                <View key={w.label} className="rounded-[10px] bg-surface-2 px-3 py-2" style={{ minWidth: "47%", flexGrow: 1 }}>
-                  <Text className="font-ui-semibold" style={{ fontSize: rf(12.5), color: w.yearsSooner! >= 0 ? colors.positive : colors.negative }}>
+                <View key={w.label} className="rounded-control bg-surface border border-border px-3.5 py-2.5 gap-0.5" style={{ minWidth: "47%", flexGrow: 1 }}>
+                  <Text className="font-ui-semibold" style={{ fontSize: rf(15), color: w.yearsSooner! >= 0 ? colors.positive : colors.negative }}>
                     {Math.abs(w.yearsSooner!).toFixed(1)} yr{Math.abs(w.yearsSooner!) >= 1.05 ? "s" : ""} {w.yearsSooner! >= 0 ? "sooner" : "later"}
                   </Text>
                   <Text className="font-ui text-text-2" style={{ fontSize: rf(12) }}>{w.label}</Text>
@@ -262,22 +261,25 @@ function Planner({
               ))}
           </View>
 
-          <View className="flex-row items-center justify-between px-1">
-            <Text className="font-ui-semibold text-text-3" style={label}>Your levers</Text>
-            <View className="flex-row items-center gap-3">
-              <Text className="font-ui" style={{ fontSize: rf(12), color: saveState === "error" ? colors.negative : colors["text-3"] }}>
-                {saveState === "saving" ? "Saving…" : saveState === "saved" ? "Saved" : saveState === "error" ? "Couldn't save" : ""}
-              </Text>
-              <Pressable
-                onPress={() =>
-                  set({ swr: DEFAULTS.swr, marketReturn: DEFAULTS.expectedReturn, inflation: DEFAULTS.inflation, expenses: defaults.defaultAnnualExpenses, saving: defaults.defaultMonthlyContribution, excluded: [] })
-                }
-                hitSlop={8}
-              >
-                <Text className="font-ui-medium text-brand" style={{ fontSize: rf(12.5) }}>Reset</Text>
-              </Pressable>
-            </View>
-          </View>
+          <SectionLabel
+            right={
+              <View className="flex-row items-center gap-3">
+                <Text className="font-ui" style={{ fontSize: rf(12), color: saveState === "error" ? colors.negative : colors["text-3"] }}>
+                  {saveState === "saving" ? "Saving…" : saveState === "saved" ? "Saved" : saveState === "error" ? "Couldn't save" : ""}
+                </Text>
+                <Pressable
+                  onPress={() =>
+                    set({ swr: DEFAULTS.swr, marketReturn: DEFAULTS.expectedReturn, inflation: DEFAULTS.inflation, expenses: defaults.defaultAnnualExpenses, saving: defaults.defaultMonthlyContribution, excluded: [] })
+                  }
+                  hitSlop={8}
+                >
+                  <Text className="font-ui-medium text-brand" style={{ fontSize: rf(13) }}>Reset</Text>
+                </Pressable>
+              </View>
+            }
+          >
+            Your levers
+          </SectionLabel>
           <Card className="p-5 gap-5">
             {coveredMonths > 0 && coveredMonths < 12 && (
               <Text className="font-ui text-text-2 rounded-control bg-info-subtle px-3 py-2" style={{ fontSize: rf(12) }}>
@@ -285,6 +287,7 @@ function Planner({
               </Text>
             )}
             <Lever
+              onSlidingChange={setSliding}
               label="Monthly saving"
               value={plan.saving}
               display={money(plan.saving)}
@@ -297,6 +300,7 @@ function Planner({
               reset={plan.saving !== defaults.defaultMonthlyContribution ? { label: `Use actual (${money(defaults.defaultMonthlyContribution)})`, run: () => set({ saving: defaults.defaultMonthlyContribution }) } : undefined}
             />
             <Lever
+              onSlidingChange={setSliding}
               label="Yearly spending in retirement"
               value={plan.expenses}
               display={money(plan.expenses)}
@@ -308,22 +312,22 @@ function Planner({
               hint={plan.expenses === defaults.defaultAnnualExpenses ? "Your last 12 months, in today's dollars" : undefined}
               reset={plan.expenses !== defaults.defaultAnnualExpenses ? { label: `Use actual (${money(defaults.defaultAnnualExpenses)})`, run: () => set({ expenses: defaults.defaultAnnualExpenses }) } : undefined}
             />
-            <Lever label="Market return" value={plan.marketReturn} display={pct1(plan.marketReturn)} min={-0.02} max={0.12} step={0.0025} onChange={(marketReturn) => set({ marketReturn })} />
-            <Lever label="Inflation" value={plan.inflation} display={pct1(plan.inflation)} min={0} max={0.06} step={0.0025} onChange={(inflation) => set({ inflation })} hint={`Return after inflation: ${pct1(r)}`} />
-            <Lever label="Withdrawal rate" value={plan.swr} display={pct1(plan.swr)} min={0.025} max={0.06} step={0.0025} onChange={(swr) => set({ swr })} hint={`Target = spending ÷ ${pct1(plan.swr)} = ${compact(v.target)}`} />
+            <Lever onSlidingChange={setSliding} label="Market return" value={plan.marketReturn} display={pct1(plan.marketReturn)} min={-0.02} max={0.12} step={0.0025} onChange={(marketReturn) => set({ marketReturn })} />
+            <Lever onSlidingChange={setSliding} label="Inflation" value={plan.inflation} display={pct1(plan.inflation)} min={0} max={0.06} step={0.0025} onChange={(inflation) => set({ inflation })} hint={`Return after inflation: ${pct1(r)}`} />
+            <Lever onSlidingChange={setSliding} label="Withdrawal rate" value={plan.swr} display={pct1(plan.swr)} min={0.025} max={0.06} step={0.0025} onChange={(swr) => set({ swr })} hint={`Target = spending ÷ ${pct1(plan.swr)} = ${compact(v.target)}`} />
             {accounts.length > 0 && (
               <View className="gap-2 pt-3" style={{ borderTopWidth: 1, borderTopColor: hairline(colors) }}>
                 <Pressable onPress={() => setAccountsOpen((o) => !o)} className="flex-row justify-between">
-                  <Text className="font-ui text-text-2 flex-1" style={{ fontSize: rf(12.5) }}>
+                  <Text className="font-ui text-text-2 flex-1" style={{ fontSize: rf(13) }}>
                     Invested today counts {accounts.filter((a) => !excluded.has(a.id)).length} of {accounts.length} accounts
                   </Text>
-                  <Text className="font-ui-medium text-brand" style={{ fontSize: rf(12.5) }}>{accountsOpen ? "Done" : "Choose"}</Text>
+                  <Text className="font-ui-medium text-brand" style={{ fontSize: rf(13) }}>{accountsOpen ? "Done" : "Choose"}</Text>
                 </Pressable>
                 {accountsOpen &&
                   accounts.map((a) => (
                     <View key={a.id} className="flex-row items-center justify-between gap-3">
                       <Text className="font-ui text-text flex-1" style={{ fontSize: rf(13.5) }} numberOfLines={1}>{a.name}</Text>
-                      <MoneyText cents={a.value} className="font-ui text-text-3" style={{ fontSize: rf(12.5) }} />
+                      <MoneyText cents={a.value} className="font-ui text-text-3" style={{ fontSize: rf(13) }} />
                       <Switch style={{ alignSelf: "center" }}
                         value={!excluded.has(a.id)}
                         onValueChange={(on) => set({ excluded: on ? plan.excluded.filter((id) => id !== a.id) : [...plan.excluded, a.id] })}
@@ -336,7 +340,7 @@ function Planner({
             )}
           </Card>
 
-          <Text className="font-ui-semibold text-text-3 px-1" style={label}>Milestones</Text>
+          <SectionLabel>Milestones</SectionLabel>
           <Card className="px-5 py-1">
             {milestones.map((m, i) => (
               <View key={m.key} className="flex-row items-center gap-3 py-3" style={i > 0 ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined}>
@@ -345,7 +349,7 @@ function Planner({
                   <Text className="font-ui text-text" style={{ fontSize: rf(13.5) }}>
                     {m.label} <Text className="text-text-3">· {compact(m.value)}</Text>
                   </Text>
-                  {m.detail && <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>{m.detail}</Text>}
+                  {m.detail && <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>{m.detail}</Text>}
                 </View>
                 <Text className="font-ui text-text-3" style={{ fontSize: rf(13), fontVariant: ["tabular-nums"] }}>
                   {m.reached ? "Reached" : m.years == null ? "—" : startYear + Math.round(m.years)}
@@ -375,6 +379,7 @@ function Lever({
   money: isMoney,
   hint,
   reset,
+  onSlidingChange,
 }: {
   label: string;
   value: number;
@@ -386,6 +391,7 @@ function Lever({
   money?: boolean;
   hint?: string;
   reset?: { label: string; run: () => void };
+  onSlidingChange?: (sliding: boolean) => void;
 }) {
   const rf = useRF();
   const [editing, setEditing] = useState(false);
@@ -398,7 +404,7 @@ function Lever({
   return (
     <View className="gap-1.5">
       <View className="flex-row items-center justify-between">
-        <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>{label}</Text>
+        <Text className="font-ui-medium text-text" style={{ fontSize: rf(14) }}>{label}</Text>
         {editing ? (
           <TextInput
             autoFocus
@@ -408,7 +414,7 @@ function Lever({
             onSubmitEditing={commit}
             keyboardType="decimal-pad"
             returnKeyType="done"
-            className="font-ui-semibold text-text rounded-[6px] bg-surface-2 px-2 border-field border-ink"
+            className="font-ui-semibold text-text rounded-control bg-surface-2 px-2.5 border-field border-ink"
             style={{ fontSize: rf(14), minWidth: 90, textAlign: "right", paddingVertical: 4 }}
           />
         ) : (
@@ -420,19 +426,19 @@ function Lever({
             hitSlop={8}
             accessibilityLabel={`${label}: ${display}. Tap to type a value`}
           >
-            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(14.5), fontVariant: ["tabular-nums"] }}>{display}</Text>
+            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16), fontVariant: ["tabular-nums"] }}>{display}</Text>
           </Pressable>
         )}
       </View>
-      <AppSlider value={Math.min(max, Math.max(min, value))} onValueChange={onChange} min={min} max={max} step={step} />
+      <AppSlider value={Math.min(max, Math.max(min, value))} onValueChange={onChange} min={min} max={max} step={step} onSlidingChange={onSlidingChange} accessibilityLabel={label} />
       {reset ? (
         <Pressable onPress={reset.run} hitSlop={6}>
-          <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>
+          <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>
             Your own amount · <Text className="font-ui-medium text-brand">{reset.label}</Text>
           </Text>
         </Pressable>
       ) : hint ? (
-        <Text className="font-ui text-text-3" style={{ fontSize: rf(11.5) }}>{hint}</Text>
+        <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>{hint}</Text>
       ) : null}
     </View>
   );

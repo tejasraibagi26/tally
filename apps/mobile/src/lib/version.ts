@@ -430,8 +430,15 @@ import Constants from "expo-constants";
  * #14121C, surface-2/raised #1C1A27, sunken #060509, border #252233, and
  * the subtle tints darker to match (web and mobile together; text pairs
  * still AA, text-3 6.3:1 on surface).
+ *
+ * 2.15.1 reworks Goals: a full-width tab switch; the year-end tab leads
+ * with the goal and its pace, then where to find it, then the goal's own
+ * rows (target edits in a FormSheet, remove asks first); retirement snaps
+ * to the type and radius scale. AppSlider is drawn in JS in Pop's colours
+ * (ink-outlined track, brand fill, marigold thumb) instead of the native
+ * SwiftUI/Material sliders, and locks the scroll while dragging.
  */
-export const APP_VERSION = "2.15.0";
+export const APP_VERSION = "2.15.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
