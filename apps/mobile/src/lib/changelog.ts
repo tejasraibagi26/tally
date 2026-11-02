@@ -19,7 +19,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "2.16.1",
     date: "2026-11-02",
     changes: [
-      { kind: "improved", text: "Sheets are see-through on iPhone: what's behind them softly blurs through." },
+      { kind: "improved", text: "Sheets, More included, are see-through on iPhone: what's behind them softly blurs through." },
       { kind: "fixed", text: "The More sheet's bottom corners are no longer cut off by the screen's rounded corners." },
     ],
   },

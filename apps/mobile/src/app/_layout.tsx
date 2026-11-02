@@ -184,6 +184,9 @@ function RootNavigator() {
                   // it unset stopped the sheet floating -- flush to the bottom,
                   // build line pushed off-screen.)
                   sheetCornerRadius: Platform.OS === "ios" ? 44 : 24,
+                  // iOS: clear, so the system sheet's frosted glass shows through
+                  // (see-through like Spotify's); more.tsx draws no background there.
+                  ...(Platform.OS === "ios" ? { contentStyle: { backgroundColor: "transparent" } } : {}),
                   sheetExpandsWhenScrolledToEdge: false,
                   headerShown: false,
                 }}

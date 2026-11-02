@@ -453,7 +453,8 @@ import Constants from "expo-constants";
  * under a 72% wash of raised, backdrop eased to 30% (loader shared with
  * TallyDialog in ui/nativeBlur.ts). The native More sheet's corner radius
  * is 44 on iOS (was 24), so iOS 26's floating sheet clears the display's
- * corners instead of being clipped by them.
+ * corners instead of being clipped by them; its content is clear on iOS
+ * (contentStyle transparent, more.tsx unpainted) so the system glass shows.
  */
 export const APP_VERSION = "2.16.1";
 

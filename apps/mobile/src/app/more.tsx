@@ -59,7 +59,9 @@ export default function MoreScreen() {
     // sheetAllowedDetents), not sized to this content -- without flex-1 here,
     // this View is only as tall as its own rows, and the native sheet's own
     // (light, even in dark mode) background shows through as a bar below it.
-    <View className="flex-1 bg-surface px-5" style={{ paddingTop: 22, paddingBottom: (Platform.OS === "ios" ? 0 : insets.bottom) + 16 }}>
+    // iOS: no background of its own -- the system sheet's glass shows
+    // through (contentStyle is clear in _layout.tsx). Android stays solid.
+    <View className={Platform.OS === "ios" ? "flex-1 px-5" : "flex-1 bg-surface px-5"} style={{ paddingTop: 22, paddingBottom: (Platform.OS === "ios" ? 0 : insets.bottom) + 16 }}>
       <View className="items-center mb-3">
         <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }}>More</Text>
       </View>
