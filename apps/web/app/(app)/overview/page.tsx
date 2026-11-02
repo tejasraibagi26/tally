@@ -14,6 +14,8 @@ import { trimLeadingEmptyMonths } from "@tally/core/cashFlowMath";
 import { creditCardsForUser, utilizationFor } from "@/lib/liabilities";
 import { latestHoldingsForUser, portfolioValue } from "@/lib/portfolio";
 import { Card, CardHeader } from "@/components/ui/Card";
+import { CategoryAvatar } from "@/components/transactions/CategoryAvatar";
+import { listUserCategories } from "@/lib/userCategories";
 import { PageHeader, SyncFreshness } from "@/components/ui/PageHeader";
 import { StatTile } from "@/components/ui/StatTile";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
@@ -96,7 +98,7 @@ export default async function OverviewPage() {
   const { start: monthStart } = monthRange(month);
   const monthEnd = monthLastDay(month);
 
-  const [budgets, thisMonth, lastMonth, breakdown, netWorthPoints, recentTx, cards, cashFlowMonths, holdings, spendByDay, [toReview]] = await Promise.all([
+  const [budgets, thisMonth, lastMonth, breakdown, netWorthPoints, recentTx, cards, cashFlowMonths, holdings, spendByDay, [toReview], userCategories] = await Promise.all([
     getBudgetsForMonth(userId, month),
     monthTotals(userId, month),
     monthTotals(userId, priorMonth),
@@ -124,7 +126,10 @@ export default async function OverviewPage() {
           lt(schema.transactions.postedDate, monthRange(month).end),
         ),
       ),
+    // Recent activity's category icons, named and colored as the user sees them.
+    listUserCategories(userId),
   ]);
+  const categoryById = new Map(userCategories.map((c) => [c.id, c]));
 
   const totalAssets = accounts.filter((a) => a.type === "depository" || a.type === "investment").reduce((sum, a) => sum + (a.currentBalance ?? 0), 0);
   const totalLiabilities = accounts.filter((a) => a.type === "credit" || a.type === "loan").reduce((sum, a) => sum + (a.currentBalance ?? 0), 0);
@@ -326,6 +331,14 @@ export default async function OverviewPage() {
           <div className="flex flex-col">
             {recentTx.map((t) => (
               <div key={t.id} className="flex items-center gap-3 px-4 py-2.5 border-b border-border last:border-b-0">
+                <CategoryAvatar
+                  categoryName={t.categoryId ? (categoryById.get(t.categoryId)?.name ?? null) : null}
+                  pfcDetailed={t.pfcDetailed}
+                  colorSlot={t.categoryId ? (categoryById.get(t.categoryId)?.colorSlot ?? null) : null}
+                  isTransfer={t.isTransfer}
+                  uncategorized={!t.categoryId && !t.isTransfer}
+                  size={28}
+                />
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <span className="text-[15px] text-text truncate">{t.merchantName ?? t.name}</span>
                   {t.isPending && <span className="text-[12px] text-warning uppercase tracking-wide flex-none">Pending</span>}

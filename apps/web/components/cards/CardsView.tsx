@@ -9,7 +9,7 @@ import { SidePanel } from "@/components/ui/SidePanel";
 import { CardTile } from "@/components/cards/CardTile";
 import { CreditLimitEditor } from "@/components/cards/CreditLimitEditor";
 import { AccountNicknameEditor } from "@/components/accounts/AccountNicknameEditor";
-import { MerchantAvatar } from "@/components/transactions/MerchantAvatar";
+import { CategoryAvatar } from "@/components/transactions/CategoryAvatar";
 import { cn } from "@/lib/cn";
 import { localToday } from "@/lib/localToday";
 
@@ -250,6 +250,11 @@ interface Charge {
   amount: number;
   isPending: boolean;
   logoUrl?: string | null;
+  categoryId?: string | null;
+  categoryName?: string | null;
+  categoryColorSlot?: number | null;
+  pfcDetailed?: string | null;
+  isTransfer?: boolean;
 }
 
 function CardPanel({ card, onClose }: { card: CardItem | null; onClose: () => void }) {
@@ -383,7 +388,7 @@ function CardPanel({ card, onClose }: { card: CardItem | null; onClose: () => vo
                 const name = t.merchantName ?? t.name;
                 return (
                   <li key={t.id} className="flex items-center gap-2.5 py-2 border-t border-border first:border-t-0">
-                    <MerchantAvatar name={name} logoUrl={t.logoUrl} className="w-7 h-7 rounded-tile text-xs" />
+                    <CategoryAvatar categoryName={t.categoryName} pfcDetailed={t.pfcDetailed} colorSlot={t.categoryColorSlot} isTransfer={t.isTransfer} uncategorized={!t.categoryId && !t.isTransfer} size={28} />
                     <span className="flex-1 min-w-0 truncate text-[13.5px] text-text">
                       {name}
                       {t.isPending && <span className="ml-1.5 text-[12px] italic text-text-3">pending</span>}

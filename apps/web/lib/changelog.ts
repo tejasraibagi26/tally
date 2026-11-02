@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.18.0",
+    date: "2026-11-02",
+    changes: [
+      { kind: "new", text: "Transactions show their category as an icon in its colour, so you can scan a list at a glance. Same icons as the app." },
+    ],
+  },
+  {
     version: "2.17.2",
     date: "2026-11-02",
     changes: [

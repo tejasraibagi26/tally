@@ -11,7 +11,7 @@ import { describeTransactionRow, groupByDay } from "@tally/core/transactionView"
 import { cn } from "@/lib/cn";
 import { TagPicker } from "@/components/transactions/TagPicker";
 import { CategoryPicker } from "@/components/transactions/CategoryPicker";
-import { MerchantAvatar } from "@/components/transactions/MerchantAvatar";
+import { CategoryAvatar } from "@/components/transactions/CategoryAvatar";
 import { TransactionDetailPanel, type TransactionDetailData, type DetailCategoryOption, type DetailSplit } from "@/components/transactions/TransactionDetailPanel";
 
 export interface TransactionRowData {
@@ -260,7 +260,7 @@ export function TransactionsList({
                   }}
                   className={cn("hidden lg:block w-4 h-4 rounded-[4px] border", isChecked ? "bg-brand border-brand" : "border-border-strong opacity-60 group-hover:opacity-100")}
                 />
-                <MerchantAvatar name={display} logoUrl={t.isTransfer || t.isManual ? null : t.logoUrl} className="w-7 h-7 rounded-tile text-xs" />
+                <CategoryAvatar categoryName={category?.name ?? null} pfcDetailed={t.pfcDetailed} colorSlot={category?.colorSlot ?? null} isTransfer={t.isTransfer} uncategorized={v.uncategorized} size={28} />
                 <span className="flex flex-col gap-0.5 min-w-0">
                   <span className="flex items-center gap-1.5 min-w-0">
                     {v.needsReview && <span className="w-2 h-2 rounded-full bg-brand flex-none" title="Needs review" />}

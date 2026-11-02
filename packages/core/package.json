@@ -37,7 +37,8 @@
     "./loans": "./src/loans.ts",
     "./yearReview": "./src/yearReview.ts",
     "./tagView": "./src/tagView.ts",
-    "./appLinks": "./src/appLinks.ts"
+    "./appLinks": "./src/appLinks.ts",
+    "./categoryIcon": "./src/categoryIcon.ts"
   },
   "scripts": {
     "test": "vitest run",

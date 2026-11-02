@@ -76,6 +76,8 @@
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) {
     color-scheme: dark;
+    /* CategoryAvatar's tint behind the icon (15% in light, the default). */
+    --cat-tint: 22%;
     --canvas: #0B0B0A;
     --surface: #191918;
     --surface-2: #222220;
@@ -122,6 +124,7 @@
    copy above. */
 :root[data-theme="dark"] {
   color-scheme: dark;
+  --cat-tint: 22%;
   --canvas: #0B0B0A;
   --surface: #191918;
   --surface-2: #222220;

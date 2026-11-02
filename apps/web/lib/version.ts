@@ -543,8 +543,14 @@
  * recaps, mobile. mapPlaidTransaction stores it in posted_date; migration
  * 0039 (data only) moves existing rows; Plaid's posting date stays in
  * raw.date.
+ *
+ * 2.18.0: category icons, as on mobile. Transactions, a card's charges and
+ * Overview's Recent activity show the category's icon in its color on a
+ * soft circle (components/transactions/CategoryAvatar.tsx; the tint is
+ * --cat-tint, 15% light / 22% dark) instead of the merchant logo. The icon
+ * comes from @tally/core/categoryIcon, now shared with mobile.
  */
-export const APP_VERSION = "2.17.2";
+export const APP_VERSION = "2.18.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
