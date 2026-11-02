@@ -498,8 +498,13 @@
  * spend cushion Save and the API key Copy are the shared Button (spinner
  * beside the label); stray errors use InlineError; the changelog title takes
  * Pop's display face; odd icon strokes snap to 1.75/2.
+ *
+ * 2.15.2 snaps the last of the sweep to the scale: arbitrary radii become
+ * rounded-badge (6) / rounded-tile (10) / the card and panel tokens, and
+ * arbitrary text sizes 11/11.5/13/14/14.5 snap to 12/13.5/15; chart labels
+ * are 12 and tooltips use the control radius.
  */
-export const APP_VERSION = "2.15.1";
+export const APP_VERSION = "2.15.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

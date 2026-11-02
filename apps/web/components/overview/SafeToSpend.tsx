@@ -68,7 +68,7 @@ function Meter({ s, legend = true }: { s: SafeToSpendResult; legend?: boolean })
 function Line({ s }: { s: SafeToSpendResult }) {
   const l = safeToSpendLine(s, fmt);
   return (
-    <p className={cn("m-0 text-[14px] leading-snug", l.short ? "text-text" : "text-text-2")}>
+    <p className={cn("m-0 text-[13.5px] leading-snug", l.short ? "text-text" : "text-text-2")}>
       {l.before}
       <b className="font-semibold text-text">{l.emphasis}</b>
       {l.after}
@@ -118,7 +118,7 @@ export function SafeToSpendCard({ s, className, forecastLink = true }: { s: Safe
           <M cents={s.amount} />
         </span>
         <Line s={s} />
-        {s.payday.source === "month_end" && <span className="text-[13px] text-text-2">We haven&apos;t spotted a steady paycheque yet.</span>}
+        {s.payday.source === "month_end" && <span className="text-[13.5px] text-text-2">We haven&apos;t spotted a steady paycheque yet.</span>}
         <span className="mt-auto flex flex-col gap-2 w-full pt-1">
           {s.stale.length > 0 ? (
             <span className="self-start inline-flex items-center gap-1.5 rounded-full border-2 border-[var(--ink,var(--warning))] bg-warning-subtle text-warning px-2.5 py-0.5 text-[12.5px] font-semibold">
@@ -139,11 +139,11 @@ function Row({ title, sub, cents, children }: { title: React.ReactNode; sub?: Re
   return (
     <li className="flex items-start gap-3 py-2 border-t border-border first:border-t-0">
       <span className="flex flex-col gap-0.5 min-w-0 flex-1">
-        <span className="text-[14px] text-text truncate">{title}</span>
+        <span className="text-[13.5px] text-text truncate">{title}</span>
         {sub && <span className="text-[12.5px] text-text-3">{sub}</span>}
         {children}
       </span>
-      <M cents={cents} className="text-[14px] text-text tabular" />
+      <M cents={cents} className="text-[13.5px] text-text tabular" />
     </li>
   );
 }
@@ -172,7 +172,7 @@ function SafeToSpendPanel({ s, open, onClose, forecastLink }: { s: SafeToSpendRe
   }
 
   const step = (label: string, cents: number, strong = false) => (
-    <div className={cn("flex justify-between", strong ? "text-[15px] font-bold text-text" : "text-[14px] text-text-2")}>
+    <div className={cn("flex justify-between", strong ? "text-[15px] font-bold text-text" : "text-[13.5px] text-text-2")}>
       <span>{label}</span>
       <M cents={cents} className="tabular" />
     </div>
@@ -269,15 +269,15 @@ function SafeToSpendPanel({ s, open, onClose, forecastLink }: { s: SafeToSpendRe
                 Never dip below
               </label>
               <div className="flex items-center h-9 rounded-control border border-border-strong bg-surface px-2.5">
-                <span className="text-text-3 text-[14px] pr-1">$</span>
-                <input id="cushion" inputMode="decimal" value={cushion} onChange={(e) => setCushion(e.target.value.replace(/[^\d.]/g, ""))} className="w-20 bg-transparent text-right text-[14px] tabular outline-none" />
+                <span className="text-text-3 text-[13.5px] pr-1">$</span>
+                <input id="cushion" inputMode="decimal" value={cushion} onChange={(e) => setCushion(e.target.value.replace(/[^\d.]/g, ""))} className="w-20 bg-transparent text-right text-[13.5px] tabular outline-none" />
               </div>
               <Button type="button" onClick={saveCushion} loading={saving}>
                 Save
               </Button>
             </div>
           ) : (
-            <div className="flex items-center gap-3 text-[14px]">
+            <div className="flex items-center gap-3 text-[13.5px]">
               <span className="flex-1 text-text-2">Money you never want to dip below</span>
               <M cents={s.cushion} className="text-text tabular" />
               <button type="button" onClick={() => setEditing(true)} className="text-[13.5px] font-semibold text-brand">
@@ -287,7 +287,7 @@ function SafeToSpendPanel({ s, open, onClose, forecastLink }: { s: SafeToSpendRe
           )}
         </section>
 
-        <div className="pt-3 border-t border-border flex flex-wrap justify-between gap-2 text-[13px]">
+        <div className="pt-3 border-t border-border flex flex-wrap justify-between gap-2 text-[13.5px]">
           <span className="text-text-3">
             {s.payday.source === "paycheque" ? `Payday from ${s.payday.label} deposits` : s.payday.source === "schedule" ? "Payday from your income schedule" : "No payday found: counting to month end"}
           </span>
@@ -296,7 +296,7 @@ function SafeToSpendPanel({ s, open, onClose, forecastLink }: { s: SafeToSpendRe
           </Link>
         </div>
         {forecastLink && (
-          <Link href="/forecast" className="ui-btn ui-btn-secondary inline-flex justify-center rounded-full border border-border-strong bg-surface hover:bg-sunken px-4 py-2 text-[14px] font-semibold text-text">
+          <Link href="/forecast" className="ui-btn ui-btn-secondary inline-flex justify-center rounded-full border border-border-strong bg-surface hover:bg-sunken px-4 py-2 text-[13.5px] font-semibold text-text">
             See everything due, and where your balance lands →
           </Link>
         )}

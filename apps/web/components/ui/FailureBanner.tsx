@@ -47,7 +47,7 @@ export function FailureBanner({
     >
       <AlertTriangle size={18} strokeWidth={1.75} className="text-warning flex-none mt-0.5" />
       <div className="flex-1 min-w-0 flex flex-col gap-1">
-        <span className="text-[14px] font-semibold text-text">{message ?? headline(items)}</span>
+        <span className="text-[13.5px] font-semibold text-text">{message ?? headline(items)}</span>
         {!message && items.length > 1 && (
           <ul className="m-0 pl-0 list-none flex flex-col gap-0.5 text-[13.5px] text-text-2">
             {items.map((item, i) => (

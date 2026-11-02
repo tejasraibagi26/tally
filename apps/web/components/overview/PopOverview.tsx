@@ -28,8 +28,8 @@ export function OnPaceCard({ streak, dailyPace, today, href, className }: { stre
           </>
         )}
       </div>
-      <p className="m-0 text-[14px] leading-snug font-medium">{onPaceLine(streak, dailyPace, today, (c) => formatCents(c))}</p>
-      <Link href={href} className="mt-auto text-[13px] font-semibold underline underline-offset-2">
+      <p className="m-0 text-[13.5px] leading-snug font-medium">{onPaceLine(streak, dailyPace, today, (c) => formatCents(c))}</p>
+      <Link href={href} className="mt-auto text-[13.5px] font-semibold underline underline-offset-2">
         See the days
       </Link>
     </Card>
@@ -49,7 +49,7 @@ export function TallyUpBanner({ count, className, style }: { count: number; clas
       </span>
       <span className="flex-1 min-w-[220px] flex flex-col">
         <span className="font-bold text-[16px] tabular">{count} to tally up</span>
-        <span className="text-[14px] text-text-2">New transactions Tally isn&apos;t sure about. Takes about a minute.</span>
+        <span className="text-[13.5px] text-text-2">New transactions Tally isn&apos;t sure about. Takes about a minute.</span>
       </span>
       <span className="inline-flex items-center gap-1 text-[15px] font-bold text-brand">
         Start review <ChevronRight size={16} strokeWidth={2.5} aria-hidden="true" />
@@ -66,12 +66,12 @@ export function YearReviewBanner({ year, className, style }: { year: number; cla
       style={style}
       className={cn("flex flex-wrap items-center gap-3.5 rounded-card border bg-[var(--marigold,var(--warning-subtle))] px-4 py-3.5 text-[var(--ink-text,var(--text))]", className)}
     >
-      <span className="w-10 h-10 flex-none rounded-control bg-surface text-text flex items-center justify-center font-display text-[13px]" aria-hidden="true">
+      <span className="w-10 h-10 flex-none rounded-control bg-surface text-text flex items-center justify-center font-display text-[13.5px]" aria-hidden="true">
         {String(year).slice(2)}
       </span>
       <span className="flex-1 min-w-[220px] flex flex-col">
         <span className="font-bold text-[16px]">Your {year} in review</span>
-        <span className="text-[14px]">Where the money went, the months that stood out, and how far net worth moved.</span>
+        <span className="text-[13.5px]">Where the money went, the months that stood out, and how far net worth moved.</span>
       </span>
       <span className="inline-flex items-center gap-1 text-[15px] font-bold">
         See your year <ChevronRight size={16} strokeWidth={2.5} aria-hidden="true" />

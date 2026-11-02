@@ -29,7 +29,7 @@ export default async function InvestmentsPage({ searchParams }: { searchParams: 
       <div className="max-w-[1280px] mx-auto px-4 lg:px-8 py-5 lg:py-7 flex flex-col gap-6">
         <PageHeader title="Investments" />
         <Card className="p-8 lg:p-10 flex flex-col items-start gap-4 max-w-[640px]">
-          <span className="w-11 h-11 rounded-[12px] bg-brand-subtle text-brand flex items-center justify-center">
+          <span className="w-11 h-11 rounded-tile bg-brand-subtle text-brand flex items-center justify-center">
             <TrendingUp size={20} strokeWidth={1.75} />
           </span>
           <h2 className="m-0 font-display text-[28px] font-normal text-text">Track your investments</h2>

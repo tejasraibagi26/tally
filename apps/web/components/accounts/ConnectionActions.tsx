@@ -174,7 +174,7 @@ export function ConnectionActionsProvider({
               Tally removes its access to {name} through Plaid and stops syncing. Past transactions stay and keep counting in spending and budgets.
             </p>
             {accounts.length > 0 && (
-              <div className="flex flex-col gap-2 rounded-[10px] border border-border bg-surface-2 p-3">
+              <div className="flex flex-col gap-2 rounded-tile border border-border bg-surface-2 p-3">
                 <span className="text-xs font-medium uppercase tracking-wide text-text-2">Stops updating</span>
                 {accounts.slice(0, REVOKE_LIST_MAX).map((a) => (
                   <div key={a.id} className="flex justify-between gap-3 text-[13.5px] text-text">
@@ -182,10 +182,10 @@ export function ConnectionActionsProvider({
                     {a.mask && <span className="font-mono text-[12.5px] text-text-3 flex-none">····{a.mask}</span>}
                   </div>
                 ))}
-                {accounts.length > REVOKE_LIST_MAX && <span className="text-[13px] text-text-3">and {accounts.length - REVOKE_LIST_MAX} more</span>}
+                {accounts.length > REVOKE_LIST_MAX && <span className="text-[13.5px] text-text-3">and {accounts.length - REVOKE_LIST_MAX} more</span>}
               </div>
             )}
-            <p className="m-0 text-[13px] text-text-3">
+            <p className="m-0 text-[13.5px] text-text-3">
               Balances leave your net worth. Connect {name} again any time and Tally picks up where it left off. To delete the data instead, use Wipe all data in Settings.
             </p>
           </>

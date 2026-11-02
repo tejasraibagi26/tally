@@ -19,12 +19,12 @@ export function OpenInApp({ to, phone }: { to: string; phone: boolean }) {
         <LogoMark size={44} />
         <div className="flex flex-col gap-1.5">
           <h1 className="ui-page-title m-0 text-2xl font-semibold text-text">Opening Tally…</h1>
-          <p className="m-0 text-[14.5px] text-text-2">If the app didn&apos;t open, tap below. iPhone asks the first time.</p>
+          <p className="m-0 text-[15px] text-text-2">If the app didn&apos;t open, tap below. iPhone asks the first time.</p>
         </div>
         <a href={app} className="ui-btn ui-btn-primary w-full h-12 inline-flex items-center justify-center rounded-control bg-brand text-on-brand text-[16px] font-semibold">
           Open in the Tally app
         </a>
-        <a href={to} className="text-[14.5px] font-medium text-brand">
+        <a href={to} className="text-[15px] font-medium text-brand">
           Continue in browser
         </a>
       </div>

@@ -15,7 +15,7 @@ export default function AccountsLoading() {
         {[3, 3].map((rows, c) => (
           <div key={c} className="rounded-card border border-border bg-surface p-4 flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <Skeleton className="w-[34px] h-[34px] rounded-[9px]" />
+              <Skeleton className="w-[34px] h-[34px] rounded-tile" />
               <div className="flex flex-col gap-1.5">
                 <Skeleton className="h-3.5 w-40" />
                 <Skeleton className="h-3 w-24" />

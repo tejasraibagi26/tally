@@ -33,7 +33,7 @@ function CopyRow({ value }: { value: string }) {
   }
   return (
     <div className="flex items-center gap-2">
-      <code className="flex-1 min-w-0 truncate px-2.5 py-2 rounded-control bg-surface border border-border-strong text-[13px] text-text font-mono">
+      <code className="flex-1 min-w-0 truncate px-2.5 py-2 rounded-control bg-surface border border-border-strong text-[13.5px] text-text font-mono">
         {value}
       </code>
       <Button type="button" variant="secondary" onClick={copy} className="flex-none gap-1.5">
@@ -104,12 +104,12 @@ export function ApiKeysManager({ apiKeys, shortcutsEndpoint }: { apiKeys: ApiKey
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2.5 p-3 rounded-control bg-surface-2 border border-border">
-        <p className="text-[13px] text-text-3 uppercase tracking-wide font-medium">Endpoint</p>
+        <p className="text-[13.5px] text-text-3 uppercase tracking-wide font-medium">Endpoint</p>
         <CopyRow value={shortcutsEndpoint} />
         <p className="text-[13.5px] text-text-2">
-          Send a <code className="text-[13px] text-text bg-sunken px-1.5 py-0.5 rounded">POST</code> with header{" "}
-          <code className="text-[13px] text-text bg-sunken px-1.5 py-0.5 rounded">Authorization: Bearer &lt;token&gt;</code> and a JSON
-          body of <code className="text-[13px] text-text bg-sunken px-1.5 py-0.5 rounded">{"{ name, amount, card, date }"}</code>, all
+          Send a <code className="text-[13.5px] text-text bg-sunken px-1.5 py-0.5 rounded">POST</code> with header{" "}
+          <code className="text-[13.5px] text-text bg-sunken px-1.5 py-0.5 rounded">Authorization: Bearer &lt;token&gt;</code> and a JSON
+          body of <code className="text-[13.5px] text-text bg-sunken px-1.5 py-0.5 rounded">{"{ name, amount, card, date }"}</code>, all
           strings. It parses "CA$16.95"-style amounts and matches "card" against your account names.
         </p>
         <details className="text-[13.5px] text-text-2">
@@ -119,10 +119,10 @@ export function ApiKeysManager({ apiKeys, shortcutsEndpoint }: { apiKeys: ApiKey
             <li>In Shortcuts, add a "Get Contents of URL" action, set to the endpoint above.</li>
             <li>Method: POST. Headers: add Authorization, value Bearer &lt;your token&gt;.</li>
             <li>
-              Request Body: JSON, with keys <code className="text-[13px] text-text bg-sunken px-1 rounded">name</code>,{" "}
-              <code className="text-[13px] text-text bg-sunken px-1 rounded">amount</code>,{" "}
-              <code className="text-[13px] text-text bg-sunken px-1 rounded">card</code>, and{" "}
-              <code className="text-[13px] text-text bg-sunken px-1 rounded">date</code>, filled from the notification
+              Request Body: JSON, with keys <code className="text-[13.5px] text-text bg-sunken px-1 rounded">name</code>,{" "}
+              <code className="text-[13.5px] text-text bg-sunken px-1 rounded">amount</code>,{" "}
+              <code className="text-[13.5px] text-text bg-sunken px-1 rounded">card</code>, and{" "}
+              <code className="text-[13.5px] text-text bg-sunken px-1 rounded">date</code>, filled from the notification
               text your automation trigger provides.
             </li>
           </ol>
@@ -133,7 +133,7 @@ export function ApiKeysManager({ apiKeys, shortcutsEndpoint }: { apiKeys: ApiKey
         <div className="flex flex-col gap-2 p-3 rounded-control bg-warning-subtle border border-warning/30">
           <p className="text-[13.5px] text-text">Copy this key now. It won&apos;t be shown again.</p>
           <CopyRow value={revealedKey} />
-          <button onClick={() => setRevealedKey(null)} className="self-start text-[13px] text-text-2 hover:text-text">
+          <button onClick={() => setRevealedKey(null)} className="self-start text-[13.5px] text-text-2 hover:text-text">
             Done
           </button>
         </div>
@@ -145,14 +145,14 @@ export function ApiKeysManager({ apiKeys, shortcutsEndpoint }: { apiKeys: ApiKey
             <div key={k.id} className="flex items-center gap-3 px-3 py-2.5 rounded-control bg-surface-2 border border-border">
               <div className="flex flex-col gap-0.5 min-w-0 flex-1">
                 <span className="text-[15px] text-text truncate">{k.name}</span>
-                <span className="text-[13px] text-text-3 truncate font-mono">
+                <span className="text-[13.5px] text-text-3 truncate font-mono">
                   {k.keyPrefix}··· · Created {formatDate(k.createdAt)}
                   {k.lastUsedAt ? ` · Last used ${formatDate(k.lastUsedAt)}` : " · Never used"}
                 </span>
               </div>
               <button
                 onClick={() => remove(k)}
-                className="text-[13px] text-negative hover:underline flex-none disabled:opacity-40"
+                className="text-[13.5px] text-negative hover:underline flex-none disabled:opacity-40"
               >
                 Revoke
               </button>

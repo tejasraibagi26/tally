@@ -21,7 +21,7 @@ export function DeselectedAccounts({ accounts }: { accounts: DeselectedAccount[]
   return (
     <section className="flex flex-col gap-3" aria-labelledby="deselected-heading">
       <div className="flex flex-col gap-0.5 px-1">
-        <h2 id="deselected-heading" className="m-0 text-[11px] font-semibold uppercase tracking-wide text-text-3">
+        <h2 id="deselected-heading" className="m-0 text-[12px] font-semibold uppercase tracking-wide text-text-3">
           No longer shared · {accounts.length}
         </h2>
         <p className="m-0 text-[13.5px] text-text-2">
@@ -32,11 +32,11 @@ export function DeselectedAccounts({ accounts }: { accounts: DeselectedAccount[]
         {accounts.map((a) => (
           <li key={a.id} className="flex items-center gap-3 rounded-card border border-border bg-surface px-4 py-3">
             <div className="flex-1 min-w-0 flex flex-col">
-              <span className="text-[14.5px] text-text truncate">
+              <span className="text-[15px] text-text truncate">
                 {a.name}
                 {a.mask && <span className="font-mono text-[12.5px] text-text-3"> ····{a.mask}</span>}
               </span>
-              <span className="text-[13px] text-text-3 truncate">
+              <span className="text-[13.5px] text-text-3 truncate">
                 {a.institutionName ?? "Bank"} · stopped sharing {shortDate(a.deselectedAt)}
               </span>
             </div>

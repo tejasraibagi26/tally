@@ -55,7 +55,7 @@ export default function PrivacyPage() {
             should identify. Operators publishing their own policy should replace the placeholders below with their
             own contact details and fill in anything specific to how they run their deployment.
           </p>
-          <div className="bg-surface-2 border border-border rounded-control p-4 text-[14px] text-text-2">
+          <div className="bg-surface-2 border border-border rounded-control p-4 text-[13.5px] text-text-2">
             Operated by: <span className="font-mono text-text">[OPERATOR NAME]</span>
             <br />
             Contact: <span className="font-mono text-text">[OPERATOR CONTACT EMAIL]</span>

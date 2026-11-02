@@ -124,7 +124,7 @@ export default async function RootPage() {
               <ScrollReveal key={s.n} delay={i * 120} className="flex flex-col gap-2">
                 <span className="font-display text-4xl text-brand">{s.n}</span>
                 <span className="text-[17px] font-semibold text-text">{s.title}</span>
-                <span className="text-[14.5px] text-text-2 leading-relaxed">{s.body}</span>
+                <span className="text-[15px] text-text-2 leading-relaxed">{s.body}</span>
               </ScrollReveal>
             ))}
           </div>
@@ -147,7 +147,7 @@ export default async function RootPage() {
 
               <div className="relative flex items-center gap-x-6 gap-y-2 flex-wrap justify-center">
                 {TRUST_POINTS.map((point) => (
-                  <span key={point} className="inline-flex items-center gap-1.5 text-[14.5px] text-text-2">
+                  <span key={point} className="inline-flex items-center gap-1.5 text-[15px] text-text-2">
                     <Check size={15} strokeWidth={2} className="text-positive flex-none" />
                     {point}
                   </span>

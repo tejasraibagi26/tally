@@ -25,11 +25,11 @@ export function NetWorthDemo() {
           className="flex items-center justify-between opacity-0"
           style={{ animation: `fade-in-up 500ms ease-out ${i * 130}ms forwards` }}
         >
-          <span className="flex items-center gap-2 text-[14px] text-text-2">
+          <span className="flex items-center gap-2 text-[13.5px] text-text-2">
             <span className="w-1.5 h-1.5 rounded-full flex-none" style={{ background: `var(--series-${r.slot})` }} />
             {r.name}
           </span>
-          <span className="text-[14px] tabular text-text">{formatCents(r.amount, { signed: true })}</span>
+          <span className="text-[13.5px] tabular text-text">{formatCents(r.amount, { signed: true })}</span>
         </div>
       ))}
       <div className="h-px bg-border opacity-0" style={{ animation: "fade-in-up 400ms ease-out 560ms forwards" }} />
@@ -45,12 +45,12 @@ export function CategorizeDemo() {
   return (
     <div className="flex flex-col gap-4 w-full max-w-[340px] mx-auto">
       <div className="flex items-center gap-3">
-        <span className="w-8 h-8 flex-none rounded-[7px] bg-sunken flex items-center justify-center text-xs font-medium text-text-2">A</span>
+        <span className="w-8 h-8 flex-none rounded-badge bg-sunken flex items-center justify-center text-xs font-medium text-text-2">A</span>
         <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-          <span className="text-[14px] text-text truncate">AMAZON.COM*A1B2C3</span>
+          <span className="text-[13.5px] text-text truncate">AMAZON.COM*A1B2C3</span>
           <span className="text-[12px] text-text-3">Today</span>
         </div>
-        <span className="text-[14px] text-negative tabular flex-none">−$34.99</span>
+        <span className="text-[13.5px] text-negative tabular flex-none">−$34.99</span>
       </div>
 
       <div className="flex items-center gap-2 opacity-0" style={{ animation: "fade-in-up 400ms ease-out 500ms forwards" }}>
@@ -58,7 +58,7 @@ export function CategorizeDemo() {
           →
         </span>
         <span
-          className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[13px] font-medium opacity-0"
+          className="inline-flex items-center gap-1.5 h-7 px-2.5 rounded-full text-[13.5px] font-medium opacity-0"
           style={{
             background: "color-mix(in srgb, var(--series-3) 16%, transparent)",
             color: "var(--series-3)",
@@ -70,7 +70,7 @@ export function CategorizeDemo() {
         </span>
       </div>
 
-      <div className="flex items-center gap-2 text-[13px] text-text-3 opacity-0" style={{ animation: "fade-in-up 400ms ease-out 1150ms forwards" }}>
+      <div className="flex items-center gap-2 text-[13.5px] text-text-3 opacity-0" style={{ animation: "fade-in-up 400ms ease-out 1150ms forwards" }}>
         <span className="text-positive" aria-hidden>
           ✓
         </span>
@@ -83,7 +83,7 @@ export function CategorizeDemo() {
 export function BudgetDemo() {
   return (
     <div className="flex flex-col gap-3 w-full max-w-[340px] mx-auto">
-      <div className="flex items-center justify-between text-[14px]">
+      <div className="flex items-center justify-between text-[13.5px]">
         <span className="text-text">Dining out</span>
         <span className="text-text-2 tabular">$361 of $500</span>
       </div>
@@ -127,7 +127,7 @@ export function InvestmentDemo() {
         {segments.map((s, i) => (
           <span
             key={s.label}
-            className="flex items-center gap-1.5 text-[13px] text-text-2 opacity-0"
+            className="flex items-center gap-1.5 text-[13.5px] text-text-2 opacity-0"
             style={{ animation: `fade-in-up 400ms ease-out ${900 + i * 150}ms forwards` }}
           >
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: `var(--series-${s.slot})` }} />
@@ -176,12 +176,12 @@ export function SubscriptionsDemo() {
           className="flex items-center justify-between opacity-0"
           style={{ animation: `fade-in-up 500ms ease-out ${i * 130}ms forwards` }}
         >
-          <span className="flex items-center gap-2 text-[14px] text-text-2">
+          <span className="flex items-center gap-2 text-[13.5px] text-text-2">
             <span className="w-1.5 h-1.5 rounded-full flex-none" style={{ background: `var(--series-${r.slot})` }} />
             {r.name}
             <span className="text-[12px] text-text-3">· {r.frequency}</span>
           </span>
-          <span className="text-[14px] tabular text-text">{formatCents(r.amount, { signed: true })}</span>
+          <span className="text-[13.5px] tabular text-text">{formatCents(r.amount, { signed: true })}</span>
         </div>
       ))}
       <div className="h-px bg-border opacity-0" style={{ animation: "fade-in-up 400ms ease-out 560ms forwards" }} />
@@ -199,13 +199,13 @@ export function CreditCardDemo() {
       <div className="flex items-center justify-between">
         <span className="text-[15px] font-medium text-text">Signature Card</span>
         <span
-          className="text-[11px] font-medium uppercase tracking-wide px-2 py-0.5 rounded-full opacity-0"
+          className="text-[12px] font-medium uppercase tracking-wide px-2 py-0.5 rounded-full opacity-0"
           style={{ background: "var(--warning-subtle)", color: "var(--warning)", animation: "tag-pop 450ms ease-out 900ms forwards" }}
         >
           Due in 6 days
         </span>
       </div>
-      <div className="flex items-center justify-between text-[13px] text-text-2">
+      <div className="flex items-center justify-between text-[13.5px] text-text-2">
         <span>Utilization</span>
         <span className="tabular">34%</span>
       </div>
@@ -215,7 +215,7 @@ export function CreditCardDemo() {
           style={{ background: "var(--series-8)", width: 0, ["--target-width" as string]: "34%", animation: "grow-width 1s ease-out 200ms forwards" }}
         />
       </div>
-      <div className="flex items-center justify-between text-[13px] text-text-3 opacity-0" style={{ animation: "fade-in-up 400ms ease-out 1100ms forwards" }}>
+      <div className="flex items-center justify-between text-[13.5px] text-text-3 opacity-0" style={{ animation: "fade-in-up 400ms ease-out 1100ms forwards" }}>
         <span>Purchase APR</span>
         <span className="tabular">24.99%</span>
       </div>
@@ -230,10 +230,10 @@ export function SecurityDemo() {
         className="flex items-center gap-3 bg-surface-2 border border-border rounded-control p-3 opacity-0"
         style={{ animation: "fade-in-up 400ms ease-out forwards" }}
       >
-        <span className="w-8 h-8 flex-none rounded-[7px] bg-sunken flex items-center justify-center text-xs font-medium text-text-2">WE</span>
+        <span className="w-8 h-8 flex-none rounded-badge bg-sunken flex items-center justify-center text-xs font-medium text-text-2">WE</span>
         <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-          <span className="text-[14px] text-text truncate">Wealthsimple access token</span>
-          <span className="font-mono text-[11px] text-text-3 truncate">access-sandbox-8f2e1c9b4a7d</span>
+          <span className="text-[13.5px] text-text truncate">Wealthsimple access token</span>
+          <span className="font-mono text-[12px] text-text-3 truncate">access-sandbox-8f2e1c9b4a7d</span>
         </div>
       </div>
 
@@ -256,11 +256,11 @@ export function SecurityDemo() {
         style={{ animation: "fade-in-up 400ms ease-out 950ms forwards" }}
       >
         <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-          <span className="text-[14px] text-text">Stored ciphertext</span>
-          <span className="font-mono text-[11px] text-text-3 truncate">7f3a9c••••••••••••••••e21b</span>
+          <span className="text-[13.5px] text-text">Stored ciphertext</span>
+          <span className="font-mono text-[12px] text-text-3 truncate">7f3a9c••••••••••••••••e21b</span>
         </div>
         <span
-          className="inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full text-[11px] font-medium flex-none opacity-0"
+          className="inline-flex items-center gap-1.5 h-6 px-2.5 rounded-full text-[12px] font-medium flex-none opacity-0"
           style={{
             background: "color-mix(in srgb, var(--positive) 16%, transparent)",
             color: "var(--positive)",

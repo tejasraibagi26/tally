@@ -55,7 +55,7 @@ export function LoginForm({ demoMode }: { demoMode: boolean }) {
         </div>
         <div className="flex flex-col gap-1">
           <span className="font-display text-2xl text-text">Sign in</span>
-          <span className="text-[14.5px] text-text-2">See exactly where you stand.</span>
+          <span className="text-[15px] text-text-2">See exactly where you stand.</span>
         </div>
       </div>
 

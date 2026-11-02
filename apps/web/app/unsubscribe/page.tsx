@@ -26,7 +26,7 @@ export default async function UnsubscribePage({ searchParams }: { searchParams: 
             ? "You won't get any more alert emails from Tally. Your monthly recap is unchanged."
             : "You won't get any more monthly recap emails from Tally."}
         </NoticeText>
-        <Link href={alerts ? "/settings#alerts" : "/settings"} className="text-[14.5px] font-medium text-brand hover:underline">
+        <Link href={alerts ? "/settings#alerts" : "/settings"} className="text-[15px] font-medium text-brand hover:underline">
           Change email settings
         </Link>
       </AccountNotice>
@@ -37,7 +37,7 @@ export default async function UnsubscribePage({ searchParams }: { searchParams: 
     return (
       <AccountNotice title="This link doesn't work">
         <NoticeText>It may have been cut off by your email app. You can turn emails off from Settings instead.</NoticeText>
-        <Link href="/settings" className="text-[14.5px] font-medium text-brand hover:underline">
+        <Link href="/settings" className="text-[15px] font-medium text-brand hover:underline">
           Go to Settings
         </Link>
       </AccountNotice>

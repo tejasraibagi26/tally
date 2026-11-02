@@ -58,7 +58,7 @@ export function GoalCard({ summary, className, style, showCurrent = false }: { s
         </span>
         <span className="flex-1 min-w-[200px] flex flex-col">
           <span className="font-bold text-[16px] text-text">Set a goal for the year</span>
-          <span className="text-[14px] text-text-2">Pick a net worth to reach by Dec 31 and Tally tracks the pace.</span>
+          <span className="text-[13.5px] text-text-2">Pick a net worth to reach by Dec 31 and Tally tracks the pace.</span>
         </span>
         <Link href="/goals" className="ui-btn ui-btn-primary inline-flex items-center h-9 px-4 rounded-control bg-brand text-on-brand font-medium text-[15px] hover:bg-brand-hover">
           Set a goal
@@ -78,7 +78,7 @@ export function GoalCard({ summary, className, style, showCurrent = false }: { s
         <span className="font-display text-[32px] leading-none text-text tabular">
           {p.status === "reached" ? "Reached" : <M cents={p.gap} />}
         </span>
-        <span className="text-[14px] text-text-2 tabular">
+        <span className="text-[13.5px] text-text-2 tabular">
           {p.status === "reached" ? (
             <>Your <M cents={p.target} /> target, <M cents={p.current - p.target} /> past it</>
           ) : (
@@ -91,13 +91,13 @@ export function GoalCard({ summary, className, style, showCurrent = false }: { s
           {projectedPct != null && <div className="absolute top-0 bottom-0 w-0 border-l-2 border-dashed border-text" style={{ left: `${projectedPct * 100}%` }} title="Where the pace lands by the deadline" />}
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[13px] font-semibold", status.tone)}>
+          <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[13.5px] font-semibold", status.tone)}>
             <status.icon size={14} strokeWidth={2} aria-hidden="true" /> {GOAL_STATUS_LABEL[p.status]}
           </span>
-          <span className="text-[14px] text-text tabular"><GoalLineText summary={summary} /></span>
+          <span className="text-[13.5px] text-text tabular"><GoalLineText summary={summary} /></span>
         </div>
         {p.pace != null && (
-          <span className="text-[13px] text-text-2 tabular border-t border-border pt-3">
+          <span className="text-[13.5px] text-text-2 tabular border-t border-border pt-3">
             Pace <M cents={p.pace} />/mo
             {p.saving != null && (
               <>
@@ -129,7 +129,7 @@ export function GoalBudgetLine({ summary, className }: { summary: GoalSummary | 
       "target reached"
     ) : null;
   return (
-    <Link href="/goals" className={cn("flex items-center gap-2.5 w-fit max-w-full rounded-control border border-border bg-surface px-3.5 py-2 text-[14px] text-text-2 hover:bg-surface-2", className)}>
+    <Link href="/goals" className={cn("flex items-center gap-2.5 w-fit max-w-full rounded-control border border-border bg-surface px-3.5 py-2 text-[13.5px] text-text-2 hover:bg-surface-2", className)}>
       <status.icon size={16} strokeWidth={2} className={cn("flex-none", status.tone.split(" ")[0])} aria-hidden="true" />
       <span className="tabular truncate">
         <span className="font-semibold text-text">Year-end goal</span> · <span className={cn("font-semibold", status.tone.split(" ")[0])}>{GOAL_STATUS_LABEL[p.status]}</span>

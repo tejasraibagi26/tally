@@ -63,7 +63,7 @@ export function CardTile({
     <span
       className={cn(
         "relative flex-none overflow-hidden",
-        lg ? "w-[88px] h-[56px] rounded-[9px]" : "w-11 h-[30px] rounded-[6px]",
+        lg ? "w-[88px] h-[56px] rounded-tile" : "w-11 h-[30px] rounded-badge",
         !color && "bg-surface-2 border border-border",
         color && !dark && "border border-border",
       )}

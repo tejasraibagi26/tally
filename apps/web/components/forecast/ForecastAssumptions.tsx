@@ -10,8 +10,8 @@ import { InlineError } from "@/components/ui/InlineError";
 function Row({ title, note }: { title: string; note: string }) {
   return (
     <div className="flex flex-col gap-0.5 border-b border-border py-2.5 last:border-b-0">
-      <span className="text-[14px] font-semibold text-text">{title}</span>
-      <span className="text-[13px] leading-snug text-text-3">{note}</span>
+      <span className="text-[13.5px] font-semibold text-text">{title}</span>
+      <span className="text-[13.5px] leading-snug text-text-3">{note}</span>
     </div>
   );
 }
@@ -55,12 +55,12 @@ export function ForecastAssumptions({ assumptions: a, cushion }: { assumptions: 
     <div className="flex flex-col">
       {editing ? (
         <div className="flex flex-col gap-2 border-b border-border py-2.5">
-          <label htmlFor="daily-spend" className="text-[14px] font-semibold text-text">
+          <label htmlFor="daily-spend" className="text-[13.5px] font-semibold text-text">
             Spend about this much a day
           </label>
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 rounded-control border border-border-strong bg-surface px-2.5 py-1.5 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-info">
-              <span className="text-[14px] text-text-3">$</span>
+              <span className="text-[13.5px] text-text-3">$</span>
               <input
                 id="daily-spend"
                 type="text"
@@ -68,7 +68,7 @@ export function ForecastAssumptions({ assumptions: a, cushion }: { assumptions: 
                 autoFocus
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
-                className="w-20 bg-transparent text-[14px] tabular text-text outline-none"
+                className="w-20 bg-transparent text-[13.5px] tabular text-text outline-none"
                 placeholder="62.00"
               />
             </div>
@@ -88,7 +88,7 @@ export function ForecastAssumptions({ assumptions: a, cushion }: { assumptions: 
             </Button>
           </div>
           {a.source === "override" && (
-            <button type="button" className="self-start text-[13px] text-brand underline-offset-2 hover:underline" onClick={() => void save(null)}>
+            <button type="button" className="self-start text-[13.5px] text-brand underline-offset-2 hover:underline" onClick={() => void save(null)}>
               Use Tally&apos;s estimate instead
             </button>
           )}
@@ -97,10 +97,10 @@ export function ForecastAssumptions({ assumptions: a, cushion }: { assumptions: 
       ) : (
         <div className="flex items-start justify-between gap-3 border-b border-border py-2.5">
           <span className="flex flex-col gap-0.5">
-            <span className="money text-[14px] font-semibold text-text tabular">
+            <span className="money text-[13.5px] font-semibold text-text tabular">
               {a.source === "none" ? "No spending estimate yet" : `Spending about ${formatCents(a.dailySpendCents)} a day`}
             </span>
-            <span className="text-[13px] leading-snug text-text-3">{spendNote}</span>
+            <span className="text-[13.5px] leading-snug text-text-3">{spendNote}</span>
           </span>
           <Button size="sm" variant="secondary" onClick={() => setEditing(true)}>
             Edit

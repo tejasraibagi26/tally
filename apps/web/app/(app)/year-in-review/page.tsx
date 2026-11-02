@@ -26,7 +26,7 @@ function Tile({ label, children, sub, href }: { label: string; children: React.R
     <>
       <span className="text-xs font-medium uppercase tracking-wide text-text-3">{label}</span>
       <span className="ui-figure font-display text-[30px] leading-none text-text tabular">{children}</span>
-      {sub && <span className="text-[13px] text-text-2">{sub}</span>}
+      {sub && <span className="text-[13.5px] text-text-2">{sub}</span>}
     </>
   );
   const cls = "bg-surface border border-border rounded-card shadow-raised p-5 flex flex-col gap-2";
@@ -132,7 +132,7 @@ export default async function YearInReviewPage({ searchParams }: { searchParams:
             </div>
             <div className="flex gap-[3px] px-1 py-2 border-t border-border">
               {Array.from({ length: 12 }, (_, i) => (
-                <span key={i} className="flex-1 text-center text-[11.5px] text-text-3">
+                <span key={i} className="flex-1 text-center text-[12px] text-text-3">
                   {new Date(Date.UTC(year, i, 1)).toLocaleDateString("en-US", { month: "narrow", timeZone: "UTC" })}
                 </span>
               ))}
@@ -145,7 +145,7 @@ export default async function YearInReviewPage({ searchParams }: { searchParams:
               <ul className="m-0 p-5 list-none flex flex-col gap-3.5">
                 {r.topCategories.map((c, i) => (
                   <li key={c.key} className="flex flex-col gap-1.5">
-                    <span className="flex justify-between text-[14px]">
+                    <span className="flex justify-between text-[13.5px]">
                       <span className="text-text">{c.label}</span>
                       <span className="text-text tabular">
                         {formatCents(c.total)} <span className="text-text-3">· {formatPercent(c.share)}</span>
@@ -162,7 +162,7 @@ export default async function YearInReviewPage({ searchParams }: { searchParams:
               <CardHeader title="Top places" />
               <ul className="m-0 p-5 list-none flex flex-col gap-3">
                 {r.topMerchants.map((m, i) => (
-                  <li key={m.key} className="flex items-center gap-3 text-[14px]">
+                  <li key={m.key} className="flex items-center gap-3 text-[13.5px]">
                     <span className="ui-tile w-8 h-8 rounded-control bg-sunken flex items-center justify-center font-display text-[15px] text-text flex-none">{i + 1}</span>
                     <span className="flex flex-col min-w-0 flex-1">
                       <span className="text-text truncate">{m.label}</span>

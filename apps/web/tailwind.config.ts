@@ -55,6 +55,8 @@ const config: Config = {
         control: "var(--radius-control)",
         card: "var(--radius-card)",
         panel: "var(--radius-panel)",
+        badge: "var(--radius-badge)",
+        tile: "var(--radius-tile)",
       },
       boxShadow: {
         raised: "var(--shadow-raised)",

@@ -33,7 +33,7 @@ export function ForecastRange({ value }: { value: Range }) {
           aria-pressed={days === value}
           disabled={pending}
           className={cn(
-            "ui-btn rounded-full border px-3 py-1 text-[13px] font-semibold tabular transition-colors",
+            "ui-btn rounded-full border px-3 py-1 text-[13.5px] font-semibold tabular transition-colors",
             days === value
               ? "ui-btn-primary border-transparent bg-brand text-on-brand"
               : "ui-btn-secondary border-border-strong bg-surface text-text hover:bg-surface-2",

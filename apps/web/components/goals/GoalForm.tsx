@@ -118,7 +118,7 @@ export function GoalForm({ targetCents, deadline, defaultDeadline }: { targetCen
                 className="flex-1 min-w-0 bg-transparent outline-none tabular text-[17px] font-semibold text-text placeholder:font-normal placeholder:text-text-3"
                 aria-label="Net worth to reach, CAD"
               />
-              <span className="text-text-3 text-[13px]">CAD</span>
+              <span className="text-text-3 text-[13.5px]">CAD</span>
             </span>
           </label>
           <label className="flex flex-col gap-1.5">

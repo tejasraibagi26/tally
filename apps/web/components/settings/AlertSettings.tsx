@@ -38,7 +38,7 @@ function Tag({ children, tone = "neutral", title }: { children: React.ReactNode;
     <span
       title={title}
       className={cn(
-        "text-[11px] px-1.5 py-0.5 rounded whitespace-nowrap",
+        "text-[12px] px-1.5 py-0.5 rounded whitespace-nowrap",
         tone === "negative" ? "bg-negative-subtle text-negative" : "bg-sunken text-text-2",
       )}
     >
@@ -151,7 +151,7 @@ export function AlertSettings({ initial, history, recapsEnabled: initialRecaps }
                   lowError ? "border-negative" : "border-border-strong",
                 )}
               >
-                <span className="text-text-3 text-[14px] pr-1">$</span>
+                <span className="text-text-3 text-[13.5px] pr-1">$</span>
                 <input
                   id="low-threshold"
                   inputMode="decimal"
@@ -164,7 +164,7 @@ export function AlertSettings({ initial, history, recapsEnabled: initialRecaps }
                   }}
                   onBlur={saveLow}
                   onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
-                  className="w-20 bg-transparent text-right text-[14px] tabular outline-none"
+                  className="w-20 bg-transparent text-right text-[13.5px] tabular outline-none"
                 />
               </div>
               {lowError && <span role="alert" className="text-xs text-negative">{lowError}</span>}
@@ -178,7 +178,7 @@ export function AlertSettings({ initial, history, recapsEnabled: initialRecaps }
                   thresholdError ? "border-negative" : "border-border-strong",
                 )}
               >
-                <span className="text-text-3 text-[14px] pr-1">$</span>
+                <span className="text-text-3 text-[13.5px] pr-1">$</span>
                 <input
                   id="large-threshold"
                   inputMode="decimal"
@@ -191,7 +191,7 @@ export function AlertSettings({ initial, history, recapsEnabled: initialRecaps }
                   }}
                   onBlur={saveThreshold}
                   onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
-                  className="w-20 bg-transparent text-right text-[14px] tabular outline-none"
+                  className="w-20 bg-transparent text-right text-[13.5px] tabular outline-none"
                 />
               </div>
               {thresholdError && <span role="alert" className="text-xs text-negative">{thresholdError}</span>}
@@ -214,8 +214,8 @@ export function AlertSettings({ initial, history, recapsEnabled: initialRecaps }
                   <>
                     <Icon size={16} strokeWidth={1.75} className="text-text-3 flex-none mt-0.5" />
                     <span className="flex flex-col gap-0.5 min-w-0 flex-1">
-                      <span className="text-[14px] text-text">{a.title}</span>
-                      <span className="text-[13px] text-text-2">{a.body}</span>
+                      <span className="text-[13.5px] text-text">{a.title}</span>
+                      <span className="text-[13.5px] text-text-2">{a.body}</span>
                       {a.email?.status === "failed" && <span className="text-xs text-negative">Email didn&apos;t send: {a.email.error}</span>}
                     </span>
                     <span className="flex flex-col items-end gap-1 flex-none">

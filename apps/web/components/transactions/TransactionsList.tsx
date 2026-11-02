@@ -223,8 +223,8 @@ export function TransactionsList({
     <>
       {groups.map((g) => (
         <section key={g.date}>
-          <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-1.5 bg-sunken border-b border-border text-[11px] font-semibold uppercase tracking-wide text-text-3">
-            <h3 className="m-0 text-[11px] font-semibold">{g.label}</h3>
+          <div className="sticky top-0 z-10 flex items-center justify-between px-4 py-1.5 bg-sunken border-b border-border text-[12px] font-semibold uppercase tracking-wide text-text-3">
+            <h3 className="m-0 text-[12px] font-semibold">{g.label}</h3>
             <span className="tabular normal-case tracking-normal font-medium text-xs">{formatCents(g.net, { signed: true })}</span>
           </div>
           {g.rows.map((t) => {
@@ -260,14 +260,14 @@ export function TransactionsList({
                   }}
                   className={cn("hidden lg:block w-4 h-4 rounded-[4px] border", isChecked ? "bg-brand border-brand" : "border-border-strong opacity-60 group-hover:opacity-100")}
                 />
-                <MerchantAvatar name={display} logoUrl={t.isTransfer || t.isManual ? null : t.logoUrl} className="w-7 h-7 rounded-[8px] text-xs" />
+                <MerchantAvatar name={display} logoUrl={t.isTransfer || t.isManual ? null : t.logoUrl} className="w-7 h-7 rounded-tile text-xs" />
                 <span className="flex flex-col gap-0.5 min-w-0">
                   <span className="flex items-center gap-1.5 min-w-0">
                     {v.needsReview && <span className="w-2 h-2 rounded-full bg-brand flex-none" title="Needs review" />}
                     {v.recurring && <RefreshCw size={12} className="text-text-3 flex-none" aria-label="Recurring" />}
-                    <span className={cn("text-[14.5px] truncate", v.amountTone === "muted" ? "text-text-2" : "text-text")}>{display}</span>
+                    <span className={cn("text-[15px] truncate", v.amountTone === "muted" ? "text-text-2" : "text-text")}>{display}</span>
                     {v.mark && (
-                      <span className={cn("flex-none text-[11px]", v.mark.kind === "pending" ? "italic text-text-3" : "px-1.5 py-px rounded-full bg-sunken text-text-3")}>{v.mark.text}</span>
+                      <span className={cn("flex-none text-[12px]", v.mark.kind === "pending" ? "italic text-text-3" : "px-1.5 py-px rounded-full bg-sunken text-text-3")}>{v.mark.text}</span>
                     )}
                   </span>
                   <span className="lg:hidden flex items-center gap-1.5 text-xs text-text-3 min-w-0">
@@ -279,7 +279,7 @@ export function TransactionsList({
                   <CategoryChip t={t} category={category} splitCats={splitCats} uncategorized={v.uncategorized} transfer={t.isTransfer} onOpen={() => setPickerFor(t.id)} />
                 </span>
                 <span className="hidden lg:block text-[12.5px] text-text-3 truncate">{account?.name ?? "—"}</span>
-                <span className={cn("text-right tabular text-[14.5px] font-medium", v.amountTone === "positive" ? "text-positive" : v.amountTone === "muted" ? "text-text-3" : "text-text", v.struck && "line-through")}>
+                <span className={cn("text-right tabular text-[15px] font-medium", v.amountTone === "positive" ? "text-positive" : v.amountTone === "muted" ? "text-text-3" : "text-text", v.struck && "line-through")}>
                   {formatCents(t.amount, { signed: true })}
                 </span>
                 {pickerFor === t.id && (
@@ -304,7 +304,7 @@ export function TransactionsList({
           </span>
           <span className="relative">
             <Button variant="secondary" size="sm" loading={busy === "setCategory"} disabled={busy !== null} onClick={() => setPickerFor("bulk")}>
-              Set category <kbd className="font-sans text-[11px] text-text-3">c</kbd>
+              Set category <kbd className="font-sans text-[12px] text-text-3">c</kbd>
             </Button>
             {pickerFor === "bulk" && (
               <CategoryPicker className="absolute bottom-full mb-2 left-0" categories={categories} onPick={(categoryId) => void bulk([...checked], { type: "setCategory", categoryId })} onClose={() => setPickerFor(null)} />
@@ -319,7 +319,7 @@ export function TransactionsList({
             )}
           </span>
           <Button variant="secondary" size="sm" loading={busy === "markReviewed"} disabled={busy !== null} onClick={() => void bulk([...checked], { type: "markReviewed" })}>
-            Mark reviewed <kbd className="font-sans text-[11px] text-text-3">e</kbd>
+            Mark reviewed <kbd className="font-sans text-[12px] text-text-3">e</kbd>
           </Button>
           <Button
             variant="secondary"

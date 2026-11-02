@@ -115,7 +115,7 @@ export function NextDueDateEditor({
               <label htmlFor={fieldId} className="flex items-center gap-2 text-xs font-medium text-text-2">
                 Next charge
                 {manualNextDueDate && (
-                  <span className="rounded-[6px] border border-brand-border bg-brand-subtle px-1.5 py-0.5 text-[11px] font-medium text-brand">Set by you</span>
+                  <span className="rounded-badge border border-brand-border bg-brand-subtle px-1.5 py-0.5 text-[12px] font-medium text-brand">Set by you</span>
                 )}
               </label>
               <input
@@ -133,7 +133,7 @@ export function NextDueDateEditor({
                 <InlineError id={`${fieldId}-help`}>Couldn&apos;t save the date. Check your connection and try again.</InlineError>
               ) : (
                 predictedNextDate && (
-                  <p id={`${fieldId}-help`} className="m-0 text-[13px] text-text-3">
+                  <p id={`${fieldId}-help`} className="m-0 text-[13.5px] text-text-3">
                     {manualNextDueDate ? `Tally predicted ${shortDate(predictedNextDate)}.` : `Tally predicts ${shortDate(predictedNextDate)} from past charges.`}
                   </p>
                 )

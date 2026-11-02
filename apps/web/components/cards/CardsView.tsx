@@ -171,7 +171,7 @@ export function CardsView({
       <div className="rounded-card bg-surface border border-border overflow-x-auto">
         <table className="w-full min-w-[760px] border-collapse text-[13.5px]">
           <thead>
-            <tr className="text-left text-[11px] font-semibold uppercase tracking-wide text-text-3 border-b border-border">
+            <tr className="text-left text-[12px] font-semibold uppercase tracking-wide text-text-3 border-b border-border">
               <th className="px-4 py-2.5 font-semibold">Card</th>
               <th className="px-4 py-2.5 font-semibold">Balance · used</th>
               <th className="px-4 py-2.5 font-semibold text-right">Statement</th>
@@ -194,7 +194,7 @@ export function CardsView({
                       <CardTile bankName={c.bankName} color={c.color} logo={c.logo} network={c.network} />
                       <span className="flex flex-col min-w-0">
                         <span className={cn("truncate", paid ? "text-text-2" : "text-text font-semibold")}>{c.displayName}</span>
-                        <span className="font-mono text-[11.5px] text-text-3">
+                        <span className="font-mono text-[12px] text-text-3">
                           ••{c.mask ?? "----"}
                           {c.needsFix && c.asOf && <span className="font-sans"> · as of {c.asOf}</span>}
                         </span>
@@ -302,7 +302,7 @@ function CardPanel({ card, onClose }: { card: CardItem | null; onClose: () => vo
           <span className={cn("font-display text-[40px] leading-none tabular money", card.balance < 0 ? "text-positive" : "text-text")}>
             {card.balance < 0 ? `${formatCents(-card.balance)} credit` : formatCents(card.balance)}
           </span>
-          <span className="text-[13px] text-text-2">
+          <span className="text-[13.5px] text-text-2">
             {v.utilization != null ? (
               <>
                 <span className={toneClass(v)}>{formatPercent(v.utilization)}</span> of your {formatCents(card.limit ?? 0)} limit
@@ -316,7 +316,7 @@ function CardPanel({ card, onClose }: { card: CardItem | null; onClose: () => vo
         </div>
 
         {card.needsFix && card.itemId && (
-          <div className="rounded-control border border-border bg-negative-subtle px-3.5 py-2.5 text-[13px] text-text-2">
+          <div className="rounded-control border border-border bg-negative-subtle px-3.5 py-2.5 text-[13.5px] text-text-2">
             <b className="block text-negative font-semibold">This card&apos;s bank needs you</b>
             Numbers are from {card.asOf ?? "the last sync"}.{" "}
             <Link href={`/accounts?bank=${card.itemId}`} className="font-semibold text-negative">
@@ -326,7 +326,7 @@ function CardPanel({ card, onClose }: { card: CardItem | null; onClose: () => vo
         )}
 
         <section className="flex flex-col gap-3">
-          <h3 className="m-0 text-[11px] font-semibold uppercase tracking-wide text-text-3">This statement</h3>
+          <h3 className="m-0 text-[12px] font-semibold uppercase tracking-wide text-text-3">This statement</h3>
           {card.statementDate ? (
             <>
               <div className="flex items-center px-1" aria-hidden="true">
@@ -337,7 +337,7 @@ function CardPanel({ card, onClose }: { card: CardItem | null; onClose: () => vo
                   </span>
                 ))}
               </div>
-              <div className="grid grid-cols-3 text-[11.5px] text-text-3">
+              <div className="grid grid-cols-3 text-[12px] text-text-3">
                 {steps.map((s, i) => (
                   <span key={i} className={cn(i === 1 && "text-center", i === 2 && "text-right")}>
                     <span className="block text-text-2">{s.label}</span>
@@ -358,13 +358,13 @@ function CardPanel({ card, onClose }: { card: CardItem | null; onClose: () => vo
               )}
             </>
           ) : (
-            <p className="m-0 text-[13px] text-text-2">{card.hasLiability ? "No statement yet. New cards get one after their first cycle." : "Your bank hasn't sent statement details for this card yet."}</p>
+            <p className="m-0 text-[13.5px] text-text-2">{card.hasLiability ? "No statement yet. New cards get one after their first cycle." : "Your bank hasn't sent statement details for this card yet."}</p>
           )}
         </section>
 
         <section className="flex flex-col gap-2">
           <div className="flex items-baseline justify-between">
-            <h3 className="m-0 text-[11px] font-semibold uppercase tracking-wide text-text-3">{card.statementDate ? "Since the statement" : "Recent charges"}</h3>
+            <h3 className="m-0 text-[12px] font-semibold uppercase tracking-wide text-text-3">{card.statementDate ? "Since the statement" : "Recent charges"}</h3>
             <Link href={`/transactions?${txQuery}`} className="text-[12.5px] font-medium text-brand">
               {charges ? `All ${charges.total}` : "View all"} →
             </Link>
@@ -376,17 +376,17 @@ function CardPanel({ card, onClose }: { card: CardItem | null; onClose: () => vo
               ))}
             </div>
           ) : charges.items.length === 0 ? (
-            <p className="m-0 text-[13px] text-text-3">No charges yet this cycle.</p>
+            <p className="m-0 text-[13.5px] text-text-3">No charges yet this cycle.</p>
           ) : (
             <ul className="m-0 p-0 list-none flex flex-col">
               {charges.items.map((t) => {
                 const name = t.merchantName ?? t.name;
                 return (
                   <li key={t.id} className="flex items-center gap-2.5 py-2 border-t border-border first:border-t-0">
-                    <MerchantAvatar name={name} logoUrl={t.logoUrl} className="w-7 h-7 rounded-[8px] text-xs" />
+                    <MerchantAvatar name={name} logoUrl={t.logoUrl} className="w-7 h-7 rounded-tile text-xs" />
                     <span className="flex-1 min-w-0 truncate text-[13.5px] text-text">
                       {name}
-                      {t.isPending && <span className="ml-1.5 text-[11px] italic text-text-3">pending</span>}
+                      {t.isPending && <span className="ml-1.5 text-[12px] italic text-text-3">pending</span>}
                     </span>
                     <span className="text-[12px] text-text-3">{shortDate(t.postedDate)}</span>
                     <span className={cn("w-20 text-right text-[13.5px] tabular money", t.amount > 0 ? "text-positive" : "text-text")}>{formatCents(t.amount, { signed: true })}</span>
@@ -399,7 +399,7 @@ function CardPanel({ card, onClose }: { card: CardItem | null; onClose: () => vo
 
         {card.aprs.length > 0 && (
           <section className="flex flex-col gap-2">
-            <h3 className="m-0 text-[11px] font-semibold uppercase tracking-wide text-text-3">Interest rates</h3>
+            <h3 className="m-0 text-[12px] font-semibold uppercase tracking-wide text-text-3">Interest rates</h3>
             <dl className="m-0 flex flex-col text-[13.5px]">
               {card.aprs.map((a) => (
                 <Row key={a.apr_type} label={APR_TYPE_LABEL[a.apr_type] ?? a.apr_type} value={`${a.apr_percentage.toFixed(2)}%`} />
@@ -409,7 +409,7 @@ function CardPanel({ card, onClose }: { card: CardItem | null; onClose: () => vo
         )}
 
         <section className="flex flex-col gap-2 pt-3 border-t border-border">
-          <h3 className="m-0 text-[11px] font-semibold uppercase tracking-wide text-text-3">Card</h3>
+          <h3 className="m-0 text-[12px] font-semibold uppercase tracking-wide text-text-3">Card</h3>
           <div className="flex items-center justify-between gap-3 text-[13.5px]">
             <span className="text-text-2">Name on Tally</span>
             <AccountNicknameEditor accountId={card.accountId} name={card.name} nickname={card.nickname} className="text-text text-right" />

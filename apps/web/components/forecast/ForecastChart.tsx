@@ -78,7 +78,7 @@ export function ForecastChart({
             stroke="var(--brand)"
             strokeWidth={1.5}
             strokeDasharray="5 4"
-            label={{ value: `Buffer ${formatCents(cushion)}`, position: "insideTopRight", fill: "var(--brand)", fontSize: 11, fontWeight: 600 }}
+            label={{ value: `Buffer ${formatCents(cushion)}`, position: "insideTopRight", fill: "var(--brand)", fontSize: 12, fontWeight: 600 }}
           />
         )}
         {banded && <Area dataKey="range" stroke="none" fill="url(#forecastBand)" isAnimationActive={false} />}
@@ -96,8 +96,8 @@ export function ForecastChart({
           contentStyle={{
             background: "var(--raised)",
             border: "var(--tooltip-border, 1px solid var(--border))",
-            borderRadius: 8,
-            fontSize: 13,
+            borderRadius: "var(--radius-control)",
+            fontSize: 13.5,
             boxShadow: "var(--shadow-overlay)",
           }}
           labelStyle={{ color: "var(--text-2)" }}
@@ -108,7 +108,7 @@ export function ForecastChart({
             if (!active || !payload?.length) return null;
             const p = payload[0]!.payload as ForecastChartPoint;
             return (
-              <div className="rounded-control border border-border bg-raised px-3 py-2 text-[13px] shadow-overlay" style={{ border: "var(--tooltip-border, 1px solid var(--border))" }}>
+              <div className="rounded-control border border-border bg-raised px-3 py-2 text-[13.5px] shadow-overlay" style={{ border: "var(--tooltip-border, 1px solid var(--border))" }}>
                 <div className="text-text-2">
                   {new Date(`${String(label)}T00:00:00Z`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" })}
                 </div>

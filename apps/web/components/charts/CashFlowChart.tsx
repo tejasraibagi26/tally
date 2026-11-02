@@ -25,7 +25,7 @@ function monthLabel(month: string): string {
 function MonthTooltip({ label, income, spend }: { label: string; income: number; spend: number }) {
   const net = income - spend;
   return (
-    <div className="bg-raised border border-border rounded-[8px] px-3 py-2 text-[13px] shadow-overlay flex flex-col gap-1 min-w-[170px]">
+    <div className="bg-raised border border-border rounded-tile px-3 py-2 text-[13.5px] shadow-overlay flex flex-col gap-1 min-w-[170px]">
       <div className="text-text-2">{label}</div>
       <Row color="var(--positive)" label="Income" value={<span className="money text-right">{formatCents(income)}</span>} />
       <Row color="var(--negative)" label="Spend" value={formatCents(spend)} />
@@ -64,7 +64,7 @@ function ChartTooltip({ active, payload }: { active?: boolean; payload?: PointPa
 
 function Legend({ items }: { items: { color: string; label: string; swatch?: "dot" | "band" }[] }) {
   return (
-    <div className="flex flex-wrap items-center gap-4 text-[13px]">
+    <div className="flex flex-wrap items-center gap-4 text-[13.5px]">
       {items.map((i) => (
         <span key={i.label} className="flex items-center gap-1.5">
           <span className={i.swatch === "band" ? "w-3 h-2 rounded-[2px]" : "w-2 h-2 rounded-full"} style={{ background: i.color, opacity: i.swatch === "band" ? 0.45 : 1 }} />

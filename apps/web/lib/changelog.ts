@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.15.2",
+    date: "2026-11-01",
+    changes: [
+      { kind: "improved", text: "Text sizes and corner rounding are the same from page to page." },
+    ],
+  },
+  {
     version: "2.15.1",
     date: "2026-11-01",
     changes: [

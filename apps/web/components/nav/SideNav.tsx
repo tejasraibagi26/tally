@@ -128,7 +128,7 @@ function YearReviewSticker({ active }: { active: boolean }) {
       href={`/year-in-review?year=${year}`}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "mx-1 flex items-center gap-3 rounded-[16px] border-2 border-[var(--ink,var(--border-strong))] bg-[var(--marigold,var(--warning-subtle))] px-3.5 py-2.5 text-[var(--ink-text,var(--text))] -rotate-[1.5deg] transition-transform hover:rotate-0 motion-reduce:transform-none",
+        "mx-1 flex items-center gap-3 rounded-card border-2 border-[var(--ink,var(--border-strong))] bg-[var(--marigold,var(--warning-subtle))] px-3.5 py-2.5 text-[var(--ink-text,var(--text))] -rotate-[1.5deg] transition-transform hover:rotate-0 motion-reduce:transform-none",
         "shadow-[3px_3px_0_var(--ink-shadow,transparent)]",
         active && "rotate-0",
       )}
@@ -160,7 +160,7 @@ function NavRow({ item, active }: { item: NavItem; active: boolean }) {
           title={item.alert.title}
           aria-label={item.alert.title}
           className={cn(
-            "min-w-[18px] h-[18px] px-1.5 rounded-full text-[11px] font-semibold leading-none flex items-center justify-center text-on-brand",
+            "min-w-[18px] h-[18px] px-1.5 rounded-full text-[12px] font-semibold leading-none flex items-center justify-center text-on-brand",
             item.alert.tone === "negative" ? "bg-negative" : "bg-warning",
           )}
         >
@@ -291,7 +291,7 @@ export function SideNav({
             <Link
               href="/settings/changelog"
               title={`Tally version ${APP_VERSION}, build ${BUILD_SHA}. See what's new`}
-              className="flex items-center gap-1.5 rounded-[6px] px-1.5 py-0.5 font-mono text-[10.5px] tracking-[0.03em] text-text-3 hover:bg-sunken hover:text-text-2 focus-visible:outline-2 focus-visible:outline-brand"
+              className="flex items-center gap-1.5 rounded-badge px-1.5 py-0.5 font-mono text-[10.5px] tracking-[0.03em] text-text-3 hover:bg-sunken hover:text-text-2 focus-visible:outline-2 focus-visible:outline-brand"
             >
               <span className="uppercase text-text-3/70">Build</span>
               <span className="text-text-2">v{APP_VERSION}</span>
@@ -300,7 +300,7 @@ export function SideNav({
             </Link>
             <span
               role="tooltip"
-              className="pointer-events-none absolute left-1/2 bottom-full mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-control bg-text px-2 py-1 text-[11px] font-sans text-canvas opacity-0 transition-opacity duration-100 group-hover/version:opacity-100 group-focus-within/version:opacity-100 z-30"
+              className="pointer-events-none absolute left-1/2 bottom-full mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-control bg-text px-2 py-1 text-[12px] font-sans text-canvas opacity-0 transition-opacity duration-100 group-hover/version:opacity-100 group-focus-within/version:opacity-100 z-30"
             >
               Tally version {APP_VERSION}, build {BUILD_SHA} · What&apos;s new
             </span>

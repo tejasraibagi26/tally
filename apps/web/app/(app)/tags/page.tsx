@@ -33,12 +33,12 @@ export default async function TagsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {tags.map((t) => (
             <Link key={t.tag} href={`/tags/${encodeURIComponent(t.tag)}`} className="bg-surface border border-border rounded-card shadow-raised p-5 flex flex-col gap-2 hover:border-border-strong transition-colors">
-              <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-brand-subtle text-brand px-2.5 py-0.5 text-[13px] font-semibold">
+              <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-brand-subtle text-brand px-2.5 py-0.5 text-[13.5px] font-semibold">
                 <Tag size={13} strokeWidth={2} aria-hidden="true" />
                 {t.tag}
               </span>
               <span className="ui-figure font-display text-[30px] leading-none text-text tabular">{formatCents(t.spend)}</span>
-              <span className="text-[13px] text-text-2">
+              <span className="text-[13.5px] text-text-2">
                 {t.count} transaction{t.count === 1 ? "" : "s"} · {range(t.firstDate, t.lastDate)}
               </span>
             </Link>

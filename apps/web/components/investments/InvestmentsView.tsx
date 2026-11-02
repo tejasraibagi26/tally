@@ -117,10 +117,10 @@ function StaleNotice({ conn, state, holdings }: { conn: InvestmentConnection; st
   return (
     <div className={cn("flex items-center gap-3 rounded-card border px-4 py-3", toneSubtle[state.tone])} style={{ borderColor: toneBorder(state.tone, 25) }}>
       <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-        <span className={cn("text-[14px] font-semibold", toneText[state.tone])}>
+        <span className={cn("text-[13.5px] font-semibold", toneText[state.tone])}>
           {bank} · {state.notice?.title ?? state.statusLine}
         </span>
-        <span className="text-[13px] text-text-2">
+        <span className="text-[13.5px] text-text-2">
           {accounts.length > 0 ? (
             <>
               {accounts.join(" and ")} (<span className="money tabular">{formatCents(value)}</span>) {accounts.length === 1 ? "is" : "are"} as of {ago(conn.lastSyncedAt)}.
@@ -238,7 +238,7 @@ function MoneyInCard({ history, positions, holdings }: { history: HistoryPoint[]
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Invested</span>
-          {enough ? <span className="money tabular text-[17px] font-semibold text-text">{formatCents(invested)}</span> : <span className="text-[13px] text-text-3">After 2 days</span>}
+          {enough ? <span className="money tabular text-[17px] font-semibold text-text">{formatCents(invested)}</span> : <span className="text-[13.5px] text-text-3">After 2 days</span>}
         </div>
         <div className="flex flex-col gap-1">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">{enough ? "Growth" : "Unrealized gain"}</span>
@@ -250,7 +250,7 @@ function MoneyInCard({ history, positions, holdings }: { history: HistoryPoint[]
           ) : unrealized.covered > 0 ? (
             <span className={cn("money tabular text-[17px] font-semibold", unrealized.amount < 0 ? "text-negative" : "text-positive")}>{formatCents(unrealized.amount, { signed: true })}</span>
           ) : (
-            <span className="text-[13px] text-text-3">—</span>
+            <span className="text-[13.5px] text-text-3">—</span>
           )}
         </div>
       </div>
@@ -294,7 +294,7 @@ function AllocationCard({ holdings }: { holdings: HoldingView[] }) {
       </div>
       <ul className="m-0 p-0 list-none flex flex-col gap-2">
         {slices.map((s, i) => (
-          <li key={s.label} className="grid grid-cols-[10px_1fr_auto_auto] items-center gap-2.5 text-[13px]">
+          <li key={s.label} className="grid grid-cols-[10px_1fr_auto_auto] items-center gap-2.5 text-[13.5px]">
             <span className="w-2 h-2 rounded-full" style={{ background: SERIES[i % SERIES.length] }} />
             <span className="text-text truncate">{s.label}</span>
             <span className="text-text-3 tabular text-right">{formatPercent(s.pct)}</span>
@@ -341,7 +341,7 @@ function HoldingsTable({
   function header(key: SortKey, label: string, align: "left" | "right" = "right") {
     const active = sort.key === key;
     return (
-      <th className={cn("px-4 py-2.5 text-[11px] font-medium uppercase tracking-wide whitespace-nowrap", align === "right" ? "text-right" : "text-left", active ? "text-text" : "text-text-3")} aria-sort={active ? (sort.desc ? "descending" : "ascending") : "none"}>
+      <th className={cn("px-4 py-2.5 text-[12px] font-medium uppercase tracking-wide whitespace-nowrap", align === "right" ? "text-right" : "text-left", active ? "text-text" : "text-text-3")} aria-sort={active ? (sort.desc ? "descending" : "ascending") : "none"}>
         <button type="button" className="uppercase tracking-wide hover:text-text" onClick={() => setSort({ key, desc: active ? !sort.desc : key !== "name" })}>
           {label}
           {active && (sort.desc ? " ↓" : " ↑")}
@@ -386,9 +386,9 @@ function HoldingsTable({
           <thead className="bg-sunken border-y border-border">
             <tr>
               {header("name", "Holding", "left")}
-              <th className="px-4 py-2.5 text-left text-[11px] font-medium uppercase tracking-wide text-text-3 hidden lg:table-cell">Accounts</th>
-              <th className="px-4 py-2.5 text-right text-[11px] font-medium uppercase tracking-wide text-text-3 hidden lg:table-cell">Quantity</th>
-              <th className="px-4 py-2.5 text-right text-[11px] font-medium uppercase tracking-wide text-text-3 hidden lg:table-cell">Price</th>
+              <th className="px-4 py-2.5 text-left text-[12px] font-medium uppercase tracking-wide text-text-3 hidden lg:table-cell">Accounts</th>
+              <th className="px-4 py-2.5 text-right text-[12px] font-medium uppercase tracking-wide text-text-3 hidden lg:table-cell">Quantity</th>
+              <th className="px-4 py-2.5 text-right text-[12px] font-medium uppercase tracking-wide text-text-3 hidden lg:table-cell">Price</th>
               {header("value", "Value")}
               {header("gain", "Gain")}
               {header("weight", "Weight")}

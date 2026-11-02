@@ -30,7 +30,7 @@ export function HeroVisual() {
       <div className="relative bg-surface border border-border rounded-card shadow-overlay p-6 flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Net worth</span>
-          <span className="flex items-center gap-1.5 text-[11px] text-text-3">
+          <span className="flex items-center gap-1.5 text-[12px] text-text-3">
             <span className="w-1.5 h-1.5 rounded-full bg-positive" style={{ animation: "float-dot 1.8s ease-in-out infinite" }} />
             Live
           </span>
@@ -63,7 +63,7 @@ export function HeroVisual() {
 
         <div className="h-px bg-border" />
 
-        <div className="flex items-center justify-between text-[13px]">
+        <div className="flex items-center justify-between text-[13.5px]">
           <span className="flex items-center gap-1.5 text-text-2">
             <span className="w-1.5 h-1.5 rounded-full flex-none" style={{ background: "var(--series-3)" }} />
             Budget this month

@@ -45,8 +45,8 @@ export function AmortizeToggle({ streamId, amortizeMonthly, amortizeMonths }: { 
         }
         className={
           amortizeMonthly
-            ? "inline-flex items-center gap-1 h-[22px] px-2 rounded-full text-[11.5px] font-medium whitespace-nowrap bg-positive-subtle text-positive hover:brightness-95 disabled:opacity-40"
-            : "inline-flex items-center gap-1 h-[22px] px-2 rounded-full text-[11.5px] font-medium whitespace-nowrap bg-brand-subtle text-brand border border-dashed border-brand-border hover:bg-brand-border/40 disabled:opacity-40"
+            ? "inline-flex items-center gap-1 h-[22px] px-2 rounded-full text-[12px] font-medium whitespace-nowrap bg-positive-subtle text-positive hover:brightness-95 disabled:opacity-40"
+            : "inline-flex items-center gap-1 h-[22px] px-2 rounded-full text-[12px] font-medium whitespace-nowrap bg-brand-subtle text-brand border border-dashed border-brand-border hover:bg-brand-border/40 disabled:opacity-40"
         }
       >
         {saving ? (
@@ -69,7 +69,7 @@ export function AmortizeToggle({ streamId, amortizeMonthly, amortizeMonths }: { 
           value={amortizeMonths}
           disabled={saving}
           onChange={(e) => patch({ amortizeMonths: Number(e.target.value) })}
-          className="h-[22px] rounded-full bg-positive-subtle text-positive text-[11.5px] font-medium px-1.5 border-none disabled:opacity-40"
+          className="h-[22px] rounded-full bg-positive-subtle text-positive text-[12px] font-medium px-1.5 border-none disabled:opacity-40"
         >
           {TERM_OPTIONS.map((m) => (
             <option key={m} value={m}>

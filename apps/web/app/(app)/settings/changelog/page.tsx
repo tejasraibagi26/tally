@@ -38,15 +38,15 @@ export default function ChangelogPage() {
                 changes on narrow screens. */}
             <div className="flex sm:flex-col items-baseline sm:items-start gap-x-3 gap-y-1">
               <span className="font-mono text-[15px] font-medium text-text">v{entry.version}</span>
-              <span className="text-[13px] text-text-3">{formatDate(entry.date)}</span>
+              <span className="text-[13.5px] text-text-3">{formatDate(entry.date)}</span>
               {entry.version === APP_VERSION && (
-                <span className="sm:mt-1.5 inline-flex px-2 py-0.5 rounded-full bg-positive-subtle text-positive text-[11.5px] font-medium">Current</span>
+                <span className="sm:mt-1.5 inline-flex px-2 py-0.5 rounded-full bg-positive-subtle text-positive text-[12px] font-medium">Current</span>
               )}
             </div>
             <div className="flex flex-col gap-5">
               {KIND_ORDER.filter((kind) => entry.changes.some((c) => c.kind === kind)).map((kind) => (
                 <section key={kind} className="flex flex-col gap-2">
-                  <h2 className={`m-0 flex items-center gap-2 text-[11.5px] font-semibold uppercase tracking-[0.06em] ${KIND_STYLE[kind].text}`}>
+                  <h2 className={`m-0 flex items-center gap-2 text-[12px] font-semibold uppercase tracking-[0.06em] ${KIND_STYLE[kind].text}`}>
                     <span className={`w-1.5 h-1.5 rounded-full ${KIND_STYLE[kind].dot}`} />
                     {KIND_STYLE[kind].label}
                   </h2>
@@ -54,7 +54,7 @@ export default function ChangelogPage() {
                     {entry.changes
                       .filter((c) => c.kind === kind)
                       .map((c) => (
-                        <li key={c.text} className="text-[14.5px] leading-[1.6] text-text max-w-[60ch]">
+                        <li key={c.text} className="text-[15px] leading-[1.6] text-text max-w-[60ch]">
                           {c.text}
                         </li>
                       ))}

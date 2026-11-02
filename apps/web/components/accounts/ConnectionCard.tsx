@@ -38,7 +38,7 @@ export function StateButton({
       loading={!!pending}
       // Tone colors over the variant's: the fix wears its state's color
       // (DESIGN.md §10.3), Remove stays neutral. Spinner sits beside the label.
-      className={cn("px-3.5 rounded-full text-[13px] font-semibold flex-none min-w-[72px] hover:opacity-90", look)}
+      className={cn("px-3.5 rounded-full text-[13.5px] font-semibold flex-none min-w-[72px] hover:opacity-90", look)}
     >
       {action.label}
     </Button>
@@ -63,7 +63,7 @@ export function ConnectionAvatar({ name, state, size = 34 }: { name: string | nu
   const loud = state.level === "act" || state.level === "blocked";
   return (
     <span
-      className={cn("flex-none rounded-[9px] flex items-center justify-center font-medium text-sm", loud ? cn(toneSubtle[state.tone], toneText[state.tone]) : "bg-brand-subtle text-brand")}
+      className={cn("flex-none rounded-tile flex items-center justify-center font-medium text-sm", loud ? cn(toneSubtle[state.tone], toneText[state.tone]) : "bg-brand-subtle text-brand")}
       style={{ width: size, height: size }}
     >
       {initials(name)}
@@ -82,7 +82,7 @@ export function StateNotice({ item, state, className }: { item: Pick<ConnectionV
     >
       <div className="flex-1 min-w-0 flex flex-col gap-0.5">
         <span className={cn("text-[13.5px] font-semibold", toneText[state.tone])}>{state.notice.title}</span>
-        <span className="text-[13px] leading-snug text-text-2">{state.notice.body}</span>
+        <span className="text-[13.5px] leading-snug text-text-2">{state.notice.body}</span>
         {state.tone === "info" && !state.action && (
           // Indeterminate slide, keyframes in globals.css.
           <span className="relative mt-2 h-[3px] rounded-full overflow-hidden" style={{ backgroundColor: toneBorder("info", 30) }}>
@@ -168,7 +168,7 @@ export function ConnectionCard({
         <button
           type="button"
           onClick={() => setExpanded(true)}
-          className="flex items-center gap-1 px-4 py-2.5 border-t border-border text-[13px] text-text-2 hover:bg-sunken text-left"
+          className="flex items-center gap-1 px-4 py-2.5 border-t border-border text-[13.5px] text-text-2 hover:bg-sunken text-left"
         >
           +{hidden} more account{hidden === 1 ? "" : "s"} <ChevronDown size={14} />
         </button>
@@ -202,7 +202,7 @@ export function ConnectionCard({
             <span className={cn("tabular money font-semibold", state.dimBalances ? "text-text-3" : "text-text")}>{formatCents(item.total)}</span>
             {/* Rows are labeled in their own currency, so a mixed-currency
                 total would otherwise look like it disagrees with them. */}
-            {mixedCurrency && <span className="text-[11px] text-text-3">{baseCurrency}</span>}
+            {mixedCurrency && <span className="text-[12px] text-text-3">{baseCurrency}</span>}
           </span>
         </div>
       )}
@@ -215,7 +215,7 @@ function AccountRow({ account, dim, baseCurrency }: { account: AccountView; dim:
   return (
     <div className="grid grid-cols-[1fr_auto] gap-4 items-center px-4 py-2.5 border-t border-border hover:bg-surface-2">
       <div className="flex flex-col gap-0.5 min-w-0">
-        <AccountNicknameEditor accountId={account.id} name={account.realName} nickname={account.nickname} className={cn("text-[14.5px]", dim ? "text-text-2" : "text-text")} />
+        <AccountNicknameEditor accountId={account.id} name={account.realName} nickname={account.nickname} className={cn("text-[15px]", dim ? "text-text-2" : "text-text")} />
         <span className="font-mono text-xs text-text-3 truncate">
           {accountKind(account.type, account.subtype)}
           {account.mask ? ` · ····${account.mask}` : ""}
@@ -225,15 +225,15 @@ function AccountRow({ account, dim, baseCurrency }: { account: AccountView; dim:
         {account.currentBalance == null ? (
           <>
             <span className="text-[15px] text-text-3">—</span>
-            <span className="text-[11px] text-text-3">No balance from bank</span>
+            <span className="text-[12px] text-text-3">No balance from bank</span>
           </>
         ) : (
           <>
             <span className={cn("text-[15px] font-semibold tabular money", dim ? "text-text-3" : "text-text")}>{formatCents(account.currentBalance)}</span>
             {account.type === "credit" && account.creditLimit != null ? (
-              <span className="text-[11px] text-text-3 tabular money">of {formatCents(account.creditLimit)}</span>
+              <span className="text-[12px] text-text-3 tabular money">of {formatCents(account.creditLimit)}</span>
             ) : (
-              foreign && <span className="text-[11px] text-text-3">{account.currency}</span>
+              foreign && <span className="text-[12px] text-text-3">{account.currency}</span>
             )}
           </>
         )}

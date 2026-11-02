@@ -177,14 +177,14 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
 
       {items.length === 0 ? (
         <Card className="p-8 lg:p-10 flex flex-col items-start gap-4 max-w-[640px]">
-          <span className="w-11 h-11 rounded-[12px] bg-brand-subtle text-brand flex items-center justify-center">
+          <span className="w-11 h-11 rounded-tile bg-brand-subtle text-brand flex items-center justify-center">
             <Landmark size={20} strokeWidth={1.75} />
           </span>
           <h2 className="m-0 font-display text-[28px] font-normal text-text">Connect your first bank</h2>
           <p className="m-0 text-[15px] leading-relaxed text-text-2 max-w-[52ch]">
             Tally reads your balances and transactions so budgets, bills and net worth fill themselves in.
           </p>
-          <ul className="m-0 p-0 list-none flex flex-col gap-2 text-[14px] text-text-2">
+          <ul className="m-0 p-0 list-none flex flex-col gap-2 text-[13.5px] text-text-2">
             {["Read-only. Tally can't move money", "Secured by Plaid. Your password stays with your bank", "Disconnect any bank at any time"].map((t) => (
               <li key={t} className="flex items-center gap-2">
                 <Check size={15} className="text-brand flex-none" /> {t}

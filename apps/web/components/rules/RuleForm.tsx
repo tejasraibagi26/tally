@@ -214,11 +214,11 @@ export function RuleForm({ categories, accounts }: { categories: RuleFormCategor
             />
           )}
           <div className="flex items-center gap-3">
-            <button type="button" onClick={handlePreview} disabled={busy} className="text-[13px] text-brand disabled:opacity-40">
+            <button type="button" onClick={handlePreview} disabled={busy} className="text-[13.5px] text-brand disabled:opacity-40">
               Preview matches
             </button>
             {previewCount !== null && (
-              <span className="text-[13px] text-text-2 tabular">
+              <span className="text-[13.5px] text-text-2 tabular">
                 Would affect {previewCount} transaction{previewCount === 1 ? "" : "s"}
               </span>
             )}

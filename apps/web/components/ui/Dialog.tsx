@@ -23,7 +23,7 @@ const toneClasses: Record<DialogTone, string> = {
 
 export function DialogTile({ tone, children }: { tone: DialogTone; children: ReactNode }) {
   return (
-    <span className={cn("ui-tile w-10 h-10 flex-none rounded-[10px] flex items-center justify-center transition-colors duration-150", toneClasses[tone])}>
+    <span className={cn("ui-tile w-10 h-10 flex-none rounded-tile flex items-center justify-center transition-colors duration-150", toneClasses[tone])}>
       {children}
     </span>
   );
@@ -87,7 +87,7 @@ export function DialogNote({ tone, icon, children, role }: { tone: "warning" | "
     <div
       role={role}
       className={cn(
-        "flex items-start gap-2.5 rounded-[10px] px-3 py-2.5 text-[13.5px] leading-normal text-text-2",
+        "flex items-start gap-2.5 rounded-tile px-3 py-2.5 text-[13.5px] leading-normal text-text-2",
         tone === "warning" && "bg-warning-subtle [&>svg]:text-warning",
         tone === "negative" && "bg-negative-subtle [&>svg]:text-negative",
         tone === "neutral" && "bg-surface-2 border border-border [&>svg]:text-text-3",

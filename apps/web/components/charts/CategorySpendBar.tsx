@@ -26,7 +26,7 @@ export function CategorySpendBar({ rows, limit = 6 }: { rows: RankedBarRow[]; li
   return (
     <div className="flex flex-col gap-3 pt-4 pb-1">
       <div className="ui-bleed-flush px-4">
-        <div className="flex h-7 gap-[2px] rounded-[6px] overflow-hidden">
+        <div className="flex h-7 gap-[2px] rounded-badge overflow-hidden">
           {top.map((row, i) => (
             <Link
               key={row.key}

@@ -107,14 +107,14 @@ function DesktopShowcase() {
               )}
             >
               <span
-                className="w-9 h-9 flex-none rounded-[9px] flex items-center justify-center transition-colors duration-300"
+                className="w-9 h-9 flex-none rounded-tile flex items-center justify-center transition-colors duration-300"
                 style={{ background: isActive ? `color-mix(in srgb, ${color} 18%, transparent)` : "var(--sunken)" }}
               >
                 <f.icon size={18} strokeWidth={1.75} style={{ color: isActive ? color : "var(--text-3)" }} />
               </span>
               <span className="flex flex-col gap-0.5 min-w-0 pb-1">
                 <span className={cn("text-[15px] font-medium", isActive ? "text-text" : "text-text-2")}>{f.title}</span>
-                {isActive && <span className="text-[13px] text-text-3 leading-snug">{f.body}</span>}
+                {isActive && <span className="text-[13.5px] text-text-3 leading-snug">{f.body}</span>}
               </span>
               {isActive && (
                 <span className="absolute bottom-0 left-3.5 right-3.5 h-[2px] bg-border overflow-hidden rounded-full">
@@ -209,14 +209,14 @@ function MobileFeatureCard({ feature }: { feature: Feature }) {
       />
       <div className="relative flex items-center gap-3">
         <span
-          className="w-9 h-9 flex-none rounded-[9px] flex items-center justify-center"
+          className="w-9 h-9 flex-none rounded-tile flex items-center justify-center"
           style={{ background: `color-mix(in srgb, ${color} 18%, transparent)` }}
         >
           <feature.icon size={18} strokeWidth={1.75} style={{ color }} />
         </span>
         <span className="text-[15px] font-medium text-text">{feature.title}</span>
       </div>
-      <p className="relative text-[13px] text-text-3 leading-snug">{feature.body}</p>
+      <p className="relative text-[13.5px] text-text-3 leading-snug">{feature.body}</p>
       <div
         className="relative rounded-card border border-border p-5 flex items-center justify-center min-h-[180px]"
         style={{ background: "color-mix(in srgb, var(--canvas) 82%, transparent)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)" }}

@@ -43,7 +43,7 @@ export default async function EmailChangePage({ searchParams }: { searchParams: 
     return (
       <AccountNotice title="That email is taken">
         <NoticeText>Another Tally account signed up with this address after you asked for the change. Your sign-in email hasn&apos;t changed.</NoticeText>
-        <Link href="/settings" className="text-[14.5px] font-medium text-brand hover:underline">
+        <Link href="/settings" className="text-[15px] font-medium text-brand hover:underline">
           Choose a different email in Settings
         </Link>
       </AccountNotice>
@@ -59,7 +59,7 @@ export default async function EmailChangePage({ searchParams }: { searchParams: 
     return (
       <AccountNotice title="This link has expired">
         <NoticeText>Confirmation links work once, for an hour. To change your sign-in email, start again from Settings and use the newest email.</NoticeText>
-        <Link href="/settings" className="text-[14.5px] font-medium text-brand hover:underline">
+        <Link href="/settings" className="text-[15px] font-medium text-brand hover:underline">
           Go to Settings
         </Link>
       </AccountNotice>

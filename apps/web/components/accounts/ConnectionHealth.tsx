@@ -27,7 +27,7 @@ export function ConnectionHealth({ banks }: { banks: { name: string; level: Heal
         <span className="font-display text-3xl tabular text-text">{banks.length}</span>
         {banks.length <= MAX_STROKES && <TallyStrokes banks={banks} />}
       </div>
-      <span className="flex items-center gap-1.5 text-[13px] text-text-2">
+      <span className="flex items-center gap-1.5 text-[13.5px] text-text-2">
         {needs === 0 ? (
           <>
             <Check size={14} strokeWidth={2} className="text-positive flex-none" />

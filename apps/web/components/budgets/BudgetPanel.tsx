@@ -127,7 +127,7 @@ export function BudgetPanel({
         </div>
 
         <section className="flex flex-col gap-2">
-          <h3 className="m-0 text-[11px] font-semibold uppercase tracking-wide text-text-3">Last 6 months</h3>
+          <h3 className="m-0 text-[12px] font-semibold uppercase tracking-wide text-text-3">Last 6 months</h3>
           {history == null ? (
             <div className="h-[86px] rounded-control bg-sunken animate-pulse" />
           ) : (
@@ -185,7 +185,7 @@ export function BudgetPanel({
           </Link>
         </div>
         {confirmRemove ? (
-          <div className="rounded-card border border-border bg-sunken p-3.5 flex flex-col gap-3 text-[13px] text-text-2">
+          <div className="rounded-card border border-border bg-sunken p-3.5 flex flex-col gap-3 text-[13.5px] text-text-2">
             <span>
               <b className="block text-text font-semibold">Remove the {current.categoryName} budget?</b>
               Its spending stays in your transactions.

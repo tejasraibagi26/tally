@@ -56,7 +56,7 @@ export async function YearEndGoal({ userId, tabs }: { userId: string; tabs: Reac
       <Card className="p-5 lg:p-6 [--bleed:20px] lg:[--bleed:24px] flex flex-col gap-3">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="ui-card-title m-0 text-xl font-semibold text-text">Where the pace lands</h2>
-          <span className="text-[13px] text-text-2">Pace = net worth&apos;s average change over the last 3 full months</span>
+          <span className="text-[13.5px] text-text-2">Pace = net worth&apos;s average change over the last 3 full months</span>
         </div>
         {points.length > 1 ? (
           <div className="ui-bleed goal-chart">
@@ -78,9 +78,9 @@ export async function YearEndGoal({ userId, tabs }: { userId: string; tabs: Reac
                 <Link href={`/transactions?category=${c.key}&transfer=0&excluded=0`} className="flex items-center justify-between gap-3 px-5 py-3 hover:bg-surface-2">
                   <span className="flex flex-col">
                     <span className="text-[15px] text-text">{c.label}</span>
-                    <span className="text-[13px] text-text-2 tabular">usually {formatCents(c.avgMonthly)} a month</span>
+                    <span className="text-[13.5px] text-text-2 tabular">usually {formatCents(c.avgMonthly)} a month</span>
                   </span>
-                  <span className="text-[14px] font-semibold text-text tabular">save {formatCents(c.save)}/mo</span>
+                  <span className="text-[13.5px] font-semibold text-text tabular">save {formatCents(c.save)}/mo</span>
                 </Link>
               </li>
             ))}

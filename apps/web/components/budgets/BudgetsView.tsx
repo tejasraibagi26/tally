@@ -102,8 +102,8 @@ export function BudgetsView({
         <Card className="lg:col-span-2 overflow-hidden">
           {groups.map((g, gi) => (
             <section key={g.name} className={cn(gi > 0 && "border-t border-border")}>
-              <div className="flex items-center justify-between px-5 pt-3.5 pb-1.5 text-[11px] font-semibold uppercase tracking-wide text-text-3">
-                <h2 className="m-0 text-[11px] font-semibold">{g.name}</h2>
+              <div className="flex items-center justify-between px-5 pt-3.5 pb-1.5 text-[12px] font-semibold uppercase tracking-wide text-text-3">
+                <h2 className="m-0 text-[12px] font-semibold">{g.name}</h2>
                 <span className="tabular normal-case tracking-normal font-medium text-xs">
                   {fmt(g.spent)} of {fmt(g.budgeted)}
                 </span>
@@ -116,12 +116,12 @@ export function BudgetsView({
           {unbudgeted.length > 0 && (
             <div className="flex items-center justify-between gap-4 px-5 py-3.5 border-t border-border bg-sunken">
               <div className="flex flex-col gap-0.5 min-w-0">
-                <span className="text-[14px] text-text-2">
+                <span className="text-[13.5px] text-text-2">
                   Not budgeted · {unbudgeted.length} {unbudgeted.length === 1 ? "category" : "categories"}
                 </span>
                 <span className="text-xs text-text-3 truncate">{unbudgeted.slice(0, 4).map((u) => `${u.categoryName} ${fmt(u.spend)}`).join(" · ")}</span>
               </div>
-              <span className="tabular text-[14px] text-text">{fmt(unbudgetedTotal)}</span>
+              <span className="tabular text-[13.5px] text-text">{fmt(unbudgetedTotal)}</span>
             </div>
           )}
         </Card>
@@ -134,7 +134,7 @@ export function BudgetsView({
                 <span className={cn("font-display text-[40px] leading-none tabular", summary.left < 0 ? "text-negative" : "text-positive")}>
                   {fmt(Math.abs(summary.left))} {summary.left < 0 ? "over" : "under"}
                 </span>
-                <span className="text-[13px] text-text-2">
+                <span className="text-[13.5px] text-text-2">
                   {fmt(summary.spent)} of {fmt(summary.budgeted)}
                   {summary.overCount > 0 && ` · ${summary.overCount} budget${summary.overCount === 1 ? "" : "s"} went over`}
                 </span>
@@ -143,7 +143,7 @@ export function BudgetsView({
               <>
                 <span className="text-xs font-medium uppercase tracking-wide text-text-3">{summary.left < 0 ? "Over budget" : "Left to spend"}</span>
                 <span className={cn("font-display text-[40px] leading-none tabular", summary.left < 0 ? "text-negative" : "text-text")}>{fmt(Math.abs(summary.left))}</span>
-                <span className="text-[13px] text-text-2">
+                <span className="text-[13.5px] text-text-2">
                   {summary.perDay != null ? `About ${fmt(summary.perDay)} a day for ${summary.daysLeft} day${summary.daysLeft === 1 ? "" : "s"}` : ctx.phase === "future" ? "Budget for the month" : "Nothing left this month"}
                 </span>
                 <div className="grid grid-cols-2 gap-2 border-t border-border pt-3 mt-2">
@@ -163,7 +163,7 @@ export function BudgetsView({
             <Card className="p-5 flex flex-col gap-1">
               <h2 className="m-0 mb-1 text-[15px] font-semibold text-text">Worth a look</h2>
               {nudges.slice(0, 3).map((n, i) => (
-                <div key={i} className={cn("flex items-center justify-between gap-3 py-2 text-[13px] text-text-2", i > 0 && "border-t border-border")}>
+                <div key={i} className={cn("flex items-center justify-between gap-3 py-2 text-[13.5px] text-text-2", i > 0 && "border-t border-border")}>
                   <span>{n.text}</span>
                   <button type="button" onClick={n.run} disabled={busy !== null} className="text-brand font-medium hover:underline disabled:opacity-50">
                     {n.action}
@@ -200,10 +200,10 @@ function BudgetBar({ line, ctx, onOpen }: { line: BudgetLine; ctx: MonthContext;
       <span className="flex items-baseline justify-between gap-3">
         <span className="flex items-center gap-2 min-w-0">
           <span className="w-2 h-2 rounded-full flex-none" style={{ background: `var(--series-${line.colorSlot})` }} />
-          <span className="text-[14.5px] text-text truncate">{line.categoryName}</span>
-          {line.isFixedAmount && <span className="flex-none rounded-full bg-surface-2 px-2 py-px text-[11px] font-medium text-text-2">Fixed</span>}
+          <span className="text-[15px] text-text truncate">{line.categoryName}</span>
+          {line.isFixedAmount && <span className="flex-none rounded-full bg-surface-2 px-2 py-px text-[12px] font-medium text-text-2">Fixed</span>}
         </span>
-        <span className="text-[13px] tabular whitespace-nowrap text-text-3">
+        <span className="text-[13.5px] tabular whitespace-nowrap text-text-3">
           {fmt(line.spend)} of {fmt(s.available)} · <span className={cn("font-semibold", toneClass[s.labelTone] === "text-text-2" ? "text-text" : toneClass[s.labelTone])}>{s.label}</span>
         </span>
       </span>

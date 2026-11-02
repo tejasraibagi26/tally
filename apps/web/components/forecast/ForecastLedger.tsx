@@ -94,12 +94,12 @@ export function ForecastLedger({
                   href={hrefFor(e)}
                   className="-mx-2 grid grid-cols-[28px_1fr_auto] items-center gap-3 rounded-control px-2 py-1.5 hover:bg-surface-2"
                 >
-                  <MerchantAvatar name={e.label} className={cn("size-7 rounded-[8px] text-[12px]", !e.affectsCash && "opacity-60")} />
+                  <MerchantAvatar name={e.label} className={cn("size-7 rounded-tile text-[12px]", !e.affectsCash && "opacity-60")} />
                   <span className="flex min-w-0 flex-col">
-                    <span className={cn("flex min-w-0 items-center gap-2 text-[14px]", e.affectsCash ? "text-text" : "text-text-3")}>
+                    <span className={cn("flex min-w-0 items-center gap-2 text-[13.5px]", e.affectsCash ? "text-text" : "text-text-3")}>
                       <span className="truncate">{e.label}</span>
                       {e.modelled && (
-                        <span className="shrink-0 rounded-full border border-dashed border-border-strong px-1.5 py-px text-[11px] font-semibold text-text-3">projected</span>
+                        <span className="shrink-0 rounded-full border border-dashed border-border-strong px-1.5 py-px text-[12px] font-semibold text-text-3">projected</span>
                       )}
                     </span>
                     {(e.date < today || !e.affectsCash) && (
@@ -110,7 +110,7 @@ export function ForecastLedger({
                   </span>
                   <span
                     className={cn(
-                      "money text-right text-[14px] font-semibold tabular",
+                      "money text-right text-[13.5px] font-semibold tabular",
                       e.amount > 0 ? "text-positive" : e.affectsCash ? "text-negative" : "text-text-3",
                     )}
                   >
@@ -136,7 +136,7 @@ export function ForecastLedger({
         );
       })}
       {hidden > 0 && (
-        <Link href="/forecast" className="pt-3 text-[13px] font-semibold text-brand">
+        <Link href="/forecast" className="pt-3 text-[13.5px] font-semibold text-brand">
           + {hidden} more through {dayLabel(days.at(-1)!.date)}
         </Link>
       )}

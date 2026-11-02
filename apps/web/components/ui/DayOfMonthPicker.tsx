@@ -72,7 +72,7 @@ export function DayOfMonthPicker({ id, value, onChange, disabled, label }: { id?
         aria-expanded={open}
         aria-label={`${label}: ${dayOfMonthLabel(value)}`}
         className={cn(
-          "h-8 min-w-[96px] inline-flex items-center justify-between gap-2 rounded-control border border-border-strong bg-surface px-2.5 text-[14px] disabled:opacity-50",
+          "h-8 min-w-[96px] inline-flex items-center justify-between gap-2 rounded-control border border-border-strong bg-surface px-2.5 text-[13.5px] disabled:opacity-50",
           value == null ? "text-text-3" : "text-text",
         )}
       >
@@ -86,7 +86,7 @@ export function DayOfMonthPicker({ id, value, onChange, disabled, label }: { id?
             {cell(0, "Last day", "col-span-4")}
           </div>
           {value != null && (
-            <button type="button" onClick={() => pick(null)} className="self-center mt-1 text-[13px] font-semibold text-text-2 hover:text-text">
+            <button type="button" onClick={() => pick(null)} className="self-center mt-1 text-[13.5px] font-semibold text-text-2 hover:text-text">
               Clear
             </button>
           )}

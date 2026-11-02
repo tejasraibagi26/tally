@@ -220,7 +220,7 @@ export function FirePlanner({
                   tickLine={false}
                   minTickGap={36}
                 />
-                <YAxis tickFormatter={compact} tick={{ fill: "var(--text-3)", fontSize: 11 }} axisLine={false} tickLine={false} width={52} domain={[0, (max: number) => Math.max(max, target * 1.15)]} />
+                <YAxis tickFormatter={compact} tick={{ fill: "var(--text-3)", fontSize: 12 }} axisLine={false} tickLine={false} width={52} domain={[0, (max: number) => Math.max(max, target * 1.15)]} />
                 <Tooltip
                   content={({ active, payload }) => {
                     const p = active ? (payload?.[0]?.payload as (typeof points)[number] | undefined) : undefined;
@@ -234,7 +234,7 @@ export function FirePlanner({
                   }}
                 />
                 <Area dataKey="band" stroke="none" fill="var(--brand)" fillOpacity={0.12} isAnimationActive={false} />
-                <ReferenceLine y={target} stroke="var(--positive)" strokeWidth={1.5} label={{ value: `Target ${compact(target)}`, position: "insideTopLeft", fill: "var(--positive)", fontSize: 11, fontWeight: 600 }} />
+                <ReferenceLine y={target} stroke="var(--positive)" strokeWidth={1.5} label={{ value: `Target ${compact(target)}`, position: "insideTopLeft", fill: "var(--positive)", fontSize: 12, fontWeight: 600 }} />
                 <Line dataKey="mid" stroke="var(--brand)" strokeWidth={2.5} dot={false} isAnimationActive={false} />
                 {years != null && years > 0 && (
                   <ReferenceDot
@@ -255,10 +255,10 @@ export function FirePlanner({
         {needed != null && (
           <div className="flex items-center gap-3 rounded-card border border-border bg-info-subtle px-4 py-3">
             <div className="flex-1 flex flex-col gap-0.5">
-              <span className="text-[14px] font-semibold text-info">To retire {age != null ? `at ${TARGET_AGE}` : `in ${yearsToTarget} years`}</span>
-              <span className="text-[13px] text-text-2">Save {money(Math.ceil(needed / 100) * 100)} a month at these returns.</span>
+              <span className="text-[13.5px] font-semibold text-info">To retire {age != null ? `at ${TARGET_AGE}` : `in ${yearsToTarget} years`}</span>
+              <span className="text-[13.5px] text-text-2">Save {money(Math.ceil(needed / 100) * 100)} a month at these returns.</span>
             </div>
-            <button type="button" onClick={() => setSaving(Math.ceil(needed / 100) * 100)} className="h-8 px-3.5 rounded-full bg-brand-subtle text-brand text-[13px] font-semibold">
+            <button type="button" onClick={() => setSaving(Math.ceil(needed / 100) * 100)} className="h-8 px-3.5 rounded-full bg-brand-subtle text-brand text-[13.5px] font-semibold">
               Use {money(Math.ceil(needed / 100) * 100)}
             </button>
           </div>
@@ -355,7 +355,7 @@ export function FirePlanner({
             <ul className="m-0 p-0 list-none flex flex-col">
               {accounts.map((a) => (
                 <li key={a.id}>
-                  <label className="flex items-center gap-2 py-1.5 text-[13px] text-text cursor-pointer">
+                  <label className="flex items-center gap-2 py-1.5 text-[13.5px] text-text cursor-pointer">
                     <input
                       type="checkbox"
                       checked={!excluded.has(a.id)}
@@ -414,7 +414,7 @@ function Lever({
   }
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="flex items-center justify-between text-[13px]">
+      <div className="flex items-center justify-between text-[13.5px]">
         <span className="text-text-2">{label}</span>
         {editing ? (
           <input
@@ -427,7 +427,7 @@ function Lever({
               if (e.key === "Escape") setEditing(false);
             }}
             aria-label={label}
-            className="w-28 h-7 rounded-[6px] bg-surface-2 border border-border-strong px-2 text-right text-[13px] text-text tabular"
+            className="w-28 h-7 rounded-badge bg-surface-2 border border-border-strong px-2 text-right text-[13.5px] text-text tabular"
           />
         ) : (
           <button

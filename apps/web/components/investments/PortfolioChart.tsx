@@ -48,7 +48,7 @@ export function PortfolioChart({ points }: { points: HistoryPoint[] }) {
             const growth = p.value - p.invested;
             return (
               <div className="rounded-control border border-border bg-raised shadow-overlay px-3 py-2.5 text-xs grid grid-cols-[auto_auto] gap-x-4 gap-y-1">
-                <span className="col-span-2 font-mono text-[11px] text-text-3">
+                <span className="col-span-2 font-mono text-[12px] text-text-3">
                   {new Date(`${p.date}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}
                 </span>
                 <span className="text-text-3">Value</span>

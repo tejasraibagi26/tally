@@ -106,8 +106,8 @@ function Group({
   return (
     <section className="flex flex-col gap-3">
       {label && (
-        <div className="flex items-center justify-between px-1 text-[11px] font-semibold uppercase tracking-wide text-text-3">
-          <h2 className={cn("m-0 text-[11px] font-semibold", tone && toneText[tone])}>{label}</h2>
+        <div className="flex items-center justify-between px-1 text-[12px] font-semibold uppercase tracking-wide text-text-3">
+          <h2 className={cn("m-0 text-[12px] font-semibold", tone && toneText[tone])}>{label}</h2>
           <span className="tabular-nums">
             {rows.length} bank{rows.length === 1 ? "" : "s"}
             {meta && <span className="normal-case tracking-normal font-normal"> · {meta}</span>}

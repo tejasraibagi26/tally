@@ -369,7 +369,7 @@ export function TransactionDetailPanel({
             {/* Header */}
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
-                <MerchantAvatar name={display} logoUrl={transaction.logoUrl} className="w-10 h-10 rounded-[11px] bg-surface-2 font-semibold text-[15px]" />
+                <MerchantAvatar name={display} logoUrl={transaction.logoUrl} className="w-10 h-10 rounded-tile bg-surface-2 font-semibold text-[15px]" />
                 <div className="flex flex-col gap-0.5 min-w-0 flex-1">
                   <MerchantNameEditor transactionId={transaction.id} display={display} renameable={!!transaction.plaidTransactionId && !transaction.isManual} />
                   <span className="text-[12.5px] text-text-3 truncate">
@@ -389,14 +389,14 @@ export function TransactionDetailPanel({
             </div>
 
             {v.notice && (
-              <div className="rounded-control border border-border bg-sunken px-3.5 py-2.5 text-[13px] leading-snug text-text-2">
+              <div className="rounded-control border border-border bg-sunken px-3.5 py-2.5 text-[13.5px] leading-snug text-text-2">
                 <span className="block font-semibold text-text">{v.notice.title}</span>
                 {v.notice.body}
               </div>
             )}
 
             {v.isInstallment && (
-              <div className="rounded-control border border-border bg-sunken px-3.5 py-2.5 text-[13px] leading-snug text-text-2">
+              <div className="rounded-control border border-border bg-sunken px-3.5 py-2.5 text-[13.5px] leading-snug text-text-2">
                 <span className="block font-semibold text-text">One month of a spread plan</span>
                 Change or stop the spread from the original charge.
               </div>
@@ -408,7 +408,7 @@ export function TransactionDetailPanel({
                 <div className="relative rounded-card bg-surface-2 p-3.5 flex flex-col gap-3">
                   <div className="flex items-center gap-3">
                     <span
-                      className="w-[30px] h-[30px] rounded-[9px] flex items-center justify-center flex-none"
+                      className="w-[30px] h-[30px] rounded-tile flex items-center justify-center flex-none"
                       style={{ background: current ? `color-mix(in srgb, var(--series-${current.colorSlot}) 16%, transparent)` : "var(--sunken)" }}
                     >
                       {dot(current?.colorSlot)}
@@ -418,7 +418,7 @@ export function TransactionDetailPanel({
                       <span className="text-[12px] text-text-3">{transaction.splits.length > 1 ? "Edit the split below" : (categoryId === transaction.categoryId ? v.sourceText : "Set by you") ?? "Not categorized yet"}</span>
                     </span>
                     {transaction.splits.length <= 1 && (
-                      <button type="button" onClick={() => setPickerOpen((o) => !o)} className="text-[13px] font-semibold text-brand">
+                      <button type="button" onClick={() => setPickerOpen((o) => !o)} className="text-[13.5px] font-semibold text-brand">
                         Change
                       </button>
                     )}
@@ -484,7 +484,7 @@ export function TransactionDetailPanel({
                       role="radio"
                       aria-checked={excluded === x}
                       onClick={() => setExcludedTo(x)}
-                      className={cn("h-8 rounded-[7px] text-[13px] font-medium", excluded === x ? "bg-surface-2 text-text" : "text-text-3 hover:text-text-2")}
+                      className={cn("h-8 rounded-badge text-[13.5px] font-medium", excluded === x ? "bg-surface-2 text-text" : "text-text-3 hover:text-text-2")}
                     >
                       {x ? "Excluded" : "Counts in spend"}
                     </button>
@@ -513,7 +513,7 @@ export function TransactionDetailPanel({
                 onBlur={() => flushNotes()}
                 rows={2}
                 placeholder="Add a note"
-                className="rounded-card bg-surface-2 border border-transparent focus:border-border-strong px-3.5 py-2.5 text-[14px] text-text resize-none outline-none"
+                className="rounded-card bg-surface-2 border border-transparent focus:border-border-strong px-3.5 py-2.5 text-[13.5px] text-text resize-none outline-none"
               />
               <div className="flex items-center gap-1.5 flex-wrap">
                 {tags.map((t) => (
@@ -569,7 +569,7 @@ export function TransactionDetailPanel({
               )}
               {v.canDelete &&
                 (confirmDelete ? (
-                  <div className="rounded-card border border-border bg-sunken p-3.5 flex flex-col gap-3 text-[13px] text-text-2">
+                  <div className="rounded-card border border-border bg-sunken p-3.5 flex flex-col gap-3 text-[13.5px] text-text-2">
                     <span>
                       <b className="block text-text font-semibold">Delete {display}?</b>
                       It comes out of your spend. This can&apos;t be undone.
@@ -600,7 +600,7 @@ export function TransactionDetailPanel({
 function Group({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <section className="flex flex-col gap-2">
-      <h3 className="m-0 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-text-3">
+      <h3 className="m-0 flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wide text-text-3">
         {label}
         {hint && <kbd className="font-mono text-[10px] normal-case tracking-normal px-1.5 rounded border border-border bg-sunken text-text-2">{hint}</kbd>}
       </h3>
@@ -624,12 +624,12 @@ function DetailRow({ label, value, mono, copy }: { label: string; value: string;
   return (
     <div className="flex items-start justify-between gap-4">
       <span className="text-text-3 flex-none">{label}</span>
-      <span className={cn("text-text text-right break-all", mono && "font-mono text-[11.5px] text-text-2")}>
+      <span className={cn("text-text text-right break-all", mono && "font-mono text-[12px] text-text-2")}>
         {value}
         {copy && (
           <button
             type="button"
-            className="ml-2 text-brand font-sans text-[11.5px] font-medium"
+            className="ml-2 text-brand font-sans text-[12px] font-medium"
             onClick={() => {
               navigator.clipboard
                 ?.writeText(value)
@@ -651,10 +651,10 @@ function DetailRow({ label, value, mono, copy }: { label: string; value: string;
 function BackBar({ title, onBack, right }: { title: string; onBack: () => void; right?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between">
-      <button type="button" onClick={onBack} className="flex items-center gap-1 text-[13px] font-medium text-brand">
+      <button type="button" onClick={onBack} className="flex items-center gap-1 text-[13.5px] font-medium text-brand">
         <ChevronLeft size={15} /> Back
       </button>
-      <span className="text-[14px] font-semibold text-text">{title}</span>
+      <span className="text-[13.5px] font-semibold text-text">{title}</span>
       <span className="min-w-[48px] flex justify-end">{right}</span>
     </div>
   );
@@ -720,7 +720,7 @@ function SplitView({
           const c = l.categoryId ? byId.get(l.categoryId) : undefined;
           return (
             <div key={i} className="relative flex items-center gap-2.5 px-3.5 py-2.5 border-t border-border first:border-t-0">
-              <button type="button" onClick={() => setPickerFor(pickerFor === i ? null : i)} className={cn("flex-1 flex items-center gap-2 text-left text-[14px] min-w-0", c ? "text-text" : "text-warning")}>
+              <button type="button" onClick={() => setPickerFor(pickerFor === i ? null : i)} className={cn("flex-1 flex items-center gap-2 text-left text-[13.5px] min-w-0", c ? "text-text" : "text-warning")}>
                 {c && dot(c.colorSlot)}
                 <span className="truncate">{c?.name ?? "Choose category"}</span>
               </button>
@@ -732,7 +732,7 @@ function SplitView({
                   setLastEdited(i);
                 }}
                 aria-label={`Amount for ${c?.name ?? "line " + (i + 1)}`}
-                className="w-24 h-8 rounded-control bg-sunken border border-border focus:border-brand px-2 text-right text-[14px] text-text tabular outline-none"
+                className="w-24 h-8 rounded-control bg-sunken border border-border focus:border-brand px-2 text-right text-[13.5px] text-text tabular outline-none"
               />
               {lines.length > 2 && (
                 <button type="button" onClick={() => setLines(lines.filter((_, j) => j !== i))} aria-label="Remove line" className="text-text-3 hover:text-negative">
@@ -750,7 +750,7 @@ function SplitView({
         </button>
       </div>
       {bal.remaining !== 0 && (
-        <div className="rounded-control border border-border bg-warning-subtle px-3.5 py-2.5 text-[13px] text-text-2">
+        <div className="rounded-control border border-border bg-warning-subtle px-3.5 py-2.5 text-[13.5px] text-text-2">
           <b className="block text-warning font-semibold">{bal.remaining > 0 ? `${formatCents(bal.remaining)} left to assign` : `${formatCents(-bal.remaining)} more than the total`}</b>
           The lines have to add up to {formatCents(total)}.
         </div>
@@ -774,7 +774,7 @@ function SplitView({
       </div>
       {transaction.splits.length > 1 &&
         (confirmUnsplit ? (
-          <div className="rounded-card border border-border bg-sunken p-3.5 flex flex-col gap-3 text-[13px] text-text-2">
+          <div className="rounded-card border border-border bg-sunken p-3.5 flex flex-col gap-3 text-[13.5px] text-text-2">
             <span>
               <b className="block text-text font-semibold">Remove the split?</b>
               The whole amount goes back to one category.
@@ -832,16 +832,16 @@ function SpreadView({ transaction, months, onBack, onDone }: { transaction: Tran
         </span>
       </div>
       <section className="flex flex-col gap-2">
-        <h3 className="m-0 text-[11px] font-semibold uppercase tracking-wide text-text-3">It&apos;s paid every</h3>
+        <h3 className="m-0 text-[12px] font-semibold uppercase tracking-wide text-text-3">It&apos;s paid every</h3>
         <div className="grid grid-cols-4 gap-1 rounded-control bg-surface p-1" role="radiogroup" aria-label="Term">
           {TERMS.map((m) => (
-            <button key={m} type="button" role="radio" aria-checked={term === m} onClick={() => setTerm(m)} className={cn("h-8 rounded-[7px] text-[13px] font-medium", term === m ? "bg-surface-2 text-text" : "text-text-3 hover:text-text-2")}>
+            <button key={m} type="button" role="radio" aria-checked={term === m} onClick={() => setTerm(m)} className={cn("h-8 rounded-badge text-[13.5px] font-medium", term === m ? "bg-surface-2 text-text" : "text-text-3 hover:text-text-2")}>
               {m} mo
             </button>
           ))}
         </div>
       </section>
-      <div className="rounded-control border border-brand-border bg-brand-subtle px-3.5 py-3 text-[13px] leading-snug text-text-2">
+      <div className="rounded-control border border-brand-border bg-brand-subtle px-3.5 py-3 text-[13.5px] leading-snug text-text-2">
         <b className="block text-brand font-semibold tabular">
           {formatCents(monthly)} a month, {monthName(start)} to {monthName(end)}
         </b>

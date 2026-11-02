@@ -65,7 +65,7 @@ export function HoldingPanel({
         </div>
 
         {!p.isCashEquivalent && (
-          <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-control bg-sunken px-4 py-3.5 text-[13px]">
+          <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-control bg-sunken px-4 py-3.5 text-[13.5px]">
             <dt className="text-text-3">Quantity</dt>
             <dd className="m-0 text-right tabular text-text">{formatQuantity(p.quantity)} shares</dd>
             <dt className="text-text-3">Price</dt>
@@ -80,7 +80,7 @@ export function HoldingPanel({
         )}
 
         <section className="flex flex-col gap-1">
-          <h3 className="m-0 text-[11px] font-semibold uppercase tracking-wide text-text-3">By account</h3>
+          <h3 className="m-0 text-[12px] font-semibold uppercase tracking-wide text-text-3">By account</h3>
           <ul className="m-0 p-0 list-none">
             {p.lots.map((l, i) => (
               <li key={l.accountId} className={cn("flex items-center justify-between gap-3 py-2.5 text-[13.5px]", i > 0 && "border-t border-border")}>
@@ -103,9 +103,9 @@ export function HoldingPanel({
         </section>
 
         <section className="flex flex-col gap-1 -mx-6">
-          <h3 className="m-0 px-6 text-[11px] font-semibold uppercase tracking-wide text-text-3">Activity</h3>
+          <h3 className="m-0 px-6 text-[12px] font-semibold uppercase tracking-wide text-text-3">Activity</h3>
           {activity.length === 0 ? (
-            <p className="m-0 px-6 py-2 text-[13px] text-text-3">No recent activity for this holding.</p>
+            <p className="m-0 px-6 py-2 text-[13.5px] text-text-3">No recent activity for this holding.</p>
           ) : (
             <ul className="m-0 p-0 list-none">
               {activity.slice(0, 10).map((a) => (

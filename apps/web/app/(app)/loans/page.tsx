@@ -102,7 +102,7 @@ export default async function LoansPage() {
           {[...totals].map(([currency, cents]) => (
             <Money key={currency} cents={cents} currency={currency} className="ui-page-title text-[34px] leading-tight text-text" />
           ))}
-          <span className="text-[13px] text-text-2">Counted against your net worth</span>
+          <span className="text-[13.5px] text-text-2">Counted against your net worth</span>
         </Card>
         <Card className="p-5 flex flex-col gap-1.5">
           <span className="text-xs font-semibold uppercase tracking-[0.08em] text-text-2">Payments a month</span>
@@ -111,7 +111,7 @@ export default async function LoansPage() {
           ) : (
             [...monthly].map(([currency, cents]) => <Money key={currency} cents={cents} currency={currency} className="ui-page-title text-[34px] leading-tight text-text" />)
           )}
-          <span className="text-[13px] text-text-2">
+          <span className="text-[13.5px] text-text-2">
             {overdue.length > 0 ? (
               <span className="inline-flex items-center gap-1.5 font-semibold text-negative">
                 <AlertTriangle size={13} strokeWidth={2} aria-hidden="true" />
@@ -136,7 +136,7 @@ export default async function LoansPage() {
               <li key={l.accountId} className="grid grid-cols-1 md:grid-cols-[minmax(0,1.6fr)_repeat(3,minmax(0,1fr))] gap-x-6 gap-y-2 px-5 py-4">
                 <div className="flex flex-col gap-0.5 min-w-0">
                   <span className="text-[15px] font-semibold text-text truncate">{loanLabel(l)}</span>
-                  <span className="text-[13px] text-text-2 truncate">
+                  <span className="text-[13.5px] text-text-2 truncate">
                     {kindLabel(l)}
                     {l.institutionName ? ` · ${l.institutionName}` : ""}
                   </span>
@@ -153,11 +153,11 @@ export default async function LoansPage() {
                       </span>
                     </span>
                   ) : (
-                    <span className="text-[13px] text-text-3">Not reported by the lender</span>
+                    <span className="text-[13.5px] text-text-3">Not reported by the lender</span>
                   )}
                 </Field>
                 <Field label="Rate · paid off">
-                  <span className="text-[14px] text-text">
+                  <span className="text-[13.5px] text-text">
                     {rate ?? "—"}
                     {d?.payoffDate ? <span className="text-text-2"> · {dateLabel(d.payoffDate, true)}</span> : null}
                   </span>
@@ -167,7 +167,7 @@ export default async function LoansPage() {
           })}
         </ul>
       </Card>
-      <p className="m-0 text-[13px] text-text-3 max-w-[70ch]">
+      <p className="m-0 text-[13.5px] text-text-3 max-w-[70ch]">
         Mortgages and student loans come with the lender&apos;s rate and next payment. For other loans, banks only share the balance.
       </p>
     </div>
@@ -177,7 +177,7 @@ export default async function LoansPage() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-0.5 min-w-0">
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-text-3">{label}</span>
+      <span className="text-[12px] font-semibold uppercase tracking-wider text-text-3">{label}</span>
       {children}
     </div>
   );

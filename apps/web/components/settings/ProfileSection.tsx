@@ -37,13 +37,13 @@ export function ProfileSection({ name, email, birthDate }: { name: string; email
     <>
       <SettingsGroup id="profile" title="Profile">
         <SettingsRow title="Name">
-          <span className="text-[14px] text-text-2">{name || "Not set"}</span>
+          <span className="text-[13.5px] text-text-2">{name || "Not set"}</span>
         </SettingsRow>
         <SettingsRow title="Email" description="For signing in and every email Tally sends">
-          <span className="text-[14px] text-text-2 truncate max-w-[260px]">{email}</span>
+          <span className="text-[13.5px] text-text-2 truncate max-w-[260px]">{email}</span>
         </SettingsRow>
         <SettingsRow title="Birth date" description="Lets the early-retirement planner show the age you'd reach it">
-          <span className="text-[14px] text-text-2 tabular-nums">{birthDate ? longDate(birthDate) : "Not set"}</span>
+          <span className="text-[13.5px] text-text-2 tabular-nums">{birthDate ? longDate(birthDate) : "Not set"}</span>
         </SettingsRow>
         <div className="flex justify-end px-[18px] py-3">
           <Button variant="secondary" size="sm" onClick={() => setEditing(true)} aria-haspopup="dialog">
@@ -256,7 +256,7 @@ function PasswordDialog({ open, onClose }: { open: boolean; onClose: () => void 
               aria-describedby={`${id}-hint`}
               onChange={(e) => setNewPassword(e.target.value)}
             />
-            <span id={`${id}-hint`} className={tooShort ? "text-[13px] text-negative" : "text-[13px] text-text-3"}>
+            <span id={`${id}-hint`} className={tooShort ? "text-[13.5px] text-negative" : "text-[13.5px] text-text-3"}>
               At least 8 characters
             </span>
           </div>

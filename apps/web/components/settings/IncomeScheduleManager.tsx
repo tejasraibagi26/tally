@@ -157,7 +157,7 @@ export function IncomeScheduleManager({
             <div key={s.id} className="flex items-center gap-3 px-3 py-2.5 rounded-control bg-surface-2 border border-border">
               <div className="flex flex-col gap-0.5 min-w-0 flex-1">
                 <span className="text-[15px] text-text truncate">{s.label}</span>
-                <span className="text-[13px] text-text-3 truncate">
+                <span className="text-[13.5px] text-text-3 truncate">
                   {s.accountName ? `${s.accountName} ····${s.accountMask ?? "----"}` : "—"} · {s.dayAnchors.map(anchorLabel).join(" & ")}
                   {s.dayAnchors.length > 1 ? " (Friday if it lands on a weekend)" : ""}
                   {s.categoryName ? ` · ${s.categoryName}` : ""}
@@ -167,14 +167,14 @@ export function IncomeScheduleManager({
               <button
                 onClick={() => toggleActive(s)}
                 disabled={busyId === s.id}
-                className="text-[13px] text-text-2 hover:text-text flex-none disabled:opacity-40"
+                className="text-[13.5px] text-text-2 hover:text-text flex-none disabled:opacity-40"
               >
                 {s.active ? "Pause" : "Resume"}
               </button>
               <button
                 onClick={() => remove(s)}
                 disabled={busyId === s.id}
-                className="text-[13px] text-negative hover:underline flex-none disabled:opacity-40"
+                className="text-[13.5px] text-negative hover:underline flex-none disabled:opacity-40"
               >
                 Delete
               </button>
@@ -228,14 +228,14 @@ export function IncomeScheduleManager({
           <SearchableSelect value={anchor1} onChange={setAnchor1} className="w-full" options={dayOptions()} />
           {anchor2 !== NONE ? (
             <div className="flex items-center gap-2">
-              <span className="text-[13px] text-text-2">and</span>
+              <span className="text-[13.5px] text-text-2">and</span>
               <SearchableSelect value={anchor2} onChange={setAnchor2} className="flex-1" options={dayOptions()} />
-              <button type="button" onClick={() => setAnchor2(NONE)} className="text-[13px] text-text-3 hover:text-negative">
+              <button type="button" onClick={() => setAnchor2(NONE)} className="text-[13.5px] text-text-3 hover:text-negative">
                 Remove
               </button>
             </div>
           ) : (
-            <button type="button" onClick={() => setAnchor2(LAST_DAY)} className="text-[13px] text-brand w-fit">
+            <button type="button" onClick={() => setAnchor2(LAST_DAY)} className="text-[13.5px] text-brand w-fit">
               + Add a second payday
             </button>
           )}

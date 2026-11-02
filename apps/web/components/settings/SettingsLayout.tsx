@@ -52,10 +52,10 @@ export function SettingsRow({
   return (
     <div className={cn("flex flex-wrap sm:flex-nowrap items-center gap-x-4 gap-y-2 px-[18px] py-3.5 min-h-14", className)}>
       <div className="flex-1 min-w-[200px] flex flex-col gap-0.5">
-        <Title htmlFor={htmlFor} className="text-[14.5px] font-medium text-text">
+        <Title htmlFor={htmlFor} className="text-[15px] font-medium text-text">
           {title}
         </Title>
-        {description && <span className="text-[13px] leading-snug text-text-2">{description}</span>}
+        {description && <span className="text-[13.5px] leading-snug text-text-2">{description}</span>}
       </div>
       {children && <div className="flex items-center gap-2 flex-none">{children}</div>}
     </div>

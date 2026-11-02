@@ -102,7 +102,7 @@ export function SyncDialog({ state, onClose, onRetry }: { state: SyncDialogState
         </div>
 
         {steps.length > 0 && (
-          <ul className="m-0 p-0 list-none flex flex-col rounded-[10px] border border-border bg-surface-2">
+          <ul className="m-0 p-0 list-none flex flex-col rounded-tile border border-border bg-surface-2">
             {steps.map((row, i) => (
               <li key={row.key} className={cn("flex items-center gap-2.5 px-3 py-2.5 text-[13.5px] text-text", i > 0 && "border-t border-border")}>
                 <span

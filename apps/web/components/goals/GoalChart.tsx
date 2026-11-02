@@ -70,7 +70,7 @@ export function GoalChart({ points, target }: { points: GoalChartPoint[]; target
             );
           }}
         />
-        <ReferenceLine y={target} stroke="var(--positive)" strokeWidth={1.5} label={{ value: `Target ${formatCents(target)}`, position: "insideTopLeft", fill: "var(--positive)", fontSize: 11, fontWeight: 600 }} />
+        <ReferenceLine y={target} stroke="var(--positive)" strokeWidth={1.5} label={{ value: `Target ${formatCents(target)}`, position: "insideTopLeft", fill: "var(--positive)", fontSize: 12, fontWeight: 600 }} />
         <Area type="monotone" dataKey="actual" stroke="var(--brand)" strokeWidth={2.5} fill="url(#goalFill)" dot={false} activeDot={{ r: 4 }} isAnimationActive={false} connectNulls={false} />
         <Line type="linear" dataKey="projected" stroke="var(--brand)" strokeWidth={2} strokeDasharray="5 5" dot={false} isAnimationActive={false} connectNulls />
       </ComposedChart>

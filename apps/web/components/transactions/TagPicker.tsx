@@ -38,7 +38,7 @@ export function TagPicker({ known, onPick, onClose, className }: { known: string
         placeholder="Tag, e.g. Japan 2026"
         aria-label="Tag name"
         maxLength={40}
-        className="h-9 rounded-control border border-border-strong bg-surface px-2.5 text-[14px] text-text outline-none focus-visible:ring-2 focus-visible:ring-info"
+        className="h-9 rounded-control border border-border-strong bg-surface px-2.5 text-[13.5px] text-text outline-none focus-visible:ring-2 focus-visible:ring-info"
       />
       {isNew && (
         <button type="button" onClick={() => onPick(typed)} className="flex items-center gap-2 px-2 py-1.5 rounded-control text-left text-[13.5px] text-text hover:bg-sunken">

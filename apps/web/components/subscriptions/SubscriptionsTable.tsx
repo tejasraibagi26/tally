@@ -77,10 +77,10 @@ export function SubscriptionsTable({ streams }: { streams: SubscriptionStream[] 
             {s.categoryName ? (
               <>
                 <span className="w-1.5 h-1.5 rounded-full flex-none" style={{ background: `var(--series-${s.categoryColorSlot})` }} />
-                <span className="text-[13px] text-text-2 truncate">{s.categoryName}</span>
+                <span className="text-[13.5px] text-text-2 truncate">{s.categoryName}</span>
               </>
             ) : (
-              <span className="text-[13px] text-text-3">—</span>
+              <span className="text-[13.5px] text-text-3">—</span>
             )}
           </span>
           <span className="font-mono text-xs text-text-2 truncate">

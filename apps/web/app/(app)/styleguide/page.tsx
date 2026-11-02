@@ -59,7 +59,7 @@ export default function StyleguidePage() {
                       className="w-16 h-16 rounded-control border border-border"
                       style={{ background: `var(--${token})` }}
                     />
-                    <span className="font-mono text-[11px] text-text-3">{token}</span>
+                    <span className="font-mono text-[12px] text-text-3">{token}</span>
                   </div>
                 ))}
               </div>
@@ -76,7 +76,7 @@ export default function StyleguidePage() {
                     className="w-16 h-16 rounded-control border border-border"
                     style={{ background: `var(--${token})` }}
                   />
-                  <span className="font-mono text-[11px] text-text-3">{token}</span>
+                  <span className="font-mono text-[12px] text-text-3">{token}</span>
                 </div>
               ))}
             </div>

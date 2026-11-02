@@ -78,7 +78,7 @@ export function FormPanel({
 export function FormField({ label, hint, children, className }: { label: string; hint?: ReactNode; children: ReactNode; className?: string }) {
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
-      <span className="text-[13px] font-medium text-text-2">{label}</span>
+      <span className="text-[13.5px] font-medium text-text-2">{label}</span>
       {children}
       {hint && <span className="text-xs text-text-3">{hint}</span>}
     </div>

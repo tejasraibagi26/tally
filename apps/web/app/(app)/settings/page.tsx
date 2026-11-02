@@ -120,7 +120,7 @@ export default async function SettingsPage() {
                 <span className="text-[16px] font-semibold text-text">
                   {paydayLabel(paycheque.nextDate)} · about <span className="money money-fit"><span>{formatCents(Math.round(paycheque.amount / 100) * 100)}</span></span>
                 </span>
-                <span className="text-[13px] text-text-2">
+                <span className="text-[13.5px] text-text-2">
                   From {paycheque.label}
                   {paychequeAccount ? ` into ${labelOf(paychequeAccount)}` : ""} · {CADENCE_LABEL[paycheque.cadence]} · the last 3 landed on time
                 </span>
@@ -128,14 +128,14 @@ export default async function SettingsPage() {
             ) : paycheque ? (
               <div className="flex flex-col gap-0.5 min-w-0">
                 <span className="text-xs font-bold uppercase tracking-[0.08em] text-text-3">Next paycheque</span>
-                <span className="text-[14px] text-text">Your pay from {paycheque.label} hasn&apos;t landed on a steady schedule lately.</span>
-                <span className="text-[13px] text-text-2">Until it does, payday comes from your income schedule, or the end of the month.</span>
+                <span className="text-[13.5px] text-text">Your pay from {paycheque.label} hasn&apos;t landed on a steady schedule lately.</span>
+                <span className="text-[13.5px] text-text-2">Until it does, payday comes from your income schedule, or the end of the month.</span>
               </div>
             ) : (
               <div className="flex flex-col gap-0.5 min-w-0">
                 <span className="text-xs font-bold uppercase tracking-[0.08em] text-text-3">Next paycheque</span>
-                <span className="text-[14px] text-text">No steady paycheque found yet.</span>
-                <span className="text-[13px] text-text-2">Set your pay&apos;s category to Income and turn on &quot;Always use&quot;. After three paydays, Tally predicts the next one.</span>
+                <span className="text-[13.5px] text-text">No steady paycheque found yet.</span>
+                <span className="text-[13.5px] text-text-2">Set your pay&apos;s category to Income and turn on &quot;Always use&quot;. After three paydays, Tally predicts the next one.</span>
               </div>
             )}
           </SettingsBlock>

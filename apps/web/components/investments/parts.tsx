@@ -15,7 +15,7 @@ export function formatQuantity(q: number): string {
 export function Ticker({ p, size = 34 }: { p: Pick<Position, "ticker" | "isCashEquivalent">; size?: number }) {
   const label = p.isCashEquivalent ? "CASH" : (p.ticker ?? "?").slice(0, 5);
   return (
-    <span className="flex-none rounded-[9px] bg-surface-2 text-text-2 font-mono text-[10.5px] font-medium flex items-center justify-center tracking-tight" style={{ width: size, height: size }}>
+    <span className="flex-none rounded-tile bg-surface-2 text-text-2 font-mono text-[10.5px] font-medium flex items-center justify-center tracking-tight" style={{ width: size, height: size }}>
       {label}
     </span>
   );
@@ -37,14 +37,14 @@ export function ActivityRow({ a, showAccount = true }: { a: ActivityView; showAc
   return (
     <li className="grid grid-cols-[64px_28px_minmax(0,1fr)_auto_auto] items-center gap-3 px-5 py-2.5 border-t border-border text-[13.5px]">
       <span className="font-mono text-xs text-text-3">{new Date(`${a.date}T00:00:00`).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
-      <span className={cn("w-7 h-7 rounded-[8px] flex items-center justify-center", d.tone === "positive" ? "bg-positive-subtle text-positive" : d.tone === "negative" ? "bg-negative-subtle text-negative" : "bg-surface-2 text-text-2")}>
+      <span className={cn("w-7 h-7 rounded-tile flex items-center justify-center", d.tone === "positive" ? "bg-positive-subtle text-positive" : d.tone === "negative" ? "bg-negative-subtle text-negative" : "bg-surface-2 text-text-2")}>
         <Icon size={14} strokeWidth={1.75} />
       </span>
       <span className="flex flex-col gap-0.5 min-w-0">
         <span className="font-medium text-text truncate">{d.title}</span>
         {d.detail && <span className="text-xs text-text-3 truncate">{d.detail}</span>}
       </span>
-      {showAccount ? <span className="text-xs text-text-3 bg-sunken rounded-md px-2 py-0.5 whitespace-nowrap">{a.accountName}</span> : <span />}
+      {showAccount ? <span className="text-xs text-text-3 bg-sunken rounded-badge px-2 py-0.5 whitespace-nowrap">{a.accountName}</span> : <span />}
       <span className={cn("tabular font-semibold text-right min-w-[90px]", d.tone === "positive" ? "text-positive" : d.tone === "negative" ? "text-negative" : "text-text")}>
         {formatCents(d.amount, { signed: d.signed })}
       </span>

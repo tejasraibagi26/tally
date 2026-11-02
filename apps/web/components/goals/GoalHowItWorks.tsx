@@ -32,10 +32,10 @@ export function GoalHowItWorks() {
           <ol className="m-0 p-0 list-none flex flex-col gap-4">
             {GOAL_HOW_IT_WORKS.map((step, i) => (
               <li key={step.title} className="flex gap-3">
-                <span className="shrink-0 w-6 h-6 rounded-full bg-brand-subtle text-brand text-[13px] font-semibold flex items-center justify-center tabular">{i + 1}</span>
+                <span className="shrink-0 w-6 h-6 rounded-full bg-brand-subtle text-brand text-[13.5px] font-semibold flex items-center justify-center tabular">{i + 1}</span>
                 <span className="flex flex-col gap-0.5">
                   <span className="text-[15px] font-semibold text-text">{step.title}</span>
-                  <span className="text-[14px] leading-relaxed text-text-2">{step.body}</span>
+                  <span className="text-[13.5px] leading-relaxed text-text-2">{step.body}</span>
                 </span>
               </li>
             ))}

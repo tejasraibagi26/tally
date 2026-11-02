@@ -328,7 +328,7 @@ export default async function OverviewPage() {
               <div key={t.id} className="flex items-center gap-3 px-4 py-2.5 border-b border-border last:border-b-0">
                 <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   <span className="text-[15px] text-text truncate">{t.merchantName ?? t.name}</span>
-                  {t.isPending && <span className="text-[11px] text-warning uppercase tracking-wide flex-none">Pending</span>}
+                  {t.isPending && <span className="text-[12px] text-warning uppercase tracking-wide flex-none">Pending</span>}
                 </div>
                 <span className="font-mono text-xs text-text-3 tabular flex-none w-20 text-right whitespace-nowrap">{relativeDate(t.postedDate, today)}</span>
                 <span className={`text-[15px] tabular flex-none w-24 text-right ${t.amount > 0 ? "text-positive" : "text-text"}`}>

@@ -15,7 +15,7 @@ export function StatusBadge({ status, label }: { status: Status; label?: string 
   return (
     <span
       className={clsx(
-        "inline-flex items-center gap-1.5 rounded-[6px] px-2.5 py-0.5 text-xs font-medium",
+        "inline-flex items-center gap-1.5 rounded-badge px-2.5 py-0.5 text-xs font-medium",
         cfg.bg,
         cfg.fg,
       )}

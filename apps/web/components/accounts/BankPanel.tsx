@@ -57,7 +57,7 @@ export function BankPanel({
 
         <StateNotice item={item} state={state} />
 
-        <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-control bg-sunken px-4 py-3.5 text-[13px]">
+        <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 rounded-control bg-sunken px-4 py-3.5 text-[13.5px]">
           <dt className="text-text-3">Status</dt>
           <dd className={cn("m-0 text-right font-medium", state.level === "quiet" ? "text-text" : toneText[state.tone])}>
             {state.notice?.title.replace(/…$/, "") ?? (state.level === "quiet" ? "Up to date" : state.statusLine)}
@@ -81,9 +81,9 @@ export function BankPanel({
         </div>
 
         <section className="flex flex-col gap-2">
-          <h3 className="m-0 text-[11px] font-semibold uppercase tracking-wide text-text-3">Sync history</h3>
+          <h3 className="m-0 text-[12px] font-semibold uppercase tracking-wide text-text-3">Sync history</h3>
           {item.runs.length === 0 ? (
-            <p className="m-0 text-[13px] text-text-3">No syncs recorded yet.</p>
+            <p className="m-0 text-[13.5px] text-text-3">No syncs recorded yet.</p>
           ) : (
             <ol className="m-0 p-0 list-none flex flex-col">
               {item.runs.map((r, i) => (
@@ -114,7 +114,7 @@ function PanelAction({ icon: Icon, label, hint, busy, onClick }: { icon: typeof 
         {busy ? <Spinner /> : <Icon size={15} strokeWidth={1.75} />}
       </span>
       <span className="flex flex-col gap-0.5">
-        <span className="text-[14px] text-text">{label}</span>
+        <span className="text-[13.5px] text-text">{label}</span>
         <span className="text-xs text-text-3">{hint}</span>
       </span>
     </button>
@@ -128,13 +128,13 @@ function SyncRunRow({ run, first }: { run: SyncRunView; first: boolean }) {
   // Plaid's code ("ITEM_LOGIN_REQUIRED: …") is the useful part of the error.
   const detail = failed ? run.error!.split(":")[0] : pending ? "In progress" : counts || "No changes";
   return (
-    <li className={cn("grid grid-cols-[10px_1fr_auto] gap-3 py-2 text-[13px] items-start", !first && "border-t border-border")}>
+    <li className={cn("grid grid-cols-[10px_1fr_auto] gap-3 py-2 text-[13.5px] items-start", !first && "border-t border-border")}>
       <span className={cn("w-2 h-2 rounded-full mt-1.5", failed ? "bg-negative" : pending ? "bg-info" : "bg-positive")} />
       <span className="flex flex-col gap-0.5 min-w-0">
         <span className="text-text">
           {KIND_LABEL[run.kind] ?? run.kind} <span className="text-text-3">· {run.trigger}</span>
         </span>
-        <span className={cn("font-mono text-[11px] truncate", failed ? "text-negative" : "text-text-3")} title={run.error ?? undefined}>
+        <span className={cn("font-mono text-[12px] truncate", failed ? "text-negative" : "text-text-3")} title={run.error ?? undefined}>
           {detail}
         </span>
       </span>

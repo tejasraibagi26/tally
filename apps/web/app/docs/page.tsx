@@ -70,7 +70,7 @@ const ENV_VARS: { name: string; required: boolean; description: string }[] = [
 
 function CodeBlock({ children }: { children: string }) {
   return (
-    <pre className="bg-surface-2 border border-border rounded-control p-4 overflow-x-auto text-[13px] font-mono text-text leading-relaxed">
+    <pre className="bg-surface-2 border border-border rounded-control p-4 overflow-x-auto text-[13.5px] font-mono text-text leading-relaxed">
       <code>{children}</code>
     </pre>
   );

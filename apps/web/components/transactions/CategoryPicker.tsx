@@ -72,17 +72,17 @@ export function CategoryPicker({
         }}
         placeholder="Find a category"
         aria-label="Find a category"
-        className="h-8 rounded-[6px] bg-surface-2 border border-border px-2 text-[13px] text-text placeholder:text-text-3 focus:outline-none focus:ring-2 focus:ring-info"
+        className="h-8 rounded-badge bg-surface-2 border border-border px-2 text-[13.5px] text-text placeholder:text-text-3 focus:outline-none focus:ring-2 focus:ring-info"
       />
       <ul ref={listRef} role="listbox" className="m-0 p-0 list-none max-h-64 overflow-y-auto">
-        {options.length === 0 && <li className="px-2 py-2 text-[13px] text-text-3">No matching category</li>}
+        {options.length === 0 && <li className="px-2 py-2 text-[13.5px] text-text-3">No matching category</li>}
         {options.map((c, i) => (
           <li key={c.id} data-index={i} role="option" aria-selected={c.id === selectedId}>
             <button
               type="button"
               onMouseEnter={() => setActive(i)}
               onClick={() => onPick(c.id)}
-              className={cn("w-full flex items-center gap-2 rounded-[6px] px-2 py-1.5 text-left text-[13px]", i === active ? "bg-raised-hover text-text" : "text-text-2", c.indent && "pl-6")}
+              className={cn("w-full flex items-center gap-2 rounded-badge px-2 py-1.5 text-left text-[13.5px]", i === active ? "bg-raised-hover text-text" : "text-text-2", c.indent && "pl-6")}
             >
               <span className="w-2 h-2 rounded-full flex-none" style={{ background: `var(--series-${c.colorSlot})` }} />
               <span className="truncate flex-1">{c.name}</span>

@@ -26,7 +26,7 @@ export function DisconnectedBanks({ banks, mock }: { banks: DisconnectedBank[]; 
   return (
     <section className="flex flex-col gap-3" aria-labelledby="disconnected-heading">
       <div className="flex flex-col gap-0.5 px-1">
-        <h2 id="disconnected-heading" className="m-0 text-[11px] font-semibold uppercase tracking-wide text-text-3">
+        <h2 id="disconnected-heading" className="m-0 text-[12px] font-semibold uppercase tracking-wide text-text-3">
           Disconnected · {banks.length}
         </h2>
         <p className="m-0 text-[13.5px] text-text-2">
@@ -37,12 +37,12 @@ export function DisconnectedBanks({ banks, mock }: { banks: DisconnectedBank[]; 
         {banks.map((bank) => (
           <div key={bank.id} className="flex flex-col gap-3 rounded-card border border-border bg-surface p-5">
             <div className="flex items-center gap-3">
-              <span className="w-[34px] h-[34px] flex-none rounded-[9px] flex items-center justify-center bg-sunken text-text-2 text-sm font-medium">
+              <span className="w-[34px] h-[34px] flex-none rounded-tile flex items-center justify-center bg-sunken text-text-2 text-sm font-medium">
                 {initials(bank.institutionName)}
               </span>
               <div className="flex-1 min-w-0 flex flex-col">
                 <span className="text-[15px] font-medium text-text truncate">{bank.institutionName ?? "Bank"}</span>
-                <span className="text-[13px] text-text-3">Disconnected {shortDate(bank.disconnectedAt)} · history kept</span>
+                <span className="text-[13.5px] text-text-3">Disconnected {shortDate(bank.disconnectedAt)} · history kept</span>
               </div>
               <LinkButton mode="create" label="Reconnect" variant="secondary" size="sm" mock={mock} />
             </div>

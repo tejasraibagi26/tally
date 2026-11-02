@@ -343,7 +343,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
           passthrough={passthroughParams}
         />
         {(unreviewed > 0 || reviewOnly) && (
-          <div className="pt-2 flex items-center gap-2 text-[13px]">
+          <div className="pt-2 flex items-center gap-2 text-[13.5px]">
             <Link
               href={reviewToggleHref}
               className={reviewOnly ? "px-3 py-1 rounded-full bg-brand-subtle text-brand" : "px-3 py-1 rounded-full border border-border text-warning hover:bg-warning-subtle"}
@@ -353,7 +353,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
           </div>
         )}
         {merchantFilter && (
-          <div className="pt-2 text-[13px] text-text-2">
+          <div className="pt-2 text-[13.5px] text-text-2">
             Filtered to merchant <span className="text-text font-medium">{merchantFilter}</span>
           </div>
         )}

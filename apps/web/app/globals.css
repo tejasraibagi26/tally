@@ -55,6 +55,9 @@
   --radius-control: 8px;
   --radius-card: 12px;
   --radius-panel: 16px;
+  /* Small fixed radii (same in Pop): status chips, and 32-44px icon/logo tiles. */
+  --radius-badge: 6px;
+  --radius-tile: 10px;
 
   --shadow-raised: 0 1px 2px rgba(26,25,23,.06);
   --shadow-overlay: 0 12px 32px -8px rgba(26,25,23,.16), 0 2px 6px rgba(26,25,23,.05);
@@ -305,9 +308,6 @@
 }
 [data-ui="pop"] .ui-side {
   border-left: 2px solid var(--ink);
-}
-[data-ui="pop"] .ui-overlay.rounded-\[16px\] {
-  border-radius: var(--radius-panel);
 }
 [data-ui="pop"] .ui-tile {
   border-radius: var(--radius-control);

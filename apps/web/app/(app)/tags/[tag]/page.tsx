@@ -41,7 +41,7 @@ export default async function TagPage({ params }: { params: Promise<{ tag: strin
           `${s.count} transaction${s.count === 1 ? "" : "s"}`,
         ]}
         actions={
-          <Link href={`/transactions?tag=${encodeURIComponent(tag)}`} className="ui-btn ui-btn-secondary inline-flex items-center h-9 px-4 rounded-control border border-border-strong bg-surface text-[14px] font-medium text-text hover:bg-sunken">
+          <Link href={`/transactions?tag=${encodeURIComponent(tag)}`} className="ui-btn ui-btn-secondary inline-flex items-center h-9 px-4 rounded-control border border-border-strong bg-surface text-[13.5px] font-medium text-text hover:bg-sunken">
             See transactions
           </Link>
         }
@@ -51,17 +51,17 @@ export default async function TagPage({ params }: { params: Promise<{ tag: strin
         <Card className="ui-hero p-5 flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Total</span>
           <span className="font-display text-[36px] leading-none text-text tabular">{formatCents(s.spend)}</span>
-          {s.income > 0 && <span className="text-[13px] text-text-2">{formatCents(s.income)} came back in</span>}
+          {s.income > 0 && <span className="text-[13.5px] text-text-2">{formatCents(s.income)} came back in</span>}
         </Card>
         <Card className="p-5 flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Per day</span>
           <span className="ui-figure font-display text-[30px] leading-none text-text tabular">{s.perDay != null ? formatCents(s.perDay) : "—"}</span>
-          <span className="text-[13px] text-text-2">over {s.days} day{s.days === 1 ? "" : "s"}</span>
+          <span className="text-[13.5px] text-text-2">over {s.days} day{s.days === 1 ? "" : "s"}</span>
         </Card>
         <Card className="p-5 flex flex-col gap-2">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Biggest share</span>
           <span className="ui-figure font-display text-[30px] leading-none text-text">{s.byCategory[0]?.label ?? "—"}</span>
-          {s.byCategory[0] && <span className="text-[13px] text-text-2">{formatPercent(s.byCategory[0].share)} of it</span>}
+          {s.byCategory[0] && <span className="text-[13.5px] text-text-2">{formatPercent(s.byCategory[0].share)} of it</span>}
         </Card>
       </div>
 
@@ -76,7 +76,7 @@ export default async function TagPage({ params }: { params: Promise<{ tag: strin
               </span>
             ))}
           </div>
-          <div className="flex justify-between px-4 py-2 border-t border-border text-[11.5px] text-text-3">
+          <div className="flex justify-between px-4 py-2 border-t border-border text-[12px] text-text-3">
             <span>{day(bars[0]!.date)}</span>
             <span>{day(bars.at(-1)!.date)}</span>
           </div>
@@ -88,7 +88,7 @@ export default async function TagPage({ params }: { params: Promise<{ tag: strin
         <ul className="m-0 p-5 list-none flex flex-col gap-3.5">
           {s.byCategory.map((c, i) => (
             <li key={c.key} className="flex flex-col gap-1.5">
-              <span className="flex justify-between text-[14px]">
+              <span className="flex justify-between text-[13.5px]">
                 <span className="text-text">{c.label}</span>
                 <span className="text-text tabular">
                   {formatCents(c.total)} <span className="text-text-3">· {formatPercent(c.share)}</span>

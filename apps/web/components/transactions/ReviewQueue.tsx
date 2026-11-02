@@ -163,7 +163,7 @@ export function ReviewQueue({ categories, pendingCount, autoOpen = false }: { ca
                   "All tallied."
                 )}
               </h3>
-              <p className="m-0 text-[14px] text-text-2">{error ?? (done > 0 ? `${done} reviewed. New transactions show up here as they sync.` : "Nothing left to review.")}</p>
+              <p className="m-0 text-[13.5px] text-text-2">{error ?? (done > 0 ? `${done} reviewed. New transactions show up here as they sync.` : "Nothing left to review.")}</p>
               <Button onClick={close}>Done</Button>
             </div>
           ) : (
@@ -193,18 +193,18 @@ export function ReviewQueue({ categories, pendingCount, autoOpen = false }: { ca
                         <span className="w-2 h-2 rounded-full" style={{ background: `var(--series-${s.colorSlot})` }} />
                         {i === 0 ? `✓ ${s.name}` : s.name}
                       </span>
-                      <span className="text-[11px] opacity-70">{i === 0 ? "Enter" : i + 1}</span>
+                      <span className="text-[12px] opacity-70">{i === 0 ? "Enter" : i + 1}</span>
                     </button>
                   ))}
                   <span className="relative">
                     <button type="button" onClick={() => setPicking(true)} className="w-full h-10 px-4 rounded-full border border-border text-text-2 text-[13.5px] flex items-center justify-between">
-                      {current.suggestions.length ? "Other category…" : "Choose a category"} <span className="text-[11px] opacity-70">o</span>
+                      {current.suggestions.length ? "Other category…" : "Choose a category"} <span className="text-[12px] opacity-70">o</span>
                     </button>
                     {picking && <CategoryPicker className="absolute top-full mt-1 left-0" categories={categories} onPick={(id) => void resolve(id)} onClose={() => setPicking(false)} />}
                   </span>
                 </div>
                 {ruleTarget && (
-                  <label className="flex items-center gap-2 text-[13px] text-text-2 cursor-pointer">
+                  <label className="flex items-center gap-2 text-[13.5px] text-text-2 cursor-pointer">
                     <input type="checkbox" checked={always} onChange={(e) => setAlways(e.target.checked)} className="accent-[var(--brand)]" />
                     Always use my pick for {ruleTarget.kind === "merchant" ? ruleTarget.label : `transactions like ${ruleTarget.label}`}
                   </label>

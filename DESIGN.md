@@ -242,7 +242,8 @@ Status colors **always ship with an icon and a text label**. On the light surfac
 - **Grid:** 12 columns, 24px gutter, page padding 32 (desktop) / 16 (mobile). Content max-width 1280px, centered.
 - **App shell:** fixed 240px left nav (collapses to 64px icon rail < 1200px, drawer < 900px), 64px top bar with month picker + global search + sync status.
 - **Spacing scale (px):** 4, 8, 12, 16, 24, 32, 48, 64, 96. Nothing off-scale.
-- **Radii:** 8 (buttons, inputs, chips) · 12 (cards) · 16 (panels, modals) · 999 (pills, avatars).
+- **Radii:** 8 (buttons, inputs, chips) · 12 (cards) · 16 (panels, modals) · 999 (pills, avatars), as `rounded-control` / `rounded-card` / `rounded-panel` / `rounded-full`. Two fixed small radii Pop doesn't restyle: `rounded-badge` 6 (status chips, tags) and `rounded-tile` 10 (32–44px icon and logo tiles). Only marks under 6px (swatches, checkboxes, thin bars) take a literal radius.
+- **Type steps in UI text:** 15 (body), 13.5 (small/secondary), 12.5 (mono), 12 (labels, chips, axis). No 11, 13, 14 or 14.5 in arbitrary `text-[…]` values.
 - **Borders:** 1px `--border` everywhere; `--border-strong` only for focus and inputs.
 - **Elevation** — hairlines first, shadow second:
   - `rest`: border only.
@@ -440,6 +441,7 @@ Respect `prefers-reduced-motion: reduce` — replace movement with an instant st
   --series-1:#1baf7a; --series-2:#eb6834; --series-3:#2a78d6; --series-4:#eda100;
   --series-5:#e87ba4; --series-6:#008300; --series-7:#4a3aa7; --series-8:#e34948;
   --radius-control:8px; --radius-card:12px; --radius-panel:16px;
+  --radius-badge:6px; --radius-tile:10px;
   --shadow-raised:0 1px 2px rgba(26,25,23,.06);
   --shadow-overlay:0 12px 32px -8px rgba(26,25,23,.16), 0 2px 6px rgba(26,25,23,.05);
   --font-ui:"Inter",ui-sans-serif,system-ui,sans-serif;

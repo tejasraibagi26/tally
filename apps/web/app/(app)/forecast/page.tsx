@@ -44,7 +44,7 @@ export default async function ForecastPage({ searchParams }: { searchParams: Pro
           <p className="mb-0 mt-2 max-w-[52ch] text-[15px] leading-relaxed text-text-2">
             Tally needs a chequing account to start from. Connect one and your bills, pay dates and card statements fill in the rest.
           </p>
-          <Link href="/accounts" className="ui-btn ui-btn-primary mt-4 inline-flex rounded-full bg-brand px-4 py-2 text-[14px] font-semibold text-on-brand">
+          <Link href="/accounts" className="ui-btn ui-btn-primary mt-4 inline-flex rounded-full bg-brand px-4 py-2 text-[13.5px] font-semibold text-on-brand">
             Connect an account
           </Link>
         </Card>
@@ -83,7 +83,7 @@ export default async function ForecastPage({ searchParams }: { searchParams: Pro
       <Card className={short ? "ui-card-negative p-5 lg:p-6" : "p-5 lg:p-6"}>
         <div className="grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_1px_repeat(3,minmax(0,0.75fr))] lg:items-center">
           <div>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-text-2">
+            <span className="text-[12px] font-semibold uppercase tracking-wider text-text-2">
               {h == null ? "Your balance" : short ? "First short day" : "Lowest point"}
             </span>
             {h == null ? (
@@ -105,9 +105,9 @@ export default async function ForecastPage({ searchParams }: { searchParams: Pro
                   <span>{formatCents(h.amount)}</span>
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-2.5">
-                  <span className="text-[14.5px] font-semibold text-text">{longDate(h.date)}</span>
+                  <span className="text-[15px] font-semibold text-text">{longDate(h.date)}</span>
                   {short && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-negative bg-negative-subtle px-2.5 py-0.5 text-[11.5px] font-semibold text-negative">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-negative bg-negative-subtle px-2.5 py-0.5 text-[12px] font-semibold text-negative">
                       <AlertTriangle size={12} strokeWidth={2.5} aria-hidden />
                       {out === 0 ? "today" : `${out} day${out === 1 ? "" : "s"} away`}
                     </span>
@@ -154,7 +154,7 @@ export default async function ForecastPage({ searchParams }: { searchParams: Pro
       <Card className="flex flex-col gap-3 p-5 [--bleed:20px] lg:p-6 lg:[--bleed:24px]">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="ui-card-title m-0 text-xl font-semibold text-text">Projected balance</h2>
-          <div className="flex items-center gap-3.5 text-[11.5px] text-text-2">
+          <div className="flex items-center gap-3.5 text-[12px] text-text-2">
             <span className="inline-flex items-center gap-1.5">
               <svg width="18" height="8" aria-hidden>
                 <line x1="0" y1="4" x2="18" y2="4" stroke="var(--series-1)" strokeWidth="2.5" />
@@ -203,7 +203,7 @@ export default async function ForecastPage({ searchParams }: { searchParams: Pro
 function Stat({ label, value, note, tone }: { label: string; value: string; note: string; tone?: "negative" }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-[11px] font-semibold uppercase tracking-wider text-text-2">{label}</span>
+      <span className="text-[12px] font-semibold uppercase tracking-wider text-text-2">{label}</span>
       <span className={`money ui-card-title text-[19px] font-semibold tabular ${tone === "negative" ? "text-negative" : "text-text"}`}>
         <span>{value}</span>
       </span>

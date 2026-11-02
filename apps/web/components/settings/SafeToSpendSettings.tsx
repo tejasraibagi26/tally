@@ -28,7 +28,7 @@ function AmountField({ id, value, onChange, onSave, error, label }: { id: string
           error ? "border-negative" : "border-border-strong",
         )}
       >
-        <span className="text-text-3 text-[14px] pr-1">$</span>
+        <span className="text-text-3 text-[13.5px] pr-1">$</span>
         <input
           id={id}
           inputMode="decimal"
@@ -38,7 +38,7 @@ function AmountField({ id, value, onChange, onSave, error, label }: { id: string
           onChange={(e) => onChange(e.target.value.replace(/[^\d.]/g, ""))}
           onBlur={onSave}
           onKeyDown={(e) => e.key === "Enter" && (e.currentTarget as HTMLInputElement).blur()}
-          className="w-20 bg-transparent text-right text-[14px] tabular outline-none"
+          className="w-20 bg-transparent text-right text-[13.5px] tabular outline-none"
         />
       </div>
       {error && <span role="alert" className="text-xs text-negative">{error}</span>}
