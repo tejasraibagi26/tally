@@ -148,7 +148,7 @@ export default function ReviewScreen() {
                   {current.isPending ? " · pending" : ""}
                 </Text>
               </View>
-              <Text className="font-ui-semibold" style={{ fontSize: rf(20), color: current.amount > 0 ? colors.positive : colors.text, fontVariant: ["tabular-nums"] }}>
+              <Text className="font-display" style={{ fontSize: rf(20), color: current.amount > 0 ? colors.positive : colors.text, fontVariant: ["tabular-nums"] }}>
                 {formatCents(current.amount, { signed: true })}
               </Text>
             </View>

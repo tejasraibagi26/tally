@@ -82,7 +82,7 @@ export default function LoansScreen() {
             <Card className="p-5 gap-1">
               <Text className="font-ui-semibold text-text-2" style={{ fontSize: rf(14) }}>You owe</Text>
               {[...totals].map(([currency, cents]) => (
-                <Text key={currency} className="font-ui-semibold text-text" style={{ fontSize: rf(32), fontVariant: ["tabular-nums"] }}>
+                <Text key={currency} className="font-display text-text" style={{ fontSize: rf(32), fontVariant: ["tabular-nums"] }}>
                   {money(cents, currency)}
                 </Text>
               ))}
@@ -102,7 +102,7 @@ export default function LoansScreen() {
                           {l.institutionName ? ` · ${l.institutionName}` : ""}
                         </Text>
                       </View>
-                      <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15), fontVariant: ["tabular-nums"] }}>{money(l.balance, l.currency)}</Text>
+                      <Text className="font-num-bold text-text" style={{ fontSize: rf(15), fontVariant: ["tabular-nums"] }}>{money(l.balance, l.currency)}</Text>
                     </View>
                     {d ? (
                       <View className="flex-row flex-wrap" style={{ columnGap: 14, rowGap: 2 }}>

@@ -482,7 +482,7 @@ function Header({
         </View>
       </View>
       <View className="flex-row items-end justify-between gap-3">
-        <Text className="font-ui-semibold" style={{ color, fontSize: rf(40), lineHeight: rf(44), fontVariant: ["tabular-nums"] }} accessibilityLabel={text}>
+        <Text className="font-display" style={{ color, fontSize: rf(40), lineHeight: rf(44), fontVariant: ["tabular-nums"] }} accessibilityLabel={text}>
           {dot === -1 ? text : text.slice(0, dot)}
           {dot !== -1 && <Text style={{ fontSize: rf(22), color: colors["text-3"] }}>{text.slice(dot)}</Text>}
         </Text>

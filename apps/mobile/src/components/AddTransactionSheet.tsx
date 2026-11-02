@@ -254,7 +254,7 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
               as its measured text (a TextInput doesn't size itself) -- so even
               9999999.99 sits on one line instead of clipping. */}
           <View className="flex-row items-center justify-center" style={{ alignSelf: "stretch" }}>
-            <Text className="font-ui-semibold" style={{ fontSize: rf(amountSize * 0.5), color: signColor }}>{kind === "expense" ? "−$" : "+$"}</Text>
+            <Text className="font-display" style={{ fontSize: rf(amountSize * 0.5), color: signColor }}>{kind === "expense" ? "−$" : "+$"}</Text>
             <TextInput
               value={amountInput}
               onChangeText={(t) => setAmountInput(cleanAmount(t))}
@@ -263,12 +263,12 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
               keyboardType="decimal-pad"
               autoFocus
               accessibilityLabel="Amount"
-              className="font-ui-semibold text-text"
+              className="font-display text-text"
               style={{ fontSize: rf(amountSize), width: amountWidth + 6, paddingVertical: 0, paddingHorizontal: 0 }}
             />
             {/* Invisible twin, same font and size, measured for the field's width. */}
             <Text
-              className="font-ui-semibold"
+              className="font-display"
               aria-hidden
               accessibilityElementsHidden
               importantForAccessibility="no-hide-descendants"

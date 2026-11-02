@@ -72,7 +72,7 @@ export function HoldingSheet({
               {rows.map(([k, v]) => (
                 <View key={k} className="flex-row justify-between gap-3">
                   <Text className="font-ui text-text-3" style={{ fontSize: rf(13) }}>{k}</Text>
-                  <Text className="font-ui-medium text-text" style={{ fontSize: rf(13), fontVariant: ["tabular-nums"] }}>{v}</Text>
+                  <Text className="font-num-semibold text-text" style={{ fontSize: rf(13), fontVariant: ["tabular-nums"] }}>{v}</Text>
                 </View>
               ))}
             </View>

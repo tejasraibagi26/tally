@@ -200,7 +200,7 @@ function Planner({
               ) : (
                 <>
                   <Text className="font-ui-medium text-text-3" style={label}>{retireAge != null ? "You could retire at" : "You could retire in"}</Text>
-                  <Text className="font-ui-semibold text-text" style={{ fontSize: rf(40), lineHeight: rf(44) }}>
+                  <Text className="font-display text-text" style={{ fontSize: rf(40), lineHeight: rf(44) }}>
                     {retireAge != null ? `${retireAge} ` : `${retireYear}`}
                     {retireAge != null && <Text className="text-text-2" style={{ fontSize: rf(20) }}>in {retireYear}</Text>}
                   </Text>
@@ -431,7 +431,7 @@ function Lever({
             hitSlop={8}
             accessibilityLabel={`${label}: ${display}. Tap to type a value`}
           >
-            <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16), fontVariant: ["tabular-nums"] }}>{display}</Text>
+            <Text className="font-num-bold text-text" style={{ fontSize: rf(16), fontVariant: ["tabular-nums"] }}>{display}</Text>
           </Pressable>
         )}
       </View>

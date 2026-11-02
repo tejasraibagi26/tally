@@ -31,7 +31,7 @@ export function BudgetDetailSheet({
 }) {
   const colors = useThemeColors();
   // Headline figures in the display face.
-  const figureFont = "font-ui-semibold text-text";
+  const figureFont = "font-display text-text";
   const rf = useRF();
   const history = useBudgetHistory(line.categoryId, month);
   const save = useSaveBudget();

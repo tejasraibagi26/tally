@@ -298,7 +298,7 @@ function Ledger({
               <Text className="font-ui-semibold" style={{ fontSize: rf(9.5), letterSpacing: 0.6, color: tileText }}>
                 {isToday ? "TODAY" : t.weekday}
               </Text>
-              <Text className="font-ui-semibold" style={{ fontSize: rf(17), marginTop: 1, color: isToday ? colors.brand : colors.text, fontVariant: ["tabular-nums"] }}>
+              <Text className="font-num-bold" style={{ fontSize: rf(17), marginTop: 1, color: isToday ? colors.brand : colors.text, fontVariant: ["tabular-nums"] }}>
                 {t.day}
               </Text>
               <Text className="font-ui-semibold" style={{ fontSize: rf(9.5), letterSpacing: 0.6, color: tileText }}>
@@ -339,7 +339,7 @@ function Ledger({
                     )}
                   </View>
                   <Text
-                    className="font-ui-semibold"
+                    className="font-num-bold"
                     style={{ fontSize: rf(14), fontVariant: ["tabular-nums"], color: e.amount > 0 ? colors.positive : e.affectsCash ? colors.negative : colors["text-3"] }}
                   >
                     {e.amount > 0 ? "+" : ""}
@@ -357,7 +357,7 @@ function Ledger({
                     </View>
                   )}
                   <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>Balance after</Text>
-                  <Text className="font-ui-semibold" style={{ fontSize: rf(12), fontVariant: ["tabular-nums"], color: after < 0 ? colors.negative : colors.text }}>
+                  <Text className="font-num-bold" style={{ fontSize: rf(12), fontVariant: ["tabular-nums"], color: after < 0 ? colors.negative : colors.text }}>
                     {money(after)}
                   </Text>
                 </View>

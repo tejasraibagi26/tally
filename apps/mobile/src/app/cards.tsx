@@ -142,7 +142,7 @@ export default function CardsScreen() {
               <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(11), letterSpacing: 0.6, textTransform: "uppercase" }}>
                 You owe across {rows.length} card{rows.length === 1 ? "" : "s"}
               </Text>
-              <Text className="font-ui-semibold text-text" style={{ fontSize: rf(40), lineHeight: rf(44), fontVariant: ["tabular-nums"] }}>
+              <Text className="font-display text-text" style={{ fontSize: rf(40), lineHeight: rf(44), fontVariant: ["tabular-nums"] }}>
                 {hidden ? "$•••••" : formatCents(owed)}
               </Text>
               {util?.utilization != null && health && (
@@ -234,7 +234,7 @@ function CardRow({ row, first, hidden, onPress }: { row: CardRowData; first: boo
           </Text>
         </View>
         <View className="items-end">
-          <Text className={paid ? "font-ui-medium" : "font-ui-semibold"} style={{ fontSize: rf(15), fontVariant: ["tabular-nums"], color: c.currentBalance < 0 ? colors.positive : paid ? colors["text-2"] : colors.text }}>
+          <Text className={paid ? "font-num-semibold" : "font-num-bold"} style={{ fontSize: rf(15), fontVariant: ["tabular-nums"], color: c.currentBalance < 0 ? colors.positive : paid ? colors["text-2"] : colors.text }}>
             {hidden ? "•••••" : c.currentBalance < 0 ? `${formatCents(-c.currentBalance)}` : formatCents(c.currentBalance)}
           </Text>
           <Text className="font-ui" style={{ fontSize: rf(12), marginTop: 2, color: v.utilizationTone === "high" ? colors.warning : v.utilizationTone === "over" ? colors.negative : colors["text-3"] }}>{right}</Text>

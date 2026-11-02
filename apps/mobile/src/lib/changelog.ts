@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.19.1",
+    date: "2026-11-02",
+    changes: [
+      { kind: "improved", text: "Every number now uses Tally's display font, Bricolage Grotesque, in a weight that suits where it sits." },
+    ],
+  },
+  {
     version: "2.19.0",
     date: "2026-11-02",
     changes: [

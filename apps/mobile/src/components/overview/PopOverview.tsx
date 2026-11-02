@@ -53,7 +53,7 @@ export function OnPaceCard({ streak, dailyPace, compact = false }: { streak: num
         ) : (
           <>
             {streak > 0 && <TallyMarks count={streak} height={24} color={ink} accent={colors.brand!} />}
-            <Text className="font-ui-semibold" style={{ color: ink, fontSize: rf(28), lineHeight: rf(32), fontVariant: ["tabular-nums"] }}>{streak}</Text>
+            <Text className="font-display" style={{ color: ink, fontSize: rf(28), lineHeight: rf(32), fontVariant: ["tabular-nums"] }}>{streak}</Text>
             <Text className="font-ui-semibold flex-1" style={{ color: ink, fontSize: rf(13.5) }} numberOfLines={2}>
               {streak === 1 ? "day" : "days"} under your {formatCents(dailyPace)} pace
             </Text>
@@ -78,7 +78,7 @@ export function OnPaceCard({ streak, dailyPace, compact = false }: { streak: num
         ) : (
           <>
             <TallyMarks count={streak} height={44} color={ink} accent={colors.brand!} />
-            <Text className="font-ui-semibold" style={{ color: ink, fontSize: rf(36), lineHeight: rf(40), fontVariant: ["tabular-nums"] }}>{streak}</Text>
+            <Text className="font-display" style={{ color: ink, fontSize: rf(36), lineHeight: rf(40), fontVariant: ["tabular-nums"] }}>{streak}</Text>
           </>
         )}
       </View>

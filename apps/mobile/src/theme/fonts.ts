@@ -2,7 +2,7 @@ import { Inter_400Regular, Inter_500Medium, Inter_600SemiBold } from "@expo-goog
 import { InstrumentSerif_400Regular } from "@expo-google-fonts/instrument-serif";
 import { JetBrainsMono_400Regular, JetBrainsMono_500Medium } from "@expo-google-fonts/jetbrains-mono";
 import { Figtree_400Regular, Figtree_600SemiBold, Figtree_700Bold } from "@expo-google-fonts/figtree";
-import { BricolageGrotesque_800ExtraBold } from "@expo-google-fonts/bricolage-grotesque";
+import { BricolageGrotesque_500Medium, BricolageGrotesque_600SemiBold, BricolageGrotesque_700Bold, BricolageGrotesque_800ExtraBold } from "@expo-google-fonts/bricolage-grotesque";
 
 // Bundled as real font assets (not a CSS @import) -- MOBILE_DESIGN.md §3.3.
 // Referenced from tailwind.config.js's fontFamily as "Inter", "InstrumentSerif",
@@ -20,4 +20,9 @@ export const fontsToLoad = {
   Figtree_SemiBold: Figtree_600SemiBold,
   Figtree_Bold: Figtree_700Bold,
   BricolageGrotesque_ExtraBold: BricolageGrotesque_800ExtraBold,
+  // Every number is Bricolage (mobile v2.19.1): font-num / -semibold / -bold
+  // for amounts in rows and captions, font-display (800) for big figures.
+  BricolageGrotesque_Medium: BricolageGrotesque_500Medium,
+  BricolageGrotesque_SemiBold: BricolageGrotesque_600SemiBold,
+  BricolageGrotesque_Bold: BricolageGrotesque_700Bold,
 };

@@ -103,7 +103,7 @@ function Header({ row, hidden }: { row: CardRowData; hidden: boolean }) {
         </View>
       </View>
       <View className="gap-1.5">
-        <Text className="font-ui-semibold" style={{ fontSize: rf(40), lineHeight: rf(44), fontVariant: ["tabular-nums"], color: c.currentBalance < 0 ? colors.positive : colors.text }}>
+        <Text className="font-display" style={{ fontSize: rf(40), lineHeight: rf(44), fontVariant: ["tabular-nums"], color: c.currentBalance < 0 ? colors.positive : colors.text }}>
           {hidden ? "$•••••" : c.currentBalance < 0 ? `${formatCents(-c.currentBalance)} credit` : formatCents(c.currentBalance)}
         </Text>
         <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>
@@ -203,7 +203,7 @@ function Charges({ row, hidden }: { row: CardRowData; hidden: boolean }) {
                 <CategoryAvatar categoryName={t.categoryName} pfcDetailed={t.pfcDetailed} colorSlot={t.categoryColorSlot} isTransfer={t.isTransfer ?? false} uncategorized={!t.categoryId && !t.isTransfer} size={28} radius={8} />
                 <Text className="font-ui text-text flex-1" style={{ fontSize: rf(14) }} numberOfLines={1}>{name}</Text>
                 <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>{new Date(t.postedDate + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })}</Text>
-                <Text className="font-ui-medium" style={{ fontSize: rf(14), fontVariant: ["tabular-nums"], color: t.amount > 0 ? colors.positive : colors.text, minWidth: 72, textAlign: "right" }}>
+                <Text className="font-num-semibold" style={{ fontSize: rf(14), fontVariant: ["tabular-nums"], color: t.amount > 0 ? colors.positive : colors.text, minWidth: 72, textAlign: "right" }}>
                   {hidden ? "•••" : formatCents(t.amount, { signed: true })}
                 </Text>
               </Pressable>
@@ -241,7 +241,7 @@ function Line({ label, value, first, strong, tone, onPress }: { label: string; v
     <Pressable onPress={onPress} disabled={!onPress} className="flex-row items-baseline justify-between gap-4 px-1" style={{ paddingVertical: 11, borderTopWidth: first ? 0 : 1, borderTopColor: hairline(colors) }}>
       <Text className="font-ui text-text-2" style={{ fontSize: rf(14) }}>{label}</Text>
       <View className="flex-row items-center gap-1 flex-shrink">
-        <Text className={strong ? "font-ui-semibold" : "font-ui"} style={{ fontSize: rf(14), fontVariant: ["tabular-nums"], color: tone ?? (onPress ? colors.brand : colors.text), textAlign: "right" }}>{value}</Text>
+        <Text className={strong ? "font-num-bold" : "font-num"} style={{ fontSize: rf(14), fontVariant: ["tabular-nums"], color: tone ?? (onPress ? colors.brand : colors.text), textAlign: "right" }}>{value}</Text>
         {onPress && <ChevronRight size={14} color={colors.brand} />}
       </View>
     </Pressable>
@@ -286,7 +286,7 @@ function LimitSheet({ row, visible, onClose }: { row: CardRowData; visible: bool
           {row.card.mask ? ` ••${row.card.mask}` : ""} · {row.card.creditLimitIsManual ? "a limit you set" : `${row.bankName} didn't report a limit`}
         </Text>
         <View className="flex-row items-center rounded-control border-field border-field-line px-4" style={{ backgroundColor: colors["surface-2"], height: 56 }}>
-          <Text className="font-ui-semibold text-text-3" style={{ fontSize: rf(28) }}>$</Text>
+          <Text className="font-display text-text-3" style={{ fontSize: rf(28) }}>$</Text>
           <TextInput
             value={text}
             onChangeText={(t) => setText(t.replace(/[^0-9.]/g, ""))}
@@ -294,7 +294,7 @@ function LimitSheet({ row, visible, onClose }: { row: CardRowData; visible: bool
             autoFocus
             placeholder="0"
             placeholderTextColor={colors["text-3"]}
-            className="flex-1 font-ui-semibold text-text"
+            className="flex-1 font-display text-text"
             style={{ fontSize: rf(28), paddingVertical: 0, marginLeft: 4 }}
             accessibilityLabel="Credit limit in dollars"
           />

@@ -50,7 +50,7 @@ export default function TagsScreen() {
                   <Tag size={12} color={colors.brand} strokeWidth={2.2} />
                   <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13) }}>{t.tag}</Text>
                 </View>
-                <Text className="font-ui-semibold text-text" style={{ fontSize: rf(26), lineHeight: rf(30), fontVariant: ["tabular-nums"] }}>{formatCents(t.spend)}</Text>
+                <Text className="font-display text-text" style={{ fontSize: rf(26), lineHeight: rf(30), fontVariant: ["tabular-nums"] }}>{formatCents(t.spend)}</Text>
                 <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>
                   {t.count} transaction{t.count === 1 ? "" : "s"} · {range(t.firstDate, t.lastDate)}
                 </Text>

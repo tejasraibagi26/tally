@@ -113,7 +113,7 @@ export function GoalChart({
         <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>
           {shown ? `${shortDate(shown.date)} · ${shown.projected ? "projected" : "net worth"}` : ""}
         </Text>
-        <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15), fontVariant: ["tabular-nums"] }}>{shown ? money(shown.value) : ""}</Text>
+        <Text className="font-num-bold text-text" style={{ fontSize: rf(15), fontVariant: ["tabular-nums"] }}>{shown ? money(shown.value) : ""}</Text>
       </View>
       <View
         style={{ height: HEIGHT }}

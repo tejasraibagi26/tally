@@ -286,7 +286,7 @@ export default function InvestmentsScreen() {
             <View key={s.label} className="flex-row items-center gap-2.5">
               <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: series[i % series.length] }} />
               <Text className="font-ui text-text flex-1" style={{ fontSize: rf(13) }} numberOfLines={1}>{s.label}</Text>
-              <Text className="font-ui text-text-3" style={{ fontSize: rf(13), fontVariant: ["tabular-nums"] }}>{formatPercent(s.pct)}</Text>
+              <Text className="font-num text-text-3" style={{ fontSize: rf(13), fontVariant: ["tabular-nums"] }}>{formatPercent(s.pct)}</Text>
               <MoneyText cents={s.value} className="font-ui text-text-2" style={{ fontSize: rf(13), minWidth: 72, textAlign: "right" }} />
             </View>
           ))}
@@ -329,11 +329,11 @@ export default function InvestmentsScreen() {
             <Card className="flex-row px-5 py-4">
               <View className="flex-1 gap-1">
                 <Text className="font-ui-medium text-text-3" style={label}>Income this year</Text>
-                <Text className="font-ui-semibold text-positive" style={{ fontSize: rf(15), fontVariant: ["tabular-nums"] }}>{formatCents(incomeYtd, { signed: true })}</Text>
+                <Text className="font-num-bold text-positive" style={{ fontSize: rf(15), fontVariant: ["tabular-nums"] }}>{formatCents(incomeYtd, { signed: true })}</Text>
               </View>
               <View className="flex-1 gap-1 items-end">
                 <Text className="font-ui-medium text-text-3" style={label}>Added this year</Text>
-                <Text className="font-ui-semibold text-text" style={{ fontSize: rf(15), fontVariant: ["tabular-nums"] }}>{formatCents(addedYtd, { signed: true })}</Text>
+                <Text className="font-num-bold text-text" style={{ fontSize: rf(15), fontVariant: ["tabular-nums"] }}>{formatCents(addedYtd, { signed: true })}</Text>
               </View>
             </Card>
           </>

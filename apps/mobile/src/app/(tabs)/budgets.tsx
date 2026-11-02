@@ -141,7 +141,7 @@ export default function BudgetsScreen() {
               {ctx.phase === "past" ? (
                 <>
                   <Text className="font-ui-medium text-text-3" style={label}>{monthLabel(month).split(" ")[0]} · finished</Text>
-                  <Text className="font-ui-semibold" style={{ fontSize: rf(34), color: summary.left < 0 ? colors.negative : colors.positive }}>
+                  <Text className="font-display" style={{ fontSize: rf(34), color: summary.left < 0 ? colors.negative : colors.positive }}>
                     {fmtBudget(Math.abs(summary.left))} {summary.left < 0 ? "over" : "under"}
                   </Text>
                   <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>
@@ -152,7 +152,7 @@ export default function BudgetsScreen() {
               ) : (
                 <>
                   <Text className="font-ui-medium text-text-3" style={label}>{summary.left < 0 ? "Over budget" : "Left to spend"}</Text>
-                  <Text className="font-ui-semibold" style={{ fontSize: rf(38), color: summary.left < 0 ? colors.negative : colors.text }}>{fmtBudget(Math.abs(summary.left))}</Text>
+                  <Text className="font-display" style={{ fontSize: rf(38), color: summary.left < 0 ? colors.negative : colors.text }}>{fmtBudget(Math.abs(summary.left))}</Text>
                   <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>
                     {summary.perDay != null ? `About ${fmtBudget(summary.perDay)} a day for ${summary.daysLeft} days · ` : ""}
                     {fmtBudget(summary.spent)} of {fmtBudget(summary.budgeted)} spent
@@ -188,7 +188,7 @@ export default function BudgetsScreen() {
                 <View className="px-5 py-3.5 gap-1 bg-sunken" style={{ borderTopWidth: 1, borderTopColor: colors.border }}>
                   <View className="flex-row justify-between">
                     <Text className="font-ui text-text-2" style={{ fontSize: rf(14) }}>Not budgeted</Text>
-                    <Text className="font-ui-semibold text-text" style={{ fontSize: rf(14), fontVariant: ["tabular-nums"] }}>{fmtBudget(unbudgetedTotal)}</Text>
+                    <Text className="font-num-bold text-text" style={{ fontSize: rf(14), fontVariant: ["tabular-nums"] }}>{fmtBudget(unbudgetedTotal)}</Text>
                   </View>
                   <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }} numberOfLines={1}>
                     {unbudgeted.slice(0, 3).map((u) => `${u.categoryName} ${fmtBudget(u.spend)}`).join(" · ")}

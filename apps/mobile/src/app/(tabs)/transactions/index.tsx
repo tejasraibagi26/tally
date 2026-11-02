@@ -191,7 +191,7 @@ export default function TransactionsScreen() {
               style={index > 0 ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined}
             >
               <Text className="font-ui-semibold text-text-3" style={{ fontSize: rf(13) }}>{g.label}</Text>
-              <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(12), fontVariant: ["tabular-nums"] }}>{formatCents(g.net, { signed: true })}</Text>
+              <Text className="font-num-semibold text-text-3" style={{ fontSize: rf(12), fontVariant: ["tabular-nums"] }}>{formatCents(g.net, { signed: true })}</Text>
             </View>
             {g.rows.map((t, i) => (
               <TransactionListRow

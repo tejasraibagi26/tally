@@ -79,7 +79,7 @@ export function GoalCard({ summary, showCurrent = false, linked = true }: { summ
     <Pressable onPress={() => router.push("/goals" as Href)} disabled={!linked} accessibilityRole={linked ? "button" : undefined} accessibilityLabel={`Year-end goal, ${status.label}. ${goalLine(summary, money)}`}>
       <Card className="p-5 gap-3">
         <Text className="font-ui-semibold text-text-2" style={{ fontSize: rf(14) }}>Year-end goal</Text>
-        <Text className="font-ui-semibold text-text" style={{ fontSize: rf(28), fontVariant: ["tabular-nums"] }}>
+        <Text className="font-display text-text" style={{ fontSize: rf(28), fontVariant: ["tabular-nums"] }}>
           {p.status === "reached" ? "Reached" : money(p.gap)}
         </Text>
         {/* Leads with what's left, not net worth again (Overview's card above has it). One size per line. */}

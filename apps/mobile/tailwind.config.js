@@ -132,6 +132,10 @@ module.exports = {
         "ui-medium": ["var(--font-ui-medium)"],
         "ui-semibold": ["var(--font-ui-semibold)"],
         display: ["var(--font-display)"],
+        // Numbers (MoneyText): Bricolage at a weight per role (theme/fonts.ts).
+        num: ["BricolageGrotesque_Medium"],
+        "num-semibold": ["BricolageGrotesque_SemiBold"],
+        "num-bold": ["BricolageGrotesque_Bold"],
         mono: ["JetBrainsMono"],
         "mono-medium": ["JetBrainsMono_Medium"],
       },

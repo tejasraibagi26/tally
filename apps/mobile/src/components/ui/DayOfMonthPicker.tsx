@@ -43,7 +43,7 @@ export function DayOfMonthPicker({ value, onChange, disabled, label }: { value: 
           className="items-center justify-center rounded-control"
           style={{ height: 44, backgroundColor: on ? colors.brand : colors["surface-2"], borderWidth: on ? 2 : 0, borderColor: colors.ink ?? colors.brand }}
         >
-          <Text className={on ? "font-ui-semibold" : "font-ui"} style={{ fontSize: rf(15), color: on ? colors["on-brand"] : colors.text, fontVariant: ["tabular-nums"] }}>{text}</Text>
+          <Text className={on ? "font-num-bold" : "font-num"} style={{ fontSize: rf(15), color: on ? colors["on-brand"] : colors.text, fontVariant: ["tabular-nums"] }}>{text}</Text>
         </Pressable>
       </View>
     );

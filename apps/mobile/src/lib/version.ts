@@ -507,8 +507,15 @@ import Constants from "expo-constants";
  * (core fix, web 2.17.1). Loans' empty state is the shared EmptyState card
  * with a way to Accounts; dialogs blur the screen behind less; Retirement
  * loads with full-width blocks instead of a centered skeleton.
+ *
+ * 2.19.1: numbers are Bricolage Grotesque, not Figtree (the user's call,
+ * reversing 2.19.0's one detail). Medium/SemiBold/Bold are now loaded
+ * beside ExtraBold (font-num / font-num-semibold / font-num-bold);
+ * MoneyText maps a caller's UI weight to the matching Bricolage weight,
+ * SplitMoney and big figures use font-display (800), and plain Texts that
+ * show only a number use font-num*.
  */
-export const APP_VERSION = "2.19.0";
+export const APP_VERSION = "2.19.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
