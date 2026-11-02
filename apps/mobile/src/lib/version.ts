@@ -460,8 +460,13 @@ import Constants from "expo-constants";
  * the blur on every sheet -- custom sheets were at 72% (nearly solid) while
  * More had no wash (stained by what's behind). More's cards are surface-2
  * at 75% on iOS, and its title is left-aligned at 18pt.
+ *
+ * 2.16.3: the transaction detail opens as the same floating glass sheet on
+ * iOS (formSheet at a 0.92 detent with GLASS_FORM_SHEET_IOS from
+ * ui/nativeBlur.ts, SHEET_WASH painted by the screen) instead of a solid
+ * full-height modal. Android keeps the modal.
  */
-export const APP_VERSION = "2.16.2";
+export const APP_VERSION = "2.16.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

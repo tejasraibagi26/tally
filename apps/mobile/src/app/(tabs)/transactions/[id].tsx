@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { View, Text, ScrollView, Pressable, TextInput, Switch, Platform, Alert } from "react-native";
 import { PillButton } from "@/components/ui/PillButton";
-import { useLocalSearchParams, useRouter, Stack, type Href } from "expo-router";
+import { useLocalSearchParams, useRouter, type Href } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { X, ChevronRight, ChevronLeft, ChevronDown, Pencil } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -29,6 +29,7 @@ import { Toast } from "@/components/ui/Toast";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { withAlpha, hairline, chartSeries } from "@/theme/colors";
+import { SHEET_WASH } from "@/components/ui/nativeBlur";
 
 const TERMS = [3, 6, 9, 12] as const;
 const NOTE_DEBOUNCE_MS = 600;
@@ -200,8 +201,12 @@ export default function TransactionDetailScreen() {
     // the content, so a fixed 22px is enough there; Android's "modal" draws
     // edge-to-edge under the status bar and needs the real inset. At the
     // bottom only the safe-area offset is kept -- no extra padding on top.
-    <View className="flex-1 bg-raised" style={{ paddingTop: Platform.OS === "ios" ? 22 : insets.top + 12 }}>
-      <Stack.Screen options={{ presentation: "modal" }} />
+    // iOS: a floating glass formSheet (transactions/_layout.tsx) -- this
+    // paints the shared SHEET_WASH over the system glass, like every sheet.
+    <View
+      className={Platform.OS === "ios" ? "flex-1" : "flex-1 bg-raised"}
+      style={{ paddingTop: Platform.OS === "ios" ? 22 : insets.top + 12, backgroundColor: Platform.OS === "ios" ? withAlpha(colors.raised!, SHEET_WASH) : undefined }}
+    >
 
       {view === "main" && (
         <View className="flex-row items-center justify-between px-5 pb-3">

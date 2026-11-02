@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.16.3",
+    date: "2026-11-02",
+    changes: [
+      { kind: "improved", text: "A transaction's details open in the same frosted, floating sheet as everything else." },
+    ],
+  },
+  {
     version: "2.16.2",
     date: "2026-11-02",
     changes: [

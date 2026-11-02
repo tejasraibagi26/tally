@@ -25,3 +25,15 @@ export const NativeBlur: BlurComponent | null = (() => {
 // cards on the glass at a lighter alpha so they belong to it.
 export const SHEET_WASH = 0.6;
 export const SHEET_CARD = 0.75;
+
+// Native (react-native-screens) formSheet options for the same floating
+// glass on iOS 26: a radius concentric with the display (iOS applies it to
+// all four corners; unset, the sheet stops floating), and clear content so
+// the system glass shows -- the screen paints SHEET_WASH over it itself.
+export const GLASS_FORM_SHEET_IOS = {
+  presentation: "formSheet" as const,
+  sheetGrabberVisible: true,
+  sheetCornerRadius: 44,
+  sheetExpandsWhenScrolledToEdge: false,
+  contentStyle: { backgroundColor: "transparent" },
+};
