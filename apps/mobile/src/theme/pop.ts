@@ -46,6 +46,8 @@ export const popLightColors: Record<string, string> = {
   // solid net-worth card with the text that sits on it.
   ink: "#1D1B2F",
   "ink-shadow": "#1D1B2F",
+  // Pop Calm (v2.18.1): text field outline, quieter than ink.
+  "field-line": "#CFC7B9",
   marigold: "#FFC53D",
   "on-marigold": "#1D1B2F",
   "marigold-accent": "#5B3BF5",
@@ -90,6 +92,7 @@ export const popDarkColors: Record<string, string> = {
   // dark shadow vanishes on the #0A0910 canvas, a coloured one reads.
   ink: "#F6F1E7",
   "ink-shadow": "#6A4BFF",
+  "field-line": "#4A4560",
   marigold: "#FFCF5C",
   "on-marigold": "#0A0910",
   "marigold-accent": "#3B2A9E",
@@ -139,7 +142,8 @@ function buildVars(colors: Record<string, string>) {
   out["--border-card"] = "0px";
   // Text fields: an outline so a field never melts into a dialog or sheet
   // of the same fill (dark Pop's raised and surface-2 match).
-  out["--border-field"] = "1.5px";
+  out["--border-field"] = "1px";
+  out["--color-field-line"] = colors["field-line"]!;
   return out;
 }
 

@@ -41,8 +41,8 @@ export function YearEndGoal() {
     <View className="flex-1">
       {goal.isLoading ? (
         <View className="px-5 gap-4">
-          <Skeleton style={{ height: 190, borderRadius: 20 }} />
-          <Skeleton style={{ height: 240, borderRadius: 20 }} />
+          <Skeleton style={{ height: 190, borderRadius: 12 }} />
+          <Skeleton style={{ height: 240, borderRadius: 12 }} />
         </View>
       ) : g ? (
         <WithGoal onHow={() => setHowOpen(true)} />
@@ -94,7 +94,7 @@ function SetGoal({ onHow }: { onHow: () => void }) {
         </View>
         <View className="gap-1.5">
           <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(13) }}>Net worth to reach, in CAD</Text>
-          <View className="flex-row items-center h-[52px] rounded-control px-4 gap-2 bg-surface-2 border-field border-ink">
+          <View className="flex-row items-center h-[52px] rounded-control px-4 gap-2 bg-surface-2 border-field border-field-line">
             <Text className="font-ui text-text-3" style={{ fontSize: rf(18) }}>$</Text>
             <TextInput
               value={amount}

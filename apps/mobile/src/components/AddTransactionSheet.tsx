@@ -254,7 +254,7 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
               as its measured text (a TextInput doesn't size itself) -- so even
               9999999.99 sits on one line instead of clipping. */}
           <View className="flex-row items-center justify-center" style={{ alignSelf: "stretch" }}>
-            <Text className="font-display" style={{ fontSize: rf(amountSize * 0.5), color: signColor }}>{kind === "expense" ? "−$" : "+$"}</Text>
+            <Text className="font-ui-semibold" style={{ fontSize: rf(amountSize * 0.5), color: signColor }}>{kind === "expense" ? "−$" : "+$"}</Text>
             <TextInput
               value={amountInput}
               onChangeText={(t) => setAmountInput(cleanAmount(t))}
@@ -263,12 +263,12 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
               keyboardType="decimal-pad"
               autoFocus
               accessibilityLabel="Amount"
-              className="font-display text-text"
+              className="font-ui-semibold text-text"
               style={{ fontSize: rf(amountSize), width: amountWidth + 6, paddingVertical: 0, paddingHorizontal: 0 }}
             />
             {/* Invisible twin, same font and size, measured for the field's width. */}
             <Text
-              className="font-display"
+              className="font-ui-semibold"
               aria-hidden
               accessibilityElementsHidden
               importantForAccessibility="no-hide-descendants"
@@ -289,7 +289,7 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
             placeholder="e.g. Tim Hortons"
             placeholderTextColor={colors["text-3"]}
             accessibilityLabel="What was it"
-            className="rounded-control px-[14px] font-ui text-text border-field border-ink"
+            className="rounded-control px-[14px] font-ui text-text border-field border-field-line"
             style={{ height: 48, fontSize: rf(15), backgroundColor: glassFill }}
           />
         </View>

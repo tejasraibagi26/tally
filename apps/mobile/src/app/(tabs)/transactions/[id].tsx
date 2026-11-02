@@ -300,7 +300,7 @@ export default function TransactionDetailScreen() {
               placeholder="Add a note"
               placeholderTextColor={colors["text-3"]}
               multiline
-              className="rounded-card bg-surface-2 px-[14px] py-3 font-ui text-text border-field border-ink"
+              className="rounded-card bg-surface-2 px-[14px] py-3 font-ui text-text border-field border-field-line"
               style={{ minHeight: 48, textAlignVertical: "top", fontSize: rf(14) }}
             />
             <View className="flex-row flex-wrap gap-1.5">
@@ -482,7 +482,7 @@ function Header({
         </View>
       </View>
       <View className="flex-row items-end justify-between gap-3">
-        <Text className="font-display" style={{ color, fontSize: rf(40), lineHeight: rf(44), fontVariant: ["tabular-nums"] }} accessibilityLabel={text}>
+        <Text className="font-ui-semibold" style={{ color, fontSize: rf(40), lineHeight: rf(44), fontVariant: ["tabular-nums"] }} accessibilityLabel={text}>
           {dot === -1 ? text : text.slice(0, dot)}
           {dot !== -1 && <Text style={{ fontSize: rf(22), color: colors["text-3"] }}>{text.slice(dot)}</Text>}
         </Text>
@@ -765,7 +765,7 @@ function SplitView({
                   keyboardType="decimal-pad"
                   selectTextOnFocus
                   className="rounded-[9px] px-2.5 font-ui text-text text-right"
-                  style={{ minWidth: 92, height: 36, fontSize: rf(14.5), fontVariant: ["tabular-nums"], backgroundColor: colors.sunken, borderWidth: 1, borderColor: colors.ink ?? colors.border }}
+                  style={{ minWidth: 92, height: 36, fontSize: rf(14.5), fontVariant: ["tabular-nums"], backgroundColor: colors.sunken, borderWidth: 1, borderColor: colors["field-line"] ?? colors.border }}
                   accessibilityLabel={`Amount for ${c?.name ?? `line ${i + 1}`}`}
                 />
                 {lines.length > 2 && (

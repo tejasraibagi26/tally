@@ -599,7 +599,7 @@ function WipeDialog({ visible, onClose, bankCount, onWiped }: { visible: boolean
           accessibilityLabel="Current password"
           className="rounded-control bg-surface-2 px-[14px] font-ui text-text"
           // Fields are outlined in ink (dark mode's dialog and field fills match).
-          style={{ height: 46, fontSize: rf(14.5), borderWidth: colors.ink ? 1.5 : 1, borderColor: error ? colors.negative : (colors.ink ?? "transparent") }}
+          style={{ height: 46, fontSize: rf(14.5), borderWidth: 1, borderColor: error ? colors.negative : colors["field-line"] }}
         />
       </View>
       {error && <DialogError icon={<AlertTriangle size={16} color={colors.negative} strokeWidth={1.75} style={{ marginTop: 1 }} />}>{error}</DialogError>}

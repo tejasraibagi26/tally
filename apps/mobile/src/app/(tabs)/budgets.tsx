@@ -102,7 +102,7 @@ export default function BudgetsScreen() {
                 ctx.phase === "past" && "Finished",
               ]}
               actions={
-                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} accessibilityLabel="Add budget" className="items-center justify-center rounded-control bg-brand" style={{ width: 34, height: 34 }}>
+                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} accessibilityLabel="Add budget" className="items-center justify-center rounded-full bg-brand" style={{ width: 34, height: 34 }}>
                   <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
                 </Pressable>
               }
@@ -141,7 +141,7 @@ export default function BudgetsScreen() {
               {ctx.phase === "past" ? (
                 <>
                   <Text className="font-ui-medium text-text-3" style={label}>{monthLabel(month).split(" ")[0]} · finished</Text>
-                  <Text className="font-display" style={{ fontSize: rf(34), color: summary.left < 0 ? colors.negative : colors.positive }}>
+                  <Text className="font-ui-semibold" style={{ fontSize: rf(34), color: summary.left < 0 ? colors.negative : colors.positive }}>
                     {fmtBudget(Math.abs(summary.left))} {summary.left < 0 ? "over" : "under"}
                   </Text>
                   <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>
@@ -152,7 +152,7 @@ export default function BudgetsScreen() {
               ) : (
                 <>
                   <Text className="font-ui-medium text-text-3" style={label}>{summary.left < 0 ? "Over budget" : "Left to spend"}</Text>
-                  <Text className="font-display" style={{ fontSize: rf(38), color: summary.left < 0 ? colors.negative : colors.text }}>{fmtBudget(Math.abs(summary.left))}</Text>
+                  <Text className="font-ui-semibold" style={{ fontSize: rf(38), color: summary.left < 0 ? colors.negative : colors.text }}>{fmtBudget(Math.abs(summary.left))}</Text>
                   <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>
                     {summary.perDay != null ? `About ${fmtBudget(summary.perDay)} a day for ${summary.daysLeft} days · ` : ""}
                     {fmtBudget(summary.spent)} of {fmtBudget(summary.budgeted)} spent

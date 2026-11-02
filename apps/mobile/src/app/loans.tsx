@@ -1,6 +1,9 @@
 import { View, Text, ScrollView, RefreshControl } from "react-native";
 import { SkeletonScreen } from "@/components/ui/Skeleton";
-import { AlertTriangle } from "lucide-react-native";
+import { AlertTriangle, Landmark } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { PillButton } from "@/components/ui/PillButton";
 import { formatCents } from "@tally/core/money";
 import { Card } from "@/components/ui/Card";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
@@ -37,6 +40,7 @@ const dateLabel = (iso: string, withYear = false) =>
 export default function LoansScreen() {
   const colors = useThemeColors();
   const rf = useRF();
+  const router = useRouter();
   const contentTop = useScreenContentTop();
   const { hidden } = usePrivacy();
   const { data, isLoading, refetch, isRefetching } = useLoans();
@@ -64,18 +68,21 @@ export default function LoansScreen() {
         refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} />}
       >
         {loans.length === 0 ? (
-          <Card className="p-5 gap-2">
-            <Text className="font-display text-text" style={{ fontSize: rf(17) }}>No loans connected</Text>
-            <Text className="font-ui text-text-2" style={{ fontSize: rf(14), lineHeight: rf(20) }}>
-              Mortgages, student loans, car and personal loans and lines of credit show up here once their bank is connected, and their balances count against your net worth.
-            </Text>
+          // The app's one empty-state shape (EmptyState in a card, like Tags), with a way forward.
+          <Card className="py-10 px-5 gap-6">
+            <EmptyState
+              icon={Landmark}
+              title="No loans yet"
+              description="Mortgages, student, car and personal loans and lines of credit show up here once their bank is connected. Their balances already count against your net worth."
+            />
+            <PillButton label="Go to Accounts" variant="subtle" size="md" inline className="self-center" onPress={() => router.push("/(tabs)/accounts")} />
           </Card>
         ) : (
           <>
             <Card className="p-5 gap-1">
-              <Text className="font-ui-semibold text-text-2" style={{ fontSize: rf(11.5), letterSpacing: 0.8, textTransform: "uppercase" }}>You owe</Text>
+              <Text className="font-ui-semibold text-text-2" style={{ fontSize: rf(14) }}>You owe</Text>
               {[...totals].map(([currency, cents]) => (
-                <Text key={currency} className="font-display text-text" style={{ fontSize: rf(32), fontVariant: ["tabular-nums"] }}>
+                <Text key={currency} className="font-ui-semibold text-text" style={{ fontSize: rf(32), fontVariant: ["tabular-nums"] }}>
                   {money(cents, currency)}
                 </Text>
               ))}

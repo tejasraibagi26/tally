@@ -16,6 +16,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.19.0",
+    date: "2026-11-02",
+    changes: [
+      { kind: "new", text: "Transactions show their category as an icon in its colour, so you can scan a list at a glance." },
+      { kind: "improved", text: "Every number now uses the same font, rounder buttons are back, and text fields have a lighter outline." },
+      { kind: "improved", text: "Loans has a proper empty screen, and pop-up explainers no longer blur the screen behind so heavily." },
+      { kind: "fixed", text: "Scrubbing a chart on Forecast, Goals or Investments no longer swipes you back a page." },
+      { kind: "fixed", text: "Forecast no longer shows a bill as overdue once it has been charged." },
+      { kind: "fixed", text: "Retirement shows a full-width loading placeholder instead of one in the middle." },
+    ],
+  },
+  {
     version: "2.18.0",
     date: "2026-11-02",
     changes: [

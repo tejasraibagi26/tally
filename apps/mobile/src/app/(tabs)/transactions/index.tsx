@@ -218,7 +218,7 @@ export default function TransactionsScreen() {
               meta={[hasSynced(syncTimes) && <SyncFreshness key="sync" syncedAt={syncTimes} />]}
               actions={
                 <>
-                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} className="items-center justify-center rounded-control bg-brand" style={{ width: 34, height: 34 }}>
+                <Pressable onPress={() => setAddOpen(true)} hitSlop={12} className="items-center justify-center rounded-full bg-brand" style={{ width: 34, height: 34 }}>
                   <Plus size={18} color={colors["on-brand"]} strokeWidth={2.3} />
                 </Pressable>
                 <Pressable

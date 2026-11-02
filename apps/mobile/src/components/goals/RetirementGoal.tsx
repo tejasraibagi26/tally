@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { SkeletonScreen } from "@/components/ui/Skeleton";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { View, Text, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, Switch } from "react-native";
 import { PillButton } from "@/components/ui/PillButton";
 import { useRouter } from "expo-router";
@@ -57,9 +57,14 @@ export function RetirementGoal() {
   const [startFromZero, setStartFromZero] = useState(false);
 
   if (loadingDefaults || loadingSettings || !defaults || settingsData === undefined) {
+    // Full-width blocks in the planner's shape (answer, chart, inputs), like
+    // the Year-end tab's skeleton -- not the generic screen skeleton, whose
+    // short title bars read as a lone shape in the middle of the tab.
     return (
-      <View className="flex-1">
-        <SkeletonScreen top={contentTop} />
+      <View className="flex-1 px-5 gap-4" accessibilityLabel="Loading" accessibilityRole="progressbar">
+        <Skeleton style={{ height: 150, borderRadius: 12 }} />
+        <Skeleton style={{ height: 220, borderRadius: 12 }} />
+        <Skeleton style={{ height: 260, borderRadius: 12 }} />
       </View>
     );
   }
@@ -195,7 +200,7 @@ function Planner({
               ) : (
                 <>
                   <Text className="font-ui-medium text-text-3" style={label}>{retireAge != null ? "You could retire at" : "You could retire in"}</Text>
-                  <Text className="font-display text-text" style={{ fontSize: rf(40), lineHeight: rf(44) }}>
+                  <Text className="font-ui-semibold text-text" style={{ fontSize: rf(40), lineHeight: rf(44) }}>
                     {retireAge != null ? `${retireAge} ` : `${retireYear}`}
                     {retireAge != null && <Text className="text-text-2" style={{ fontSize: rf(20) }}>in {retireYear}</Text>}
                   </Text>
@@ -414,7 +419,7 @@ function Lever({
             onSubmitEditing={commit}
             keyboardType="decimal-pad"
             returnKeyType="done"
-            className="font-ui-semibold text-text rounded-control bg-surface-2 px-2.5 border-field border-ink"
+            className="font-ui-semibold text-text rounded-control bg-surface-2 px-2.5 border-field border-field-line"
             style={{ fontSize: rf(14), minWidth: 90, textAlign: "right", paddingVertical: 4 }}
           />
         ) : (

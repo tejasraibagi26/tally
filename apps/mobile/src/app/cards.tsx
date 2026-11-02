@@ -142,7 +142,7 @@ export default function CardsScreen() {
               <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(11), letterSpacing: 0.6, textTransform: "uppercase" }}>
                 You owe across {rows.length} card{rows.length === 1 ? "" : "s"}
               </Text>
-              <Text className="font-display text-text" style={{ fontSize: rf(40), lineHeight: rf(44), fontVariant: ["tabular-nums"] }}>
+              <Text className="font-ui-semibold text-text" style={{ fontSize: rf(40), lineHeight: rf(44), fontVariant: ["tabular-nums"] }}>
                 {hidden ? "$•••••" : formatCents(owed)}
               </Text>
               {util?.utilization != null && health && (

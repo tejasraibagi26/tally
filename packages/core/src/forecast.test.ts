@@ -104,13 +104,22 @@ describe("bills", () => {
   });
 
   it("clamps a month-end stream into a shorter month", () => {
-    const dates = occurrencesFor(stream({ predictedNextDate: "2026-01-31" }), "2026-01-01", "2026-03-31");
+    const dates = occurrencesFor(stream({ predictedNextDate: "2026-01-31", lastDate: "2025-12-31" }), "2026-01-01", "2026-03-31");
     expect(dates).toEqual(["2026-01-31", "2026-02-28", "2026-03-28"]);
   });
 
   it("rolls a stale predicted date forward instead of dropping the bill", () => {
     const dates = occurrencesFor(stream({ predictedNextDate: "2026-08-03" }), "2026-11-01", "2026-11-30");
     expect(dates).toEqual(["2026-11-03"]);
+  });
+
+  it("drops a past-due occurrence once its charge has posted (not overdue)", () => {
+    // Rent charged Nov 1, two days early; detection still predicts Nov 3.
+    expect(occurrencesFor(stream({ predictedNextDate: "2026-11-03", lastDate: "2026-11-01" }), "2026-11-01", "2026-12-31")).toEqual(["2026-12-03"]);
+    // Charged on the day itself, now past: no overdue listing either.
+    expect(occurrencesFor(stream({ predictedNextDate: "2026-10-31", lastDate: "2026-10-31" }), "2026-10-29", "2026-11-30")).toEqual(["2026-11-30"]);
+    // Last month's charge doesn't cover this month.
+    expect(occurrencesFor(stream({ predictedNextDate: "2026-10-31", lastDate: "2026-09-30" }), "2026-10-29", "2026-11-30")).toEqual(["2026-10-31", "2026-11-30"]);
   });
 
   it("keeps a bill that slipped a day past due, on day 0", () => {

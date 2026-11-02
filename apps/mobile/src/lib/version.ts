@@ -492,8 +492,23 @@ import Constants from "expo-constants";
  * section labels on the four tabs are sentence case instead of uppercase.
  * Sheets keep their floating glass: surface-2/raised and the panel radius
  * are unchanged.
+ *
+ * 2.19.0: Pop Calm feedback. Transaction rows (Transactions, Overview's
+ * Recent, a card's charges) show the category as an icon in its own color
+ * (CategoryAvatar: icon matched from the category name, then Plaid's
+ * category) instead of the merchant logo. Every number is Figtree --
+ * MoneyText/SplitMoney map font-display to the bold UI weight; Bricolage
+ * is for titles only. Buttons are full pills again; text fields wear a
+ * quiet 1px field-line instead of the ink outline; the net worth ranges
+ * sit left. Budgets' year-end goal row is taller; on Overview the goal
+ * card joins Safe to spend and on-pace days in one tighter group. Pushed
+ * iOS screens turn off the iOS 26 full-screen back swipe, which stole
+ * sideways drags on charts. Forecast stops calling a charged bill overdue
+ * (core fix, web 2.17.1). Loans' empty state is the shared EmptyState card
+ * with a way to Accounts; dialogs blur the screen behind less; Retirement
+ * loads with full-width blocks instead of a centered skeleton.
  */
-export const APP_VERSION = "2.18.0";
+export const APP_VERSION = "2.19.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

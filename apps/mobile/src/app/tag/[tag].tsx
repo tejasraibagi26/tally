@@ -56,13 +56,13 @@ export default function TagScreen() {
             </Text>
             <Card className="p-5 gap-1.5">
               <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(11), letterSpacing: 0.6, textTransform: "uppercase" }}>Total</Text>
-              <Text className="font-display text-text" style={{ fontSize: rf(38), lineHeight: rf(42), fontVariant: ["tabular-nums"] }}>{formatCents(s.spend)}</Text>
+              <Text className="font-ui-semibold text-text" style={{ fontSize: rf(38), lineHeight: rf(42), fontVariant: ["tabular-nums"] }}>{formatCents(s.spend)}</Text>
               {s.income > 0 && <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>{formatCents(s.income)} came back in</Text>}
             </Card>
             <View className="flex-row gap-3">
               <Card className="p-4 gap-1.5 flex-1">
                 <Text className="font-ui-medium text-text-3" style={{ fontSize: rf(11), letterSpacing: 0.6, textTransform: "uppercase" }}>Per day</Text>
-                <Text className="font-display text-text" style={figure}>{s.perDay != null ? formatCents(s.perDay) : "—"}</Text>
+                <Text className="font-ui-semibold text-text" style={figure}>{s.perDay != null ? formatCents(s.perDay) : "—"}</Text>
                 <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>over {s.days} day{s.days === 1 ? "" : "s"}</Text>
               </Card>
               <Card className="p-4 gap-1.5 flex-1">

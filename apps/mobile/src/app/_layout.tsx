@@ -124,7 +124,18 @@ function RootNavigator() {
   const pushedScreenOptions = (title: string) =>
     Platform.OS === "android"
       ? { headerShown: true, headerTransparent: true, headerTitle: title, header: (props: NativeStackHeaderProps) => <TransparentHeader {...props} /> }
-      : { headerShown: true, headerTransparent: true, headerStyle: { backgroundColor: "transparent" }, headerTitle: title, headerBackTitle: "" };
+      : {
+          headerShown: true,
+          headerTransparent: true,
+          headerStyle: { backgroundColor: "transparent" },
+          headerTitle: title,
+          headerBackTitle: "",
+          // iOS 26 turns on a full-screen back swipe by default, which takes
+          // a sideways drag on a chart (Forecast, Goals, Investments) and
+          // pops the screen instead of scrubbing. Back stays on the edge
+          // swipe and the header button.
+          fullScreenGestureEnabled: false,
+        };
 
   // BootSplash stays at the same spot in the tree across the !shellReady ->
   // ready switch, so its animation isn't remounted (restarted) mid-draw.

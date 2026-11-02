@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { MerchantAvatar } from "@/components/transactions/MerchantAvatar";
+import { CategoryAvatar } from "@/components/transactions/CategoryAvatar";
 import { View, Text, Pressable } from "react-native";
 import { useRouter } from "expo-router";
 import ReanimatedSwipeable, { type SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
@@ -94,7 +94,7 @@ export function TransactionListRow({
         className="flex-row items-center gap-3 bg-surface px-4 py-3"
         style={showTopBorder ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined}
       >
-        <MerchantAvatar name={display} logoUrl={item.isTransfer || item.isManual ? null : item.logoUrl} size={30} radius={9} fontSize={12} />
+        <CategoryAvatar categoryName={item.categoryName} pfcDetailed={item.pfcDetailed} colorSlot={item.categoryColorSlot} isTransfer={item.isTransfer ?? false} uncategorized={v.uncategorized} size={32} radius={10} />
         <View className="flex-1 gap-1">
           <View className="flex-row items-center gap-1.5">
             {v.needsReview && <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: colors.brand }} accessibilityLabel="Needs review" />}

@@ -1,5 +1,5 @@
 import { View, Text, Pressable } from "react-native";
-import { MerchantAvatar } from "@/components/transactions/MerchantAvatar";
+import { CategoryAvatar } from "@/components/transactions/CategoryAvatar";
 import { useRouter } from "expo-router";
 import { prettifyPfc } from "@tally/core/pfc";
 import { DEFAULT_CURRENCY } from "@tally/core/fx";
@@ -68,7 +68,7 @@ export function RecentList({ items }: { items: TransactionRow[] }) {
                 className="flex-row items-center gap-3 py-3.5"
                 style={i > 0 ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined}
               >
-                <MerchantAvatar name={display} logoUrl={t.isTransfer || t.isManual ? null : t.logoUrl} size={30} radius={9} fontSize={12} />
+                <CategoryAvatar categoryName={t.categoryName} pfcDetailed={t.pfcDetailed} colorSlot={t.categoryColorSlot} isTransfer={t.isTransfer ?? false} uncategorized={v.uncategorized} size={32} radius={10} />
                 <View className="flex-1 gap-0.5">
                   <View className="flex-row items-center gap-1.5">
                     {v.needsReview && <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: colors.brand }} accessibilityLabel="Needs review" />}

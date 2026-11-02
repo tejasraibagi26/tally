@@ -298,7 +298,7 @@ export function NetWorthHero({
               />
             )}
           </Animated.View>
-          <View className="flex-row gap-1 justify-center" accessibilityRole="tablist">
+          <View className="flex-row gap-1" accessibilityRole="tablist">
             {NET_WORTH_RANGES.map((r) => {
               const on = r === range;
               return (
@@ -306,7 +306,7 @@ export function NetWorthHero({
                   key={r}
                   onPress={() => chooseRange(r)}
                   hitSlop={{ top: 8, bottom: 8 }}
-                  className="h-8 px-3.5 rounded-control items-center justify-center"
+                  className="h-8 px-3.5 rounded-full items-center justify-center"
                   style={on ? [{ backgroundColor: colors.surface }, rangeEdge] : undefined}
                   accessibilityRole="tab"
                   accessibilityState={{ selected: on }}

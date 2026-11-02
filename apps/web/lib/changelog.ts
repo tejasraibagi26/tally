@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.17.1",
+    date: "2026-11-02",
+    changes: [
+      { kind: "fixed", text: "Forecast no longer shows a bill as overdue once it has been charged." },
+    ],
+  },
+  {
     version: "2.17.0",
     date: "2026-11-02",
     changes: [

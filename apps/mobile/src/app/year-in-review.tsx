@@ -151,7 +151,7 @@ export default function YearInReviewScreen() {
               {r.topMerchants.map((m, i) => (
                 <View key={m.key} className="flex-row items-center gap-3">
                   <View className="items-center justify-center rounded-control" style={{ width: 32, height: 32, backgroundColor: colors.sunken, borderWidth: 2, borderColor: colors.ink ?? colors.border }}>
-                    <Text className="font-display text-text" style={{ fontSize: rf(14) }}>{i + 1}</Text>
+                    <Text className="font-ui-semibold text-text" style={{ fontSize: rf(14) }}>{i + 1}</Text>
                   </View>
                   <View className="flex-1 min-w-0">
                     <Text className="font-ui text-text" style={{ fontSize: rf(14) }} numberOfLines={1}>{m.label}</Text>
@@ -171,7 +171,7 @@ export default function YearInReviewScreen() {
               </Tile>
             </View>
             <Tile label="Subscriptions" sub={`${r.subscriptions.activeCount} active, at today's prices`}>
-              <Text className="font-display text-text" style={figure}>
+              <Text className="font-ui-semibold text-text" style={figure}>
                 {formatCents(r.subscriptions.yearlyTotal)}
                 <Text className="font-ui text-text-2" style={{ fontSize: rf(14) }}> a year</Text>
               </Text>

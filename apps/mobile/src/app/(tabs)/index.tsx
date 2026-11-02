@@ -175,15 +175,14 @@ export default function OverviewScreen() {
         </HeroSurface>
 
         {/* Safe to spend over a compact on-pace row (the streak needs a budget to pace against) */}
-        {((safe.data?.cash.length ?? 0) > 0 || onPace) && (
-          <View className="gap-3.5">
-            {safe.data && safe.data.cash.length > 0 && <SafeToSpendCard s={safe.data} initiallyOpen={params.safe === "1"} />}
-            {onPace && <OnPaceCard streak={onPace.streak} dailyPace={onPace.dailyPace} compact={(safe.data?.cash.length ?? 0) > 0} />}
-          </View>
-        )}
-
-        {/* The year-end goal, or a prompt to set one */}
-        <GoalCard summary={goal.data} />
+        {/* Safe to spend, the compact on-pace row and the year-end goal (or a
+            prompt to set one) read as one group: the tighter gap-3.5 between
+            them, gap-7 only around the group. */}
+        <View className="gap-3.5">
+          {safe.data && safe.data.cash.length > 0 && <SafeToSpendCard s={safe.data} initiallyOpen={params.safe === "1"} />}
+          {onPace && <OnPaceCard streak={onPace.streak} dailyPace={onPace.dailyPace} compact={(safe.data?.cash.length ?? 0) > 0} />}
+          <GoalCard summary={goal.data} />
+        </View>
 
         {/* Banks that need a tap and this month's review backlog (the same count as
             the Transactions tab's "N to review" banner) -- renders nothing when all

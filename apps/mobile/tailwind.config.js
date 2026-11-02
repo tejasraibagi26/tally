@@ -107,6 +107,8 @@ for (const token of CSS_VAR_TOKENS) {
 }
 // Tally Pop's sticker outline (theme/pop.ts); transparent in the classic look.
 themeColors.ink = "var(--color-ink)";
+// Pop Calm text-field outline (theme/pop.ts).
+themeColors["field-line"] = "var(--color-field-line)";
 
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],

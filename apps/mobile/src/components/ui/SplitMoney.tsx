@@ -4,7 +4,7 @@ import { usePrivacy } from "@/lib/PrivacyContext";
 import { useRF } from "@/theme/responsiveFont";
 
 /**
- * A display-size amount (serif) whose cents render at a smaller, muted size
+ * A display-size amount (Figtree bold, like every number) whose cents render at a smaller, muted size
  * so the dollars carry the figure. Same privacy-mask contract as MoneyText.
  */
 export function SplitMoney({
@@ -31,14 +31,14 @@ export function SplitMoney({
   const frac = dot === -1 ? "" : text.slice(dot);
   return (
     <Text
-      className="font-display text-text"
+      className="font-ui-semibold text-text"
       style={{ fontSize: rf(size), lineHeight: rf(lineHeight), fontVariant: ["tabular-nums"] }}
       numberOfLines={1}
       adjustsFontSizeToFit
       accessibilityLabel={masked ? "Amount hidden" : accessibilityLabel ?? text}
     >
       {masked ? "••••••" : whole}
-      {!masked && <Text className="font-display text-text-3" style={{ fontSize: rf(centsSize) }}>{frac}</Text>}
+      {!masked && <Text className="font-ui-semibold text-text-3" style={{ fontSize: rf(centsSize) }}>{frac}</Text>}
     </Text>
   );
 }

@@ -80,12 +80,12 @@ export function TallyDialog({
 
   return (
     <Modal visible transparent animationType="none" onRequestClose={dismissible ? onClose : () => {}} statusBarTranslucent>
-      {/* The screen behind is blurred, like web's modal (backdrop-blur over
+      {/* The screen behind is lightly blurred (v2.18.1: was too strong), like web's modal (backdrop-blur over
           the scrim): iOS 26's glass material, tinted dark so it still dims.
           Without liquid glass (Android, older iOS) the plain scrim stays. */}
-      <Animated.View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: NativeBlur ? "rgba(0,0,0,0.22)" : blur ? undefined : "rgba(0,0,0,0.42)", opacity: anim }}>
-        {NativeBlur && <NativeBlur intensity={45} tint="dark" style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }} />}
-        {blur && <GlassView glassEffectStyle="regular" tintColor="rgba(0,0,0,0.28)" style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }} />}
+      <Animated.View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: NativeBlur ? "rgba(0,0,0,0.18)" : blur ? undefined : "rgba(0,0,0,0.38)", opacity: anim }}>
+        {NativeBlur && <NativeBlur intensity={18} tint="dark" style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }} />}
+        {blur && <GlassView glassEffectStyle="clear" tintColor="rgba(0,0,0,0.22)" style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }} />}
         <Pressable style={{ flex: 1 }} onPress={dismissible ? onClose : undefined} accessibilityLabel="Close" />
       </Animated.View>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={{ flex: 1, justifyContent: "center", alignItems: "center" }} pointerEvents="box-none">

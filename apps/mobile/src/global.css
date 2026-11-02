@@ -48,6 +48,7 @@
     --border-button: 0px;
     --border-card: 0px;
     --border-field: 0px;
+    --color-field-line: transparent;
   }
 
   /* Same palette as web's dark theme (apps/web/app/globals.css, "dark v2",

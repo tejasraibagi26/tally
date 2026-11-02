@@ -530,8 +530,14 @@
  * chips, an account that's never preselected, and "Add expense · $X"
  * disabled until amount, description and account are set. Category
  * options now carry kind (lib/categoryOptions.ts).
+ *
+ * 2.17.1: Forecast no longer lists a bill as "Overdue" once its charge has
+ * posted. @tally/core's occurrencesFor skips an occurrence when the stream's
+ * lastDate landed on or up to 5 days (3 for weekly) before it, which covers
+ * a charge that posted while predicted_next_date hadn't moved on yet. Shared
+ * with mobile (forecast comes from /api/forecast).
  */
-export const APP_VERSION = "2.17.0";
+export const APP_VERSION = "2.17.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

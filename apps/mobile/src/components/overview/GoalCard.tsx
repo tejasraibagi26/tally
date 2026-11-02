@@ -3,7 +3,7 @@ import { useRouter, type Href } from "expo-router";
 import { AlertTriangle, CheckCircle2, ChevronRight, Clock, Flag, Target, type LucideIcon } from "lucide-react-native";
 import { formatCents } from "@tally/core/money";
 import type { GoalStatus } from "@tally/core/goalMath";
-import { Card } from "@/components/ui/Card";
+import { Card, useStickerShadow } from "@/components/ui/Card";
 import type { GoalSummary } from "@/lib/queries/goals";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
@@ -79,7 +79,7 @@ export function GoalCard({ summary, showCurrent = false, linked = true }: { summ
     <Pressable onPress={() => router.push("/goals" as Href)} disabled={!linked} accessibilityRole={linked ? "button" : undefined} accessibilityLabel={`Year-end goal, ${status.label}. ${goalLine(summary, money)}`}>
       <Card className="p-5 gap-3">
         <Text className="font-ui-semibold text-text-2" style={{ fontSize: rf(14) }}>Year-end goal</Text>
-        <Text className="font-display text-text" style={{ fontSize: rf(28), fontVariant: ["tabular-nums"] }}>
+        <Text className="font-ui-semibold text-text" style={{ fontSize: rf(28), fontVariant: ["tabular-nums"] }}>
           {p.status === "reached" ? "Reached" : money(p.gap)}
         </Text>
         {/* Leads with what's left, not net worth again (Overview's card above has it). One size per line. */}
@@ -108,6 +108,7 @@ export function GoalBudgetLine({ summary }: { summary: GoalSummary | undefined }
   const colors = useThemeColors();
   const rf = useRF();
   const money = usePrivateMoney();
+  const edge = useStickerShadow();
   if (!summary?.goal || !summary.projection) return null;
   const p = summary.projection;
   const status = STATUS[p.status];
@@ -124,12 +125,13 @@ export function GoalBudgetLine({ summary }: { summary: GoalSummary | undefined }
   return (
     <Pressable
       onPress={() => router.push("/goals" as Href)}
-      className="flex-row items-center gap-2.5 mt-3 rounded-control border-card border-ink bg-surface px-3.5 py-2.5 active:opacity-80"
+      className="flex-row items-center gap-3 mt-3 rounded-card bg-surface px-4 py-4 active:opacity-80"
+      style={[{ minHeight: 56 }, edge]}
       accessibilityRole="link"
       accessibilityLabel={`Year-end goal, ${status.label}${detail ? `, ${detail}` : ""}`}
     >
-      <status.icon size={16} color={tone} strokeWidth={2.25} />
-      <Text className="font-ui text-text-2 flex-1" style={{ fontSize: rf(13.5), fontVariant: ["tabular-nums"] }} numberOfLines={1}>
+      <status.icon size={18} color={tone} strokeWidth={2.25} />
+      <Text className="font-ui text-text-2 flex-1" style={{ fontSize: rf(14.5), fontVariant: ["tabular-nums"] }} numberOfLines={1}>
         <Text className="font-ui-semibold text-text">Year-end goal</Text> · <Text className="font-ui-semibold" style={{ color: tone }}>{status.label}</Text>
         {detail ? ` · ${detail}` : ""}
       </Text>

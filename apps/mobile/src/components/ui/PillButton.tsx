@@ -16,7 +16,7 @@ const PAD_X: Record<PillSize, number> = { lg: 24, md: 20, sm: 16 };
 /**
  * Mobile's one button. Busy shows a spinner beside the label, which stays,
  * at a fixed size -- never a bare spinner in place of the label (DESIGN.md
- * §8). Pop Calm (mobile v2.18.0): no ink outline, 8px corners. Full width unless
+ * §8). Pop Calm (mobile v2.18.0): no ink outline; still a full pill. Full width unless
  * `inline`, which sizes to the label.
  */
 export function PillButton({
@@ -59,7 +59,7 @@ export function PillButton({
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ busy: loading, disabled: disabled || loading }}
-      className={`rounded-control flex-row items-center justify-center active:opacity-90 ${inline && !/\bself-/.test(className ?? "") ? "self-start" : ""} ${look} ${className ?? ""}`}
+      className={`rounded-full flex-row items-center justify-center active:opacity-90 ${inline && !/\bself-/.test(className ?? "") ? "self-start" : ""} ${look} ${className ?? ""}`}
       style={{ height: HEIGHT[size], paddingHorizontal: PAD_X[size], opacity: disabled && !loading ? 0.45 : 1 }}
     >
       <BusyLabel busy={loading} color={fg}>

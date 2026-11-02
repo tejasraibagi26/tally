@@ -227,6 +227,13 @@ function weekday(date: string): number {
   return new Date(Date.parse(`${date}T00:00:00Z`)).getUTCDay();
 }
 
+/**
+ * How early a charge can post and still count as this occurrence's payment
+ * (occurrencesFor). Under half the period, so last cycle's charge never
+ * covers this one.
+ */
+const HIT_WINDOW_DAYS: Record<ForecastFrequency, number> = { weekly: 3, biweekly: 5, monthly: 5, quarterly: 5, annual: 5 };
+
 const STEP: Record<ForecastFrequency, (d: string) => string> = {
   weekly: (d) => addDays(d, 7),
   biweekly: (d) => addDays(d, 14),
@@ -270,7 +277,11 @@ export function occurrencesFor(s: ForecastStreamInput, from: string, to: string)
   let guard = 0;
   while (d < from && guard++ < 400) d = step(d);
   while (d <= to && dates.length < 400) {
-    dates.push(d);
+    // Already charged: the stream's last charge landed on or a few days
+    // before this date, but detection hasn't moved predicted_next_date on
+    // yet. Listing it would show a paid bill as "Overdue" and take it out
+    // of cash a second time.
+    if (!(s.lastDate && s.lastDate >= daysBefore(d, HIT_WINDOW_DAYS[s.frequency]))) dates.push(d);
     d = step(d);
   }
   return dates;

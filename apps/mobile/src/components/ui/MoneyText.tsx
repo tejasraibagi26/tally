@@ -31,10 +31,14 @@ interface MoneyTextProps extends TextProps {
 // explicit font-display every time.
 export function MoneyText({ cents, signed, abbreviate, className, style, mask = true, ...props }: MoneyTextProps) {
   const { hidden } = usePrivacy();
-  const hasFontOverride = /font-(display|mono|ui-medium|ui-semibold|mono-medium)\b/.test(className ?? "");
+  // Every number uses the UI family (mobile v2.18.1): a font-display asked
+  // for by a caller becomes the bold UI weight, so big figures change size
+  // and weight but never typeface. Bricolage stays for titles only.
+  const cls = (className ?? "").replace(/\bfont-display\b/g, "font-ui-semibold");
+  const hasFontOverride = /font-(mono|ui-medium|ui-semibold|mono-medium)\b/.test(cls);
   return (
     <Text
-      className={`${hasFontOverride ? "" : "font-ui"} ${className ?? ""}`}
+      className={`${hasFontOverride ? "" : "font-ui"} ${cls}`}
       style={[{ fontVariant: ["tabular-nums"] }, style]}
       {...props}
     >
