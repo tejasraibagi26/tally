@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { Skeleton, SkeletonList } from "@/components/ui/Skeleton";
 import { View, Text, ScrollView, Pressable, Switch, ActivityIndicator, Alert, TextInput } from "react-native";
 import { useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -260,8 +261,10 @@ export default function SettingsScreen() {
     return (
       <View className="flex-1 bg-canvas" style={{ paddingTop: contentTop }}>
         <ScreenGlow />
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator />
+        <View className="px-5 gap-5 pt-1">
+          <Skeleton style={{ height: 72, borderRadius: 18 }} />
+          <SkeletonList rows={4} avatar={false} />
+          <SkeletonList rows={3} avatar={false} />
         </View>
       </View>
     );

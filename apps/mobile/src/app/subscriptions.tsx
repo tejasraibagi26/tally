@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View, Text, ScrollView, ActivityIndicator, Pressable, Alert } from "react-native";
+import { SkeletonList } from "@/components/ui/Skeleton";
+import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { Stack } from "expo-router";
 import { AddBillSheet } from "@/components/AddBillSheet";
 import { subscriptionsMonthlyTotal } from "@tally/core/subscriptionMath";
@@ -136,7 +137,7 @@ export default function SubscriptionsScreen() {
       )}
 
       {isLoading ? (
-        <ActivityIndicator />
+        <SkeletonList rows={5} />
       ) : (
         <Card className="px-5">
           {streams.map((s, i, arr) => (

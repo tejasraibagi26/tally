@@ -1,4 +1,5 @@
-import { ActivityIndicator, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { CalendarCheck } from "lucide-react-native";
 import { formatCents } from "@tally/core/money";
 import { CADENCE_LABEL } from "@tally/core/paycheque";
@@ -32,7 +33,7 @@ export function NextPaychequeCard() {
       <View className="flex-1 gap-0.5">
         <Text className="font-ui-semibold" style={{ fontSize: rf(11.5), letterSpacing: 0.8, textTransform: "uppercase", color: p?.confident ? colors.positive : colors["text-3"] }}>Next paycheque</Text>
         {safe.isLoading ? (
-          <ActivityIndicator style={{ alignSelf: "flex-start" }} />
+          <Skeleton style={{ height: 14, width: 160, marginTop: 4 }} />
         ) : p?.confident ? (
           <>
             <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }}>

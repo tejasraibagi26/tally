@@ -5,6 +5,7 @@ import { formatCents } from "@tally/core/money";
 import type { ConnectionState } from "@tally/core/connectionState";
 import { cn } from "@/lib/cn";
 import { SidePanel } from "@/components/ui/SidePanel";
+import { Button, Spinner } from "@/components/ui/Button";
 import { useConnectionActions } from "@/components/accounts/ConnectionActions";
 import { ConnectionAvatar, StateNotice, StatusLine } from "@/components/accounts/ConnectionCard";
 import { exactTime, toneText } from "@/components/accounts/connectionUi";
@@ -97,13 +98,9 @@ export function BankPanel({
 
         <div className="mt-auto pt-4 border-t border-border flex items-center justify-between gap-4">
           <span className="text-xs text-text-3">Stops syncing. Its history stays.</span>
-          <button
-            type="button"
-            onClick={() => confirmRemove(item)}
-            className="h-8 px-3 rounded-control text-[13px] font-medium text-negative hover:bg-negative-subtle inline-flex items-center gap-1.5 flex-none"
-          >
+          <Button type="button" variant="destructive" size="sm" onClick={() => confirmRemove(item)} className="flex-none">
             <Unplug size={14} /> Disconnect
-          </button>
+          </Button>
         </div>
       </div>
     </SidePanel>
@@ -114,7 +111,7 @@ function PanelAction({ icon: Icon, label, hint, busy, onClick }: { icon: typeof 
   return (
     <button type="button" onClick={onClick} disabled={busy} className="flex items-center gap-3 px-2 py-2.5 rounded-control text-left hover:bg-raised-hover disabled:opacity-60">
       <span className="w-8 h-8 rounded-control bg-surface-2 flex items-center justify-center text-text-2 flex-none">
-        {busy ? <span className="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent animate-spin" /> : <Icon size={15} strokeWidth={1.75} />}
+        {busy ? <Spinner /> : <Icon size={15} strokeWidth={1.75} />}
       </span>
       <span className="flex flex-col gap-0.5">
         <span className="text-[14px] text-text">{label}</span>

@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, ActivityIndicator, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
+import { SkeletonList } from "@/components/ui/Skeleton";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useColorScheme } from "nativewind";
@@ -13,6 +14,7 @@ import { useScreenContentTop } from "@/components/ui/ScreenHeader";
 import { HeroSurface } from "@/components/overview/PopOverview";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
+import { todayISO } from "@/lib/today";
 import { chartSeries } from "@/theme/colors";
 
 // Native port of web's app/(app)/year-in-review/page.tsx, from GET
@@ -39,7 +41,7 @@ export default function YearInReviewScreen() {
   const colors = useThemeColors();
   const contentTop = useScreenContentTop();
   // Whole years only: the latest finished year, and back from there.
-  const lastYear = latestCompleteYear(new Date().toISOString().slice(0, 10));
+  const lastYear = latestCompleteYear(todayISO());
   const { year: asked } = useLocalSearchParams<{ year?: string }>();
   const [year, setYear] = useState(() => (Number(asked) >= 2000 && Number(asked) <= lastYear ? Number(asked) : lastYear));
   const q = useQuery({ queryKey: ["year-in-review", year], queryFn: () => apiGet<YearReview>(`/api/year-in-review?year=${year}`) });
@@ -85,7 +87,7 @@ export default function YearInReviewScreen() {
         </View>
 
         {q.isLoading || !r ? (
-          <ActivityIndicator className="mt-8" />
+          <SkeletonList rows={6} avatar={false} />
         ) : r.months.length === 0 ? (
           <Text className="font-ui text-text-2 px-1" style={{ fontSize: rf(14) }}>Nothing recorded for {r.year}.</Text>
         ) : (

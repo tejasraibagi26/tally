@@ -35,7 +35,7 @@ export function ConnectionHealth({ banks }: { banks: { name: string; level: Heal
           </>
         ) : (
           <>
-            <AlertTriangle size={14} strokeWidth={1.9} className={cn("flex-none", blocked ? "text-negative" : "text-warning")} />
+            <AlertTriangle size={14} strokeWidth={1.75} className={cn("flex-none", blocked ? "text-negative" : "text-warning")} />
             <span className={blocked ? "text-negative" : "text-warning"}>
               {needs} need{needs === 1 ? "s" : ""} you
             </span>

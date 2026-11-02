@@ -42,7 +42,7 @@ export function TagPicker({ known, onPick, onClose, className }: { known: string
       />
       {isNew && (
         <button type="button" onClick={() => onPick(typed)} className="flex items-center gap-2 px-2 py-1.5 rounded-control text-left text-[13.5px] text-text hover:bg-sunken">
-          <Tag size={13} strokeWidth={2.2} className="text-brand" aria-hidden="true" />
+          <Tag size={13} strokeWidth={2} className="text-brand" aria-hidden="true" />
           Add “{typed}”
         </button>
       )}

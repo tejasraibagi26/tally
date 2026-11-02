@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, Text, Pressable, ScrollView, Platform } from "react-native";
+import { PillButton } from "@/components/ui/PillButton";
 import { useColorScheme } from "nativewind";
 import { Calendar, ChevronRight, X } from "lucide-react-native";
 import DateTimePicker, { DateTimePickerAndroid } from "@react-native-community/datetimepicker";
@@ -8,6 +9,7 @@ import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 import { Sheet } from "@/components/ui/Sheet";
 import { MultiPickerSheet } from "@/components/ui/MultiPickerSheet";
+import { todayISO } from "@/lib/today";
 
 export interface TransactionFilters {
   account?: string[];
@@ -21,11 +23,14 @@ export interface TransactionFilters {
 }
 
 function lastMonthRange(): { from: string; to: string } {
-  const now = new Date();
-  const firstOfThisMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1));
-  const lastMonthEnd = new Date(firstOfThisMonth.getTime() - 86_400_000);
-  const lastMonthStart = new Date(Date.UTC(lastMonthEnd.getUTCFullYear(), lastMonthEnd.getUTCMonth(), 1));
-  return { from: lastMonthStart.toISOString().slice(0, 10), to: lastMonthEnd.toISOString().slice(0, 10) };
+  // This device's calendar, not UTC: in the evening west of UTC, UTC is
+  // already tomorrow (and on the 1st, already next month).
+  const [y, m] = todayISO().split("-").map(Number) as [number, number];
+  const year = m === 1 ? y - 1 : y;
+  const month = m === 1 ? 12 : m - 1;
+  const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const mm = String(month).padStart(2, "0");
+  return { from: `${year}-${mm}-01`, to: `${year}-${mm}-${String(lastDay).padStart(2, "0")}` };
 }
 
 function isLastMonthRange(from?: string, to?: string): boolean {
@@ -236,15 +241,13 @@ export function TransactionFiltersSheet({
         </ScrollView>
 
         <View className="px-5 pt-2 pb-8 gap-2.5">
-          <Pressable
+          <PillButton
+            label="Apply filters"
             onPress={() => {
               onApply(draft);
               onClose();
             }}
-            className="h-14 rounded-full bg-brand items-center justify-center active:opacity-90 border-button border-ink"
-          >
-            <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>Apply filters</Text>
-          </Pressable>
+          />
           <Pressable
             onPress={() => {
               setDraft({});

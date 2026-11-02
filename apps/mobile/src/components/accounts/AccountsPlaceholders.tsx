@@ -1,4 +1,5 @@
-import { View, Text, Pressable, ActivityIndicator } from "react-native";
+import { View, Text, Pressable } from "react-native";
+import { PillButton } from "@/components/ui/PillButton";
 import { Landmark, Check } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { Skeleton } from "@/components/ui/Skeleton";
@@ -62,10 +63,7 @@ export function ConnectFirstBank({ onConnect, connecting }: { onConnect: () => v
           </View>
         ))}
       </View>
-      <Pressable onPress={onConnect} disabled={connecting} className="h-12 rounded-full flex-row items-center justify-center gap-2 bg-brand active:opacity-90 mt-1 border-button border-ink">
-        {connecting && <ActivityIndicator size="small" color={colors["on-brand"]} />}
-        <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14.5) }}>Connect a bank</Text>
-      </Pressable>
+      <PillButton label="Connect a bank" onPress={onConnect} loading={connecting} size="md" className="mt-1" />
     </Card>
   );
 }

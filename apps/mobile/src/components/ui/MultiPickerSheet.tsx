@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, Pressable, FlatList } from "react-native";
+import { PillButton } from "@/components/ui/PillButton";
 import { Check, X } from "lucide-react-native";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
@@ -73,17 +74,13 @@ export function MultiPickerSheet({
         )}
       />
       <View className="px-5 pt-2" style={{ paddingBottom: 24 }}>
-        <Pressable
+        <PillButton
+          label={draft.length > 0 ? `Done (${draft.length})` : "Done"}
           onPress={() => {
             onApply(draft);
             onClose();
           }}
-          className="h-12 rounded-full bg-brand items-center justify-center active:opacity-90 border-button border-ink"
-        >
-          <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14.5) }}>
-            {draft.length > 0 ? `Done (${draft.length})` : "Done"}
-          </Text>
-        </Pressable>
+        />
       </View>
     </Sheet>
   );

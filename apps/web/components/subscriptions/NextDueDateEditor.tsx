@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, CalendarDays, Pencil, RotateCcw } from "lucide-react";
+import { CalendarDays, Pencil, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { DialogBody, DialogFooter, DialogHeader, DialogTile } from "@/components/ui/Dialog";
 import { showToast } from "@/lib/toast";
+import { InlineError } from "@/components/ui/InlineError";
 
 /** "2026-10-14" → "Oct 14". */
 function shortDate(iso: string): string {
@@ -129,10 +130,7 @@ export function NextDueDateEditor({
                 className={`h-9 w-full rounded-control bg-surface border px-3 text-[15px] text-text tabular-nums disabled:opacity-60 ${error ? "border-negative" : "border-border-strong"}`}
               />
               {error ? (
-                <p id={`${fieldId}-help`} role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-negative">
-                  <AlertTriangle size={14} strokeWidth={1.75} className="flex-none" />
-                  Couldn&apos;t save the date. Check your connection and try again.
-                </p>
+                <InlineError id={`${fieldId}-help`}>Couldn&apos;t save the date. Check your connection and try again.</InlineError>
               ) : (
                 predictedNextDate && (
                   <p id={`${fieldId}-help`} className="m-0 text-[13px] text-text-3">

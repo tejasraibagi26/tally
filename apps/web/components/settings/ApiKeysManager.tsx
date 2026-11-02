@@ -36,13 +36,10 @@ function CopyRow({ value }: { value: string }) {
       <code className="flex-1 min-w-0 truncate px-2.5 py-2 rounded-control bg-surface border border-border-strong text-[13px] text-text font-mono">
         {value}
       </code>
-      <button
-        onClick={copy}
-        className="h-9 px-3 flex-none inline-flex items-center gap-1.5 rounded-control bg-surface border border-border-strong text-sm font-medium text-text hover:bg-sunken"
-      >
-        {copied ? <Check size={14} strokeWidth={2} /> : <Copy size={14} strokeWidth={2} />}
+      <Button type="button" variant="secondary" onClick={copy} className="flex-none gap-1.5">
+        {copied ? <Check size={14} strokeWidth={1.75} /> : <Copy size={14} strokeWidth={1.75} />}
         {copied ? "Copied" : "Copy"}
-      </button>
+      </Button>
     </div>
   );
 }

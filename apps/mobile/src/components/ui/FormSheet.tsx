@@ -1,7 +1,8 @@
 import { type ReactNode } from "react";
-import { View, Text, Pressable, ScrollView, TextInput, ActivityIndicator, type TextInputProps } from "react-native";
+import { View, Text, Pressable, ScrollView, TextInput, type TextInputProps } from "react-native";
 import { AlertTriangle, ChevronRight } from "lucide-react-native";
 import { Sheet } from "@/components/ui/Sheet";
+import { PillButton } from "@/components/ui/PillButton";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
 
@@ -139,45 +140,5 @@ export function SheetError({ children }: { children: string }) {
   );
 }
 
-/**
- * The full-width pill every sheet ends with. Busy: a spinner beside the
- * label, which stays, at a fixed height -- never a bare spinner in place of
- * the label (DESIGN.md §8). `subtle` is the secondary brand-tinted pill,
- * `plain` a text-only one for a quiet way out ("Keep it").
- */
-export function PillButton({
-  label,
-  onPress,
-  loading = false,
-  disabled = false,
-  variant = "primary",
-  height = 52,
-}: {
-  label: string;
-  onPress: () => void;
-  loading?: boolean;
-  disabled?: boolean;
-  variant?: "primary" | "subtle" | "plain";
-  height?: number;
-}) {
-  const colors = useThemeColors();
-  const rf = useRF();
-  const fg = variant === "primary" ? colors["on-brand"]! : variant === "subtle" ? colors.brand! : colors["text-2"]!;
-  const bg = variant === "primary" ? "bg-brand" : variant === "subtle" ? "bg-brand-subtle" : "";
-  return (
-    <Pressable
-      onPress={onPress}
-      disabled={disabled || loading}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ busy: loading, disabled: disabled || loading }}
-      className={`rounded-full flex-row items-center justify-center gap-2 active:opacity-90 ${bg}`}
-      style={{ height, opacity: disabled && !loading ? 0.45 : 1 }}
-    >
-      {loading && <ActivityIndicator size="small" color={fg} />}
-      <Text className={variant === "plain" ? "font-ui-medium" : "font-ui-semibold"} style={{ fontSize: rf(variant === "plain" ? 14 : 15), color: fg }}>
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
+/** Every sheet ends with a PillButton; it lives in its own module now. */
+export { PillButton };

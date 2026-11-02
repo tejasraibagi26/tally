@@ -114,7 +114,7 @@ export default async function LoansPage() {
           <span className="text-[13px] text-text-2">
             {overdue.length > 0 ? (
               <span className="inline-flex items-center gap-1.5 font-semibold text-negative">
-                <AlertTriangle size={13} strokeWidth={2.4} aria-hidden="true" />
+                <AlertTriangle size={13} strokeWidth={2} aria-hidden="true" />
                 {overdue.length} past due
               </span>
             ) : (

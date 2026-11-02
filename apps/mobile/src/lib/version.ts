@@ -420,8 +420,13 @@ import Constants from "expo-constants";
  *
  * 2.14.0 makes dark Pop pop, as web 2.15.0: cream ink outlines over a hard
  * grape shadow, the net-worth hero in solid grape on a marigold shadow.
+ *
+ * 2.14.1 is a consistency sweep: screens load behind skeletons, never a
+ * centred spinner; PillButton (components/ui/PillButton.tsx, lg/md/sm) is
+ * the one button, with the spinner beside a label that stays; "last month"
+ * in filters and Year in review use this device's date, not UTC.
  */
-export const APP_VERSION = "2.14.0";
+export const APP_VERSION = "2.14.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

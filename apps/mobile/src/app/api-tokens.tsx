@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from "react-native";
+import { SkeletonList } from "@/components/ui/Skeleton";
+import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { Stack } from "expo-router";
 import { Card } from "@/components/ui/Card";
 import { useApiTokens, useCreateApiToken, useDeleteApiToken, type ApiToken } from "@/lib/queries/apiTokens";
@@ -106,7 +107,7 @@ export default function ApiTokensScreen() {
         </Card>
 
         {isLoading ? (
-          <ActivityIndicator className="mt-4" />
+          <SkeletonList rows={2} avatar={false} />
         ) : (
           <>
             {revealedKey && (

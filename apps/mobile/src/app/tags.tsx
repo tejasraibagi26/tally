@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, ActivityIndicator, Pressable } from "react-native";
+import { View, Text, ScrollView, Pressable } from "react-native";
+import { SkeletonList } from "@/components/ui/Skeleton";
 import { useRouter, type Href } from "expo-router";
 import { Tag } from "lucide-react-native";
 import { formatCents } from "@tally/core/money";
@@ -31,7 +32,7 @@ export default function TagsScreen() {
       <ScreenGlow />
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 12, paddingBottom: 40 }}>
         {isLoading ? (
-          <ActivityIndicator className="mt-8" />
+          <SkeletonList rows={4} avatar={false} />
         ) : (data?.tags.length ?? 0) === 0 ? (
           // Same card, icon and words as web's Tags page (app/(app)/tags/page.tsx), with mobile's own way to tag.
           <Card className="py-10 px-5">

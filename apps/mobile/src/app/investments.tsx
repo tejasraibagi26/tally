@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View, Text, ScrollView, ActivityIndicator, Pressable, RefreshControl } from "react-native";
+import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
+import { PillButton } from "@/components/ui/PillButton";
 import { Stack, useRouter } from "expo-router";
 import { ChevronRight, RefreshCw, TrendingUp } from "lucide-react-native";
 import { BusyIcon } from "@/components/ui/BusyIcon";
@@ -154,10 +155,7 @@ export default function InvestmentsScreen() {
               Connect a brokerage like Wealthsimple or Questrade to see your TFSA, RRSP and FHSA in one place, with growth over time.
             </Text>
           </View>
-          <Pressable onPress={() => openLink("create")} disabled={isLinking} className="h-12 rounded-full flex-row items-center justify-center gap-2 bg-brand active:opacity-90 border-button border-ink">
-            {isLinking && <ActivityIndicator size="small" color={colors["on-brand"]} />}
-            <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14.5) }}>Connect a brokerage</Text>
-          </Pressable>
+          <PillButton label="Connect a brokerage" onPress={() => openLink("create")} loading={isLinking} size="md" />
         </Card>
       </View>
     );

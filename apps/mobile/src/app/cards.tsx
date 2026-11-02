@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
+import { PillButton } from "@/components/ui/PillButton";
 import { Stack, useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChevronRight, RefreshCw } from "lucide-react-native";
@@ -133,9 +134,7 @@ export default function CardsScreen() {
             <Text className="font-ui text-text-2 text-center" style={{ fontSize: rf(13.5), lineHeight: rf(19) }}>
               Connect a card and its balance, statement and due date show up here.
             </Text>
-            <Pressable onPress={() => router.push("/(tabs)/accounts")} className="mt-2 h-10 px-5 rounded-full bg-brand items-center justify-center border-button border-ink">
-              <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14) }}>Connect a card</Text>
-            </Pressable>
+            <PillButton label="Connect a card" onPress={() => router.push("/(tabs)/accounts")} size="sm" inline className="mt-2 self-center" />
           </View>
         ) : (
           <>

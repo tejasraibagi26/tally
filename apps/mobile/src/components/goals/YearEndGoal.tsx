@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator, Alert } from "react-native";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { View, Text, ScrollView, TextInput, Pressable, Alert } from "react-native";
+import { PillButton } from "@/components/ui/PillButton";
 import { useRouter } from "expo-router";
 import { Info } from "lucide-react-native";
 import { formatCents } from "@tally/core/money";
@@ -57,7 +59,10 @@ export function YearEndGoal() {
     <View className="flex-1">
       <ScrollView className="flex-1" scrollEnabled={!scrubbing} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled" contentContainerStyle={{ paddingHorizontal: 20, gap: 16, paddingBottom: 40 }}>
         {goal.isLoading ? (
-          <ActivityIndicator />
+          <>
+            <Skeleton style={{ height: 36, width: 200 }} />
+            <Skeleton style={{ height: 200, borderRadius: 18 }} />
+          </>
         ) : (
           <>
             <Pressable onPress={() => setHowOpen(true)} accessibilityRole="button" className="self-start flex-row items-center gap-1.5 h-9 px-3.5 rounded-full border-button border-ink active:opacity-80" style={{ backgroundColor: colors.surface }}>
@@ -109,9 +114,7 @@ export function YearEndGoal() {
                 />
               </View>
               {error && <Text className="font-ui text-negative" style={{ fontSize: rf(13) }}>{error}</Text>}
-              <Pressable onPress={submit} disabled={save.isPending} className="h-12 rounded-full bg-brand border-button border-ink items-center justify-center active:opacity-90 disabled:opacity-50">
-                {save.isPending ? <ActivityIndicator color={colors["on-brand"]} /> : <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>{g ? "Save goal" : "Set goal"}</Text>}
-              </Pressable>
+              <PillButton label={g ? "Save goal" : "Set goal"} onPress={submit} loading={save.isPending} size="md" />
               {g && (
                 <Pressable onPress={confirmRemove} disabled={remove.isPending} className="h-11 items-center justify-center">
                   <Text className="font-ui-semibold text-negative" style={{ fontSize: rf(14.5) }}>Remove goal</Text>

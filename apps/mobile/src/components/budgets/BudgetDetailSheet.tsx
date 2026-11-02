@@ -141,10 +141,10 @@ export function BudgetDetailSheet({
         {error && <SheetError>{error}</SheetError>}
         <View className="flex-row gap-2">
           <View className="flex-1">
-            <PillButton label="Save" onPress={onSave} loading={save.isPending} disabled={!dirty} height={46} />
+            <PillButton label="Save" onPress={onSave} loading={save.isPending} disabled={!dirty} size="md" />
           </View>
           <View className="flex-1">
-            <PillButton label="See transactions" onPress={onViewTransactions} variant="subtle" height={46} />
+            <PillButton label="See transactions" onPress={onViewTransactions} variant="subtle" size="md" />
           </View>
         </View>
         <Pressable onPress={onRemove} disabled={del.isPending} accessibilityRole="button" className="flex-row items-center justify-center gap-2 py-2">

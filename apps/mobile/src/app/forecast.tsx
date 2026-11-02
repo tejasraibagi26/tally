@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View, Text, ScrollView, Pressable, ActivityIndicator } from "react-native";
+import { SkeletonScreen } from "@/components/ui/Skeleton";
+import { View, Text, ScrollView, Pressable } from "react-native";
 import { useRouter, type Href } from "expo-router";
 import { AlertTriangle, Info } from "lucide-react-native";
 import { formatCents } from "@tally/core/money";
@@ -49,8 +50,8 @@ export default function ForecastScreen() {
 
   if (forecast.isLoading) {
     return (
-      <View className="flex-1 bg-canvas items-center justify-center">
-        <ActivityIndicator color={colors["text-3"]} />
+      <View className="flex-1 bg-canvas">
+        <SkeletonScreen top={contentTop} />
       </View>
     );
   }

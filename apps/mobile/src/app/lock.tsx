@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, Pressable } from "react-native";
+import { PillButton } from "@/components/ui/PillButton";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Lock as LockIcon } from "lucide-react-native";
 import { useAuth } from "@/lib/AuthContext";
@@ -48,11 +49,7 @@ export default function LockScreen() {
             Couldn&apos;t verify it&apos;s you. Try again.
           </Text>
         )}
-        <Pressable onPress={attempt} disabled={attempting} className="rounded-full bg-brand px-6 py-3 mt-2 disabled:opacity-50 border-button border-ink">
-          <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>
-            {attempting ? "Checking…" : "Unlock"}
-          </Text>
-        </Pressable>
+        <PillButton label="Unlock" onPress={attempt} loading={attempting} size="md" inline className="mt-2 self-center" />
         <Pressable onPress={logout} hitSlop={8} className="mt-2">
           <Text className="font-ui text-text-3" style={{ fontSize: rf(13) }}>
             Log out instead

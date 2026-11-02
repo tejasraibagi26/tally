@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, ActivityIndicator, RefreshControl } from "react-native";
+import { View, Text, ScrollView, RefreshControl } from "react-native";
+import { SkeletonScreen } from "@/components/ui/Skeleton";
 import { AlertTriangle } from "lucide-react-native";
 import { formatCents } from "@tally/core/money";
 import { Card } from "@/components/ui/Card";
@@ -44,8 +45,8 @@ export default function LoansScreen() {
 
   if (isLoading) {
     return (
-      <View className="flex-1 bg-canvas items-center justify-center">
-        <ActivityIndicator color={colors["text-3"]} />
+      <View className="flex-1 bg-canvas">
+        <SkeletonScreen top={contentTop} />
       </View>
     );
   }

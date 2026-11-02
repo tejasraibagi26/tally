@@ -492,8 +492,14 @@
  * 2.15.0 makes dark Pop pop: cream ink outlines over a hard grape shadow
  * (was #6E6895, 3.6:1), the net-worth hero and current nav item in solid
  * grape with white text, the hero on a marigold shadow.
+ *
+ * 2.15.1 is a consistency sweep: Goals, Loans, Settings, Tags and Year in
+ * review get loading skeletons; connection actions, Disconnect, the Safe to
+ * spend cushion Save and the API key Copy are the shared Button (spinner
+ * beside the label); stray errors use InlineError; the changelog title takes
+ * Pop's display face; odd icon strokes snap to 1.75/2.
  */
-export const APP_VERSION = "2.15.0";
+export const APP_VERSION = "2.15.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

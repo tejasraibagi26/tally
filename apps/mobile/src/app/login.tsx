@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
+import { View, Text, TextInput, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
+import { PillButton } from "@/components/ui/PillButton";
 import Svg, { Path } from "react-native-svg";
 import { useAuth } from "@/lib/AuthContext";
 import { ApiError, NetworkError } from "@/lib/api";
@@ -82,15 +83,7 @@ export default function LoginScreen() {
 
           {error && <SheetError>{error}</SheetError>}
 
-          <Pressable
-            onPress={handleLogin}
-            disabled={loading || !email || !password}
-            accessibilityState={{ busy: loading }}
-            className="h-14 rounded-full bg-brand flex-row items-center justify-center gap-2 mt-2 active:opacity-90 disabled:opacity-40 border-button border-ink"
-          >
-            {loading && <ActivityIndicator size="small" color={colors["on-brand"]} />}
-            <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15.5) }}>Log in</Text>
-          </Pressable>
+          <PillButton label="Log in" onPress={handleLogin} loading={loading} disabled={!email || !password} className="mt-2" />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

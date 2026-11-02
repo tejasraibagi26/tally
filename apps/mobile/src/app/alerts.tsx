@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, TextInput, Switch, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
+import { SkeletonList } from "@/components/ui/Skeleton";
+import { View, Text, ScrollView, TextInput, Switch, KeyboardAvoidingView, Platform } from "react-native";
 import { PieChart, Receipt, Repeat, Landmark, Target, PiggyBank, TrendingDown, type LucideIcon } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
@@ -130,7 +131,7 @@ export default function AlertsScreen() {
         </Text>
 
         {prefs.isLoading || !prefs.data ? (
-          <ActivityIndicator className="mt-4" />
+          <SkeletonList rows={4} avatar={false} />
         ) : (
           <>
             <Card className="px-5">
@@ -225,7 +226,7 @@ export default function AlertsScreen() {
         <View className="gap-3">
           <Text className="font-ui-semibold text-text-2 px-1" style={{ textTransform: "uppercase", fontSize: rf(13) }}>Recent alerts</Text>
           {history.isLoading ? (
-            <ActivityIndicator />
+            <SkeletonList rows={3} avatar={false} />
           ) : (history.data?.alerts.length ?? 0) === 0 ? (
             <Text className="font-ui text-text-3 px-1" style={{ fontSize: rf(13) }}>No alerts yet. They&apos;ll show up here as they&apos;re sent.</Text>
           ) : (

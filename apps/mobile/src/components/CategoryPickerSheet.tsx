@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { View, Text, Pressable, FlatList, TextInput, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, FlatList, TextInput } from "react-native";
+import { BusyLabel } from "@/components/ui/BusyIcon";
 import { X, Check, Search, Plus } from "lucide-react-native";
 import { useColorScheme } from "nativewind";
 import { useCategories, useCreateCategory, type Category } from "@/lib/queries/categories";
@@ -126,11 +127,9 @@ export function CategoryPickerSheet({
                 className="rounded-control bg-brand items-center justify-center px-4 disabled:opacity-50 border-button border-ink"
                 style={{ height: 42 }}
               >
-                {createCategory.isPending ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
-                ) : (
+                <BusyLabel busy={createCategory.isPending} color={colors["on-brand"]!}>
                   <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14) }}>Add</Text>
-                )}
+                </BusyLabel>
               </Pressable>
               <Pressable onPress={() => { setCreating(false); setNewName(""); }} hitSlop={8}>
                 <X size={18} color={colors["text-3"]} />

@@ -10,6 +10,7 @@ import type { SafeToSpendResult } from "@/lib/safeToSpend";
 import { SidePanel } from "@/components/ui/SidePanel";
 import { showToast } from "@/lib/toast";
 import { cn } from "@/lib/cn";
+import { Button } from "@/components/ui/Button";
 
 const fmt = (c: number) => formatCents(c);
 
@@ -111,7 +112,7 @@ export function SafeToSpendCard({ s, className, forecastLink = true }: { s: Safe
       >
         <span className="flex items-center justify-between w-full">
           <span className="text-xs font-bold uppercase tracking-[0.08em] text-text">Safe to spend</span>
-          <ChevronRight size={18} strokeWidth={2.2} className="text-text" aria-hidden="true" />
+          <ChevronRight size={18} strokeWidth={2} className="text-text" aria-hidden="true" />
         </span>
         <span className={cn("font-display text-[40px] leading-none tabular", short ? "text-negative" : "text-text")}>
           <M cents={s.amount} />
@@ -121,7 +122,7 @@ export function SafeToSpendCard({ s, className, forecastLink = true }: { s: Safe
         <span className="mt-auto flex flex-col gap-2 w-full pt-1">
           {s.stale.length > 0 ? (
             <span className="self-start inline-flex items-center gap-1.5 rounded-full border-2 border-[var(--ink,var(--warning))] bg-warning-subtle text-warning px-2.5 py-0.5 text-[12.5px] font-semibold">
-              <AlertTriangle size={13} strokeWidth={2.4} aria-hidden="true" />
+              <AlertTriangle size={13} strokeWidth={2} aria-hidden="true" />
               {s.stale[0]!.name} {syncedAgo(s.stale[0]!.syncedAt)}
             </span>
           ) : (
@@ -271,9 +272,9 @@ function SafeToSpendPanel({ s, open, onClose, forecastLink }: { s: SafeToSpendRe
                 <span className="text-text-3 text-[14px] pr-1">$</span>
                 <input id="cushion" inputMode="decimal" value={cushion} onChange={(e) => setCushion(e.target.value.replace(/[^\d.]/g, ""))} className="w-20 bg-transparent text-right text-[14px] tabular outline-none" />
               </div>
-              <button type="button" onClick={saveCushion} disabled={saving} className="ui-btn ui-btn-primary h-9 px-3.5 rounded-control bg-brand text-on-brand text-[13.5px] font-medium">
+              <Button type="button" onClick={saveCushion} loading={saving}>
                 Save
-              </button>
+              </Button>
             </div>
           ) : (
             <div className="flex items-center gap-3 text-[14px]">

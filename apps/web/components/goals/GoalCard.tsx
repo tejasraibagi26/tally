@@ -92,7 +92,7 @@ export function GoalCard({ summary, className, style, showCurrent = false }: { s
         </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[13px] font-semibold", status.tone)}>
-            <status.icon size={14} strokeWidth={2.25} aria-hidden="true" /> {GOAL_STATUS_LABEL[p.status]}
+            <status.icon size={14} strokeWidth={2} aria-hidden="true" /> {GOAL_STATUS_LABEL[p.status]}
           </span>
           <span className="text-[14px] text-text tabular"><GoalLineText summary={summary} /></span>
         </div>
@@ -130,12 +130,12 @@ export function GoalBudgetLine({ summary, className }: { summary: GoalSummary | 
     ) : null;
   return (
     <Link href="/goals" className={cn("flex items-center gap-2.5 w-fit max-w-full rounded-control border border-border bg-surface px-3.5 py-2 text-[14px] text-text-2 hover:bg-surface-2", className)}>
-      <status.icon size={16} strokeWidth={2.25} className={cn("flex-none", status.tone.split(" ")[0])} aria-hidden="true" />
+      <status.icon size={16} strokeWidth={2} className={cn("flex-none", status.tone.split(" ")[0])} aria-hidden="true" />
       <span className="tabular truncate">
         <span className="font-semibold text-text">Year-end goal</span> · <span className={cn("font-semibold", status.tone.split(" ")[0])}>{GOAL_STATUS_LABEL[p.status]}</span>
         {detail && <> · {detail}</>}
       </span>
-      <ChevronRight size={16} strokeWidth={2.25} className="flex-none text-text-3" aria-hidden="true" />
+      <ChevronRight size={16} strokeWidth={2} className="flex-none text-text-3" aria-hidden="true" />
     </Link>
   );
 }

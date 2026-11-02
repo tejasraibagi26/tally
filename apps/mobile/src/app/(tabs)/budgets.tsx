@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
+import { PillButton } from "@/components/ui/PillButton";
 import { useRouter } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -206,11 +207,13 @@ export default function BudgetsScreen() {
                 {unbudgetedTotal > 0 && ctx.phase !== "future" ? ` You've spent ${fmtBudget(unbudgetedTotal)} so far.` : ""}
               </Text>
               {data?.setup?.copy && (
-                <Pressable onPress={() => setup.mutate({ month, source: "copy" })} disabled={setup.isPending} className="h-12 rounded-full items-center justify-center bg-brand mt-1 border-button border-ink">
-                  <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14) }}>
-                    Copy {monthLabel(data.setup.copy.fromMonth).split(" ")[0]} · {data.setup.copy.count} budgets, {fmtBudget(data.setup.copy.total)}
-                  </Text>
-                </Pressable>
+                <PillButton
+                  label={`Copy ${monthLabel(data.setup.copy.fromMonth).split(" ")[0]} · ${data.setup.copy.count} budgets, ${fmtBudget(data.setup.copy.total)}`}
+                  onPress={() => setup.mutate({ month, source: "copy" })}
+                  loading={setup.isPending}
+                  size="md"
+                  className="mt-1"
+                />
               )}
               {data?.setup?.average && (
                 <Pressable onPress={() => setup.mutate({ month, source: "average" })} disabled={setup.isPending} className="h-11 rounded-full items-center justify-center bg-brand-subtle">

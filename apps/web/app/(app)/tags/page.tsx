@@ -34,7 +34,7 @@ export default async function TagsPage() {
           {tags.map((t) => (
             <Link key={t.tag} href={`/tags/${encodeURIComponent(t.tag)}`} className="bg-surface border border-border rounded-card shadow-raised p-5 flex flex-col gap-2 hover:border-border-strong transition-colors">
               <span className="inline-flex items-center gap-1.5 self-start rounded-full bg-brand-subtle text-brand px-2.5 py-0.5 text-[13px] font-semibold">
-                <Tag size={13} strokeWidth={2.2} aria-hidden="true" />
+                <Tag size={13} strokeWidth={2} aria-hidden="true" />
                 {t.tag}
               </span>
               <span className="ui-figure font-display text-[30px] leading-none text-text tabular">{formatCents(t.spend)}</span>

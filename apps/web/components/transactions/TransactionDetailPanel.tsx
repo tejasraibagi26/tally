@@ -352,15 +352,15 @@ export function TransactionDetailPanel({
               <div className="flex items-center gap-1 text-text-3">
                 {onNavigate && (
                   <>
-                    <button type="button" onClick={() => { flushNotes(); onNavigate(-1); }} className="w-8 h-8 rounded-control hover:bg-surface-2 flex items-center justify-center" aria-label="Previous transaction" title="Previous (k)">
+                    <button type="button" onClick={() => { flushNotes(); onNavigate(-1); }} className="w-8 h-8 flex-none flex items-center justify-center rounded-control text-text-3 hover:text-text hover:bg-sunken" aria-label="Previous transaction" title="Previous (k)">
                       <ChevronLeft size={16} />
                     </button>
-                    <button type="button" onClick={() => { flushNotes(); onNavigate(1); }} className="w-8 h-8 rounded-control hover:bg-surface-2 flex items-center justify-center" aria-label="Next transaction" title="Next (j)">
+                    <button type="button" onClick={() => { flushNotes(); onNavigate(1); }} className="w-8 h-8 flex-none flex items-center justify-center rounded-control text-text-3 hover:text-text hover:bg-sunken" aria-label="Next transaction" title="Next (j)">
                       <ChevronRight size={16} />
                     </button>
                   </>
                 )}
-                <button type="button" onClick={close} className="w-8 h-8 rounded-control hover:bg-surface-2 flex items-center justify-center" aria-label="Close" title="Close (Esc)">
+                <button type="button" onClick={close} className="w-8 h-8 flex-none flex items-center justify-center rounded-control text-text-3 hover:text-text hover:bg-sunken" aria-label="Close" title="Close (Esc)">
                   <X size={16} />
                 </button>
               </div>

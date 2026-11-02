@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, ScrollView, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform, Switch } from "react-native";
+import { SkeletonScreen } from "@/components/ui/Skeleton";
+import { View, Text, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, Switch } from "react-native";
+import { PillButton } from "@/components/ui/PillButton";
 import { useRouter } from "expo-router";
 import { formatCents, formatPercent } from "@tally/core/money";
 import { ageAsOf, fireMilestones, fireNumber, fireProgressPct, fireWhatIfs, projectionSeries, realReturn, requiredMonthlySaving, yearsToFire } from "@tally/core/fireMath";
@@ -55,8 +57,8 @@ export function RetirementGoal() {
 
   if (loadingDefaults || loadingSettings || !defaults || settingsData === undefined) {
     return (
-      <View className="flex-1 items-center justify-center" style={{ paddingTop: contentTop }}>
-        <ActivityIndicator />
+      <View className="flex-1">
+        <SkeletonScreen top={contentTop} />
       </View>
     );
   }
@@ -77,7 +79,6 @@ export function RetirementGoal() {
 }
 
 function EmptyFire({ contentTop, hasAccounts, onStartFromZero }: { contentTop: number; hasAccounts: boolean; onStartFromZero: () => void }) {
-  const colors = useThemeColors();
   const rf = useRF();
   const { openLink, isLinking, progressSheet } = usePlaidLink();
   return (
@@ -90,10 +91,7 @@ function EmptyFire({ contentTop, hasAccounts, onStartFromZero }: { contentTop: n
             ? "Tally can work it out from your spending. Connect a brokerage so it also knows what you've invested, or start from $0."
             : "Connect your bank and brokerage, and Tally works it out from your spending and investments. Or start from $0."}
         </Text>
-        <Pressable onPress={() => openLink("create")} disabled={isLinking} className="h-12 rounded-full flex-row items-center justify-center gap-2 bg-brand mt-1 border-button border-ink">
-          {isLinking && <ActivityIndicator size="small" color={colors["on-brand"]} />}
-          <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14.5) }}>Connect a brokerage</Text>
-        </Pressable>
+        <PillButton label="Connect a brokerage" onPress={() => openLink("create")} loading={isLinking} size="md" className="mt-1" />
         <Pressable onPress={onStartFromZero} className="h-11 rounded-full items-center justify-center bg-brand-subtle">
           <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(14) }}>Start from $0</Text>
         </Pressable>

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { View, Text, ScrollView, Pressable, TextInput, Switch, Platform, Alert } from "react-native";
+import { PillButton } from "@/components/ui/PillButton";
 import { useLocalSearchParams, useRouter, Stack, type Href } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { X, ChevronRight, ChevronLeft, ChevronDown, Pencil } from "lucide-react-native";
@@ -872,18 +873,16 @@ function SpreadView({ t, months, bottom, onBack, onDone }: { t: TransactionRow; 
         </View>
         {error && <Text className="font-ui" style={{ fontSize: rf(13), color: colors.negative }}>{error}</Text>}
         {months == null ? (
-          <Pressable onPress={() => void run(() => markAnnual.mutateAsync(term), `Spread over ${term} months`)} disabled={busy} className="h-12 rounded-full bg-brand border-button border-ink items-center justify-center disabled:opacity-50">
-            <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>{busy ? "Spreading…" : `Spread over ${term} months`}</Text>
-          </Pressable>
+          <PillButton label={`Spread over ${term} months`} onPress={() => void run(() => markAnnual.mutateAsync(term), `Spread over ${term} months`)} loading={busy} size="md" />
         ) : (
           <>
-            <Pressable
+            <PillButton
+              label={term === months ? `Spread over ${months} months` : `Change to ${term} months`}
               onPress={() => void run(() => updateSpread.mutateAsync({ streamId: t.recurringStreamId!, body: { amortizeMonths: term } }), `Now spread over ${term} months`)}
-              disabled={busy || term === months}
-              className="h-12 rounded-full bg-brand border-button border-ink items-center justify-center disabled:opacity-40"
-            >
-              <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(15) }}>{term === months ? `Spread over ${months} months` : `Change to ${term} months`}</Text>
-            </Pressable>
+              loading={busy && term !== months}
+              disabled={term === months}
+              size="md"
+            />
             <Pressable onPress={() => void run(() => updateSpread.mutateAsync({ streamId: t.recurringStreamId!, body: { amortizeMonthly: false } }), "Stopped spreading")} disabled={busy} hitSlop={8} className="self-start">
               <Text className="font-ui-medium" style={{ fontSize: rf(14), color: colors.negative }}>Stop spreading</Text>
             </Pressable>

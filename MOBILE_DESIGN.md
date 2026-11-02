@@ -516,14 +516,14 @@ persisting settings requires an API call).
 | Table | Card list (row = merchant/category left, amount right, 2-line stack) |
 | Side panel (420px, slide from right) | Bottom sheet (85% height, slide up) |
 | Modal | Picked by job: **progress sheet** (`ProgressSheet`, a `Sheet` with `dismissible={false}` while running) for connect/reconnect; **`TallyDialog`** (centered, 180ms fade + scale in, 120ms fade out) for irreversible actions that need to list what's affected, show progress or fail in place (revoke a connection, wipe all data); native `Alert.alert` only for simple yes/no confirms (delete a schedule, remove a budget or bill, revoke an API token). Errors never go in an alert: inline with an icon, or a SyncBanner |
-| Sheet actions and errors | Every sheet ends with `PillButton` (components/ui/FormSheet.tsx: spinner beside the label, fixed height) and shows failures with `SheetError` (icon + text). Smaller buttons use `BusyLabel` / `BusyIcon` so a spinner never replaces a label or resizes the control |
+| Sheet actions and errors | Every sheet, and every full-width or inline brand action, is a `PillButton` (components/ui/PillButton.tsx: lg 52 ends a sheet or form, md 48 inside a screen or card, sm 36 inline; spinner beside the label, fixed height) and shows failures with `SheetError` (icon + text). Smaller buttons use `BusyLabel` / `BusyIcon` so a spinner never replaces a label or resizes the control |
 | Progress indicator | `TallyLoader` (components/ui/TallyLoader.tsx): the brand mark writing itself, 2.4s loop, in a 40pt header tile only (warning tone, 3.2s after 20s). Buttons keep `ActivityIndicator`, beside the label, never replacing it |
 | Row hover quick-categorize | Swipe-left action |
 | Bulk-select via checkbox column | Long-press to enter select mode |
 | Sticky filter bar | "Filters" pill → filter bottom sheet |
 | Left nav (240px) | Bottom tab bar (4 tabs) + header |
 | Toast (bottom-right, 4s) | Toast (bottom-center, above tab bar, 4s) — same content rule: sync completion is a toast, sync failure is a persistent banner |
-| Skeleton | Same shape-matched `--sunken` blocks, no changes needed |
+| Skeleton | Same shape-matched `--sunken` blocks; `SkeletonList` (a Card of rows) and `SkeletonScreen` (hero + cards) in components/ui/Skeleton.tsx. Never a centred `ActivityIndicator` while a screen loads |
 | Stat tile | Same anatomy, narrower fixed width for horizontal scroll strip on Overview |
 | Meter bar | Unchanged anatomy, full width of screen minus 16px page padding |
 | Category pill, badge/status chip | Unchanged anatomy — already touch-target-safe at 24px/20px tall with adequate tap padding added on mobile (effective tap area padded to 44px even though visual pill stays compact) |

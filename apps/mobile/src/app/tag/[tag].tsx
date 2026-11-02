@@ -1,4 +1,5 @@
-import { View, Text, ScrollView, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView } from "react-native";
+import { Skeleton, SkeletonList } from "@/components/ui/Skeleton";
 import { Stack, useLocalSearchParams } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { formatCents, formatPercent } from "@tally/core/money";
@@ -44,7 +45,10 @@ export default function TagScreen() {
       <ScreenGlow />
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 20, gap: 14, paddingBottom: 40 }}>
         {isLoading || !s ? (
-          <ActivityIndicator className="mt-8" />
+          <>
+            <Skeleton style={{ height: 36, width: 180, marginTop: 8 }} />
+            <SkeletonList rows={5} />
+          </>
         ) : (
           <>
             <Text className="font-ui text-text-2 px-1" style={{ fontSize: rf(13.5) }}>

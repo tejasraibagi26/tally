@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { SkeletonList } from "@/components/ui/Skeleton";
 import { View, Text, TextInput, FlatList, Pressable, ActivityIndicator, RefreshControl } from "react-native";
+import { PillButton } from "@/components/ui/PillButton";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ListFilter, Plus, RefreshCw, Search, X } from "lucide-react-native";
@@ -266,9 +268,7 @@ export default function TransactionsScreen() {
                   <Text className="font-ui-semibold text-brand" style={{ fontSize: rf(13.5) }}>{summary.unreviewed} to review</Text>
                   <Text className="font-ui text-text-2" style={{ fontSize: rf(12) }}>Confirm categories one by one. Swipe to go fast.</Text>
                 </View>
-                <Pressable onPress={() => router.push("/(tabs)/transactions/review")} className="h-9 px-4 rounded-full items-center justify-center bg-brand border-button border-ink">
-                  <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(13) }}>Review</Text>
-                </Pressable>
+                <PillButton label="Review" onPress={() => router.push("/(tabs)/transactions/review")} size="sm" inline />
               </View>
             )}
 
@@ -332,7 +332,7 @@ export default function TransactionsScreen() {
         }
         ListEmptyComponent={
           isLoading ? (
-            <ActivityIndicator className="mt-8" />
+            <View className="mt-2"><SkeletonList rows={8} /></View>
           ) : activeCount === 0 && !searchQuery ? (
             <View className="rounded-card bg-surface border-card border-ink p-8 mt-2">
               <EmptyState

@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { View, Text, ScrollView, Pressable, ActivityIndicator, Alert } from "react-native";
+import { SkeletonList } from "@/components/ui/Skeleton";
+import { View, Text, ScrollView, Pressable, Alert } from "react-native";
 import { Stack } from "expo-router";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
@@ -161,7 +162,7 @@ export default function IncomeSchedulesScreen() {
           <Text className="font-ui text-text-2" style={{ fontSize: rf(13) }}>For a paycheque your bank doesn&apos;t sync reliably: set the amount and pay days once, and Tally adds it on every payday.</Text>
         </View>
         {isLoading ? (
-          <ActivityIndicator className="mt-8" />
+          <SkeletonList rows={2} avatar={false} />
         ) : (data?.schedules.length ?? 0) > 0 ? (
           <Card className="px-5">
             {data!.schedules.map((s, i, arr) => (

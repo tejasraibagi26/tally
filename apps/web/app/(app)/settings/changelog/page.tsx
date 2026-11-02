@@ -24,7 +24,7 @@ export default function ChangelogPage() {
         <Link href="/settings" className="text-[13.5px] text-text-3 hover:text-text-2 self-start">
           ← Settings
         </Link>
-        <h1 className="text-2xl font-semibold text-text">Changelog</h1>
+        <h1 className="ui-page-title m-0 text-2xl font-semibold text-text leading-tight">Changelog</h1>
         <p className="text-[13.5px] text-text-2">You&apos;re on v{APP_VERSION}.</p>
       </div>
 

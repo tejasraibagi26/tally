@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, AccessibilityInfo } from "react-native";
+import { View, Text, AccessibilityInfo } from "react-native";
+import { PillButton } from "@/components/ui/PillButton";
 import { AlertTriangle, Check, CheckCircle2, Clock, X, XCircle } from "lucide-react-native";
 import { SYNC_SLOW_AFTER_MS, syncDialogCopy, syncSteps, type SyncDialogMode, type SyncDialogPhase } from "@tally/core/syncDialog";
 import { Sheet } from "@/components/ui/Sheet";
@@ -174,18 +175,5 @@ export function ProgressSheet({ state, onClose, onRetry }: { state: ProgressStat
 }
 
 function Pill({ label, onPress, variant }: { label: string; onPress: () => void; variant: "primary" | "secondary" }) {
-  const colors = useThemeColors();
-  const rf = useRF();
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      className={variant === "primary" ? "rounded-full bg-brand border-button border-ink items-center justify-center active:opacity-90" : "rounded-full bg-surface-2 items-center justify-center active:opacity-80"}
-      style={[{ height: 50 }, variant === "secondary" ? { borderWidth: 1, borderColor: colors.border } : null]}
-    >
-      <Text className={variant === "primary" ? "font-ui-semibold text-on-brand" : "font-ui-semibold text-text"} style={{ fontSize: rf(15) }}>
-        {label}
-      </Text>
-    </Pressable>
-  );
+  return <PillButton label={label} onPress={onPress} variant={variant} />;
 }

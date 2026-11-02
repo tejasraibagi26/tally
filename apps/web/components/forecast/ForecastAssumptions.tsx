@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { formatCents } from "@tally/core/money";
 import type { ForecastAssumptions as Assumptions } from "@/lib/forecast";
 import { Button } from "@/components/ui/Button";
+import { InlineError } from "@/components/ui/InlineError";
 
 function Row({ title, note }: { title: string; note: string }) {
   return (
@@ -91,7 +92,7 @@ export function ForecastAssumptions({ assumptions: a, cushion }: { assumptions: 
               Use Tally&apos;s estimate instead
             </button>
           )}
-          {error && <p className="m-0 text-[13px] text-negative">{error}</p>}
+          {error && <InlineError>{error}</InlineError>}
         </div>
       ) : (
         <div className="flex items-start justify-between gap-3 border-b border-border py-2.5">

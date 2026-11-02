@@ -177,7 +177,7 @@ export default async function OverviewPage() {
         actions={
           brokenItems > 0 && (
             <Link href="/accounts" className="ui-btn inline-flex items-center gap-1.5 rounded-full border-2 border-[var(--ink)] bg-negative-subtle px-3 py-1 text-[13.5px] font-semibold text-negative">
-              <AlertTriangle size={14} strokeWidth={2.25} aria-hidden="true" />
+              <AlertTriangle size={14} strokeWidth={2} aria-hidden="true" />
               {brokenItems} connection{brokenItems === 1 ? "" : "s"} need{brokenItems === 1 ? "s" : ""} you
             </Link>
           )

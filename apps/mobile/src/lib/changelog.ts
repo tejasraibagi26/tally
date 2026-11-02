@@ -16,6 +16,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.14.1",
+    date: "2026-11-01",
+    changes: [
+      { kind: "improved", text: "Screens show a placeholder of what's coming while they load, instead of a spinner." },
+      { kind: "fixed", text: "Buttons that are busy keep their label and size, and look the same everywhere." },
+      { kind: "fixed", text: "The \"Last month\" filter and Year in review use your own date, not UTC, so they're right late in the evening." },
+    ],
+  },
+  {
     version: "2.14.0",
     date: "2026-11-01",
     changes: [{ kind: "improved", text: "Dark mode pops like light mode: bold outlines, a grape shadow under every card, and a solid grape net worth card." }],

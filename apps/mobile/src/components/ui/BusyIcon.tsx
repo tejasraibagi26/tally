@@ -23,7 +23,7 @@ export function BusyIcon({ busy, color, size = 16, children }: { busy: boolean; 
  */
 export function BusyLabel({ busy, color, gap = 6, size = 14, children }: { busy: boolean; color: string; gap?: number; size?: number; children: ReactNode }) {
   return (
-    <View style={{ flexDirection: "row", alignItems: "center", gap }}>
+    <View style={{ flexDirection: "row", alignItems: "center", gap, flexShrink: 1 }}>
       <BusyIcon busy={busy} color={color} size={size}>
         {null}
       </BusyIcon>

@@ -3,12 +3,13 @@
 import { useCallback, useId, useState, type FormEvent } from "react";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { AlertTriangle, KeyRound, UserRound } from "lucide-react";
+import { KeyRound, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { DialogBody, DialogFooter, DialogHeader, DialogTile } from "@/components/ui/Dialog";
 import { SettingsGroup, SettingsRow } from "@/components/settings/SettingsLayout";
 import { showToast } from "@/lib/toast";
+import { InlineError } from "@/components/ui/InlineError";
 
 const inputClass =
   "h-9 w-full rounded-control border border-border-strong bg-surface px-3 text-[15px] text-text focus:outline-none focus:ring-2 focus:ring-info disabled:opacity-60";
@@ -19,12 +20,7 @@ function longDate(iso: string): string {
 }
 
 function FieldError({ id, children }: { id: string; children: string }) {
-  return (
-    <p id={id} role="alert" className="m-0 flex items-start gap-1.5 text-[13px] text-negative">
-      <AlertTriangle size={14} strokeWidth={1.75} className="flex-none mt-0.5" />
-      {children}
-    </p>
-  );
+  return <InlineError id={id}>{children}</InlineError>;
 }
 
 /**

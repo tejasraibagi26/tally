@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { View, Text, ScrollView, TextInput, Switch, ActivityIndicator, KeyboardAvoidingView, Platform } from "react-native";
+import { SkeletonList } from "@/components/ui/Skeleton";
+import { View, Text, ScrollView, TextInput, Switch, KeyboardAvoidingView, Platform } from "react-native";
 import { Card } from "@/components/ui/Card";
 import { ScreenGlow } from "@/components/ui/ScreenGlow";
 import { useScreenContentTop } from "@/components/ui/ScreenHeader";
@@ -108,7 +109,7 @@ export default function SafeToSpendScreen() {
         <NextPaychequeCard />
 
         {settings.isLoading || !settings.data ? (
-          <ActivityIndicator className="mt-4" />
+          <SkeletonList rows={3} avatar={false} />
         ) : (
           <>
             <Card className="px-5">

@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { View, Text, Pressable, Animated, PanResponder, ActivityIndicator, Switch } from "react-native";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { View, Text, Pressable, Animated, PanResponder, Switch } from "react-native";
+import { PillButton } from "@/components/ui/PillButton";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueryClient } from "@tanstack/react-query";
@@ -124,7 +126,7 @@ export default function ReviewScreen() {
 
       <View className="flex-1 justify-center px-5">
         {isLoading ? (
-          <ActivityIndicator />
+          <Skeleton style={{ height: 320, borderRadius: 18 }} />
         ) : isError ? (
           <Text className="font-ui text-text-2 text-center" style={{ fontSize: rf(14) }}>{"Couldn't load transactions to review."}</Text>
         ) : !current ? (
@@ -134,9 +136,7 @@ export default function ReviewScreen() {
             <Text className="font-ui text-text-2 text-center" style={{ fontSize: rf(14) }}>
               {done > 0 ? `${done} reviewed. New transactions show up here as they sync.` : "Nothing left to review."}
             </Text>
-            <Pressable onPress={finish} className="mt-2 h-11 px-6 rounded-full items-center justify-center bg-brand border-button border-ink">
-              <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14) }}>Done</Text>
-            </Pressable>
+            <PillButton label="Done" onPress={finish} size="md" inline className="mt-2 self-center" />
           </View>
         ) : (
           <Animated.View {...responder.panHandlers} style={{ transform: [{ translateX: x }, { rotate }] }} className="rounded-[20px] bg-surface border-card border-ink p-5 gap-4">
@@ -157,13 +157,7 @@ export default function ReviewScreen() {
             )}
             <View className="gap-2">
               {current.suggestions[0] && (
-                <Pressable onPress={() => resolve(current.suggestions[0]!.categoryId)} disabled={review.isPending} className="h-12 rounded-full flex-row items-center justify-center gap-2 bg-brand border-button border-ink">
-                  {review.isPending ? (
-                    <ActivityIndicator color={colors["on-brand"]} />
-                  ) : (
-                    <Text className="font-ui-semibold text-on-brand" style={{ fontSize: rf(14.5) }}>✓ {current.suggestions[0].name}</Text>
-                  )}
-                </Pressable>
+                <PillButton label={`✓ ${current.suggestions[0].name}`} onPress={() => resolve(current.suggestions[0]!.categoryId)} loading={review.isPending} size="md" />
               )}
               <View className="flex-row gap-2">
                 {current.suggestions.slice(1).map((s) => (

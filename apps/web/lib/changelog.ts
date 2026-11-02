@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.15.1",
+    date: "2026-11-01",
+    changes: [
+      { kind: "improved", text: "Goals, Loans, Settings, Tags and Year in review show a placeholder while they load instead of a blank page." },
+      { kind: "fixed", text: "Buttons that are busy keep their label and size, and look the same everywhere." },
+    ],
+  },
+  {
     version: "2.15.0",
     date: "2026-11-01",
     changes: [
