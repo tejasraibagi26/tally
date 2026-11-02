@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.16.0",
+    date: "2026-11-02",
+    changes: [
+      { kind: "improved", text: "Sheets now float as rounded cards, set in from the edges of the screen." },
+    ],
+  },
+  {
     version: "2.15.3",
     date: "2026-11-02",
     changes: [

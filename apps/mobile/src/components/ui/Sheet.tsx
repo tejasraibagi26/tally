@@ -20,11 +20,17 @@ const SCREEN_HEIGHT = Dimensions.get("window").height;
 // §"Bottom sheet open/close" calls for "physically dragged," not a fixed-duration tween.
 const OPEN_SPRING = { damping: 30, stiffness: 300, mass: 0.9 };
 const CLOSE_DURATION = 220;
+// Floating-card geometry: an 8pt inset all round, and corners concentric
+// with the phone's display corners (~55pt on Face ID iPhones, minus the
+// inset). Android displays are less rounded, so a smaller radius there.
+const SHEET_GAP = 8;
+const SHEET_RADIUS = Platform.OS === "ios" ? 46 : 28;
 const DRAG_CLOSE_VELOCITY = 900; // px/s -- a fast flick closes even without crossing the distance threshold
 
 /**
  * Shared shell for every bottom sheet (MOBILE_DESIGN.md's mobile equivalent
- * of web's side panel/modal): native-style grabber handle, spring-in on
+ * of web's side panel/modal): a floating card (inset 8pt, all corners
+ * rounded), native-style grabber handle, spring-in on
  * open, swipe-down-to-dismiss from the handle, and a tap-out backdrop.
  * Callers keep their own header/content -- this only owns the shell chrome
  * and the open/close motion. `onClose` is called once the close animation
@@ -123,6 +129,15 @@ export function Sheet({
   // that padding is added -- the indicator sits in the bottom ~13pt, well
   // inside it. Android keeps the full inset (gesture/nav bar).
   const bottomPad = Platform.OS === "ios" ? Math.max(8, insets.bottom - 20) : insets.bottom;
+  // The sheet floats like iOS's own (and Spotify's) card sheets: inset from
+  // the sides and bottom, every corner rounded concentric with the screen's.
+  // The gap is taken out of bottomPad, not added to it, so content ends the
+  // same distance from the screen edge as before (no double-counted inset).
+  const gap = SHEET_GAP;
+  // iOS: the home indicator may overlap the card, as on native sheets.
+  // Android: the card floats above the nav bar, never over it.
+  const innerBottom = keyboardVisible || Platform.OS === "android" ? 0 : Math.max(0, bottomPad - gap);
+  const outerBottom = keyboardVisible || Platform.OS === "ios" ? gap : insets.bottom + gap;
 
   if (!mounted) return null;
 
@@ -142,8 +157,20 @@ export function Sheet({
           pointerEvents="box-none"
         >
           <Animated.View
-            className="bg-raised rounded-t-panel overflow-hidden"
-            style={[{ maxHeight, paddingBottom: keyboardVisible ? 0 : bottomPad }, sheetStyle]}
+            className="bg-raised overflow-hidden"
+            style={[
+              {
+                maxHeight,
+                marginHorizontal: gap,
+                marginBottom: outerBottom,
+                paddingBottom: innerBottom,
+                borderRadius: SHEET_RADIUS,
+                borderCurve: "continuous",
+                borderWidth: 1,
+                borderColor: colors.border,
+              },
+              sheetStyle,
+            ]}
           >
             <GestureDetector gesture={panGesture}>
               <View style={{ alignItems: "center", paddingTop: 8, paddingBottom: 4 }} hitSlop={{ top: 12, bottom: 12, left: 48, right: 48 }}>

@@ -443,8 +443,13 @@ import Constants from "expo-constants";
  *
  * 2.15.3 gives Add transaction's date, category and account rows (and the
  * Expense/Income switch) the same ink field outline as its text inputs.
+ *
+ * 2.16.0 floats every bottom sheet as a card (Sheet.tsx): inset 8pt from
+ * the sides and bottom, all corners rounded concentric with the display
+ * (46 iOS / 28 Android), hairline border. The inset comes out of the iOS
+ * bottom padding so content ends where it did; Android sits above the nav bar.
  */
-export const APP_VERSION = "2.15.3";
+export const APP_VERSION = "2.16.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
