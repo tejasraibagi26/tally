@@ -476,8 +476,13 @@ import Constants from "expo-constants";
  * categories of that kind) and for Today/Yesterday/a date, an account row
  * that is never preselected, and "Add expense · $X" disabled until amount,
  * description and account are set. Switching kind clears the category.
+ *
+ * 2.17.1: Add transaction's amount no longer clips past 7 characters. The
+ * field is as wide as an invisible measured twin of its text (no more
+ * 0.62em guess), the number steps 60 -> 48 -> 40pt as it grows, and input
+ * is capped at 7 whole digits + 2 decimals.
  */
-export const APP_VERSION = "2.17.0";
+export const APP_VERSION = "2.17.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

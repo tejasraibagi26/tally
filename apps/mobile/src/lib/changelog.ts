@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.17.1",
+    date: "2026-11-02",
+    changes: [
+      { kind: "fixed", text: "Big amounts in Add transaction no longer get cut off: the number shrinks to fit as you type." },
+    ],
+  },
+  {
     version: "2.17.0",
     date: "2026-11-02",
     changes: [

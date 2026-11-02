@@ -40,6 +40,14 @@ function yesterday(): Date {
 
 const CHIP_COUNT = 5;
 
+/** Digits and one decimal point; at most 7 whole digits and 2 decimals (up to 9,999,999.99). */
+function cleanAmount(raw: string): string {
+  const t = raw.replace(",", ".").replace(/[^0-9.]/g, "");
+  const [whole = "", ...rest] = t.split(".");
+  const w = whole.slice(0, 7);
+  return rest.length ? `${w}.${rest.join("").slice(0, 2)}` : w;
+}
+
 type ChipProps = { label: string; selected: boolean; onPress: () => void; dot?: string; accent?: boolean; fill: string };
 
 /** A quick-pick chip: selected wears the ink outline on brand-subtle, like Pop's selected states. */
@@ -95,6 +103,7 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
   const { data: topData } = useTopCategories(kind);
   const [name, setName] = useState("");
   const [amountInput, setAmountInput] = useState("");
+  const [amountWidth, setAmountWidth] = useState(40);
   const [accountId, setAccountId] = useState<string | null>(null);
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [date, setDate] = useState(() => new Date());
@@ -131,6 +140,8 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
   const glassFill = NativeBlur ? withAlpha(colors["surface-2"]!, SHEET_CARD) : colors["surface-2"]!;
 
   const amountCents = Math.round(parseFloat(amountInput) * 100);
+  // 60pt up to 6 characters, then smaller so a long amount still fits a line.
+  const amountSize = amountInput.length <= 6 ? 60 : amountInput.length <= 8 ? 48 : 40;
   const amountValid = Number.isFinite(amountCents) && amountCents > 0;
   const canSubmit = amountValid && name.trim().length > 0 && !!selectedAccount;
   const formatted = amountValid ? `$${(amountCents / 100).toFixed(2)}` : null;
@@ -239,22 +250,33 @@ export function AddTransactionSheet({ visible, onClose }: { visible: boolean; on
               );
             })}
           </View>
-          <View className="flex-row items-center justify-center">
-            <Text className="font-display" style={{ fontSize: rf(30), color: signColor }}>{kind === "expense" ? "−$" : "+$"}</Text>
+          {/* The number steps down a size as it grows, and the field is as wide
+              as its measured text (a TextInput doesn't size itself) -- so even
+              9999999.99 sits on one line instead of clipping. */}
+          <View className="flex-row items-center justify-center" style={{ alignSelf: "stretch" }}>
+            <Text className="font-display" style={{ fontSize: rf(amountSize * 0.5), color: signColor }}>{kind === "expense" ? "−$" : "+$"}</Text>
             <TextInput
               value={amountInput}
-              onChangeText={(t) => setAmountInput(t.replace(",", "."))}
+              onChangeText={(t) => setAmountInput(cleanAmount(t))}
               placeholder="0"
               placeholderTextColor={colors["text-3"]}
               keyboardType="decimal-pad"
               autoFocus
-              returnKeyType="next"
               accessibilityLabel="Amount"
               className="font-display text-text"
-              // A TextInput doesn't size to its text, so it's sized from what's typed
-              // (Bricolage 800 digits run ~0.62em) -- else "42.50" clips.
-              style={{ fontSize: rf(60), width: Math.min(280, Math.max(1, (amountInput || "0").length) * rf(60) * 0.62 + 8), paddingVertical: 0, letterSpacing: -1 }}
+              style={{ fontSize: rf(amountSize), width: amountWidth + 6, paddingVertical: 0, paddingHorizontal: 0 }}
             />
+            {/* Invisible twin, same font and size, measured for the field's width. */}
+            <Text
+              className="font-display"
+              aria-hidden
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              onLayout={(e) => setAmountWidth(Math.ceil(e.nativeEvent.layout.width))}
+              style={{ position: "absolute", opacity: 0, fontSize: rf(amountSize) }}
+            >
+              {amountInput || "0"}
+            </Text>
           </View>
           <Text style={{ fontFamily: "JetBrainsMono", fontSize: rf(11), letterSpacing: 0.4, color: colors["text-3"], marginTop: -4 }}>{DEFAULT_CURRENCY}</Text>
         </View>
