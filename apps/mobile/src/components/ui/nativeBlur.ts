@@ -17,3 +17,11 @@ export const NativeBlur: BlurComponent | null = (() => {
     return null;
   }
 })();
+
+// One glass recipe for every sheet -- ui/Sheet.tsx (expo-blur underneath)
+// and the native More sheet (iOS's own glass underneath): a wash of
+// `raised` over the blur, dense enough that what's behind reads as a soft
+// hint rather than stains and captions stay legible on any backdrop, and
+// cards on the glass at a lighter alpha so they belong to it.
+export const SHEET_WASH = 0.6;
+export const SHEET_CARD = 0.75;

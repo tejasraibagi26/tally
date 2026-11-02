@@ -455,8 +455,13 @@ import Constants from "expo-constants";
  * is 44 on iOS (was 24), so iOS 26's floating sheet clears the display's
  * corners instead of being clipped by them; its content is clear on iOS
  * (contentStyle transparent, more.tsx unpainted) so the system glass shows.
+ *
+ * 2.16.2: one glass recipe (ui/nativeBlur.ts): a 60% wash of raised over
+ * the blur on every sheet -- custom sheets were at 72% (nearly solid) while
+ * More had no wash (stained by what's behind). More's cards are surface-2
+ * at 75% on iOS, and its title is left-aligned at 18pt.
  */
-export const APP_VERSION = "2.16.1";
+export const APP_VERSION = "2.16.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

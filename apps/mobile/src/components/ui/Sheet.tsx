@@ -12,7 +12,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { withAlpha } from "@/theme/colors";
-import { NativeBlur } from "@/components/ui/nativeBlur";
+import { NativeBlur, SHEET_WASH } from "@/components/ui/nativeBlur";
 import { useColorScheme } from "nativewind";
 import { useThemeColors } from "@/theme/useThemeColors";
 
@@ -185,7 +185,7 @@ export function Sheet({
                   tint={colorScheme === "dark" ? "systemThickMaterialDark" : "systemThickMaterialLight"}
                   style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
                 />
-                <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: withAlpha(colors.raised!, 0.72) }} />
+                <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: withAlpha(colors.raised!, SHEET_WASH) }} />
               </>
             )}
             <GestureDetector gesture={panGesture}>

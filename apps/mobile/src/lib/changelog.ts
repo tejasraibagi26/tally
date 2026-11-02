@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.16.2",
+    date: "2026-11-02",
+    changes: [
+      { kind: "improved", text: "Every sheet now has the same frosted look: see-through, but calm and easy to read whatever is behind it." },
+      { kind: "improved", text: "The More sheet's cards sit on the glass, and its title lines up on the left." },
+    ],
+  },
+  {
     version: "2.16.1",
     date: "2026-11-02",
     changes: [

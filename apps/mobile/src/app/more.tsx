@@ -4,9 +4,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Repeat, TrendingUp, TrendingDown, Settings, LogOut, ChevronRight, CreditCard, Banknote, Target, Tag } from "lucide-react-native";
 import { useAuth } from "@/lib/AuthContext";
 import { useThemeColors } from "@/theme/useThemeColors";
-import { hairline } from "@/theme/colors";
+import { hairline, withAlpha } from "@/theme/colors";
 import { useRF } from "@/theme/responsiveFont";
 import { APP_VERSION, BUILD_SHA } from "@/lib/version";
+import { SHEET_CARD, SHEET_WASH } from "@/components/ui/nativeBlur";
 
 function Row({
   icon,
@@ -47,6 +48,9 @@ export default function MoreScreen() {
   const { logout } = useAuth();
   const rf = useRF();
   const soft = { borderTopWidth: 1, borderTopColor: hairline(colors) };
+  const ios = Platform.OS === "ios";
+  // On iOS the cards sit on the glass, a touch see-through (SHEET_CARD).
+  const card = ios ? { backgroundColor: withAlpha(colors["surface-2"]!, SHEET_CARD) } : undefined;
   const caption = { fontSize: rf(11), letterSpacing: 0.66, textTransform: "uppercase" as const };
 
   function go(href: Href) {
@@ -59,11 +63,14 @@ export default function MoreScreen() {
     // sheetAllowedDetents), not sized to this content -- without flex-1 here,
     // this View is only as tall as its own rows, and the native sheet's own
     // (light, even in dark mode) background shows through as a bar below it.
-    // iOS: no background of its own -- the system sheet's glass shows
-    // through (contentStyle is clear in _layout.tsx). Android stays solid.
-    <View className={Platform.OS === "ios" ? "flex-1 px-5" : "flex-1 bg-surface px-5"} style={{ paddingTop: 22, paddingBottom: (Platform.OS === "ios" ? 0 : insets.bottom) + 16 }}>
-      <View className="items-center mb-3">
-        <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }}>More</Text>
+    // iOS: the system sheet's glass (contentStyle is clear in _layout.tsx)
+    // under the same wash as every other sheet (SHEET_WASH). Android stays solid.
+    <View
+      className={ios ? "flex-1 px-5" : "flex-1 bg-surface px-5"}
+      style={{ paddingTop: 22, paddingBottom: (ios ? 0 : insets.bottom) + 16, backgroundColor: ios ? withAlpha(colors.raised!, SHEET_WASH) : undefined }}
+    >
+      <View className="mb-3 px-1">
+        <Text className="font-ui-semibold text-text" style={{ fontSize: rf(18) }}>More</Text>
       </View>
       {/* Same order, names and icons as web's side nav (Your money → What
           you have → Plan ahead), collapsed into one card because mobile has
@@ -72,7 +79,7 @@ export default function MoreScreen() {
           Account actions get their own card, like web's footer. */}
       <View className="gap-2">
         <Text className="font-ui-medium text-text-3 px-1" style={caption}>Your money</Text>
-        <View className="rounded-card bg-surface-2 border border-border overflow-hidden">
+        <View className={ios ? "rounded-card border border-border overflow-hidden" : "rounded-card bg-surface-2 border border-border overflow-hidden"} style={card}>
           <Row icon={<TrendingDown size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Forecast" onPress={() => go("/forecast" as Href)} colors={colors} />
           <View style={soft}>
             <Row icon={<Repeat size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Subscriptions" onPress={() => go("/subscriptions")} colors={colors} />
@@ -97,7 +104,7 @@ export default function MoreScreen() {
 
       <View className="gap-2 mt-5">
         <Text className="font-ui-medium text-text-3 px-1" style={caption}>Account</Text>
-        <View className="rounded-card bg-surface-2 border border-border overflow-hidden">
+        <View className={ios ? "rounded-card border border-border overflow-hidden" : "rounded-card bg-surface-2 border border-border overflow-hidden"} style={card}>
           <Row icon={<Settings size={19} color={colors["text-2"]} strokeWidth={1.75} />} label="Settings" onPress={() => go("/settings")} colors={colors} />
           <View style={soft}>
             <Row icon={<LogOut size={19} color={colors.negative} strokeWidth={1.75} />} label="Sign out" destructive onPress={() => logout()} colors={colors} />
