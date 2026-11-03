@@ -528,8 +528,11 @@ import Constants from "expo-constants";
  *
  * 2.19.5: Settings' Appearance switch is easier to hit: 36pt pill segments
  * (56pt min wide, 14pt text, 4pt vertical slop) instead of ~24pt ones.
+ *
+ * 2.19.6: the net worth range pills (1M/3M/6M/1Y) are outlined: 1px
+ * field-line on each, brand on the selected one.
  */
-export const APP_VERSION = "2.19.5";
+export const APP_VERSION = "2.19.6";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

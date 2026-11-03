@@ -308,7 +308,12 @@ export function NetWorthHero({
                   onPress={() => chooseRange(r)}
                   hitSlop={{ top: 8, bottom: 8 }}
                   className="h-8 px-3.5 rounded-full items-center justify-center"
-                  style={on ? [{ backgroundColor: colors.surface }, rangeEdge] : undefined}
+                  style={[
+                    // Every range is outlined (v2.19.6); the selected one sits on a
+                    // white card with a brand outline.
+                    on ? [{ backgroundColor: colors.surface }, rangeEdge] : null,
+                    { borderWidth: 1, borderColor: on ? colors.brand : colors["field-line"] },
+                  ]}
                   accessibilityRole="tab"
                   accessibilityState={{ selected: on }}
                   accessibilityLabel={RANGE_CAPTION[r]}
