@@ -1,3 +1,4 @@
+import { useStickerShadow } from "@/components/ui/Card";
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Skeleton, SkeletonList } from "@/components/ui/Skeleton";
 import { View, Text, ScrollView, Pressable, Switch, ActivityIndicator, Alert, TextInput } from "react-native";
@@ -132,9 +133,10 @@ const APPEARANCE_OPTIONS: { mode: AppearanceMode; label: string }[] = [
   { mode: "system", label: "Auto" },
 ];
 
-/** Compact segmented control that fits in a row. */
+/** Segmented control that fits in a row, with 36pt segments (44pt with the slop) so each is easy to hit (v2.19.5). */
 function AppearanceSegments() {
   const rf = useRF();
+  const edge = useStickerShadow();
   const [selected, setSelected] = useState<AppearanceMode>("system");
 
   useEffect(() => {
@@ -148,7 +150,7 @@ function AppearanceSegments() {
   }
 
   return (
-    <View className="flex-row rounded-[9px] bg-sunken" style={{ padding: 2 }} accessibilityRole="radiogroup" accessibilityLabel="Appearance">
+    <View className="flex-row rounded-full bg-sunken" style={{ padding: 3, gap: 2 }} accessibilityRole="radiogroup" accessibilityLabel="Appearance">
       {APPEARANCE_OPTIONS.map(({ mode, label }) => {
         const active = selected === mode;
         return (
@@ -157,10 +159,11 @@ function AppearanceSegments() {
             onPress={() => choose(mode)}
             accessibilityRole="radio"
             accessibilityState={{ selected: active }}
-            hitSlop={{ top: 8, bottom: 8 }}
-            className={active ? "rounded-[7px] bg-surface px-2.5 py-1" : "rounded-[7px] px-2.5 py-1"}
+            hitSlop={{ top: 4, bottom: 4 }}
+            className={`rounded-full items-center justify-center ${active ? "bg-surface" : "active:opacity-70"}`}
+            style={[{ height: 36, minWidth: 56, paddingHorizontal: 12 }, active ? edge : null]}
           >
-            <Text className={active ? "font-ui-semibold text-text" : "font-ui text-text-2"} style={{ fontSize: rf(12.5) }}>
+            <Text className={active ? "font-ui-semibold text-text" : "font-ui-medium text-text-2"} style={{ fontSize: rf(14) }}>
               {label}
             </Text>
           </Pressable>

@@ -525,8 +525,11 @@ import Constants from "expo-constants";
  *
  * 2.19.4: CategoryAvatar is option 2 from the canvas: a soft circle, the
  * category color at 15% (22% dark) behind the icon in the full color.
+ *
+ * 2.19.5: Settings' Appearance switch is easier to hit: 36pt pill segments
+ * (56pt min wide, 14pt text, 4pt vertical slop) instead of ~24pt ones.
  */
-export const APP_VERSION = "2.19.4";
+export const APP_VERSION = "2.19.5";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

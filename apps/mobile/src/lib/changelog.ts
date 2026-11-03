@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.19.5",
+    date: "2026-11-02",
+    changes: [
+      { kind: "fixed", text: "The Light, Dark and Auto buttons in Settings are bigger and easier to tap." },
+    ],
+  },
+  {
     version: "2.19.4",
     date: "2026-11-02",
     changes: [
