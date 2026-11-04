@@ -1,6 +1,7 @@
 import { eq, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
+import { markItemFromPlaidError } from "@/lib/itemStatusFromError";
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
 import type { SyncTrigger } from "@/lib/plaidSync";
 
@@ -70,6 +71,7 @@ export async function refreshAccountBalances(itemId: string, trigger: SyncTrigge
     const code = plaidErrorCode(err);
     const message = err instanceof Error ? err.message : "unknown error";
     console.error(`refreshAccountBalances failed for item ${itemId}`, { code, message });
+    await markItemFromPlaidError(itemId, err);
     await db.insert(schema.syncRuns).values({
       itemId,
       kind: "balances",

@@ -549,8 +549,14 @@
  * soft circle (components/transactions/CategoryAvatar.tsx; the tint is
  * --cat-tint, 15% light / 22% dark) instead of the merchant logo. The icon
  * comes from @tally/core/categoryIcon, now shared with mobile.
+ *
+ * 2.18.1: a sync or balance refresh that Plaid rejects with
+ * ITEM_LOGIN_REQUIRED (or a revoked-access code) now sets the item's status
+ * itself (lib/itemStatusFromError.ts) instead of only logging it. Until now
+ * only the ITEM webhook did, so a bank whose webhook never came stayed
+ * "healthy" and neither app showed the "needs you" banner.
  */
-export const APP_VERSION = "2.18.0";
+export const APP_VERSION = "2.18.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

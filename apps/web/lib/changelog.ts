@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.18.1",
+    date: "2026-11-03",
+    changes: [
+      { kind: "fixed", text: "When a bank signs Tally out, it's flagged straight away the next time it syncs, so the \"needs you\" banner shows in the app and on the web instead of balances quietly going stale." },
+    ],
+  },
+  {
     version: "2.18.0",
     date: "2026-11-02",
     changes: [

@@ -1,6 +1,7 @@
 import { sql, eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
+import { markItemFromPlaidError } from "@/lib/itemStatusFromError";
 import { upsertAccountsForItem } from "@/lib/plaidAccounts";
 import { dedupeReattached } from "@/lib/reattach";
 import { isMockPlaidItemId } from "@/lib/mock/isMock";
@@ -182,6 +183,7 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
     return result;
   } catch (err) {
     console.error(`Transaction sync failed for item ${itemId} (${plaidErrorCode(err) ?? "unknown error"})`);
+    await markItemFromPlaidError(itemId, err);
     await db.insert(schema.syncRuns).values({
       itemId,
       kind: "transactions",
