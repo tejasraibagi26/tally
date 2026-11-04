@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.18.3",
+    date: "2026-11-03",
+    changes: [
+      { kind: "improved", text: "The \"needs you\" banner only appears when there's something you can fix, like signing in again. A bank that's just having trouble on its side says so on its own card, with Retry." },
+    ],
+  },
+  {
     version: "2.18.2",
     date: "2026-11-03",
     changes: [

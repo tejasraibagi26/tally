@@ -563,8 +563,14 @@
  * it (the daily sweep covers a lasting one). Also /api/categories/top casts
  * its day count to int: Postgres read "date - $n" as date - date and every
  * call failed, so Add transaction's quick chips were empty.
+ *
+ * 2.18.3: the "needs you" strip, Needs you panel, nav badge only count a bank the
+ * user can fix -- a sign-in (@tally/core connectionState.needsAttention). A
+ * bank that's down on its or Plaid's side keeps its own card notice and
+ * Retry, and joins the strip once a retry fails or it's been down a day.
+ * The Accounts health strokes go by level, so it isn't drawn healthy.
  */
-export const APP_VERSION = "2.18.2";
+export const APP_VERSION = "2.18.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

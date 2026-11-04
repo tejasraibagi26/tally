@@ -136,14 +136,17 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
 
   // Server-side health for the summary meter and header (no in-flight local state here).
   const levels = views.map((v) => connectionState(v, { refreshing: false, linking: false, justReconnected: false, refreshFailed: serverRefreshFailed.includes(v.id) }));
+  // "N need you" counts what the user can fix (needsAttention). The health
+  // strokes below go by level instead, so a bank that's down on its side
+  // still isn't drawn healthy even though it isn't counted as needing you.
   const count = (pred: (l: ConnectionLevel, needs: boolean) => boolean) => levels.filter((s) => pred(s.level, s.needsAttention)).length;
-  const blocked = count((l) => l === "blocked");
+  const blocked = count((l, needs) => needs && l === "blocked");
   const actSoon = count((l, needs) => needs && l !== "blocked");
   // One tally stroke per bank in the summary, most urgent first (the cards' own order).
   const healthBanks = views
     .map((v, i) => ({
       name: v.institutionName ?? "A bank",
-      level: (levels[i]!.level === "blocked" ? "blocked" : levels[i]!.needsAttention ? "act" : "healthy") as HealthLevel,
+      level: (levels[i]!.level === "blocked" ? "blocked" : levels[i]!.level === "act" ? "act" : "healthy") as HealthLevel,
       rank: levels[i]!.rank,
     }))
     .sort((a, b) => a.rank - b.rank || a.name.localeCompare(b.name));

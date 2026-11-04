@@ -531,8 +531,13 @@ import Constants from "expo-constants";
  *
  * 2.19.6: the net worth range pills (1M/3M/6M/1Y) are outlined: 1px
  * field-line on each, brand on the selected one.
+ *
+ * 2.19.7: the "needs you" strip, Overview card and Fix sheet only count a bank the
+ * user can fix -- a sign-in (@tally/core connectionState.needsAttention). A
+ * bank that's down on its or Plaid's side keeps its own card notice and
+ * Retry, and joins the strip once a retry fails or it's been down a day.
  */
-export const APP_VERSION = "2.19.6";
+export const APP_VERSION = "2.19.7";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

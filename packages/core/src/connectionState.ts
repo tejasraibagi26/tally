@@ -57,7 +57,12 @@ export interface ConnectionState {
   collapsed: boolean;
   /** Sort key, lowest first. */
   rank: number;
-  /** Counts toward the "N banks need you" strip and the Fix sheet. */
+  /**
+   * Counts toward the "N banks need you" strip, the Fix sheet and the nav
+   * badge -- only when the user can fix it (a sign-in). A bank that's down on
+   * its or Plaid's side says so on its own card, with Retry, but stays out of
+   * the strip until retrying has failed or it's been down a day.
+   */
   needsAttention: boolean;
 }
 
@@ -191,7 +196,7 @@ function resolveServerState(
         action: escalate ? signInAgain : { kind: "refresh", label: "Retry" },
         dimBalances: true,
         rank: 1,
-        needsAttention: true,
+        needsAttention: escalate,
       };
     }
     case "pending_expiration":
@@ -229,7 +234,7 @@ function resolveServerState(
             : { title: "Nothing has arrived yet", body: `${bank} hasn't sent any data since you connected it.` },
           action: local.refreshFailed ? signInAgain : { kind: "refresh", label: "Sync now" },
           rank: 1,
-          needsAttention: true,
+          needsAttention: local.refreshFailed,
         };
       }
       return {
@@ -242,7 +247,7 @@ function resolveServerState(
           : { title: `Hasn't synced in ${daysSince(inst.lastSyncedAt, now)} days`, body: "Try a manual sync. If it keeps failing, sign in again." },
         action: local.refreshFailed ? signInAgain : { kind: "refresh", label: "Sync now" },
         rank: 1,
-        needsAttention: true,
+        needsAttention: local.refreshFailed,
       };
     case "warning":
       // 6–48h behind is normal for banks that sync once a day: color the
