@@ -36,7 +36,7 @@ export async function GET(req: Request) {
         eq(schema.transactions.isTransfer, false),
         isNotNull(schema.transactions.categoryId),
         eq(schema.categories.kind, kind),
-        gte(schema.transactions.postedDate, sql`(${today}::date - ${DAYS})`),
+        gte(schema.transactions.postedDate, sql`(${today}::date - ${DAYS}::int)`),
       ),
     )
     .groupBy(schema.transactions.categoryId)

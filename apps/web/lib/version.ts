@@ -555,8 +555,16 @@
  * itself (lib/itemStatusFromError.ts) instead of only logging it. Until now
  * only the ITEM webhook did, so a bank whose webhook never came stayed
  * "healthy" and neither app showed the "needs you" banner.
+ *
+ * 2.18.2: a Plaid/bank outage on a sync (INTERNAL_SERVER_ERROR,
+ * INSTITUTION_DOWN…) sets status "error" too, so the card says the bank isn't
+ * responding and the "needs you" strip appears, instead of only a
+ * "didn't sync" banner over a card that looked fine. No instant email for
+ * it (the daily sweep covers a lasting one). Also /api/categories/top casts
+ * its day count to int: Postgres read "date - $n" as date - date and every
+ * call failed, so Add transaction's quick chips were empty.
  */
-export const APP_VERSION = "2.18.1";
+export const APP_VERSION = "2.18.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

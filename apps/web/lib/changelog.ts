@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.18.2",
+    date: "2026-11-03",
+    changes: [
+      { kind: "fixed", text: "When a bank isn't responding, its card now says so with a Retry button, and the \"needs you\" banner shows, instead of only a \"didn't sync\" message." },
+      { kind: "fixed", text: "Quick category chips when adding a transaction in the app load again." },
+    ],
+  },
+  {
     version: "2.18.1",
     date: "2026-11-03",
     changes: [
