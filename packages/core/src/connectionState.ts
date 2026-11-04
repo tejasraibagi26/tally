@@ -61,7 +61,7 @@ export interface ConnectionState {
    * Counts toward the "N banks need you" strip, the Fix sheet and the nav
    * badge -- only when the user can fix it (a sign-in). A bank that's down on
    * its or Plaid's side says so on its own card, with Retry, but stays out of
-   * the strip until retrying has failed or it's been down a day.
+   * the strip until it's been down a full day.
    */
   needsAttention: boolean;
 }
@@ -196,7 +196,9 @@ function resolveServerState(
         action: escalate ? signInAgain : { kind: "refresh", label: "Retry" },
         dimBalances: true,
         rank: 1,
-        needsAttention: escalate,
+        // A failed retry alone doesn't make it the user's to fix (Plaid's own
+        // 500s fail every retry); a full day down is when signing in is the fix.
+        needsAttention: longDown,
       };
     }
     case "pending_expiration":

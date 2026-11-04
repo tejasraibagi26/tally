@@ -569,8 +569,12 @@
  * bank that's down on its or Plaid's side keeps its own card notice and
  * Retry, and joins the strip once a retry fails or it's been down a day.
  * The Accounts health strokes go by level, so it isn't drawn healthy.
+ *
+ * 2.18.4: an "error" (outage) bank joins needs-you only after a full day down,
+ * not after a failed retry -- Plaid's own 500s fail every retry, and signing
+ * in wouldn't help.
  */
-export const APP_VERSION = "2.18.3";
+export const APP_VERSION = "2.18.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

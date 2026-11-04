@@ -539,8 +539,12 @@ import Constants from "expo-constants";
  *
  * 2.19.8: a bank card's notice stacks its text over a compact button
  * (InstitutionCard Notice) instead of squeezing the text beside it.
+ *
+ * 2.19.9: an "error" (outage) bank joins needs-you only after a full day down,
+ * not after a failed retry -- Plaid's own 500s fail every retry, and signing
+ * in wouldn't help.
  */
-export const APP_VERSION = "2.19.8";
+export const APP_VERSION = "2.19.9";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -50,7 +50,7 @@ describe("connectionState", () => {
 
   it("keeps a bank that's down out of the needs-you strip until the user can fix it", () => {
     expect(connectionState(conn("error", "critical", hoursAgo(5)), idle, NOW).needsAttention).toBe(false);
-    expect(connectionState(conn("error", "critical", hoursAgo(5)), { ...idle, refreshFailed: true }, NOW).needsAttention).toBe(true);
+    expect(connectionState(conn("error", "critical", hoursAgo(5)), { ...idle, refreshFailed: true }, NOW).needsAttention).toBe(false);
     expect(connectionState(conn("error", "critical", hoursAgo(30)), idle, NOW).needsAttention).toBe(true);
     expect(connectionState(conn("healthy", "serious", hoursAgo(80)), idle, NOW).needsAttention).toBe(false);
     expect(connectionState(conn("healthy", "serious", hoursAgo(80)), { ...idle, refreshFailed: true }, NOW).needsAttention).toBe(true);
