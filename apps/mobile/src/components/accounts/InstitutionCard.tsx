@@ -134,7 +134,7 @@ export function InstitutionCard({
           tone={state.tone}
           title={state.notice.title}
           body={state.notice.body}
-          // Two choices (revoked) go on their own row beneath; one fits inline.
+          // Two choices (revoked) go on their own row beneath; one sits inside the notice, under its text.
           inlineAction={!state.secondaryAction ? state.action : undefined}
           pending={state.actionPending}
           onAction={onAction}
@@ -210,15 +210,21 @@ function Notice({
   const rf = useRF();
   const accent = toneColor(colors, tone);
   return (
+    // Stacked, not side by side: beside a button the text got half the width,
+    // so a long bank name wrapped the title and the body ran to three lines.
     <View
-      className="mx-4 mb-2 rounded-[14px] flex-row items-center gap-3 pl-3.5 pr-3 py-3"
+      className="mx-4 mb-2 rounded-[14px] px-3.5 py-3 gap-2.5"
       style={{ backgroundColor: toneSubtle(colors, tone), borderWidth: 1, borderColor: withAlpha(accent, 0.25) }}
     >
-      <View className="flex-1 gap-0.5">
+      <View className="gap-0.5">
         <Text className="font-ui-semibold" style={{ color: accent, fontSize: rf(13.5) }}>{title}</Text>
         <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5), lineHeight: rf(17) }}>{body}</Text>
       </View>
-      {inlineAction && <StateButton action={inlineAction} tone={tone} pending={pending} onPress={() => onAction(inlineAction)} />}
+      {inlineAction && (
+        <View className="flex-row">
+          <StateButton action={inlineAction} tone={tone} pending={pending} onPress={() => onAction(inlineAction)} compact />
+        </View>
+      )}
     </View>
   );
 }

@@ -536,8 +536,11 @@ import Constants from "expo-constants";
  * user can fix -- a sign-in (@tally/core connectionState.needsAttention). A
  * bank that's down on its or Plaid's side keeps its own card notice and
  * Retry, and joins the strip once a retry fails or it's been down a day.
+ *
+ * 2.19.8: a bank card's notice stacks its text over a compact button
+ * (InstitutionCard Notice) instead of squeezing the text beside it.
  */
-export const APP_VERSION = "2.19.7";
+export const APP_VERSION = "2.19.8";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.19.8",
+    date: "2026-11-03",
+    changes: [
+      { kind: "improved", text: "A bank's \"isn't responding\" or \"sign in\" message reads on fewer lines, with its button underneath." },
+    ],
+  },
+  {
     version: "2.19.7",
     date: "2026-11-03",
     changes: [
