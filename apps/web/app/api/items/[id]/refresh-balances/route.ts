@@ -1,3 +1,5 @@
+import { log } from "@switchyard/logger";
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
@@ -9,7 +11,7 @@ import { plaidErrorCode } from "@/lib/plaid";
 // Lighter-weight than "Sync now" (which also pulls transactions/holdings/
 // investments/liabilities) — just the balances, for the 3-dot menu's
 // "Refresh balances" action.
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function POST_handler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -46,7 +48,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     // default inspection depth, hiding Plaid's actual error_code/message --
     // pull it out explicitly (refreshAccountBalances also logs this now,
     // but this route's own catch never did).
-    console.error(`Balance refresh failed for item ${id}`, { code: plaidErrorCode(err), message: err instanceof Error ? err.message : err });
+    log.error(`Balance refresh failed for item ${id}`, { code: plaidErrorCode(err), message: err instanceof Error ? err.message : err });
     return NextResponse.json({ error: "Refresh failed" }, { status: 502 });
   }
 }
+
+export const POST = route(POST_handler);

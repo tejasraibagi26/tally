@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { db, schema } from "@/db";
 import { and, eq } from "drizzle-orm";
@@ -25,7 +26,7 @@ const SYNC_FNS: Record<SyncProduct, (itemId: string) => Promise<unknown>> = {
 // or retries — a failure for data it doesn't show. Syncs every item the user
 // owns. Sequential per item (each item already serializes its own pages
 // internally); fine at this account count, revisit if that changes.
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -56,3 +57,5 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ ok: true, results });
 }
+
+export const POST = route(POST_handler);

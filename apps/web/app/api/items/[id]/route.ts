@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
@@ -5,7 +6,7 @@ import { requireUserId } from "@/lib/session";
 import { disconnectItem } from "@/lib/reattach";
 import { recordAudit } from "@/lib/audit";
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function DELETE_handler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -48,3 +49,5 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
   return NextResponse.json({ ok: true });
 }
+
+export const DELETE = route(DELETE_handler);

@@ -1,3 +1,5 @@
+import { log } from "@switchyard/logger";
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { isAuthorizedCronRequest, isAuthorizedQStashRequest } from "@/lib/cronAuth";
 import { activeItemIds } from "@/lib/activeItems";
@@ -13,7 +15,7 @@ async function runSyncAll(): Promise<{ itemCount: number; failed: number }> {
       await syncTransactionsForItem(itemId, "cron");
     } catch (err) {
       failed++;
-      console.error(`Cron sync-all: transactions sync failed for item ${itemId}`, err);
+      log.error(`Cron sync-all: transactions sync failed for item ${itemId}`, err);
     }
   }
   return { itemCount: itemIds.length, failed };
@@ -25,7 +27,7 @@ async function runSyncAll(): Promise<{ itemCount: number; failed: number }> {
 // which POSTs in with a signed request rather than Vercel's own cron
 // mechanism — see isAuthorizedQStashRequest. GET (Vercel-native, CRON_SECRET)
 // stays supported too in case a Pro plan ever re-adds it to vercel.json.
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   if (!isAuthorizedCronRequest(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -33,7 +35,7 @@ export async function GET(req: Request) {
   return NextResponse.json({ ok: true, ...result });
 }
 
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   const rawBody = await req.text();
   if (!(await isAuthorizedQStashRequest(req, rawBody))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -41,3 +43,6 @@ export async function POST(req: Request) {
   const result = await runSyncAll();
   return NextResponse.json({ ok: true, ...result });
 }
+
+export const GET = route(GET_handler);
+export const POST = route(POST_handler);

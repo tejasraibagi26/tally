@@ -1,3 +1,4 @@
+import { log } from "@switchyard/logger";
 import { eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { plaidClient, getAccessToken, plaidErrorCode, institutionSupportsProduct } from "@/lib/plaid";
@@ -115,7 +116,7 @@ export async function syncLiabilitiesForItem(itemId: string, trigger: SyncTrigge
   } catch (err) {
     const code = plaidErrorCode(err);
     if (code && NOT_SUPPORTED_CODES.has(code)) return; // not a failure — no liability-eligible accounts on this item
-    console.error(`Liabilities sync failed for item ${itemId} (${code ?? "unknown error"})`);
+    log.error(`Liabilities sync failed for item ${itemId} (${code ?? "unknown error"})`);
     await recordSyncRun(itemId, "liabilities", trigger, startedAt, { error: err instanceof Error ? err.message : "unknown error" });
     throw err; // rethrow so the queue worker retries (§8.2)
   }

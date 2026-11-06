@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { and, desc, eq, inArray, isNotNull, ne } from "drizzle-orm";
@@ -18,7 +19,7 @@ const splitSchema = z.object({ categoryId: z.string().uuid(), amount: z.number()
 // (MOBILE_DESIGN.md §5.4) -- the web app renders detail inline from its
 // already-fetched list, so this never existed until mobile needed a
 // standalone fetch. Same shape as a row from GET /api/transactions.
-export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function GET_handler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -129,7 +130,7 @@ const patchSchema = z.object({
 // touches categoryId/categorySource again (mergeTransactionUpdate) and the
 // rules engine skips this row entirely (categorize.ts only ever queries
 // category_source != 'manual').
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function PATCH_handler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -209,7 +210,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 // Manual-only: a Plaid-synced row has no business being deleted here — it'd
 // just come back on the next sync — so this only ever removes a row that
 // isManual (currently: a generated-paycheck transaction, lib/incomeSchedule.ts).
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function DELETE_handler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -233,3 +234,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   await db.delete(schema.transactions).where(eq(schema.transactions.id, id));
   return NextResponse.json({ ok: true });
 }
+
+export const GET = route(GET_handler);
+export const PATCH = route(PATCH_handler);
+export const DELETE = route(DELETE_handler);

@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { and, desc, eq, gte, inArray, isNotNull, lte } from "drizzle-orm";
 import { db, schema } from "@/db";
@@ -18,7 +19,7 @@ const QUEUE_LIMIT = 100;
  * transactions posted this month (the mobile app's queue), matching the
  * Transactions tab's "N to review" count.
  */
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -91,3 +92,5 @@ export async function GET(req: Request) {
     })),
   });
 }
+
+export const GET = route(GET_handler);

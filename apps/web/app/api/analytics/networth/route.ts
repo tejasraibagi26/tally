@@ -1,10 +1,11 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { requireUserId } from "@/lib/session";
 import { netWorthTrend } from "@/lib/networth";
 
 const RANGE_DAYS: Record<string, number> = { "3m": 90, "6m": 180, "12m": 365, "24m": 730 };
 
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -17,3 +18,5 @@ export async function GET(req: Request) {
 
   return NextResponse.json({ range, points: await netWorthTrend(userId, days) });
 }
+
+export const GET = route(GET_handler);

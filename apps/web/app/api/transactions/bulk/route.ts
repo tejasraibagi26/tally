@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { and, eq, inArray } from "drizzle-orm";
@@ -15,7 +16,7 @@ const bodySchema = z.object({
   ]),
 });
 
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -65,3 +66,5 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ ok: true, affected: ownedIds.length });
 }
+
+export const POST = route(POST_handler);

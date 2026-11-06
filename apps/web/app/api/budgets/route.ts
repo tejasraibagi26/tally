@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { and, eq } from "drizzle-orm";
@@ -8,7 +9,7 @@ import { getBudgetsForMonth, unbudgetedSpend, budgetSetupOptions } from "@/lib/b
 
 const monthSchema = z.string().regex(/^\d{4}-\d{2}-01$/, "month must be YYYY-MM-01");
 
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -48,7 +49,7 @@ const putSchema = z.object({
   isFixedAmount: z.boolean().default(false),
 });
 
-export async function PUT(req: Request) {
+async function PUT_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -79,7 +80,7 @@ export async function PUT(req: Request) {
 
 const deleteSchema = z.object({ month: monthSchema, categoryId: z.string().uuid() });
 
-export async function DELETE(req: Request) {
+async function DELETE_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -99,3 +100,7 @@ export async function DELETE(req: Request) {
 
   return NextResponse.json({ ok: true });
 }
+
+export const GET = route(GET_handler);
+export const PUT = route(PUT_handler);
+export const DELETE = route(DELETE_handler);

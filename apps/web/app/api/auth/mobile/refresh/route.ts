@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { and, eq, isNull } from "drizzle-orm";
@@ -31,7 +32,7 @@ const familyOf = (row: Row) => row.familyId ?? row.id;
  *   reuse and ended every device, so two phones signed each other out in
  *   turn, each presenting the token the other's alarm had revoked.
  */
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   const parsed = bodySchema.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
@@ -78,3 +79,5 @@ export async function POST(req: Request) {
   const { token: accessToken, expiresIn } = await signAccessToken(result.userId, user.sessionVersion);
   return NextResponse.json({ accessToken, refreshToken: result.refreshToken, expiresIn });
 }
+
+export const POST = route(POST_handler);

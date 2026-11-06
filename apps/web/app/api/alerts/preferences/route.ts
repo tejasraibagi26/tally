@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
@@ -16,7 +17,7 @@ const patchSchema = z.object({
   safeToSpendLowCents: z.number().int().min(0).max(10_000_000).optional(),
 });
 
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -27,7 +28,7 @@ export async function GET(req: Request) {
   return NextResponse.json(prefs);
 }
 
-export async function PATCH(req: Request) {
+async function PATCH_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -56,3 +57,6 @@ export async function PATCH(req: Request) {
   const { prefs: next } = await loadAlertPreferences(userId);
   return NextResponse.json(next);
 }
+
+export const GET = route(GET_handler);
+export const PATCH = route(PATCH_handler);

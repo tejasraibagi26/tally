@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { and, eq } from "drizzle-orm";
@@ -20,7 +21,7 @@ const bodySchema = z.object({
 // several months at once) can fail its "at least 3 occurrences with a stable
 // interval" bar from the very first payment, so there's nothing in
 // Subscriptions to attach a manualNextDueDate override to otherwise.
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -87,3 +88,5 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ stream, generated });
 }
+
+export const POST = route(POST_handler);

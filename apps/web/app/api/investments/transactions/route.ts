@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { and, desc, eq, gte, inArray, lte } from "drizzle-orm";
 import { db, schema } from "@/db";
@@ -5,7 +6,7 @@ import { requireUserId } from "@/lib/session";
 import { toNetWorthCurrency, NET_WORTH_CURRENCY } from "@tally/core/fx";
 import { accountDisplayName } from "@tally/core/accountName";
 
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -71,3 +72,5 @@ export async function GET(req: Request) {
   );
   return NextResponse.json({ transactions });
 }
+
+export const GET = route(GET_handler);

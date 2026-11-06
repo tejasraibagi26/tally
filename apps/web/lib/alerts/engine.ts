@@ -1,3 +1,4 @@
+import { log } from "@switchyard/logger";
 import { and, eq, gte, isNull, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import type { AlertCandidate } from "@tally/core/alerts";
@@ -100,7 +101,7 @@ async function deliver(row: EventRow, prefs: AlertPreferences): Promise<boolean>
     if (payload.emailError) await noteDelivery(row.id, {}, ["emailError"]);
     return true;
   } catch (err) {
-    console.error(`Alert email failed (event ${row.id})`, err);
+    log.error(`Alert email failed (event ${row.id})`, err);
     await noteDelivery(row.id, { emailError: err instanceof Error ? err.message : String(err) }).catch(() => {});
     return false;
   }

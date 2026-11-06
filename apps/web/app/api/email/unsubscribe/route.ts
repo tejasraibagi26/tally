@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
@@ -9,11 +10,11 @@ import { loadAlertPreferences, ALERT_TYPES } from "@/lib/alerts/preferences";
 // emails off and sends the browser back to the page to say so.
 
 // Emails sent before the page existed link here directly.
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   return NextResponse.redirect(new URL(`/unsubscribe${new URL(req.url).search}`, req.url), 303);
 }
 
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   const url = new URL(req.url);
   const userId = url.searchParams.get("uid");
   const token = url.searchParams.get("token");
@@ -31,3 +32,6 @@ export async function POST(req: Request) {
   await db.update(schema.users).set({ recapsEnabled: false }).where(eq(schema.users.id, userId));
   return NextResponse.redirect(new URL("/unsubscribe?status=done", req.url), 303);
 }
+
+export const GET = route(GET_handler);
+export const POST = route(POST_handler);

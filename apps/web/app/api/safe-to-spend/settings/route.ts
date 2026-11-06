@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { and, eq, inArray } from "drizzle-orm";
@@ -15,7 +16,7 @@ const bodySchema = z.object({
 });
 
 /** What Settings → Safe to spend edits (mobile reads it here; web's Settings page loads it directly). */
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -25,7 +26,7 @@ export async function GET(req: Request) {
   return NextResponse.json(await safeToSpendSettingsFor(userId));
 }
 
-export async function PUT(req: Request) {
+async function PUT_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -54,3 +55,6 @@ export async function PUT(req: Request) {
   }
   return NextResponse.json({ ok: true });
 }
+
+export const GET = route(GET_handler);
+export const PUT = route(PUT_handler);

@@ -1,3 +1,4 @@
+import { log } from "@switchyard/logger";
 import { createHash } from "node:crypto";
 import { importJWK, jwtVerify, decodeProtectedHeader, type JWK } from "jose";
 import { plaidClient } from "@/lib/plaid";
@@ -62,7 +63,7 @@ export async function verifyPlaidWebhook(rawBody: string, verificationHeader: st
 
     return true;
   } catch (err) {
-    console.error("plaid webhook verification failed", err);
+    log.error("plaid webhook verification failed", err);
     return false;
   }
 }

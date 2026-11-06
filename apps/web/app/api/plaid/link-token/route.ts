@@ -1,3 +1,5 @@
+import { log } from "@switchyard/logger";
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { CountryCode, Products } from "plaid";
@@ -21,7 +23,7 @@ const bodySchema = z.object({
 
 // Server-side only: builds a short-lived Link token. This is the only Plaid
 // string that ever reaches the browser (never an access_token).
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -78,7 +80,9 @@ export async function POST(req: Request) {
     });
     return NextResponse.json({ linkToken: res.data.link_token });
   } catch (err) {
-    console.error("plaid/link-token failed", err);
+    log.error("plaid/link-token failed", err);
     return NextResponse.json({ error: "Failed to create link token" }, { status: 502 });
   }
 }
+
+export const POST = route(POST_handler);

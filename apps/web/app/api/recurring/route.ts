@@ -1,9 +1,10 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { and, desc, eq, isNotNull, isNull } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -27,3 +28,5 @@ export async function GET(req: Request) {
 
   return NextResponse.json({ streams });
 }
+
+export const GET = route(GET_handler);

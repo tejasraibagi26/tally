@@ -1,3 +1,5 @@
+import { log } from "@switchyard/logger";
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
@@ -14,7 +16,7 @@ const bodySchema = z.object({
   currentPassword: z.string().min(1),
 });
 
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -37,7 +39,7 @@ export async function GET(req: Request) {
 // identifier, so it (like a password change) requires the current password
 // — this isn't a "add a field" form. birthDate isn't sensitive on its own, but it's bundled into
 // this same password-gated form rather than a separate one, same as name.
-export async function PATCH(req: Request) {
+async function PATCH_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -79,7 +81,7 @@ export async function PATCH(req: Request) {
     try {
       await sendEmailChangeEmails({ appUrl, userId, fromEmail: user.email, toEmail: email });
     } catch (err) {
-      console.error("email change: sending the confirm link failed", err);
+      log.error("email change: sending the confirm link failed", err);
       return NextResponse.json({ error: "Couldn't send the confirmation email. Try again." }, { status: 502 });
     }
     emailChangePending = true;
@@ -89,3 +91,6 @@ export async function PATCH(req: Request) {
   // yet (older mobile builds read it to decide whether to sign out).
   return NextResponse.json({ ok: true, emailChanged: false, emailChangePending });
 }
+
+export const GET = route(GET_handler);
+export const PATCH = route(PATCH_handler);

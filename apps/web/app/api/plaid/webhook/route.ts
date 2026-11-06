@@ -1,3 +1,5 @@
+import { log } from "@switchyard/logger";
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { db, schema } from "@/db";
 import { eq, sql } from "drizzle-orm";
@@ -31,7 +33,7 @@ const SYNC_BY_TYPE: { type: string; codes: Set<string>; sync: (itemId: string, t
 // endpoint always returns 200 regardless, matching that "webhook is the
 // fast path, cron is the backstop" design rather than relying on Plaid's
 // own webhook-delivery retries.
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   const rawBody = await req.text();
   const verified = await verifyPlaidWebhook(rawBody, req.headers.get("plaid-verification"));
 
@@ -78,7 +80,7 @@ export async function POST(req: Request) {
         .returning({ userId: schema.plaidItems.userId });
       // Connection alert (ALERTS.md §2). Never fails the webhook.
       if (updated) {
-        await evaluateConnections(updated.userId).catch((err) => console.error("Connection alert evaluation failed", err));
+        await evaluateConnections(updated.userId).catch((err) => log.error("Connection alert evaluation failed", err));
       }
     }
   }
@@ -103,7 +105,7 @@ export async function POST(req: Request) {
         }
         processed = true;
       } catch (err) {
-        console.error(`Webhook-triggered ${payload.webhook_type} sync failed for item ${item.id}`, err);
+        log.error(`Webhook-triggered ${payload.webhook_type} sync failed for item ${item.id}`, err);
         if (event) {
           await db
             .update(schema.webhookEvents)
@@ -129,3 +131,5 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ received: true });
 }
+
+export const POST = route(POST_handler);

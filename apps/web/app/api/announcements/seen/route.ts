@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUserId } from "@/lib/session";
@@ -6,7 +7,7 @@ import { ANNOUNCEMENTS, markAnnouncementSeen } from "@/lib/announcements";
 const bodySchema = z.object({ key: z.enum(ANNOUNCEMENTS) });
 
 /** A one-time announcement was dismissed (lib/announcements.ts); web and mobile. */
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -18,3 +19,5 @@ export async function POST(req: Request) {
   await markAnnouncementSeen(userId, parsed.data.key);
   return NextResponse.json({ ok: true });
 }
+
+export const POST = route(POST_handler);

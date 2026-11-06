@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUserId } from "@/lib/session";
@@ -10,7 +11,7 @@ const schema = z.object({
 
 // Fills an empty month in one tap: copy last month's budgets, or set each
 // category to its 3-month average. Never overwrites an existing budget.
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -27,3 +28,5 @@ export async function POST(req: Request) {
   const created = await applyBudgetRows(userId, month, option.rows);
   return NextResponse.json({ ok: true, created });
 }
+
+export const POST = route(POST_handler);

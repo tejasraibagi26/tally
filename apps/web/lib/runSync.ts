@@ -1,3 +1,4 @@
+import { log } from "@switchyard/logger";
 import { SYNC_RESULT_EVENT, type SyncResultEventDetail } from "@/lib/syncResultEvent";
 import { showToast } from "@/lib/toast";
 import type { SyncProduct } from "@/lib/syncSteps";
@@ -32,7 +33,7 @@ export async function runSync(products: SyncProduct[]): Promise<boolean> {
     if (failedItems.length === 0 && results.length > 0) showToast(results.length === 1 ? "Your bank is synced" : `All ${results.length} banks synced`);
     return failedItems.length === 0;
   } catch (err) {
-    console.error(err);
+    log.error(err);
     dispatch({ failedItems: [], runFailed: true, products });
     return false;
   }

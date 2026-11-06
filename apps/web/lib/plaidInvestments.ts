@@ -1,3 +1,4 @@
+import { log } from "@switchyard/logger";
 import { and, eq, gte, inArray, lte, notInArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { plaidClient, getAccessToken, plaidErrorCode, institutionSupportsProduct } from "@/lib/plaid";
@@ -84,7 +85,7 @@ export async function syncHoldingsForItem(itemId: string, trigger: SyncTrigger):
   } catch (err) {
     const code = plaidErrorCode(err);
     if (code && NOT_SUPPORTED_CODES.has(code)) return; // not a failure — nothing to sync here (§6.4)
-    console.error(`Holdings sync failed for item ${itemId} (${code ?? "unknown error"})`);
+    log.error(`Holdings sync failed for item ${itemId} (${code ?? "unknown error"})`);
     await recordSyncRun(itemId, "holdings", trigger, startedAt, { error: err instanceof Error ? err.message : "unknown error" });
     throw err; // rethrow so the queue worker retries (§8.2) — only the "not supported" branch above is a true no-op
   }
@@ -127,7 +128,7 @@ async function reconcileHoldings(securities: Security[], holdings: Holding[], to
       // Plaid sent no exchange we recognize, so the currency below falls back
       // to Plaid's own labels -- exactly what mislabeled VFV. Logged so a
       // repeat is visible in the function logs rather than silent.
-      console.warn(
+      log.warn(
         `Holding currency fell back to Plaid labels: ticker=${security?.ticker_symbol ?? "?"} mic=${security?.market_identifier_code ?? "none"} ` +
           `security=${security?.iso_currency_code ?? "?"} holding=${h.iso_currency_code ?? "?"}`,
       );
@@ -227,7 +228,7 @@ export async function syncInvestmentTransactionsForItem(itemId: string, trigger:
   } catch (err) {
     const code = plaidErrorCode(err);
     if (code && NOT_SUPPORTED_CODES.has(code)) return; // not a failure — nothing to sync here (§6.4)
-    console.error(`Investment transaction sync failed for item ${itemId} (${code ?? "unknown error"})`);
+    log.error(`Investment transaction sync failed for item ${itemId} (${code ?? "unknown error"})`);
     await recordSyncRun(itemId, "inv_tx", trigger, startedAt, { error: err instanceof Error ? err.message : "unknown error" });
     throw err; // rethrow so the queue worker retries (§8.2)
   }

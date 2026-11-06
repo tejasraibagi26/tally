@@ -1,3 +1,4 @@
+import { log } from "@switchyard/logger";
 import { db, schema } from "@/db";
 
 /**
@@ -26,6 +27,6 @@ export async function recordAudit(entry: {
     });
   } catch (err) {
     // Never let audit logging itself break the action being audited.
-    console.error(`Failed to record audit entry (${entry.action})`, err);
+    log.error(`Failed to record audit entry (${entry.action})`, err);
   }
 }

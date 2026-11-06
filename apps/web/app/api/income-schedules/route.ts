@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
@@ -9,7 +10,7 @@ import { generateDuePaychecks } from "@/lib/incomeSchedule";
 import { accountDisplayName } from "@tally/core/accountName";
 import { todayFor } from "@/lib/userTimezone";
 
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -55,7 +56,7 @@ const bodySchema = z.object({
   dayAnchors: z.array(anchorSchema).min(1).max(2),
 });
 
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -98,3 +99,6 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ schedule, generated });
 }
+
+export const GET = route(GET_handler);
+export const POST = route(POST_handler);

@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { db, schema } from "@/db";
@@ -12,7 +13,7 @@ import { syncLiabilitiesForItem } from "@/lib/plaidLiabilities";
 // Stands in for /api/plaid/link-token + /api/plaid/exchange when MOCK_MODE
 // is on: no Plaid credentials required. Real accounts/plaid_items rows, so
 // the rest of the app (balances, health badges, delete) works unmodified.
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   if (!MOCK_MODE) {
     return NextResponse.json({ error: "Mock mode is disabled" }, { status: 403 });
   }
@@ -84,3 +85,5 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ ok: true, itemId: item.id });
 }
+
+export const POST = route(POST_handler);

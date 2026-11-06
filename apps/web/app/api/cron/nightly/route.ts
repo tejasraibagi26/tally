@@ -1,3 +1,5 @@
+import { log } from "@switchyard/logger";
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { pruneAuthAttempts } from "@/lib/rateLimit";
 import { isAuthorizedCronRequest } from "@/lib/cronAuth";
@@ -20,7 +22,7 @@ export const maxDuration = 300;
 // a job — it's computed on read (lib/budgets.ts). Recurring re-detection
 // isn't here either — it already runs after every transaction sync that
 // finds something new (lib/plaidSync.ts).
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   if (!isAuthorizedCronRequest(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -34,13 +36,13 @@ export async function GET(req: Request) {
     await runSyncStep("investments", () => syncInvestmentTransactionsForItem(item.id, "cron"), failures);
     await runSyncStep("liabilities", () => syncLiabilitiesForItem(item.id, "cron"), failures);
     if (failures.length > 0) {
-      console.error(`Cron nightly: item ${item.id} product failures`, failures);
+      log.error(`Cron nightly: item ${item.id} product failures`, failures);
     }
     try {
       // Each user's own date: the cron runs on UTC, a day ahead of the Americas' evening.
       await computeAndStoreNetWorthSnapshot(item.userId, await todayFor(item.userId));
     } catch (err) {
-      console.error(`Cron nightly: net-worth snapshot failed for user ${item.userId}`, err);
+      log.error(`Cron nightly: net-worth snapshot failed for user ${item.userId}`, err);
     }
   }
 
@@ -48,17 +50,19 @@ export async function GET(req: Request) {
   try {
     paychecksGenerated = await generateDuePaychecksForAllActiveSchedules();
   } catch (err) {
-    console.error("Cron nightly: income schedule generation failed", err);
+    log.error("Cron nightly: income schedule generation failed", err);
   }
 
   let billsGenerated = 0;
   try {
     billsGenerated = await generateDueManualBillPaymentsForAllStreams();
   } catch (err) {
-    console.error("Cron nightly: manual bill generation failed", err);
+    log.error("Cron nightly: manual bill generation failed", err);
   }
 
-  await pruneAuthAttempts().catch((err) => console.error("Cron nightly: auth_attempts prune failed", err));
+  await pruneAuthAttempts().catch((err) => log.error("Cron nightly: auth_attempts prune failed", err));
 
   return NextResponse.json({ ok: true, itemCount: items.length, paychecksGenerated, billsGenerated });
 }
+
+export const GET = route(GET_handler);

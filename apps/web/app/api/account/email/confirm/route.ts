@@ -1,3 +1,5 @@
+import { log } from "@switchyard/logger";
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
@@ -12,12 +14,12 @@ function backToPage(req: Request, params: Record<string, string>) {
 }
 
 // Confirmation emails sent before the page existed link here directly.
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   const token = new URL(req.url).searchParams.get("token") ?? "";
   return backToPage(req, { token });
 }
 
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   const token = new URL(req.url).searchParams.get("token") ?? "";
   const claims = token ? await verifyEmailChangeToken(token) : null;
   // The page shows "expired" for a token that doesn't verify or was used.
@@ -37,7 +39,7 @@ export async function POST(req: Request) {
       .where(and(eq(schema.users.id, claims.userId), eq(schema.users.email, claims.from)));
   } catch (err) {
     // Unique constraint: someone took the address since the link was sent.
-    console.error("email change confirm failed", err);
+    log.error("email change confirm failed", err);
     return backToPage(req, { status: "taken" });
   }
   await db
@@ -47,3 +49,6 @@ export async function POST(req: Request) {
 
   return backToPage(req, { status: "done", token });
 }
+
+export const GET = route(GET_handler);
+export const POST = route(POST_handler);

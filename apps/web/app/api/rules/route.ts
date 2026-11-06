@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { asc, eq } from "drizzle-orm";
@@ -7,7 +8,7 @@ import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
 import { previewRuleMatchCount, applyRulesToExistingTransactions } from "@/lib/categorize";
 import type { RuleMatch } from "@tally/core/rulesEngine";
 
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -45,7 +46,7 @@ const createSchema = z.object({
 // count before it commits" — ?preview=1 evaluates `match` against the
 // user's current transactions and returns the count without creating
 // anything; without it, the rule is created (and applied, if requested).
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -85,3 +86,6 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ rule });
 }
+
+export const GET = route(GET_handler);
+export const POST = route(POST_handler);

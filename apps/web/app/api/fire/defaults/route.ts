@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
@@ -9,7 +10,7 @@ import { todayFor } from "@/lib/userTimezone";
 // as the web page. investableNetWorth now honours excluded accounts and
 // converts every account to CAD; accounts, coveredMonths and settings are
 // new (older mobile builds ignore them).
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -35,3 +36,5 @@ export async function GET(req: Request) {
     today,
   });
 }
+
+export const GET = route(GET_handler);

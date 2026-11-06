@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse, after } from "next/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
@@ -30,7 +31,7 @@ const bodySchema = z.object({
   date: z.string().trim().min(1),
 });
 
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireApiKeyUserId(req);
@@ -137,3 +138,5 @@ export async function POST(req: Request) {
     { status: 201 },
   );
 }
+
+export const POST = route(POST_handler);

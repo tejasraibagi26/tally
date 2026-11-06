@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { requireUserId } from "@/lib/session";
 import { latestHoldingsForUser, portfolioValue, allocationFor, unrealizedGain, portfolioSimpleReturn } from "@/lib/portfolio";
@@ -5,7 +6,7 @@ import { latestHoldingsForUser, portfolioValue, allocationFor, unrealizedGain, p
 // ?asOf is accepted per WORK.md §10 but not yet implemented as a historical
 // lookup — holdings snapshots only started accumulating with M5, so there's
 // no meaningful history to query yet. Always returns the latest snapshot.
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -27,3 +28,5 @@ export async function GET(req: Request) {
     simpleReturn,
   });
 }
+
+export const GET = route(GET_handler);

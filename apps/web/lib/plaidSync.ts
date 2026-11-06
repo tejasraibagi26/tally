@@ -1,3 +1,4 @@
+import { log } from "@switchyard/logger";
 import { sql, eq, inArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
@@ -35,7 +36,7 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
   const lockKey = sql`hashtext(${itemId})`;
   const lockRows = await db.execute<{ locked: boolean }>(sql`select pg_try_advisory_lock(${lockKey}) as locked`);
   if (!lockRows[0]?.locked) {
-    console.warn(`Sync already in progress for item ${itemId}, skipping`);
+    log.warn(`Sync already in progress for item ${itemId}, skipping`);
     return null;
   }
 
@@ -76,7 +77,7 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
       try {
         await upsertAccountsForItem(itemId, item.userId, accessToken);
       } catch (err) {
-        console.error(`upsertAccountsForItem failed for item ${itemId}`, err);
+        log.error(`upsertAccountsForItem failed for item ${itemId}`, err);
       }
     }
 
@@ -138,9 +139,9 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
     if (item.reattachedAt && result.added > 0) {
       try {
         const merged = await dedupeReattached(itemId, item.reattachedAt);
-        if (merged > 0) console.log(`Merged ${merged} re-synced transactions into kept history for item ${itemId}`);
+        if (merged > 0) log.info(`Merged ${merged} re-synced transactions into kept history for item ${itemId}`);
       } catch (err) {
-        console.error(`Merging re-synced history failed for item ${itemId}`, err);
+        log.error(`Merging re-synced history failed for item ${itemId}`, err);
       }
     }
 
@@ -166,7 +167,7 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
       // permanent history point rather than being overwritten again.
       await computeAndStoreNetWorthSnapshot(item.userId, await todayFor(item.userId));
     } catch (err) {
-      console.error(`Categorization/transfer detection failed for item ${itemId}`, err);
+      log.error(`Categorization/transfer detection failed for item ${itemId}`, err);
     }
 
     // Alerts (ALERTS.md §3) run last, on fully categorized and transfer-
@@ -176,13 +177,13 @@ export async function syncTransactionsForItem(itemId: string, trigger: SyncTrigg
         await evaluateAfterTransactionSync(item.userId, added.map((t) => t.transaction_id));
       }
     } catch (err) {
-      console.error(`Alert evaluation failed for item ${itemId}`, err);
+      log.error(`Alert evaluation failed for item ${itemId}`, err);
     }
 
     await recordSyncRun(itemId, trigger, startedAt, result);
     return result;
   } catch (err) {
-    console.error(`Transaction sync failed for item ${itemId} (${plaidErrorCode(err) ?? "unknown error"})`);
+    log.error(`Transaction sync failed for item ${itemId} (${plaidErrorCode(err) ?? "unknown error"})`);
     await markItemFromPlaidError(itemId, err);
     await db.insert(schema.syncRuns).values({
       itemId,
@@ -257,7 +258,7 @@ async function reconcileTransactions(
         .where(inArray(schema.accounts.plaidAccountId, plaidAccountIds));
       accountIdByPlaidId = new Map(accountRows.map((a) => [a.plaidAccountId, a.id]));
     } catch (err) {
-      console.error(`upsertAccountsForItem (self-heal) failed for item ${itemId}`, err);
+      log.error(`upsertAccountsForItem (self-heal) failed for item ${itemId}`, err);
     }
   }
 
@@ -278,7 +279,7 @@ async function reconcileTransactions(
     for (const t of incoming) {
       const accountId = accountIdByPlaidId.get(t.account_id);
       if (!accountId) {
-        console.warn(`Skipping transaction ${t.transaction_id}: unknown account ${t.account_id}`);
+        log.warn(`Skipping transaction ${t.transaction_id}: unknown account ${t.account_id}`);
         continue;
       }
       const existing = existingByPlaidId.get(t.transaction_id);

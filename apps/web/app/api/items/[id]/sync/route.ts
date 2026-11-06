@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { db, schema } from "@/db";
 import { eq } from "drizzle-orm";
@@ -15,7 +16,7 @@ import { runSyncStep, type SyncFailure } from "@/lib/syncSteps";
 // calls all of them for a live item. Each step runs independently
 // (runSyncStep) so one down product doesn't prevent the others from running,
 // and `failures` reports back what didn't come through.
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function POST_handler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -46,3 +47,5 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   return NextResponse.json({ ok: true, ...(result ?? { inProgress: true }), institutionName: item.institutionName, failures });
 }
+
+export const POST = route(POST_handler);

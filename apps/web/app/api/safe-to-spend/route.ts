@@ -1,9 +1,10 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { requireUserId } from "@/lib/session";
 import { safeToSpendFor } from "@/lib/safeToSpend";
 
 /** Safe to spend and its breakdown (lib/safeToSpend.ts), for web and mobile. */
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -12,3 +13,5 @@ export async function GET(req: Request) {
   }
   return NextResponse.json(await safeToSpendFor(userId));
 }
+
+export const GET = route(GET_handler);

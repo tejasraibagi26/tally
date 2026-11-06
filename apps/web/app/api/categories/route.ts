@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { db, schema } from "@/db";
@@ -7,7 +8,7 @@ import { categoriesUsableBy, unknownCategoryBody } from "@/lib/categoryAccess";
 
 // System categories (user_id null, seeded from Plaid's PFC taxonomy) plus
 // this user's own additions — every category a user is allowed to see or use.
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -28,7 +29,7 @@ const createSchema = z.object({
   icon: z.string().max(40).nullable().optional(),
 });
 
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -66,3 +67,6 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ category: created });
 }
+
+export const GET = route(GET_handler);
+export const POST = route(POST_handler);

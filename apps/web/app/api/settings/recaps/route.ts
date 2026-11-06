@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
@@ -8,7 +9,7 @@ const bodySchema = z.object({ enabled: z.boolean() });
 
 // Not bundled into PATCH /api/account (name/email/birthDate, password-gated) —
 // this toggle is non-sensitive and should be a single click, no password.
-export async function PATCH(req: Request) {
+async function PATCH_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -24,3 +25,5 @@ export async function PATCH(req: Request) {
   await db.update(schema.users).set({ recapsEnabled: parsed.data.enabled }).where(eq(schema.users.id, userId));
   return NextResponse.json({ ok: true });
 }
+
+export const PATCH = route(PATCH_handler);

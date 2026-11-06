@@ -1,3 +1,5 @@
+import { log } from "@switchyard/logger";
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
@@ -26,7 +28,7 @@ interface RecapFailure {
  * Still requires that same server-to-server auth; there's no user-facing
  * equivalent of this override (see app/api/settings/recaps/test for that).
  */
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   if (!isAuthorizedCronRequest(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -59,10 +61,12 @@ export async function GET(req: Request) {
       if (result.status === "sent") sent++;
       else skipped++;
     } catch (err) {
-      console.error(`Cron monthly-recap: failed for user ${user.id}`, err);
+      log.error(`Cron monthly-recap: failed for user ${user.id}`, err);
       failures.push({ userId: user.id, error: err instanceof Error ? err.message : String(err) });
     }
   }
 
   return NextResponse.json({ ok: true, month, sent, skipped, failures });
 }
+
+export const GET = route(GET_handler);

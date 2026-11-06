@@ -1,3 +1,4 @@
+import { log } from "@switchyard/logger";
 import { and, desc, eq, inArray, isNotNull } from "drizzle-orm";
 import type { AccountBase } from "plaid";
 import { db, schema } from "@/db";
@@ -43,7 +44,7 @@ export async function disconnectItem(itemId: string, userId: string): Promise<{ 
     } catch (err) {
       // Already revoked or dead on Plaid's side: still disconnect locally so
       // the user isn't stuck with a connection they asked to end.
-      console.error(`item/remove failed (${plaidErrorCode(err) ?? "unknown error"}), disconnecting locally anyway`);
+      log.error(`item/remove failed (${plaidErrorCode(err) ?? "unknown error"}), disconnecting locally anyway`);
     }
   }
 

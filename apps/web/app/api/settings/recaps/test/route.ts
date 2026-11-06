@@ -1,3 +1,5 @@
+import { log } from "@switchyard/logger";
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
@@ -17,7 +19,7 @@ const bodySchema = z.object({ month: z.string().regex(MONTH_RE).optional() });
  * checkAlreadySent/checkActivity and doesn't recordSend, so it never
  * interferes with the real monthly cron's idempotency or FIRE-delta state.
  */
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -48,7 +50,9 @@ export async function POST(req: Request) {
     );
     return NextResponse.json({ ok: true, result });
   } catch (err) {
-    console.error(`Test recap send failed for user ${userId}`, err);
+    log.error(`Test recap send failed for user ${userId}`, err);
     return NextResponse.json({ error: err instanceof Error ? err.message : "Send failed" }, { status: 500 });
   }
 }
+
+export const POST = route(POST_handler);

@@ -1,10 +1,11 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -28,7 +29,7 @@ const putSchema = z.object({
   excludedAccountIds: z.array(z.string().uuid()).max(100).optional(),
 });
 
-export async function PUT(req: Request) {
+async function PUT_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -65,3 +66,6 @@ export async function PUT(req: Request) {
 
   return NextResponse.json({ settings });
 }
+
+export const GET = route(GET_handler);
+export const PUT = route(PUT_handler);

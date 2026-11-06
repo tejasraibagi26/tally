@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { eq, desc } from "drizzle-orm";
 import { db, schema } from "@/db";
@@ -11,7 +12,7 @@ import { onPaceStreak } from "@tally/core/popView";
 // §9's headline figures, bundled — the Overview page itself reads these
 // straight from the DB (no network round trip); this route exists for
 // external/programmatic use per WORK.md §10.
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -52,3 +53,5 @@ export async function GET(req: Request) {
     onPace,
   });
 }
+
+export const GET = route(GET_handler);

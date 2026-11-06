@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUserId } from "@/lib/session";
@@ -9,7 +10,7 @@ const schema = z.object({
 });
 
 // Six months of one category's budget and spend, for the budget detail view.
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -21,3 +22,5 @@ export async function GET(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   return NextResponse.json({ months: await budgetHistory(userId, parsed.data.categoryId, parsed.data.month) });
 }
+
+export const GET = route(GET_handler);

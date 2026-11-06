@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { and, desc, eq, gte, lte } from "drizzle-orm";
 import { db, schema } from "@/db";
@@ -20,7 +21,7 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 // request (WORK.md §2's scale is 300–2,000 tx/month, so this is generous).
 const MAX_ROWS = 20_000;
 
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -105,3 +106,5 @@ export async function GET(req: Request) {
     },
   });
 }
+
+export const GET = route(GET_handler);

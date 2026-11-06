@@ -1,3 +1,4 @@
+import { log } from "@switchyard/logger";
 import { and, eq, ne, notInArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { plaidErrorCode } from "@/lib/plaid";
@@ -56,6 +57,6 @@ export async function markItemFromPlaidError(itemId: string, err: unknown): Prom
     // the daily sweep alerts if it's still down. Signed-out alerts now.
     if (updated && status !== "error") await evaluateConnections(updated.userId);
   } catch (e) {
-    console.error(`Couldn't record ${code} on item ${itemId}`, e);
+    log.error(`Couldn't record ${code} on item ${itemId}`, e);
   }
 }

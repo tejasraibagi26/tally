@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { requireUserId } from "@/lib/session";
 import { todayFor } from "@/lib/userTimezone";
@@ -5,7 +6,7 @@ import { yearReviewFor } from "@/lib/yearReview";
 import { latestCompleteYear } from "@tally/core/yearReview";
 
 /** Year in review (lib/yearReview.ts) for ?year=, the latest finished year by default; for mobile. */
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -18,3 +19,5 @@ export async function GET(req: Request) {
   const year = Number.isInteger(asked) && asked >= 2000 && asked <= lastYear ? asked : lastYear;
   return NextResponse.json(await yearReviewFor(userId, year));
 }
+
+export const GET = route(GET_handler);

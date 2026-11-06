@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { desc, eq } from "drizzle-orm";
@@ -11,7 +12,7 @@ import { generateApiKey } from "@/lib/apiKeyAuth";
 // requireApiKeyUserId) means this management surface itself works from
 // either the web session or the mobile app's bearer token, same as every
 // other settings API.
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -38,7 +39,7 @@ const createSchema = z.object({
   name: z.string().trim().min(1).max(80),
 });
 
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -61,3 +62,6 @@ export async function POST(req: Request) {
   // the response includes it once, the row from here on only holds its hash.
   return NextResponse.json({ apiKey: created, key }, { status: 201 });
 }
+
+export const GET = route(GET_handler);
+export const POST = route(POST_handler);

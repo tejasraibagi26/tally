@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUserId } from "@/lib/session";
@@ -12,7 +13,7 @@ const bodySchema = z.object({
 // synced transaction with the same original merchant name, now and on
 // future syncs (lib/merchantRenames.ts). Manual rows have no Plaid merchant
 // to rename -- their label is the user's already -- so they 404 here.
-export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function GET_handler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -26,7 +27,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   return NextResponse.json(rename);
 }
 
-export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function PUT_handler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -44,3 +45,6 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   if (!result) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(result);
 }
+
+export const GET = route(GET_handler);
+export const PUT = route(PUT_handler);

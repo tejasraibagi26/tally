@@ -1,9 +1,10 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { requireUserId } from "@/lib/session";
 import { creditCardsForUser, institutionBrands, utilizationFor, viewForCard } from "@/lib/liabilities";
 import { todayFor } from "@/lib/userTimezone";
 
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -20,3 +21,5 @@ export async function GET(req: Request) {
     utilization: await utilizationFor(cards),
   });
 }
+
+export const GET = route(GET_handler);

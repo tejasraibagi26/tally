@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { resolveMerchantLogos } from "@/lib/merchantLogos";
 import { z } from "zod";
@@ -27,7 +28,7 @@ function locationLabel(raw: unknown): string | null {
 // §5.3) — mirrors app/(app)/transactions/page.tsx's filter/pagination logic
 // exactly (same query params, same defaulting to the current calendar
 // month when no date range is given) so the two surfaces can't drift.
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -225,7 +226,7 @@ const createSchema = z.object({
 // sync only ever matches rows by plaidTransactionId, so this row is safe
 // from being touched or duplicated by the next sync, and it's what lets the
 // user delete it again from the detail panel.
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -269,3 +270,6 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ transaction: created }, { status: 201 });
 }
+
+export const GET = route(GET_handler);
+export const POST = route(POST_handler);

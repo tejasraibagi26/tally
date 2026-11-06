@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { requireUserId } from "@/lib/session";
 import { MOCK_MODE } from "@/lib/config";
@@ -7,7 +8,7 @@ import { MOCK_MODE } from "@/lib/config";
 // way for a client to know whether "Add account" should skip real Plaid
 // Link and hit /api/mock/connect instead (dev defaults to mock so there's
 // no Plaid credentials requirement to run the app locally).
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   try {
     await requireUserId(req);
   } catch {
@@ -15,3 +16,5 @@ export async function GET(req: Request) {
   }
   return NextResponse.json({ mockMode: MOCK_MODE });
 }
+
+export const GET = route(GET_handler);

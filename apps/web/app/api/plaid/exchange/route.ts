@@ -1,3 +1,5 @@
+import { log } from "@switchyard/logger";
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { CountryCode } from "plaid";
@@ -21,7 +23,7 @@ const bodySchema = z.object({
     .optional(),
 });
 
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -73,7 +75,7 @@ export async function POST(req: Request) {
             },
           });
       } catch (err) {
-        console.error("institutions/get_by_id failed, continuing without logo", err);
+        log.error("institutions/get_by_id failed, continuing without logo", err);
       }
     }
 
@@ -141,9 +143,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, itemId: item.id, institutionName, failures, reconnected: previous !== null && matches.size > 0 });
   } catch (err) {
-    console.error("plaid/exchange failed", err);
+    log.error("plaid/exchange failed", err);
     // `code` lets the client pick plain-language copy (@tally/core/syncDialog
     // connectErrorCopy); it's never shown as-is.
     return NextResponse.json({ error: "Failed to link account", code: plaidErrorCode(err) ?? null }, { status: 502 });
   }
 }
+
+export const POST = route(POST_handler);

@@ -1,9 +1,10 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { requireUserId } from "@/lib/session";
 import { categoryBreakdown, merchantBreakdown } from "@/lib/analytics";
 import { currentMonthFor } from "@/lib/userTimezone";
 
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -18,3 +19,5 @@ export async function GET(req: Request) {
   const rows = groupBy === "merchant" ? await merchantBreakdown(userId, month) : await categoryBreakdown(userId, month);
   return NextResponse.json({ month, groupBy, rows });
 }
+
+export const GET = route(GET_handler);

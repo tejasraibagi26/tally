@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -16,7 +17,7 @@ const bodySchema = z.object({
 // (lib/authenticateCredentials.ts) — but issues a bearer token pair instead
 // of a browser session cookie. Excluded from middleware's cookie gate by the
 // existing "api/auth" matcher exclusion (middleware.ts).
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   const parsed = bodySchema.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
@@ -51,3 +52,5 @@ export async function POST(req: Request) {
     user: { id: user.id, email: user.email, name: user.name },
   });
 }
+
+export const POST = route(POST_handler);

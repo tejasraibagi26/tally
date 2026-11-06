@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 import { db, schema } from "@/db";
@@ -20,7 +21,7 @@ const bodySchema = z.object({
 // recurringDetection.ts has nothing to cluster against). Creates or updates
 // the recurringStreams row for this transaction's merchant/account directly
 // with amortizeMonthly = true, rather than waiting on detection to catch up.
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function POST_handler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -117,3 +118,5 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   return NextResponse.json({ stream, generated });
 }
+
+export const POST = route(POST_handler);

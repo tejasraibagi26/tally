@@ -1,3 +1,5 @@
+import { log } from "@switchyard/logger";
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
@@ -14,7 +16,7 @@ const bodySchema = z.object({ currentPassword: z.string().min(1) });
 // the current user (accounts/transactions/holdings/etc. cascade off
 // plaid_items). Does NOT delete the login itself — that's a different,
 // even more destructive action this app doesn't expose.
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -51,7 +53,7 @@ export async function POST(req: Request) {
       await plaidClient.itemRemove({ access_token: accessToken });
     } catch (err) {
       const code = plaidErrorCode(err);
-      console.error(`item/remove failed during wipe for item ${item.id} (${code ?? "unknown error"}), continuing`);
+      log.error(`item/remove failed during wipe for item ${item.id} (${code ?? "unknown error"}), continuing`);
     }
   }
 
@@ -64,3 +66,5 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ ok: true, itemsRemoved: items.length });
 }
+
+export const POST = route(POST_handler);

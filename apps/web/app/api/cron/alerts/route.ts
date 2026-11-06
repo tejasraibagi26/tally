@@ -1,3 +1,5 @@
+import { log } from "@switchyard/logger";
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { db, schema } from "@/db";
 import { isAuthorizedCronRequest } from "@/lib/cronAuth";
@@ -10,7 +12,7 @@ export const maxDuration = 300;
 // user for connections, budget steps reached outside a sync (manual entries,
 // Shortcuts, recategorizing) and subscription changes; then retries alert
 // emails that failed in the last 36 hours.
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   if (!isAuthorizedCronRequest(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
@@ -21,7 +23,7 @@ export async function GET(req: Request) {
     try {
       swept += await evaluateUserSweep(u.id);
     } catch (err) {
-      console.error(`Cron alerts: sweep failed for user ${u.id}`, err);
+      log.error(`Cron alerts: sweep failed for user ${u.id}`, err);
     }
   }
 
@@ -29,8 +31,10 @@ export async function GET(req: Request) {
   try {
     flushed = await flushPendingAlerts();
   } catch (err) {
-    console.error("Cron alerts: flush failed", err);
+    log.error("Cron alerts: flush failed", err);
   }
 
   return NextResponse.json({ ok: true, users: users.length, swept, flushed });
 }
+
+export const GET = route(GET_handler);

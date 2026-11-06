@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { and, eq, isNull } from "drizzle-orm";
@@ -10,7 +11,7 @@ const bodySchema = z.object({ refreshToken: z.string().min(1) });
 // perspective (the app clears its local tokens regardless) — this just
 // makes the revocation server-side too, so a stolen refresh token can't be
 // replayed after the legitimate user logs out.
-export async function POST(req: Request) {
+async function POST_handler(req: Request) {
   const parsed = bodySchema.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
@@ -34,3 +35,5 @@ export async function POST(req: Request) {
 
   return NextResponse.json({ ok: true });
 }
+
+export const POST = route(POST_handler);

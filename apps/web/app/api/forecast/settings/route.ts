@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
@@ -13,7 +14,7 @@ const bodySchema = z.object({
 });
 
 /** Forecast's two remembered choices: the daily-spend override and the range. */
-export async function PATCH(req: Request) {
+async function PATCH_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -31,3 +32,5 @@ export async function PATCH(req: Request) {
 
   return NextResponse.json({ ok: true });
 }
+
+export const PATCH = route(PATCH_handler);

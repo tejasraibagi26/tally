@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireUserId } from "@/lib/session";
@@ -18,7 +19,7 @@ async function user(req: Request): Promise<string | null> {
   }
 }
 
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   const userId = await user(req);
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const [summary, introSeen] = await Promise.all([goalSummary(userId), goalsIntroSeen(userId)]);
@@ -30,7 +31,7 @@ const bodySchema = z.object({
   deadline: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });
 
-export async function PUT(req: Request) {
+async function PUT_handler(req: Request) {
   const userId = await user(req);
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const parsed = bodySchema.safeParse(await req.json().catch(() => ({})));
@@ -41,9 +42,13 @@ export async function PUT(req: Request) {
   return NextResponse.json(await goalSummary(userId));
 }
 
-export async function DELETE(req: Request) {
+async function DELETE_handler(req: Request) {
   const userId = await user(req);
   if (!userId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   await archiveGoal(userId);
   return NextResponse.json({ ok: true });
 }
+
+export const GET = route(GET_handler);
+export const PUT = route(PUT_handler);
+export const DELETE = route(DELETE_handler);

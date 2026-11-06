@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
@@ -35,7 +36,7 @@ async function loadOwnedRule(userId: string, id: string) {
   return rule;
 }
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function PATCH_handler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -82,7 +83,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   return NextResponse.json({ rule });
 }
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function DELETE_handler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -97,3 +98,6 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   await db.delete(schema.rules).where(eq(schema.rules.id, id));
   return NextResponse.json({ ok: true });
 }
+
+export const PATCH = route(PATCH_handler);
+export const DELETE = route(DELETE_handler);

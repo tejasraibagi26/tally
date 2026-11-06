@@ -1,3 +1,4 @@
+import { log } from "@switchyard/logger";
 import { eq, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { plaidClient, getAccessToken, plaidErrorCode } from "@/lib/plaid";
@@ -70,7 +71,7 @@ export async function refreshAccountBalances(itemId: string, trigger: SyncTrigge
     // after the fact.
     const code = plaidErrorCode(err);
     const message = err instanceof Error ? err.message : "unknown error";
-    console.error(`refreshAccountBalances failed for item ${itemId}`, { code, message });
+    log.error(`refreshAccountBalances failed for item ${itemId}`, { code, message });
     await markItemFromPlaidError(itemId, err);
     await db.insert(schema.syncRuns).values({
       itemId,

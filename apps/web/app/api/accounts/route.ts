@@ -1,3 +1,4 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
@@ -13,7 +14,7 @@ import { accountDisplayName } from "@tally/core/accountName";
 // under their institution and computes each connection's health badge
 // server-side via lib/freshness.ts's itemStatusToBadge, the same function
 // the web page now imports, so the two surfaces can't disagree on a badge.
-export async function GET(req: Request) {
+async function GET_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -114,3 +115,5 @@ export async function GET(req: Request) {
     totals: { assets: totalAssets, liabilities: totalLiabilities, net: totalAssets - totalLiabilities, currency: NET_WORTH_CURRENCY },
   });
 }
+
+export const GET = route(GET_handler);

@@ -1,9 +1,10 @@
+import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { and, eq, isNull } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
 
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function POST_handler(req: Request, { params }: { params: Promise<{ id: string }> }) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -17,3 +18,5 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     .where(and(eq(schema.alertEvents.id, id), eq(schema.alertEvents.userId, userId), isNull(schema.alertEvents.readAt)));
   return NextResponse.json({ ok: true });
 }
+
+export const POST = route(POST_handler);
