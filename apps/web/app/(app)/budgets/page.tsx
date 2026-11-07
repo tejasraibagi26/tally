@@ -1,3 +1,4 @@
+import { sendToNewUi } from "@/lib/newUi";
 import { listUserCategories } from "@/lib/userCategories";
 import { requireUserId } from "@/lib/session";
 import { budgetSetupOptions, getBudgetsForMonth, shiftMonth, unbudgetedSpend } from "@/lib/budgets";
@@ -16,6 +17,7 @@ function monthLabel(month: string): string {
 
 export default async function BudgetsPage({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
   const userId = await requireUserId();
+  await sendToNewUi(userId, "/new/plans");
   const sp = await searchParams;
   const [currentMonth, today] = await Promise.all([currentMonthFor(userId), todayFor(userId)]);
   const month = /^\d{4}-\d{2}-01$/.test(sp.month ?? "") ? (sp.month as string) : currentMonth;

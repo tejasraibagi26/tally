@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { requireUserId } from "@/lib/session";
 import { MOCK_MODE } from "@/lib/config";
 import { NET_WORTH_CURRENCY } from "@tally/core/fx";
 import { composition, dollars, GROUP_LABEL, loadAccounts, type AccountGroup, type NewAccount } from "@/lib/newData";
 import { NewSubNav } from "@/components/new/NewNav";
 import { PlaidButton } from "@/components/new/PlaidButton";
+import { BankActions, RenameAccount } from "@/components/new/AccountControls";
 
 const ORDER: AccountGroup[] = ["cash", "savings", "invested", "card", "loan", "other"];
 const DEBT = new Set<AccountGroup>(["card", "loan"]);
@@ -97,9 +97,7 @@ export default async function NewAccountsPage() {
           {p.state.action?.kind === "signIn" ? (
             <PlaidButton mode="update" itemId={p.id} label={p.state.action.label} tone="coral" />
           ) : (
-            <Link href="/accounts" className="tn-btn tn-btn-sm">
-              Open in classic view
-            </Link>
+            <BankActions id={p.id} name={p.institution} />
           )}
         </div>
       ))}
@@ -133,6 +131,7 @@ export default async function NewAccountsPage() {
                     <div className="tn-row-sub" style={item?.state.needsAttention ? { color: "#ff9c8c" } : undefined}>
                       {[a.isManual ? "Added by you" : a.institution, a.mask && `•• ${a.mask}`, item?.state.statusLine].filter(Boolean).join(" · ")}
                     </div>
+                    {!a.isManual && <div style={{ marginTop: 8 }}><RenameAccount id={a.id} name={a.name} /></div>}
                     {use != null && (
                       <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 8, maxWidth: 320 }}>
                         <div className="tn-bar" style={{ flex: 1, height: 8 }} aria-hidden="true">
@@ -155,12 +154,25 @@ export default async function NewAccountsPage() {
         );
       })}
 
-      <div className="tn-muted" style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", paddingTop: 12, borderTop: "1px solid var(--tn-line)", fontSize: 14 }}>
-        <span>Rename, hide or disconnect accounts in the classic view for now.</span>
-        <Link href="/accounts" style={{ marginLeft: "auto" }}>
-          Manage accounts →
-        </Link>
-      </div>
+      {items.length > 0 && (
+        <section className="tn-section" style={{ gap: 0 }}>
+          <h2 className="tn-h2" style={{ marginBottom: 8 }}>
+            Your banks
+          </h2>
+          {items.map((i) => (
+            <div key={i.id} style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "8px 16px", padding: "14px 0", borderTop: "1px solid var(--tn-line)" }}>
+              <span style={{ flex: "1 1 240px", minWidth: 0 }}>
+                <span style={{ display: "block", fontWeight: 500 }}>{i.institution}</span>
+                <span className="tn-muted" style={{ fontSize: 13, color: i.state.needsAttention ? "#ff9c8c" : undefined }}>
+                  {i.state.statusLine}
+                </span>
+              </span>
+              <PlaidButton mode="update" itemId={i.id} label="Add or remove accounts" tone="ghost" />
+              <BankActions id={i.id} name={i.institution} />
+            </div>
+          ))}
+        </section>
+      )}
     </main>
   );
 }

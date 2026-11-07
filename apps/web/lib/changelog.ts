@@ -15,6 +15,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.20.0",
+    date: "2026-11-06",
+    changes: [
+      { kind: "new", text: "The new Tally is ready to use every day. Switch to it from the sidebar and Tally will open there from now on; switch back anytime from Settings or Classic view." },
+      { kind: "new", text: "New screens for Forecast, credit cards, loans, investments, tags, rules and settings, all in the new look." },
+      { kind: "improved", text: "Edit budgets, your goal and bills, add a transaction by hand, and rename, sync or disconnect a bank without leaving the new Tally." },
+    ],
+  },
+  {
     version: "2.19.1",
     date: "2026-11-06",
     changes: [

@@ -5,8 +5,12 @@ import { usePathname } from "next/navigation";
 
 const SECTIONS = [
   { label: "Now", href: "/new", match: (p: string) => p === "/new" },
-  { label: "Plans", href: "/new/plans", match: (p: string) => p.startsWith("/new/plans") || p.startsWith("/new/bills") },
-  { label: "Everything", href: "/new/accounts", match: (p: string) => p.startsWith("/new/accounts") || p.startsWith("/new/activity") },
+  { label: "Plans", href: "/new/plans", match: (p: string) => ["/new/plans", "/new/bills", "/new/forecast"].some((x) => p.startsWith(x)) },
+  {
+    label: "Everything",
+    href: "/new/accounts",
+    match: (p: string) => ["/new/accounts", "/new/activity", "/new/cards", "/new/loans", "/new/investments", "/new/tags"].some((x) => p.startsWith(x)),
+  },
 ];
 
 /** The new Tally's three places: what's happening, what's planned, and everything else. */
@@ -27,10 +31,19 @@ const TABS: Record<string, { label: string; href: string }[]> = {
   plans: [
     { label: "Goals & budgets", href: "/new/plans" },
     { label: "Bills & subscriptions", href: "/new/bills" },
+    { label: "Forecast", href: "/new/forecast" },
   ],
   everything: [
     { label: "Accounts", href: "/new/accounts" },
     { label: "Activity", href: "/new/activity" },
+    { label: "Cards", href: "/new/cards" },
+    { label: "Loans", href: "/new/loans" },
+    { label: "Investments", href: "/new/investments" },
+    { label: "Tags", href: "/new/tags" },
+  ],
+  settings: [
+    { label: "Settings", href: "/new/settings" },
+    { label: "Rules", href: "/new/settings/rules" },
   ],
 };
 
@@ -38,9 +51,9 @@ const TABS: Record<string, { label: string; href: string }[]> = {
 export function NewSubNav({ section }: { section: keyof typeof TABS }) {
   const path = usePathname() ?? "";
   return (
-    <nav className="tn-sub" aria-label={section === "plans" ? "Plans" : "Everything"}>
+    <nav className="tn-sub" aria-label={section === "plans" ? "Plans" : section === "settings" ? "Settings" : "Everything"}>
       {TABS[section]!.map((t) => (
-        <Link key={t.href} href={t.href} aria-current={path.startsWith(t.href) ? "page" : undefined}>
+        <Link key={t.href} href={t.href} aria-current={(t.href === "/new/settings" ? path === t.href : path.startsWith(t.href)) ? "page" : undefined}>
           {t.label}
         </Link>
       ))}

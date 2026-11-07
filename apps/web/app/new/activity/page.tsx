@@ -14,8 +14,10 @@ import { formatCents } from "@tally/core/money";
 import { dayLabel, dollars } from "@/lib/newData";
 import { NewSubNav } from "@/components/new/NewNav";
 import { TxPanel } from "@/components/new/TxPanel";
+import { AddTransaction } from "@/components/new/AddTransaction";
+import { liveAccount } from "@/lib/liveAccounts";
 
-type Search = { q?: string; account?: string; review?: string; t?: string };
+type Search = { q?: string; account?: string; review?: string; t?: string; category?: string; tag?: string };
 
 function href(sp: Search, patch: Partial<Search>): string {
   const next = { ...sp, ...patch };
@@ -32,8 +34,11 @@ export default async function NewActivityPage({ searchParams }: { searchParams: 
   const q = sp.q?.trim() ?? "";
   const reviewOnly = sp.review === "1";
 
-  // Searching reaches back a year; otherwise it's this month.
-  const where: SQL[] = [eq(schema.transactions.userId, userId), lt(schema.transactions.postedDate, monthEnd), gte(schema.transactions.postedDate, q ? daysBefore(today, 365) : month)];
+  // Searching or a tag reaches back a year (two for a tag); otherwise it's this month.
+  const from = sp.tag ? daysBefore(today, 730) : q ? daysBefore(today, 365) : month;
+  const where: SQL[] = [eq(schema.transactions.userId, userId), lt(schema.transactions.postedDate, monthEnd), gte(schema.transactions.postedDate, from)];
+  if (sp.category) where.push(eq(schema.transactions.categoryId, sp.category));
+  if (sp.tag) where.push(sql`${schema.transactions.tags} @> ${JSON.stringify([sp.tag])}::jsonb`);
   if (q) where.push(or(ilike(schema.transactions.merchantName, `%${q}%`), ilike(schema.transactions.name, `%${q}%`))!);
   if (sp.account) where.push(eq(schema.transactions.accountId, sp.account));
   if (reviewOnly) where.push(eq(schema.transactions.reviewed, false), eq(schema.transactions.isTransfer, false));
@@ -53,13 +58,15 @@ export default async function NewActivityPage({ searchParams }: { searchParams: 
         isTransfer: schema.transactions.isTransfer,
         reviewed: schema.transactions.reviewed,
         excluded: schema.transactions.excludedFromBudget,
+        isManual: schema.transactions.isManual,
+        tags: schema.transactions.tags,
       })
       .from(schema.transactions)
       .where(and(...where))
       .orderBy(desc(schema.transactions.postedDate), desc(schema.transactions.createdAt))
       .limit(300),
     listUserCategories(userId),
-    db.select({ id: schema.accounts.id, name: schema.accounts.name, nickname: schema.accounts.nickname }).from(schema.accounts).where(eq(schema.accounts.userId, userId)),
+    db.select({ id: schema.accounts.id, name: schema.accounts.name, nickname: schema.accounts.nickname, type: schema.accounts.type, live: sql<boolean>`${liveAccount}` }).from(schema.accounts).where(eq(schema.accounts.userId, userId)),
     monthTotals(userId, month),
     db
       .select({ count: sql<number>`count(*)::int` })
@@ -135,10 +142,13 @@ export default async function NewActivityPage({ searchParams }: { searchParams: 
             <span className="money">{dollars(totals.spend)}</span> out · <span className="tn-lime money">{dollars(totals.income)}</span> in
           </span>
         </div>
-        <Link href="/transactions" className="tn-btn">
-          Add one by hand (classic)
-        </Link>
       </section>
+      <AddTransaction
+        accounts={accountRows.filter((a) => a.live && (a.type === "depository" || a.type === "credit")).map((a) => ({ id: a.id, name: accountDisplayName(a.name, a.nickname) }))}
+        expense={categories.filter((c) => c.kind === "expense").map((c) => ({ id: c.id, name: c.name }))}
+        income={categories.filter((c) => c.kind === "income").map((c) => ({ id: c.id, name: c.name }))}
+        today={today}
+      />
 
       <form action="/new/activity" style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
         <label className="tn-input" style={{ flex: "1 1 360px", display: "flex", alignItems: "center", gap: 10, borderRadius: 999, minHeight: 52, background: "var(--tn-surface)" }}>
@@ -161,10 +171,12 @@ export default async function NewActivityPage({ searchParams }: { searchParams: 
           </select>
         </label>
         {reviewOnly && <input type="hidden" name="review" value="1" />}
+        {sp.category && <input type="hidden" name="category" value={sp.category} />}
+        {sp.tag && <input type="hidden" name="tag" value={sp.tag} />}
         <button type="submit" className="tn-btn" style={{ minHeight: 52 }}>
           Search
         </button>
-        {(q || sp.account || reviewOnly) && (
+        {(q || sp.account || reviewOnly || sp.category || sp.tag) && (
           <Link href="/new/activity" className="tn-btn" style={{ minHeight: 52 }}>
             Clear
           </Link>
@@ -185,6 +197,12 @@ export default async function NewActivityPage({ searchParams }: { searchParams: 
             </div>
           )}
           {reviewOnly && <h2 className="tn-h2" style={{ margin: "4px 6px" }}>To review</h2>}
+          {sp.category && <h2 className="tn-h2" style={{ margin: "4px 6px" }}>{catById.get(sp.category)?.name ?? "Category"} this month</h2>}
+          {sp.tag && (
+            <h2 className="tn-h2" style={{ margin: "4px 6px" }}>
+              #{sp.tag} <span className="tn-muted" style={{ fontSize: 15, fontWeight: 400 }}>· past two years</span>
+            </h2>
+          )}
 
           {days.length === 0 && <div className="tn-empty">{q ? `Nothing matches “${q}” in the past year.` : "Nothing here yet."}</div>}
 
@@ -277,6 +295,7 @@ export default async function NewActivityPage({ searchParams }: { searchParams: 
                     all={pickable}
                     reviewed={selected.reviewed}
                     excluded={selected.excluded}
+                    isManual={selected.isManual}
                   />
                 </>
               )}
@@ -286,6 +305,18 @@ export default async function NewActivityPage({ searchParams }: { searchParams: 
                   <span className="tn-muted">Past year here</span>
                   <span>
                     {selectedExtras.trips} times, about <span className="money">{dollars(selectedExtras.avg)}</span> each
+                  </span>
+                </div>
+              )}
+              {selected.tags.length > 0 && (
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, paddingTop: 12, borderTop: "1px solid var(--tn-line)", fontSize: 14 }}>
+                  <span className="tn-muted">Tags</span>
+                  <span style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "flex-end" }}>
+                    {selected.tags.map((t) => (
+                      <Link key={t} href={`/new/activity?tag=${encodeURIComponent(t)}`}>
+                        #{t}
+                      </Link>
+                    ))}
                   </span>
                 </div>
               )}

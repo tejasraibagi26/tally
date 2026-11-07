@@ -10,6 +10,10 @@ import { isActiveExpenseStream, monthlyCost, subscriptionsMonthlyTotal } from "@
 import { formatCents } from "@tally/core/money";
 import { dollars, shortDate } from "@/lib/newData";
 import { NewSubNav } from "@/components/new/NewNav";
+import { AddBill, BillActions } from "@/components/new/BillEditor";
+import { liveAccount } from "@/lib/liveAccounts";
+import { listUserCategories } from "@/lib/userCategories";
+import { accountDisplayName } from "@tally/core/accountName";
 
 type CalItem = { label: string; amount: number; kind: "in" | "big" | "paid" | "bill" };
 
@@ -23,7 +27,7 @@ export default async function NewBillsPage() {
   const last = monthLastDay(month);
   const { end: monthEnd } = monthRange(month);
 
-  const [forecast, streams] = await Promise.all([
+  const [forecast, streams, accountRows, categories] = await Promise.all([
     forecastFor(userId, 60),
     db
       .select({
@@ -41,7 +45,14 @@ export default async function NewBillsPage() {
       })
       .from(schema.recurringStreams)
       .where(and(eq(schema.recurringStreams.userId, userId), isNull(schema.recurringStreams.dismissedAt))),
+    db
+      .select({ id: schema.accounts.id, name: schema.accounts.name, nickname: schema.accounts.nickname, type: schema.accounts.type })
+      .from(schema.accounts)
+      .where(and(eq(schema.accounts.userId, userId), liveAccount)),
+    listUserCategories(userId),
   ]);
+  const accountOptions = accountRows.filter((a) => a.type === "depository" || a.type === "credit").map((a) => ({ id: a.id, name: accountDisplayName(a.name, a.nickname) }));
+  const categoryOptions = categories.filter((c) => c.kind === "expense").map((c) => ({ id: c.id, name: c.name }));
 
   const active = streams.filter(isActiveExpenseStream).map((s) => ({ ...s, description: s.description ?? "Recurring charge", next: s.manualNextDueDate ?? s.predictedNextDate, perMonth: monthlyCost(s) }));
   const { monthlyTotal } = subscriptionsMonthlyTotal(streams);
@@ -180,7 +191,7 @@ export default async function NewBillsPage() {
                 That&apos;s <strong className="money" style={{ color: "var(--tn-ink)" }}>{dollars(monthlyTotal * 12)}</strong> a year.
               </p>
               {found.map((s) => (
-                <StreamRow key={s.id} name={s.description} sub={s.next ? `Next ${shortDate(s.next)}${s.status === "at_risk" ? " · may have stopped" : ""}` : "No date yet"} amount={s.perMonth} perMonth />
+                <StreamRow key={s.id} id={s.id} next={s.next} isManual={false} today={today} name={s.description} sub={s.next ? `Next ${shortDate(s.next)}${s.status === "at_risk" ? " · may have stopped" : ""}` : "No date yet"} amount={s.perMonth} perMonth />
               ))}
             </>
           )}
@@ -191,14 +202,12 @@ export default async function NewBillsPage() {
             <h2 className="tn-h2" style={{ fontSize: 26 }}>
               Bills you added
             </h2>
-            <Link href="/subscriptions" style={{ fontSize: 14 }}>
-              Add or edit →
-            </Link>
+            <AddBill accounts={accountOptions} categories={categoryOptions} today={today} />
           </div>
           {added.length === 0 ? (
-            <p className="tn-muted">Rent, or anything paid in a way Tally can&apos;t see? Add it in the classic view and it&apos;ll show up here and in your forecast.</p>
+            <p className="tn-muted">Rent, or anything paid in a way Tally can&apos;t see? Add it and it&apos;ll show up here and in your forecast.</p>
           ) : (
-            added.map((s) => <StreamRow key={s.id} name={s.description} sub={s.next ? `Next ${shortDate(s.next)}` : "No date yet"} amount={Math.abs(s.averageAmount)} />)
+            added.map((s) => <StreamRow key={s.id} id={s.id} next={s.next} isManual today={today} name={s.description} sub={s.next ? `Next ${shortDate(s.next)}` : "No date yet"} amount={Math.abs(s.averageAmount)} />)
           )}
         </section>
       </div>
@@ -206,20 +215,23 @@ export default async function NewBillsPage() {
   );
 }
 
-function StreamRow({ name, sub, amount, perMonth }: { name: string; sub: string; amount: number; perMonth?: boolean }) {
+function StreamRow({ id, next, isManual, today, name, sub, amount, perMonth }: { id: string; next: string | null; isManual: boolean; today: string; name: string; sub: string; amount: number; perMonth?: boolean }) {
   return (
-    <div className="tn-row" style={{ padding: "14px 4px", borderTop: "1px solid var(--tn-line)", borderRadius: 0 }}>
-      <span className="tn-avatar" aria-hidden="true">
-        {name.trim().charAt(0).toUpperCase()}
-      </span>
-      <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
-        <span className="tn-row-title">{name}</span>
-        <span className="tn-row-sub">{sub}</span>
-      </span>
-      <span className="tn-amt money">
-        {formatCents(amount)}
-        {perMonth && <span className="tn-faint" style={{ fontSize: 12, fontWeight: 400, fontFamily: "var(--font-inter)" }}> /mo</span>}
-      </span>
+    <div style={{ borderTop: "1px solid var(--tn-line)" }}>
+      <div className="tn-row" style={{ gridTemplateColumns: "44px minmax(0, 1fr) auto auto", padding: "14px 4px", borderRadius: 0 }}>
+        <span className="tn-avatar" aria-hidden="true">
+          {name.trim().charAt(0).toUpperCase()}
+        </span>
+        <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+          <span className="tn-row-title">{name}</span>
+          <span className="tn-row-sub">{sub}</span>
+        </span>
+        <span className="tn-amt money">
+          {formatCents(amount)}
+          {perMonth && <span className="tn-faint" style={{ fontSize: 12, fontWeight: 400, fontFamily: "var(--font-inter)" }}> /mo</span>}
+        </span>
+        <BillActions id={id} name={name} next={next} isManual={isManual} today={today} />
+      </div>
     </div>
   );
 }

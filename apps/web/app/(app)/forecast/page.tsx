@@ -1,3 +1,4 @@
+import { sendToNewUi } from "@/lib/newUi";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import { requireUserId } from "@/lib/session";
@@ -32,6 +33,7 @@ function daysAway(from: string, to: string): number {
  */
 export default async function ForecastPage({ searchParams }: { searchParams: Promise<{ days?: string }> }) {
   const userId = await requireUserId();
+  await sendToNewUi(userId, "/new/forecast");
   const { days } = await searchParams;
   const [f, safe] = await Promise.all([forecastFor(userId, days == null ? undefined : Number(days)), safeToSpendFor(userId)]);
 

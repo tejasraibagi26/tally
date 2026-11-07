@@ -1,3 +1,4 @@
+import { sendToNewUi } from "@/lib/newUi";
 import { db, schema } from "@/db";
 import { isLiveAccountRow } from "@/lib/liveAccounts";
 import { and, eq, gte, lt, sql } from "drizzle-orm";
@@ -62,6 +63,7 @@ function relativeDate(dateStr: string, today: string): string {
 
 export default async function OverviewPage() {
   const userId = await requireUserId();
+  await sendToNewUi(userId, "/new");
 
   const allAccounts = await db.query.accounts.findMany({ where: eq(schema.accounts.userId, userId) });
   const allItems = await db.query.plaidItems.findMany({ where: eq(schema.plaidItems.userId, userId) });

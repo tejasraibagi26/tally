@@ -146,8 +146,15 @@
   display: flex;
   gap: 28px;
   border-bottom: 1px solid var(--tn-line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tn-sub::-webkit-scrollbar {
+  display: none;
 }
 .tn-sub a {
+  flex: none;
+  white-space: nowrap;
   padding: 6px 0;
   margin-bottom: -1px;
   color: var(--tn-muted);

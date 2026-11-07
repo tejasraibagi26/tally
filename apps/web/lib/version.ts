@@ -585,8 +585,17 @@
  * runs full width on real dates, weekly past three months, with a padded
  * scale, $ and month labels, a hover readout, 3M/6M/1Y/All ranges and the
  * change over the chosen range; the goal line shows only when it fits.
+ *
+ * 2.20.0: the new Tally is complete enough to live in, and opt-in per account
+ * (users.new_ui_at, migration 0040, lib/newUi.ts). Opting in (sidebar,
+ * the /new banner, or new Settings) sends classic pages that have a new
+ * counterpart to it; "Classic view" opts out. New: Forecast, Cards, Loans,
+ * Investments, Tags, Settings and Rules screens; budgets, the goal, bills,
+ * hand-added transactions, account names, bank sync and disconnect all edit
+ * in place. Classic full settings, the advanced rule editor, year in review
+ * and FIRE stay classic and reachable.
  */
-export const APP_VERSION = "2.19.1";
+export const APP_VERSION = "2.20.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

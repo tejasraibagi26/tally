@@ -7,6 +7,8 @@ import { accountDisplayName } from "@tally/core/accountName";
 import { countsAsCash } from "@tally/core/safeToSpend";
 import { connectionState, type ConnectionState } from "@tally/core/connectionState";
 import { formatCents } from "@tally/core/money";
+import type { Forecast } from "@tally/core/forecast";
+import type { Headline } from "@/components/new/AffordPanel";
 
 /**
  * Shared loaders for the new Tally pilot (app/new). Same rules as the
@@ -164,4 +166,24 @@ export function dayLabel(iso: string): string {
 export function listNames(names: string[]): string {
   if (names.length <= 1) return names.join("");
   return `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`;
+}
+
+/** The one-line answer to "am I okay?" over the forecast's window, shared by Now and Forecast. */
+export function forecastHeadline(forecast: Forecast, days: number): Headline {
+  if (!forecast.headline) {
+    return { tone: "ink", title: "Here's where you stand.", sub: "Tally hasn't spotted a paycheque yet, so it can't look ahead. Add your pay in Settings and this will tell you what's coming." };
+  }
+  if (forecast.headline.kind === "shortfall") {
+    const causes = forecast.headline.causes.slice(0, 2).map((c) => c.label);
+    return {
+      tone: "coral",
+      title: `Heads up: ${shortDate(forecast.headline.date)} gets tight.`,
+      sub: `Your cash would dip under ${forecast.cushion > 0 ? `your ${dollars(forecast.cushion)} buffer` : "$0"}${causes.length ? `, mostly from ${listNames(causes)}` : ""}.`,
+    };
+  }
+  return {
+    tone: "lime",
+    title: `You're in good shape for the next ${days} days.`,
+    sub: `Every bill Tally knows about is covered. Your lowest point is ${dollars(forecast.lowest.amount)}, on ${shortDate(forecast.lowest.date)}.`,
+  };
 }

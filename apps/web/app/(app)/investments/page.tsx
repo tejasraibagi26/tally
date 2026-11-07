@@ -1,3 +1,4 @@
+import { sendToNewUi } from "@/lib/newUi";
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { TrendingUp } from "lucide-react";
 import { db, schema } from "@/db";
@@ -21,6 +22,7 @@ const ACTIVITY_LIMIT = 200;
 
 export default async function InvestmentsPage({ searchParams }: { searchParams: Promise<{ holding?: string }> }) {
   const userId = await requireUserId();
+  await sendToNewUi(userId, "/new/investments");
   const { holding } = await searchParams;
   const [holdings, history, today] = await Promise.all([latestHoldingsForUser(userId), portfolioHistory(userId), todayFor(userId)]);
 

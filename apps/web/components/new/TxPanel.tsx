@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
+import { ConfirmButton } from "@/components/new/ConfirmButton";
 
 interface Option {
   id: string;
@@ -22,6 +23,7 @@ export function TxPanel({
   all,
   reviewed,
   excluded,
+  isManual,
 }: {
   id: string;
   merchant: string;
@@ -30,6 +32,7 @@ export function TxPanel({
   all: Option[];
   reviewed: boolean;
   excluded: boolean;
+  isManual: boolean;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -136,6 +139,30 @@ export function TxPanel({
       >
         {excluded ? "Count it in totals again" : "Not a real expense? Leave it out of totals"}
       </button>
+
+      {isManual && (
+        <ConfirmButton
+          label="Delete this transaction"
+          question={`Delete ${merchant}? This can't be undone.`}
+          confirmLabel="Yes, delete"
+          disabled={busy}
+          onConfirm={async () => {
+            setBusy(true);
+            try {
+              const res = await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+              if (!res.ok) {
+                showToast("Couldn't delete that. Try again.", "negative");
+                return;
+              }
+              showToast(`${merchant} deleted`);
+              router.push("/new/activity");
+              router.refresh();
+            } finally {
+              setBusy(false);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

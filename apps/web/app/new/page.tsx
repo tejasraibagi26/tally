@@ -13,8 +13,8 @@ import { safeToSpendFor } from "@/lib/safeToSpend";
 import { getBudgetsForMonth } from "@/lib/budgets";
 import { dailySpend, monthTotals } from "@/lib/analytics";
 import { goalSummary } from "@/lib/goals";
-import { composition, dollars, listNames, loadAccounts, shortDate, signedDollars } from "@/lib/newData";
-import { AffordPanel, type Headline } from "@/components/new/AffordPanel";
+import { composition, dollars, forecastHeadline, listNames, loadAccounts, shortDate, signedDollars } from "@/lib/newData";
+import { AffordPanel } from "@/components/new/AffordPanel";
 import { NetWorthTrend } from "@/components/new/NetWorthTrend";
 
 
@@ -35,7 +35,7 @@ export default async function NowPage() {
             Nothing connected yet
           </h1>
           <p style={{ margin: "0 0 18px" }}>Connect a bank, card or brokerage and Tally will show where you stand and what&apos;s ahead.</p>
-          <Link href="/accounts" className="tn-btn tn-btn-solid">
+          <Link href="/new/accounts" className="tn-btn tn-btn-solid">
             Connect an account
           </Link>
         </div>
@@ -79,19 +79,7 @@ export default async function NowPage() {
   const tally = budgetTally(budgets.map((b) => ({ ...b, name: b.categoryName })), ctx);
 
   // ── the headline, from the forecast ──
-  const headline: Headline = !forecast.headline
-    ? { tone: "ink", title: "Here's where you stand.", sub: "Tally hasn't spotted a paycheque yet, so it can't look ahead. Add one in Forecast and this page will tell you what's coming." }
-    : forecast.headline.kind === "shortfall"
-      ? {
-          tone: "coral",
-          title: `Heads up: ${shortDate(forecast.headline.date)} gets tight.`,
-          sub: `Your cash would dip under ${forecast.cushion > 0 ? `your ${dollars(forecast.cushion)} buffer` : "$0"}${forecast.headline.causes.length ? `, mostly from ${listNames(forecast.headline.causes.slice(0, 2).map((c) => c.label))}` : ""}.`,
-        }
-      : {
-          tone: "lime",
-          title: "You're in good shape for the next 30 days.",
-          sub: `Every bill Tally knows about is covered. Your lowest point is ${dollars(forecast.lowest.amount)}, on ${shortDate(forecast.lowest.date)}.`,
-        };
+  const headline = forecastHeadline(forecast, 30);
 
   // ── plain words ──
   const last7 = Array.from({ length: 7 }, (_, i) => daysBefore(today, i)).reduce((s, d) => s + (thisDaily[d] ?? priorDaily[d] ?? 0), 0);

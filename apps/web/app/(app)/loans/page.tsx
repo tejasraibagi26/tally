@@ -1,3 +1,4 @@
+import { sendToNewUi } from "@/lib/newUi";
 import Link from "next/link";
 import { AlertTriangle, Banknote } from "lucide-react";
 import { requireUserId } from "@/lib/session";
@@ -55,6 +56,7 @@ function Money({ cents, currency, className }: { cents: number; currency: string
  */
 export default async function LoansPage() {
   const userId = await requireUserId();
+  await sendToNewUi(userId, "/new/loans");
   const loans = await loansForUser(userId);
 
   if (loans.length === 0) {

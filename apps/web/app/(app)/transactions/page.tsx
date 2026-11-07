@@ -1,3 +1,4 @@
+import { sendToNewUi } from "@/lib/newUi";
 import { db, schema } from "@/db";
 import { listUserCategories } from "@/lib/userCategories";
 import { resolveMerchantLogos } from "@/lib/merchantLogos";
@@ -64,6 +65,7 @@ interface SearchParams {
 
 export default async function TransactionsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const userId = await requireUserId();
+  await sendToNewUi(userId, "/new/activity");
   // Self-heals a transaction left stuck "Marked as annual" by a stream
   // deleted before undoAmortization existed — see clearOrphanedRecurringStreamRefs.
   await clearOrphanedRecurringStreamRefs(userId);

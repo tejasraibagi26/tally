@@ -63,12 +63,14 @@ export function AffordPanel({
   events,
   cushion,
   headline,
+  title = "Your next 30 days",
   children,
 }: {
   days: { date: string; balance: number }[];
   events: AffordEvent[];
   cushion: number;
   headline: Headline;
+  title?: string;
   children?: React.ReactNode;
 }) {
   const [raw, setRaw] = useState("");
@@ -156,7 +158,7 @@ export function AffordPanel({
 
           <section className="tn-section" style={{ gap: 8 }}>
             <div className="tn-section-head">
-              <h2 className="tn-h2">Your next 30 days</h2>
+              <h2 className="tn-h2">{title}</h2>
               <span className="tn-faint" style={{ fontSize: 13 }}>
                 Cash accounts, with the bills and paydays Tally knows about and your usual day-to-day spending
               </span>
