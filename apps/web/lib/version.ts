@@ -580,8 +580,13 @@
  * a "Can I afford it?" box over the 30-day forecast, budgets and goals in
  * plain words, a bills calendar, and an Activity view that can recategorize
  * and teach rules. Shared logic lives in @tally/core/nowView.
+ *
+ * 2.19.1: the new Now page's net worth chart (components/new/NetWorthTrend)
+ * runs full width on real dates, weekly past three months, with a padded
+ * scale, $ and month labels, a hover readout, 3M/6M/1Y/All ranges and the
+ * change over the chosen range; the goal line shows only when it fits.
  */
-export const APP_VERSION = "2.19.0";
+export const APP_VERSION = "2.19.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

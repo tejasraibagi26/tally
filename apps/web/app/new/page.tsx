@@ -6,7 +6,7 @@ import { getUserTimezone } from "@/lib/userTimezone";
 import { todayInZone } from "@tally/core/zonedDate";
 import { monthLastDay, monthRange, shiftMonth } from "@tally/core/budgetMath";
 import { daysBefore } from "@tally/core/overviewView";
-import { budgetTally, linePoints, netWorthChange, yFor } from "@tally/core/nowView";
+import { budgetTally, netWorthChange } from "@tally/core/nowView";
 import { netWorthTrend } from "@/lib/networth";
 import { forecastFor } from "@/lib/forecast";
 import { safeToSpendFor } from "@/lib/safeToSpend";
@@ -15,9 +15,8 @@ import { dailySpend, monthTotals } from "@/lib/analytics";
 import { goalSummary } from "@/lib/goals";
 import { composition, dollars, listNames, loadAccounts, shortDate, signedDollars } from "@/lib/newData";
 import { AffordPanel, type Headline } from "@/components/new/AffordPanel";
+import { NetWorthTrend } from "@/components/new/NetWorthTrend";
 
-const NW_W = 600;
-const NW_H = 170;
 
 export default async function NowPage() {
   const userId = await requireUserId();
@@ -45,7 +44,7 @@ export default async function NowPage() {
   }
 
   const [points, forecast, safe, budgets, thisMonth, thisDaily, priorDaily, goal, [review]] = await Promise.all([
-    netWorthTrend(userId, 365),
+    netWorthTrend(userId, 3660),
     forecastFor(userId, 30),
     safeToSpendFor(userId),
     getBudgetsForMonth(userId, month),
@@ -71,10 +70,6 @@ export default async function NowPage() {
   const comp = composition(accounts);
   const netWorth = points.at(-1)?.net ?? comp.owned - comp.owed;
   const change = netWorthChange(points, netWorth, today);
-  const nets = points.map((p) => p.net);
-  const target = goal?.goal.targetCents ?? null;
-  const showGoal = target != null && nets.length > 1 && target <= Math.max(...nets) * 1.6;
-  const nwRange = nets.length > 1 ? { min: Math.min(...nets), max: Math.max(...nets, showGoal ? target! : -Infinity) } : null;
 
   // ── this month ──
   const usualByNow = Object.entries(priorDaily)
@@ -191,7 +186,7 @@ export default async function NowPage() {
   return (
     <main className="tn-main">
       {/* Net worth first: where you stand, in one number. */}
-      <section aria-labelledby="tn-nw" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "28px 48px", alignItems: "end", paddingBottom: 32, borderBottom: "1px solid var(--tn-line)" }}>
+      <section aria-labelledby="tn-nw" style={{ display: "flex", flexDirection: "column", gap: 24, paddingBottom: 32, borderBottom: "1px solid var(--tn-line)" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           <span id="tn-nw" className="tn-muted">
             Your net worth · {new Date(`${today}T00:00:00Z`).toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", timeZone: "UTC" })}
@@ -205,9 +200,9 @@ export default async function NowPage() {
                 <span className="money">{signedDollars(change.month.amount)}</span> since {shortDate(change.month.since)}
               </span>
             )}
-            {change.year && (
-              <span className={change.year.amount >= 0 ? "tn-lime" : "tn-coral"}>
-                <span className="money">{signedDollars(change.year.amount)}</span> over the past year
+            {goal && goal.projection.gap > 0 && (
+              <span className="tn-amber">
+                <span className="money">{dollars(goal.projection.gap)}</span> to your <span className="money">{dollars(goal.goal.targetCents)}</span> goal
               </span>
             )}
           </div>
@@ -215,30 +210,7 @@ export default async function NowPage() {
             Everything you own (<span className="money">{dollars(comp.owned)}</span>) minus what you owe (<span className="money">{dollars(comp.owed)}</span>)
           </span>
         </div>
-        {nwRange && (
-          <figure style={{ margin: 0, display: "flex", flexDirection: "column", gap: 8 }}>
-            {showGoal && goal && (
-              <span className="tn-amber" style={{ fontSize: 13 }}>
-                Year-end goal <span className="money">{dollars(goal.goal.targetCents)}</span>
-                {goal.projection.gap > 0 && (
-                  <>
-                    {" "}
-                    · <span className="money">{dollars(goal.projection.gap)}</span> to go
-                  </>
-                )}
-              </span>
-            )}
-            <svg viewBox={`0 0 ${NW_W} ${NW_H}`} preserveAspectRatio="none" style={{ display: "block", width: "100%", height: NW_H }} role="img" aria-label={`Net worth over the past year, from ${dollars(nets[0]!)} to ${dollars(netWorth)}`}>
-              {showGoal && <line x1="0" y1={yFor(target!, NW_H, nwRange)} x2={NW_W} y2={yFor(target!, NW_H, nwRange)} stroke="#f2b84b" strokeWidth="1.5" strokeDasharray="6 5" vectorEffect="non-scaling-stroke" />}
-              <polyline points={`0,${NW_H} ${linePoints(nets, NW_W, NW_H, 8, nwRange)} ${NW_W},${NW_H}`} fill="#c9f26b" fillOpacity="0.08" stroke="none" />
-              <polyline points={linePoints(nets, NW_W, NW_H, 8, nwRange)} fill="none" stroke="#c9f26b" strokeWidth="3" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-            </svg>
-            <div className="tn-faint" style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-              <span>{shortDate(points[0]!.asOfDate)}</span>
-              <span>Today</span>
-            </div>
-          </figure>
-        )}
+        <NetWorthTrend points={points.map((p) => ({ asOfDate: p.asOfDate, net: p.net }))} goal={goal?.goal.targetCents ?? null} />
       </section>
 
       <AffordPanel

@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.19.1",
+    date: "2026-11-06",
+    changes: [
+      { kind: "improved", text: "In the new Tally, the net worth chart is bigger and easier to read: pick 3 months, 6 months, a year or all time, see how much it changed, and hover for any day's value." },
+    ],
+  },
+  {
     version: "2.19.0",
     date: "2026-11-06",
     changes: [
