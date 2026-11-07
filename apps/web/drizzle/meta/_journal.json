@@ -281,6 +281,13 @@
       "when": 1793740800004,
       "tag": "0039_transaction_date_is_purchase_date",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1793740800005,
+      "tag": "0040_new_ui_opt_in",
+      "breakpoints": true
     }
   ]
 }
