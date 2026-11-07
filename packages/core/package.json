@@ -38,7 +38,8 @@
     "./yearReview": "./src/yearReview.ts",
     "./tagView": "./src/tagView.ts",
     "./appLinks": "./src/appLinks.ts",
-    "./categoryIcon": "./src/categoryIcon.ts"
+    "./categoryIcon": "./src/categoryIcon.ts",
+    "./nowView": "./src/nowView.ts"
   },
   "scripts": {
     "test": "vitest run",

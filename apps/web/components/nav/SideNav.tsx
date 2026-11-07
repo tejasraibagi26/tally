@@ -235,6 +235,19 @@ export function SideNav({
       </div>
 
       <div className="mt-auto flex flex-col gap-2.5">
+        {/* The new Tally pilot (app/new): its own dark shell, same data. */}
+        <Link
+          href="/new"
+          className="mx-1 flex items-center justify-between gap-3 rounded-card bg-[#11110f] px-3.5 py-2.5 text-[#f2f1ea] hover:text-white"
+        >
+          <span className="flex flex-col min-w-0">
+            <span className="text-[15px] font-bold leading-tight">Try the new Tally</span>
+            <span className="text-[12.5px] leading-tight text-[#a19f95]">A preview of what&apos;s next</span>
+          </span>
+          <span aria-hidden="true" className="text-[#c9f26b] text-lg">
+            →
+          </span>
+        </Link>
         <YearReviewSticker active={isActive("/year-in-review")} />
         <div className="h-px bg-border" />
 

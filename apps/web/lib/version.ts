@@ -573,8 +573,15 @@
  * 2.18.4: an "error" (outage) bank joins needs-you only after a full day down,
  * not after a failed retry -- Plaid's own 500s fail every retry, and signing
  * in wouldn't help.
+ *
+ * 2.19.0: a preview of the new Tally at /new (app/new), reached from "Try the
+ * new Tally" in the sidebar. Its own dark shell with three places -- Now,
+ * Plans, Everything -- on the same data: net worth first, what makes it up,
+ * a "Can I afford it?" box over the 30-day forecast, budgets and goals in
+ * plain words, a bills calendar, and an Activity view that can recategorize
+ * and teach rules. Shared logic lives in @tally/core/nowView.
  */
-export const APP_VERSION = "2.18.4";
+export const APP_VERSION = "2.19.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

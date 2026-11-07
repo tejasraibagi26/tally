@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.19.0",
+    date: "2026-11-06",
+    changes: [
+      { kind: "new", text: "Try the new Tally: a preview of a calmer, darker Tally that answers \"Where do I stand?\" and \"Can I afford this?\" in plain words. Open it from \"Try the new Tally\" in the sidebar. It uses your real data, and Classic view is one click away." },
+    ],
+  },
+  {
     version: "2.18.4",
     date: "2026-11-03",
     changes: [
