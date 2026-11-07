@@ -632,8 +632,23 @@
  * grouped by parent, because the runway only reads as a comparison when
  * every row shares one calendar. "What it's for" is the parent category,
  * fixed-amount and rollover, since budgets have no description of their own.
+ *
+ * 2.23.0: budgets get a real "what it's for" (migration 0043), written in
+ * the budget panel and shown under the name on the goal view. It lives on
+ * the category, not the month's budget row, so it holds across months with
+ * no copy-forward: on categories for a user's own, and on category_overrides
+ * for a system one, which lib/userCategories.ts resolves the same way as
+ * name, colour, icon and parent. Without one, the row still falls back to
+ * parent, fixed-amount and rollover.
+ *
+ * Also fixes the runway axis: TODAY was spaced with justify-between, so it
+ * sat at the middle of the row rather than over the tick (on day 7 of 30 it
+ * pointed at the 50% mark). It is positioned by the tick now, an end label
+ * drops out when they would collide, the tick itself is 2px instead of a 1px
+ * line lost in a colour change, and one line under the headings says what
+ * the grey and the coloured stretch of every bar actually mean.
  */
-export const APP_VERSION = "2.22.2";
+export const APP_VERSION = "2.23.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

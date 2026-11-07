@@ -34,6 +34,7 @@ export function userCategories(userId: string) {
       colorSlot: sql<number>`case when ${overridden} then ${o.colorSlot} else ${c.colorSlot} end`.as("uc_color_slot"),
       icon: sql<string | null>`case when ${overridden} then ${o.icon} else ${c.icon} end`.as("uc_icon"),
       parentId: sql<string | null>`case when ${overridden} then ${o.parentId} else ${c.parentId} end`.as("uc_parent_id"),
+      description: sql<string | null>`case when ${overridden} then ${o.description} else ${c.description} end`.as("uc_description"),
     })
     .from(c)
     .leftJoin(o, and(eq(o.categoryId, c.id), eq(o.userId, userId)))
@@ -51,6 +52,8 @@ export type UserCategory = {
   colorSlot: number;
   icon: string | null;
   parentId: string | null;
+  /** The user's own "what it's for" line; null when they haven't written one. */
+  description: string | null;
 };
 
 /** Every category this user sees, overrides applied -- the replacement for

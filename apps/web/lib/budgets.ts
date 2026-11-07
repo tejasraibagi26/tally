@@ -141,6 +141,8 @@ export async function spendByCategory(userId: string, month: string): Promise<Ma
 export interface BudgetLine {
   categoryId: string;
   categoryName: string;
+  /** The category's "what it's for" line; null when the user hasn't written one. */
+  description: string | null;
   /** Parent category's name, for grouping rows; null for a top-level category. */
   parentName: string | null;
   categoryColorSlot: number;
@@ -190,6 +192,7 @@ export async function getBudgetsForMonth(userId: string, month: string): Promise
       categoryName: uc.name,
       categoryColorSlot: uc.colorSlot,
       parentId: uc.parentId,
+      description: uc.description,
     })
     .from(schema.budgets)
     .innerJoin(uc, eq(schema.budgets.categoryId, uc.id))
@@ -204,6 +207,7 @@ export async function getBudgetsForMonth(userId: string, month: string): Promise
     lines.push({
       categoryId: row.categoryId,
       categoryName: row.categoryName,
+      description: row.description,
       parentName: row.parentId ? (parentNames.get(row.parentId) ?? null) : null,
       categoryColorSlot: row.categoryColorSlot,
       colorSlot: 1, // assigned below, once every line is known

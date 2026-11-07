@@ -12,6 +12,8 @@ const patchSchema = z.object({
   parentId: z.string().uuid().nullable().optional(),
   colorSlot: z.number().int().min(1).max(8).optional(),
   icon: z.string().max(40).nullable().optional(),
+  // One line, so it fits under the name on a Budgets row. Empty clears it.
+  description: z.string().max(120).nullable().optional(),
 });
 
 // §7.1: users can rename/recolor/reparent any category they see. Their own
@@ -52,7 +54,8 @@ async function PATCH_handler(req: Request, { params }: { params: Promise<{ id: s
   }
 
   if (category.userId === userId) {
-    await db.update(schema.categories).set(parsed.data).where(eq(schema.categories.id, id));
+    const own = parsed.data.description === "" ? { ...parsed.data, description: null } : parsed.data;
+    await db.update(schema.categories).set(own).where(eq(schema.categories.id, id));
   } else {
     // Start from what this user sees now (their earlier override, or the
     // system row), so the snapshot carries every field, not just this edit.
@@ -64,6 +67,7 @@ async function PATCH_handler(req: Request, { params }: { params: Promise<{ id: s
       colorSlot: parsed.data.colorSlot ?? current.colorSlot,
       icon: parsed.data.icon !== undefined ? parsed.data.icon : current.icon,
       parentId: parsed.data.parentId !== undefined ? parsed.data.parentId : current.parentId,
+      description: parsed.data.description !== undefined ? parsed.data.description || null : current.description,
       updatedAt: new Date(),
     };
     await db

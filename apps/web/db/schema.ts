@@ -287,6 +287,9 @@ export const categories = pgTable("categories", {
   colorSlot: integer("color_slot").notNull().default(1), // 1-8, maps to --series-N
   kind: categoryKindEnum("kind").notNull().default("expense"),
   sortOrder: integer("sort_order").notNull().default(0),
+  // The user's own one-line "what it's for", shown under the name on Budgets
+  // in the goal view. Migration 0043; read through lib/userCategories.ts.
+  description: text("description"),
 });
 
 // One user's own name/colour/icon/parent for a *system* category
@@ -301,6 +304,7 @@ export const categoryOverrides = pgTable("category_overrides", {
   colorSlot: integer("color_slot").notNull(),
   icon: text("icon"),
   parentId: uuid("parent_id"),
+  description: text("description"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => ({
   pk: primaryKey({ columns: [t.userId, t.categoryId] }),

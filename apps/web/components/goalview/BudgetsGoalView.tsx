@@ -35,17 +35,24 @@ function monthEdge(month: string, day: number): string {
     .toUpperCase();
 }
 
+/** "November", for the one line explaining what a bar is. */
+function monthOnlyLabel(month: string): string {
+  return new Date(`${month}T00:00:00Z`).toLocaleDateString("en-US", { month: "long", timeZone: "UTC" });
+}
+
 function daysLabel(days: number): string {
   const n = days === Math.round(days) ? String(days) : days.toFixed(1);
   return `${n} ${days === 1 ? "day" : "days"}`;
 }
 
 /**
- * What a budget is for, from what Tally actually knows: its parent category,
- * whether the amount is fixed, and any rollover. Budgets carry no description
- * of their own, so this stands in rather than inventing one.
+ * What a budget is for: the user's own line when they've written one (set in
+ * the budget panel, stored on the category so it holds across months), and
+ * otherwise what Tally can tell on its own, being the parent category,
+ * whether the amount is fixed, and any rollover.
  */
 function whatFor(line: BudgetLine): string | null {
+  if (line.description) return line.description;
   const parts: string[] = [];
   if (line.parentName && line.parentName !== line.categoryName) parts.push(line.parentName);
   if (line.isFixedAmount) parts.push("fixed amount");
@@ -177,6 +184,13 @@ export function BudgetsGoalView({
           <span className="text-right">Costs the goal</span>
         </div>
 
+        {current && (
+          <p className="m-0 hidden px-5 pb-3 text-[12.5px] text-text-3 lg:block">
+            Each bar is {monthOnlyLabel(month)}. The grey is the month so far, and the colour is how far what&apos;s left
+            carries you at the rate you&apos;re going: reaching the right edge means it lasts the month.
+          </p>
+        )}
+
         {rows.map(({ line, available, r, cost }) => (
           <button
             key={line.categoryId}
@@ -208,13 +222,18 @@ export function BudgetsGoalView({
               <span className="relative flex h-2 overflow-hidden rounded-full bg-sunken" aria-hidden="true">
                 <span className="absolute inset-y-0 left-0 bg-border" style={{ width: `${r.todayPct * 100}%` }} />
                 <span className="absolute inset-y-0" style={{ left: `${r.todayPct * 100}%`, width: `${r.carryPct * 100}%`, background: FILL[r.state] }} />
-                {r.todayPct > 0 && <span className="absolute inset-y-0 w-px bg-text" style={{ left: `${r.todayPct * 100}%` }} />}
+                {r.todayPct > 0 && <span className="absolute -inset-y-0.5 w-0.5 rounded-full bg-text" style={{ left: `${r.todayPct * 100}%` }} />}
               </span>
               {current && (
-                <span className="flex justify-between font-mono text-[10.5px] tracking-[0.03em] text-text-3">
-                  <span>{monthEdge(month, 1)}</span>
-                  <span>TODAY</span>
-                  <span>{monthEdge(month, runway.daysInMonth)}</span>
+                <span className="relative block h-3.5 font-mono text-[10.5px] tracking-[0.03em] text-text-3">
+                  {r.todayPct > 0.16 && <span className="absolute left-0">{monthEdge(month, 1)}</span>}
+                  <span
+                    className="absolute -translate-x-1/2 whitespace-nowrap font-medium text-text-2"
+                    style={{ left: `${Math.min(92, Math.max(8, r.todayPct * 100))}%` }}
+                  >
+                    TODAY
+                  </span>
+                  {r.todayPct < 0.84 && <span className="absolute right-0">{monthEdge(month, runway.daysInMonth)}</span>}
                 </span>
               )}
               <span className="text-[13px] text-text-2 tabular">{r.sentence}</span>

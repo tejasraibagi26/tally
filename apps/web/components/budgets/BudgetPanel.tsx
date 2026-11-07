@@ -37,6 +37,7 @@ export function BudgetPanel({
   const [amountInput, setAmountInput] = useState("");
   const [rollover, setRollover] = useState(false);
   const [fixed, setFixed] = useState(false);
+  const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirmRemove, setConfirmRemove] = useState(false);
@@ -47,6 +48,7 @@ export function BudgetPanel({
     setAmountInput((line.amount / 100).toFixed(0));
     setRollover(line.rolloverEnabled);
     setFixed(line.isFixedAmount);
+    setDescription(line.description ?? "");
     setError(null);
     setHistory(null);
     let cancelled = false;
@@ -64,7 +66,8 @@ export function BudgetPanel({
   if (!line) return null;
   const current = line;
   const amount = Math.round((parseFloat(amountInput) || 0) * 100);
-  const dirty = amount !== current.amount || rollover !== current.rolloverEnabled || fixed !== current.isFixedAmount;
+  const descriptionDirty = description.trim() !== (current.description ?? "");
+  const dirty = amount !== current.amount || rollover !== current.rolloverEnabled || fixed !== current.isFixedAmount || descriptionDirty;
   const past = (history ?? []).slice(0, -1).filter((h) => h.spend > 0 || h.amount != null);
   const recent = past.slice(-3);
   const avg = recent.length ? Math.round(recent.reduce((s, h) => s + h.spend, 0) / recent.length) : null;
@@ -81,6 +84,14 @@ export function BudgetPanel({
     setError(null);
     try {
       await put({ amount, rolloverEnabled: rollover, isFixedAmount: fixed });
+      if (descriptionDirty) {
+        const res = await fetch(`/api/categories/${current.categoryId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ description: description.trim() || null }),
+        });
+        if (!res.ok) throw new Error("Failed");
+      }
       router.refresh();
     } catch {
       setError("Couldn't save. Try again.");
@@ -164,6 +175,21 @@ export function BudgetPanel({
           <span className="flex items-center gap-1.5">
             <span className="text-text-3 text-sm">$</span>
             <input type="number" min="0" step="1" value={amountInput} onChange={(e) => setAmountInput(e.target.value)} className="w-full h-9 rounded-control bg-surface border border-border-strong px-3 text-[15px] text-text tabular focus:outline-none focus:ring-2 focus:ring-info" />
+          </span>
+        </label>
+
+        <label className="flex flex-col gap-1.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-text-3">What it&apos;s for</span>
+          <input
+            type="text"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            maxLength={120}
+            placeholder="The weekly shop"
+            className="h-9 w-full rounded-control border border-border-strong bg-surface px-3 text-[15px] text-text focus:outline-none focus:ring-2 focus:ring-info"
+          />
+          <span className="text-xs text-text-3">
+            Shown under the name on Budgets. It belongs to the category, so it stays the same every month.
           </span>
         </label>
 

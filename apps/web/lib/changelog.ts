@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.23.0",
+    date: "2026-11-07",
+    changes: [
+      { kind: "new", text: "Say what a budget is for. Open a budget and write a line like \"the weekly shop\", and it shows under the name on Budgets. It belongs to the category, so you write it once and it stays the same every month." },
+      { kind: "fixed", text: "On the goal view, the TODAY mark under a budget bar now sits where today actually falls in the month instead of in the middle, and a line above the list explains what the bar is showing." },
+    ],
+  },
+  {
     version: "2.22.2",
     date: "2026-11-07",
     changes: [

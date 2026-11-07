@@ -302,6 +302,13 @@
       "when": 1793740800007,
       "tag": "0042_goal_view_opt_in",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1793740800008,
+      "tag": "0043_category_description",
+      "breakpoints": true
     }
   ]
 }
