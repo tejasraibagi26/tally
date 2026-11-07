@@ -867,6 +867,12 @@ body {
   --shadow-raised: 0 1px 2px rgba(28, 26, 36, 0.05);
   --shadow-overlay: 0 12px 32px -8px rgba(28, 26, 36, 0.16), 0 2px 6px rgba(28, 26, 36, 0.05);
   --tooltip-border: 1px solid var(--border);
+  /* --ink is Pop's outline colour, and it is only ever a border, an inset
+     ring or a shadow: text on a coloured ground is --ink-text, which is
+     untouched. Retuning it here is what stops the outline reading as a
+     bright edge in dark, where Pop sets it to cream (#F6F1E7). */
+  --ink: #D8D4CB;
+  --ink-shadow: transparent;
 }
 
 :root[data-ui="pop"][data-skin="quiet"][data-theme="dark"] {
@@ -881,6 +887,8 @@ body {
   /* Dark drops the shadow and leans on the raised surface instead. */
   --shadow-raised: none;
   --shadow-overlay: 0 12px 32px -8px rgba(0, 0, 0, 0.6);
+  --ink: #302C3C;
+  --ink-shadow: transparent;
 }
 
 /* Cards and panels: hairline, not outline. */
@@ -914,7 +922,7 @@ body {
 [data-ui="pop"][data-skin="quiet"] .ui-btn-secondary,
 [data-ui="pop"][data-skin="quiet"] .ui-btn-destructive-solid {
   border-width: 1px;
-  border-color: color-mix(in srgb, var(--ink) 18%, transparent);
+  border-color: var(--ink);
   box-shadow: none;
 }
 [data-ui="pop"][data-skin="quiet"] .ui-btn:not(:disabled):active {
@@ -935,8 +943,10 @@ body {
   color: var(--brand);
 }
 
-/* Meters lose the outline too. */
+/* Meters lose the ink outline. Height stays Pop's, so existing budget
+   meters keep their shape; the goal view's own bars don't use .ui-meter. */
 [data-ui="pop"][data-skin="quiet"] .ui-meter {
+  outline: none;
   box-shadow: none;
 }
 

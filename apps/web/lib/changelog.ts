@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.22.1",
+    date: "2026-11-07",
+    changes: [
+      { kind: "fixed", text: "In the goal view, cards, buttons and budget meters no longer draw a bright outline in dark mode." },
+      { kind: "fixed", text: "The bars on Overview and Budgets are their proper height again instead of being squashed thin." },
+    ],
+  },
+  {
     version: "2.22.0",
     date: "2026-11-07",
     changes: [

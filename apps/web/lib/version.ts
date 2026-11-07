@@ -612,8 +612,17 @@
  * and what this month's budgets are costing the goal. Budgets draws each row
  * as the month with a runway (@tally/core/budgetRunway) and prices overages
  * in days (@tally/core/goalCost). Toggle in Settings > Display.
+ *
+ * 2.22.1: the quiet skin stopped at the rules that draw outlines and left
+ * --ink itself alone, so everything it didn't override kept drawing Pop's
+ * outline, which is cream (#F6F1E7) in dark. --ink and --ink-shadow are now
+ * retuned in the skin, which covers the components that set
+ * border-[var(--ink)] inline too; .ui-meter's 2px outline is cleared (only
+ * its shadow was). Dropping .ui-meter from the pace split and runway bars
+ * also un-squashes them: it forces height 12px above Tailwind's h-*, so a
+ * 32px bar and an 8px bar were both rendering at 12.
  */
-export const APP_VERSION = "2.22.0";
+export const APP_VERSION = "2.22.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -238,7 +238,7 @@ function RunwayRow({ line, goalView }: { line: BudgetLine; goalView: GoalViewCon
 
   return (
     <span className="flex flex-col gap-2">
-      <span className="ui-meter relative flex h-2 overflow-hidden rounded-full bg-sunken" aria-hidden="true">
+      <span className="relative flex h-2 overflow-hidden rounded-full bg-sunken" aria-hidden="true">
         {/* The month already behind you, then the stretch the money covers. */}
         <span className="absolute inset-y-0 left-0 bg-border" style={{ width: `${r.todayPct * 100}%` }} />
         <span className="absolute inset-y-0" style={{ left: `${r.todayPct * 100}%`, width: `${r.carryPct * 100}%`, background: fill }} />

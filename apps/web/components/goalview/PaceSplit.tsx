@@ -51,7 +51,7 @@ export function PaceSplit({ summary, children }: { summary: GoalSummary; childre
           </span>
 
           <div className="relative mt-8">
-            <div className="ui-meter flex h-8 rounded-control bg-sunken overflow-hidden" aria-hidden="true">
+            <div className="flex h-8 rounded-control bg-sunken overflow-hidden" aria-hidden="true">
               {saving != null && saving > 0 && <span className="h-full bg-brand" style={{ width: pct(saving) }} />}
               {other != null && other > 0 && <span className="h-full bg-brand-subtle" style={{ width: pct(other) }} />}
               {saving == null && <span className="h-full bg-brand" style={{ width: pct(pace) }} />}
