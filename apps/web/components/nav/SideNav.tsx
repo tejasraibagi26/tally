@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { TryNewTally } from "@/components/nav/TryNewTally";
+import { TryGoalView } from "@/components/goalview/TryGoalView";
 import { usePathname } from "next/navigation";
 import {
   X,
@@ -193,11 +193,14 @@ export function SideNav({
   user,
   counts,
   mockMode,
+  goalView,
   onClose,
 }: {
   user: { name: string | null; email: string };
   counts: NavCounts;
   mockMode: boolean;
+  /** Already on the goal view (lib/goalView.ts), so the way in is hidden. */
+  goalView?: boolean;
   /** Present only when rendered inside the mobile drawer (components/nav/MobileNav.tsx) — shows a close button. */
   onClose?: () => void;
 }) {
@@ -236,8 +239,8 @@ export function SideNav({
       </div>
 
       <div className="mt-auto flex flex-col gap-2.5">
-        {/* Opts in to the new Tally (app/new, lib/newUi.ts). */}
-        <TryNewTally />
+        {/* The goal view's way in (components/goalview), until it's on. */}
+        {!goalView && <TryGoalView />}
         <YearReviewSticker active={isActive("/year-in-review")} />
         <div className="h-px bg-border" />
 

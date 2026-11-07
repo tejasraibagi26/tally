@@ -39,7 +39,8 @@
     "./tagView": "./src/tagView.ts",
     "./appLinks": "./src/appLinks.ts",
     "./categoryIcon": "./src/categoryIcon.ts",
-    "./nowView": "./src/nowView.ts"
+    "./goalCost": "./src/goalCost.ts",
+    "./budgetRunway": "./src/budgetRunway.ts"
   },
   "scripts": {
     "test": "vitest run",

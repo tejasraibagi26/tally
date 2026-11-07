@@ -1,4 +1,3 @@
-import { sendToNewUi } from "@/lib/newUi";
 import { db, schema } from "@/db";
 import { isLiveAccountRow } from "@/lib/liveAccounts";
 import { and, eq, gte, lt, sql } from "drizzle-orm";
@@ -28,6 +27,12 @@ import { BudgetMeterList } from "@/components/budgets/BudgetMeterList";
 import { LinkButton } from "@/components/plaid/LinkButton";
 import { MOCK_MODE } from "@/lib/config";
 import Link from "next/link";
+import { prefersGoalView } from "@/lib/goalView";
+import { savingLedger } from "@/lib/goalLedger";
+import { GoalStand } from "@/components/goalview/GoalStand";
+import { PaceSplit } from "@/components/goalview/PaceSplit";
+import { SavingLedger } from "@/components/goalview/SavingLedger";
+import { GoalCosts } from "@/components/goalview/GoalCosts";
 import { getUserTimezone } from "@/lib/userTimezone";
 import { todayInZone } from "@tally/core/zonedDate";
 import { monthSummary } from "@tally/core/budgetView";
@@ -63,7 +68,6 @@ function relativeDate(dateStr: string, today: string): string {
 
 export default async function OverviewPage() {
   const userId = await requireUserId();
-  await sendToNewUi(userId, "/new");
 
   const allAccounts = await db.query.accounts.findMany({ where: eq(schema.accounts.userId, userId) });
   const allItems = await db.query.plaidItems.findMany({ where: eq(schema.plaidItems.userId, userId) });
@@ -166,7 +170,11 @@ export default async function OverviewPage() {
   const dailyPace = totalBudgeted > 0 ? Math.floor(totalBudgeted / daysInMonth) : 0;
   const streak = onPaceStreak(spendByDay, dailyPace, today, monthStart);
   const unreviewed = toReview?.count ?? 0;
-  const [goal, introSeen, seen, safe] = await Promise.all([goalSummary(userId), goalsIntroSeen(userId), seenAnnouncements(userId), safeToSpendFor(userId)]);
+  const [goal, introSeen, seen, safe, goalView] = await Promise.all([goalSummary(userId), goalsIntroSeen(userId), seenAnnouncements(userId), safeToSpendFor(userId), prefersGoalView(userId)]);
+  // The goal view's accountability band (lib/goalLedger.ts). Only loaded for
+  // the accounts that opted in, so the classic page costs nothing extra.
+  const ledger = goalView ? await savingLedger(userId) : null;
+  const netWorthDeltaLine = netWorthMonthAgo != null ? `${netWorth >= netWorthMonthAgo ? "+" : "−"}${formatCents(Math.abs(netWorth - netWorthMonthAgo))} this month` : null;
   // The right-hand column: safe to spend over the on-pace card, at equal
   // heights; either alone fills it. With neither, Connections takes it.
   const showSafe = safe.cash.length > 0;
@@ -191,7 +199,26 @@ export default async function OverviewPage() {
         }
       />
 
+      {/* The goal view (lib/goalView.ts, opt-in): net worth leads with the
+          goal attached, then why it is moving, then the record, then what
+          this month is costing. Everything below Row 2 is shared. */}
+      {goalView && (
+        <>
+          <GoalStand netWorth={netWorth} summary={goal} deltaLine={netWorthDeltaLine} style={reveal(0)} />
+          {goal && <PaceSplit summary={goal}>{showSafe && <SafeToSpendCard s={safe} forecastLink={false} />}</PaceSplit>}
+          {ledger && <SavingLedger months={ledger} neededPerMonth={goal?.projection.neededPerMonth ?? null} daysLeft={daysInMonth - daysElapsed} />}
+          <GoalCosts budgets={budgets} month={month} ctx={{ daysElapsed, daysInMonth }} neededPerMonth={goal?.projection.neededPerMonth ?? null} />
+          <Card className="overflow-hidden">
+            <CardHeader title="Net worth over the year" />
+            <div className="min-h-[200px] flex">
+              <NetWorthChart points={netWorthPoints} />
+            </div>
+          </Card>
+        </>
+      )}
+
       {/* Row 1: hero net worth + connections health */}
+      {!goalView && (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch" style={reveal(0)}>
         <Card className="ui-hero lg:col-span-8 p-5 lg:p-7 flex flex-col gap-4 overflow-hidden">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-12">
@@ -258,6 +285,7 @@ export default async function OverviewPage() {
         </Card>
         )}
       </div>
+      )}
 
       {/* Row 2: stat tiles */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" style={reveal(1)}>
@@ -299,7 +327,7 @@ export default async function OverviewPage() {
       {featuredReviewYear(today) != null && <YearReviewBanner year={featuredReviewYear(today)!} style={reveal(2)} />}
 
       {/* The year-end goal (lib/goals.ts), or a prompt to set one */}
-      <GoalCard summary={goal} style={reveal(2)} />
+      {!goalView && <GoalCard summary={goal} style={reveal(2)} />}
       {/* Once per account, and not once a goal exists */}
       <GoalIntroModal show={!introSeen && !goal} />
       <ForecastIntroModal show={!forecastSeen && goalsStepDone} />

@@ -44,7 +44,7 @@ export function ForecastIntroModal({ show }: { show: boolean }) {
         />
         <ul className="m-0 pl-5 flex flex-col gap-2 text-[15px] leading-relaxed text-text">
           <li>Tally plots your balance day by day from your pay dates, your bills and your card statements.</li>
-          <li>It leads with the first day you&apos;d drop below your buffer — and what put you there.</li>
+          <li>It leads with the first day you&apos;d drop below your buffer, and what put you there.</li>
           <li>Day-to-day spending is the one estimate, so it&apos;s drawn as a range you can adjust.</li>
         </ul>
       </DialogBody>

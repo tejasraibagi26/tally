@@ -1,4 +1,3 @@
-import { sendToNewUi } from "@/lib/newUi";
 import { listUserCategories } from "@/lib/userCategories";
 import { requireUserId } from "@/lib/session";
 import { budgetSetupOptions, getBudgetsForMonth, shiftMonth, unbudgetedSpend } from "@/lib/budgets";
@@ -8,8 +7,10 @@ import { MonthStepper, PageHeader } from "@/components/ui/PageHeader";
 import { AddBudgetForm } from "@/components/budgets/AddBudgetForm";
 import { BudgetsView } from "@/components/budgets/BudgetsView";
 import { GoalBudgetLine } from "@/components/goals/GoalCard";
+import { GoalCostSummary } from "@/components/goalview/GoalCostSummary";
 import { goalSummary } from "@/lib/goals";
 import { currentMonthFor, todayFor } from "@/lib/userTimezone";
+import { prefersGoalView } from "@/lib/goalView";
 
 function monthLabel(month: string): string {
   return new Date(month + "T00:00:00Z").toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
@@ -17,7 +18,6 @@ function monthLabel(month: string): string {
 
 export default async function BudgetsPage({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
   const userId = await requireUserId();
-  await sendToNewUi(userId, "/new/plans");
   const sp = await searchParams;
   const [currentMonth, today] = await Promise.all([currentMonthFor(userId), todayFor(userId)]);
   const month = /^\d{4}-\d{2}-01$/.test(sp.month ?? "") ? (sp.month as string) : currentMonth;
@@ -25,6 +25,7 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
   const budgets = await getBudgetsForMonth(userId, month);
   // Tally Pop: the year-end goal's verdict, this month only.
   const goal = month === currentMonth ? await goalSummary(userId) : null;
+  const goalView = await prefersGoalView(userId);
   const budgetedCategoryIds = budgets.map((b) => b.categoryId);
   const [availableCategories, unbudgeted, setup] = await Promise.all([
     listUserCategories(userId).then((all) => all.filter((c) => c.kind === "expense" && !budgetedCategoryIds.includes(c.id))),
@@ -56,10 +57,15 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
           </>
         }
       />
-      <GoalBudgetLine className="-mt-2" summary={goal} />
+      {goalView ? (
+        <GoalCostSummary className="-mt-2" budgets={budgets} summary={goal} daysInMonth={daysInMonth} daysElapsed={ctx.daysElapsed} />
+      ) : (
+        <GoalBudgetLine className="-mt-2" summary={goal} />
+      )}
       <BudgetsView
         month={month}
         ctx={ctx}
+        goalView={goalView ? { neededPerMonth: goal?.projection.neededPerMonth ?? null, daysInMonth, daysElapsed: ctx.daysElapsed } : null}
         budgets={budgets}
         unbudgeted={unbudgeted}
         setup={setup && { copy: setup.copy && { fromMonth: setup.copy.fromMonth, count: setup.copy.count, total: setup.copy.total }, average: setup.average && { count: setup.average.count, total: setup.average.total } }}

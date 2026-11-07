@@ -288,6 +288,20 @@
       "when": 1793740800005,
       "tag": "0040_new_ui_opt_in",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1793740800006,
+      "tag": "0041_drop_new_ui_opt_in",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1793740800007,
+      "tag": "0042_goal_view_opt_in",
+      "breakpoints": true
     }
   ]
 }

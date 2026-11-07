@@ -45,7 +45,7 @@ const MAX_CAUSES = 2;
 export const FORECAST_HOW_IT_WORKS: { title: string; body: string }[] = [
   {
     title: "It starts with the cash you have",
-    body: "Your chequing balance today. Savings stays out of it unless you've said it counts — you can change that in Settings.",
+    body: "Your chequing balance today. Savings stays out of it unless you've said it counts. You can change that in Settings.",
   },
   {
     title: "Then it adds what's scheduled",
@@ -57,7 +57,7 @@ export const FORECAST_HOW_IT_WORKS: { title: string; body: string }[] = [
   },
   {
     title: "The number that matters is the first dip",
-    body: "Tally leads with the first day you'd drop below your buffer, not the lowest day — it's the one you can still do something about — and names what put you there.",
+    body: "Tally leads with the first day you'd drop below your buffer rather than the lowest day, because it's the one you can still do something about, and it names what put you there.",
   },
   {
     title: "It gets more accurate the closer it is",

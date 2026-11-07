@@ -833,3 +833,133 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   The quiet skin: Pop with the sticker treatment dialled off.
+
+   Carried by data-skin="quiet" on <html>, set in app/layout.tsx for accounts
+   on the goal view (lib/goalView.ts). Pop's identity is the grape and the
+   display face, and both stay; what reads loud is the 2px ink outline, the
+   hard offset shadow, the big radii and marigold everywhere, so that is what
+   comes off. Pulling grape off the nav row and the buttons leaves the
+   net-worth hero as the only saturated surface on the page, which is what
+   makes it lead without needing an outline.
+
+   Every selector here is one attribute more specific than the [data-ui="pop"]
+   rule it overrides, so order in this file doesn't matter. Text tokens are
+   left exactly as Pop set them: they are the AA-checked pairs, and the
+   canvas only gets lighter here, so nothing needs re-measuring.
+   --------------------------------------------------------------------------- */
+:root[data-ui="pop"][data-skin="quiet"] {
+  /* A hint of Pop's warmth rather than the custard. */
+  --canvas: #F7F6F3;
+  --surface: #FFFFFF;
+  --surface-2: #FBFAF8;
+  --sunken: #F1EFEA;
+  --border: #E7E4DD;
+  --raised: #FFFFFF;
+  --raised-hover: #FBFAF8;
+  --radius-control: 9px;
+  --radius-card: 14px;
+  --radius-panel: 18px;
+  --marigold: #F0B429;
+  /* Hairlines first, shadow barely there (DESIGN.md §6). */
+  --shadow-raised: 0 1px 2px rgba(28, 26, 36, 0.05);
+  --shadow-overlay: 0 12px 32px -8px rgba(28, 26, 36, 0.16), 0 2px 6px rgba(28, 26, 36, 0.05);
+  --tooltip-border: 1px solid var(--border);
+}
+
+:root[data-ui="pop"][data-skin="quiet"][data-theme="dark"] {
+  --canvas: #0C0B11;
+  --surface: #16141D;
+  --surface-2: #1C1A25;
+  --sunken: #100E16;
+  --border: #272430;
+  --raised: #1C1A25;
+  --raised-hover: #22202C;
+  --marigold: #E8B64A;
+  /* Dark drops the shadow and leans on the raised surface instead. */
+  --shadow-raised: none;
+  --shadow-overlay: 0 12px 32px -8px rgba(0, 0, 0, 0.6);
+}
+
+/* Cards and panels: hairline, not outline. */
+[data-ui="pop"][data-skin="quiet"] .rounded-card.border,
+[data-ui="pop"][data-skin="quiet"] .rounded-panel.border {
+  border-width: 1px;
+  border-color: var(--border);
+  box-shadow: var(--shadow-raised);
+}
+[data-ui="pop"][data-skin="quiet"] .ui-card-negative.rounded-card.border {
+  border-color: color-mix(in srgb, var(--negative) 45%, var(--border));
+  box-shadow: var(--shadow-raised);
+}
+[data-ui="pop"][data-skin="quiet"] .shadow-overlay.border {
+  border-width: 1px;
+  border-color: var(--border);
+}
+[data-ui="pop"][data-skin="quiet"] .ui-side {
+  border-left: 1px solid var(--border);
+}
+[data-ui="pop"][data-skin="quiet"] .ui-tile,
+[data-ui="pop"][data-skin="quiet"] .rounded-full.shadow-raised {
+  box-shadow: inset 0 0 0 1px var(--border);
+}
+
+/* Buttons stay pills, but they stop pressing down into a shadow. */
+[data-ui="pop"][data-skin="quiet"] .ui-btn {
+  font-weight: 600;
+}
+[data-ui="pop"][data-skin="quiet"] .ui-btn-primary,
+[data-ui="pop"][data-skin="quiet"] .ui-btn-secondary,
+[data-ui="pop"][data-skin="quiet"] .ui-btn-destructive-solid {
+  border-width: 1px;
+  border-color: color-mix(in srgb, var(--ink) 18%, transparent);
+  box-shadow: none;
+}
+[data-ui="pop"][data-skin="quiet"] .ui-btn:not(:disabled):active {
+  transform: none;
+  box-shadow: none;
+}
+
+/* The current nav row: grape tint and grape text, so the hero keeps the only
+   solid fill on the page. */
+[data-ui="pop"][data-skin="quiet"] .ui-nav-active {
+  background: var(--brand-subtle);
+  color: var(--brand);
+  font-weight: 600;
+  box-shadow: none;
+}
+[data-ui="pop"][data-skin="quiet"][data-theme="dark"] .ui-nav-active {
+  background: var(--brand-subtle);
+  color: var(--brand);
+}
+
+/* Meters lose the outline too. */
+[data-ui="pop"][data-skin="quiet"] .ui-meter {
+  box-shadow: none;
+}
+
+/* The display face stays Bricolage, one weight range lighter. */
+[data-ui="pop"][data-skin="quiet"] .font-display,
+[data-ui="pop"][data-skin="quiet"] .ui-figure {
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+[data-ui="pop"][data-skin="quiet"] .ui-page-title {
+  font-weight: 600;
+  letter-spacing: -0.022em;
+}
+[data-ui="pop"][data-skin="quiet"] .ui-card-title {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+/* The hero keeps its solid grape, and loses only the hard shadow. */
+[data-ui="pop"][data-skin="quiet"] .ui-hero {
+  box-shadow: var(--shadow-raised);
+  border-color: color-mix(in srgb, #1D1B2F 20%, transparent);
+}
+[data-ui="pop"][data-skin="quiet"][data-theme="dark"] .ui-hero {
+  box-shadow: none;
+}

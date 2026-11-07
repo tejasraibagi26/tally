@@ -286,7 +286,7 @@ export const CHANGELOG: ChangelogEntry[] = [
   {
     version: "2.8.3",
     date: "2026-10-30",
-    changes: [{ kind: "improved", text: "Forecast: What's coming matches the web — one block per day, the balance that day leaves you, and a clear flag when it's under your buffer. Tap a row to open the bill, card or paycheque behind it." }],
+    changes: [{ kind: "improved", text: "Forecast: What's coming matches the web. One block per day, the balance that day leaves you, and a clear flag when it's under your buffer. Tap a row to open the bill, card or paycheque behind it." }],
   },
   {
     version: "2.8.2",
@@ -306,7 +306,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "2.8.0",
     date: "2026-10-28",
     changes: [
-      { kind: "new", text: "Forecast: where your balance is heading for the next 60 days, from your pay dates, bills and card statements. It leads with the first day you'd drop below your buffer and what put you there — under Forecast in the More menu." },
+      { kind: "new", text: "Forecast: where your balance is heading for the next 60 days, from your pay dates, bills and card statements. It leads with the first day you'd drop below your buffer and what put you there, under Forecast in the More menu." },
     ],
   },
   {

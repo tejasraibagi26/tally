@@ -1,4 +1,3 @@
-import { sendToNewUi } from "@/lib/newUi";
 import { and, eq, isNull, or } from "drizzle-orm";
 import { Repeat } from "lucide-react";
 import { db, schema } from "@/db";
@@ -16,7 +15,6 @@ import { isActiveExpenseStream, subscriptionsMonthlyTotal } from "@tally/core/su
 
 export default async function SubscriptionsPage() {
   const userId = await requireUserId();
-  await sendToNewUi(userId, "/new/bills");
 
   const uc = userCategories(userId);
   const streams = await db

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import localFont from "next/font/local";
 import "./globals.css";
+import { auth } from "@/lib/auth";
+import { prefersGoalView } from "@/lib/goalView";
 
 // Self-hosted (app/fonts, Latin subset, SIL OFL) rather than next/font/google:
 // fetching from Google at build time failed intermittently ("An error occurred
@@ -41,7 +43,9 @@ const figtree = localFont({
 
 const bricolage = localFont({
   src: "./fonts/bricolage-grotesque-latin-var.woff2",
-  weight: "700 800",
+  // 400 upward because the quiet skin (globals.css, data-skin="quiet") sets
+  // display text at 500; Pop itself still asks for 800.
+  weight: "400 800",
   variable: "--font-bricolage",
   display: "swap",
 });
@@ -74,8 +78,14 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // page render per request, which a nonce needs: a prerendered page would
   // carry a stale one the CSP refuses.
   const nonce = (await headers()).get("x-nonce") ?? undefined;
+  // The quiet skin rides the goal-view opt-in (lib/goalView.ts). Read here
+  // rather than in app/(app)/layout.tsx because it belongs on <html>, and
+  // stamped server-side so the page never paints Pop and then flips.
+  const session = await auth().catch(() => null);
+  const userId = (session?.user as { id?: string } | undefined)?.id;
+  const quiet = userId ? await prefersGoalView(userId).catch(() => false) : false;
   return (
-    <html lang="en" data-theme="light" data-ui="pop" data-hide-amounts="false" suppressHydrationWarning>
+    <html lang="en" data-theme="light" data-ui="pop" data-skin={quiet ? "quiet" : undefined} data-hide-amounts="false" suppressHydrationWarning>
       <head>
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script nonce={nonce} dangerouslySetInnerHTML={{ __html: PRIVACY_INIT_SCRIPT }} />

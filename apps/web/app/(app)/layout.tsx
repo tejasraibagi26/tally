@@ -14,6 +14,7 @@ import { monthRange } from "@tally/core/budgetMath";
 import { currentMonthFor } from "@/lib/userTimezone";
 import { itemStatusToBadge } from "@/lib/freshness";
 import { connectionState } from "@tally/core/connectionState";
+import { prefersGoalView } from "@/lib/goalView";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -25,6 +26,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // defaults to the current month — this nav badge should read as "how many
   // are waiting in Transactions right now," not an all-time total.
   const { start, end } = monthRange((await currentMonthFor(userId)));
+  const goalView = await prefersGoalView(userId);
 
   const [[user], [txnCount], [acctCount], [cardCount], [loanCount], items] = await Promise.all([
     db.select({ name: schema.users.name, email: schema.users.email }).from(schema.users).where(eq(schema.users.id, userId)).limit(1),
@@ -80,9 +82,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       {isDemo && <DemoBanner />}
       <div className="flex flex-col lg:flex-row flex-1 min-h-0">
         <div className="hidden lg:flex lg:flex-none">
-          <SideNav user={navUser} counts={navCounts} mockMode={MOCK_MODE} />
+          <SideNav user={navUser} counts={navCounts} mockMode={MOCK_MODE} goalView={goalView} />
         </div>
-        <MobileNav user={navUser} counts={navCounts} mockMode={MOCK_MODE} />
+        <MobileNav user={navUser} counts={navCounts} mockMode={MOCK_MODE} goalView={goalView} />
         <div className="flex-1 flex flex-col min-w-0 min-h-0">
           <main className="flex-1 min-w-0 overflow-y-auto">{children}</main>
         </div>

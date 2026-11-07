@@ -1,4 +1,3 @@
-import { sendToNewUi } from "@/lib/newUi";
 import { requireUserId } from "@/lib/session";
 import { GoalsTabs } from "@/components/goals/GoalsTabs";
 import { YearEndGoal } from "@/components/goals/YearEndGoal";
@@ -13,7 +12,6 @@ export const metadata = { title: "Goals · Tally" };
  */
 export default async function GoalsPage({ searchParams }: { searchParams: Promise<{ view?: string; start?: string }> }) {
   const userId = await requireUserId();
-  await sendToNewUi(userId, "/new/plans");
   const { view, start } = await searchParams;
   if (view === "retirement") {
     return <RetirementGoal userId={userId} startFromZero={start === "zero"} tabs={<GoalsTabs active="retirement" />} />;

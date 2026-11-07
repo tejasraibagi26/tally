@@ -1,4 +1,3 @@
-import { sendToNewUi } from "@/lib/newUi";
 import Link from "next/link";
 import { CreditCard as CreditCardIcon } from "lucide-react";
 import { requireUserId } from "@/lib/session";
@@ -24,7 +23,6 @@ const NEEDS_FIX = new Set(["login_required", "error", "revoked", "pending_expira
  */
 export default async function CardsPage() {
   const userId = await requireUserId();
-  await sendToNewUi(userId, "/new/cards");
   const [rows, today] = await Promise.all([creditCardsForUser(userId), todayFor(userId)]);
 
   if (rows.length === 0) {

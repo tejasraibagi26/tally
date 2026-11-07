@@ -18,7 +18,7 @@ export function DemoBanner() {
         <Eye size={15} strokeWidth={1.75} className="flex-none text-info" />
         <span>
           <span className="font-medium">You&apos;re exploring a demo.</span>{" "}
-          <span className="text-text-2">Sample data for one fictional household — look around, but nothing saves.</span>
+          <span className="text-text-2">Sample data for one fictional household. Look around, but nothing saves.</span>
         </span>
       </span>
       <button

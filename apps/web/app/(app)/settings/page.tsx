@@ -8,6 +8,8 @@ import { DangerZone } from "@/components/settings/DangerZone";
 import { IncomeScheduleManager } from "@/components/settings/IncomeScheduleManager";
 import { AlertSettings } from "@/components/settings/AlertSettings";
 import { SettingsBlock, SettingsGroup, SettingsRow } from "@/components/settings/SettingsLayout";
+import { GoalViewToggle } from "@/components/goalview/GoalViewToggle";
+import { prefersGoalView } from "@/lib/goalView";
 import { loadAlertPreferences } from "@/lib/alerts/preferences";
 import { alertHistory } from "@/lib/alerts/history";
 import { ApiKeysManager } from "@/components/settings/ApiKeysManager";
@@ -68,6 +70,7 @@ export default async function SettingsPage() {
   // Safe to spend's settings and the paycheque behind payday.
   const today = await todayFor(userId);
   const [safeSettings, paycheque] = await Promise.all([safeToSpendSettingsFor(userId), paychequeFor(userId, today)]);
+  const goalView = await prefersGoalView(userId);
   const paychequeAccount = paycheque ? accounts.find((a) => a.id === paycheque.accountId) : undefined;
   const labelOf = (a: { name: string; mask: string | null }) => a.name + (a.mask ? ` ····${a.mask}` : "");
   const paydayLabel = (d: string) => new Date(`${d}T00:00:00Z`).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
@@ -145,6 +148,19 @@ export default async function SettingsPage() {
         </SettingsGroup>
 
         <SafeToSpendSettings {...safeSettings} />
+
+        <SettingsGroup
+          id="display"
+          title="Display"
+          description="How Overview and Budgets read. Everything else in Tally looks the same either way."
+        >
+          <SettingsRow
+            title="The goal view"
+            description="Net worth leads with your year-end goal attached, your pace splits into what you saved and what markets did, and every budget says how far it carries you and what going over costs the goal. Quieter styling to match."
+          >
+            <GoalViewToggle enabled={goalView} />
+          </SettingsRow>
+        </SettingsGroup>
 
         <SettingsGroup id="data" title="Data">
           <SettingsRow title="Export transactions" description="Every transaction you have, for backups or moving your data elsewhere">

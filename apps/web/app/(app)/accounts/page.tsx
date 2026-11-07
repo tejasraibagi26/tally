@@ -1,4 +1,3 @@
-import { sendToNewUi } from "@/lib/newUi";
 import { db, schema } from "@/db";
 import { isLiveAccountRow } from "@/lib/liveAccounts";
 import { DisconnectedBanks, type DisconnectedBank } from "@/components/accounts/DisconnectedBanks";
@@ -27,7 +26,6 @@ const RUNS_PER_ITEM = 10;
 
 export default async function AccountsPage({ searchParams }: { searchParams: Promise<{ bank?: string }> }) {
   const userId = await requireUserId();
-  await sendToNewUi(userId, "/new/accounts");
   const { bank } = await searchParams;
 
   const [allItems, allAccounts] = await Promise.all([

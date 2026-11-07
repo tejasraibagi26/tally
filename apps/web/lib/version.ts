@@ -594,8 +594,26 @@
  * hand-added transactions, account names, bank sync and disconnect all edit
  * in place. Classic full settings, the advanced rule editor, year in review
  * and FIRE stay classic and reachable.
+ *
+ * 2.21.0: the new Tally is gone -- app/new, components/new, lib/newData.ts,
+ * lib/newUi.ts, the new-ui opt-in route and @tally/core/nowView are all
+ * removed, the sidebar's switch with them, and classic pages no longer
+ * redirect anyone. users.new_ui_at is dropped in migration 0041 (IF EXISTS,
+ * so it's a no-op wherever 0040 never ran). The design it piloted read well
+ * but didn't match how Tally is actually used day to day; a fresh pass
+ * starts from where you stand and what each budget is for.
+ *
+ * 2.22.0: the goal view, opt-in per account (users.goal_view_at, migration
+ * 0042, lib/goalView.ts) and not a second app: it changes what /overview and
+ * /budgets render, and adds data-skin="quiet" to <html> for Pop with the ink
+ * outlines, hard shadows and big radii dialled off. Overview gains the net
+ * worth hero with its goal bar and verdict, the pace split into saving vs
+ * markets and debt, a six-month saving record against what the goal needs,
+ * and what this month's budgets are costing the goal. Budgets draws each row
+ * as the month with a runway (@tally/core/budgetRunway) and prices overages
+ * in days (@tally/core/goalCost). Toggle in Settings > Display.
  */
-export const APP_VERSION = "2.20.0";
+export const APP_VERSION = "2.22.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -1,4 +1,3 @@
-import { sendToNewUi } from "@/lib/newUi";
 import Link from "next/link";
 import { Tag } from "lucide-react";
 import { requireUserId } from "@/lib/session";
@@ -17,7 +16,6 @@ function range(first: string, last: string): string {
 /** Every tag, most recently used first: a trip, a wedding, a project, summed across categories. */
 export default async function TagsPage() {
   const userId = await requireUserId();
-  await sendToNewUi(userId, "/new/tags");
   const tags = await tagsFor(userId);
 
   return (

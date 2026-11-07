@@ -121,7 +121,7 @@ export function ForecastAssumptions({ assumptions: a, cushion }: { assumptions: 
         note={a.lumpy.length ? `${a.lumpy.join(", ")} counted whole on the day it lands, not spread.` : "A missing bill is added in Subscriptions."}
       />
       {a.cardsExcluded.map((label) => (
-        <Row key={label} title={`${label} — not counted`} note="No statement and no due day set." />
+        <Row key={label} title={`${label}: not counted`} note="No statement and no due day set." />
       ))}
       {a.stale.map((s) => (
         <Row key={s.id} title={`${s.name} is out of date`} note="Its balance hasn't synced today, so the whole curve starts from an old number." />

@@ -63,7 +63,7 @@ export function isBlockedForDemo(method: string, pathname: string): boolean {
 /** Machine-readable marker the client fetch interceptor matches on. */
 export const DEMO_READ_ONLY_CODE = "DEMO_READ_ONLY";
 
-export const DEMO_READ_ONLY_MESSAGE = "This is a read-only demo — changes aren't saved.";
+export const DEMO_READ_ONLY_MESSAGE = "This is a read-only demo, so changes aren't saved.";
 
 export const demoReadOnlyBody = {
   error: DEMO_READ_ONLY_MESSAGE,

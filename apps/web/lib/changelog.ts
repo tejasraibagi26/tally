@@ -15,6 +15,23 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.22.0",
+    date: "2026-11-07",
+    changes: [
+      { kind: "new", text: "A new way to read Overview and Budgets, built around your year-end goal. Turn it on under Settings, Display. Net worth leads with your target and where your pace lands you, and your pace splits into what you saved and what markets and debt did, so you can see which half is yours to steer." },
+      { kind: "new", text: "Every budget now says how far it carries you: the bar is the month, with a mark for today and a fill that reaches as far as the money lasts at the rate you are going. A full bar lasts the month, a short one names the day it runs out." },
+      { kind: "new", text: "Going over a budget is priced in days off your goal date, and Tally says whether it was one charge or a pace that will keep costing you." },
+      { kind: "improved", text: "Six months of what you actually saved, drawn against what your goal needs, with the months behind the verdict marked." },
+    ],
+  },
+  {
+    version: "2.21.0",
+    date: "2026-11-07",
+    changes: [
+      { kind: "improved", text: "The new Tally preview has been taken down. Everything is back in one place, the way it was, with nothing to switch between -- a reworked design is on the way." },
+    ],
+  },
+  {
     version: "2.20.0",
     date: "2026-11-06",
     changes: [
@@ -266,7 +283,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "2.8.2",
     date: "2026-10-30",
     changes: [
-      { kind: "improved", text: "Forecast: What's coming is easier to scan — one block per day, with the balance that day leaves you and a clear flag when it's under your buffer." },
+      { kind: "improved", text: "Forecast: What's coming is easier to scan. One block per day, with the balance that day leaves you and a clear flag when it's under your buffer." },
     ],
   },
   {
@@ -280,7 +297,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "2.8.0",
     date: "2026-10-28",
     changes: [
-      { kind: "new", text: "Forecast: where your balance is heading for the next 60 days, day by day, from your pay dates, bills and card statements. It leads with the first day you'd drop below your buffer and what put you there — under Plan ahead in the sidebar." },
+      { kind: "new", text: "Forecast: where your balance is heading for the next 60 days, day by day, from your pay dates, bills and card statements. It leads with the first day you'd drop below your buffer and what put you there, under Plan ahead in the sidebar." },
       { kind: "new", text: "Overview shows the next 60 days at a glance, and Tally emails you when a day ahead is heading under your buffer." },
     ],
   },

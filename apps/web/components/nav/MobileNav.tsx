@@ -12,10 +12,12 @@ export function MobileNav({
   user,
   counts,
   mockMode,
+  goalView,
 }: {
   user: { name: string | null; email: string };
   counts: NavCounts;
   mockMode: boolean;
+  goalView?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -59,7 +61,7 @@ export function MobileNav({
             aria-hidden="true"
           />
           <div className="relative w-60 max-w-[80%] h-full shadow-overlay animate-[slide-in-left_220ms_cubic-bezier(.32,.72,0,1)] motion-reduce:animate-none">
-            <SideNav user={user} counts={counts} mockMode={mockMode} onClose={() => setOpen(false)} />
+            <SideNav user={user} counts={counts} mockMode={mockMode} goalView={goalView} onClose={() => setOpen(false)} />
           </div>
         </div>
       )}

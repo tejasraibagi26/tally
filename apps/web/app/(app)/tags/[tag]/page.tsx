@@ -1,4 +1,3 @@
-import { sendToNewUi } from "@/lib/newUi";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireUserId } from "@/lib/session";
@@ -18,7 +17,6 @@ function day(d: string, withYear = false): string {
 export default async function TagPage({ params }: { params: Promise<{ tag: string }> }) {
   const userId = await requireUserId();
   const tag = decodeURIComponent((await params).tag);
-  await sendToNewUi(userId, `/new/activity?tag=${encodeURIComponent(tag)}`);
   const s = await tagSummaryFor(userId, tag);
   if (s.count === 0) notFound();
 

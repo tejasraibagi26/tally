@@ -35,7 +35,7 @@ export function ForecastIntroDialog({ profile, show }: { profile: AccountProfile
 
   const points = [
     "Tally plots your balance day by day from your pay dates, bills and card statements.",
-    "It leads with the first day you'd drop below your buffer — and what put you there.",
+    "It leads with the first day you'd drop below your buffer, and what put you there.",
     "Day-to-day spending is the one estimate, so it's drawn as a range.",
   ];
 

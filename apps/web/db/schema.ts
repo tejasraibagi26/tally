@@ -105,9 +105,10 @@ export const users = pgTable("users", {
   // everywhere"): web JWTs and mobile access tokens carry the value they
   // were issued under, and lib/session.ts refuses one that's behind.
   sessionVersion: integer("session_version").notNull().default(0),
-  // When the user opted in to the new Tally (app/new); null means classic.
-  // Migration 0040. Read through lib/newUi.ts.
-  newUiAt: timestamp("new_ui_at", { withTimezone: true }),
+  // When the user opted in to the goal view: the Overview bands and Budgets
+  // columns built around the year-end goal, plus the quieter skin. Null means
+  // the classic pages. Migration 0042. Read through lib/goalView.ts.
+  goalViewAt: timestamp("goal_view_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

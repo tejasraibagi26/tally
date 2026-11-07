@@ -1,15 +1,15 @@
 import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
-import { db, schema } from "@/db";
 import { requireUserId } from "@/lib/session";
+import { setGoalView } from "@/lib/goalView";
 
 const bodySchema = z.object({ enabled: z.boolean() });
 
-// Opt in to (or out of) the new Tally. One click, no password: it only
-// changes which screens the user lands on (lib/newUi.ts).
-async function PUT_handler(req: Request) {
+// A display preference, like the recaps toggle: one click, no password. The
+// caller reloads afterwards, because the opt-in is read server-side on
+// /overview, /budgets and in the root layout's data-skin attribute.
+async function PATCH_handler(req: Request) {
   let userId: string;
   try {
     userId = await requireUserId(req);
@@ -22,8 +22,8 @@ async function PUT_handler(req: Request) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  await db.update(schema.users).set({ newUiAt: parsed.data.enabled ? new Date() : null }).where(eq(schema.users.id, userId));
-  return NextResponse.json({ ok: true, enabled: parsed.data.enabled });
+  await setGoalView(userId, parsed.data.enabled);
+  return NextResponse.json({ ok: true });
 }
 
-export const PUT = route(PUT_handler);
+export const PATCH = route(PATCH_handler);

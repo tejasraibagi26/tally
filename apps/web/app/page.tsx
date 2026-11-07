@@ -89,7 +89,7 @@ export default async function RootPage() {
               </Link>
               <span className="text-sm text-text-3">
                 {demoAvailable ? (
-                  <>No sign-up, and nothing to connect — the demo is sample data.</>
+                  <>No sign-up, and nothing to connect. The demo is sample data.</>
                 ) : (
                   <>
                     No account? This instance is invite-only, but you can{" "}
