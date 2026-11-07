@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.22.2",
+    date: "2026-11-07",
+    changes: [
+      { kind: "improved", text: "Budgets in the goal view is now a proper table: what each budget is for, what is left, how far that carries you through the month with the dates labelled, and what going over costs your goal." },
+      { kind: "improved", text: "The month totals now show what your budgets have cost the goal so far, beside what you have left and spent." },
+    ],
+  },
+  {
     version: "2.22.1",
     date: "2026-11-07",
     changes: [

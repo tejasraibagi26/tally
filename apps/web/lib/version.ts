@@ -621,8 +621,19 @@
  * its shadow was). Dropping .ui-meter from the pace split and runway bars
  * also un-squashes them: it forces height 12px above Tailwind's h-*, so a
  * 32px bar and an 8px bar were both rendering at 12.
+ *
+ * 2.22.2: Budgets on the goal view is the screen the design called for,
+ * not two columns bolted onto the classic list. Its body is its own
+ * component (components/goalview/BudgetsGoalView) and BudgetsView goes back
+ * untouched: a totals strip carrying what the month costs the goal, then a
+ * four-column table of budget and what it's for, what's left as a display
+ * figure over the exact amount, the runway with its calendar labelled at
+ * both ends and today, and what the row costs the goal. Rows are flat, not
+ * grouped by parent, because the runway only reads as a comparison when
+ * every row shares one calendar. "What it's for" is the parent category,
+ * fixed-amount and rollover, since budgets have no description of their own.
  */
-export const APP_VERSION = "2.22.1";
+export const APP_VERSION = "2.22.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

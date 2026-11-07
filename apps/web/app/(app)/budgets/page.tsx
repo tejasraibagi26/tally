@@ -8,12 +8,18 @@ import { AddBudgetForm } from "@/components/budgets/AddBudgetForm";
 import { BudgetsView } from "@/components/budgets/BudgetsView";
 import { GoalBudgetLine } from "@/components/goals/GoalCard";
 import { GoalCostSummary } from "@/components/goalview/GoalCostSummary";
+import { BudgetsGoalView } from "@/components/goalview/BudgetsGoalView";
 import { goalSummary } from "@/lib/goals";
 import { currentMonthFor, todayFor } from "@/lib/userTimezone";
 import { prefersGoalView } from "@/lib/goalView";
 
 function monthLabel(month: string): string {
   return new Date(month + "T00:00:00Z").toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+}
+
+/** Just the month name, for the goal view's page title; the stepper carries the year. */
+function monthOnly(month: string): string {
+  return new Date(month + "T00:00:00Z").toLocaleDateString("en-US", { month: "long", timeZone: "UTC" });
 }
 
 export default async function BudgetsPage({ searchParams }: { searchParams: Promise<{ month?: string }> }) {
@@ -44,8 +50,9 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
   return (
     <div className="ui-page flex flex-col gap-6">
       <PageHeader
-        title="Budgets"
+        title={goalView && budgets.length > 0 ? monthOnly(month) : "Budgets"}
         meta={[
+          goalView && ctx.phase === "current" && `Day ${ctx.daysElapsed} of ${daysInMonth}`,
           budgets.length > 0 && `${budgets.length} ${budgets.length === 1 ? "category" : "categories"} budgeted`,
           daysLeft != null && (daysLeft === 0 ? "Last day of the month" : `${daysLeft} day${daysLeft === 1 ? "" : "s"} left`),
           ctx.phase === "past" && "Finished",
@@ -57,19 +64,27 @@ export default async function BudgetsPage({ searchParams }: { searchParams: Prom
           </>
         }
       />
-      {goalView ? (
-        <GoalCostSummary className="-mt-2" budgets={budgets} summary={goal} daysInMonth={daysInMonth} daysElapsed={ctx.daysElapsed} />
+      {goalView && budgets.length > 0 ? (
+        <BudgetsGoalView
+          month={month}
+          ctx={ctx}
+          runwayCtx={{ neededPerMonth: goal?.projection.neededPerMonth ?? null, daysInMonth, daysElapsed: ctx.daysElapsed }}
+          budgets={budgets}
+          unbudgeted={unbudgeted}
+          note={<GoalCostSummary budgets={budgets} summary={goal} daysInMonth={daysInMonth} daysElapsed={ctx.daysElapsed} />}
+        />
       ) : (
-        <GoalBudgetLine className="-mt-2" summary={goal} />
+        <>
+          <GoalBudgetLine className="-mt-2" summary={goal} />
+          <BudgetsView
+            month={month}
+            ctx={ctx}
+            budgets={budgets}
+            unbudgeted={unbudgeted}
+            setup={setup && { copy: setup.copy && { fromMonth: setup.copy.fromMonth, count: setup.copy.count, total: setup.copy.total }, average: setup.average && { count: setup.average.count, total: setup.average.total } }}
+          />
+        </>
       )}
-      <BudgetsView
-        month={month}
-        ctx={ctx}
-        goalView={goalView ? { neededPerMonth: goal?.projection.neededPerMonth ?? null, daysInMonth, daysElapsed: ctx.daysElapsed } : null}
-        budgets={budgets}
-        unbudgeted={unbudgeted}
-        setup={setup && { copy: setup.copy && { fromMonth: setup.copy.fromMonth, count: setup.copy.count, total: setup.copy.total }, average: setup.average && { count: setup.average.count, total: setup.average.total } }}
-      />
     </div>
   );
 }

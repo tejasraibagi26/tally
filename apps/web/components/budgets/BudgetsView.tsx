@@ -4,9 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatCents } from "@tally/core/money";
 import { budgetRowState, groupBudgets, monthSummary, type LabelTone, type MonthContext } from "@tally/core/budgetView";
-import { budgetRunway } from "@tally/core/budgetRunway";
-import { goalCost } from "@tally/core/goalCost";
-import { computeBurnRateProjection } from "@tally/core/budgetMath";
 import { cn } from "@/lib/cn";
 import { Card } from "@/components/ui/Card";
 import { BudgetPanel } from "@/components/budgets/BudgetPanel";
@@ -18,14 +15,6 @@ import type { BudgetLine, UnbudgetedSpend } from "@/lib/budgets";
 export interface SetupSummary {
   copy: { fromMonth: string; count: number; total: number } | null;
   average: { count: number; total: number } | null;
-}
-
-export interface GoalViewContext {
-  /** goalMath's neededPerMonth. Null without a live goal, which prices nothing. */
-  neededPerMonth: number | null;
-  daysInMonth: number;
-  /** Day of the month today; omitted for a month that is not in progress. */
-  daysElapsed?: number;
 }
 
 const toneClass: Record<LabelTone, string> = {
@@ -56,18 +45,12 @@ export function BudgetsView({
   budgets,
   unbudgeted,
   setup,
-  goalView,
 }: {
   month: string;
   ctx: MonthContext;
   budgets: BudgetLine[];
   unbudgeted: UnbudgetedSpend[];
   setup: SetupSummary | null;
-  /**
-   * Set for accounts on the goal view (lib/goalView.ts): every row gains the
-   * runway bar and what it costs the goal. Null keeps the classic meter.
-   */
-  goalView?: GoalViewContext | null;
 }) {
   const router = useRouter();
   const [openId, setOpenId] = useState<string | null>(null);
@@ -126,7 +109,7 @@ export function BudgetsView({
                 </span>
               </div>
               {g.lines.map((b) => (
-                <BudgetBar key={b.categoryId} line={b} ctx={ctx} goalView={goalView} onOpen={() => setOpenId(b.categoryId)} />
+                <BudgetBar key={b.categoryId} line={b} ctx={ctx} onOpen={() => setOpenId(b.categoryId)} />
               ))}
             </section>
           ))}
@@ -209,55 +192,7 @@ export function BudgetsView({
   );
 }
 
-/** The runway bar's fill color: evergreen carries, amber lands short, red is gone. */
-const RUNWAY_FILL: Record<string, string> = {
-  carries: "var(--brand)",
-  lands_short: "var(--warning)",
-  runs_dry: "var(--negative)",
-  untouched: "var(--brand)",
-  fixed: "var(--border-strong)",
-};
-
-/**
- * The goal view's row: the month as a bar (Nov 1 to Nov 30, a tick for
- * today, the fill running as far as what's left lasts), the sentence from
- * @tally/core/budgetRunway, and what the row costs the goal in days.
- */
-function RunwayRow({ line, goalView }: { line: BudgetLine; goalView: GoalViewContext }) {
-  const available = line.amount + line.rolloverFromPrior;
-  const r = budgetRunway({ available, spend: line.spend, isFixedAmount: line.isFixedAmount }, goalView, fmt);
-  const projectedSpend =
-    !line.isFixedAmount && goalView.daysElapsed != null ? computeBurnRateProjection(line.spend, goalView.daysElapsed, goalView.daysInMonth) : null;
-  const cost = goalCost({
-    over: Math.max(0, line.spend - available),
-    projectedOver: projectedSpend != null ? Math.max(0, projectedSpend - available) : null,
-    neededPerMonth: goalView.neededPerMonth,
-    daysInMonth: goalView.daysInMonth,
-  });
-  const fill = RUNWAY_FILL[r.state] ?? "var(--brand)";
-
-  return (
-    <span className="flex flex-col gap-2">
-      <span className="relative flex h-2 overflow-hidden rounded-full bg-sunken" aria-hidden="true">
-        {/* The month already behind you, then the stretch the money covers. */}
-        <span className="absolute inset-y-0 left-0 bg-border" style={{ width: `${r.todayPct * 100}%` }} />
-        <span className="absolute inset-y-0" style={{ left: `${r.todayPct * 100}%`, width: `${r.carryPct * 100}%`, background: fill }} />
-        {r.todayPct > 0 && <span className="absolute inset-y-0 w-px bg-text" style={{ left: `${r.todayPct * 100}%` }} />}
-      </span>
-      <span className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <span className="flex-1 min-w-[200px] text-[13px] text-text-2 tabular">{r.sentence}</span>
-        {(cost.label || cost.note) && (
-          <span className="text-right text-[12.5px] text-text-3">
-            {cost.label && <span className="text-[13.5px] font-semibold text-negative tabular">{cost.label} </span>}
-            {cost.note}
-          </span>
-        )}
-      </span>
-    </span>
-  );
-}
-
-function BudgetBar({ line, ctx, goalView, onOpen }: { line: BudgetLine; ctx: MonthContext; goalView?: GoalViewContext | null; onOpen: () => void }) {
+function BudgetBar({ line, ctx, onOpen }: { line: BudgetLine; ctx: MonthContext; onOpen: () => void }) {
   const s = budgetRowState(line, ctx, fmt);
   const color = s.barTone === "warning" ? "var(--warning)" : `var(--series-${line.colorSlot})`;
   return (
@@ -272,22 +207,16 @@ function BudgetBar({ line, ctx, goalView, onOpen }: { line: BudgetLine; ctx: Mon
           {fmt(line.spend)} of {fmt(s.available)} · <span className={cn("font-semibold", toneClass[s.labelTone] === "text-text-2" ? "text-text" : toneClass[s.labelTone])}>{s.label}</span>
         </span>
       </span>
-      {goalView ? (
-        <RunwayRow line={line} goalView={goalView} />
-      ) : (
-        <>
-          <span className="ui-meter relative h-2 rounded-full bg-sunken flex overflow-hidden" aria-hidden="true">
-            <span className="h-full" style={{ width: `${s.fillPct * 100}%`, background: color }} />
-            {s.overPct > 0 && <span className="h-full bg-negative" style={{ width: `${s.overPct * 100}%` }} />}
-            {s.pacePct != null && <span className="absolute -top-0.5 -bottom-0.5 w-0.5 bg-text opacity-50" style={{ left: `${s.pacePct * 100}%` }} title="Where you'd be at an even pace" />}
-          </span>
-          {(s.note || line.rolloverFromPrior > 0) && (
-            <span className="flex justify-between text-xs">
-              <span className="text-text-3">{line.rolloverFromPrior > 0 ? `+ ${fmt(line.rolloverFromPrior)} rolled over` : ""}</span>
-              {s.note && <span className={toneClass[s.noteTone]}>{s.note}</span>}
-            </span>
-          )}
-        </>
+      <span className="ui-meter relative h-2 rounded-full bg-sunken flex overflow-hidden" aria-hidden="true">
+        <span className="h-full" style={{ width: `${s.fillPct * 100}%`, background: color }} />
+        {s.overPct > 0 && <span className="h-full bg-negative" style={{ width: `${s.overPct * 100}%` }} />}
+        {s.pacePct != null && <span className="absolute -top-0.5 -bottom-0.5 w-0.5 bg-text opacity-50" style={{ left: `${s.pacePct * 100}%` }} title="Where you'd be at an even pace" />}
+      </span>
+      {(s.note || line.rolloverFromPrior > 0) && (
+        <span className="flex justify-between text-xs">
+          <span className="text-text-3">{line.rolloverFromPrior > 0 ? `+ ${fmt(line.rolloverFromPrior)} rolled over` : ""}</span>
+          {s.note && <span className={toneClass[s.noteTone]}>{s.note}</span>}
+        </span>
       )}
     </button>
   );
