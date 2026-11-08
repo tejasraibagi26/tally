@@ -287,16 +287,39 @@ async function reconcileTransactions(
       values.merchantName = applyMerchantRename(renames, values.merchantName, values.name);
 
       if (!existing) {
-        await tx.insert(schema.transactions).values({
-          userId,
-          accountId,
-          ...values,
-          categoryId: values.categoryId ?? null,
-          categorySource: values.categorySource ?? "plaid",
-          tags: values.tags ?? [],
-          excludedFromBudget: values.excludedFromBudget ?? false,
-        });
-        addedCount++;
+        // On conflict, update instead: the row can appear between the lookup
+        // above and here -- a concurrent sync of the same item (the session
+        // advisory lock doesn't hold through the transaction pooler), or the
+        // same id twice in this batch (added on one page, modified on a later
+        // one). A plain insert failed the whole page on the unique key.
+        const inserted = await tx
+          .insert(schema.transactions)
+          .values({
+            userId,
+            accountId,
+            ...values,
+            categoryId: values.categoryId ?? null,
+            categorySource: values.categorySource ?? "plaid",
+            tags: values.tags ?? [],
+            excludedFromBudget: values.excludedFromBudget ?? false,
+          })
+          .onConflictDoNothing({ target: schema.transactions.plaidTransactionId })
+          .returning({ id: schema.transactions.id });
+        if (inserted.length > 0) {
+          addedCount++;
+          existingByPlaidId.set(t.transaction_id, { id: inserted[0]!.id, plaidTransactionId: t.transaction_id, categorySource: values.categorySource ?? "plaid" });
+          continue;
+        }
+        const [row] = await tx
+          .select({ id: schema.transactions.id, categorySource: schema.transactions.categorySource })
+          .from(schema.transactions)
+          .where(eq(schema.transactions.plaidTransactionId, t.transaction_id))
+          .limit(1);
+        if (!row) continue;
+        const update = mergeTransactionUpdate(row, toPlaidOwnedFields(t));
+        update.merchantName = applyMerchantRename(renames, update.merchantName, update.name);
+        await tx.update(schema.transactions).set({ ...update, updatedAt: new Date() }).where(eq(schema.transactions.id, row.id));
+        modifiedCount++;
       } else {
         await tx.update(schema.transactions).set({ ...values, updatedAt: new Date() }).where(eq(schema.transactions.id, existing.id));
         modifiedCount++;

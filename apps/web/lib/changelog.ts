@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.23.4",
+    date: "2026-11-07",
+    changes: [
+      { kind: "fixed", text: "When your bank sent two updates at once, a sync could fail and new transactions would wait for the next one. Both now go through." },
+    ],
+  },
+  {
     version: "2.23.3",
     date: "2026-11-07",
     changes: [
