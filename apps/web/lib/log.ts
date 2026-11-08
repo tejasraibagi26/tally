@@ -6,9 +6,10 @@ import { log as base } from "@switchyard/logger";
  * Who a request came from, attached to every log written while handling it
  * (route() below sets it up). `client` answers "web or mobile?":
  *
- *   mobile  the app (sends x-tally-client: mobile, plus its version/platform)
+ *   mobile  the app (sends x-tally-client: mobile, plus its version/platform;
+ *           older builds are known by their non-API-key bearer token)
  *   web     the browser app (same-origin fetch or page)
- *   api     a bearer token with no client header (personal API tokens, scripts)
+ *   api     a personal API key (Bearer tly_…: Shortcuts, scripts)
  *   plaid   Plaid's webhook
  *   cron    Vercel cron
  *   unknown anything else
@@ -45,7 +46,12 @@ function clientOf(req: Request, path: string): RequestLogContext["client"] {
   if (declared === "mobile" || declared === "web") return declared;
   if (path.startsWith("/api/cron/")) return "cron";
   if (path === "/api/plaid/webhook") return "plaid";
-  if (req.headers.get("authorization")?.startsWith("Bearer ")) return "api";
+  // Personal API keys (lib/apiKeyAuth.ts) start tly_; every other bearer
+  // token is the app's access token -- so an app build from before it sent
+  // x-tally-client still reads as mobile (just without its version fields).
+  const auth = req.headers.get("authorization");
+  if (auth?.startsWith("Bearer tly_")) return "api";
+  if (auth?.startsWith("Bearer ")) return "mobile";
   const site = req.headers.get("sec-fetch-site");
   if (site === "same-origin" || site === "none" || req.headers.get("cookie")?.includes("authjs.")) return "web";
   return "unknown";
@@ -76,6 +82,8 @@ export function requestLogContext(req: Request): RequestLogContext {
       osVersion: header(req, "x-tally-os-version", 20),
       device: header(req, "x-tally-device", 60),
     });
+    // An older build that didn't send its headers: the user agent is all there is.
+    if (!ctx.appVersion) ctx.userAgent = header(req, "user-agent", 200);
   } else if (client === "web" || client === "api" || client === "unknown") {
     ctx.userAgent = header(req, "user-agent", 200);
   }

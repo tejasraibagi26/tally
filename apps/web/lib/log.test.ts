@@ -37,6 +37,7 @@ describe("requestLogContext", () => {
   it("tells web, API tokens, Plaid and cron apart", () => {
     expect(at("/api/accounts", { "sec-fetch-site": "same-origin", "user-agent": "Mozilla/5.0" })).toMatchObject({ client: "web", userAgent: "Mozilla/5.0" });
     expect(at("/api/v1/transactions", { authorization: "Bearer tly_x" }).client).toBe("api");
+    expect(at("/api/analytics/categories", { authorization: "Bearer eyJhbGciOi" }).client).toBe("mobile");
     expect(at("/api/plaid/webhook", {}, "POST").client).toBe("plaid");
     expect(at("/api/cron/nightly", { authorization: "Bearer cron" }).client).toBe("cron");
     expect(at("/api/anything").client).toBe("unknown");
