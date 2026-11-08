@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.23.6",
+    date: "2026-11-08",
+    changes: [
+      { kind: "improved", text: "The net worth chart is drawn in Tally's own color instead of green, matching the app." },
+    ],
+  },
+  {
     version: "2.23.5",
     date: "2026-11-08",
     changes: [

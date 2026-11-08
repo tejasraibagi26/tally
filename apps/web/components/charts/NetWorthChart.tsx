@@ -25,8 +25,8 @@ export function NetWorthChart({ points }: { points: NetWorthPoint[] }) {
       <AreaChart data={points} margin={{ top: 8, right: 0, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="netWorthFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--series-1)" stopOpacity={0.28} />
-            <stop offset="100%" stopColor="var(--series-1)" stopOpacity={0} />
+            <stop offset="0%" stopColor="var(--brand)" stopOpacity={0.28} />
+            <stop offset="100%" stopColor="var(--brand)" stopOpacity={0} />
           </linearGradient>
         </defs>
         <XAxis dataKey="asOfDate" hide />
@@ -36,7 +36,7 @@ export function NetWorthChart({ points }: { points: NetWorthPoint[] }) {
           labelStyle={{ color: "var(--text-2)" }}
           formatter={(value: number) => [formatCents(value), "Net worth"]}
         />
-        <Area type="monotone" dataKey="net" stroke="var(--series-1)" strokeWidth={2.5} fill="url(#netWorthFill)" dot={false} activeDot={{ r: 4 }} isAnimationActive={false} />
+        <Area type="monotone" dataKey="net" stroke="var(--brand)" strokeWidth={2.5} fill="url(#netWorthFill)" dot={false} activeDot={{ r: 4 }} isAnimationActive={false} />
       </AreaChart>
     </ResponsiveContainer>
   );
