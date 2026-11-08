@@ -5,6 +5,9 @@
 // what happens when that refresh itself fails (session is cleared, user is
 // routed back to login).
 
+import { Platform } from "react-native";
+import { APP_VERSION, BUILD_SHA } from "@/lib/version";
+
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? "https://tally.useuplift.live";
 
 let inMemoryAccessToken: string | null = null;
@@ -44,6 +47,35 @@ export class ApiError extends Error {
 // error, since this specifically isn't the server's fault.
 export class NetworkError extends Error {}
 
+// Who's calling, for the server's logs (apps/web/lib/log.ts): marks the
+// request as the app's and says which version, build, OTA update, OS and
+// device sent it. Read once; the native modules are guarded so a build
+// without them still sends the rest.
+function clientHeaders(): Record<string, string> {
+  const h: Record<string, string> = {
+    "x-tally-client": "mobile",
+    "x-tally-app-version": APP_VERSION,
+    "x-tally-build": BUILD_SHA,
+    "x-tally-platform": Platform.OS,
+    "x-tally-os-version": String(Platform.Version),
+  };
+  try {
+    h["x-tally-timezone"] = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {}
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Updates = require("expo-updates") as typeof import("expo-updates");
+    if (Updates.updateId) h["x-tally-update-id"] = Updates.updateId;
+  } catch {}
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Device = require("expo-device") as typeof import("expo-device");
+    if (Device.modelName) h["x-tally-device"] = Device.modelName;
+  } catch {}
+  return h;
+}
+let cachedClientHeaders: Record<string, string> | null = null;
+
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -63,6 +95,7 @@ function delay(ms: number): Promise<void> {
 // is not retried here).
 async function rawFetch(path: string, options: RequestInit, accessToken: string | null): Promise<Response> {
   const headers = new Headers(options.headers);
+  for (const [k, v] of Object.entries((cachedClientHeaders ??= clientHeaders()))) headers.set(k, v);
   if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
   if (options.body && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
   const backoffMs = [500, 1500];

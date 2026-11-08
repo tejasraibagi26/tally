@@ -1,4 +1,4 @@
-import { log } from "@switchyard/logger";
+import { log } from "./log";
 import { and, eq, ne, notInArray } from "drizzle-orm";
 import { db, schema } from "@/db";
 import { plaidErrorCode } from "@/lib/plaid";

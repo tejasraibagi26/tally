@@ -3,6 +3,7 @@ import { verifyAccessToken } from "@/lib/mobileAuth";
 import { isWriteRequest } from "@/lib/demo";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { setLogUser } from "./log";
 
 /** A session (web JWT or mobile access token) carries the users.session_version
  * it was issued under; a password change or "Sign out everywhere" bumps the
@@ -30,6 +31,7 @@ export async function requireUserId(req?: Request): Promise<string> {
     // password, so it can't mint a mobile token (lib/auth.ts).
     const claims = await verifyAccessToken(authHeader.slice(7));
     if (!claims || !(await sessionStillCurrent(claims.userId, claims.sessionVersion))) throw new Error("UNAUTHENTICATED");
+    setLogUser(claims.userId);
     return claims.userId;
   }
 
@@ -38,6 +40,7 @@ export async function requireUserId(req?: Request): Promise<string> {
   const userId = user?.id;
   if (!userId) throw new Error("UNAUTHENTICATED");
   if (!(await sessionStillCurrent(userId, user?.sv ?? 0))) throw new Error("UNAUTHENTICATED");
+  setLogUser(userId);
 
   // Defence in depth behind middleware's read-only gate (lib/auth.config.ts),
   // which already refuses demo writes with a 403 before they get this far.

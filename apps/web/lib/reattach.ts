@@ -1,4 +1,4 @@
-import { log } from "@switchyard/logger";
+import { log } from "./log";
 import { and, desc, eq, inArray, isNotNull } from "drizzle-orm";
 import type { AccountBase } from "plaid";
 import { db, schema } from "@/db";

@@ -1,4 +1,4 @@
-import { log } from "@switchyard/logger";
+import { log } from "../log";
 import { and, eq, gte, isNull, sql } from "drizzle-orm";
 import { db, schema } from "@/db";
 import type { AlertCandidate } from "@tally/core/alerts";

@@ -3,7 +3,7 @@
  * email-sending service — not a third-party ESP. Generic on purpose: any
  * feature that needs to send an email calls this, not just the monthly recap.
  */
-import { log } from "@switchyard/logger";
+import { log } from "./log";
 
 export interface SendEmailParams {
   to: string;

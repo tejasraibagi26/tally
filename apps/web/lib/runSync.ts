@@ -1,4 +1,4 @@
-import { log } from "@switchyard/logger";
+import { log } from "./log";
 import { SYNC_RESULT_EVENT, type SyncResultEventDetail } from "@/lib/syncResultEvent";
 import { showToast } from "@/lib/toast";
 import type { SyncProduct } from "@/lib/syncSteps";

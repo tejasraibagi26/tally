@@ -1,6 +1,7 @@
 import { randomBytes, createHash } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
+import { setLogUser } from "./log";
 
 const KEY_PREFIX = "tly_";
 const PREFIX_DISPLAY_LEN = 12; // "tly_" + 8 chars, enough to tell keys apart in a list
@@ -39,5 +40,6 @@ export async function requireApiKeyUserId(req: Request): Promise<string> {
   if (!authHeader?.startsWith("Bearer ")) throw new Error("UNAUTHENTICATED");
   const userId = await verifyApiKey(authHeader.slice(7));
   if (!userId) throw new Error("UNAUTHENTICATED");
+  setLogUser(userId);
   return userId;
 }

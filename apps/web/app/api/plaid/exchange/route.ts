@@ -1,4 +1,4 @@
-import { log } from "@switchyard/logger";
+import { log } from "@/lib/log";
 import { route } from "@/lib/log";
 import { NextResponse } from "next/server";
 import { z } from "zod";
