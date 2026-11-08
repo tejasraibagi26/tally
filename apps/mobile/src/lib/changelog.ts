@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.20.7",
+    date: "2026-11-08",
+    changes: [
+      { kind: "fixed", text: "The year-end goal row on Overview shows its whole message, moving to a second line instead of cutting off." },
+    ],
+  },
+  {
     version: "2.20.6",
     date: "2026-11-07",
     changes: [
