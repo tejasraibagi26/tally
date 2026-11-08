@@ -664,8 +664,12 @@
  * could push them out of view, which is what the goal view's way in did:
  * it was a two-line bordered card and is now one row in the same shape as
  * the links above it, with a New pill.
+ *
+ * 2.23.3: the pace split's "Goal needs $X" ran off the card. The label was
+ * anchored by its left edge at the dashed mark, which sits 88% along, and
+ * it doesn't wrap. It hangs to the left of the mark now, on web and mobile.
  */
-export const APP_VERSION = "2.23.2";
+export const APP_VERSION = "2.23.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

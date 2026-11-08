@@ -551,8 +551,11 @@ import Constants from "expo-constants";
  * did, then six months of saving against what the goal needs. Budgets rows
  * become the month as a runway with what each one costs the goal. No skin
  * change: Pop Calm (2.18.0) already did mobile's de-pop.
+ *
+ * 2.20.1: the pace split's "needs $X" label hangs left of the dashed mark
+ * instead of starting at it, where it ran off the card.
  */
-export const APP_VERSION = "2.20.0";
+export const APP_VERSION = "2.20.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -57,11 +57,17 @@ export function PaceSplit({ summary, children }: { summary: GoalSummary; childre
               {saving == null && <span className="h-full bg-brand" style={{ width: pct(pace) }} />}
             </div>
             {needed != null && (
-              <span className="absolute -top-2 -bottom-2 border-l border-dashed border-border-strong" style={{ left: `${MARK_PCT * 100}%` }} aria-hidden="true">
-                <span className="absolute -top-6 left-1.5 whitespace-nowrap text-[11.5px] font-medium text-text-3 tabular">
+              <>
+                <span className="absolute -top-2 -bottom-2 border-l border-dashed border-border-strong" style={{ left: `${MARK_PCT * 100}%` }} aria-hidden="true" />
+                {/* Hangs to the left of the mark. Anchored at it, a nowrap
+                    label starting 88% along ran straight off the card. */}
+                <span
+                  className="absolute -top-6 whitespace-nowrap pr-1.5 text-[11.5px] font-semibold text-text-3 tabular"
+                  style={{ right: `${(1 - MARK_PCT) * 100}%` }}
+                >
                   Goal needs <M cents={needed} />
                 </span>
-              </span>
+              </>
             )}
           </div>
 

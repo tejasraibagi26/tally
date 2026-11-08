@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.23.3",
+    date: "2026-11-07",
+    changes: [
+      { kind: "fixed", text: "In \"Why net worth is moving\", the \"Goal needs\" label no longer runs off the edge of the card." },
+    ],
+  },
+  {
     version: "2.23.2",
     date: "2026-11-07",
     changes: [

@@ -42,9 +42,11 @@ export function PaceSplit({ summary }: { summary: GoalSummary | undefined }) {
 
       <View style={{ marginTop: 22 }}>
         {p.neededPerMonth != null && (
+          /* Hangs to the left of the mark, for the same reason as web. */
           <Text
             className="font-ui-semibold"
-            style={{ position: "absolute", top: -16, left: `${MARK_PCT * 100}%`, fontSize: rf(10.5), color: colors["text-3"] }}
+            numberOfLines={1}
+            style={{ position: "absolute", top: -16, right: `${(1 - MARK_PCT) * 100}%`, paddingRight: 6, fontSize: rf(10.5), color: colors["text-3"] }}
           >
             needs {money(p.neededPerMonth)}
           </Text>
