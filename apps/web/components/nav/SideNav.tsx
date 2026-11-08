@@ -208,8 +208,10 @@ export function SideNav({
   const isActive = (href: string) => pathname?.startsWith(href) ?? false;
 
   return (
-    // Sized to fit a ~800px window; it scrolls only when the window is shorter.
-    <nav className="w-60 h-full flex-none bg-surface border-r border-border px-4 py-5 flex flex-col gap-5 overflow-y-auto">
+    // Sized to fit a ~800px window. The nav itself never scrolls: if the
+    // window is shorter than the links need, the link list scrolls inside
+    // and the brand, display toggles, profile row and build line stay put.
+    <nav className="w-60 h-full flex-none bg-surface border-r border-border px-4 py-5 flex flex-col gap-5 overflow-hidden">
       <div className="flex items-center justify-between gap-2 px-2">
         <div className="flex items-center gap-2">
           <LogoMark size={22} />
@@ -222,7 +224,7 @@ export function SideNav({
         )}
       </div>
 
-      <div className="flex flex-col gap-2.5">
+      <div className="flex min-h-0 flex-1 flex-col gap-2.5 overflow-y-auto">
         {navGroups(counts).map((group, i) => (
           <div key={group.label ?? "top"} className="flex flex-col gap-2.5">
             {i > 0 && <div className="h-px bg-border mx-2" />}
@@ -238,7 +240,7 @@ export function SideNav({
         ))}
       </div>
 
-      <div className="mt-auto flex flex-col gap-2.5">
+      <div className="flex flex-none flex-col gap-2.5">
         {/* The goal view's way in (components/goalview), until it's on. */}
         {!goalView && <TryGoalView />}
         <YearReviewSticker active={isActive("/year-in-review")} />

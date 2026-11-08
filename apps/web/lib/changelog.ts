@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.23.2",
+    date: "2026-11-07",
+    changes: [
+      { kind: "fixed", text: "The sidebar no longer scrolls as a whole on a short window. Your profile, the display toggles and the version line stay put, and only the list of links moves." },
+    ],
+  },
+  {
     version: "2.23.1",
     date: "2026-11-07",
     changes: [

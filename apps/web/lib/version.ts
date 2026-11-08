@@ -656,8 +656,16 @@
  * figure it hangs on rather than printing one flat string; joining the parts
  * reproduces the sentence exactly, which a test pins. GET /api/account also
  * reports goalView, for mobile's copy of the opt-in.
+ *
+ * 2.23.2: the sidebar stops scrolling as a whole. overflow-y-auto moves off
+ * the <nav> and onto the link list, which takes flex-1 and min-h-0, so a
+ * short window scrolls the links and leaves the brand, display toggles,
+ * profile row and build line in place. Before, anything added to the footer
+ * could push them out of view, which is what the goal view's way in did:
+ * it was a two-line bordered card and is now one row in the same shape as
+ * the links above it, with a New pill.
  */
-export const APP_VERSION = "2.23.1";
+export const APP_VERSION = "2.23.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
