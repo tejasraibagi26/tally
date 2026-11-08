@@ -4,6 +4,8 @@ import { apiGet, apiPut, apiPost, apiFetch } from "@/lib/api";
 export interface BudgetLine {
   categoryId: string;
   categoryName: string;
+  /** The category's "what it is for" line; absent on older servers. */
+  description?: string | null;
   /** Parent category name for grouping rows; null for a top-level category. */
   parentName: string | null;
   categoryColorSlot: number;

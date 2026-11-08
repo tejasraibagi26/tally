@@ -33,6 +33,9 @@ import { GoalCard } from "@/components/overview/GoalCard";
 import { GoalIntroDialog } from "@/components/overview/GoalIntroDialog";
 import { ForecastIntroDialog } from "@/components/forecast/ForecastIntroDialog";
 import { useAccountProfile } from "@/lib/queries/account";
+import { GoalStand } from "@/components/goalview/GoalStand";
+import { PaceSplit } from "@/components/goalview/PaceSplit";
+import { SavingLedger } from "@/components/goalview/SavingLedger";
 import { useGoal } from "@/lib/queries/goals";
 import { monthSummary } from "@tally/core/budgetView";
 import { greetingFor, leftToSpendLine } from "@tally/core/popView";
@@ -56,6 +59,8 @@ export default function OverviewScreen() {
   // ?safe=1 from an alert email (via the web's /open and +native-intent) opens the breakdown.
   const params = useLocalSearchParams<{ safe?: string }>();
   const profile = useAccountProfile();
+  // One account setting, shared with web (users.goal_view_at).
+  const goalView = profile.data?.goalView ?? false;
   // The forecast intro waits for the goals step to be settled, so only one
   // dialog ever appears per visit.
   const goalsStepDone = goal.data != null ? goal.data.goal != null || goal.data.introSeen !== false : false;
@@ -63,7 +68,9 @@ export default function OverviewScreen() {
   const overview = useOverview();
   const trend = useNetWorthTrend();
   const recent = useTransactions();
-  const cashFlow = useCashFlowTrend(2);
+  // Two months is all the classic overview compares; the goal view's saving
+  // record draws six.
+  const cashFlow = useCashFlowTrend(goalView ? 6 : 2);
   const liabilities = useLiabilities();
   const holdings = useHoldings();
   const breakdown = useCategoryBreakdown();
@@ -74,6 +81,17 @@ export default function OverviewScreen() {
   const [isScrubbingChart, setIsScrubbingChart] = useState(false);
 
   const netCents = accounts.data?.totals.net ?? 0;
+  // "+$1,818 this month" under the goal view's hero: today against the last
+  // snapshot on or before the start of this month.
+  const netWorthDeltaLine = (() => {
+    const points = trend.data?.points ?? [];
+    if (points.length === 0) return null;
+    const monthStart = `${todayISO().slice(0, 8)}01`;
+    const prior = [...points].reverse().find((pt) => pt.asOfDate < monthStart);
+    if (!prior) return null;
+    const delta = netCents - prior.net;
+    return `${delta >= 0 ? "+" : "−"}${formatCents(Math.abs(delta))} this month`;
+  })();
 
   const recentItems = recent.data?.pages[0]?.items.slice(0, 5) ?? [];
   const topBudgets = rankBudgets(overview.data?.budgets.categories ?? [], 3);
@@ -169,10 +187,24 @@ export default function OverviewScreen() {
         </View>
 
       <View className="gap-7 px-5 pt-3">
+        {goalView ? (
+          <View className="gap-3.5">
+            <GoalStand netWorth={netCents} summary={goal.data} deltaLine={netWorthDeltaLine} />
+            <PaceSplit summary={goal.data} />
+            <SavingLedger
+              months={cashFlow.data?.months?.slice(-6) ?? []}
+              neededPerMonth={goal.data?.projection?.neededPerMonth}
+              currentMonth={`${todayISO().slice(0, 8)}01`}
+            />
+          </View>
+        ) : (
+        <>
         {/* Hero net worth -- unboxed, per MOBILE_DESIGN.md */}
         <HeroSurface>
           <NetWorthHero netCents={netCents} points={trend.data?.points ?? []} loading={accounts.isLoading} onScrubChange={setIsScrubbingChart} />
         </HeroSurface>
+        </>
+        )}
 
         {/* Safe to spend over a compact on-pace row (the streak needs a budget to pace against) */}
         {/* Safe to spend, the compact on-pace row and the year-end goal (or a
@@ -181,7 +213,7 @@ export default function OverviewScreen() {
         <View className="gap-3.5">
           {safe.data && safe.data.cash.length > 0 && <SafeToSpendCard s={safe.data} initiallyOpen={params.safe === "1"} />}
           {onPace && <OnPaceCard streak={onPace.streak} dailyPace={onPace.dailyPace} compact={(safe.data?.cash.length ?? 0) > 0} />}
-          <GoalCard summary={goal.data} />
+          {!goalView && <GoalCard summary={goal.data} />}
         </View>
 
         {/* Banks that need a tap and this month's review backlog (the same count as

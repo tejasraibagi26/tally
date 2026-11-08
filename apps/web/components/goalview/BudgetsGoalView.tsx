@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatCents } from "@tally/core/money";
 import { monthSummary, type MonthContext } from "@tally/core/budgetView";
-import { budgetRunway, type RunwayContext, type RunwayState } from "@tally/core/budgetRunway";
+import { budgetRunway, type RunwayContext, type RunwayState, type SentencePart } from "@tally/core/budgetRunway";
 import { goalCost, goalCostTotal, type GoalCost } from "@tally/core/goalCost";
 import { computeBurnRateProjection } from "@tally/core/budgetMath";
 import { Card } from "@/components/ui/Card";
@@ -58,6 +58,17 @@ function whatFor(line: BudgetLine): string | null {
   if (line.isFixedAmount) parts.push("fixed amount");
   if (line.rolloverFromPrior > 0) parts.push(`+${fmt(line.rolloverFromPrior)} rolled over`);
   return parts.length > 0 ? parts.join(" · ") : null;
+}
+
+/** The runway sentence, with the verdict and its figure in bold. */
+function Sentence({ parts }: { parts: SentencePart[] }) {
+  return (
+    <span className="text-[13px] text-text-2 tabular">
+      {parts.map((p, i) =>
+        p.strong ? <strong key={i} className="font-semibold text-text">{p.text}</strong> : <span key={i}>{p.text}</span>,
+      )}
+    </span>
+  );
 }
 
 function GoalCostCell({ cost }: { cost: GoalCost }) {
@@ -141,7 +152,7 @@ export function BudgetsGoalView({
           the page opens on the same trade-off every row below repeats. */}
       <Card className="flex flex-wrap items-end gap-x-9 gap-y-5 p-5">
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs font-medium uppercase tracking-[0.07em] text-text-3">
+          <span className="text-xs font-semibold uppercase tracking-[0.07em] text-text-3">
             {summary.left < 0 ? "Over budget" : ctx.phase === "past" ? "Left unspent" : "Left to spend"}
           </span>
           <span className={cn("font-display text-[30px] leading-tight tabular money", summary.left < 0 ? "text-negative" : "text-text")}>
@@ -149,16 +160,16 @@ export function BudgetsGoalView({
           </span>
         </div>
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs font-medium uppercase tracking-[0.07em] text-text-3">Spent</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.07em] text-text-3">Spent</span>
           <span className="font-display text-[30px] leading-tight tabular money text-text">{fmt(summary.spent)}</span>
         </div>
         <div className="flex flex-col gap-0.5">
-          <span className="text-xs font-medium uppercase tracking-[0.07em] text-text-3">Budgeted</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.07em] text-text-3">Budgeted</span>
           <span className="font-display text-[30px] leading-tight tabular money text-text-3">{fmt(summary.budgeted)}</span>
         </div>
         {costingDays != null && (
           <div className="flex flex-col gap-0.5">
-            <span className="text-xs font-medium uppercase tracking-[0.07em] text-text-3">Costing the goal</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.07em] text-text-3">Costing the goal</span>
             <span className={cn("font-display text-[30px] leading-tight tabular", costingDays > 0 ? "text-negative" : "text-text")}>
               {costingDays > 0 ? daysLabel(costingDays) : "Nothing"}
             </span>
@@ -177,7 +188,7 @@ export function BudgetsGoalView({
 
         {/* Column headings, desktop only: below lg the cells stack, where a
             header row would sit above the wrong thing. */}
-        <div className={cn("hidden gap-5 px-5 pb-2.5 pt-3 text-xs font-medium uppercase tracking-[0.07em] text-text-3 lg:grid", cols)}>
+        <div className={cn("hidden gap-5 px-5 pb-2.5 pt-3 text-xs font-semibold uppercase tracking-[0.07em] text-text-3 lg:grid", cols)}>
           <span>Budget · what it&apos;s for</span>
           <span className="text-right">Left</span>
           <span>{current ? `How far that carries you · ${monthEdge(month, 1)} to ${monthEdge(month, runway.daysInMonth)}` : "The month"}</span>
@@ -236,7 +247,7 @@ export function BudgetsGoalView({
                   {r.todayPct < 0.84 && <span className="absolute right-0">{monthEdge(month, runway.daysInMonth)}</span>}
                 </span>
               )}
-              <span className="text-[13px] text-text-2 tabular">{r.sentence}</span>
+              <Sentence parts={r.parts} />
             </span>
 
             <GoalCostCell cost={cost} />

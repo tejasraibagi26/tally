@@ -21,6 +21,8 @@ import { AddBudgetSheet } from "@/components/AddBudgetSheet";
 import { TabHeader } from "@/components/ui/TabHeader";
 import { GoalBudgetLine } from "@/components/overview/GoalCard";
 import { useGoal } from "@/lib/queries/goals";
+import { useAccountProfile } from "@/lib/queries/account";
+import { RunwayRow } from "@/components/goalview/RunwayRow";
 
 function shiftMonth(month: string, delta: number): string {
   const d = new Date(month + "T00:00:00Z");
@@ -47,6 +49,9 @@ export default function BudgetsScreen() {
   const tabBarClearance = useTabBarBottomClearance();
   const colors = useThemeColors();
   const goal = useGoal();
+  // The goal view is one account setting, shared with web (users.goal_view_at).
+  const { data: profile } = useAccountProfile();
+  const goalView = profile?.goalView ?? false;
   const rf = useRF();
   const router = useRouter();
   const { colorScheme } = useColorScheme();
@@ -171,7 +176,19 @@ export default function BudgetsScreen() {
             </Card>
 
             <Card className="overflow-hidden">
-              {groups.map((g, gi) => (
+              {goalView
+                ? budgets.map((b, i) => (
+                    <RunwayRow
+                      key={b.categoryId}
+                      line={b}
+                      ctx={{ daysInMonth: daysInMonthOf(month), daysElapsed: ctx.phase === "current" ? ctx.daysElapsed : undefined }}
+                      neededPerMonth={goal.data?.projection?.neededPerMonth ?? null}
+                      month={month}
+                      showTopBorder={i > 0}
+                      onPress={() => setOpenId(b.categoryId)}
+                    />
+                  ))
+                : groups.map((g, gi) => (
                 <View key={g.name} style={gi > 0 ? { borderTopWidth: 1, borderTopColor: colors.border } : undefined}>
                   <View className="flex-row justify-between px-5 pt-3.5 pb-1">
                     <Text className="font-ui-semibold text-text-3" style={label}>{g.name}</Text>

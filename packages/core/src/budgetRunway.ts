@@ -45,6 +45,13 @@ export interface RunwayContext {
   daysInMonth: number;
 }
 
+/** A run of sentence text, with the parts worth emphasising marked. */
+export interface SentencePart {
+  text: string;
+  /** Render bold: the verdict, and the rate or date it turns on. */
+  strong?: boolean;
+}
+
 export interface Runway {
   state: RunwayState;
   left: number;
@@ -58,8 +65,13 @@ export interface Runway {
   todayPct: number;
   /** 0..1 of the bar the remaining money covers, measured from todayPct. */
   carryPct: number;
-  /** One or two sentences for under the bar. */
+  /** One or two sentences for under the bar, plain. */
   sentence: string;
+  /**
+   * The same sentence split so a view can bold what matters: the verdict
+   * and the figure it hangs on. Joining every `text` gives `sentence`.
+   */
+  parts: SentencePart[];
 }
 
 function ordinal(day: number): string {
@@ -81,6 +93,11 @@ function plural(n: number, word: string): string {
   return `${n} ${n === 1 ? word : `${word}s`}`;
 }
 
+/** Joins the parts into the plain sentence, so the two can never drift. */
+function say(parts: SentencePart[]): { sentence: string; parts: SentencePart[] } {
+  return { sentence: parts.map((p) => p.text).join(""), parts };
+}
+
 export function budgetRunway(line: RunwayInput, ctx: RunwayContext, formatMoney: (cents: number) => string): Runway {
   const { available, spend, isFixedAmount } = line;
   const { daysInMonth } = ctx;
@@ -93,18 +110,18 @@ export function budgetRunway(line: RunwayInput, ctx: RunwayContext, formatMoney:
   const base = { left, todayPct, rate: null, allowance, runsOutDay: null };
 
   if (!current) {
-    return { ...base, state: "not_current", allowance: null, carryPct: 0, sentence: `${formatMoney(available)} budgeted.` };
+    return { ...base, state: "not_current", allowance: null, carryPct: 0, ...say([{ text: formatMoney(available), strong: true }, { text: " budgeted." }]) };
   }
 
   if (isFixedAmount) {
-    const sentence =
+    const parts: SentencePart[] =
       spend >= available
-        ? `Paid in full. Nothing here is still a decision.`
+        ? [{ text: "Paid in full.", strong: true }, { text: " Nothing here is still a decision." }]
         : spend > 0
-          ? `${formatMoney(spend)} of ${formatMoney(available)} paid so far.`
-          : `Not paid yet. ${formatMoney(available)} is set aside for it.`;
+          ? [{ text: `${formatMoney(spend)} of ${formatMoney(available)}`, strong: true }, { text: " paid so far." }]
+          : [{ text: "Not paid yet." }, { text: ` ${formatMoney(available)}`, strong: true }, { text: " is set aside for it." }];
     // A fixed amount has no runway: the whole bar reads as settled.
-    return { ...base, state: "fixed", allowance: null, carryPct: spend >= available ? 1 - todayPct : 0, sentence };
+    return { ...base, state: "fixed", allowance: null, carryPct: spend >= available ? 1 - todayPct : 0, ...say(parts) };
   }
 
   if (spend > available) {
@@ -113,7 +130,7 @@ export function budgetRunway(line: RunwayInput, ctx: RunwayContext, formatMoney:
       state: "over",
       allowance: null,
       carryPct: 0,
-      sentence: `${formatMoney(spend - available)} over, on day ${ctx.daysElapsed}.`,
+      ...say([{ text: `${formatMoney(spend - available)} over`, strong: true }, { text: `, on day ${ctx.daysElapsed}.` }]),
     };
   }
 
@@ -122,7 +139,11 @@ export function budgetRunway(line: RunwayInput, ctx: RunwayContext, formatMoney:
       ...base,
       state: "untouched",
       carryPct: 1 - todayPct,
-      sentence: `Untouched. The whole ${formatMoney(available)} is still there, and there is no rate to project yet.`,
+      ...say([
+        { text: "Untouched." },
+        { text: ` The whole ${formatMoney(available)}`, strong: true },
+        { text: " is still there, and there is no rate to project yet." },
+      ]),
     };
   }
 
@@ -139,7 +160,11 @@ export function budgetRunway(line: RunwayInput, ctx: RunwayContext, formatMoney:
       state: "carries",
       rate,
       carryPct,
-      sentence: `Carries past month end. ${perDay} to the ${ordinal(daysInMonth)}.`,
+      ...say([
+        { text: "Carries past month end." },
+        { text: ` ${perDay}`, strong: true },
+        { text: ` to the ${ordinal(daysInMonth)}.` },
+      ]),
     };
   }
 
@@ -151,7 +176,10 @@ export function budgetRunway(line: RunwayInput, ctx: RunwayContext, formatMoney:
       rate,
       runsOutDay,
       carryPct,
-      sentence: `Lands on the ${ordinal(runsOutDay!)}, ${plural(shortBy, "day")} shy. ${perDay} holds it to the end.`,
+      ...say([
+        { text: `Lands on the ${ordinal(runsOutDay!)}`, strong: true },
+        { text: `, ${plural(shortBy, "day")} shy. ${perDay} holds it to the end.` },
+      ]),
     };
   }
 
@@ -161,6 +189,9 @@ export function budgetRunway(line: RunwayInput, ctx: RunwayContext, formatMoney:
     rate,
     runsOutDay,
     carryPct,
-    sentence: `Runs dry on the ${ordinal(runsOutDay!)}. You're going ${formatMoney(Math.round(rate))} a day; reaching the ${ordinal(daysInMonth)} needs ${perDay}.`,
+    ...say([
+      { text: `Runs dry on the ${ordinal(runsOutDay!)}`, strong: true },
+      { text: `. You're going ${formatMoney(Math.round(rate))} a day; reaching the ${ordinal(daysInMonth)} needs ${perDay}.` },
+    ]),
   };
 }

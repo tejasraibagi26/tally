@@ -15,6 +15,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.23.1",
+    date: "2026-11-07",
+    changes: [
+      { kind: "improved", text: "Headings and figures in the goal view carry more weight again, so a page reads as a hierarchy rather than one flat tone." },
+      { kind: "improved", text: "Each budget sentence now bolds the part that matters: whether it carries, the day it runs dry, or the rate that holds it." },
+    ],
+  },
+  {
     version: "2.23.0",
     date: "2026-11-07",
     changes: [

@@ -647,8 +647,17 @@
  * drops out when they would collide, the tick itself is 2px instead of a 1px
  * line lost in a colour change, and one line under the headings says what
  * the grey and the coloured stretch of every bar actually mean.
+ *
+ * 2.23.1: hierarchy. The de-pop had taken every heading down a step at once
+ * (display 800 to 500, page titles to 600, card titles to 600), which
+ * flattened the page rather than quieting it; weight comes back a notch and
+ * the loose tracking and hairlines carry the calm instead. budgetRunway now
+ * returns `parts` beside `sentence`, so a view can bold the verdict and the
+ * figure it hangs on rather than printing one flat string; joining the parts
+ * reproduces the sentence exactly, which a test pins. GET /api/account also
+ * reports goalView, for mobile's copy of the opt-in.
  */
-export const APP_VERSION = "2.23.0";
+export const APP_VERSION = "2.23.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

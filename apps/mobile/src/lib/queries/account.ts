@@ -8,6 +8,8 @@ export interface AccountProfile {
   recapsEnabled: boolean;
   /** One-time modals already dismissed (web lib/announcements.ts); missing on older servers. */
   seenAnnouncements?: string[];
+  /** On the goal view (users.goal_view_at). Missing on older servers, which means off. */
+  goalView?: boolean;
 }
 
 export function useAccountProfile() {
@@ -56,5 +58,20 @@ export function useWipeAccount() {
   return useMutation({
     mutationFn: (body: { currentPassword: string }) => apiPost<{ ok: true; itemsRemoved: number }>("/api/account/wipe", body),
     onSuccess: () => queryClient.invalidateQueries(),
+  });
+}
+
+/**
+ * The goal view, shared with web: one account setting, one column
+ * (users.goal_view_at). Turning it on here turns it on there too, which is
+ * the point -- it is how you read your money, not a per-device preference.
+ */
+export function useUpdateGoalView() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (enabled: boolean) => apiPatch<{ ok: true }>("/api/settings/goal-view", { enabled }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["account"] });
+    },
   });
 }

@@ -16,6 +16,15 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.20.0",
+    date: "2026-11-07",
+    changes: [
+      { kind: "new", text: "The goal view, now on mobile. Turn it on under Settings, Preferences, and it turns on everywhere: Overview leads with your net worth and the goal you are heading for, and shows how much of your pace is money you saved versus what markets and debt did." },
+      { kind: "new", text: "Budgets show how far each one carries you through the month, with the day it runs out, and what going over costs your goal in days." },
+      { kind: "new", text: "Six months of what you actually saved, drawn against what your goal needs." },
+    ],
+  },
+  {
     version: "2.19.9",
     date: "2026-11-03",
     changes: [

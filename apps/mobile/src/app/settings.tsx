@@ -5,9 +5,9 @@ import { View, Text, ScrollView, Pressable, Switch, ActivityIndicator, Alert, Te
 import { useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as LocalAuthentication from "expo-local-authentication";
-import { AlertTriangle, Bell, ChevronRight, Download, KeyRound, Lock, Mail, PiggyBank, ScanFace, SunMoon, Trash2, Wallet } from "lucide-react-native";
+import { Target, AlertTriangle, Bell, ChevronRight, Download, KeyRound, Lock, Mail, PiggyBank, ScanFace, SunMoon, Trash2, Wallet } from "lucide-react-native";
 import { exportTransactions } from "@/lib/exportData";
-import { useAccountProfile, useUpdateAccountProfile, useUpdateRecaps, useChangePassword, useWipeAccount } from "@/lib/queries/account";
+import { useAccountProfile, useUpdateAccountProfile, useUpdateRecaps, useUpdateGoalView, useChangePassword, useWipeAccount } from "@/lib/queries/account";
 import { useAlertPreferences } from "@/lib/queries/alerts";
 import { useIncomeSchedules } from "@/lib/queries/incomeSchedules";
 import { useSafeToSpend } from "@/lib/queries/safeToSpend";
@@ -202,9 +202,13 @@ export default function SettingsScreen() {
   const { data: tokens } = useApiTokens();
   const { data: accounts } = useAccounts();
   const updateRecaps = useUpdateRecaps();
+  const updateGoalView = useUpdateGoalView();
   const { biometricLockEnabled, setBiometricLockEnabled, logout } = useAuth();
 
   const [recapsEnabled, setRecapsEnabled] = useState(true);
+  // Read straight off the profile: the mutation invalidates ["account"], so
+  // the switch follows the server rather than keeping its own copy.
+  const goalView = profile?.goalView ?? false;
   const [biometricBusy, setBiometricBusy] = useState(false);
   const [sheet, setSheet] = useState<"profile" | "password" | "export" | null>(null);
   const [wipeOpen, setWipeOpen] = useState(false);
@@ -303,6 +307,18 @@ export default function SettingsScreen() {
 
         <Group caption="Preferences">
           <Row first icon={(c) => <SunMoon size={15} color={c} strokeWidth={1.9} />} label="Appearance" right={<AppearanceSegments />} />
+          <Row
+            icon={(c) => <Target size={15} color={c} strokeWidth={1.9} />}
+            label="The goal view"
+            right={
+              <ThemedSwitch
+                value={goalView}
+                onValueChange={(v) => updateGoalView.mutate(v)}
+                disabled={updateGoalView.isPending}
+                label="Show Overview and Budgets built around your goal"
+              />
+            }
+          />
           <Row
             icon={(c) => <ScanFace size={15} color={c} strokeWidth={1.9} />}
             label="Require Face ID to open"

@@ -66,3 +66,34 @@ describe("budgetRunway", () => {
     expect(on(1, 10_000, 9_000)).toContain("on the 1st");
   });
 });
+
+describe("budgetRunway emphasis", () => {
+  const every: [string, ReturnType<typeof budgetRunway>][] = [
+    ["carries", budgetRunway(line(65_000, 13_820), day7, money)],
+    ["runs dry", budgetRunway(line(24_000, 14_675), day7, money)],
+    ["lands short", budgetRunway(line(20_000, 4_800), day7, money)],
+    ["over", budgetRunway(line(7_000, 7_840), day7, money)],
+    ["untouched", budgetRunway(line(9_000, 0), day7, money)],
+    ["fixed paid", budgetRunway(line(8_697, 8_697, true), day7, money)],
+    ["fixed part-paid", budgetRunway(line(8_697, 4_000, true), day7, money)],
+    ["fixed unpaid", budgetRunway(line(8_697, 0, true), day7, money)],
+    ["not current", budgetRunway(line(65_000, 60_000), { daysInMonth: 30 }, money)],
+  ];
+
+  it.each(every)("%s joins its parts back into the plain sentence", (_name, r) => {
+    expect(r.parts.map((p) => p.text).join("")).toBe(r.sentence);
+  });
+
+  it.each(every)("%s marks something worth bolding, but not everything", (_name, r) => {
+    const strong = r.parts.filter((p) => p.strong);
+    expect(strong.length).toBeGreaterThan(0);
+    expect(strong.length).toBeLessThan(r.parts.length);
+  });
+
+  it("bolds the verdict and the figure it hangs on", () => {
+    const dry = budgetRunway(line(24_000, 14_675), day7, money);
+    expect(dry.parts.find((p) => p.strong)?.text).toBe("Runs dry on the 11th");
+    const carries = budgetRunway(line(65_000, 13_820), day7, money);
+    expect(carries.parts.find((p) => p.strong)?.text).toBe(" $21 a day");
+  });
+});

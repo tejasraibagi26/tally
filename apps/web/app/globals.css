@@ -950,19 +950,20 @@ body {
   box-shadow: none;
 }
 
-/* The display face stays Bricolage, one weight range lighter. */
+/* The display face stays Bricolage, a step lighter than Pop's 800 but still
+   carrying the hierarchy: headings have to out-weigh the body around them. */
 [data-ui="pop"][data-skin="quiet"] .font-display,
 [data-ui="pop"][data-skin="quiet"] .ui-figure {
-  font-weight: 500;
-  letter-spacing: -0.02em;
-}
-[data-ui="pop"][data-skin="quiet"] .ui-page-title {
   font-weight: 600;
   letter-spacing: -0.022em;
 }
+[data-ui="pop"][data-skin="quiet"] .ui-page-title {
+  font-weight: 700;
+  letter-spacing: -0.028em;
+}
 [data-ui="pop"][data-skin="quiet"] .ui-card-title {
-  font-weight: 600;
-  letter-spacing: -0.005em;
+  font-weight: 700;
+  letter-spacing: -0.012em;
 }
 
 /* The hero keeps its solid grape, and loses only the hard shadow. */

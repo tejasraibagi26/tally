@@ -46,7 +46,7 @@ export function PaceSplit({ summary, children }: { summary: GoalSummary; childre
       <CardHeader title="Why net worth is moving" action={<Link href="/goals" className="text-brand text-[13.5px]">Your goal →</Link>} />
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_280px]">
         <div className="p-5 lg:border-r border-border">
-          <span className="text-xs font-medium uppercase tracking-[0.07em] text-text-3">
+          <span className="text-xs font-semibold uppercase tracking-[0.07em] text-text-3">
             Average month, last {PACE_MONTHS} full months
           </span>
 

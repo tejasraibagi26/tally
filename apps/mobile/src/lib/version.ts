@@ -543,8 +543,16 @@ import Constants from "expo-constants";
  * 2.19.9: an "error" (outage) bank joins needs-you only after a full day down,
  * not after a failed retry -- Plaid's own 500s fail every retry, and signing
  * in wouldn't help.
+ *
+ * 2.20.0: the goal view comes to mobile, on the same opt-in as web
+ * (users.goal_view_at, one account setting, toggled in Settings >
+ * Preferences). Overview leads with net worth and its goal bar, then why
+ * the pace is moving split into what you saved and what markets and debt
+ * did, then six months of saving against what the goal needs. Budgets rows
+ * become the month as a runway with what each one costs the goal. No skin
+ * change: Pop Calm (2.18.0) already did mobile's de-pop.
  */
-export const APP_VERSION = "2.19.9";
+export const APP_VERSION = "2.20.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

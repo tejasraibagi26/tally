@@ -84,7 +84,7 @@ export function GoalStand({
     <Card className={cn("ui-hero p-5 lg:p-7 overflow-hidden", className)} style={style}>
       <div className="flex flex-col lg:flex-row lg:items-stretch gap-6 lg:gap-9">
         <div className="flex-1 min-w-0 flex flex-col">
-          <span className="text-xs font-medium uppercase tracking-[0.07em] text-text-2">Net worth ({NET_WORTH_CURRENCY})</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.07em] text-text-2">Net worth ({NET_WORTH_CURRENCY})</span>
           <AnimatedNumber cents={netWorth} className="mt-1.5 font-display text-[40px] lg:text-[56px] leading-none text-text tabular money" />
           {deltaLine && <span className="mt-2 text-[13px] text-text-2 tabular">{deltaLine}</span>}
 

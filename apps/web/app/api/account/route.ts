@@ -26,13 +26,16 @@ async function GET_handler(req: Request) {
 
   const [user] = await db
     // seenAnnouncements: one-time modals already dismissed (lib/announcements.ts).
-    .select({ name: schema.users.name, email: schema.users.email, birthDate: schema.users.birthDate, recapsEnabled: schema.users.recapsEnabled, seenAnnouncements: schema.users.seenAnnouncements })
+    .select({ name: schema.users.name, email: schema.users.email, birthDate: schema.users.birthDate, recapsEnabled: schema.users.recapsEnabled, seenAnnouncements: schema.users.seenAnnouncements, goalViewAt: schema.users.goalViewAt })
     .from(schema.users)
     .where(eq(schema.users.id, userId))
     .limit(1);
   if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  return NextResponse.json(user);
+  // goalView as a boolean rather than the timestamp: the clients only ever
+  // ask whether it is on (lib/goalView.ts owns the column).
+  const { goalViewAt, ...rest } = user;
+  return NextResponse.json({ ...rest, goalView: goalViewAt != null });
 }
 
 // Updates name/birthDate, and starts an email change. Email is the login
