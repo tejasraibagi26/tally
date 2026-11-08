@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.20.3",
+    date: "2026-11-07",
+    changes: [
+      { kind: "fixed", text: "Scrolling a transaction's details no longer slides the merchant name over the top of the sheet." },
+    ],
+  },
+  {
     version: "2.20.2",
     date: "2026-11-07",
     changes: [

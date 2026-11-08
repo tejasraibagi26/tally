@@ -560,7 +560,7 @@ import Constants from "expo-constants";
  * its width pushed the pill in from the left. The pill is a View with the
  * icon inside it now, sized to its content.
  */
-export const APP_VERSION = "2.20.2";
+export const APP_VERSION = "2.20.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

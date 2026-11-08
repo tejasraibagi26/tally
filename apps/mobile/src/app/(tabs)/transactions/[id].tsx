@@ -237,8 +237,11 @@ export default function TransactionDetailScreen() {
           setView("main");
         }} />
       ) : (
+        // overflow hidden: inside the iOS glass formSheet the scroll view
+        // doesn't clip, so scrolled content drew over the header row.
         <ScrollView
           className="px-5"
+          style={{ overflow: "hidden" }}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ gap: 22, paddingBottom: insets.bottom }}
           keyboardShouldPersistTaps="handled"
@@ -740,7 +743,7 @@ function SplitView({
           </Pressable>
         }
       />
-      <ScrollView className="px-5" contentContainerStyle={{ gap: 14, paddingBottom: bottom }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
+      <ScrollView className="px-5" style={{ overflow: "hidden" }} contentContainerStyle={{ gap: 14, paddingBottom: bottom }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <View className="flex-row h-2 rounded-full overflow-hidden" style={{ gap: 2, backgroundColor: colors.sunken }}>
           {lines.map((l, i) => (
             <View key={i} style={{ flex: Math.max(0, cents[i]!), backgroundColor: color(byId.get(l.categoryId ?? "")?.colorSlot) ?? colors["text-3"] }} />
@@ -860,7 +863,7 @@ function SpreadView({ t, months, bottom, onBack, onDone }: { t: TransactionRow; 
   return (
     <>
       <BackBar title="Spread" onBack={onBack} />
-      <ScrollView className="px-5" contentContainerStyle={{ gap: 16, paddingBottom: bottom }}>
+      <ScrollView className="px-5" style={{ overflow: "hidden" }} contentContainerStyle={{ gap: 16, paddingBottom: bottom }}>
         <View>
           <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }}>{t.merchantName ?? t.name}</Text>
           <Text className="font-ui text-text-3 mt-0.5" style={{ fontSize: rf(13) }}>
