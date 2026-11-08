@@ -237,11 +237,13 @@ export default function TransactionDetailScreen() {
           setView("main");
         }} />
       ) : (
-        // overflow hidden: inside the iOS glass formSheet the scroll view
-        // doesn't clip, so scrolled content drew over the header row.
+        // SheetScroll: react-native-screens resets a formSheet's ScrollView
+        // frame to the whole sheet (y = 0) when it finds it -- opening a few
+        // transactions in a row sometimes did, and the merchant row drew over
+        // the title and grabber. The wrapper starts below the header and clips.
+        <SheetScroll>
         <ScrollView
           className="px-5"
-          style={{ overflow: "hidden" }}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ gap: 22, paddingBottom: insets.bottom }}
           keyboardShouldPersistTaps="handled"
@@ -369,12 +371,20 @@ export default function TransactionDetailScreen() {
               ))}
           </View>
         </ScrollView>
+        </SheetScroll>
       )}
 
       <CategoryPickerSheet visible={pickerOpen} onClose={() => setPickerOpen(false)} selectedId={categoryId} onSelect={(cid) => pickCategory(cid)} />
       <Toast message={toast?.message ?? null} onHidden={() => setToast(null)} action={toast?.undo ? { label: "Undo", onPress: toast.undo } : undefined} bottom={insets.bottom + 8} />
     </View>
   );
+}
+
+// Holds a sheet's ScrollView below its header. collapsable={false} keeps this
+// a real native view, so a frame react-native-screens forces onto the
+// ScrollView lands inside it (and is clipped) instead of at the sheet's top.
+function SheetScroll({ children }: { children: React.ReactNode }) {
+  return <View collapsable={false} style={{ flex: 1, overflow: "hidden" }}>{children}</View>;
 }
 
 function useSeries() {
@@ -743,7 +753,8 @@ function SplitView({
           </Pressable>
         }
       />
-      <ScrollView className="px-5" style={{ overflow: "hidden" }} contentContainerStyle={{ gap: 14, paddingBottom: bottom }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
+      <SheetScroll>
+      <ScrollView className="px-5" contentContainerStyle={{ gap: 14, paddingBottom: bottom }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <View className="flex-row h-2 rounded-full overflow-hidden" style={{ gap: 2, backgroundColor: colors.sunken }}>
           {lines.map((l, i) => (
             <View key={i} style={{ flex: Math.max(0, cents[i]!), backgroundColor: color(byId.get(l.categoryId ?? "")?.colorSlot) ?? colors["text-3"] }} />
@@ -824,6 +835,7 @@ function SplitView({
           </Pressable>
         )}
       </ScrollView>
+      </SheetScroll>
       <CategoryPickerSheet
         visible={pickerFor !== null}
         onClose={() => setPickerFor(null)}
@@ -863,7 +875,8 @@ function SpreadView({ t, months, bottom, onBack, onDone }: { t: TransactionRow; 
   return (
     <>
       <BackBar title="Spread" onBack={onBack} />
-      <ScrollView className="px-5" style={{ overflow: "hidden" }} contentContainerStyle={{ gap: 16, paddingBottom: bottom }}>
+      <SheetScroll>
+      <ScrollView className="px-5" contentContainerStyle={{ gap: 16, paddingBottom: bottom }}>
         <View>
           <Text className="font-ui-semibold text-text" style={{ fontSize: rf(16) }}>{t.merchantName ?? t.name}</Text>
           <Text className="font-ui text-text-3 mt-0.5" style={{ fontSize: rf(13) }}>
@@ -897,6 +910,7 @@ function SpreadView({ t, months, bottom, onBack, onDone }: { t: TransactionRow; 
           </>
         )}
       </ScrollView>
+      </SheetScroll>
     </>
   );
 }
