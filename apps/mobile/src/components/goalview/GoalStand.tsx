@@ -87,12 +87,12 @@ export function GoalStand({ netWorth, summary, deltaLine }: { netWorth: number; 
             </View>
 
             <View style={{ marginTop: 18, paddingTop: 16, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.22)" }}>
-              <View className="flex-row items-center" style={{ gap: 6 }}>
-                {Icon && <Icon size={13} color={HERO_BG} strokeWidth={2.5} />}
-                <Text
-                  className="font-ui-semibold"
-                  style={{ fontSize: rf(11.5), color: HERO_BG, backgroundColor: ON_HERO, paddingHorizontal: 8, paddingVertical: 1, borderRadius: 999, overflow: "hidden" }}
-                >
+              <View
+                className="flex-row items-center"
+                style={{ alignSelf: "flex-start", gap: 5, backgroundColor: ON_HERO, paddingHorizontal: 9, paddingVertical: 3, borderRadius: 999 }}
+              >
+                {Icon && <Icon size={12} color={HERO_BG} strokeWidth={2.5} />}
+                <Text className="font-ui-semibold" style={{ fontSize: rf(11.5), color: HERO_BG }}>
                   {status?.label}
                 </Text>
               </View>

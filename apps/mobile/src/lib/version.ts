@@ -554,8 +554,13 @@ import Constants from "expo-constants";
  *
  * 2.20.1: the pace split's "needs $X" label hangs left of the dashed mark
  * instead of starting at it, where it ran off the card.
+ *
+ * 2.20.2: the goal hero's verdict pill had its icon outside the pill, in
+ * the pill's own colour on the grape card, so the icon was invisible and
+ * its width pushed the pill in from the left. The pill is a View with the
+ * icon inside it now, sized to its content.
  */
-export const APP_VERSION = "2.20.1";
+export const APP_VERSION = "2.20.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

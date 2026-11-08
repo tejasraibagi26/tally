@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.20.2",
+    date: "2026-11-07",
+    changes: [
+      { kind: "fixed", text: "On the net worth card, the On track badge sits flush with everything else again, and its icon is visible." },
+    ],
+  },
+  {
     version: "2.20.1",
     date: "2026-11-07",
     changes: [
