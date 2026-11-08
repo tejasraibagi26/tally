@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.20.5",
+    date: "2026-11-07",
+    changes: [
+      { kind: "fixed", text: "The net worth chart is back in the goal view, under what you've saved. Drag across it to see any day, and switch between 1M, 3M, 6M and 1Y." },
+    ],
+  },
+  {
     version: "2.20.4",
     date: "2026-11-07",
     changes: [

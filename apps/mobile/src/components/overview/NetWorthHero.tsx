@@ -40,20 +40,26 @@ export function NetWorthHero({
   points,
   loading,
   onScrubChange,
+  variant = "hero",
 }: {
   netCents: number;
   points: NetWorthPoint[];
   loading: boolean;
   /** True for the duration of a finger on the chart -- the screen locks its ScrollView meanwhile. */
   onScrubChange: (scrubbing: boolean) => void;
+  /** "card": the goal view's "Net worth over the year" card (web's overview,
+   * goal view) -- GoalStand already shows the figure, so no big number here,
+   * a year by default, and full-bleed to a p-4 Card instead of the screen. */
+  variant?: "hero" | "card";
 }) {
+  const isCard = variant === "card";
   const colors = useThemeColors();
   // The selected range sits on a small card: the same soft edge as every card.
   const rangeEdge = useStickerShadow();
   const rf = useRF();
   const { hidden } = usePrivacy();
   const { width: windowWidth } = useWindowDimensions();
-  const [range, setRange] = useState<NetWorthRange>(DEFAULT_RANGE);
+  const [range, setRange] = useState<NetWorthRange>(isCard ? "1Y" : DEFAULT_RANGE);
   // The chart was hardcoded to 300 -- narrower than the available width on
   // most phones (leaving a gap on the right) and wider than it on the
   // smallest ones (clipping). Measured via onLayout on its wrapping View so
@@ -219,10 +225,31 @@ export function NetWorthHero({
 
   return (
     <View className="gap-3">
-      <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(14) }}>
-        Net worth
-      </Text>
-      {loading ? (
+      {isCard ? (
+        <Text className="font-ui-semibold uppercase" style={{ fontSize: rf(11), letterSpacing: 0.7, color: colors["text-3"] }}>
+          Net worth over the year
+        </Text>
+      ) : (
+        <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(14) }}>
+          Net worth
+        </Text>
+      )}
+      {isCard ? (
+        <View className="h-[26px] justify-center" accessible accessibilityLabel={loading ? "Net worth" : spoken}>
+          {hoveredPoint ? (
+            <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(13) }}>
+              {dateLabel(hoveredPoint.asOfDate)}{hidden ? "" : ` · ${formatCents(hoveredPoint.net)}`}
+            </Text>
+          ) : !loading && delta && deltaText ? (
+            <View className="flex-row items-center gap-2.5">
+              <View className="h-[26px] justify-center rounded-full px-2.5" style={{ backgroundColor: up ? colors["positive-subtle"] : colors["negative-subtle"] }}>
+                <Text className="font-num-semibold" style={{ fontSize: rf(12.5), color: up ? colors.positive : colors.negative, fontVariant: ["tabular-nums"] }}>{deltaText}</Text>
+              </View>
+              <Text className="font-ui text-text-3" style={{ fontSize: rf(12.5) }}>{RANGE_CAPTION[range]}</Text>
+            </View>
+          ) : null}
+        </View>
+      ) : loading ? (
         <View className="gap-2">
           <Skeleton style={{ width: 260, height: 60 }} />
           <Skeleton style={{ width: 150, height: 26, borderRadius: 999 }} />
@@ -255,7 +282,7 @@ export function NetWorthHero({
             // cancels the screen's px-5 so the area runs edge to edge.
             // Scrubbing reads locationX within this view, and chartWidth is
             // measured from it.
-            style={{ height: HERO_CHART_HEIGHT, marginHorizontal: -20, opacity: fade }}
+            style={{ height: HERO_CHART_HEIGHT, marginHorizontal: isCard ? -16 : -20, opacity: fade }}
             {...chartPanResponder.panHandlers}
             accessible
             accessibilityRole="adjustable"

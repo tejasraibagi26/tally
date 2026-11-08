@@ -196,6 +196,10 @@ export default function OverviewScreen() {
               neededPerMonth={goal.data?.projection?.neededPerMonth}
               currentMonth={`${todayISO().slice(0, 8)}01`}
             />
+            {/* Web's goal view ends its lead group on this card too. */}
+            <Card className="p-4">
+              <NetWorthHero variant="card" netCents={netCents} points={trend.data?.points ?? []} loading={accounts.isLoading} onScrubChange={setIsScrubbingChart} />
+            </Card>
           </View>
         ) : (
         <>
