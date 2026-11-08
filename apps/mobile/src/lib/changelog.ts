@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.20.6",
+    date: "2026-11-07",
+    changes: [
+      { kind: "improved", text: "Sliders in Early retirement have a calmer look: a plain track and a brand-colored handle, without the heavy outline." },
+    ],
+  },
+  {
     version: "2.20.5",
     date: "2026-11-07",
     changes: [

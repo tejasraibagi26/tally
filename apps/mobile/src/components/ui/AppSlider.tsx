@@ -3,15 +3,17 @@ import { PanResponder, Platform, View, type LayoutChangeEvent } from "react-nati
 import { useThemeColors } from "@/theme/useThemeColors";
 
 const HEIGHT = 36; // the touch row
-const TRACK = 10;
-const THUMB = 24;
+const TRACK = 8;
+const THUMB = 22;
 
 /**
- * Tally Pop's slider, drawn in JS so it matches the theme on both
- * platforms (the native SwiftUI / Material sliders it replaced, mobile
- * v2.15.1, wore the system blue and Material's purple): a sunken track in
- * the ink outline, the filled part in brand, a marigold thumb with a small
- * hard shadow. Tap anywhere on the track to jump there, drag to adjust.
+ * The app's slider, drawn in JS so it matches the theme on both platforms
+ * (the native SwiftUI / Material sliders it replaced, mobile v2.15.1, wore
+ * the system blue and Material's purple). Calm, like web's RangeSlider: a
+ * plain sunken track with the filled part in brand, a brand thumb ringed in
+ * the surface color on a soft shadow -- no ink outline or hard shadow (the
+ * Pop version, until v2.20.6). Tap anywhere on the track to jump there, drag
+ * to adjust.
  * `onSlidingChange` lets a parent ScrollView stop scrolling mid-drag.
  * VoiceOver/TalkBack adjust it one step per swipe.
  */
@@ -83,8 +85,8 @@ export function AppSlider({
   const stepBy = step && step > 0 ? step : span / 100;
   const shadow =
     Platform.OS === "ios"
-      ? { shadowColor: colors["ink-shadow"], shadowOffset: { width: 2, height: 2 }, shadowOpacity: 1, shadowRadius: 0 }
-      : { boxShadow: `2px 2px 0px 0px ${colors["ink-shadow"]}` };
+      ? { shadowColor: "#1D1B2F", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.18, shadowRadius: 4 }
+      : { boxShadow: "0px 1px 4px 0px rgba(29, 27, 47, 0.22)" };
 
   return (
     <View
@@ -103,7 +105,7 @@ export function AppSlider({
     >
       <View
         pointerEvents="none"
-        style={{ height: TRACK, borderRadius: TRACK, borderWidth: 2, borderColor: colors.ink, backgroundColor: colors.sunken, overflow: "hidden", marginHorizontal: 2 }}
+        style={{ height: TRACK, borderRadius: TRACK, backgroundColor: colors.sunken, overflow: "hidden" }}
       >
         <View style={{ height: "100%", width: thumbX + THUMB / 2, backgroundColor: colors.brand }} />
       </View>
@@ -116,9 +118,9 @@ export function AppSlider({
             width: THUMB,
             height: THUMB,
             borderRadius: THUMB / 2,
-            borderWidth: 2,
-            borderColor: colors.ink,
-            backgroundColor: colors.marigold,
+            borderWidth: 3,
+            borderColor: colors.surface,
+            backgroundColor: colors.brand,
             transform: [{ scale: sliding ? 1.12 : 1 }],
           },
           shadow,
