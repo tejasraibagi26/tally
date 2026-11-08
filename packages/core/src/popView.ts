@@ -1,6 +1,6 @@
 /**
  * Pure rules behind the Tally Pop preview's extra Overview pieces (web now,
- * mobile later): the greeting, the "left to spend" line, the on-pace streak
+ * mobile later): the greeting, the "left to spend" line, the on-pace days
  * and how a count is drawn as tally marks. Callers pass "today" as
  * YYYY-MM-DD in the user's zone so nothing here reads the clock.
  */
@@ -38,20 +38,24 @@ function addDays(date: string, days: number): string {
 }
 
 /**
- * Finished days in a row, ending yesterday, whose spend stayed at or under
- * an even daily pace (the month's budget / its days). Today doesn't count
- * yet: it isn't over. Stops at the first day over pace or the month's
- * first day. `dailySpend` holds spend in cents by YYYY-MM-DD; a missing day
- * spent nothing.
+ * Finished days this month whose spend stayed at or under an even daily
+ * pace (the month's budget / its days) -- every such day, not just a run:
+ * a day over pace no longer resets the count to 0. Today doesn't count yet:
+ * it isn't over. `dailySpend` holds spend in cents by YYYY-MM-DD; a missing
+ * day spent nothing.
  */
-export function onPaceStreak(dailySpend: Record<string, number>, dailyPace: number, today: string, monthStart: string): number {
+export function onPaceDays(dailySpend: Record<string, number>, dailyPace: number, today: string, monthStart: string): number {
   if (dailyPace <= 0) return 0;
-  let streak = 0;
+  let days = 0;
   for (let day = addDays(today, -1); day >= monthStart; day = addDays(day, -1)) {
-    if ((dailySpend[day] ?? 0) > dailyPace) break;
-    streak++;
+    if ((dailySpend[day] ?? 0) <= dailyPace) days++;
   }
-  return streak;
+  return days;
+}
+
+/** Days of the month that have finished (today isn't over). */
+export function finishedDays(today: string): number {
+  return Math.max(0, Number(today.slice(8, 10)) - 1);
 }
 
 /**
@@ -64,12 +68,13 @@ export function isFirstDayOfMonth(today: string): boolean {
 }
 
 /** The On-pace card's line, shared by web and mobile. */
-export function onPaceLine(streak: number, dailyPace: number, today: string, formatMoney: (cents: number) => string): string {
+export function onPaceLine(days: number, dailyPace: number, today: string, formatMoney: (cents: number) => string): string {
   const pace = formatMoney(dailyPace);
   if (isFirstDayOfMonth(today)) return `Stay under ${pace} today and tomorrow starts your count.`;
-  if (streak === 0) return `Yesterday went over your ${pace} daily pace. Today's a fresh start.`;
-  const next = 5 - (streak % 5);
-  return `${streak === 1 ? "Day" : "Days"} in a row under your ${pace} daily pace.${streak < 15 ? ` ${next === 1 ? "One more closes" : `${next} more close`} the next five.` : ""}`;
+  const finished = finishedDays(today);
+  if (days === 0) return `No days under your ${pace} daily pace yet this month. Today's a fresh start.`;
+  if (days >= finished) return `Every day so far this month under your ${pace} daily pace.`;
+  return `${days} of ${finished} days this month under your ${pace} daily pace.`;
 }
 
 /** A count as tally marks: full groups of five (four strokes + a crossing) and the strokes left over. */

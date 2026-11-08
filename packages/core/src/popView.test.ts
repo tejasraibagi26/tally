@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { greetingFor, isFirstDayOfMonth, leftToSpendLine, onPaceLine, onPaceStreak, tallyGroups } from "./popView";
+import { greetingFor, isFirstDayOfMonth, leftToSpendLine, finishedDays, onPaceDays, onPaceLine, tallyGroups } from "./popView";
 import type { MonthSummary } from "./budgetView";
 
 const money = (c: number) => `$${(c / 100).toFixed(2)}`;
@@ -29,19 +29,23 @@ describe("leftToSpendLine", () => {
   });
 });
 
-describe("onPaceStreak", () => {
+describe("onPaceDays", () => {
   const pace = 8387;
-  it("counts finished days under pace, ending yesterday", () => {
+  it("counts every finished day under pace, not just a run", () => {
     const daily = { "2026-10-23": 9000, "2026-10-24": 2000, "2026-10-25": 8387, "2026-10-26": 50000 };
-    // 26th is today (not counted); 25th at pace and 24th under; 23rd over stops it.
-    expect(onPaceStreak(daily, pace, "2026-10-26", "2026-10-01")).toBe(2);
+    // 26th is today (not counted); 23rd over pace; the other 24 days of the month count.
+    expect(onPaceDays(daily, pace, "2026-10-26", "2026-10-01")).toBe(24);
   });
-  it("treats days with no spend as under and stops at the month start", () => {
-    expect(onPaceStreak({}, pace, "2026-10-04", "2026-10-01")).toBe(3);
+  it("doesn't reset when yesterday went over", () => {
+    expect(onPaceDays({ "2026-10-09": 9000 }, pace, "2026-10-10", "2026-10-01")).toBe(8);
   });
   it("is zero on the first of the month or with no budget", () => {
-    expect(onPaceStreak({}, pace, "2026-10-01", "2026-10-01")).toBe(0);
-    expect(onPaceStreak({}, 0, "2026-10-10", "2026-10-01")).toBe(0);
+    expect(onPaceDays({}, pace, "2026-10-01", "2026-10-01")).toBe(0);
+    expect(onPaceDays({}, 0, "2026-10-10", "2026-10-01")).toBe(0);
+  });
+  it("knows how many days have finished", () => {
+    expect(finishedDays("2026-10-01")).toBe(0);
+    expect(finishedDays("2026-10-26")).toBe(25);
   });
 });
 
@@ -59,10 +63,9 @@ describe("onPaceLine", () => {
     expect(isFirstDayOfMonth("2026-11-01")).toBe(true);
     expect(onPaceLine(0, 12200, "2026-11-01", fmt)).toBe("Stay under $122 today and tomorrow starts your count.");
   });
-  it("says yesterday went over only mid-month", () => {
-    expect(onPaceLine(0, 12200, "2026-11-09", fmt)).toBe("Yesterday went over your $122 daily pace. Today's a fresh start.");
-  });
-  it("counts toward the next five", () => {
-    expect(onPaceLine(3, 12200, "2026-11-04", fmt)).toBe("Days in a row under your $122 daily pace. 2 more close the next five.");
+  it("counts the month's on-pace days out of the finished ones", () => {
+    expect(onPaceLine(6, 12200, "2026-11-09", fmt)).toBe("6 of 8 days this month under your $122 daily pace.");
+    expect(onPaceLine(8, 12200, "2026-11-09", fmt)).toBe("Every day so far this month under your $122 daily pace.");
+    expect(onPaceLine(0, 12200, "2026-11-09", fmt)).toBe("No days under your $122 daily pace yet this month. Today's a fresh start.");
   });
 });

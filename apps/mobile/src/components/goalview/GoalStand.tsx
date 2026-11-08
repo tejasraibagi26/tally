@@ -59,18 +59,18 @@ export function GoalStand({ netWorth, summary, deltaLine }: { netWorth: number; 
         {goal && p ? (
           <>
             <View style={{ marginTop: 18 }}>
-              <View style={{ height: 6, borderRadius: 3, backgroundColor: "rgba(255,255,255,0.22)" }}>
-                <View style={{ height: 6, borderRadius: 3, backgroundColor: MARIGOLD, width: `${p.progress * 100}%` }} />
+              <View style={{ height: 10, borderRadius: 5, backgroundColor: "rgba(255,255,255,0.22)" }}>
+                <View style={{ height: 10, borderRadius: 5, backgroundColor: MARIGOLD, width: `${p.progress * 100}%` }} />
                 {projectedPct != null && (
                   <View
                     style={{
                       position: "absolute",
                       top: -2,
                       left: `${projectedPct * 100}%`,
-                      marginLeft: -5,
-                      width: 10,
-                      height: 10,
-                      borderRadius: 5,
+                      marginLeft: -7,
+                      width: 14,
+                      height: 14,
+                      borderRadius: 7,
                       backgroundColor: ON_HERO,
                     }}
                   />

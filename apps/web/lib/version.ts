@@ -669,7 +669,7 @@
  * anchored by its left edge at the dashed mark, which sits 88% along, and
  * it doesn't wrap. It hangs to the left of the mark now, on web and mobile.
  */
-export const APP_VERSION = "2.23.4";
+export const APP_VERSION = "2.23.5";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

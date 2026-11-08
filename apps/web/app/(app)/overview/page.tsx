@@ -36,7 +36,7 @@ import { GoalCosts } from "@/components/goalview/GoalCosts";
 import { getUserTimezone } from "@/lib/userTimezone";
 import { todayInZone } from "@tally/core/zonedDate";
 import { monthSummary } from "@tally/core/budgetView";
-import { greetingFor, leftToSpendLine, onPaceStreak } from "@tally/core/popView";
+import { greetingFor, leftToSpendLine, onPaceDays } from "@tally/core/popView";
 import { OnPaceCard, TallyUpBanner, YearReviewBanner } from "@/components/overview/PopOverview";
 import { featuredReviewYear } from "@tally/core/yearReview";
 import { SafeToSpendCard } from "@/components/overview/SafeToSpend";
@@ -168,7 +168,7 @@ export default async function OverviewPage() {
   const monthName = new Date(month + "T00:00:00Z").toLocaleDateString("en-US", { month: "long", timeZone: "UTC" });
   const popLine = leftToSpendLine(monthSummary(budgets, { phase: "current", daysElapsed, daysInMonth }), (c) => formatCents(c));
   const dailyPace = totalBudgeted > 0 ? Math.floor(totalBudgeted / daysInMonth) : 0;
-  const streak = onPaceStreak(spendByDay, dailyPace, today, monthStart);
+  const streak = onPaceDays(spendByDay, dailyPace, today, monthStart);
   const unreviewed = toReview?.count ?? 0;
   const [goal, introSeen, seen, safe, goalView] = await Promise.all([goalSummary(userId), goalsIntroSeen(userId), seenAnnouncements(userId), safeToSpendFor(userId), prefersGoalView(userId)]);
   // The goal view's accountability band (lib/goalLedger.ts). Only loaded for

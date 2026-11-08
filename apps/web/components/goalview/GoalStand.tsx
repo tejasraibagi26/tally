@@ -91,14 +91,14 @@ export function GoalStand({
           {goal && p ? (
             <div className="mt-6">
               <div
-                className="relative h-1.5 rounded-full bg-[color-mix(in_srgb,currentColor_22%,transparent)]"
+                className="relative h-2.5 rounded-full bg-[color-mix(in_srgb,currentColor_22%,transparent)]"
                 role="img"
                 aria-label={`${Math.round(p.progress * 100)} percent of the way from where the goal started to the target`}
               >
                 <div className="absolute inset-y-0 left-0 rounded-full bg-[var(--marigold)]" style={{ width: `${p.progress * 100}%` }} />
                 {projectedPct != null && (
                   <span
-                    className="absolute top-1/2 -mt-[5px] -ml-[5px] w-2.5 h-2.5 rounded-full bg-text"
+                    className="absolute top-1/2 -mt-[7px] -ml-[7px] w-3.5 h-3.5 rounded-full bg-text"
                     style={{ left: `${projectedPct * 100}%` }}
                     title="Where your current pace lands you"
                   />

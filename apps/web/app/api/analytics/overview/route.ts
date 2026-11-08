@@ -7,7 +7,7 @@ import { getBudgetsForMonth } from "@/lib/budgets";
 import { dailySpend } from "@/lib/analytics";
 import { todayFor } from "@/lib/userTimezone";
 import { monthLastDay } from "@tally/core/budgetMath";
-import { onPaceStreak } from "@tally/core/popView";
+import { onPaceDays } from "@tally/core/popView";
 
 // §9's headline figures, bundled — the Overview page itself reads these
 // straight from the DB (no network round trip); this route exists for
@@ -37,13 +37,15 @@ async function GET_handler(req: Request) {
   const totalBudgeted = budgets.reduce((s, b) => s + b.amount + b.rolloverFromPrior, 0);
   const totalSpend = budgets.reduce((s, b) => s + b.spend, 0);
 
-  // Tally Pop's on-pace streak (web Overview's OnPaceCard; @tally/core/popView):
-  // this month only, and only with a budget to pace against.
+  // On-pace days (web Overview's OnPaceCard; @tally/core/popView onPaceDays):
+  // this month's finished days at or under pace, this month only, and only
+  // with a budget to pace against. Still sent as `streak` so installed app
+  // builds keep reading it; it's no longer a run that resets.
   let onPace: { streak: number; dailyPace: number } | null = null;
   if (month === currentMonth && totalBudgeted > 0) {
     const daysInMonth = Number(monthLastDay(month).slice(8, 10));
     const dailyPace = Math.floor(totalBudgeted / daysInMonth);
-    onPace = { streak: onPaceStreak(await dailySpend(userId, month), dailyPace, today, month), dailyPace };
+    onPace = { streak: onPaceDays(await dailySpend(userId, month), dailyPace, today, month), dailyPace };
   }
 
   return NextResponse.json({
