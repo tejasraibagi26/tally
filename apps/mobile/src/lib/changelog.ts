@@ -16,12 +16,18 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.20.9",
+    date: "2026-11-08",
+    changes: [
+      { kind: "fixed", text: "The year-end goal row fills its first line and wraps only the words that don't fit." },
+    ],
+  },
+  {
     version: "2.20.8",
     date: "2026-11-08",
     changes: [
       { kind: "improved", text: "On-pace days now counts every day this month you stayed under your daily pace, like \"6 of 8 days\". A day over no longer resets it to zero." },
       { kind: "improved", text: "The goal bar on Overview is thicker and easier to read." },
-      { kind: "fixed", text: "When the year-end goal row needs two lines, the second starts cleanly, without a stray dot at the end of the first." },
     ],
   },
   {

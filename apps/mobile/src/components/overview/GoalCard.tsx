@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useRouter, type Href } from "expo-router";
 import { AlertTriangle, CheckCircle2, ChevronRight, Clock, Flag, Target, type LucideIcon } from "lucide-react-native";
@@ -110,9 +109,6 @@ export function GoalBudgetLine({ summary }: { summary: GoalSummary | undefined }
   const rf = useRF();
   const money = usePrivateMoney();
   const edge = useStickerShadow();
-  // Whether the one-line version ran past the width (measured by
-  // onTextLayout), keyed by the text so a new detail measures again.
-  const [wrappedFor, setWrappedFor] = useState<string | null>(null);
   if (!summary?.goal || !summary.projection) return null;
   const p = summary.projection;
   const status = STATUS[p.status];
@@ -135,17 +131,10 @@ export function GoalBudgetLine({ summary }: { summary: GoalSummary | undefined }
       accessibilityLabel={`Year-end goal, ${status.label}${detail ? `, ${detail}` : ""}`}
     >
       <status.icon size={18} color={tone} strokeWidth={2.25} />
-      {/* One line when it fits. When it doesn't, the detail moves to its own
-          line, whole (non-breaking spaces) and without a dangling separator. */}
-      <Text
-        className="font-ui text-text-2 flex-1"
-        style={{ fontSize: rf(14.5), lineHeight: rf(20), fontVariant: ["tabular-nums"] }}
-        onTextLayout={(e) => {
-          if (detail && wrappedFor !== detail && e.nativeEvent.lines.length > 1) setWrappedFor(detail);
-        }}
-      >
+      {/* Plain word wrap: fills the line, the words that don't fit go to the next. */}
+      <Text className="font-ui text-text-2 flex-1" style={{ fontSize: rf(14.5), lineHeight: rf(20), fontVariant: ["tabular-nums"] }}>
         <Text className="font-ui-semibold text-text">Year-end goal</Text> · <Text className="font-ui-semibold" style={{ color: tone }}>{status.label}</Text>
-        {detail ? `${wrappedFor === detail ? "\n" : " · "}${detail.replace(/ /g, "\u00A0")}` : ""}
+        {detail ? ` · ${detail}` : ""}
       </Text>
       <ChevronRight size={16} color={colors["text-3"]} strokeWidth={2.25} />
     </Pressable>
