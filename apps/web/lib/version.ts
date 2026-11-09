@@ -698,6 +698,9 @@
  * brand on track, marigold ahead of pace, red over, grey settled. Classic
  * Budgets and mobile are unchanged.
  *
+ * 2.26.1: a settled budget bar (paid, or not this month) wears the
+ * category's own series colour instead of border-strong grey.
+ *
  * 2.25.0: Settings splits into sections, one URL each, with a menu beside
  * them (a pill row on narrow screens): Account at /settings, then
  * /settings/notifications, /income, /display, /data, /danger -- a
@@ -708,7 +711,7 @@
  * preferences link use the new URLs, and core appLinks maps them for the
  * app.
  */
-export const APP_VERSION = "2.26.0";
+export const APP_VERSION = "2.26.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

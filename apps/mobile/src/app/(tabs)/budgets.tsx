@@ -184,6 +184,7 @@ export default function BudgetsScreen() {
                       ctx={{ daysInMonth: daysInMonthOf(month), daysElapsed: ctx.phase === "current" ? ctx.daysElapsed : undefined }}
                       neededPerMonth={goal.data?.projection?.neededPerMonth ?? null}
                       month={month}
+                      color={colorFor(b)}
                       showTopBorder={i > 0}
                       onPress={() => setOpenId(b.categoryId)}
                     />

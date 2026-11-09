@@ -571,8 +571,11 @@ import Constants from "expo-constants";
  * @tally/core/budgetStatus replaces the runway sentence and the separate
  * goal-cost line, carrying the cost only when there is one. Also picks up
  * core appLinks' new web settings paths (/settings/notifications etc.).
+ *
+ * 2.22.1: a settled bar (paid, or not this month) wears the category's own
+ * colour (budgets.tsx colorFor, passed to RunwayRow) instead of grey.
  */
-export const APP_VERSION = "2.22.0";
+export const APP_VERSION = "2.22.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

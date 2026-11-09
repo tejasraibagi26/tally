@@ -18,13 +18,14 @@ function fmt(c: number) {
   return formatCents(c).replace(/\.00$/, "");
 }
 
-/** One meaning per colour, bar and text alike. */
-const TONE_FILL: Record<BudgetTone, string> = {
-  ok: "var(--brand)",
-  ahead: "var(--marigold)",
-  over: "var(--negative)",
-  settled: "var(--border-strong)",
-};
+/**
+ * One meaning per colour, bar and text alike. A settled bar (paid, or not
+ * this month) has no verdict, so it wears the category's own colour.
+ */
+function toneFill(tone: BudgetTone, colorSlot: number): string {
+  if (tone === "settled") return `var(--series-${colorSlot})`;
+  return tone === "ahead" ? "var(--marigold)" : tone === "over" ? "var(--negative)" : "var(--brand)";
+}
 const TONE_TEXT: Record<BudgetTone, string> = {
   ok: "text-text-2",
   ahead: "text-warning",
@@ -182,7 +183,7 @@ export function BudgetsGoalView({
               {/* What's spent, as a share of the budget, with today marked:
                   a fill past the mark is spending ahead of the month. */}
               <span className="relative block h-2 rounded-full bg-sunken" aria-hidden="true">
-                <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${status.spentPct * 100}%`, background: TONE_FILL[status.tone] }} />
+                <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${status.spentPct * 100}%`, background: toneFill(status.tone, line.colorSlot) }} />
                 {current && <span className="absolute -inset-y-1 w-0.5 rounded-full bg-text" style={{ left: `${r.todayPct * 100}%` }} />}
               </span>
               <span className="text-[13px] tabular">

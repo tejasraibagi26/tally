@@ -34,6 +34,7 @@ export function RunwayRow({
   ctx,
   neededPerMonth,
   month,
+  color,
   showTopBorder,
   onPress,
 }: {
@@ -41,6 +42,8 @@ export function RunwayRow({
   ctx: RunwayContext;
   neededPerMonth: number | null;
   month: string;
+  /** The category's own series colour, for a settled bar. */
+  color: string;
   showTopBorder: boolean;
   onPress: () => void;
 }) {
@@ -60,12 +63,13 @@ export function RunwayRow({
 
   const status = budgetStatus({ available, spend: line.spend, month }, r, cost, fmtBudget);
   // One meaning per colour, as on web: brand on track, marigold ahead of
-  // pace, red over, grey settled.
+  // pace, red over. A settled bar (paid, or not this month) has no verdict,
+  // so it wears the category's own colour.
   const FILL: Record<BudgetTone, string> = {
     ok: colors.brand!,
     ahead: colors.marigold!,
     over: colors.negative!,
-    settled: colors["border-strong"]!,
+    settled: color,
   };
   const TEXT: Record<BudgetTone, string> = {
     ok: colors["text-2"]!,
