@@ -130,6 +130,14 @@ export function BudgetPanel({
           <div className="flex flex-col gap-0.5">
             <span className="text-xs font-medium uppercase tracking-wide text-text-3">Spent</span>
             <span className="ui-figure tabular text-[22px] font-semibold text-text">{fmt(current.spend)}</span>
+            {/* Navigation about the money, so it sits with the money rather
+                than among the form's actions at the bottom. */}
+            <Link
+              href={`/transactions?category=${current.categoryId}&from=${month}&to=${monthLastDay(month)}&transfer=0&excluded=0`}
+              className="text-[13px] font-semibold text-brand hover:underline self-start"
+            >
+              See transactions →
+            </Link>
           </div>
           <div className="flex flex-col gap-0.5 items-end">
             <span className="text-xs font-medium uppercase tracking-wide text-text-3">Budget</span>
@@ -199,17 +207,8 @@ export function BudgetPanel({
         </div>
 
         {error && <InlineError>{error}</InlineError>}
-        <div className="flex flex-wrap gap-2">
-          <Button onClick={save} loading={saving} disabled={!dirty}>
-            Save
-          </Button>
-          <Link
-            href={`/transactions?category=${current.categoryId}&from=${month}&to=${monthLastDay(month)}&transfer=0&excluded=0`}
-            className="h-9 px-3 rounded-control bg-surface border border-border-strong text-[15px] font-medium text-text hover:bg-sunken inline-flex items-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-info"
-          >
-            See transactions
-          </Link>
-        </div>
+        {/* One footer row: the quiet destructive action on the left, Save on
+            the right. Confirming a removal swaps the row for its prompt. */}
         {confirmRemove ? (
           <div className="rounded-card border border-border bg-sunken p-3.5 flex flex-col gap-3 text-[13.5px] text-text-2">
             <span>
@@ -226,9 +225,14 @@ export function BudgetPanel({
             </div>
           </div>
         ) : (
-          <Button variant="destructive" size="sm" onClick={() => setConfirmRemove(true)} disabled={saving} className="self-start -ml-3">
-            Remove budget
-          </Button>
+          <div className="flex items-center justify-between gap-3 pt-4 border-t border-border">
+            <Button variant="destructive" onClick={() => setConfirmRemove(true)} disabled={saving} className="-ml-3">
+              Remove budget
+            </Button>
+            <Button onClick={save} loading={saving} disabled={!dirty} className="min-w-[112px]">
+              {dirty ? "Save" : "Saved"}
+            </Button>
+          </div>
         )}
       </div>
     </SidePanel>

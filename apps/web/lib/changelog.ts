@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.25.1",
+    date: "2026-11-09",
+    changes: [
+      { kind: "improved", text: "A budget's panel is tidier: See transactions sits under what you've spent, and Remove and Save share one row at the bottom." },
+    ],
+  },
+  {
     version: "2.25.0",
     date: "2026-11-09",
     changes: [

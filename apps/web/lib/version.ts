@@ -681,6 +681,11 @@
  * (bg-brand-subtle, --brand-border edge). In Pop dark its --surface-2 was
  * the side panel's own --raised (#1C1A27), so only a faint outline showed.
  *
+ * 2.25.1: the budget panel's actions. "See transactions" was a hand-rolled
+ * square button beside a pill Save; it's a "See transactions →" link under
+ * the Spent figure now. Remove budget and Save share one bordered footer
+ * row (Save reads "Saved" while nothing has changed).
+ *
  * 2.25.0: Settings splits into sections, one URL each, with a menu beside
  * them (a pill row on narrow screens): Account at /settings, then
  * /settings/notifications, /income, /display, /data, /danger -- a
@@ -691,7 +696,7 @@
  * preferences link use the new URLs, and core appLinks maps them for the
  * app.
  */
-export const APP_VERSION = "2.25.0";
+export const APP_VERSION = "2.25.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
