@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatCents } from "@tally/core/money";
 import { monthSummary, type MonthContext } from "@tally/core/budgetView";
-import { budgetRunway, type RunwayContext, type RunwayState, type SentencePart } from "@tally/core/budgetRunway";
-import { goalCost, goalCostTotal, type GoalCost } from "@tally/core/goalCost";
+import { budgetRunway, type RunwayContext } from "@tally/core/budgetRunway";
+import { budgetStatus, type BudgetTone } from "@tally/core/budgetStatus";
+import { goalCost, goalCostTotal } from "@tally/core/goalCost";
 import { computeBurnRateProjection } from "@tally/core/budgetMath";
 import { Card } from "@/components/ui/Card";
 import { BudgetPanel } from "@/components/budgets/BudgetPanel";
@@ -17,28 +18,19 @@ function fmt(c: number) {
   return formatCents(c).replace(/\.00$/, "");
 }
 
-/** The runway fill: brand carries, marigold lands short, red is gone. */
-const FILL: Record<RunwayState, string> = {
-  carries: "var(--brand)",
-  untouched: "var(--brand)",
-  lands_short: "var(--marigold)",
-  runs_dry: "var(--negative)",
+/** One meaning per colour, bar and text alike. */
+const TONE_FILL: Record<BudgetTone, string> = {
+  ok: "var(--brand)",
+  ahead: "var(--marigold)",
   over: "var(--negative)",
-  fixed: "var(--border-strong)",
-  not_current: "var(--border-strong)",
+  settled: "var(--border-strong)",
 };
-
-/** "NOV 1", "NOV 30": the two ends of the runway's calendar. */
-function monthEdge(month: string, day: number): string {
-  return new Date(`${month.slice(0, 8)}${String(day).padStart(2, "0")}T00:00:00Z`)
-    .toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })
-    .toUpperCase();
-}
-
-/** "November", for the one line explaining what a bar is. */
-function monthOnlyLabel(month: string): string {
-  return new Date(`${month}T00:00:00Z`).toLocaleDateString("en-US", { month: "long", timeZone: "UTC" });
-}
+const TONE_TEXT: Record<BudgetTone, string> = {
+  ok: "text-text-2",
+  ahead: "text-warning",
+  over: "text-negative",
+  settled: "text-text-2",
+};
 
 function daysLabel(days: number): string {
   const n = days === Math.round(days) ? String(days) : days.toFixed(1);
@@ -60,33 +52,12 @@ function whatFor(line: BudgetLine): string | null {
   return parts.length > 0 ? parts.join(" · ") : null;
 }
 
-/** The runway sentence, with the verdict and its figure in bold. */
-function Sentence({ parts }: { parts: SentencePart[] }) {
-  return (
-    <span className="text-[13px] text-text-2 tabular">
-      {parts.map((p, i) =>
-        p.strong ? <strong key={i} className="font-semibold text-text">{p.text}</strong> : <span key={i}>{p.text}</span>,
-      )}
-    </span>
-  );
-}
-
-function GoalCostCell({ cost }: { cost: GoalCost }) {
-  if (cost.kind === "none") {
-    return <span className="text-[12.5px] text-text-3">{cost.days == null ? "no goal set" : "nothing"}</span>;
-  }
-  return (
-    <span className="flex flex-col gap-0.5 lg:items-end">
-      {cost.label && <span className="text-[14px] font-semibold text-negative tabular">{cost.label}</span>}
-      {cost.note && <span className="text-[12.5px] text-text-3">{cost.note}</span>}
-    </span>
-  );
-}
-
 /**
  * The Budgets body on the goal view: a totals strip, then one row per budget
- * as four columns, being what it is for, what is left, how far that carries
- * you through the month, and what it costs the goal.
+ * as three columns: what it is for, a bar of what's spent with a mark for
+ * today and one status line under it, and what is left. The goal cost rides
+ * on the status line only for the rows that have one (@tally/core/budgetStatus),
+ * and the month's total sits in the totals strip.
  *
  * Flat rather than grouped by parent category, which the classic view keeps:
  * the runway column only reads as a comparison when every row shares one
@@ -123,17 +94,14 @@ export function BudgetsGoalView({
       !line.isFixedAmount && runway.daysElapsed != null
         ? computeBurnRateProjection(line.spend, runway.daysElapsed, runway.daysInMonth)
         : null;
-    return {
-      line,
-      available,
-      r: budgetRunway({ available, spend: line.spend, isFixedAmount: line.isFixedAmount }, runway, fmt),
-      cost: goalCost({
-        over: Math.max(0, line.spend - available),
-        projectedOver: projectedSpend != null ? Math.max(0, projectedSpend - available) : null,
-        neededPerMonth,
-        daysInMonth: runway.daysInMonth,
-      }),
-    };
+    const r = budgetRunway({ available, spend: line.spend, isFixedAmount: line.isFixedAmount }, runway, fmt);
+    const cost = goalCost({
+      over: Math.max(0, line.spend - available),
+      projectedOver: projectedSpend != null ? Math.max(0, projectedSpend - available) : null,
+      neededPerMonth,
+      daysInMonth: runway.daysInMonth,
+    });
+    return { line, available, r, status: budgetStatus({ available, spend: line.spend, month }, r, cost, fmt) };
   });
 
   const costingDays = goalCostTotal(
@@ -142,9 +110,8 @@ export function BudgetsGoalView({
     runway.daysInMonth,
   );
 
-  // One column template, shared by the headings and every row, so they stay
-  // aligned. Below lg the cells stack and label themselves.
-  const cols = "lg:grid-cols-[minmax(0,230px)_112px_minmax(0,1fr)_136px]";
+  // One column template for every row. Below lg the cells stack.
+  const cols = "lg:grid-cols-[minmax(0,240px)_minmax(0,1fr)_120px] lg:items-center";
 
   return (
     <>
@@ -183,32 +150,23 @@ export function BudgetsGoalView({
           <h2 className="ui-card-title m-0 text-xl font-semibold text-text">
             {budgets.length} {budgets.length === 1 ? "budget" : "budgets"}
           </h2>
-          <span className="text-[13px] text-text-3">Pick a row to edit it</span>
+          {current ? (
+            <span className="flex items-center gap-2 text-[13px] text-text-3">
+              <span className="h-3.5 w-0.5 rounded-full bg-text" aria-hidden="true" />
+              marks today
+            </span>
+          ) : (
+            <span className="text-[13px] text-text-3">Pick a row to edit it</span>
+          )}
         </div>
 
-        {/* Column headings, desktop only: below lg the cells stack, where a
-            header row would sit above the wrong thing. */}
-        <div className={cn("hidden gap-5 px-5 pb-2.5 pt-3 text-xs font-semibold uppercase tracking-[0.07em] text-text-3 lg:grid", cols)}>
-          <span>Budget · what it&apos;s for</span>
-          <span className="text-right">Left</span>
-          <span>{current ? `How far that carries you · ${monthEdge(month, 1)} to ${monthEdge(month, runway.daysInMonth)}` : "The month"}</span>
-          <span className="text-right">Costs the goal</span>
-        </div>
-
-        {current && (
-          <p className="m-0 hidden px-5 pb-3 text-[12.5px] text-text-3 lg:block">
-            Each bar is {monthOnlyLabel(month)}. The grey is the month so far, and the colour is how far what&apos;s left
-            carries you at the rate you&apos;re going: reaching the right edge means it lasts the month.
-          </p>
-        )}
-
-        {rows.map(({ line, available, r, cost }) => (
+        {rows.map(({ line, available, r, status }) => (
           <button
             key={line.categoryId}
             type="button"
             onClick={() => setOpenId(line.categoryId)}
             className={cn(
-              "grid w-full gap-x-5 gap-y-3 border-t border-border px-5 py-4 text-left hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-info",
+              "grid w-full gap-x-7 gap-y-3 border-t border-border px-5 py-4 text-left hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-info",
               cols,
             )}
           >
@@ -220,37 +178,27 @@ export function BudgetsGoalView({
               {whatFor(line) && <span className="pl-4 text-[12.5px] text-text-3">{whatFor(line)}</span>}
             </span>
 
+            <span className="flex flex-col gap-2">
+              {/* What's spent, as a share of the budget, with today marked:
+                  a fill past the mark is spending ahead of the month. */}
+              <span className="relative block h-2 rounded-full bg-sunken" aria-hidden="true">
+                <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${status.spentPct * 100}%`, background: TONE_FILL[status.tone] }} />
+                {current && <span className="absolute -inset-y-1 w-0.5 rounded-full bg-text" style={{ left: `${r.todayPct * 100}%` }} />}
+              </span>
+              <span className="text-[13px] tabular">
+                <span className={TONE_TEXT[status.tone]}>{status.text}</span>
+                {status.cost && <span className="text-negative">{status.cost}</span>}
+              </span>
+            </span>
+
             <span className="flex flex-col lg:items-end">
               <span className={cn("font-display text-[23px] leading-tight tabular money", r.left < 0 ? "text-negative" : "text-text")}>
                 {r.left < 0 ? `−${fmt(-r.left)}` : fmt(r.left)}
               </span>
-              <span className={cn("font-mono text-[11px] leading-snug tabular money", r.left < 0 ? "text-negative" : "text-text-3")}>
+              <span className="font-mono text-[11px] leading-snug tabular money text-text-3">
                 {r.left < 0 ? `${formatCents(line.spend)} of ${formatCents(available)}` : `of ${formatCents(available)}`}
               </span>
             </span>
-
-            <span className="flex flex-col gap-1.5">
-              <span className="relative flex h-2 overflow-hidden rounded-full bg-sunken" aria-hidden="true">
-                <span className="absolute inset-y-0 left-0 bg-border" style={{ width: `${r.todayPct * 100}%` }} />
-                <span className="absolute inset-y-0" style={{ left: `${r.todayPct * 100}%`, width: `${r.carryPct * 100}%`, background: FILL[r.state] }} />
-                {r.todayPct > 0 && <span className="absolute -inset-y-0.5 w-0.5 rounded-full bg-text" style={{ left: `${r.todayPct * 100}%` }} />}
-              </span>
-              {current && (
-                <span className="relative block h-3.5 font-mono text-[10.5px] tracking-[0.03em] text-text-3">
-                  {r.todayPct > 0.16 && <span className="absolute left-0">{monthEdge(month, 1)}</span>}
-                  <span
-                    className="absolute -translate-x-1/2 whitespace-nowrap font-medium text-text-2"
-                    style={{ left: `${Math.min(92, Math.max(8, r.todayPct * 100))}%` }}
-                  >
-                    TODAY
-                  </span>
-                  {r.todayPct < 0.84 && <span className="absolute right-0">{monthEdge(month, runway.daysInMonth)}</span>}
-                </span>
-              )}
-              <Sentence parts={r.parts} />
-            </span>
-
-            <GoalCostCell cost={cost} />
           </button>
         ))}
 

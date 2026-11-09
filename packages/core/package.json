@@ -41,7 +41,8 @@
     "./appLinks": "./src/appLinks.ts",
     "./categoryIcon": "./src/categoryIcon.ts",
     "./goalCost": "./src/goalCost.ts",
-    "./budgetRunway": "./src/budgetRunway.ts"
+    "./budgetRunway": "./src/budgetRunway.ts",
+    "./budgetStatus": "./src/budgetStatus.ts"
   },
   "scripts": {
     "test": "vitest run",

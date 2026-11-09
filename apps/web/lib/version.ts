@@ -689,6 +689,15 @@
  * 2.25.2: the budget panel's $ sits inside the amount field (absolute,
  * pl-7), like FormPanel's AmountInput, instead of hanging outside it.
  *
+ * 2.26.0: the goal view's Budgets rows go from four columns to three. The
+ * bar fills with what's spent (with a mark for today) instead of the runway
+ * from today, so it needs no explanatory paragraph or calendar labels; one
+ * status line goes under it (@tally/core/budgetStatus), and the "Costs the
+ * goal" column is gone: the cost rides on the status line only for rows that
+ * have one, the total stays in the totals strip. Colour means one thing:
+ * brand on track, marigold ahead of pace, red over, grey settled. Classic
+ * Budgets and mobile are unchanged.
+ *
  * 2.25.0: Settings splits into sections, one URL each, with a menu beside
  * them (a pill row on narrow screens): Account at /settings, then
  * /settings/notifications, /income, /display, /data, /danger -- a
@@ -699,7 +708,7 @@
  * preferences link use the new URLs, and core appLinks maps them for the
  * app.
  */
-export const APP_VERSION = "2.25.2";
+export const APP_VERSION = "2.26.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
