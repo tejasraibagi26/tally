@@ -180,9 +180,10 @@ export function BudgetPanel({
 
         <label className="flex flex-col gap-1.5">
           <span className="text-xs font-medium uppercase tracking-wide text-text-3">Monthly budget</span>
-          <span className="flex items-center gap-1.5">
-            <span className="text-text-3 text-sm">$</span>
-            <input type="number" min="0" step="1" value={amountInput} onChange={(e) => setAmountInput(e.target.value)} className="w-full h-9 rounded-control bg-surface border border-border-strong px-3 text-[15px] text-text tabular focus:outline-none focus:ring-2 focus:ring-info" />
+          {/* The $ sits inside the field, like FormPanel's AmountInput. */}
+          <span className="relative">
+            <span aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-text-3 text-[15px] pointer-events-none">$</span>
+            <input type="number" min="0" step="1" value={amountInput} onChange={(e) => setAmountInput(e.target.value)} className="w-full h-9 rounded-control bg-surface border border-border-strong pl-7 pr-3 text-[15px] text-text tabular focus:outline-none focus:ring-2 focus:ring-info" />
           </span>
         </label>
 

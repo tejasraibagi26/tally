@@ -686,6 +686,9 @@
  * the Spent figure now. Remove budget and Save share one bordered footer
  * row (Save reads "Saved" while nothing has changed).
  *
+ * 2.25.2: the budget panel's $ sits inside the amount field (absolute,
+ * pl-7), like FormPanel's AmountInput, instead of hanging outside it.
+ *
  * 2.25.0: Settings splits into sections, one URL each, with a menu beside
  * them (a pill row on narrow screens): Account at /settings, then
  * /settings/notifications, /income, /display, /data, /danger -- a
@@ -696,7 +699,7 @@
  * preferences link use the new URLs, and core appLinks maps them for the
  * app.
  */
-export const APP_VERSION = "2.25.1";
+export const APP_VERSION = "2.25.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
