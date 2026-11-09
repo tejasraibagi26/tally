@@ -309,6 +309,13 @@
       "when": 1793740800008,
       "tag": "0043_category_description",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1793740800009,
+      "tag": "0044_account_subtype_override",
+      "breakpoints": true
     }
   ]
 }
