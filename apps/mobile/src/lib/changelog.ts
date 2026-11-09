@@ -16,6 +16,14 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.22.0",
+    date: "2026-11-09",
+    changes: [
+      { kind: "improved", text: "Budgets in the goal view are simpler: one bar of what you've spent with a mark for today, and one line on how it's going. What a budget costs your goal shows only when it costs something." },
+      { kind: "fixed", text: "Links in Tally's emails to notification settings open Alerts in the app again." },
+    ],
+  },
+  {
     version: "2.21.0",
     date: "2026-11-09",
     changes: [

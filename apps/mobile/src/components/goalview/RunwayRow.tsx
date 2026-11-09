@@ -1,5 +1,6 @@
 import { Pressable, Text, View } from "react-native";
-import { budgetRunway, type RunwayContext, type RunwayState } from "@tally/core/budgetRunway";
+import { budgetRunway, type RunwayContext } from "@tally/core/budgetRunway";
+import { budgetStatus, type BudgetTone } from "@tally/core/budgetStatus";
 import { goalCost } from "@tally/core/goalCost";
 import { computeBurnRateProjection } from "@tally/core/budgetMath";
 import type { BudgetLine } from "@/lib/queries/budgets";
@@ -7,13 +8,6 @@ import { fmtBudget } from "@/components/budgets/BudgetRowItem";
 import { hairline } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
 import { useRF } from "@/theme/responsiveFont";
-
-/** "NOV 1", "NOV 30": the two ends of the runway's calendar. */
-function monthEdge(month: string, day: number): string {
-  return new Date(`${month.slice(0, 8)}${String(day).padStart(2, "0")}T00:00:00Z`)
-    .toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })
-    .toUpperCase();
-}
 
 /**
  * What a budget is for: the user's own line when they've written one (set on
@@ -30,10 +24,10 @@ function whatFor(line: BudgetLine): string | null {
 }
 
 /**
- * One budget on the goal view: the month as a bar with a mark for today and
- * a fill reaching as far as what's left lasts, the sentence from
- * @tally/core/budgetRunway with its verdict in bold, and what the row costs
- * the goal. Mirrors web's BudgetsGoalView row.
+ * One budget on the goal view: the name and what's left, a bar of what's
+ * spent with a mark for today, and one status line from
+ * @tally/core/budgetStatus. The goal cost rides on that line only when the
+ * row has one. Mirrors web's BudgetsGoalView row (web v2.26.0).
  */
 export function RunwayRow({
   line,
@@ -64,14 +58,20 @@ export function RunwayRow({
     daysInMonth: ctx.daysInMonth,
   });
 
-  const FILL: Record<RunwayState, string> = {
-    carries: colors.brand!,
-    untouched: colors.brand!,
-    lands_short: colors.warning!,
-    runs_dry: colors.negative!,
+  const status = budgetStatus({ available, spend: line.spend, month }, r, cost, fmtBudget);
+  // One meaning per colour, as on web: brand on track, marigold ahead of
+  // pace, red over, grey settled.
+  const FILL: Record<BudgetTone, string> = {
+    ok: colors.brand!,
+    ahead: colors.marigold!,
     over: colors.negative!,
-    fixed: colors["border-strong"]!,
-    not_current: colors["border-strong"]!,
+    settled: colors["border-strong"]!,
+  };
+  const TEXT: Record<BudgetTone, string> = {
+    ok: colors["text-2"]!,
+    ahead: colors.warning!,
+    over: colors.negative!,
+    settled: colors["text-2"]!,
   };
   const sub = whatFor(line);
 
@@ -105,58 +105,21 @@ export function RunwayRow({
         </View>
       </View>
 
-      <View className="h-2 rounded-full bg-sunken overflow-hidden">
-        <View style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: `${r.todayPct * 100}%`, backgroundColor: colors.border }} />
-        <View style={{ position: "absolute", left: `${r.todayPct * 100}%`, top: 0, bottom: 0, width: `${r.carryPct * 100}%`, backgroundColor: FILL[r.state] }} />
-        {r.todayPct > 0 && (
-          <View style={{ position: "absolute", left: `${r.todayPct * 100}%`, top: 0, bottom: 0, width: 2, backgroundColor: colors.text }} />
+      {/* What's spent, as a share of the budget; a fill past today's mark
+          is spending ahead of the month. */}
+      <View className="h-2 rounded-full bg-sunken">
+        <View
+          style={{ position: "absolute", left: 0, top: 0, bottom: 0, borderRadius: 999, width: `${status.spentPct * 100}%`, backgroundColor: FILL[status.tone] }}
+        />
+        {ctx.daysElapsed != null && (
+          <View style={{ position: "absolute", left: `${r.todayPct * 100}%`, top: -3, bottom: -3, width: 2, borderRadius: 1, backgroundColor: colors.text }} />
         )}
       </View>
 
-      {ctx.daysElapsed != null && (
-        <View style={{ height: 13 }}>
-          {r.todayPct > 0.16 && (
-            <Text className="font-ui text-text-3" style={{ position: "absolute", left: 0, fontSize: rf(9.5), letterSpacing: 0.4 }}>
-              {monthEdge(month, 1)}
-            </Text>
-          )}
-          <Text
-            className="font-ui-medium"
-            style={{ position: "absolute", left: `${Math.min(88, Math.max(6, r.todayPct * 100))}%`, fontSize: rf(9.5), letterSpacing: 0.4, color: colors["text-2"] }}
-          >
-            TODAY
-          </Text>
-          {r.todayPct < 0.8 && (
-            <Text className="font-ui text-text-3" style={{ position: "absolute", right: 0, fontSize: rf(9.5), letterSpacing: 0.4 }}>
-              {monthEdge(month, ctx.daysInMonth)}
-            </Text>
-          )}
-        </View>
-      )}
-
-      <Text className="font-ui text-text-2" style={{ fontSize: rf(12.5) }}>
-        {r.parts.map((p, i) =>
-          p.strong ? (
-            <Text key={i} className="font-ui-semibold" style={{ color: colors.text }}>
-              {p.text}
-            </Text>
-          ) : (
-            <Text key={i}>{p.text}</Text>
-          ),
-        )}
+      <Text className="font-ui" style={{ fontSize: rf(12.5), color: TEXT[status.tone], fontVariant: ["tabular-nums"] }}>
+        {status.text}
+        {status.cost ? <Text style={{ color: colors.negative }}>{status.cost}</Text> : null}
       </Text>
-
-      {cost.kind !== "none" && (
-        <Text className="font-ui" style={{ fontSize: rf(11.5), color: colors["text-3"] }}>
-          {cost.label && (
-            <Text className="font-ui-semibold" style={{ color: colors.negative }}>
-              {cost.label}{" "}
-            </Text>
-          )}
-          {cost.note}
-          {cost.label ? " off your goal date" : ""}
-        </Text>
-      )}
     </Pressable>
   );
 }

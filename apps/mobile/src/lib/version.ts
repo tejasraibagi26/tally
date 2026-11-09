@@ -564,8 +564,15 @@ import Constants from "expo-constants";
  * is its own tap target that retags the kind -- action sheet on iOS, Alert
  * on Android -- via PATCH /api/accounts/:id { subtypeOverride }. Shown only
  * when the server sends plaidSubtype (web v2.24.0+).
+ *
+ * 2.22.0: the goal view's budget rows match web v2.26.0. RunwayRow's bar
+ * fills with what's spent, with a mark for today, instead of the runway
+ * from today with a NOV 1 / TODAY / NOV 30 calendar; one status line from
+ * @tally/core/budgetStatus replaces the runway sentence and the separate
+ * goal-cost line, carrying the cost only when there is one. Also picks up
+ * core appLinks' new web settings paths (/settings/notifications etc.).
  */
-export const APP_VERSION = "2.21.0";
+export const APP_VERSION = "2.22.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
