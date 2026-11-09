@@ -201,9 +201,10 @@ function SafeToSpendPanel({ s, open, onClose, forecastLink }: { s: SafeToSpendRe
           </button>
         </div>
 
-        {/* A card like any other (Pop's ink outline and hard shadow come from rounded-card.border). The
+        {/* Brand-tinted so it stands off the panel: in Pop dark, --surface-2 is
+            the panel's own --raised, which left only a faint outline. The
             labels carry the minus, so the amounts are magnitudes. */}
-        <div className="flex flex-col gap-1.5 rounded-card border border-border shadow-raised bg-surface-2 px-4 py-3.5">
+        <div className="flex flex-col gap-1.5 rounded-card border border-[var(--brand-border)] shadow-raised bg-brand-subtle px-4 py-3.5">
           {step(`Cash in ${s.cash.length} account${s.cash.length === 1 ? "" : "s"}`, s.cashTotal)}
           {step("− Bills before payday", s.billsTotal)}
           {step("− Card payments due", s.cardsTotal)}

@@ -676,8 +676,12 @@
  * safe-to-spend / forecast's counts-as-cash default; changing it clears an
  * earlier counts-as-cash choice. GET /api/accounts sends the effective kind
  * as subtype, plus plaidSubtype and subtypeOverride for mobile's picker.
+ *
+ * 2.24.1: the Safe to spend panel's breakdown card is brand-tinted
+ * (bg-brand-subtle, --brand-border edge). In Pop dark its --surface-2 was
+ * the side panel's own --raised (#1C1A27), so only a faint outline showed.
  */
-export const APP_VERSION = "2.24.0";
+export const APP_VERSION = "2.24.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
