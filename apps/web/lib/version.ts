@@ -680,8 +680,18 @@
  * 2.24.1: the Safe to spend panel's breakdown card is brand-tinted
  * (bg-brand-subtle, --brand-border edge). In Pop dark its --surface-2 was
  * the side panel's own --raised (#1C1A27), so only a faint outline showed.
+ *
+ * 2.25.0: Settings splits into sections, one URL each, with a menu beside
+ * them (a pill row on narrow screens): Account at /settings, then
+ * /settings/notifications, /income, /display, /data, /danger -- a
+ * (sections) route group whose layout holds the menu, so the changelog
+ * keeps its own header. Each page loads only what it shows. Old
+ * /settings#anchor links are forwarded client-side by SettingsNav
+ * (legacySettingsHashTarget); in-app links, alert emails and the recap's
+ * preferences link use the new URLs, and core appLinks maps them for the
+ * app.
  */
-export const APP_VERSION = "2.24.1";
+export const APP_VERSION = "2.25.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

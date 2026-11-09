@@ -26,7 +26,7 @@ export default async function UnsubscribePage({ searchParams }: { searchParams: 
             ? "You won't get any more alert emails from Tally. Your monthly recap is unchanged."
             : "You won't get any more monthly recap emails from Tally."}
         </NoticeText>
-        <Link href={alerts ? "/settings#alerts" : "/settings"} className="text-[15px] font-medium text-brand hover:underline">
+        <Link href={alerts ? "/settings/notifications" : "/settings"} className="text-[15px] font-medium text-brand hover:underline">
           Change email settings
         </Link>
       </AccountNotice>

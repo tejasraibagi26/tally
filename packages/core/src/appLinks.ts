@@ -41,6 +41,10 @@ export function appPathForWebPath(webPath: string): string {
   }
   if (path.startsWith("/tags/")) return `/tag/${path.slice("/tags/".length)}`;
   if (path === "/settings") return url.hash === "#alerts" ? "/alerts" : url.hash === "#safe-to-spend" ? "/safe-to-spend" : url.hash === "#income" ? "/income-schedules" : "/settings";
+  // Web Settings split into one URL per section (web v2.25.0).
+  if (path === "/settings/notifications") return "/alerts";
+  if (path === "/settings/income") return url.hash === "#safe-to-spend" ? "/safe-to-spend" : "/income-schedules";
+  if (path.startsWith("/settings/")) return "/settings";
   if (path === "/year-in-review") return q.get("year") ? `/year-in-review?year=${q.get("year")}` : "/year-in-review";
 
   // Upcoming was folded into Forecast (mobile v2.11.0) and Early retirement

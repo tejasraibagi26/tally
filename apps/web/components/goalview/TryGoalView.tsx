@@ -18,7 +18,7 @@ import { Target } from "lucide-react";
 export function TryGoalView() {
   return (
     <Link
-      href="/settings#display"
+      href="/settings/display"
       className="flex items-center justify-between gap-2 rounded-control px-2.5 py-1.5 text-[15px] text-text-2 hover:bg-sunken"
     >
       <span className="flex min-w-0 items-center gap-2.5">

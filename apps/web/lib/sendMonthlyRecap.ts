@@ -64,7 +64,7 @@ export async function sendMonthlyRecapForUser(
   const goal = await goalSummary(user.id);
   const html = renderMonthInReviewEmail(data, {
     appUrl: env.appUrl,
-    preferencesUrl: `${env.appUrl}/settings`,
+    preferencesUrl: `${env.appUrl}/settings/notifications`,
     unsubscribeUrl: `${env.appUrl}/unsubscribe?uid=${user.id}&token=${unsubscribeToken(user.id)}`,
     companyName: env.companyName,
     companyAddress: env.companyAddress,

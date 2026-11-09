@@ -251,7 +251,7 @@ function SafeToSpendPanel({ s, open, onClose, forecastLink }: { s: SafeToSpendRe
                   {c.assumed && (
                     <span className="flex flex-col items-start gap-1 pt-0.5">
                       <span className="text-[12px] font-semibold text-warning bg-warning-subtle rounded-full px-2 py-0.5">Assumed due before payday</span>
-                      <Link href="/settings#safe-to-spend" className="text-[12.5px] font-semibold text-brand">
+                      <Link href="/settings/income#safe-to-spend" className="text-[12.5px] font-semibold text-brand">
                         Add due day (optional)
                       </Link>
                     </span>
@@ -292,7 +292,7 @@ function SafeToSpendPanel({ s, open, onClose, forecastLink }: { s: SafeToSpendRe
           <span className="text-text-3">
             {s.payday.source === "paycheque" ? `Payday from ${s.payday.label} deposits` : s.payday.source === "schedule" ? "Payday from your income schedule" : "No payday found: counting to month end"}
           </span>
-          <Link href="/settings#safe-to-spend" className="font-semibold text-brand">
+          <Link href="/settings/income#safe-to-spend" className="font-semibold text-brand">
             Choose which accounts count
           </Link>
         </div>

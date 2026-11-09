@@ -91,7 +91,7 @@ export default async function ForecastPage({ searchParams }: { searchParams: Pro
                 <p className="mb-0 mt-2 max-w-[46ch] text-[15px] leading-relaxed text-text-2">
                   Tally can plot your bills, but not where you land without knowing when you get paid.
                 </p>
-                <Link href="/settings#income" className="ui-btn ui-btn-primary mt-3 inline-flex rounded-full bg-brand px-3.5 py-1.5 text-[13.5px] font-semibold text-on-brand">
+                <Link href="/settings/income" className="ui-btn ui-btn-primary mt-3 inline-flex rounded-full bg-brand px-3.5 py-1.5 text-[13.5px] font-semibold text-on-brand">
                   Set your pay schedule
                 </Link>
               </>

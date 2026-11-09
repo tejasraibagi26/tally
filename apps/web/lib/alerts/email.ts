@@ -85,7 +85,7 @@ export function alertEmailHtml(opts: { type: AlertType; title: string; body: str
   const copy = COPY[opts.type];
   const badge = POP_BADGE[opts.type];
   const open = `${opts.appUrl}${openLinkPath(opts.url)}`;
-  const manage = `${opts.appUrl}/settings#alerts`;
+  const manage = `${opts.appUrl}/settings/notifications`;
   const unsub = `${opts.appUrl}/unsubscribe?uid=${opts.userId}&token=${unsubscribeToken(opts.userId)}&kind=alerts`;
   const cta = opts.type === "connection_broken" ? "#D03B3B" : "#5B3BF5";
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">
