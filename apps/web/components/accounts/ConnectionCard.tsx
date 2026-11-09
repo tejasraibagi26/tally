@@ -9,8 +9,9 @@ import { ago, type ConnectionAction, type ConnectionState, type ConnectionTone }
 import { cn } from "@/lib/cn";
 import { Card } from "@/components/ui/Card";
 import { AccountNicknameEditor } from "@/components/accounts/AccountNicknameEditor";
+import { AccountKindPicker } from "@/components/accounts/AccountKindPicker";
 import { useConnectionActions } from "@/components/accounts/ConnectionActions";
-import { accountKind, exactTime, initials, toneBorder, toneButton, toneDot, toneSubtle, toneText } from "@/components/accounts/connectionUi";
+import { exactTime, initials, toneBorder, toneButton, toneDot, toneSubtle, toneText } from "@/components/accounts/connectionUi";
 import type { AccountView, ConnectionView } from "@/components/accounts/types";
 
 /** Healthy cards with more accounts than this show the first few plus "+N more". */
@@ -217,7 +218,7 @@ function AccountRow({ account, dim, baseCurrency }: { account: AccountView; dim:
       <div className="flex flex-col gap-0.5 min-w-0">
         <AccountNicknameEditor accountId={account.id} name={account.realName} nickname={account.nickname} className={cn("text-[15px]", dim ? "text-text-2" : "text-text")} />
         <span className="font-mono text-xs text-text-3 truncate">
-          {accountKind(account.type, account.subtype)}
+          <AccountKindPicker accountId={account.id} type={account.type} plaidSubtype={account.plaidSubtype} subtypeOverride={account.subtypeOverride} />
           {account.mask ? ` · ····${account.mask}` : ""}
         </span>
       </div>

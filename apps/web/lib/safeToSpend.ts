@@ -10,6 +10,7 @@ import { toNetWorthCurrency } from "@tally/core/fx";
 import { accountDisplayName } from "@tally/core/accountName";
 import { daysBefore, qualifiesAsUpcoming, UPCOMING_GRACE_DAYS } from "@tally/core/overviewView";
 import { detectPaycheques, primaryPaycheque, type Paycheque } from "@tally/core/paycheque";
+import { accountKindLabel, effectiveSubtype } from "@tally/core/accountKind";
 import { choosePayday, computeSafeToSpend, countsAsCash, nextScheduledPayday, type SafeToSpend } from "@tally/core/safeToSpend";
 
 /** How far back deposits are read to find a paycheque: enough for six monthly ones. */
@@ -73,6 +74,7 @@ export async function safeToSpendFor(userId: string): Promise<SafeToSpendResult>
         mask: schema.accounts.mask,
         type: schema.accounts.type,
         subtype: schema.accounts.subtype,
+        subtypeOverride: schema.accounts.subtypeOverride,
         currency: schema.accounts.currency,
         countsAsCash: schema.accounts.countsAsCash,
         paymentDueDay: schema.accounts.paymentDueDay,
@@ -120,7 +122,7 @@ export async function safeToSpendFor(userId: string): Promise<SafeToSpendResult>
         id: a.id,
         name: accountDisplayName(a.name, a.nickname) + (a.mask ? ` ····${a.mask}` : ""),
         type: a.type,
-        subtype: a.subtype,
+        subtype: effectiveSubtype(a.type, a.subtype, a.subtypeOverride),
         countsAsCash: a.countsAsCash,
         balance: await toNetWorthCurrency(a.availableBalance ?? a.currentBalance ?? 0, a.currency),
         // A manual account has no sync: its balance is as fresh as its last edit.
@@ -205,6 +207,7 @@ export async function safeToSpendSettingsFor(userId: string): Promise<SafeToSpen
         mask: schema.accounts.mask,
         type: schema.accounts.type,
         subtype: schema.accounts.subtype,
+        subtypeOverride: schema.accounts.subtypeOverride,
         countsAsCash: schema.accounts.countsAsCash,
         paymentDueDay: schema.accounts.paymentDueDay,
         reportedDue: schema.liabilitiesCredit.nextPaymentDueDate,
@@ -218,7 +221,10 @@ export async function safeToSpendSettingsFor(userId: string): Promise<SafeToSpen
     cushion: user?.cushion ?? 0,
     accounts: rows
       .filter((a) => a.type === "depository")
-      .map((a) => ({ id: a.id, label: label(a), kind: a.subtype ? a.subtype[0]!.toUpperCase() + a.subtype.slice(1) : "Bank account", counts: countsAsCash(a) })),
+      .map((a) => {
+        const subtype = effectiveSubtype(a.type, a.subtype, a.subtypeOverride);
+        return { id: a.id, label: label(a), kind: subtype ? accountKindLabel(a.type, subtype) : "Bank account", counts: countsAsCash({ ...a, subtype }) };
+      }),
     cards: rows.filter((a) => a.type === "credit" && !a.reportedDue).map((a) => ({ id: a.id, label: label(a), dueDay: a.paymentDueDay })),
   };
 }

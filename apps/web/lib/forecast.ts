@@ -10,6 +10,7 @@ import { toNetWorthCurrency } from "@tally/core/fx";
 import { accountDisplayName } from "@tally/core/accountName";
 import { daysBefore } from "@tally/core/overviewView";
 import { countsAsCash } from "@tally/core/safeToSpend";
+import { effectiveSubtype } from "@tally/core/accountKind";
 import {
   DEFAULT_FORECAST_DAYS,
   FORECAST_RANGES,
@@ -115,6 +116,7 @@ export async function forecastFor(userId: string, days?: number): Promise<Foreca
         mask: schema.accounts.mask,
         type: schema.accounts.type,
         subtype: schema.accounts.subtype,
+        subtypeOverride: schema.accounts.subtypeOverride,
         currency: schema.accounts.currency,
         countsAsCash: schema.accounts.countsAsCash,
         paymentDueDay: schema.accounts.paymentDueDay,
@@ -212,7 +214,7 @@ export async function forecastFor(userId: string, days?: number): Promise<Foreca
       id: a.id,
       name: label(a),
       type: a.type,
-      subtype: a.subtype,
+      subtype: effectiveSubtype(a.type, a.subtype, a.subtypeOverride),
       countsAsCash: a.countsAsCash,
       balance: await toNetWorthCurrency(a.availableBalance ?? a.currentBalance ?? 0, a.currency),
       // A manual account has no sync: its balance is as fresh as its last edit.

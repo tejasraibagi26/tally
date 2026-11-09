@@ -58,16 +58,6 @@ export function initials(name: string | null): string {
   return (name ?? "?").replace(/[^A-Za-z0-9 ]/g, "").slice(0, 2).toUpperCase() || "?";
 }
 
-// Registered-account and plan names Plaid sends in lowercase ("tfsa").
-const ACRONYMS = new Set(["tfsa", "rrsp", "fhsa", "resp", "rrif", "lira", "lif", "hsa", "ira", "401k", "403b", "529", "cd", "gic"]);
-
-/** "Credit card", "Savings", "TFSA" -- from Plaid's subtype, falling back to its type. */
-export function accountKind(type: string, subtype: string | null): string {
-  const raw = (subtype ?? type).replace(/_/g, " ").trim();
-  if (ACRONYMS.has(raw.toLowerCase())) return raw.toUpperCase();
-  return raw.charAt(0).toUpperCase() + raw.slice(1);
-}
-
 export function exactTime(iso: string): string {
   const d = new Date(iso);
   const time = d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });

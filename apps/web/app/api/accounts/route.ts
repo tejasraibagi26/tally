@@ -1,4 +1,5 @@
 import { route } from "@/lib/log";
+import { effectiveSubtype } from "@tally/core/accountKind";
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { db, schema } from "@/db";
@@ -90,7 +91,11 @@ async function GET_handler(req: Request) {
       nickname: a.nickname,
       mask: a.mask,
       type: a.type,
-      subtype: a.subtype,
+      // Already the effective kind (the user's override over Plaid's), so
+      // clients that predate the override still label it right.
+      subtype: effectiveSubtype(a.type, a.subtype, a.subtypeOverride),
+      plaidSubtype: a.subtype,
+      subtypeOverride: a.subtypeOverride,
       currentBalance: a.currentBalance,
       availableBalance: a.availableBalance,
       currency: a.currency,
@@ -107,7 +112,11 @@ async function GET_handler(req: Request) {
       nickname: a.nickname,
       mask: a.mask,
       type: a.type,
-      subtype: a.subtype,
+      // Already the effective kind (the user's override over Plaid's), so
+      // clients that predate the override still label it right.
+      subtype: effectiveSubtype(a.type, a.subtype, a.subtypeOverride),
+      plaidSubtype: a.subtype,
+      subtypeOverride: a.subtypeOverride,
       currentBalance: a.currentBalance,
       availableBalance: a.availableBalance,
       currency: a.currency,

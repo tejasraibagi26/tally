@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.21.0",
+    date: "2026-11-09",
+    changes: [
+      { kind: "new", text: "Tell Tally what an account is really for. On Accounts, tap \"Checking\" or \"Savings\" under a bank account to change it, like a second checking account you keep as savings. Savings don't count toward Safe to spend." },
+    ],
+  },
+  {
     version: "2.20.9",
     date: "2026-11-08",
     changes: [

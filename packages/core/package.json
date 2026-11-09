@@ -17,6 +17,7 @@
     "./alerts": "./src/alerts.ts",
     "./pfc": "./src/pfc.ts",
     "./accountName": "./src/accountName.ts",
+    "./accountKind": "./src/accountKind.ts",
     "./listingCurrency": "./src/listingCurrency.ts",
     "./cashFlowMath": "./src/cashFlowMath.ts",
     "./subscriptionMath": "./src/subscriptionMath.ts",

@@ -10,7 +10,11 @@ export interface AccountView {
   nickname: string | null;
   mask: string | null;
   type: string;
+  /** The effective kind: the user's override, else Plaid's subtype. */
   subtype: string | null;
+  /** Plaid's own tag, shown as the "Auto" choice in the kind picker. */
+  plaidSubtype: string | null;
+  subtypeOverride: string | null;
   currentBalance: number | null;
   currency: string;
   creditLimit: number | null;

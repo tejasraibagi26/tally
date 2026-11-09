@@ -233,6 +233,10 @@ export const accounts = pgTable("accounts", {
   mask: text("mask"),
   type: text("type").notNull(), // depository | credit | investment | loan
   subtype: text("subtype"),
+  // The user's retag of a bank account's kind ("savings" for a checking
+  // account kept as savings). Null = Plaid's subtype. Read through
+  // @tally/core/accountKind's effectiveSubtype, never on its own.
+  subtypeOverride: text("subtype_override"),
   currency: text("currency").notNull().default("USD"),
   isHidden: boolean("is_hidden").notNull().default(false),
   isManual: boolean("is_manual").notNull().default(false),

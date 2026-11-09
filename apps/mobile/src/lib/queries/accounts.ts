@@ -11,7 +11,11 @@ export interface AccountRow {
   nickname: string | null;
   mask: string | null;
   type: string;
+  /** The effective kind (the user's override over Plaid's), resolved server-side. */
   subtype: string | null;
+  /** Plaid's own tag and the user's retag; missing from servers older than web v2.24.0. */
+  plaidSubtype?: string | null;
+  subtypeOverride?: string | null;
   currentBalance: number | null;
   availableBalance: number | null;
   currency: string;
@@ -65,6 +69,20 @@ export function useUpdateAccountNickname(accountId: string) {
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
       queryClient.invalidateQueries({ queryKey: ["overview"] });
       queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    },
+  });
+}
+
+/** Retag a bank account's kind (checking / savings); null hands it back to the bank's tag. */
+export function useUpdateAccountKind(accountId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (subtypeOverride: string | null) => apiPatch<{ ok: true; subtypeOverride?: string | null }>(`/api/accounts/${accountId}`, { subtypeOverride }),
+    onSuccess: () => {
+      // The kind sets whether the balance counts as spending money.
+      for (const key of ["accounts", "overview", "safe-to-spend", "safe-to-spend-settings", "forecast"]) {
+        queryClient.invalidateQueries({ queryKey: [key] });
+      }
     },
   });
 }

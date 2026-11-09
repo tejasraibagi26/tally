@@ -559,8 +559,13 @@ import Constants from "expo-constants";
  * the pill's own colour on the grape card, so the icon was invisible and
  * its width pushed the pill in from the left. The pill is a View with the
  * icon inside it now, sized to its content.
+ *
+ * 2.21.0: a bank account's kind caption on Accounts ("Checking · ····1234")
+ * is its own tap target that retags the kind -- action sheet on iOS, Alert
+ * on Android -- via PATCH /api/accounts/:id { subtypeOverride }. Shown only
+ * when the server sends plaidSubtype (web v2.24.0+).
  */
-export const APP_VERSION = "2.20.9";
+export const APP_VERSION = "2.21.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

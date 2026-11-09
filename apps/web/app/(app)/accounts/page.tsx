@@ -1,4 +1,5 @@
 import { db, schema } from "@/db";
+import { effectiveSubtype } from "@tally/core/accountKind";
 import { isLiveAccountRow } from "@/lib/liveAccounts";
 import { DisconnectedBanks, type DisconnectedBank } from "@/components/accounts/DisconnectedBanks";
 import { DeselectedAccounts, type DeselectedAccount } from "@/components/accounts/DeselectedAccounts";
@@ -109,7 +110,9 @@ export default async function AccountsPage({ searchParams }: { searchParams: Pro
         nickname: a.nickname,
         mask: a.mask,
         type: a.type,
-        subtype: a.subtype,
+        subtype: effectiveSubtype(a.type, a.subtype, a.subtypeOverride),
+        plaidSubtype: a.subtype,
+        subtypeOverride: a.subtypeOverride,
         currentBalance: a.currentBalance,
         currency: a.currency,
         creditLimit: a.creditLimit,

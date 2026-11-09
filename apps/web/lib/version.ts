@@ -668,8 +668,16 @@
  * 2.23.3: the pace split's "Goal needs $X" ran off the card. The label was
  * anchored by its left edge at the dashed mark, which sits 88% along, and
  * it doesn't wrap. It hangs to the left of the mark now, on web and mobile.
+ *
+ * 2.24.0: account kinds can be retagged. Plaid's subtype stays the default,
+ * but a bank account's "Checking" / "Savings" caption on Accounts is now a
+ * picker, saved as accounts.subtype_override (migration 0044). The effective
+ * kind (@tally/core/accountKind's effectiveSubtype) feeds the label and
+ * safe-to-spend / forecast's counts-as-cash default; changing it clears an
+ * earlier counts-as-cash choice. GET /api/accounts sends the effective kind
+ * as subtype, plus plaidSubtype and subtypeOverride for mobile's picker.
  */
-export const APP_VERSION = "2.23.6";
+export const APP_VERSION = "2.24.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

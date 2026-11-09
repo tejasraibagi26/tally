@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { View, Text, TextInput, ActivityIndicator, Pressable } from "react-native";
+import { View, Text, TextInput, ActivityIndicator, Pressable, Platform, ActionSheetIOS, Alert } from "react-native";
 import { MoreHorizontal, X, ChevronDown, ChevronUp } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
 import { MoneyText } from "@/components/ui/MoneyText";
-import { useUpdateAccountNickname, type Institution, type AccountRow } from "@/lib/queries/accounts";
+import { useUpdateAccountNickname, useUpdateAccountKind, type Institution, type AccountRow } from "@/lib/queries/accounts";
+import { accountKindLabel, kindOptions } from "@tally/core/accountKind";
 import { ago, type ConnectionAction, type ConnectionState, type ConnectionTone } from "@/lib/connectionState";
 import { hairline, withAlpha } from "@/theme/colors";
 import { useThemeColors } from "@/theme/useThemeColors";
@@ -229,14 +230,43 @@ function Notice({
   );
 }
 
-// Registered-account and plan names Plaid sends in lowercase ("tfsa").
-const ACRONYMS = new Set(["tfsa", "rrsp", "fhsa", "resp", "rrif", "lira", "lif", "hsa", "ira", "401k", "403b", "529", "cd", "gic"]);
-
-/** "Credit card", "Savings", "TFSA" -- from Plaid's subtype, falling back to its type. */
+/** "Credit card", "Savings", "TFSA" -- the effective kind, from @tally/core/accountKind. */
 function accountKind(a: AccountRow): string {
-  const raw = (a.subtype ?? a.type).replace(/_/g, " ").trim();
-  if (ACRONYMS.has(raw.toLowerCase())) return raw.toUpperCase();
-  return raw.charAt(0).toUpperCase() + raw.slice(1);
+  return accountKindLabel(a.type, a.subtype);
+}
+
+/** The bank's own tag, offered as the "from bank" choice when retagging. */
+function bankKindLabel(a: AccountRow): string {
+  const plaid = a.plaidSubtype ?? null;
+  return !plaid && a.type === "depository" ? "Bank account" : accountKindLabel(a.type, plaid);
+}
+
+/**
+ * Pick a bank account's kind: the bank's tag, or one of the others (a second
+ * checking account kept as savings). iOS gets an action sheet; Android's
+ * Alert caps at three buttons, which the list always fits in once Cancel is
+ * left to tapping outside.
+ */
+function pickKind(account: AccountRow, onPick: (override: string | null) => void) {
+  const plaid = (account.plaidSubtype ?? "").toLowerCase();
+  const choices: { label: string; value: string | null }[] = [
+    { label: `${bankKindLabel(account)} (from bank)`, value: null },
+    ...kindOptions(account.type)
+      .filter((k) => k !== plaid)
+      .map((k) => ({ label: accountKindLabel(account.type, k), value: k })),
+  ];
+  const title = "Kind of account";
+  const message = "Savings don't count toward Safe to spend.";
+  if (Platform.OS === "ios") {
+    ActionSheetIOS.showActionSheetWithOptions(
+      { title, message, options: [...choices.map((c) => c.label), "Cancel"], cancelButtonIndex: choices.length },
+      (i) => {
+        if (i < choices.length) onPick(choices[i]!.value);
+      },
+    );
+  } else {
+    Alert.alert(title, message, choices.map((c) => ({ text: c.label, onPress: () => onPick(c.value) })), { cancelable: true });
+  }
 }
 
 /** Balances are stored positive for every type -- for a card or loan that's what's owed. */
@@ -263,6 +293,10 @@ export function AccountLine({
   const [editing, setEditing] = useState(false);
   const [input, setInput] = useState(account.nickname ?? "");
   const updateNickname = useUpdateAccountNickname(account.id);
+  const updateKind = useUpdateAccountKind(account.id);
+  // Only when the server sent the bank's tag (web v2.24.0+), so a pick never
+  // starts from a guess about what "from bank" means.
+  const canRetag = !caption && account.plaidSubtype !== undefined && kindOptions(account.type).length > 0;
   const border = showTopBorder ? { borderTopWidth: 1, borderTopColor: hairline(colors) } : undefined;
 
   function save() {
@@ -331,9 +365,32 @@ export function AccountLine({
         className="flex-1 pr-3 gap-0.5"
       >
         <Text className={`font-ui-medium ${dim ? "text-text-2" : "text-text"}`} style={{ fontSize: rf(14.5) }} numberOfLines={1}>{account.name}</Text>
-        <Text className="text-text-3" style={{ fontFamily: "JetBrainsMono", fontSize: rf(11.5) }} numberOfLines={1}>
-          {caption ?? `${accountKind(account)}${account.mask ? ` · ····${account.mask}` : ""}`}
-        </Text>
+        {canRetag ? (
+          // Its own tap target inside the rename one: the kind opens the
+          // kind picker, the rest of the row still renames.
+          <View className="flex-row items-center">
+            <Pressable
+              onPress={() => pickKind(account, (next) => updateKind.mutate(next))}
+              disabled={updateKind.isPending}
+              hitSlop={{ top: 6, bottom: 6 }}
+              accessibilityRole="button"
+              accessibilityLabel={`Kind of account: ${accountKind(account)}`}
+              accessibilityHint="Changes what kind of account this is"
+              className="flex-row items-center gap-0.5"
+              style={{ opacity: updateKind.isPending ? 0.6 : 1 }}
+            >
+              <Text className="text-text-3" style={{ fontFamily: "JetBrainsMono", fontSize: rf(11.5) }} numberOfLines={1}>{accountKind(account)}</Text>
+              <ChevronDown size={11} color={colors["text-3"]} strokeWidth={2.25} />
+            </Pressable>
+            {account.mask && (
+              <Text className="text-text-3" style={{ fontFamily: "JetBrainsMono", fontSize: rf(11.5) }} numberOfLines={1}>{` · ····${account.mask}`}</Text>
+            )}
+          </View>
+        ) : (
+          <Text className="text-text-3" style={{ fontFamily: "JetBrainsMono", fontSize: rf(11.5) }} numberOfLines={1}>
+            {caption ?? `${accountKind(account)}${account.mask ? ` · ····${account.mask}` : ""}`}
+          </Text>
+        )}
       </Pressable>
       <View style={{ flexShrink: 0, alignItems: "flex-end" }}>
         {account.currentBalance == null ? (
