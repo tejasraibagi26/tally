@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.27.0",
+    date: "2026-11-10",
+    changes: [
+      { kind: "new", text: "The goal view's net worth chart shows how much it changed, and you can switch it between the past month, 3 months, 6 months and year." },
+    ],
+  },
+  {
     version: "2.26.1",
     date: "2026-11-09",
     changes: [

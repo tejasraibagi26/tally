@@ -33,6 +33,7 @@ import { GoalStand } from "@/components/goalview/GoalStand";
 import { PaceSplit } from "@/components/goalview/PaceSplit";
 import { SavingLedger } from "@/components/goalview/SavingLedger";
 import { GoalCosts } from "@/components/goalview/GoalCosts";
+import { NetWorthRangeCard } from "@/components/goalview/NetWorthRangeCard";
 import { getUserTimezone } from "@/lib/userTimezone";
 import { todayInZone } from "@tally/core/zonedDate";
 import { monthSummary } from "@tally/core/budgetView";
@@ -208,12 +209,7 @@ export default async function OverviewPage() {
           {goal && <PaceSplit summary={goal}>{showSafe && <SafeToSpendCard s={safe} forecastLink={false} />}</PaceSplit>}
           {ledger && <SavingLedger months={ledger} neededPerMonth={goal?.projection.neededPerMonth ?? null} daysLeft={daysInMonth - daysElapsed} />}
           <GoalCosts budgets={budgets} month={month} ctx={{ daysElapsed, daysInMonth }} neededPerMonth={goal?.projection.neededPerMonth ?? null} />
-          <Card className="overflow-hidden">
-            <CardHeader title="Net worth over the year" />
-            <div className="min-h-[200px] flex">
-              <NetWorthChart points={netWorthPoints} />
-            </div>
-          </Card>
+          <NetWorthRangeCard points={netWorthPoints} netWorth={netWorth} today={today} />
         </>
       )}
 
