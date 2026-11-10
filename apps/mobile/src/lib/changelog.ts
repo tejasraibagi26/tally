@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.23.2",
+    date: "2026-11-10",
+    changes: [
+      { kind: "fixed", text: "The net worth range picker is back under the chart, so it no longer runs off the edge on smaller screens." },
+    ],
+  },
+  {
     version: "2.23.1",
     date: "2026-11-10",
     changes: [

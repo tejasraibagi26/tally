@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, PanResponder, Animated, AccessibilityInfo, useWindowDimensions } from "react-native";
+import { View, Text, Pressable, PanResponder, Animated, AccessibilityInfo, useWindowDimensions } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 import { formatCents } from "@tally/core/money";
 import { NET_WORTH_RANGES, RANGE_CAPTION, netWorthDelta, sliceNetWorthRange, type NetWorthRange } from "@tally/core/overviewView";
 import { SplitMoney } from "@/components/ui/SplitMoney";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { NativeSegmented } from "@/components/ui/NativeSegmented";
+import { useStickerShadow } from "@/components/ui/Card";
 import { usePrivacy } from "@/lib/PrivacyContext";
 import { todayISO } from "@/lib/today";
 import type { NetWorthPoint } from "@/lib/queries/overview";
@@ -54,6 +54,8 @@ export function NetWorthHero({
 }) {
   const isCard = variant === "card";
   const colors = useThemeColors();
+  // The selected range sits on a small card: the same soft edge as every card.
+  const rangeEdge = useStickerShadow();
   const rf = useRF();
   const { hidden } = usePrivacy();
   const { width: windowWidth } = useWindowDimensions();
@@ -227,19 +229,15 @@ export function NetWorthHero({
 
   return (
     <View className="gap-3">
-      {/* Title on the left, the compact range control on the right. */}
-      <View className="flex-row items-center justify-between gap-3">
-        {isCard ? (
-          <Text className="font-ui-semibold uppercase" style={{ fontSize: rf(11), letterSpacing: 0.7, color: colors["text-3"] }}>
-            Net worth over the year
-          </Text>
-        ) : (
-          <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(14) }}>
-            Net worth
-          </Text>
-        )}
-        {points.length > 1 && <NativeSegmented options={NET_WORTH_RANGES} value={range} onChange={chooseRange} label="Chart range" />}
-      </View>
+      {isCard ? (
+        <Text className="font-ui-semibold uppercase" style={{ fontSize: rf(11), letterSpacing: 0.7, color: colors["text-3"] }}>
+          Net worth over the year
+        </Text>
+      ) : (
+        <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(14) }}>
+          Net worth
+        </Text>
+      )}
       {isCard ? (
         <View className="h-[26px] justify-center" accessible accessibilityLabel={loading ? "Net worth" : spoken}>
           {hoveredPoint ? (
@@ -332,6 +330,30 @@ export function NetWorthHero({
               />
             )}
           </Animated.View>
+          <View className="flex-row gap-1" accessibilityRole="tablist">
+            {NET_WORTH_RANGES.map((r) => {
+              const on = r === range;
+              return (
+                <Pressable
+                  key={r}
+                  onPress={() => chooseRange(r)}
+                  hitSlop={{ top: 8, bottom: 8 }}
+                  className="h-8 px-3.5 rounded-full items-center justify-center"
+                  style={[
+                    // Every range is outlined (v2.19.6); the selected one sits on a
+                    // white card with a brand outline.
+                    on ? [{ backgroundColor: colors.surface }, rangeEdge] : null,
+                    { borderWidth: 1, borderColor: on ? colors.brand : colors["field-line"] },
+                  ]}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: on }}
+                  accessibilityLabel={RANGE_CAPTION[r]}
+                >
+                  <Text className="font-ui-semibold" style={{ fontSize: rf(13), color: on ? colors.text : colors["text-3"] }}>{r}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
         </>
       )}
     </View>

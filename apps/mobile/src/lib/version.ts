@@ -587,8 +587,11 @@ import Constants from "expo-constants";
  * 2.23.1: that control is compact -- small control size, sized to its
  * segments -- and sits on the right of the title row instead of spanning
  * the screen under the chart.
+ *
+ * 2.23.2: reverts 2.23.0-2.23.1 -- the native control overflowed the title
+ * row on some devices. Back to the outlined pills under the chart.
  */
-export const APP_VERSION = "2.23.1";
+export const APP_VERSION = "2.23.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
