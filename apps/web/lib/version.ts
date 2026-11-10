@@ -698,6 +698,9 @@
  * brand on track, marigold ahead of pace, red over, grey settled. Classic
  * Budgets and mobile are unchanged.
  *
+ * 2.27.1: that range control is a sliding pill (the selection glides
+ * between equal-width segments; no motion under reduced-motion).
+ *
  * 2.27.0: the goal view's "Net worth over the year" card gets mobile's
  * change chip and 1M/3M/6M/1Y range pills (goalview/NetWorthRangeCard).
  *
@@ -714,7 +717,7 @@
  * preferences link use the new URLs, and core appLinks maps them for the
  * app.
  */
-export const APP_VERSION = "2.27.0";
+export const APP_VERSION = "2.27.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

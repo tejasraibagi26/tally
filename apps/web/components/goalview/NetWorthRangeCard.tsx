@@ -33,7 +33,14 @@ export function NetWorthRangeCard({ points, netWorth, today }: { points: NetWort
         title="Net worth over the year"
         action={
           points.length > 1 && (
-            <div className="flex gap-1 rounded-full bg-sunken p-[3px]" role="tablist" aria-label="Chart range">
+            // Equal-width segments, so the selected pill slides by whole
+            // multiples of its own width (translateX(index * 100%)).
+            <div className="relative grid grid-cols-4 rounded-full bg-sunken p-[3px]" role="tablist" aria-label="Chart range">
+              <span
+                aria-hidden="true"
+                className="absolute top-[3px] bottom-[3px] left-[3px] w-[calc((100%-6px)/4)] rounded-full bg-raised shadow-raised transition-transform duration-200 ease-out motion-reduce:transition-none"
+                style={{ transform: `translateX(${NET_WORTH_RANGES.indexOf(range) * 100}%)` }}
+              />
               {NET_WORTH_RANGES.map((r) => (
                 <button
                   key={r}
@@ -41,7 +48,7 @@ export function NetWorthRangeCard({ points, netWorth, today }: { points: NetWort
                   role="tab"
                   aria-selected={range === r}
                   onClick={() => setRange(r)}
-                  className={cn("px-2.5 py-1 rounded-full text-xs font-medium", range === r ? "bg-raised text-text" : "text-text-3 hover:text-text")}
+                  className={cn("relative z-10 w-10 py-1 rounded-full text-xs font-medium transition-colors", range === r ? "text-text" : "text-text-3 hover:text-text")}
                 >
                   {r}
                 </button>

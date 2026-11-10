@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.27.1",
+    date: "2026-11-10",
+    changes: [
+      { kind: "improved", text: "The net worth chart's range picker slides to the range you choose." },
+    ],
+  },
+  {
     version: "2.27.0",
     date: "2026-11-10",
     changes: [
