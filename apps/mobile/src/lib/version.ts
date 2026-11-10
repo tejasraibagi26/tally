@@ -574,8 +574,12 @@ import Constants from "expo-constants";
  *
  * 2.22.1: a settled bar (paid, or not this month) wears the category's own
  * colour (budgets.tsx colorFor, passed to RunwayRow) instead of grey.
+ *
+ * 2.22.2: the Net worth hero shows its % change on every range. When history
+ * is shorter than the range, core netWorthDelta measures from the earliest
+ * snapshot and the caption reads "Since Mar 4" instead of hiding the chip.
  */
-export const APP_VERSION = "2.22.1";
+export const APP_VERSION = "2.22.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

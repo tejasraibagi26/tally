@@ -101,20 +101,35 @@ export interface NetWorthDelta {
   cents: number;
   /** Whole-number percent of the starting value. */
   pct: number;
+  /**
+   * Set when history doesn't reach back to the range's start: the change is
+   * measured from this (the earliest usable) snapshot instead, so the chip
+   * can say "Since Mar 4" rather than claiming the full range.
+   */
+  since?: string;
 }
 
 /**
  * Change from the latest snapshot at or before the range's start to today's
  * live total (not the series' last point, which can lag a balance refresh).
- * Undefined when there's no snapshot that old, or it was zero, so the chip
- * never shows a misleading "0%".
+ * When history is shorter than the range (or that snapshot was zero), it
+ * falls back to the earliest non-zero snapshot after the cutoff, so every
+ * range shows a change. Undefined only when there's no non-zero snapshot.
  */
 export function netWorthDelta(points: TrendPoint[], currentNet: number, range: NetWorthRange, today: string): NetWorthDelta | undefined {
   const cutoff = monthsAgo(today, RANGE_MONTHS[range]);
-  const prior = [...points].reverse().find((p) => p.asOfDate <= cutoff)?.net;
-  if (prior == null || prior === 0) return undefined;
-  const change = currentNet - prior;
-  return { direction: change >= 0 ? "up" : "down", cents: Math.abs(change), pct: Math.round((Math.abs(change) / Math.abs(prior)) * 100) };
+  const atCutoff = [...points].reverse().find((p) => p.asOfDate <= cutoff);
+  let start: TrendPoint | undefined = atCutoff && atCutoff.net !== 0 ? atCutoff : undefined;
+  let since: string | undefined;
+  if (!start) {
+    start = points.find((p) => p.asOfDate > cutoff && p.asOfDate < today && p.net !== 0);
+    since = start?.asOfDate;
+  }
+  if (!start) return undefined;
+  const change = currentNet - start.net;
+  const delta: NetWorthDelta = { direction: change >= 0 ? "up" : "down", cents: Math.abs(change), pct: Math.round((Math.abs(change) / Math.abs(start.net)) * 100) };
+  if (since) delta.since = since;
+  return delta;
 }
 
 export const CREDIT_UTILIZATION_LIMIT = 0.3;

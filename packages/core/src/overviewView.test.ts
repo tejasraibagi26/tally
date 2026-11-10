@@ -76,8 +76,14 @@ describe("net worth range", () => {
     expect(netWorthDelta(pts, 300, "1M", "2026-10-14")).toEqual({ direction: "up", cents: 100, pct: 50 });
     expect(netWorthDelta(pts, 150, "1M", "2026-10-14")).toEqual({ direction: "down", cents: 50, pct: 25 });
   });
-  it("has no delta without a snapshot that old, or from a zero start", () => {
-    expect(netWorthDelta(pts, 300, "6M", "2026-10-14")).toBeUndefined();
+  it("falls back to the earliest snapshot when history is shorter than the range", () => {
+    const first = pts.find((p) => p.net !== 0)!;
+    const d = netWorthDelta(pts, 300, "6M", "2026-10-14");
+    expect(d?.since).toBe(first.asOfDate);
+    expect(d?.cents).toBe(Math.abs(300 - first.net));
+  });
+  it("skips a zero start, and has no delta only without any non-zero snapshot", () => {
+    expect(netWorthDelta([{ asOfDate: "2026-09-01", net: 0 }, { asOfDate: "2026-09-20", net: 200 }], 300, "1M", "2026-10-14")).toEqual({ direction: "up", cents: 100, pct: 50, since: "2026-09-20" });
     expect(netWorthDelta([{ asOfDate: "2026-09-01", net: 0 }], 300, "1M", "2026-10-14")).toBeUndefined();
   });
 });

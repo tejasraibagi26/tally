@@ -218,10 +218,14 @@ export function NetWorthHero({
   }, [values]);
 
   const up = delta?.direction === "up";
+  // History shorter than the range: the change runs from the first snapshot.
+  const caption = delta?.since
+    ? `Since ${new Date(delta.since + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })}`
+    : RANGE_CAPTION[range];
   const deltaText = delta ? `${up ? "▲" : "▼"} ${hidden ? "" : `${up ? "+" : "−"}${formatCents(delta.cents)} · `}${delta.pct}%` : null;
   const spoken = loading
     ? "Net worth"
-    : `Net worth ${hidden ? "hidden" : formatCents(netCents)}${delta ? `, ${up ? "up" : "down"} ${hidden ? "" : `${formatCents(delta.cents)}, `}${delta.pct} percent, ${RANGE_CAPTION[range].toLowerCase()}` : ""}`;
+    : `Net worth ${hidden ? "hidden" : formatCents(netCents)}${delta ? `, ${up ? "up" : "down"} ${hidden ? "" : `${formatCents(delta.cents)}, `}${delta.pct} percent, ${caption.toLowerCase()}` : ""}`;
 
   return (
     <View className="gap-3">
@@ -245,7 +249,7 @@ export function NetWorthHero({
               <View className="h-[26px] justify-center rounded-full px-2.5" style={{ backgroundColor: up ? colors["positive-subtle"] : colors["negative-subtle"] }}>
                 <Text className="font-num-semibold" style={{ fontSize: rf(12.5), color: up ? colors.positive : colors.negative, fontVariant: ["tabular-nums"] }}>{deltaText}</Text>
               </View>
-              <Text className="font-ui text-text-3" style={{ fontSize: rf(12.5) }}>{RANGE_CAPTION[range]}</Text>
+              <Text className="font-ui text-text-3" style={{ fontSize: rf(12.5) }}>{caption}</Text>
             </View>
           ) : null}
         </View>
@@ -268,7 +272,7 @@ export function NetWorthHero({
                 <View className="h-[26px] justify-center rounded-full px-2.5" style={{ backgroundColor: up ? colors["positive-subtle"] : colors["negative-subtle"] }}>
                   <Text className="font-num-semibold" style={{ fontSize: rf(12.5), color: up ? colors.positive : colors.negative, fontVariant: ["tabular-nums"] }}>{deltaText}</Text>
                 </View>
-                <Text className="font-ui text-text-3" style={{ fontSize: rf(12.5) }}>{RANGE_CAPTION[range]}</Text>
+                <Text className="font-ui text-text-3" style={{ fontSize: rf(12.5) }}>{caption}</Text>
               </View>
             ) : null}
           </View>

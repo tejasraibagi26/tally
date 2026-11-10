@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.22.2",
+    date: "2026-11-09",
+    changes: [
+      { kind: "fixed", text: "Net worth always shows its % change when you switch between 1M, 3M, 6M and 1Y. If your history doesn't go back that far, it counts from your first day instead." },
+    ],
+  },
+  {
     version: "2.22.1",
     date: "2026-11-09",
     changes: [
