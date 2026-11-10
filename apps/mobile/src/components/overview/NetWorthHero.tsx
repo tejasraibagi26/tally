@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, Pressable, PanResponder, Animated, AccessibilityInfo, useWindowDimensions } from "react-native";
+import { View, Text, PanResponder, Animated, AccessibilityInfo, useWindowDimensions } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
 import { formatCents } from "@tally/core/money";
 import { NET_WORTH_RANGES, RANGE_CAPTION, netWorthDelta, sliceNetWorthRange, type NetWorthRange } from "@tally/core/overviewView";
 import { SplitMoney } from "@/components/ui/SplitMoney";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { useStickerShadow } from "@/components/ui/Card";
+import { NativeSegmented } from "@/components/ui/NativeSegmented";
 import { usePrivacy } from "@/lib/PrivacyContext";
 import { todayISO } from "@/lib/today";
 import type { NetWorthPoint } from "@/lib/queries/overview";
@@ -54,8 +54,6 @@ export function NetWorthHero({
 }) {
   const isCard = variant === "card";
   const colors = useThemeColors();
-  // The selected range sits on a small card: the same soft edge as every card.
-  const rangeEdge = useStickerShadow();
   const rf = useRF();
   const { hidden } = usePrivacy();
   const { width: windowWidth } = useWindowDimensions();
@@ -330,30 +328,8 @@ export function NetWorthHero({
               />
             )}
           </Animated.View>
-          <View className="flex-row gap-1" accessibilityRole="tablist">
-            {NET_WORTH_RANGES.map((r) => {
-              const on = r === range;
-              return (
-                <Pressable
-                  key={r}
-                  onPress={() => chooseRange(r)}
-                  hitSlop={{ top: 8, bottom: 8 }}
-                  className="h-8 px-3.5 rounded-full items-center justify-center"
-                  style={[
-                    // Every range is outlined (v2.19.6); the selected one sits on a
-                    // white card with a brand outline.
-                    on ? [{ backgroundColor: colors.surface }, rangeEdge] : null,
-                    { borderWidth: 1, borderColor: on ? colors.brand : colors["field-line"] },
-                  ]}
-                  accessibilityRole="tab"
-                  accessibilityState={{ selected: on }}
-                  accessibilityLabel={RANGE_CAPTION[r]}
-                >
-                  <Text className="font-ui-semibold" style={{ fontSize: rf(13), color: on ? colors.text : colors["text-3"] }}>{r}</Text>
-                </Pressable>
-              );
-            })}
-          </View>
+          {/* The OS's own segmented control -- Liquid Glass on iOS 26+. */}
+          <NativeSegmented options={NET_WORTH_RANGES} value={range} onChange={chooseRange} label="Chart range" />
         </>
       )}
     </View>

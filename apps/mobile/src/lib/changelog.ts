@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.23.0",
+    date: "2026-11-10",
+    changes: [
+      { kind: "improved", text: "The net worth range picker is your phone's own sliding control, with the glass look on newer iPhones." },
+    ],
+  },
+  {
     version: "2.22.2",
     date: "2026-11-09",
     changes: [

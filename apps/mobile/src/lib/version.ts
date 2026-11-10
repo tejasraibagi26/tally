@@ -578,8 +578,13 @@ import Constants from "expo-constants";
  * 2.22.2: the Net worth hero shows its % change on every range. When history
  * is shorter than the range, core netWorthDelta measures from the earliest
  * snapshot and the caption reads "Since Mar 4" instead of hiding the chip.
+ *
+ * 2.23.0: the Net worth range control is the OS's own segmented control
+ * (components/ui/NativeSegmented via @expo/ui): SwiftUI's segmented Picker
+ * on iOS -- Liquid Glass on iOS 26+ -- and Material 3 segmented buttons on
+ * Android, replacing the hand-drawn outlined pills.
  */
-export const APP_VERSION = "2.22.2";
+export const APP_VERSION = "2.23.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build
