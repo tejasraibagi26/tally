@@ -26,8 +26,6 @@ export async function sendEmail({ to, subject, html }: SendEmailParams): Promise
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
-      // Carries the current transaction to the email service, so both sides show up as one flow.
-      ...log.inject({}),
     },
     body: JSON.stringify({ to, subject, html }),
   });

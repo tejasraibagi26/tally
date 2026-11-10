@@ -1,6 +1,4 @@
 import { AsyncLocalStorage } from "node:async_hooks";
-import { after } from "next/server";
-import { log as base } from "@switchyard/logger";
 
 /**
  * Who a request came from, attached to every log written while handling it
@@ -14,8 +12,7 @@ import { log as base } from "@switchyard/logger";
  *   cron    Vercel cron
  *   unknown anything else
  *
- * userId and requestId are lifted by Switchyard into their own top-level
- * fields; the rest lands in the event's context.
+ * Every field lands on the log line's JSON alongside the message.
  */
 export type RequestLogContext = {
   client: "mobile" | "web" | "api" | "plaid" | "cron" | "unknown";
@@ -103,12 +100,28 @@ export function currentLogContext(): RequestLogContext | undefined {
   return store.getStore();
 }
 
-// Merges the request context under whatever the call passed, keeping the
-// logger's own conventions: an Error as ctx becomes `err` (Switchyard lifts
-// it into the event's error), anything else that isn't an object `detail`.
-function withRequest(ctx: unknown): unknown {
-  const req = store.getStore();
-  if (!req) return ctx;
+type Level = "trace" | "debug" | "info" | "warn" | "error" | "fatal";
+
+// Never written to a log, at any depth.
+const REDACT = new Set(["access_token", "public_token", "plaidAccessToken", "secret"]);
+
+function serializeError(err: Error): Record<string, unknown> {
+  return { name: err.name, message: err.message, stack: err.stack };
+}
+
+function redact(value: unknown, depth = 0): unknown {
+  if (value instanceof Error) return serializeError(value);
+  if (value === null || typeof value !== "object" || depth > 6) return value;
+  if (Array.isArray(value)) return value.map((v) => redact(v, depth + 1));
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(value)) out[k] = REDACT.has(k) ? "[redacted]" : redact(v, depth + 1);
+  return out;
+}
+
+// Merges the request context under whatever the call passed: an Error as ctx
+// becomes `err`, an array `items`, anything else that isn't an object `detail`.
+function withRequest(ctx: unknown): Record<string, unknown> {
+  const req = store.getStore() ?? {};
   if (ctx === undefined || ctx === null) return { ...req };
   if (ctx instanceof Error) return { ...req, err: ctx };
   if (Array.isArray(ctx)) return { ...req, items: ctx };
@@ -116,10 +129,29 @@ function withRequest(ctx: unknown): unknown {
   return { ...req, detail: ctx };
 }
 
-type Level = "trace" | "debug" | "info" | "warn" | "error" | "fatal";
-const at = (level: Level) => (msg: unknown, ctx?: unknown) => base[level](msg, withRequest(ctx));
+const CONSOLE: Record<Level, (line: string) => void> = {
+  trace: (l) => console.debug(l),
+  debug: (l) => console.debug(l),
+  info: (l) => console.info(l),
+  warn: (l) => console.warn(l),
+  error: (l) => console.error(l),
+  fatal: (l) => console.error(l),
+};
 
-/** The app's logger: Switchyard's, plus the request context on every line. */
+// One JSON line per call, so Vercel's runtime logs can be searched by field.
+const at = (level: Level) => (msg: unknown, ctx?: unknown) => {
+  const fields = withRequest(ctx);
+  let message: string;
+  if (msg instanceof Error) {
+    message = msg.message;
+    fields.err ??= msg;
+  } else {
+    message = typeof msg === "string" ? msg : JSON.stringify(msg);
+  }
+  CONSOLE[level](JSON.stringify({ level, msg: message, ...(redact(fields) as Record<string, unknown>) }));
+};
+
+/** The app's logger: structured console lines, plus the request context on every line. */
 export const log = {
   trace: at("trace"),
   debug: at("debug"),
@@ -127,41 +159,30 @@ export const log = {
   warn: at("warn"),
   error: at("error"),
   fatal: at("fatal"),
-  child: base.child,
-  flush: base.flush,
-  inject: base.inject,
-  extract: base.extract,
-  withTransaction: base.withTransaction,
-  currentTransaction: base.currentTransaction,
 };
 
 /**
- * Wraps an API route handler for Switchyard: continues the transaction from the caller (or starts one),
- * tags every log in the request with it and with who sent it (requestLogContext), logs one line per
- * request, and sends logs after the response.
+ * Wraps an API route handler: tags every log in the request with who sent it (requestLogContext),
+ * logs one line per request, and turns an uncaught throw into a logged 500.
  *
  *   async function GET_handler(req: Request) { … }
  *   export const GET = route(GET_handler);
  */
 export function route<R extends Request, A extends unknown[]>(fn: (req: R, ...args: A) => Response | Promise<Response>) {
-  return base.handler(
-    (req: R, ...args: A) =>
-      store.run(requestLogContext(req), async () => {
-        const start = Date.now();
-        let res: Response;
-        try {
-          res = await fn(req, ...args);
-        } catch (err) {
-          // Logged here (not left to Switchyard's handler) so the line carries
-          // the client and user; the caller gets the same 500 either way.
-          log.error(err instanceof Error ? err : new Error(String(err)), { uncaught: true });
-          res = Response.json({ error: "Something went wrong" }, { status: 500 });
-        }
-        const durationMs = Date.now() - start;
-        const ctx = store.getStore()!;
-        log[res.status >= 500 ? "warn" : "info"](`${req.method} ${ctx.path} ${res.status} in ${durationMs}ms`, { status: res.status, durationMs });
-        return res;
-      }),
-    { waitUntil: after },
-  );
+  return (req: R, ...args: A) =>
+    store.run(requestLogContext(req), async () => {
+      const start = Date.now();
+      let res: Response;
+      try {
+        res = await fn(req, ...args);
+      } catch (err) {
+        // Logged here so the line carries the client and user.
+        log.error(err instanceof Error ? err : new Error(String(err)), { uncaught: true });
+        res = Response.json({ error: "Something went wrong" }, { status: 500 });
+      }
+      const durationMs = Date.now() - start;
+      const ctx = store.getStore()!;
+      log[res.status >= 500 ? "warn" : "info"](`${req.method} ${ctx.path} ${res.status} in ${durationMs}ms`, { status: res.status, durationMs });
+      return res;
+    });
 }

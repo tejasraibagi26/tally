@@ -24,7 +24,6 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@switchyard/logger": "file:vendor/switchyard-logger-0.2.1.tgz",
     "@tally/core": "*",
     "@upstash/qstash": "^2.11.3",
     "bcryptjs": "^2.4.3",
