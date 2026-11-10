@@ -1,15 +1,16 @@
 import { Platform } from "react-native";
 import { useColorScheme } from "nativewind";
 import { Host as SwiftHost, Picker, Text as SwiftText } from "@expo/ui/swift-ui";
-import { pickerStyle, tag } from "@expo/ui/swift-ui/modifiers";
+import { controlSize, fixedSize, pickerStyle, tag } from "@expo/ui/swift-ui/modifiers";
 import { Host as ComposeHost, SingleChoiceSegmentedButtonRow, SegmentedButton, Text as ComposeText } from "@expo/ui/jetpack-compose";
-import { fillMaxWidth, weight } from "@expo/ui/jetpack-compose/modifiers";
+import { height, width } from "@expo/ui/jetpack-compose/modifiers";
 
 /**
  * The OS's own segmented control: SwiftUI's segmented Picker on iOS (which
  * picks up Liquid Glass on iOS 26+ by itself, sliding selection included)
- * and Material 3's single-choice segmented buttons on Android. Spans its
- * parent's width; the height comes from the native control.
+ * and Material 3's single-choice segmented buttons on Android. Compact:
+ * the small control size, sized to its own segments (it sits beside a
+ * title, not across the screen).
  */
 export function NativeSegmented<T extends string>({
   options,
@@ -30,8 +31,13 @@ export function NativeSegmented<T extends string>({
 
   if (Platform.OS === "ios") {
     return (
-      <SwiftHost matchContents={{ vertical: true }} colorScheme={scheme} style={{ width: "100%" }}>
-        <Picker<string> label={label} selection={value} onSelectionChange={(next) => onChange(next as T)} modifiers={[pickerStyle("segmented")]}>
+      <SwiftHost matchContents colorScheme={scheme}>
+        <Picker<string>
+          label={label}
+          selection={value}
+          onSelectionChange={(next) => onChange(next as T)}
+          modifiers={[pickerStyle("segmented"), controlSize("small"), fixedSize()]}
+        >
           {options.map((o) => (
             <SwiftText key={o} modifiers={[tag(o)]}>
               {o}
@@ -43,12 +49,12 @@ export function NativeSegmented<T extends string>({
   }
 
   return (
-    <ComposeHost matchContents={{ vertical: true }} colorScheme={scheme} style={{ width: "100%" }}>
-      <SingleChoiceSegmentedButtonRow modifiers={[fillMaxWidth()]}>
+    <ComposeHost matchContents colorScheme={scheme}>
+      <SingleChoiceSegmentedButtonRow modifiers={[height(34)]}>
         {options.map((o) => (
-          <SegmentedButton key={o} selected={o === value} onClick={() => onChange(o)} modifiers={[weight(1)]}>
+          <SegmentedButton key={o} selected={o === value} onClick={() => onChange(o)} modifiers={[width(52)]}>
             <SegmentedButton.Label>
-              <ComposeText>{o}</ComposeText>
+              <ComposeText style={{ fontSize: 12 }}>{o}</ComposeText>
             </SegmentedButton.Label>
           </SegmentedButton>
         ))}

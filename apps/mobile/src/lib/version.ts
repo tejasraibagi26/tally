@@ -583,8 +583,12 @@ import Constants from "expo-constants";
  * (components/ui/NativeSegmented via @expo/ui): SwiftUI's segmented Picker
  * on iOS -- Liquid Glass on iOS 26+ -- and Material 3 segmented buttons on
  * Android, replacing the hand-drawn outlined pills.
+ *
+ * 2.23.1: that control is compact -- small control size, sized to its
+ * segments -- and sits on the right of the title row instead of spanning
+ * the screen under the chart.
  */
-export const APP_VERSION = "2.23.0";
+export const APP_VERSION = "2.23.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

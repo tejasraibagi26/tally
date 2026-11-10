@@ -227,15 +227,19 @@ export function NetWorthHero({
 
   return (
     <View className="gap-3">
-      {isCard ? (
-        <Text className="font-ui-semibold uppercase" style={{ fontSize: rf(11), letterSpacing: 0.7, color: colors["text-3"] }}>
-          Net worth over the year
-        </Text>
-      ) : (
-        <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(14) }}>
-          Net worth
-        </Text>
-      )}
+      {/* Title on the left, the compact range control on the right. */}
+      <View className="flex-row items-center justify-between gap-3">
+        {isCard ? (
+          <Text className="font-ui-semibold uppercase" style={{ fontSize: rf(11), letterSpacing: 0.7, color: colors["text-3"] }}>
+            Net worth over the year
+          </Text>
+        ) : (
+          <Text className="font-ui-medium text-text-2" style={{ fontSize: rf(14) }}>
+            Net worth
+          </Text>
+        )}
+        {points.length > 1 && <NativeSegmented options={NET_WORTH_RANGES} value={range} onChange={chooseRange} label="Chart range" />}
+      </View>
       {isCard ? (
         <View className="h-[26px] justify-center" accessible accessibilityLabel={loading ? "Net worth" : spoken}>
           {hoveredPoint ? (
@@ -328,8 +332,6 @@ export function NetWorthHero({
               />
             )}
           </Animated.View>
-          {/* The OS's own segmented control -- Liquid Glass on iOS 26+. */}
-          <NativeSegmented options={NET_WORTH_RANGES} value={range} onChange={chooseRange} label="Chart range" />
         </>
       )}
     </View>
