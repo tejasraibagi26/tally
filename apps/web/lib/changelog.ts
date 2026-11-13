@@ -18,7 +18,7 @@ export const CHANGELOG: ChangelogEntry[] = [
     version: "2.28.1",
     date: "2026-11-13",
     changes: [
-      { kind: "fix", text: "The retirement planner's \"spending is an estimate\" note is easier to see in dark mode." },
+      { kind: "fixed", text: "The retirement planner's \"spending is an estimate\" note is easier to see in dark mode." },
     ],
   },
   {
