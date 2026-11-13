@@ -67,6 +67,7 @@ async function ensureMonthSeeded(userId: string, month: string): Promise<void> {
   if (already) return;
 
   const priorMonth = shiftMonth(month, -1);
+  // One-time budgets belong to their own month only.
   const priorRows = await db
     .select({
       categoryId: schema.budgets.categoryId,
@@ -75,7 +76,7 @@ async function ensureMonthSeeded(userId: string, month: string): Promise<void> {
       isFixedAmount: schema.budgets.isFixedAmount,
     })
     .from(schema.budgets)
-    .where(and(eq(schema.budgets.userId, userId), eq(schema.budgets.month, priorMonth)));
+    .where(and(eq(schema.budgets.userId, userId), eq(schema.budgets.month, priorMonth), eq(schema.budgets.isOneTime, false)));
   if (priorRows.length === 0) return;
 
   await db
@@ -152,6 +153,8 @@ export interface BudgetLine {
   rolloverEnabled: boolean;
   rolloverFromPrior: number;
   isFixedAmount: boolean;
+  /** Just this month: never carried forward, copied, or rolled over. */
+  isOneTime: boolean;
   spend: number;
   remaining: number;
 }
@@ -171,7 +174,8 @@ async function priorMonthRollover(userId: string, categoryId: string, month: str
     .from(schema.budgets)
     .where(and(eq(schema.budgets.userId, userId), eq(schema.budgets.categoryId, categoryId), eq(schema.budgets.month, priorMonth)))
     .limit(1);
-  if (!prior) return 0;
+  // A one-time budget's leftover stays in its own month.
+  if (!prior || prior.isOneTime) return 0;
 
   const priorRollover = prior.rolloverEnabled ? await priorMonthRollover(userId, categoryId, priorMonth, rollup) : 0;
   const priorSpend = rolledUpSpend(await spendByCategory(userId, priorMonth), rollup, categoryId);
@@ -189,6 +193,7 @@ export async function getBudgetsForMonth(userId: string, month: string): Promise
       amount: schema.budgets.amount,
       rolloverEnabled: schema.budgets.rolloverEnabled,
       isFixedAmount: schema.budgets.isFixedAmount,
+      isOneTime: schema.budgets.isOneTime,
       categoryName: uc.name,
       categoryColorSlot: uc.colorSlot,
       parentId: uc.parentId,
@@ -215,6 +220,7 @@ export async function getBudgetsForMonth(userId: string, month: string): Promise
       rolloverEnabled: row.rolloverEnabled,
       rolloverFromPrior,
       isFixedAmount: row.isFixedAmount,
+      isOneTime: row.isOneTime,
       spend: catSpend,
       remaining: computeRemaining(row.amount, rolloverFromPrior, catSpend),
     });
@@ -285,7 +291,7 @@ export async function budgetSetupOptions(userId: string, month: string): Promise
   const prior = await db
     .select({ categoryId: schema.budgets.categoryId, amount: schema.budgets.amount, rolloverEnabled: schema.budgets.rolloverEnabled, isFixedAmount: schema.budgets.isFixedAmount })
     .from(schema.budgets)
-    .where(and(eq(schema.budgets.userId, userId), eq(schema.budgets.month, fromMonth)));
+    .where(and(eq(schema.budgets.userId, userId), eq(schema.budgets.month, fromMonth), eq(schema.budgets.isOneTime, false)));
 
   const [rollup, cats, ...spends] = await Promise.all([
     categoryRollupMap(userId),

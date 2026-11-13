@@ -590,8 +590,12 @@ import Constants from "expo-constants";
  *
  * 2.23.2: reverts 2.23.0-2.23.1 -- the native control overflowed the title
  * row on some devices. Back to the outlined pills under the chart.
+ *
+ * 2.24.0: one-time budgets (budgets.is_one_time, migration 0045): set for
+ * one month only -- skipped by the month carry-forward and setup copy, no
+ * rollover in or out -- with a "One-time" tag on the row.
  */
-export const APP_VERSION = "2.23.2";
+export const APP_VERSION = "2.24.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

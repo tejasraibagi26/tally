@@ -39,10 +39,11 @@ export function BudgetDetailSheet({
   const [amountInput, setAmountInput] = useState((line.amount / 100).toFixed(0));
   const [rollover, setRollover] = useState(line.rolloverEnabled);
   const [fixed, setFixed] = useState(line.isFixedAmount);
+  const [oneTime, setOneTime] = useState(line.isOneTime ?? false);
   const [error, setError] = useState<string | null>(null);
 
   const amount = Math.round((parseFloat(amountInput) || 0) * 100);
-  const dirty = amount !== line.amount || rollover !== line.rolloverEnabled || fixed !== line.isFixedAmount;
+  const dirty = amount !== line.amount || rollover !== line.rolloverEnabled || fixed !== line.isFixedAmount || oneTime !== (line.isOneTime ?? false);
   const months = history.data?.months ?? [];
   const past = months.slice(0, -1).filter((h) => h.spend > 0 || h.amount != null);
   const recent = past.slice(-3);
@@ -53,11 +54,11 @@ export function BudgetDetailSheet({
 
   function onSave() {
     setError(null);
-    save.mutate({ month, categoryId: line.categoryId, amount, rolloverEnabled: rollover, isFixedAmount: fixed }, { onSuccess: onClose, onError: () => setError("Couldn't save. Try again.") });
+    save.mutate({ month, categoryId: line.categoryId, amount, rolloverEnabled: rollover && !oneTime, isFixedAmount: fixed, isOneTime: oneTime }, { onSuccess: onClose, onError: () => setError("Couldn't save. Try again.") });
   }
 
   function onRemove() {
-    const snapshot = { month, categoryId: line.categoryId, amount: line.amount, rolloverEnabled: line.rolloverEnabled, isFixedAmount: line.isFixedAmount };
+    const snapshot = { month, categoryId: line.categoryId, amount: line.amount, rolloverEnabled: line.rolloverEnabled, isFixedAmount: line.isFixedAmount, isOneTime: line.isOneTime ?? false };
     Alert.alert(`Remove the ${line.categoryName} budget?`, "Its spending stays in your transactions.", [
       { text: "Cancel", style: "cancel" },
       {
@@ -134,7 +135,8 @@ export function BudgetDetailSheet({
         </View>
 
         <View className="rounded-control bg-sunken px-4">
-          <ToggleRow label="Roll over what's left" hint="Unspent money adds to next month's budget." value={rollover} onChange={setRollover} />
+          <ToggleRow label="One-time" hint="Just this month, like a birthday. Won't carry into next month." value={oneTime} onChange={setOneTime} />
+          {!oneTime && <ToggleRow label="Roll over what's left" hint="Unspent money adds to next month's budget." value={rollover} onChange={setRollover} border />}
           <ToggleRow label="Fixed amount" hint="For rent or insurance: paid / not paid, no pace." value={fixed} onChange={setFixed} border />
         </View>
 

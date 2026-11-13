@@ -50,6 +50,7 @@ export function AddBudgetSheet({
   const [amountInput, setAmountInput] = useState(existing ? (existing.amount / 100).toFixed(2) : "");
   const [rollover, setRollover] = useState(existing?.rolloverEnabled ?? false);
   const [fixed, setFixed] = useState(existing?.isFixedAmount ?? false);
+  const [oneTime, setOneTime] = useState(existing?.isOneTime ?? false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -59,6 +60,7 @@ export function AddBudgetSheet({
     setAmountInput(existing ? (existing.amount / 100).toFixed(2) : "");
     setRollover(existing?.rolloverEnabled ?? false);
     setFixed(existing?.isFixedAmount ?? false);
+    setOneTime(existing?.isOneTime ?? false);
     setError(null);
   }
 
@@ -75,7 +77,7 @@ export function AddBudgetSheet({
     }
     setError(null);
     try {
-      await saveBudget.mutateAsync({ month, categoryId, amount, rolloverEnabled: rollover, isFixedAmount: fixed });
+      await saveBudget.mutateAsync({ month, categoryId, amount, rolloverEnabled: rollover && !oneTime, isFixedAmount: fixed, isOneTime: oneTime });
       handleClose();
     } catch {
       setError("Something went wrong. Try again.");
@@ -140,10 +142,21 @@ export function AddBudgetSheet({
             />
           </View>
 
-          <View className="flex-row items-center justify-between">
-            <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>Rollover unused</Text>
-            <Switch style={{ alignSelf: "center" }} value={rollover} onValueChange={setRollover} trackColor={{ false: colors["border-strong"], true: colors.brand }} ios_backgroundColor={colors["border-strong"]} />
+          <View className="flex-row items-center justify-between gap-3">
+            <View className="flex-1 gap-0.5">
+              <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>One-time</Text>
+              <Text className="font-ui text-text-3" style={{ fontSize: rf(12) }}>
+                {"Just this month, like a birthday or a trip. It won't carry into next month."}
+              </Text>
+            </View>
+            <Switch style={{ alignSelf: "center" }} value={oneTime} onValueChange={setOneTime} trackColor={{ false: colors["border-strong"], true: colors.brand }} ios_backgroundColor={colors["border-strong"]} />
           </View>
+          {!oneTime && (
+            <View className="flex-row items-center justify-between">
+              <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>Rollover unused</Text>
+              <Switch style={{ alignSelf: "center" }} value={rollover} onValueChange={setRollover} trackColor={{ false: colors["border-strong"], true: colors.brand }} ios_backgroundColor={colors["border-strong"]} />
+            </View>
+          )}
           <View className="flex-row items-center justify-between gap-3">
             <View className="flex-1 gap-0.5">
               <Text className="font-ui text-text" style={{ fontSize: rf(14.5) }}>Fixed amount</Text>

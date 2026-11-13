@@ -461,6 +461,9 @@ export const budgets = pgTable("budgets", {
   // Suppresses the projection marker/line for this budget in
   // BudgetRow.tsx/BudgetMeterList.tsx.
   isFixedAmount: boolean("is_fixed_amount").notNull().default(false),
+  // One-time (a birthday, a trip): only for this month. Never carried into
+  // the next month or copied by setup, and its leftover never rolls over.
+  isOneTime: boolean("is_one_time").notNull().default(false),
 }, (t) => ({
   userMonthIdx: index("budgets_user_month_idx").on(t.userId, t.month),
   uniq: uniqueIndex("budgets_user_month_category_idx").on(t.userId, t.month, t.categoryId),

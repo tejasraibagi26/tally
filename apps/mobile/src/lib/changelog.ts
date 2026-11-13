@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.24.0",
+    date: "2026-11-13",
+    changes: [
+      { kind: "new", text: "One-time budgets: turn on \"One-time\" when adding a budget for something like a birthday. It's just for that month and won't carry into the next one." },
+    ],
+  },
+  {
     version: "2.23.2",
     date: "2026-11-10",
     changes: [

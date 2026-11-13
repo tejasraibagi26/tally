@@ -716,8 +716,12 @@
  * (legacySettingsHashTarget); in-app links, alert emails and the recap's
  * preferences link use the new URLs, and core appLinks maps them for the
  * app.
+ *
+ * 2.28.0: one-time budgets (budgets.is_one_time, migration 0045): set for
+ * one month only -- skipped by the month carry-forward and setup copy, no
+ * rollover in or out -- with a "One-time" tag on the row.
  */
-export const APP_VERSION = "2.27.1";
+export const APP_VERSION = "2.28.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

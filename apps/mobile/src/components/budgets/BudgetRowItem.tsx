@@ -35,6 +35,11 @@ export function BudgetRowItem({ line, ctx, color, showTopBorder, onPress }: { li
               <Text className="font-ui-medium text-brand" style={{ fontSize: rf(10.5) }}>Fixed</Text>
             </View>
           )}
+          {line.isOneTime && (
+            <View className="rounded-full bg-brand-subtle px-2 py-0.5">
+              <Text className="font-ui-medium text-brand" style={{ fontSize: rf(10.5) }}>One-time</Text>
+            </View>
+          )}
         </View>
         <Text className="font-ui-semibold" style={{ fontSize: rf(13), color: s.labelTone === "default" ? colors.text : toneColorFor(colors, s.labelTone), fontVariant: ["tabular-nums"] }}>{s.label}</Text>
       </View>

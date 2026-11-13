@@ -15,6 +15,8 @@ export interface BudgetLine {
   rolloverEnabled: boolean;
   rolloverFromPrior: number;
   isFixedAmount: boolean;
+  /** Just this month: never carried forward, copied, or rolled over. Absent from older servers. */
+  isOneTime?: boolean;
   spend: number;
   remaining: number;
 }
@@ -57,6 +59,7 @@ export interface NewBudget {
   amount: number; // cents
   rolloverEnabled: boolean;
   isFixedAmount: boolean;
+  isOneTime: boolean;
 }
 
 // Mirrors web's AddBudgetForm.tsx -- same PUT /api/budgets contract

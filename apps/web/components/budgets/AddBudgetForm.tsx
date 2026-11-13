@@ -22,6 +22,7 @@ export function AddBudgetForm({ month, monthLabel, categories }: { month: string
   const [amountInput, setAmountInput] = useState("");
   const [rollover, setRollover] = useState(false);
   const [fixed, setFixed] = useState(false);
+  const [oneTime, setOneTime] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,7 +59,7 @@ export function AddBudgetForm({ month, monthLabel, categories }: { month: string
       const res = await fetch("/api/budgets", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ month, categoryId: resolvedCategoryId, amount, rolloverEnabled: rollover, isFixedAmount: fixed }),
+        body: JSON.stringify({ month, categoryId: resolvedCategoryId, amount, rolloverEnabled: rollover && !oneTime, isFixedAmount: fixed, isOneTime: oneTime }),
       });
       if (!res.ok) throw new Error("Failed to create budget");
       const budgetName = categories.find((c) => c.id === resolvedCategoryId)?.name ?? newCategoryName.trim();
@@ -68,6 +69,7 @@ export function AddBudgetForm({ month, monthLabel, categories }: { month: string
       setCategoryId(categories[0]?.id ?? "");
       setRollover(false);
       setFixed(false);
+      setOneTime(false);
       close();
       router.refresh();
     } catch (err) {
@@ -117,11 +119,17 @@ export function AddBudgetForm({ month, monthLabel, categories }: { month: string
             />
           </FormField>
         )}
-        <FormField label="Monthly limit">
+        <FormField label={oneTime ? "Limit" : "Monthly limit"}>
           <AmountInput value={amountInput} onChange={setAmountInput} />
         </FormField>
         <div className="flex flex-col gap-3 pt-1">
-          <CheckboxField checked={rollover} onChange={setRollover} label="Rollover unused" hint="Whatever's left this month carries into next month's limit." />
+          <CheckboxField
+            checked={oneTime}
+            onChange={setOneTime}
+            label="One-time"
+            hint={`Just for ${monthLabel}, like a birthday or a trip. It won't carry into next month.`}
+          />
+          {!oneTime && <CheckboxField checked={rollover} onChange={setRollover} label="Rollover unused" hint="Whatever's left this month carries into next month's limit." />}
           <CheckboxField
             checked={fixed}
             onChange={setFixed}

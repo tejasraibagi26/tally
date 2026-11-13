@@ -202,6 +202,7 @@ function BudgetBar({ line, ctx, onOpen }: { line: BudgetLine; ctx: MonthContext;
           <span className="w-2 h-2 rounded-full flex-none" style={{ background: `var(--series-${line.colorSlot})` }} />
           <span className="text-[15px] text-text truncate">{line.categoryName}</span>
           {line.isFixedAmount && <span className="flex-none rounded-full bg-surface-2 px-2 py-px text-[12px] font-medium text-text-2">Fixed</span>}
+          {line.isOneTime && <span className="flex-none rounded-full bg-surface-2 px-2 py-px text-[12px] font-medium text-text-2">One-time</span>}
         </span>
         <span className="text-[13.5px] tabular whitespace-nowrap text-text-3">
           {fmt(line.spend)} of {fmt(s.available)} · <span className={cn("font-semibold", toneClass[s.labelTone] === "text-text-2" ? "text-text" : toneClass[s.labelTone])}>{s.label}</span>

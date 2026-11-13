@@ -47,6 +47,7 @@ const putSchema = z.object({
   amount: z.number().int().min(0),
   rolloverEnabled: z.boolean().default(false),
   isFixedAmount: z.boolean().default(false),
+  isOneTime: z.boolean().default(false),
 });
 
 async function PUT_handler(req: Request) {
@@ -61,17 +62,19 @@ async function PUT_handler(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: "Invalid request", issues: parsed.error.issues }, { status: 400 });
   }
-  const { month, categoryId, amount, rolloverEnabled, isFixedAmount } = parsed.data;
+  const { month, categoryId, amount, isFixedAmount, isOneTime } = parsed.data;
+  // A one-time budget has no next month to roll into.
+  const rolloverEnabled = isOneTime ? false : parsed.data.rolloverEnabled;
   if (!(await categoriesUsableBy(userId, [categoryId]))) {
     return NextResponse.json(unknownCategoryBody, { status: 400 });
   }
 
   const [budget] = await db
     .insert(schema.budgets)
-    .values({ userId, month, categoryId, amount, rolloverEnabled, isFixedAmount })
+    .values({ userId, month, categoryId, amount, rolloverEnabled, isFixedAmount, isOneTime })
     .onConflictDoUpdate({
       target: [schema.budgets.userId, schema.budgets.month, schema.budgets.categoryId],
-      set: { amount, rolloverEnabled, isFixedAmount },
+      set: { amount, rolloverEnabled, isFixedAmount, isOneTime },
     })
     .returning();
 

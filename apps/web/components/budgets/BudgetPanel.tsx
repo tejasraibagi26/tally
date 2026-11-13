@@ -37,6 +37,7 @@ export function BudgetPanel({
   const [amountInput, setAmountInput] = useState("");
   const [rollover, setRollover] = useState(false);
   const [fixed, setFixed] = useState(false);
+  const [oneTime, setOneTime] = useState(false);
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +49,7 @@ export function BudgetPanel({
     setAmountInput((line.amount / 100).toFixed(0));
     setRollover(line.rolloverEnabled);
     setFixed(line.isFixedAmount);
+    setOneTime(line.isOneTime);
     setDescription(line.description ?? "");
     setError(null);
     setHistory(null);
@@ -67,14 +69,14 @@ export function BudgetPanel({
   const current = line;
   const amount = Math.round((parseFloat(amountInput) || 0) * 100);
   const descriptionDirty = description.trim() !== (current.description ?? "");
-  const dirty = amount !== current.amount || rollover !== current.rolloverEnabled || fixed !== current.isFixedAmount || descriptionDirty;
+  const dirty = amount !== current.amount || rollover !== current.rolloverEnabled || fixed !== current.isFixedAmount || oneTime !== current.isOneTime || descriptionDirty;
   const past = (history ?? []).slice(0, -1).filter((h) => h.spend > 0 || h.amount != null);
   const recent = past.slice(-3);
   const avg = recent.length ? Math.round(recent.reduce((s, h) => s + h.spend, 0) / recent.length) : null;
   const overCount = past.filter((h) => h.amount != null && h.spend > h.amount).length;
   const maxBar = Math.max(1, ...(history ?? []).map((h) => Math.max(h.spend, h.amount ?? 0)));
 
-  async function put(body: { amount: number; rolloverEnabled: boolean; isFixedAmount: boolean }) {
+  async function put(body: { amount: number; rolloverEnabled: boolean; isFixedAmount: boolean; isOneTime: boolean }) {
     const res = await fetch("/api/budgets", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ month, categoryId: current.categoryId, ...body }) });
     if (!res.ok) throw new Error("Failed");
   }
@@ -83,7 +85,7 @@ export function BudgetPanel({
     setSaving(true);
     setError(null);
     try {
-      await put({ amount, rolloverEnabled: rollover, isFixedAmount: fixed });
+      await put({ amount, rolloverEnabled: rollover && !oneTime, isFixedAmount: fixed, isOneTime: oneTime });
       if (descriptionDirty) {
         const res = await fetch(`/api/categories/${current.categoryId}`, {
           method: "PATCH",
@@ -105,7 +107,7 @@ export function BudgetPanel({
     try {
       const res = await fetch("/api/budgets", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ month, categoryId: current.categoryId }) });
       if (!res.ok) throw new Error("Failed");
-      const snapshot = { amount: current.amount, rolloverEnabled: current.rolloverEnabled, isFixedAmount: current.isFixedAmount };
+      const snapshot = { amount: current.amount, rolloverEnabled: current.rolloverEnabled, isFixedAmount: current.isFixedAmount, isOneTime: current.isOneTime };
       router.refresh();
       onRemoved(() => put(snapshot));
     } catch {
@@ -203,7 +205,8 @@ export function BudgetPanel({
         </label>
 
         <div className="flex flex-col rounded-control bg-sunken px-4">
-          <Toggle label="Roll over what's left" hint="Unspent money adds to next month's budget." on={rollover} onChange={setRollover} />
+          <Toggle label="One-time" hint="Just this month, like a birthday. It won't carry into next month." on={oneTime} onChange={setOneTime} />
+          {!oneTime && <Toggle label="Roll over what's left" hint="Unspent money adds to next month's budget." on={rollover} onChange={setRollover} border />}
           <Toggle label="Fixed amount" hint="For rent or insurance: shows paid / not paid instead of a pace." on={fixed} onChange={setFixed} border />
         </div>
 

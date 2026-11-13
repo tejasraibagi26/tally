@@ -18,6 +18,7 @@ function whatFor(line: BudgetLine): string | null {
   if (line.description) return line.description;
   const parts: string[] = [];
   if (line.parentName && line.parentName !== line.categoryName) parts.push(line.parentName);
+  if (line.isOneTime) parts.push("one-time");
   if (line.isFixedAmount) parts.push("fixed amount");
   if (line.rolloverFromPrior > 0) parts.push(`+${fmtBudget(line.rolloverFromPrior)} rolled over`);
   return parts.length > 0 ? parts.join(" · ") : null;
