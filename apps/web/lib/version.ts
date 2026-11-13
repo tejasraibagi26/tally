@@ -724,8 +724,13 @@
  * 2.28.1: the FIRE planner's "spending is an estimate" notice gets an info
  * icon and a stronger tint so it reads in dark mode (info-subtle alone
  * barely separated from the card).
+ *
+ * 2.29.0: Cash flow redraws as one bar per month for what was kept (green
+ * up, coral down when overspent) with the amount on each bar, a dashed
+ * average line, and the month in progress hatched as "so far" -- replacing
+ * the income/spend gap lines, whose partial edge months read as a crash.
  */
-export const APP_VERSION = "2.28.1";
+export const APP_VERSION = "2.29.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

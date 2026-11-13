@@ -1,9 +1,8 @@
 "use client";
 
-import { Area, Bar, BarChart, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { EdgeTick } from "@/components/charts/EdgeTick";
+import { useState } from "react";
 import { formatCents, formatPercent } from "@tally/core/money";
-import { cashFlowSummary, trimLeadingEmptyMonths, withCrossings } from "@tally/core/cashFlowMath";
+import { cashFlowSummary, trimLeadingEmptyMonths } from "@tally/core/cashFlowMath";
 
 export interface CashFlowMonth {
   month: string;
@@ -11,10 +10,6 @@ export interface CashFlowMonth {
   spend: number;
   cashFlow: number;
 }
-
-// Below this many months with data the line view is just a couple of
-// points, so the paired bars read better until there's more history.
-const MIN_MONTHS_FOR_LINES = 4;
 
 function monthLabel(month: string): string {
   return new Date(month + "T00:00:00Z").toLocaleDateString("en-US", { month: "short", timeZone: "UTC" });
@@ -50,24 +45,12 @@ function Row({ color, label, value }: { color: string; label: string; value: Rea
   );
 }
 
-interface PointPayload {
-  payload: { label?: string; income: number; spend: number; crossing?: boolean };
-}
-
-function ChartTooltip({ active, payload }: { active?: boolean; payload?: PointPayload[] }) {
-  const point = payload?.[0]?.payload;
-  // Inserted crossing points exist only to shade the gap precisely; they
-  // aren't a month, so they get no tooltip.
-  if (!active || !point || point.crossing || !point.label) return null;
-  return <MonthTooltip label={point.label} income={point.income} spend={point.spend} />;
-}
-
-function Legend({ items }: { items: { color: string; label: string; swatch?: "dot" | "band" }[] }) {
+function Legend({ items }: { items: { label: string; swatch: React.CSSProperties }[] }) {
   return (
-    <div className="flex flex-wrap items-center gap-4 text-[13.5px]">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px]">
       {items.map((i) => (
         <span key={i.label} className="flex items-center gap-1.5">
-          <span className={i.swatch === "band" ? "w-3 h-2 rounded-[2px]" : "w-2 h-2 rounded-full"} style={{ background: i.color, opacity: i.swatch === "band" ? 0.45 : 1 }} />
+          <span className="w-2.5 h-2.5 rounded-[3px] box-border" style={i.swatch} />
           <span className="text-text-2">{i.label}</span>
         </span>
       ))}
@@ -75,11 +58,12 @@ function Legend({ items }: { items: { color: string; label: string; swatch?: "do
   );
 }
 
-// DESIGN.md §7.2, revised: income and spend as two lines with the gap
-// between them shaded green (saved) or red (overspent) once there are
-// MIN_MONTHS_FOR_LINES months of data; side-by-side bars from a zero
-// baseline before that. Leading empty months are dropped either way, and a
-// headline states the takeaway (average saved, savings rate).
+// One bar per month for what was kept: green up from zero when income beat
+// spend, coral down when it didn't, the amount on each bar and a dashed line
+// at the average. The month in progress is hatched ("so far") so a
+// half-finished month doesn't read as a drop. Leading empty months are
+// dropped, and a headline states the takeaway (average saved, savings rate).
+// Drawn in HTML rather than recharts so the amounts can carry .money.
 export function CashFlowChart({ months }: { months: CashFlowMonth[] }) {
   const visible = trimLeadingEmptyMonths(months);
   if (visible.length === 0) {
@@ -87,7 +71,6 @@ export function CashFlowChart({ months }: { months: CashFlowMonth[] }) {
   }
 
   const summary = cashFlowSummary(visible);
-  const useLines = visible.length >= MIN_MONTHS_FOR_LINES;
 
   return (
     <div className="flex flex-col gap-3">
@@ -123,84 +106,113 @@ export function CashFlowChart({ months }: { months: CashFlowMonth[] }) {
           )}
         </div>
       </div>
-      {useLines ? <GapLines months={visible} /> : <PairedBars months={visible} />}
+      <NetBars months={visible} avgSaved={summary.avgSaved} showAvg={summary.monthsCounted > 1} />
     </div>
   );
 }
 
-function GapLines({ months }: { months: CashFlowMonth[] }) {
-  const data = withCrossings(months).map((p) => ({
-    ...p,
-    label: p.crossing ? undefined : monthLabel(months[p.x]!.month),
-    // Range bands: a zero-height band wherever that side doesn't apply, so
-    // each color only fills its own stretches of the gap.
-    savedBand: p.income >= p.spend ? [p.spend, p.income] : [p.income, p.income],
-    overBand: p.spend > p.income ? [p.income, p.spend] : [p.spend, p.spend],
-  }));
-  const ticks = months.map((_, i) => i);
-  const dot = (color: string) =>
-    function DotRenderer(props: { cx?: number; cy?: number; payload?: { crossing?: boolean }; index?: number }) {
-      if (props.payload?.crossing || props.cx == null || props.cy == null) return <g key={props.index} />;
-      return <circle key={props.index} cx={props.cx} cy={props.cy} r={3.5} fill="var(--surface)" stroke={color} strokeWidth={2} />;
-    };
+const CHART_H = 220;
+const LABEL_ROOM = 24;
 
-  return (
-    <div className="flex flex-col gap-2">
-      <div className="ui-bleed">
-        <ResponsiveContainer width="100%" height={220}>
-          <ComposedChart data={data} margin={{ top: 8, right: 6, left: 6, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke="var(--border)" />
-            <XAxis
-              dataKey="x"
-              type="number"
-              domain={[0, months.length - 1]}
-              ticks={ticks}
-              tick={<EdgeTick fontSize={12} format={(i) => monthLabel(months[Number(i)]!.month)} />}
-              axisLine={false}
-              tickLine={false}
-              interval={0}
-            />
-            <YAxis hide domain={[0, "auto"]} />
-            <Tooltip content={<ChartTooltip />} cursor={{ stroke: "var(--border-strong)", strokeDasharray: "3 4" }} />
-            <Area dataKey="savedBand" type="linear" stroke="none" fill="var(--positive)" fillOpacity={0.18} isAnimationActive={false} activeDot={false} />
-            <Area dataKey="overBand" type="linear" stroke="none" fill="var(--negative)" fillOpacity={0.22} isAnimationActive={false} activeDot={false} />
-            <Line dataKey="spend" type="linear" stroke="var(--negative)" strokeWidth={2.5} dot={dot("var(--negative)")} activeDot={{ r: 4.5 }} isAnimationActive={false} />
-            <Line dataKey="income" type="linear" stroke="var(--positive)" strokeWidth={2.5} dot={dot("var(--positive)")} activeDot={{ r: 4.5 }} isAnimationActive={false} />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </div>
-      <Legend
-        items={[
-          { color: "var(--positive)", label: "Income" },
-          { color: "var(--negative)", label: "Spend" },
-          { color: "var(--positive)", label: "Saved", swatch: "band" },
-          { color: "var(--negative)", label: "Overspent", swatch: "band" },
-        ]}
-      />
-    </div>
-  );
+// Bar labels drop the cents: six "$2,070.45"s crowd a narrow card.
+function wholeDollars(cents: number): string {
+  return "$" + Math.round(Math.abs(cents) / 100).toLocaleString("en-US");
 }
 
-function PairedBars({ months }: { months: CashFlowMonth[] }) {
-  const data = months.map((m) => ({ ...m, label: monthLabel(m.month) }));
+function hatch(color: string): React.CSSProperties {
+  return {
+    background: `repeating-linear-gradient(135deg, color-mix(in srgb, ${color} 34%, transparent) 0 4px, transparent 4px 9px)`,
+    border: `1.5px dashed ${color}`,
+  };
+}
+
+function NetBars({ months, avgSaved, showAvg }: { months: CashFlowMonth[]; avgSaved: number; showAvg: boolean }) {
+  const [hover, setHover] = useState<number | null>(null);
+  const nets = months.map((m) => m.income - m.spend);
+  const hi = Math.max(0, ...nets, showAvg ? avgSaved : 0);
+  const lo = Math.min(0, ...nets, showAvg ? avgSaved : 0);
+  const top = LABEL_ROOM;
+  const bottom = lo < 0 ? LABEL_ROOM : 0;
+  const span = hi - lo || 1;
+  const scale = (CHART_H - top - bottom) / span;
+  const zeroY = top + hi * scale;
+  const avgY = zeroY - avgSaved * scale;
+  const last = months.length - 1;
+  const anyOver = nets.some((n, i) => n < 0 && i !== last);
+
   return (
     <div className="flex flex-col gap-2">
       <div className="ui-bleed">
-        <ResponsiveContainer width="100%" height={220}>
-          <BarChart data={data} margin={{ top: 8, right: 0, left: 0, bottom: 0 }} barGap={6}>
-            <CartesianGrid vertical={false} stroke="var(--border)" />
-            <XAxis dataKey="label" tick={{ fill: "var(--text-3)", fontSize: 12 }} axisLine={false} tickLine={false} />
-            <YAxis hide domain={[0, "auto"]} />
-            <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--sunken)" }} />
-            <Bar dataKey="income" fill="var(--positive)" radius={[4, 4, 0, 0]} maxBarSize={44} isAnimationActive={false} />
-            <Bar dataKey="spend" fill="var(--negative)" radius={[4, 4, 0, 0]} maxBarSize={44} isAnimationActive={false} />
-          </BarChart>
-        </ResponsiveContainer>
+        <div className="relative" style={{ height: CHART_H }} onMouseLeave={() => setHover(null)}>
+          <div className="absolute inset-x-0 border-t border-border-strong opacity-50" style={{ top: zeroY }} />
+          {showAvg && (
+            <>
+              <div className="absolute inset-x-0 border-t-[1.5px] border-dashed border-border-strong" style={{ top: avgY }} />
+              <span
+                className="absolute right-4 -translate-y-1/2 bg-surface px-1.5 text-[12px] font-semibold text-text-2 flex items-center gap-1"
+                style={{ top: avgY }}
+              >
+                avg{" "}
+                <span className="money tabular">
+                  {avgSaved < 0 ? "−" : "+"}
+                  {formatCents(Math.abs(avgSaved))}
+                </span>
+              </span>
+            </>
+          )}
+          <div className="absolute inset-0 grid" style={{ gridTemplateColumns: `repeat(${months.length}, minmax(0, 1fr))` }}>
+            {months.map((m, i) => {
+              const net = nets[i]!;
+              const up = net >= 0;
+              const h = Math.max(2, Math.abs(net) * scale);
+              const barTop = up ? zeroY - h : zeroY;
+              const partial = i === last && months.length > 1;
+              const color = up ? "var(--positive)" : "var(--negative)";
+              return (
+                <div key={m.month} className="relative" onMouseEnter={() => setHover(i)}>
+                  <span
+                    className={`absolute inset-x-0 text-center text-[12.5px] font-bold tabular ${partial ? "text-text-2" : up ? "text-positive" : "text-negative"}`}
+                    style={{ top: up ? barTop - 20 : barTop + h + 4 }}
+                  >
+                    <span className="money">
+                      {up ? "+" : "−"}
+                      {wholeDollars(net)}
+                    </span>
+                  </span>
+                  <div
+                    className="absolute left-1/2 -translate-x-1/2 box-border"
+                    style={{
+                      top: barTop,
+                      height: h,
+                      width: "min(56px, 52%)",
+                      borderRadius: up ? "8px 8px 3px 3px" : "3px 3px 8px 8px",
+                      ...(partial ? hatch(color) : { background: color }),
+                      opacity: hover != null && hover !== i ? 0.55 : 1,
+                    }}
+                  />
+                  {hover === i && (
+                    <div className={`absolute z-10 ${i >= months.length / 2 ? "right-1/2" : "left-1/2"}`} style={{ top: Math.max(0, Math.min(barTop, zeroY) - 8) }}>
+                      <MonthTooltip label={monthLabel(m.month) + (partial ? " (so far)" : "")} income={m.income} spend={m.spend} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="grid pt-2" style={{ gridTemplateColumns: `repeat(${months.length}, minmax(0, 1fr))` }}>
+          {months.map((m) => (
+            <span key={m.month} className="text-center text-[12px] text-text-3">
+              {monthLabel(m.month)}
+            </span>
+          ))}
+        </div>
       </div>
       <Legend
         items={[
-          { color: "var(--positive)", label: "Income" },
-          { color: "var(--negative)", label: "Spend" },
+          { label: "Saved", swatch: { background: "var(--positive)" } },
+          ...(anyOver ? [{ label: "Overspent", swatch: { background: "var(--negative)" } }] : []),
+          ...(months.length > 1 ? [{ label: "This month so far", swatch: hatch("var(--text-3)") }] : []),
         ]}
       />
     </div>
