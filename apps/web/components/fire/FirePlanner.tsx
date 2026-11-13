@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { Info } from "lucide-react";
 import { ComposedChart, Area, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine, ReferenceDot, CartesianGrid } from "recharts";
 import { EdgeTick } from "@/components/charts/EdgeTick";
 import { formatCents, formatPercent } from "@tally/core/money";
@@ -308,8 +309,14 @@ export function FirePlanner({
         </div>
 
         {coveredMonths > 0 && coveredMonths < 12 && (
-          <p className="m-0 rounded-control bg-info-subtle px-3 py-2 text-xs text-text-2">
-            Spending is an estimate: only {coveredMonths} month{coveredMonths === 1 ? "" : "s"} of history so far, scaled up to a year.
+          <p
+            className="m-0 flex items-start gap-2 rounded-control border bg-info-subtle px-3 py-2 text-xs text-text"
+            style={{ borderColor: "color-mix(in srgb, var(--info) 40%, transparent)" }}
+          >
+            <Info size={14} className="mt-px shrink-0 text-info" aria-hidden />
+            <span>
+              Spending is an estimate: only {coveredMonths} month{coveredMonths === 1 ? "" : "s"} of history so far, scaled up to a year.
+            </span>
           </p>
         )}
 

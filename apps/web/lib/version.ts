@@ -720,8 +720,12 @@
  * 2.28.0: one-time budgets (budgets.is_one_time, migration 0045): set for
  * one month only -- skipped by the month carry-forward and setup copy, no
  * rollover in or out -- with a "One-time" tag on the row.
+ *
+ * 2.28.1: the FIRE planner's "spending is an estimate" notice gets an info
+ * icon and a stronger tint so it reads in dark mode (info-subtle alone
+ * barely separated from the card).
  */
-export const APP_VERSION = "2.28.0";
+export const APP_VERSION = "2.28.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { View, Text, ScrollView, TextInput, Pressable, KeyboardAvoidingView, Platform, Switch } from "react-native";
 import { PillButton } from "@/components/ui/PillButton";
+import { Info } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import { formatCents, formatPercent } from "@tally/core/money";
 import { ageAsOf, fireMilestones, fireNumber, fireProgressPct, fireWhatIfs, projectionSeries, realReturn, requiredMonthlySaving, yearsToFire } from "@tally/core/fireMath";
@@ -287,9 +288,15 @@ function Planner({
           </SectionLabel>
           <Card className="p-5 gap-5">
             {coveredMonths > 0 && coveredMonths < 12 && (
-              <Text className="font-ui text-text-2 rounded-control bg-info-subtle px-3 py-2" style={{ fontSize: rf(12) }}>
-                Spending is an estimate: only {coveredMonths} month{coveredMonths === 1 ? "" : "s"} of history so far, scaled up to a year.
-              </Text>
+              <View
+                className="flex-row items-start gap-2 rounded-control px-3 py-2"
+                style={{ backgroundColor: colors.info + "26" }}
+              >
+                <Info size={rf(14)} color={colors.info} strokeWidth={2} style={{ marginTop: 1 }} />
+                <Text className="font-ui text-text flex-1" style={{ fontSize: rf(12) }}>
+                  Spending is an estimate: only {coveredMonths} month{coveredMonths === 1 ? "" : "s"} of history so far, scaled up to a year.
+                </Text>
+              </View>
             )}
             <Lever
               onSlidingChange={setSliding}
