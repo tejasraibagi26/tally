@@ -598,8 +598,11 @@ import Constants from "expo-constants";
  * 2.24.1: the FIRE planner's "spending is an estimate" notice gets an info
  * icon and a stronger tint so it reads in dark mode (info-subtle alone
  * barely separated from the card).
+ *
+ * 2.24.2: the compact on-pace row draws one tally group at most (max 5) so
+ * it stays the same width all month; the number carries the count.
  */
-export const APP_VERSION = "2.24.1";
+export const APP_VERSION = "2.24.2";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

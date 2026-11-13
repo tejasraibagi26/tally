@@ -52,7 +52,9 @@ export function OnPaceCard({ streak, dailyPace, compact = false }: { streak: num
           </Text>
         ) : (
           <>
-            {streak > 0 && <TallyMarks count={streak} height={24} color={ink} accent={colors.brand!} />}
+            {/* One group at most: the number beside it carries the count, and more
+                groups squeeze the line onto two rows as the month goes on. */}
+            {streak > 0 && <TallyMarks count={streak} max={5} height={24} color={ink} accent={colors.brand!} />}
             <Text className="font-display" style={{ color: ink, fontSize: rf(28), lineHeight: rf(32), fontVariant: ["tabular-nums"] }}>{streak}</Text>
             <Text className="font-ui-semibold flex-1" style={{ color: ink, fontSize: rf(13.5) }} numberOfLines={2}>
               of {finishedDays(today)} {finishedDays(today) === 1 ? "day" : "days"} under your {formatCents(dailyPace)} pace
