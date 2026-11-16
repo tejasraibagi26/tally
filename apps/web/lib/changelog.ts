@@ -15,6 +15,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.29.1",
+    date: "2026-11-16",
+    changes: [
+      { kind: "improved", text: "Recap and alert emails are calmer: a soft card on a neutral background instead of heavy outlines and offset shadows." },
+    ],
+  },
+  {
     version: "2.29.0",
     date: "2026-11-13",
     changes: [

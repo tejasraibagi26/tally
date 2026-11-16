@@ -729,8 +729,12 @@
  * up, coral down when overspent) with the amount on each bar, a dashed
  * average line, and the month in progress hatched as "so far" -- replacing
  * the income/spend gap lines, whose partial edge months read as a crash.
+ *
+ * 2.29.1: the recap and alert emails drop the Pop outlines and hard
+ * shadows for the calm look the mobile app uses: 1px hairline cards, 12px
+ * corners, #F6F4F0 canvas, sentence-case labels, marigold kept to badges.
  */
-export const APP_VERSION = "2.29.0";
+export const APP_VERSION = "2.29.1";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

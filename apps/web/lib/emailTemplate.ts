@@ -54,11 +54,11 @@ const POP_FONT = "Figtree, Arial, Helvetica, sans-serif";
 const POP_INK = "#1D1B2F";
 const POP_TEXT2 = "#4A4760";
 const POP_NEGATIVE = "#C2341F";
-const POP_TRACK = "#F8EDDB";
+const POP_TRACK = "#EFEBE4";
 // The chart series in their fixed order (DESIGN.md §7.1), for budget fills.
 const POP_SERIES = ["#1baf7a", "#eb6834", "#2a78d6", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948"];
 
-/** One budget: name and "$X under" / "⊘ $X over", then an outlined meter with the overage in red. */
+/** One budget: name and "$X under" / "⊘ $X over", then a meter with the overage in red. */
 function budgetRowHtmlPop(b: MonthlyRecapData["budgets"][number], i: number): string {
   const name = escapeHtml(b.categoryName);
   const fill = POP_SERIES[i % POP_SERIES.length]!;
@@ -79,7 +79,7 @@ function budgetRowHtmlPop(b: MonthlyRecapData["budgets"][number], i: number): st
         <td align="right" class="num" style="font-family:${POP_FONT}; font-size:14px;">${right}</td>
       </tr>
     </table>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 16px 0; border:2px solid ${POP_INK}; border-radius:999px; background-color:${POP_TRACK}; overflow:hidden;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:6px 0 16px 0; border-radius:999px; background-color:${POP_TRACK}; overflow:hidden;">
       <tr style="height:10px;">${cells}</tr>
     </table>`;
 }
@@ -101,7 +101,7 @@ function categoryRowHtmlPop(c: MonthlyRecapData["categories"][number], max: numb
     <tr>
       <td style="padding:0;">
         <table role="presentation" width="${width}%" cellpadding="0" cellspacing="0" border="0">
-          <tr style="height:18px;"><td height="18" style="background-color:${c.color}; border:2px solid ${POP_INK}; border-left:0; border-radius:0 8px 8px 0; font-size:0; line-height:0;">&nbsp;</td></tr>
+          <tr style="height:18px;"><td height="18" style="background-color:${c.color}; border-radius:0 6px 6px 0; font-size:0; line-height:0;">&nbsp;</td></tr>
         </table>
       </td>
     </tr>`;
@@ -113,7 +113,7 @@ function netWorthDeltaChipHtmlPop(data: MonthlyRecapData): string {
   const up = data.netWorthDeltaDirection === "up";
   const color = up ? "#0F7A43" : POP_NEGATIVE;
   const arrow = up ? "&#9650;" : "&#9660;";
-  return `<span class="num" style="display:inline-block; background-color:#FFFFFF; color:${color}; border:2px solid ${POP_INK}; border-radius:999px; padding:4px 12px; font-family:${POP_FONT}; font-size:14px; font-weight:800;">${arrow} ${formatCents(Math.abs(data.netWorthDeltaAmount))} &middot; ${formatPercent(Math.abs(data.netWorthDeltaPct))} since last month</span>`;
+  return `<span class="num" style="display:inline-block; background-color:#FFFFFF; color:${color}; border-radius:999px; padding:4px 12px; font-family:${POP_FONT}; font-size:14px; font-weight:800;">${arrow} ${formatCents(Math.abs(data.netWorthDeltaAmount))} &middot; ${formatPercent(Math.abs(data.netWorthDeltaPct))} since last month</span>`;
 }
 
 function netWorthMonthLabelsHtmlPop(labels: string[]): string {
@@ -132,7 +132,7 @@ function subPriceIncreaseHtmlPop(data: MonthlyRecapData): string {
   const p = data.priceIncrease;
   if (!p) return "";
   return `
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:12px; background-color:#FFF1DC; border-radius:12px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:12px; background-color:#F6F4F0; border-radius:12px;">
       <tr>
         <td class="num" style="padding:12px 14px; font-family:${POP_FONT}; font-size:14px; color:${POP_INK}; line-height:1.5;">
           <strong>${escapeHtml(p.label)} went up.</strong> ${formatCents(p.oldAmount)} &rarr; ${formatCents(p.newAmount)} (+${p.pctIncrease}).
@@ -190,7 +190,7 @@ export function renderMonthInReviewEmail(data: MonthlyRecapData, ctx: RenderCont
     INCOME: formatCents(data.income),
     SPEND: formatCents(data.spend),
     SAVED: formatCents(data.saved, { signed: true }),
-    // Pop prints Saved on marigold: ink when kept, red (large, bold: 3:1 is enough) when over.
+    // Saved prints in ink when kept, red (large, bold: 3:1 is enough) when over.
     SAVED_COLOR: data.saved >= 0 ? POP_INK : POP_NEGATIVE,
     SAVINGS_RATE_LINE: savingsRateLineText(data),
     BUDGET_ROWS: data.budgets.map(budgetRowHtmlPop).join("\n"),

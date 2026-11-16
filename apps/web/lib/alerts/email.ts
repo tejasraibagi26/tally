@@ -73,9 +73,8 @@ const POP_DISPLAY = "'Bricolage Grotesque',Figtree,-apple-system,Segoe UI,Helvet
 
 /**
  * One alert as an email (ALERTS.md §5.2), inline styles only (email
- * clients): cream ground, an ink-outlined card whose thicker right and
- * bottom borders stand in for the hard shadow (box-shadow doesn't survive
- * Gmail or Outlook), a colored badge with a glyph, and a pill button --
+ * clients): calm ground, a hairline-bordered 12px card with no outlines or
+ * hard shadows, a colored badge with a glyph, and a pill button --
  * red for a broken connection, like the app's fix buttons. Every text pair
  * is AA. The footer says exactly which setting sent it, links to Settings
  * → Alerts, and has a one-click link that turns off alert email only;
@@ -90,17 +89,17 @@ export function alertEmailHtml(opts: { type: AlertType; title: string; body: str
   const cta = opts.type === "connection_broken" ? "#D03B3B" : "#5B3BF5";
   return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><meta name="color-scheme" content="light"><meta name="supported-color-schemes" content="light">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet"></head>
-<body style="margin:0;background:#FFF6E9;font-family:${POP_FONT};color:#1D1B2F;">
+<body style="margin:0;background:#F6F4F0;font-family:${POP_FONT};color:#1D1B2F;">
 <div style="display:none;max-height:0;overflow:hidden;">${esc(opts.body)}</div>
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FFF6E9;padding:32px 16px;"><tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F6F4F0;padding:32px 16px;"><tr><td align="center">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
-<tr><td style="padding:0 4px 18px;"><span style="display:inline-block;background:#5B3BF5;color:#FFFFFF;border:2px solid #1D1B2F;border-radius:12px;padding:3px 12px;font-family:${POP_DISPLAY};font-size:20px;font-weight:800;letter-spacing:-0.5px;">tally</span></td></tr>
-<tr><td style="background:#FFFFFF;border:2px solid #1D1B2F;border-right-width:6px;border-bottom-width:6px;border-radius:24px;padding:28px;">
-<div style="margin-bottom:14px;"><span style="display:inline-block;background:${badge.bg};color:${badge.fg};border:2px solid #1D1B2F;border-radius:999px;padding:3px 12px;font-size:12px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;">${badge.glyph} ${esc(copy.label)}</span></div>
+<tr><td style="padding:0 4px 18px;"><span style="display:inline-block;background:#5B3BF5;color:#FFFFFF;border-radius:8px;padding:3px 12px;font-family:${POP_DISPLAY};font-size:20px;font-weight:800;letter-spacing:-0.5px;">tally</span></td></tr>
+<tr><td style="background:#FFFFFF;border:1px solid #E7E2D9;border-radius:12px;padding:28px;">
+<div style="margin-bottom:14px;"><span style="display:inline-block;background:${badge.bg};color:${badge.fg};border-radius:999px;padding:3px 12px;font-size:12.5px;font-weight:700;">${badge.glyph} ${esc(copy.label)}</span></div>
 <div style="font-family:${POP_DISPLAY};font-size:30px;font-weight:800;line-height:1.1;letter-spacing:-0.8px;margin-bottom:12px;">${esc(opts.title)}</div>
 <div style="font-size:16px;line-height:1.55;color:#1D1B2F;margin-bottom:16px;">${esc(opts.body)}</div>
 <div style="font-size:14px;line-height:1.55;color:#4A4760;margin-bottom:22px;">${esc(copy.why)}</div>
-<a href="${esc(open)}" style="display:inline-block;background:${cta};color:#FFFFFF;text-decoration:none;font-size:15px;font-weight:800;padding:12px 24px;border:2px solid #1D1B2F;border-right-width:4px;border-bottom-width:4px;border-radius:999px;">${esc(copy.cta)}</a>
+<a href="${esc(open)}" style="display:inline-block;background:${cta};color:#FFFFFF;text-decoration:none;font-size:15px;font-weight:800;padding:12px 24px;border-radius:999px;">${esc(copy.cta)}</a>
 </td></tr>
 <tr><td style="padding:18px 4px;font-size:12.5px;line-height:1.6;color:#4A4760;">
 You're getting this because email is on for ${esc(copy.settingName)} in Tally.<br>
