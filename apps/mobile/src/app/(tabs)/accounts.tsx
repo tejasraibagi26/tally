@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { View, Text, ScrollView, Pressable, RefreshControl, KeyboardAvoidingView, Platform } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useScrollToTop } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Plus, RefreshCw } from "lucide-react-native";
 import { Card } from "@/components/ui/Card";
@@ -32,6 +32,9 @@ import { useRF } from "@/theme/responsiveFont";
 const RECONNECTED_MS = 6000;
 
 export default function AccountsScreen() {
+  // Tapping the already-focused tab scrolls back to the top.
+  const scrollRef = useRef<ScrollView>(null);
+  useScrollToTop(scrollRef);
   const insets = useSafeAreaInsets();
   const tabBarClearance = useTabBarBottomClearance();
   const colors = useThemeColors();
@@ -133,6 +136,7 @@ export default function AccountsScreen() {
       <ScreenGlow />
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} className="flex-1">
         <ScrollView
+          ref={scrollRef}
           className="flex-1"
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 + tabBarClearance }}

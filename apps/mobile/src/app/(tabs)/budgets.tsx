@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
 import { PillButton } from "@/components/ui/PillButton";
-import { useRouter } from "expo-router";
+import { useRouter, useScrollToTop } from "expo-router";
 import { useColorScheme } from "nativewind";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react-native";
@@ -45,6 +45,9 @@ function daysInMonthOf(month: string): number {
 // one-tap setup for an empty month, and a detail sheet per budget. Row
 // colors and labels come from @tally/core/budgetView, shared with web.
 export default function BudgetsScreen() {
+  // Tapping the already-focused tab scrolls back to the top.
+  const scrollRef = useRef<ScrollView>(null);
+  useScrollToTop(scrollRef);
   const insets = useSafeAreaInsets();
   const tabBarClearance = useTabBarBottomClearance();
   const colors = useThemeColors();
@@ -92,6 +95,7 @@ export default function BudgetsScreen() {
     <View className="flex-1 bg-canvas">
       <ScreenGlow />
       <ScrollView
+        ref={scrollRef}
         style={{ flex: 1 }}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 + tabBarClearance }}

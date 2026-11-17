@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.25.0",
+    date: "2026-11-17",
+    changes: [
+      { kind: "new", text: "Tap the tab you are already on to jump back to the top of the screen." },
+    ],
+  },
+  {
     version: "2.24.4",
     date: "2026-11-17",
     changes: [

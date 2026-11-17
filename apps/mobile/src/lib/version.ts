@@ -607,8 +607,11 @@ import Constants from "expo-constants";
  *
  * 2.24.4: light Pop surface-2 / raised-hover become neutral #F4F2EE and the
  * boot splash uses the Pop Calm canvas, so no cream remains in mobile.
+ *
+ * 2.25.0: re-tapping the focused tab scrolls its screen to the top
+ * (useScrollToTop on Overview, Transactions, Budgets, Accounts).
  */
-export const APP_VERSION = "2.24.4";
+export const APP_VERSION = "2.25.0";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

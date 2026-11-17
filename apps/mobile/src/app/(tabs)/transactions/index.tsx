@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { SkeletonList } from "@/components/ui/Skeleton";
 import { View, Text, TextInput, FlatList, Pressable, ActivityIndicator, RefreshControl } from "react-native";
 import { PillButton } from "@/components/ui/PillButton";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams, useScrollToTop } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ListFilter, Plus, RefreshCw, Search, X } from "lucide-react-native";
 import { groupByDay } from "@tally/core/transactionView";
@@ -154,6 +154,9 @@ export default function TransactionsScreen() {
     () => groupByDay(items.map((t) => ({ ...t, isTransfer: t.isTransfer ?? false })), todayISO()),
     [items],
   );
+  // Tapping the already-focused tab scrolls back to the top.
+  const scrollRef = useRef<FlatList<(typeof groups)[number]>>(null);
+  useScrollToTop(scrollRef);
   // Headline: spend for the period/filters on screen, from the API's summary
   // (absent on a server older than this build -- the figure just hides).
   const firstPage = data?.pages[0];
@@ -177,6 +180,7 @@ export default function TransactionsScreen() {
           side inset Budget gets from its `px-5` wrapper, applied uniformly to the title and the
           row list below it so both line up exactly like Overview/Accounts/Budgets. */}
       <FlatList
+        ref={scrollRef}
         data={groups}
         keyExtractor={(g) => g.date}
         // One continuous table: each day is a slice of the same card, so only the

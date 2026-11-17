@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { View, Text, ScrollView, Pressable, RefreshControl } from "react-native";
-import { useRouter, useLocalSearchParams, type Href } from "expo-router";
+import { useRouter, useLocalSearchParams, useScrollToTop, type Href } from "expo-router";
 import { Ellipsis, Eye, EyeOff } from "lucide-react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useQueryClient } from "@tanstack/react-query";
@@ -48,6 +48,9 @@ import { todayISO } from "@/lib/today";
 // used, "Budget this month" (the three most-used), "Recent
 // activity" and "Where it went."
 export default function OverviewScreen() {
+  // Tapping the already-focused tab scrolls back to the top.
+  const scrollRef = useRef<ScrollView>(null);
+  useScrollToTop(scrollRef);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const tabBarClearance = useTabBarBottomClearance();
@@ -130,6 +133,7 @@ export default function OverviewScreen() {
     <View className="flex-1 bg-canvas">
       <ScreenGlow />
       <ScrollView
+        ref={scrollRef}
         className="flex-1"
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: 28 + tabBarClearance }}
