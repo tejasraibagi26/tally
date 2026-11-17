@@ -175,7 +175,7 @@ function SafeToSpendSheet({ s: next, onClose, forecastLink }: { s: SafeToSpendRe
           </View>
 
           {/* A sticker card like any other; the labels carry the minus, so the amounts are magnitudes. */}
-          <View className="rounded-card border-card border-ink px-4 py-3 gap-1.5" style={[{ backgroundColor: colors["surface-2"] }, sticker]}>
+          <View className="rounded-card border-card border-ink px-4 py-3 gap-1.5" style={[{ backgroundColor: colors.surface }, sticker]}>
             {step(`Cash in ${s.cash.length} account${s.cash.length === 1 ? "" : "s"}`, s.cashTotal)}
             {step("− Bills before payday", s.billsTotal)}
             {step("− Card payments due", s.cardsTotal)}

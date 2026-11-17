@@ -601,8 +601,11 @@ import Constants from "expo-constants";
  *
  * 2.24.2: the compact on-pace row draws one tally group at most (max 5) so
  * it stays the same width all month; the number carries the count.
+ *
+ * 2.24.3: the Safe to spend breakdown card uses the neutral surface instead
+ * of the cream surface-2, which clashed with the light sheet.
  */
-export const APP_VERSION = "2.24.2";
+export const APP_VERSION = "2.24.3";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

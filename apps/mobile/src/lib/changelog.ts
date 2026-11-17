@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.24.3",
+    date: "2026-11-17",
+    changes: [
+      { kind: "fixed", text: "The Safe to spend breakdown is now a clean white card in light mode instead of cream." },
+    ],
+  },
+  {
     version: "2.24.2",
     date: "2026-11-13",
     changes: [
