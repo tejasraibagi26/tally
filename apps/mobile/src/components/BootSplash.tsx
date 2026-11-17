@@ -43,7 +43,7 @@ const FADE_OUT_MS = 320;
 // The brand mark with its marigold crossing stroke on Pop's canvas. The native splash
 // before JS can't know the flag, so this one cross-fades in from it.
 const POP_PALETTE = {
-  light: { bg: "#FFF6E9", ink: "#5B3BF5", accent: "#FFC53D", text: "#1D1B2F" },
+  light: { bg: "#F6F4F0", ink: "#5B3BF5", accent: "#FFC53D", text: "#1D1B2F" },
   dark: { bg: "#0A0910", ink: "#9B87FF", accent: "#FFCF5C", text: "#F6F1E7" },
 };
 

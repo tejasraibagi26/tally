@@ -604,8 +604,11 @@ import Constants from "expo-constants";
  *
  * 2.24.3: the Safe to spend breakdown card uses the neutral surface instead
  * of the cream surface-2, which clashed with the light sheet.
+ *
+ * 2.24.4: light Pop surface-2 / raised-hover become neutral #F4F2EE and the
+ * boot splash uses the Pop Calm canvas, so no cream remains in mobile.
  */
-export const APP_VERSION = "2.24.3";
+export const APP_VERSION = "2.24.4";
 
 /**
  * A short (7-char) git commit SHA identifying the exact commit this build

@@ -20,7 +20,7 @@ export const popLightColors: Record<string, string> = {
   ...lightColors,
   canvas: "#F6F4F0",
   surface: "#FFFFFF",
-  "surface-2": "#FFF1DC",
+  "surface-2": "#F4F2EE",
   sunken: "#F1ECE3",
   border: "#ECE6DC",
   "border-strong": "#6B6880",
@@ -41,7 +41,7 @@ export const popLightColors: Record<string, string> = {
   "warning-subtle": "#FFF0CC",
   "info-subtle": "#E6EEFA",
   raised: "#FFFFFF",
-  "raised-hover": "#FFF1DC",
+  "raised-hover": "#F4F2EE",
   // Pop-only: the sticker outline, its hard shadow, the highlight, and the
   // solid net-worth card with the text that sits on it.
   ink: "#1D1B2F",

@@ -16,6 +16,13 @@ export interface ChangelogEntry {
 
 export const CHANGELOG: ChangelogEntry[] = [
   {
+    version: "2.24.4",
+    date: "2026-11-17",
+    changes: [
+      { kind: "fixed", text: "The leftover cream tint is gone from light mode: sheet cards, pressed rows and the launch screen now use the same neutral as the rest of the app." },
+    ],
+  },
+  {
     version: "2.24.3",
     date: "2026-11-17",
     changes: [
